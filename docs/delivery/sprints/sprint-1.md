@@ -369,7 +369,7 @@ Brand assets, information architecture, tokens and core components shared by all
 ### DSN-DES-1 — Brand assets, information architecture & design system
 `type: Task · area: design · size: XL · prio: P0 · reqs: NFR-USB, NFR-LNG · labels: needs-client`
 
-**What:** final Jazlah identity assets ready for the apps. The app was renamed from Sinam, so the earlier Sinam directions don't apply as they are.
+**What:** turn the identity the client already approved (burgundy & gold, Readex Pro + El Messiri, see `docs/design/README.md` and the approved prototype https://frentex-tech.github.io/sinam-brand/app/v2/) into Jazlah's production assets and Figma design system. Only the name changed (Sinam → Jazlah), so the wordmark is redrawn and the palette is kept.
 
 This task also covers:
 - **Information architecture & key user flows:** sitemap and flows before screens are drawn.
@@ -378,7 +378,8 @@ This task also covers:
 **Output:**
 
 *Jazlah brand assets (logo, colors, app icon, splash)*
-- logo (AR/EN lockups, SVG), brand palette, app icon (iOS/Android adaptive), splash, favicon set, exported to `docs/design/brand/`
+- «جزلة / Jazlah» wordmark in AR/EN lockups (SVG) in the style of the approved emblem, the emblem decision confirmed with the client (keep the ram shield or adapt it), app icon (iOS/Android adaptive), splash, favicon set, exported to `docs/design/brand/`
+- Figma file «Jazlah — Product Design» with variables seeded from `docs/design/tokens.json` (the approved palette)
 
 *Information architecture & key user flows*
 - customer app map (tabs: Home, Services (occasions/visits/feed), Orders, Account), dashboard sitemaps per role, flow diagrams for order (≤ 6 steps, NFR-USB), occasion request, farm visit, cooking, Adha, feed listing and chat
@@ -389,12 +390,13 @@ This task also covers:
 **How:**
 
 *Jazlah brand assets (logo, colors, app icon, splash)*
-- get client approval on the identity before tokens are frozen.
+- The palette and fonts are already approved, so don't re-open them. Get written client approval on the new wordmark only.
+- Use the approved prototype's screens (`docs/design/reference/screens/`) as the visual reference for components.
 
 **Where:** `docs/design/brand/`, `docs/design/flows/`, `docs/design/tokens.json`
 
 **Acceptance:**
-- [ ] Client approved the logo and palette in writing
+- [ ] Client approved the Jazlah wordmark in writing (palette and fonts already approved)
 - [ ] Assets exported at all required sizes
 - [ ] The regular order flow reaches "order placed" in ≤ 6 steps
 - [ ] Both developers reviewed the flows

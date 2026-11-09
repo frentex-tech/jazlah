@@ -72,7 +72,10 @@ The Figma MCP has tight rate limits. Use it **only** for occasional read-only in
 - **Speed:** a regular order in ≤ 6 steps (NFR-USB), the total always visible while configuring a product, disabled options that explain *why*.
 - **Accessibility:** contrast WCAG AA, tap targets ≥ 44, Arabic text at least 14pt for body copy.
 - **Dashboards:** dense but scannable tables, status colors consistent with the order states, destructive actions visually separated.
-- **Brand:** the Jazlah identity from DSN-DES-1. Until the client approves it, work with provisional tokens and keep everything bound to variables so the swap is one script.
+- **Brand (already approved; do not redesign it):** read `docs/design/README.md` first.
+  - Burgundy `#4A1014` + gold `#C99A52` on cream `#F7F0E8`, ember CTA `#8E1F26`, Readex Pro + El Messiri. All values are in `docs/design/tokens.json`. That file seeds the Figma variables, so `tokens.json` stays the source of truth.
+  - The interactive prototype the client approved is the visual and UX reference for the customer app: https://frentex-tech.github.io/sinam-brand/app/v2/ (source `docs/design/reference/prototype/v2/`, captures `docs/design/reference/screens/`). Match its look, density and photography style, and extend it to the new multi-vendor features.
+  - Only the name changed (Sinam → Jazlah). Redraw the wordmark in the same style, and keep everything bound to variables so any later tweak is one script.
 
 ## Report back
 - Screens and states delivered against the task Output, with Figma links.
