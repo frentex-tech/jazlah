@@ -5,6 +5,10 @@ Jazlah sells its own products, and partner butchers and slaughterhouses list the
 
 > Built by **Frentex Tech**. Source of truth for scope: [SRS v1.0](docs/srs/Jazlah-SRS-v1.0.pdf) · [Requirements index](docs/requirements.md) · [Approved decisions](docs/decisions/Jazlah-Decisions.png)
 
+## Start here
+
+- New to the project, or a Claude Code session? Read [CLAUDE.md](CLAUDE.md) → [docs/delivery/STATUS.md](docs/delivery/STATUS.md) → the current sprint file.
+
 ## Repository layout
 
 | Path | What | Stack |
@@ -19,7 +23,8 @@ Jazlah sells its own products, and partner butchers and slaughterhouses list the
 ## How we work
 
 - **Board:** GitHub Project *Jazlah — Delivery Board* (Backlog → Todo → In Progress → In Review → QA → Done).
-- **Sprints:** milestones `Sprint 0 … Sprint 10` for the launch, then `Post-launch`.
+- **Sprints:** 7 milestones (`Sprint 1` … `Sprint 7` → v1.0.0), then `Post-launch`. Full plan in [docs/delivery](docs/delivery/README.md).
+- **Progress:** the pinned issue *📊 Project progress dashboard* updates automatically every day.
 - **Hierarchy:** every module is an **Epic** issue. Its work is split into **sub-issues**, one per layer (API, mobile, web, dashboard, design, QA).
 - **Traceability:** every issue cites the SRS requirement IDs it implements (for example `FR-SCH-03`).
 - **Branching, commits, PRs, merge rules and Definition of Done:** see [CONTRIBUTING.md](CONTRIBUTING.md).

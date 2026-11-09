@@ -1,0 +1,26 @@
+name: Progress dashboard
+on:
+  schedule:
+    - cron: "0 5 * * *"   # daily 08:00 Riyadh
+  issues:
+    types: [closed, reopened, assigned]
+  pull_request:
+    types: [closed]
+  workflow_dispatch:
+permissions:
+  contents: read
+  issues: write
+  pull-requests: read
+concurrency:
+  group: progress-dashboard
+  cancel-in-progress: true
+jobs:
+  update:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with: { ref: develop }
+      - name: Update pinned dashboard issue
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: python3 tools/backlog/progress.py

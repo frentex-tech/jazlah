@@ -20,7 +20,7 @@ feature/..  ●───●       ●●             hotfix/..
 | `develop` | Integration branch, auto-deployed to **staging**. Default branch. | `main` | `release/*` | Only via PR |
 | `feature/<issue>-<slug>` | One issue / sub-issue | `develop` | `develop` | PR, **squash merge** |
 | `fix/<issue>-<slug>` | Bug fix found in develop or during a release | `develop` or `release/*` | the branch it came from | PR, squash merge |
-| `chore/<issue>-<slug>`, `docs/…`, `refactor/…`, `test/…` | Tooling, docs, refactors, tests | `develop` | `develop` | PR, squash merge |
+| `chore/<issue>-<slug>`, `docs/…`, `refactor/…`, `test/…`, `perf/…`, `ci/…`, `build/…` | Tooling, docs, refactors, tests, performance, CI | `develop` | `develop` | PR, squash merge |
 | `release/vX.Y.Z` | Freeze a sprint/version for QA. **No new features.** | `develop` | `main`, then `main` → `develop` | PR, **merge commit** + tag `vX.Y.Z` |
 | `hotfix/<issue>-<slug>` | Urgent production fix | `main` | `main`, then `main` → `develop` | PR, merge commit + patch tag |
 
@@ -32,6 +32,7 @@ Examples: `feature/42-otp-login`, `fix/118-cutoff-timezone`, `release/v1.0.0`, `
 |---|---|---|---|
 | `feature/*`, `chore/*`, `docs/*`, `refactor/*`, `test/*` | ✅ | ❌ | ❌ |
 | `fix/*` | ✅ | ✅ (release fixes) | ❌ |
+| `chore/*`, `docs/*`, `perf/*` during a release | ✅ | ✅ (no features) | ❌ |
 | `release/*` | ✅ (back-merge) | — | ✅ |
 | `hotfix/*` | ✅ (back-merge) | — | ✅ |
 | `main` | ✅ (back-merge after a release/hotfix) | ❌ | — |

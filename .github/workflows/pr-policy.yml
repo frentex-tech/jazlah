@@ -16,7 +16,7 @@ jobs:
           BODY: ${{ github.event.pull_request.body }}
         run: |
           fail() { echo "::error::$1"; exit 1; }
-          work='^(feature|fix|chore|docs|refactor|test)/[0-9]+-[a-z0-9-]+$'
+          work='^(feature|fix|chore|docs|refactor|test|perf|ci|build)/[0-9]+-[a-z0-9-]+$'
           case "$BASE" in
             main)
               [[ "$HEAD" =~ ^release/v[0-9]+\.[0-9]+\.[0-9]+$ || "$HEAD" =~ ^hotfix/[0-9]+-[a-z0-9-]+$ ]] \
@@ -25,7 +25,7 @@ jobs:
               [[ "$HEAD" =~ $work || "$HEAD" =~ ^release/ || "$HEAD" =~ ^hotfix/ || "$HEAD" == main ]] \
                 || fail "branch '$HEAD' must be <type>/<issue>-<slug>, e.g. feature/42-otp-login" ;;
             release/*)
-              [[ "$HEAD" =~ ^fix/[0-9]+-[a-z0-9-]+$ ]] || fail "release branches only accept fix/<issue>-<slug>" ;;
+              [[ "$HEAD" =~ ^(fix|chore|docs|perf)/[0-9]+-[a-z0-9-]+$ ]] || fail "release branches only accept fix|chore|docs|perf/<issue>-<slug> (no features)" ;;
             *) fail "PRs must target develop, main or release/*" ;;
           esac
           [[ "$TITLE" =~ ^(feat|fix|chore|docs|refactor|test|perf|ci|build|revert)(\((api|mobile|web|dashboard|infra|docs|deps)\))?!?:\ .+ ]] \
