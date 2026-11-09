@@ -1,6 +1,6 @@
 # Jazlah — How to follow the project
 
-**For management:** open the repository and read the pinned issue **📊 Project progress dashboard**. It updates automatically every morning and whenever a task is closed or a PR is merged. It shows:
+**For management:** open the live dashboard at **https://frentex-tech.github.io/jazlah/**. It updates automatically every 6 hours and whenever a task is closed, assigned or a PR is merged. The pinned issue *📊 Project progress dashboard* links to it. It shows:
 - overall progress to the v1.0.0 launch (weighted by task size)
 - progress of each sprint
 - what each team member has delivered (tasks done, PRs merged, size points)

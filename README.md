@@ -24,7 +24,7 @@ Jazlah sells its own products, and partner butchers and slaughterhouses list the
 
 - **Board:** GitHub Project *Jazlah — Delivery Board* (Backlog → Todo → In Progress → In Review → QA → Done).
 - **Sprints:** 7 milestones (`Sprint 1` … `Sprint 7` → v1.0.0), then `Post-launch`. Full plan in [docs/delivery](docs/delivery/README.md).
-- **Progress:** the pinned issue *📊 Project progress dashboard* updates automatically every day.
+- **Progress:** live dashboard at https://frentex-tech.github.io/jazlah/ (auto-updated).
 - **Hierarchy:** every module is an **Epic** issue. Its work is split into **sub-issues**, one per layer (API, mobile, web, dashboard, design, QA).
 - **Traceability:** every issue cites the SRS requirement IDs it implements (for example `FR-SCH-03`).
 - **Branching, commits, PRs, merge rules and Definition of Done:** see [CONTRIBUTING.md](CONTRIBUTING.md).
