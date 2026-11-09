@@ -90,7 +90,7 @@ def gh(method, path, body=None, ok404=False):
             print(f"   rate limited, sleeping {wait}s", flush=True)
             time.sleep(wait)
             continue
-        if "502" in err or "503" in err or "timeout" in err.lower():
+        if "502" in err or "503" in err or "timeout" in err.lower() or "something went wrong" in err.lower():
             time.sleep(5 * (attempt + 1))
             continue
         raise RuntimeError(f"gh {method} {path} failed: {err.strip()[:600]}")

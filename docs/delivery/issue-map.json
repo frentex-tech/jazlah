@@ -1,0 +1,3382 @@
+{
+ "dashboard": 199,
+ "issues": {
+  "ACC": {
+   "digest": "86eaae1d16d5",
+   "fields": {
+    "Status": "Backlog"
+   },
+   "id": 6291173179,
+   "item": "PVTI_lADOFIc2Jc4Bq4SzzhHRWyY",
+   "node_id": "I_kwDOVoYHnc8AAAABdvuvOw",
+   "number": 15
+  },
+  "ACC-API-1": {
+   "deps": [
+    "FND-API-3",
+    "FND-API-4"
+   ],
+   "digest": "432bcd575edb",
+   "fields": {
+    "Area": "api",
+    "Priority": "P0",
+    "Size": "M",
+    "Status": "Todo"
+   },
+   "id": 6291174900,
+   "item": "PVTI_lADOFIc2Jc4Bq4SzzhHRW1M",
+   "node_id": "I_kwDOVoYHnc8AAAABdvu19A",
+   "number": 17
+  },
+  "ACC-API-2": {
+   "deps": [
+    "ACC-API-1",
+    "LOC-API-1"
+   ],
+   "digest": "a3dc002a8594",
+   "fields": {
+    "Area": "api",
+    "Priority": "P0",
+    "Size": "L",
+    "Status": "Todo"
+   },
+   "id": 6291175561,
+   "item": "PVTI_lADOFIc2Jc4Bq4SzzhHRW1o",
+   "node_id": "I_kwDOVoYHnc8AAAABdvu4iQ",
+   "number": 18
+  },
+  "ACC-DES-1": {
+   "deps": [
+    "DSN-DES-1"
+   ],
+   "digest": "524c7e364a06",
+   "fields": {
+    "Area": "design",
+    "Priority": "P0",
+    "Size": "M",
+    "Status": "Todo"
+   },
+   "id": 6291174001,
+   "item": "PVTI_lADOFIc2Jc4Bq4SzzhHRW0g",
+   "node_id": "I_kwDOVoYHnc8AAAABdvuycQ",
+   "number": 16
+  },
+  "ACC-DSH-1": {
+   "deps": [
+    "ACC-API-1",
+    "APP-DSH-1"
+   ],
+   "digest": "90cb89f4ef09",
+   "fields": {
+    "Area": "dashboard",
+    "Priority": "P0",
+    "Size": "S",
+    "Status": "Todo"
+   },
+   "id": 6291178546,
+   "item": "PVTI_lADOFIc2Jc4Bq4SzzhHRW5Q",
+   "node_id": "I_kwDOVoYHnc8AAAABdvvEMg",
+   "number": 22
+  },
+  "ACC-MOB-1": {
+   "deps": [
+    "ACC-API-1",
+    "ACC-DES-1",
+    "APP-MOB-1",
+    "ACC-API-2"
+   ],
+   "digest": "f26cb43a748b",
+   "fields": {
+    "Area": "mobile",
+    "Priority": "P0",
+    "Size": "L",
+    "Status": "Todo"
+   },
+   "id": 6291176341,
+   "item": "PVTI_lADOFIc2Jc4Bq4SzzhHRW2g",
+   "node_id": "I_kwDOVoYHnc8AAAABdvu7lQ",
+   "number": 19
+  },
+  "ACC-MOB-3": {
+   "deps": [
+    "ACC-API-2",
+    "LOC-MOB-1"
+   ],
+   "digest": "5f874f93db72",
+   "fields": {
+    "Area": "mobile",
+    "Priority": "P0",
+    "Size": "M",
+    "Status": "Todo"
+   },
+   "id": 6291177035,
+   "item": "PVTI_lADOFIc2Jc4Bq4SzzhHRW3k",
+   "node_id": "I_kwDOVoYHnc8AAAABdvu-Sw",
+   "number": 20
+  },
+  "ACC-WEB-1": {
+   "deps": [
+    "ACC-API-1",
+    "ACC-API-2",
+    "APP-WEB-1",
+    "LOC-WEB-1"
+   ],
+   "digest": "6acf411e401d",
+   "fields": {
+    "Area": "web",
+    "Priority": "P0",
+    "Size": "L",
+    "Status": "Todo"
+   },
+   "id": 6291177767,
+   "item": "PVTI_lADOFIc2Jc4Bq4SzzhHRW4Q",
+   "node_id": "I_kwDOVoYHnc8AAAABdvvBJw",
+   "number": 21
+  },
+  "ADH": {
+   "digest": "8365605ca0ff",
+   "fields": {
+    "Status": "Backlog"
+   },
+   "id": 6291257385,
+   "item": "PVTI_lADOFIc2Jc4Bq4SzzhHRYwk",
+   "node_id": "I_kwDOVoYHnc8AAAABdvz4KQ",
+   "number": 130
+  },
+  "ADH-API-1": {
+   "deps": [
+    "SCH-API-2",
+    "CRT-API-1",
+    "PAY-API-1"
+   ],
+   "digest": "c1e5b2fa6ebc",
+   "fields": {
+    "Area": "api",
+    "Priority": "P0",
+    "Size": "L",
+    "Status": "Backlog"
+   },
+   "id": 6291258039,
+   "item": "PVTI_lADOFIc2Jc4Bq4SzzhHRY0Q",
+   "node_id": "I_kwDOVoYHnc8AAAABdvz6tw",
+   "number": 131
+  },
+  "ADH-DSH-1": {
+   "deps": [
+    "ADH-API-1"
+   ],
+   "digest": "7e8df4b84cc6",
+   "fields": {
+    "Area": "dashboard",
+    "Priority": "P0",
+    "Size": "M",
+    "Status": "Backlog"
+   },
+   "id": 6291258803,
+   "item": "PVTI_lADOFIc2Jc4Bq4SzzhHRY0o",
+   "node_id": "I_kwDOVoYHnc8AAAABdvz9sw",
+   "number": 132
+  },
+  "ADH-MOB-1": {
+   "deps": [
+    "ADH-API-1",
+    "ADH-DSH-1",
+    "PAY-MOB-1",
+    "OCC-DES-1"
+   ],
+   "digest": "98fa43b6e05c",
+   "fields": {
+    "Area": "mobile",
+    "Priority": "P0",
+    "Size": "M",
+    "Status": "Backlog"
+   },
+   "id": 6291259587,
+   "item": "PVTI_lADOFIc2Jc4Bq4SzzhHRY1A",
+   "node_id": "I_kwDOVoYHnc8AAAABdv0Aww",
+   "number": 133
+  },
+  "ADM": {
+   "digest": "6df29ff8afc3",
+   "fields": {
+    "Status": "Backlog"
+   },
+   "id": 6291243158,
+   "item": "PVTI_lADOFIc2Jc4Bq4SzzhHRYV8",
+   "node_id": "I_kwDOVoYHnc8AAAABdvzAlg",
+   "number": 110
+  },
+  "ADM-API-1": {
+   "deps": [
+    "FND-API-3",
+    "FND-API-4"
+   ],
+   "digest": "416366478009",
+   "fields": {
+    "Area": "api",
+    "Priority": "P0",
+    "Size": "M",
+    "Status": "Backlog"
+   },
+   "id": 6291243788,
+   "item": "PVTI_lADOFIc2Jc4Bq4SzzhHRYZs",
+   "node_id": "I_kwDOVoYHnc8AAAABdvzDDA",
+   "number": 111
+  },
+  "ADM-API-2": {
+   "deps": [
+    "ORD-API-2",
+    "ADM-API-1"
+   ],
+   "digest": "ca65f3699ef8",
+   "fields": {
+    "Area": "api",
+    "Priority": "P0",
+    "Size": "M",
+    "Status": "Backlog"
+   },
+   "id": 6291244427,
+   "item": "PVTI_lADOFIc2Jc4Bq4SzzhHRYak",
+   "node_id": "I_kwDOVoYHnc8AAAABdvzFiw",
+   "number": 112
+  },
+  "ADM-DSH-1": {
+   "deps": [
+    "ADM-API-1",
+    "ADM-API-2"
+   ],
+   "digest": "45d9bedcafb9",
+   "fields": {
+    "Area": "dashboard",
+    "Priority": "P0",
+    "Size": "L",
+    "Status": "Backlog"
+   },
+   "id": 6291245090,
+   "item": "PVTI_lADOFIc2Jc4Bq4SzzhHRYbo",
+   "node_id": "I_kwDOVoYHnc8AAAABdvzIIg",
+   "number": 113
+  },
+  "ADM-DSH-2": {
+   "deps": [
+    "ORD-DSH-1",
+    "CAN-API-1",
+    "ADM-API-2",
+    "DLV-DSH-1"
+   ],
+   "digest": "717670ca1732",
+   "fields": {
+    "Area": "dashboard",
+    "Priority": "P0",
+    "Size": "L",
+    "Status": "Backlog"
+   },
+   "id": 6291245760,
+   "item": "PVTI_lADOFIc2Jc4Bq4SzzhHRYck",
+   "node_id": "I_kwDOVoYHnc8AAAABdvzKwA",
+   "number": 114
+  },
+  "APP": {
+   "digest": "aa126196d147",
+   "fields": {
+    "Status": "Backlog"
+   },
+   "id": 6291168447,
+   "item": "PVTI_lADOFIc2Jc4Bq4SzzhHRWl0",
+   "node_id": "I_kwDOVoYHnc8AAAABdvucvw",
+   "number": 9
+  },
+  "APP-DSH-1": {
+   "deps": [
+    "FND-INF-3",
+    "FND-API-3"
+   ],
+   "digest": "0da64f71ed77",
+   "fields": {
+    "Area": "dashboard",
+    "Priority": "P0",
+    "Size": "M",
+    "Status": "Todo"
+   },
+   "id": 6291170773,
+   "item": "PVTI_lADOFIc2Jc4Bq4SzzhHRWrc",
+   "node_id": "I_kwDOVoYHnc8AAAABdvul1Q",
+   "number": 12
+  },
+  "APP-MOB-1": {
+   "deps": [
+    "FND-INF-3"
+   ],
+   "digest": "ccdd3436f3ef",
+   "fields": {
+    "Area": "mobile",
+    "Priority": "P0",
+    "Size": "XL",
+    "Status": "Todo"
+   },
+   "id": 6291169267,
+   "item": "PVTI_lADOFIc2Jc4Bq4SzzhHRWp8",
+   "node_id": "I_kwDOVoYHnc8AAAABdvuf8w",
+   "number": 10
+  },
+  "APP-WEB-1": {
+   "deps": [
+    "FND-INF-3",
+    "APP-DSH-1"
+   ],
+   "digest": "dbebf7ed4c71",
+   "fields": {
+    "Area": "web",
+    "Priority": "P0",
+    "Size": "L",
+    "Status": "Todo"
+   },
+   "id": 6291170047,
+   "item": "PVTI_lADOFIc2Jc4Bq4SzzhHRWqo",
+   "node_id": "I_kwDOVoYHnc8AAAABdvui_w",
+   "number": 11
+  },
+  "BNPL": {
+   "digest": "bacdb305cbc0",
+   "fields": {
+    "Status": "Backlog"
+   },
+   "id": 6291293708,
+   "item": "PVTI_lADOFIc2Jc4Bq4SzzhHRZxo",
+   "node_id": "I_kwDOVoYHnc8AAAABdv2GDA",
+   "number": 181
+  },
+  "BNPL-API-1": {
+   "deps": [
+    "PAY-API-2"
+   ],
+   "digest": "33193b45ab0f",
+   "fields": {
+    "Area": "api",
+    "Priority": "P2",
+    "Size": "L",
+    "Status": "Backlog"
+   },
+   "id": 6291294365,
+   "item": "PVTI_lADOFIc2Jc4Bq4SzzhHRZ04",
+   "node_id": "I_kwDOVoYHnc8AAAABdv2InQ",
+   "number": 182
+  },
+  "BNPL-MOB-1": {
+   "deps": [
+    "BNPL-API-1"
+   ],
+   "digest": "7c9d49a6dfe0",
+   "fields": {
+    "Area": "mobile",
+    "Priority": "P2",
+    "Size": "M",
+    "Status": "Backlog"
+   },
+   "id": 6291295090,
+   "item": "PVTI_lADOFIc2Jc4Bq4SzzhHRZ1k",
+   "node_id": "I_kwDOVoYHnc8AAAABdv2Lcg",
+   "number": 183
+  },
+  "CAN": {
+   "digest": "0cf2dcd3edf0",
+   "fields": {
+    "Status": "Backlog"
+   },
+   "id": 6291228911,
+   "item": "PVTI_lADOFIc2Jc4Bq4SzzhHRX-0",
+   "node_id": "I_kwDOVoYHnc8AAAABdvyI7w",
+   "number": 91
+  },
+  "CAN-API-1": {
+   "deps": [
+    "ORD-API-2",
+    "PAY-API-1",
+    "WAL-API-1",
+    "FND-API-4"
+   ],
+   "digest": "8d83cb69978e",
+   "fields": {
+    "Area": "api",
+    "Priority": "P0",
+    "Size": "L",
+    "Status": "Backlog"
+   },
+   "id": 6291229682,
+   "item": "PVTI_lADOFIc2Jc4Bq4SzzhHRYDA",
+   "node_id": "I_kwDOVoYHnc8AAAABdvyL8g",
+   "number": 92
+  },
+  "CAN-DSH-1": {
+   "deps": [
+    "CAN-API-1",
+    "WAL-API-1"
+   ],
+   "digest": "9dea9c8559d8",
+   "fields": {
+    "Area": "dashboard",
+    "Priority": "P0",
+    "Size": "M",
+    "Status": "Backlog"
+   },
+   "id": 6291230366,
+   "item": "PVTI_lADOFIc2Jc4Bq4SzzhHRYDg",
+   "node_id": "I_kwDOVoYHnc8AAAABdvyOng",
+   "number": 93
+  },
+  "CAN-MOB-1": {
+   "deps": [
+    "CAN-API-1",
+    "ORD-MOB-2",
+    "WAL-API-1"
+   ],
+   "digest": "078a573a0190",
+   "fields": {
+    "Area": "mobile",
+    "Priority": "P0",
+    "Size": "L",
+    "Status": "Backlog"
+   },
+   "id": 6291231190,
+   "item": "PVTI_lADOFIc2Jc4Bq4SzzhHRYEM",
+   "node_id": "I_kwDOVoYHnc8AAAABdvyR1g",
+   "number": 94
+  },
+  "CAN-WEB-1": {
+   "deps": [
+    "CAN-API-1",
+    "ORD-WEB-2",
+    "WAL-API-1"
+   ],
+   "digest": "a8352343a646",
+   "fields": {
+    "Area": "web",
+    "Priority": "P1",
+    "Size": "M",
+    "Status": "Backlog"
+   },
+   "id": 6291231924,
+   "item": "PVTI_lADOFIc2Jc4Bq4SzzhHRYEo",
+   "node_id": "I_kwDOVoYHnc8AAAABdvyUtA",
+   "number": 95
+  },
+  "CAT": {
+   "digest": "3ba469982df3",
+   "fields": {
+    "Status": "Backlog"
+   },
+   "id": 6291196113,
+   "item": "PVTI_lADOFIc2Jc4Bq4SzzhHRXO0",
+   "node_id": "I_kwDOVoYHnc8AAAABdvwI0Q",
+   "number": 47
+  },
+  "CAT-API-1": {
+   "deps": [
+    "FND-API-1",
+    "VND-API-1"
+   ],
+   "digest": "5b4225efa60c",
+   "fields": {
+    "Area": "api",
+    "Priority": "P0",
+    "Size": "L",
+    "Status": "Backlog"
+   },
+   "id": 6291196935,
+   "item": "PVTI_lADOFIc2Jc4Bq4SzzhHRXSo",
+   "node_id": "I_kwDOVoYHnc8AAAABdvwMBw",
+   "number": 48
+  },
+  "CAT-API-3": {
+   "deps": [
+    "CAT-API-1",
+    "FND-API-4"
+   ],
+   "digest": "7d6c40f563f0",
+   "fields": {
+    "Area": "api",
+    "Priority": "P0",
+    "Size": "L",
+    "Status": "Backlog"
+   },
+   "id": 6291197572,
+   "item": "PVTI_lADOFIc2Jc4Bq4SzzhHRXTg",
+   "node_id": "I_kwDOVoYHnc8AAAABdvwOhA",
+   "number": 49
+  },
+  "CAT-API-5": {
+   "deps": [
+    "CAT-API-1",
+    "VND-API-2"
+   ],
+   "digest": "93789b31ca31",
+   "fields": {
+    "Area": "api",
+    "Priority": "P0",
+    "Size": "L",
+    "Status": "Backlog"
+   },
+   "id": 6291198230,
+   "item": "PVTI_lADOFIc2Jc4Bq4SzzhHRXT0",
+   "node_id": "I_kwDOVoYHnc8AAAABdvwRFg",
+   "number": 50
+  },
+  "CAT-DSH-1": {
+   "deps": [
+    "CAT-API-3",
+    "VND-DES-1"
+   ],
+   "digest": "46b9f6fffc23",
+   "fields": {
+    "Area": "dashboard",
+    "Priority": "P0",
+    "Size": "L",
+    "Status": "Backlog"
+   },
+   "id": 6291198827,
+   "item": "PVTI_lADOFIc2Jc4Bq4SzzhHRXUc",
+   "node_id": "I_kwDOVoYHnc8AAAABdvwTaw",
+   "number": 51
+  },
+  "CAT-DSH-2": {
+   "deps": [
+    "CAT-API-3",
+    "CAT-DSH-1"
+   ],
+   "digest": "e9d8a9b6973b",
+   "fields": {
+    "Area": "dashboard",
+    "Priority": "P0",
+    "Size": "M",
+    "Status": "Backlog"
+   },
+   "id": 6291199441,
+   "item": "PVTI_lADOFIc2Jc4Bq4SzzhHRXVM",
+   "node_id": "I_kwDOVoYHnc8AAAABdvwV0Q",
+   "number": 52
+  },
+  "CHR": {
+   "digest": "b79d16a67fe3",
+   "fields": {
+    "Status": "Backlog"
+   },
+   "id": 6291291611,
+   "item": "PVTI_lADOFIc2Jc4Bq4SzzhHRZsA",
+   "node_id": "I_kwDOVoYHnc8AAAABdv192w",
+   "number": 178
+  },
+  "CHR-API-1": {
+   "deps": [
+    "PAY-API-2",
+    "NOT-API-1"
+   ],
+   "digest": "f509481d21b6",
+   "fields": {
+    "Area": "api",
+    "Priority": "P1",
+    "Size": "M",
+    "Status": "Backlog"
+   },
+   "id": 6291292276,
+   "item": "PVTI_lADOFIc2Jc4Bq4SzzhHRZv4",
+   "node_id": "I_kwDOVoYHnc8AAAABdv2AdA",
+   "number": 179
+  },
+  "CHR-MOB-1": {
+   "deps": [
+    "CHR-API-1"
+   ],
+   "digest": "cc5038c66f88",
+   "fields": {
+    "Area": "mobile",
+    "Priority": "P1",
+    "Size": "M",
+    "Status": "Backlog"
+   },
+   "id": 6291292922,
+   "item": "PVTI_lADOFIc2Jc4Bq4SzzhHRZwo",
+   "node_id": "I_kwDOVoYHnc8AAAABdv2C-g",
+   "number": 180
+  },
+  "CHT": {
+   "digest": "c4eb136d9afc",
+   "fields": {
+    "Status": "Backlog"
+   },
+   "id": 6291274722,
+   "item": "PVTI_lADOFIc2Jc4Bq4SzzhHRZFg",
+   "node_id": "I_kwDOVoYHnc8AAAABdv074g",
+   "number": 154
+  },
+  "CHT-API-1": {
+   "deps": [
+    "FND-API-4",
+    "NOT-API-1"
+   ],
+   "digest": "f0925183b54b",
+   "fields": {
+    "Area": "api",
+    "Priority": "P0",
+    "Size": "L",
+    "Status": "Backlog"
+   },
+   "id": 6291275504,
+   "item": "PVTI_lADOFIc2Jc4Bq4SzzhHRZG8",
+   "node_id": "I_kwDOVoYHnc8AAAABdv0-8A",
+   "number": 155
+  },
+  "CHT-MOB-1": {
+   "deps": [
+    "CHT-API-1",
+    "FED-DES-1",
+    "NOT-MOB-1"
+   ],
+   "digest": "0067c1c970bd",
+   "fields": {
+    "Area": "mobile",
+    "Priority": "P0",
+    "Size": "L",
+    "Status": "Backlog"
+   },
+   "id": 6291276290,
+   "item": "PVTI_lADOFIc2Jc4Bq4SzzhHRZHY",
+   "node_id": "I_kwDOVoYHnc8AAAABdv1CAg",
+   "number": 156
+  },
+  "CMS": {
+   "digest": "39b3faf55fe2",
+   "fields": {
+    "Status": "Backlog"
+   },
+   "id": 6291280158,
+   "item": "PVTI_lADOFIc2Jc4Bq4SzzhHRZPs",
+   "node_id": "I_kwDOVoYHnc8AAAABdv1RHg",
+   "number": 161
+  },
+  "CMS-API-1": {
+   "deps": [
+    "FND-API-4",
+    "CAT-API-5"
+   ],
+   "digest": "cbf5adabaa03",
+   "fields": {
+    "Area": "api",
+    "Priority": "P0",
+    "Size": "M",
+    "Status": "Backlog"
+   },
+   "id": 6291280895,
+   "item": "PVTI_lADOFIc2Jc4Bq4SzzhHRZRc",
+   "node_id": "I_kwDOVoYHnc8AAAABdv1T_w",
+   "number": 162
+  },
+  "CMS-DSH-1": {
+   "deps": [
+    "CMS-API-1"
+   ],
+   "digest": "4f02e687e168",
+   "fields": {
+    "Area": "dashboard",
+    "Priority": "P0",
+    "Size": "M",
+    "Status": "Backlog"
+   },
+   "id": 6291281534,
+   "item": "PVTI_lADOFIc2Jc4Bq4SzzhHRZR8",
+   "node_id": "I_kwDOVoYHnc8AAAABdv1Wfg",
+   "number": 163
+  },
+  "CMS-MOB-1": {
+   "deps": [
+    "CMS-API-1",
+    "STF-MOB-1",
+    "STF-WEB-1"
+   ],
+   "digest": "9eeecf0c5bfa",
+   "fields": {
+    "Area": "mobile",
+    "Priority": "P0",
+    "Size": "S",
+    "Status": "Backlog"
+   },
+   "id": 6291282150,
+   "item": "PVTI_lADOFIc2Jc4Bq4SzzhHRZSQ",
+   "node_id": "I_kwDOVoYHnc8AAAABdv1Y5g",
+   "number": 164
+  },
+  "CRT": {
+   "digest": "c2720841230e",
+   "fields": {
+    "Status": "Backlog"
+   },
+   "id": 6291205245,
+   "item": "PVTI_lADOFIc2Jc4Bq4SzzhHRXck",
+   "node_id": "I_kwDOVoYHnc8AAAABdvwsfQ",
+   "number": 60
+  },
+  "CRT-API-1": {
+   "deps": [
+    "CAT-API-1",
+    "ACC-API-1",
+    "SCH-API-1"
+   ],
+   "digest": "9235d5ef7f58",
+   "fields": {
+    "Area": "api",
+    "Priority": "P0",
+    "Size": "L",
+    "Status": "Backlog"
+   },
+   "id": 6291205919,
+   "item": "PVTI_lADOFIc2Jc4Bq4SzzhHRXfU",
+   "node_id": "I_kwDOVoYHnc8AAAABdvwvHw",
+   "number": 61
+  },
+  "CRT-API-3": {
+   "deps": [
+    "CRT-API-1"
+   ],
+   "digest": "c84fb8d78060",
+   "fields": {
+    "Area": "api",
+    "Priority": "P0",
+    "Size": "M",
+    "Status": "Backlog"
+   },
+   "id": 6291206591,
+   "item": "PVTI_lADOFIc2Jc4Bq4SzzhHRXgA",
+   "node_id": "I_kwDOVoYHnc8AAAABdvwxvw",
+   "number": 62
+  },
+  "CRT-DSH-1": {
+   "deps": [
+    "CRT-API-3"
+   ],
+   "digest": "866ca8a70d38",
+   "fields": {
+    "Area": "dashboard",
+    "Priority": "P0",
+    "Size": "S",
+    "Status": "Backlog"
+   },
+   "id": 6291207232,
+   "item": "PVTI_lADOFIc2Jc4Bq4SzzhHRXhI",
+   "node_id": "I_kwDOVoYHnc8AAAABdvw0QA",
+   "number": 63
+  },
+  "CRT-MOB-1": {
+   "deps": [
+    "CRT-API-1",
+    "CRT-API-3",
+    "STF-MOB-3"
+   ],
+   "digest": "dfa0fdd1cb1b",
+   "fields": {
+    "Area": "mobile",
+    "Priority": "P0",
+    "Size": "M",
+    "Status": "Backlog"
+   },
+   "id": 6291208032,
+   "item": "PVTI_lADOFIc2Jc4Bq4SzzhHRXh4",
+   "node_id": "I_kwDOVoYHnc8AAAABdvw3YA",
+   "number": 64
+  },
+  "CRT-WEB-1": {
+   "deps": [
+    "CRT-API-1",
+    "CRT-API-3",
+    "STF-WEB-2"
+   ],
+   "digest": "6060656c2edf",
+   "fields": {
+    "Area": "web",
+    "Priority": "P0",
+    "Size": "M",
+    "Status": "Backlog"
+   },
+   "id": 6291208758,
+   "item": "PVTI_lADOFIc2Jc4Bq4SzzhHRXi8",
+   "node_id": "I_kwDOVoYHnc8AAAABdvw6Ng",
+   "number": 65
+  },
+  "DLV": {
+   "digest": "939f72e9c7d4",
+   "fields": {
+    "Status": "Backlog"
+   },
+   "id": 6291232684,
+   "item": "PVTI_lADOFIc2Jc4Bq4SzzhHRYFY",
+   "node_id": "I_kwDOVoYHnc8AAAABdvyXrA",
+   "number": 96
+  },
+  "DLV-API-1": {
+   "deps": [
+    "ORD-API-2"
+   ],
+   "digest": "770db349d851",
+   "fields": {
+    "Area": "api",
+    "Priority": "P0",
+    "Size": "L",
+    "Status": "Backlog"
+   },
+   "id": 6291234500,
+   "item": "PVTI_lADOFIc2Jc4Bq4SzzhHRYHg",
+   "node_id": "I_kwDOVoYHnc8AAAABdvyexA",
+   "number": 98
+  },
+  "DLV-API-2": {
+   "deps": [
+    "DLV-API-1",
+    "DLV-DOC-1"
+   ],
+   "digest": "69421a0e7bbf",
+   "fields": {
+    "Area": "api",
+    "Priority": "P0",
+    "Size": "XL",
+    "Status": "Backlog"
+   },
+   "id": 6291235263,
+   "item": "PVTI_lADOFIc2Jc4Bq4SzzhHRYIM",
+   "node_id": "I_kwDOVoYHnc8AAAABdvyhvw",
+   "number": 99
+  },
+  "DLV-DOC-1": {
+   "digest": "9e6a2debe3ba",
+   "fields": {
+    "Area": "api",
+    "Priority": "P0",
+    "Size": "S",
+    "Status": "Backlog"
+   },
+   "id": 6291233579,
+   "item": "PVTI_lADOFIc2Jc4Bq4SzzhHRYG4",
+   "node_id": "I_kwDOVoYHnc8AAAABdvybKw",
+   "number": 97
+  },
+  "DLV-DSH-1": {
+   "deps": [
+    "DLV-API-1"
+   ],
+   "digest": "1bb4c5f12c75",
+   "fields": {
+    "Area": "dashboard",
+    "Priority": "P0",
+    "Size": "M",
+    "Status": "Backlog"
+   },
+   "id": 6291235995,
+   "item": "PVTI_lADOFIc2Jc4Bq4SzzhHRYI4",
+   "node_id": "I_kwDOVoYHnc8AAAABdvykmw",
+   "number": 100
+  },
+  "DLV-MOB-1": {
+   "deps": [
+    "ORD-MOB-2",
+    "VOP-API-1",
+    "DLV-API-1"
+   ],
+   "digest": "e13c56a3fd85",
+   "fields": {
+    "Area": "mobile",
+    "Priority": "P0",
+    "Size": "M",
+    "Status": "Backlog"
+   },
+   "id": 6291236747,
+   "item": "PVTI_lADOFIc2Jc4Bq4SzzhHRYJM",
+   "node_id": "I_kwDOVoYHnc8AAAABdvyniw",
+   "number": 101
+  },
+  "DLV-WEB-1": {
+   "deps": [
+    "ORD-WEB-2",
+    "VOP-API-1",
+    "NOT-API-1",
+    "DLV-API-1"
+   ],
+   "digest": "275ebdd934da",
+   "fields": {
+    "Area": "web",
+    "Priority": "P1",
+    "Size": "S",
+    "Status": "Backlog"
+   },
+   "id": 6291237580,
+   "item": "PVTI_lADOFIc2Jc4Bq4SzzhHRYJ8",
+   "node_id": "I_kwDOVoYHnc8AAAABdvyqzA",
+   "number": 102
+  },
+  "DSN": {
+   "digest": "bed03dc19801",
+   "fields": {
+    "Status": "Backlog"
+   },
+   "id": 6291171661,
+   "item": "PVTI_lADOFIc2Jc4Bq4SzzhHRWsg",
+   "node_id": "I_kwDOVoYHnc8AAAABdvupTQ",
+   "number": 13
+  },
+  "DSN-DES-1": {
+   "digest": "21e314b22359",
+   "fields": {
+    "Area": "design",
+    "Priority": "P0",
+    "Size": "XL",
+    "Status": "Todo"
+   },
+   "id": 6291172406,
+   "item": "PVTI_lADOFIc2Jc4Bq4SzzhHRWxA",
+   "node_id": "I_kwDOVoYHnc8AAAABdvusNg",
+   "number": 14
+  },
+  "FED": {
+   "digest": "8d69ea941a02",
+   "fields": {
+    "Status": "Backlog"
+   },
+   "id": 6291269553,
+   "item": "PVTI_lADOFIc2Jc4Bq4SzzhHRZAQ",
+   "node_id": "I_kwDOVoYHnc8AAAABdv0nsQ",
+   "number": 147
+  },
+  "FED-API-1": {
+   "deps": [
+    "ACC-API-2",
+    "FND-API-4",
+    "LOC-API-1"
+   ],
+   "digest": "41288dcb3f23",
+   "fields": {
+    "Area": "api",
+    "Priority": "P0",
+    "Size": "L",
+    "Status": "Backlog"
+   },
+   "id": 6291271056,
+   "item": "PVTI_lADOFIc2Jc4Bq4SzzhHRZCY",
+   "node_id": "I_kwDOVoYHnc8AAAABdv0tkA",
+   "number": 149
+  },
+  "FED-API-2": {
+   "deps": [
+    "FED-API-1",
+    "CHT-API-1",
+    "ADM-API-1"
+   ],
+   "digest": "24667c0a7a71",
+   "fields": {
+    "Area": "api",
+    "Priority": "P0",
+    "Size": "M",
+    "Status": "Backlog"
+   },
+   "id": 6291271831,
+   "item": "PVTI_lADOFIc2Jc4Bq4SzzhHRZC0",
+   "node_id": "I_kwDOVoYHnc8AAAABdv0wlw",
+   "number": 150
+  },
+  "FED-DES-1": {
+   "deps": [
+    "DSN-DES-1"
+   ],
+   "digest": "06dec9a0d427",
+   "fields": {
+    "Area": "design",
+    "Priority": "P0",
+    "Size": "M",
+    "Status": "Backlog"
+   },
+   "id": 6291270241,
+   "item": "PVTI_lADOFIc2Jc4Bq4SzzhHRZBk",
+   "node_id": "I_kwDOVoYHnc8AAAABdv0qYQ",
+   "number": 148
+  },
+  "FED-DSH-1": {
+   "deps": [
+    "FED-API-2",
+    "FED-DES-1"
+   ],
+   "digest": "6eba8bd0fcd7",
+   "fields": {
+    "Area": "dashboard",
+    "Priority": "P0",
+    "Size": "M",
+    "Status": "Backlog"
+   },
+   "id": 6291272584,
+   "item": "PVTI_lADOFIc2Jc4Bq4SzzhHRZDQ",
+   "node_id": "I_kwDOVoYHnc8AAAABdv0ziA",
+   "number": 151
+  },
+  "FED-MOB-1": {
+   "deps": [
+    "FED-API-2",
+    "FED-DES-1"
+   ],
+   "digest": "aa3116f4a14f",
+   "fields": {
+    "Area": "mobile",
+    "Priority": "P0",
+    "Size": "XL",
+    "Status": "Backlog"
+   },
+   "id": 6291273335,
+   "item": "PVTI_lADOFIc2Jc4Bq4SzzhHRZDo",
+   "node_id": "I_kwDOVoYHnc8AAAABdv02dw",
+   "number": 152
+  },
+  "FED-WEB-1": {
+   "deps": [
+    "FED-API-1"
+   ],
+   "digest": "2167f85033b5",
+   "fields": {
+    "Area": "web",
+    "Priority": "P2",
+    "Size": "S",
+    "Status": "Backlog"
+   },
+   "id": 6291274008,
+   "item": "PVTI_lADOFIc2Jc4Bq4SzzhHRZEQ",
+   "node_id": "I_kwDOVoYHnc8AAAABdv05GA",
+   "number": 153
+  },
+  "FIN": {
+   "digest": "d491df8cf76c",
+   "fields": {
+    "Status": "Backlog"
+   },
+   "id": 6291246591,
+   "item": "PVTI_lADOFIc2Jc4Bq4SzzhHRYdQ",
+   "node_id": "I_kwDOVoYHnc8AAAABdvzN_w",
+   "number": 115
+  },
+  "FIN-API-1": {
+   "deps": [
+    "ORD-API-2",
+    "CAN-API-1"
+   ],
+   "digest": "2da80624572a",
+   "fields": {
+    "Area": "api",
+    "Priority": "P0",
+    "Size": "L",
+    "Status": "Backlog"
+   },
+   "id": 6291247324,
+   "item": "PVTI_lADOFIc2Jc4Bq4SzzhHRYgQ",
+   "node_id": "I_kwDOVoYHnc8AAAABdvzQ3A",
+   "number": 116
+  },
+  "FIN-API-2": {
+   "deps": [
+    "FIN-API-1",
+    "DLV-API-1"
+   ],
+   "digest": "d57f83ff45bc",
+   "fields": {
+    "Area": "api",
+    "Priority": "P0",
+    "Size": "L",
+    "Status": "Backlog"
+   },
+   "id": 6291248082,
+   "item": "PVTI_lADOFIc2Jc4Bq4SzzhHRYhQ",
+   "node_id": "I_kwDOVoYHnc8AAAABdvzT0g",
+   "number": 117
+  },
+  "FIN-DSH-1": {
+   "deps": [
+    "FIN-API-2",
+    "ADM-DSH-1"
+   ],
+   "digest": "2b63d74518d3",
+   "fields": {
+    "Area": "dashboard",
+    "Priority": "P0",
+    "Size": "L",
+    "Status": "Backlog"
+   },
+   "id": 6291248821,
+   "item": "PVTI_lADOFIc2Jc4Bq4SzzhHRYiM",
+   "node_id": "I_kwDOVoYHnc8AAAABdvzWtQ",
+   "number": 118
+  },
+  "FND": {
+   "digest": "09798795510a",
+   "fields": {
+    "Status": "Backlog"
+   },
+   "id": 6291161356,
+   "item": "PVTI_lADOFIc2Jc4Bq4SzzhHRWe0",
+   "node_id": "I_kwDOVoYHnc8AAAABdvuBDA",
+   "number": 1
+  },
+  "FND-API-1": {
+   "deps": [
+    "FND-INF-1"
+   ],
+   "digest": "266d830c88bf",
+   "fields": {
+    "Area": "api",
+    "Priority": "P0",
+    "Size": "L",
+    "Status": "Todo"
+   },
+   "id": 6291163079,
+   "item": "PVTI_lADOFIc2Jc4Bq4SzzhHRWhQ",
+   "node_id": "I_kwDOVoYHnc8AAAABdvuHxw",
+   "number": 3
+  },
+  "FND-API-3": {
+   "deps": [
+    "FND-API-1"
+   ],
+   "digest": "95975ada4fcf",
+   "fields": {
+    "Area": "api",
+    "Priority": "P0",
+    "Size": "M",
+    "Status": "Todo"
+   },
+   "id": 6291164020,
+   "item": "PVTI_lADOFIc2Jc4Bq4SzzhHRWiM",
+   "node_id": "I_kwDOVoYHnc8AAAABdvuLdA",
+   "number": 4
+  },
+  "FND-API-4": {
+   "deps": [
+    "FND-API-3",
+    "FND-API-1"
+   ],
+   "digest": "b1d6fdef8130",
+   "fields": {
+    "Area": "api",
+    "Priority": "P0",
+    "Size": "L",
+    "Status": "Todo"
+   },
+   "id": 6291165038,
+   "item": "PVTI_lADOFIc2Jc4Bq4SzzhHRWiw",
+   "node_id": "I_kwDOVoYHnc8AAAABdvuPbg",
+   "number": 5
+  },
+  "FND-INF-1": {
+   "digest": "3a09026f5f45",
+   "fields": {
+    "Area": "infra",
+    "Priority": "P0",
+    "Size": "M",
+    "Status": "Todo"
+   },
+   "id": 6291162173,
+   "item": "PVTI_lADOFIc2Jc4Bq4SzzhHRWgU",
+   "node_id": "I_kwDOVoYHnc8AAAABdvuEPQ",
+   "number": 2
+  },
+  "FND-INF-3": {
+   "deps": [
+    "FND-API-1"
+   ],
+   "digest": "2f030e5f7bca",
+   "fields": {
+    "Area": "infra",
+    "Priority": "P0",
+    "Size": "M",
+    "Status": "Todo"
+   },
+   "id": 6291165885,
+   "item": "PVTI_lADOFIc2Jc4Bq4SzzhHRWjI",
+   "node_id": "I_kwDOVoYHnc8AAAABdvuSvQ",
+   "number": 6
+  },
+  "FND-INF-4": {
+   "digest": "d7b959f99b5e",
+   "fields": {
+    "Area": "infra",
+    "Priority": "P0",
+    "Size": "S",
+    "Status": "Todo"
+   },
+   "id": 6291166845,
+   "item": "PVTI_lADOFIc2Jc4Bq4SzzhHRWjk",
+   "node_id": "I_kwDOVoYHnc8AAAABdvuWfQ",
+   "number": 7
+  },
+  "FND-INF-5": {
+   "deps": [
+    "FND-INF-4",
+    "FND-API-1",
+    "FND-INF-3"
+   ],
+   "digest": "196f7d494952",
+   "fields": {
+    "Area": "infra",
+    "Priority": "P0",
+    "Size": "L",
+    "Status": "Todo"
+   },
+   "id": 6291167714,
+   "item": "PVTI_lADOFIc2Jc4Bq4SzzhHRWkE",
+   "node_id": "I_kwDOVoYHnc8AAAABdvuZ4g",
+   "number": 8
+  },
+  "FTX": {
+   "digest": "f03b588044ec",
+   "fields": {
+    "Status": "Backlog"
+   },
+   "id": 6291302505,
+   "item": "PVTI_lADOFIc2Jc4Bq4SzzhHRaJI",
+   "node_id": "I_kwDOVoYHnc8AAAABdv2oaQ",
+   "number": 193
+  },
+  "FTX-API-1": {
+   "deps": [
+    "FED-API-1",
+    "PAY-API-2",
+    "DLV-API-1",
+    "FIN-API-1"
+   ],
+   "digest": "3e670bb1f467",
+   "fields": {
+    "Area": "api",
+    "Priority": "P2",
+    "Size": "XL",
+    "Status": "Backlog"
+   },
+   "id": 6291303054,
+   "item": "PVTI_lADOFIc2Jc4Bq4SzzhHRaKk",
+   "node_id": "I_kwDOVoYHnc8AAAABdv2qjg",
+   "number": 194
+  },
+  "FTX-MOB-1": {
+   "deps": [
+    "FTX-API-1"
+   ],
+   "digest": "6c1fa7e9bdb8",
+   "fields": {
+    "Area": "mobile",
+    "Priority": "P2",
+    "Size": "L",
+    "Status": "Backlog"
+   },
+   "id": 6291303618,
+   "item": "PVTI_lADOFIc2Jc4Bq4SzzhHRaK4",
+   "node_id": "I_kwDOVoYHnc8AAAABdv2swg",
+   "number": 195
+  },
+  "HRD": {
+   "digest": "916930a0ff67",
+   "fields": {
+    "Status": "Backlog"
+   },
+   "id": 6291262432,
+   "item": "PVTI_lADOFIc2Jc4Bq4SzzhHRY7I",
+   "node_id": "I_kwDOVoYHnc8AAAABdv0L4A",
+   "number": 137
+  },
+  "HRD-API-1": {
+   "deps": [
+    "ADM-API-1",
+    "REL-INF-6"
+   ],
+   "digest": "8e11b7ab0b7a",
+   "fields": {
+    "Area": "api",
+    "Priority": "P0",
+    "Size": "L",
+    "Status": "Backlog"
+   },
+   "id": 6291264437,
+   "item": "PVTI_lADOFIc2Jc4Bq4SzzhHRY9s",
+   "node_id": "I_kwDOVoYHnc8AAAABdv0TtQ",
+   "number": 140
+  },
+  "HRD-DOC-1": {
+   "digest": "e36871a73723",
+   "fields": {
+    "Area": "docs",
+    "Priority": "P0",
+    "Size": "S",
+    "Status": "Backlog"
+   },
+   "id": 6291266562,
+   "item": "PVTI_lADOFIc2Jc4Bq4SzzhHRY_M",
+   "node_id": "I_kwDOVoYHnc8AAAABdv0cAg",
+   "number": 143
+  },
+  "HRD-INF-1": {
+   "deps": [
+    "FND-INF-5"
+   ],
+   "digest": "aab70719403b",
+   "fields": {
+    "Area": "infra",
+    "Priority": "P0",
+    "Size": "L",
+    "Status": "Backlog"
+   },
+   "id": 6291263083,
+   "item": "PVTI_lADOFIc2Jc4Bq4SzzhHRY8c",
+   "node_id": "I_kwDOVoYHnc8AAAABdv0Oaw",
+   "number": 138
+  },
+  "HRD-INF-2": {
+   "deps": [
+    "HRD-INF-1"
+   ],
+   "digest": "3c0a64009389",
+   "fields": {
+    "Area": "infra",
+    "Priority": "P0",
+    "Size": "M",
+    "Status": "Backlog"
+   },
+   "id": 6291263734,
+   "item": "PVTI_lADOFIc2Jc4Bq4SzzhHRY80",
+   "node_id": "I_kwDOVoYHnc8AAAABdv0Q9g",
+   "number": 139
+  },
+  "HRD-INF-3": {
+   "deps": [
+    "HRD-INF-2",
+    "HRD-MOB-1",
+    "HRD-API-1"
+   ],
+   "digest": "a6aa74e8bd08",
+   "fields": {
+    "Area": "infra",
+    "Priority": "P0",
+    "Size": "S",
+    "Status": "Backlog"
+   },
+   "id": 6291268816,
+   "item": "PVTI_lADOFIc2Jc4Bq4SzzhHRZA8",
+   "node_id": "I_kwDOVoYHnc8AAAABdv0k0A",
+   "number": 146
+  },
+  "HRD-MOB-1": {
+   "deps": [
+    "HRD-QA-2",
+    "HRD-DOC-1"
+   ],
+   "digest": "0e838b75b455",
+   "fields": {
+    "Area": "mobile",
+    "Priority": "P0",
+    "Size": "L",
+    "Status": "Backlog"
+   },
+   "id": 6291267317,
+   "item": "PVTI_lADOFIc2Jc4Bq4SzzhHRY_w",
+   "node_id": "I_kwDOVoYHnc8AAAABdv0e9Q",
+   "number": 144
+  },
+  "HRD-QA-1": {
+   "deps": [
+    "HRD-INF-1"
+   ],
+   "digest": "e040f9000622",
+   "fields": {
+    "Area": "qa",
+    "Priority": "P0",
+    "Size": "M",
+    "Status": "Backlog"
+   },
+   "id": 6291265078,
+   "item": "PVTI_lADOFIc2Jc4Bq4SzzhHRY-I",
+   "node_id": "I_kwDOVoYHnc8AAAABdv0WNg",
+   "number": 141
+  },
+  "HRD-QA-2": {
+   "deps": [
+    "HRD-QA-1",
+    "REL-INF-6"
+   ],
+   "digest": "cbe7b12b220a",
+   "fields": {
+    "Area": "qa",
+    "Priority": "P0",
+    "Size": "L",
+    "Status": "Backlog"
+   },
+   "id": 6291265733,
+   "item": "PVTI_lADOFIc2Jc4Bq4SzzhHRY-w",
+   "node_id": "I_kwDOVoYHnc8AAAABdv0YxQ",
+   "number": 142
+  },
+  "HRD-WEB-1": {
+   "deps": [
+    "HRD-INF-1"
+   ],
+   "digest": "0b86499802e2",
+   "fields": {
+    "Area": "web",
+    "Priority": "P1",
+    "Size": "M",
+    "Status": "Backlog"
+   },
+   "id": 6291267907,
+   "item": "PVTI_lADOFIc2Jc4Bq4SzzhHRZAk",
+   "node_id": "I_kwDOVoYHnc8AAAABdv0hQw",
+   "number": 145
+  },
+  "INV": {
+   "digest": "85678e1b6ac0",
+   "fields": {
+    "Status": "Backlog"
+   },
+   "id": 6291183121,
+   "item": "PVTI_lADOFIc2Jc4Bq4SzzhHRW9Q",
+   "node_id": "I_kwDOVoYHnc8AAAABdvvWEQ",
+   "number": 28
+  },
+  "INV-API-1": {
+   "deps": [
+    "INV-DOC-1",
+    "ORD-API-2",
+    "CAN-API-1",
+    "VIS-API-2",
+    "OCC-API-2"
+   ],
+   "digest": "b9cbe56e1458",
+   "fields": {
+    "Area": "api",
+    "Priority": "P0",
+    "Size": "L",
+    "Status": "Backlog"
+   },
+   "id": 6291184413,
+   "item": "PVTI_lADOFIc2Jc4Bq4SzzhHRXAw",
+   "node_id": "I_kwDOVoYHnc8AAAABdvvbHQ",
+   "number": 30
+  },
+  "INV-API-2": {
+   "deps": [
+    "INV-API-1"
+   ],
+   "digest": "aaff24ad9552",
+   "fields": {
+    "Area": "api",
+    "Priority": "P0",
+    "Size": "L",
+    "Status": "Backlog"
+   },
+   "id": 6291185076,
+   "item": "PVTI_lADOFIc2Jc4Bq4SzzhHRXBo",
+   "node_id": "I_kwDOVoYHnc8AAAABdvvdtA",
+   "number": 31
+  },
+  "INV-DOC-1": {
+   "digest": "7022792477e1",
+   "fields": {
+    "Area": "docs",
+    "Priority": "P0",
+    "Size": "S",
+    "Status": "Todo"
+   },
+   "id": 6291183692,
+   "item": "PVTI_lADOFIc2Jc4Bq4SzzhHRXAM",
+   "node_id": "I_kwDOVoYHnc8AAAABdvvYTA",
+   "number": 29
+  },
+  "INV-MOB-1": {
+   "deps": [
+    "INV-API-1",
+    "ORD-MOB-2",
+    "ORD-WEB-2"
+   ],
+   "digest": "2b28cb546341",
+   "fields": {
+    "Area": "mobile",
+    "Priority": "P0",
+    "Size": "XS",
+    "Status": "Backlog"
+   },
+   "id": 6291185823,
+   "item": "PVTI_lADOFIc2Jc4Bq4SzzhHRXCI",
+   "node_id": "I_kwDOVoYHnc8AAAABdvvgnw",
+   "number": 32
+  },
+  "KIT": {
+   "digest": "79e3556fe2e4",
+   "fields": {
+    "Status": "Backlog"
+   },
+   "id": 6291253638,
+   "item": "PVTI_lADOFIc2Jc4Bq4SzzhHRYrI",
+   "node_id": "I_kwDOVoYHnc8AAAABdvzphg",
+   "number": 125
+  },
+  "KIT-API-1": {
+   "deps": [
+    "CAT-API-3",
+    "ADM-API-1"
+   ],
+   "digest": "12488ecfcd45",
+   "fields": {
+    "Area": "api",
+    "Priority": "P0",
+    "Size": "M",
+    "Status": "Backlog"
+   },
+   "id": 6291254349,
+   "item": "PVTI_lADOFIc2Jc4Bq4SzzhHRYso",
+   "node_id": "I_kwDOVoYHnc8AAAABdvzsTQ",
+   "number": 126
+  },
+  "KIT-API-2": {
+   "deps": [
+    "KIT-API-1",
+    "DLV-API-1",
+    "SCH-API-2"
+   ],
+   "digest": "701838c1cf7c",
+   "fields": {
+    "Area": "api",
+    "Priority": "P0",
+    "Size": "L",
+    "Status": "Backlog"
+   },
+   "id": 6291255170,
+   "item": "PVTI_lADOFIc2Jc4Bq4SzzhHRYtg",
+   "node_id": "I_kwDOVoYHnc8AAAABdvzvgg",
+   "number": 127
+  },
+  "KIT-DSH-1": {
+   "deps": [
+    "KIT-API-2"
+   ],
+   "digest": "30b4dec65c5f",
+   "fields": {
+    "Area": "dashboard",
+    "Priority": "P0",
+    "Size": "L",
+    "Status": "Backlog"
+   },
+   "id": 6291255986,
+   "item": "PVTI_lADOFIc2Jc4Bq4SzzhHRYt4",
+   "node_id": "I_kwDOVoYHnc8AAAABdvzysg",
+   "number": 128
+  },
+  "KIT-MOB-1": {
+   "deps": [
+    "KIT-API-2",
+    "STF-MOB-3",
+    "OCC-DES-1"
+   ],
+   "digest": "6e611e165a22",
+   "fields": {
+    "Area": "mobile",
+    "Priority": "P0",
+    "Size": "M",
+    "Status": "Backlog"
+   },
+   "id": 6291256741,
+   "item": "PVTI_lADOFIc2Jc4Bq4SzzhHRYuw",
+   "node_id": "I_kwDOVoYHnc8AAAABdvz1pQ",
+   "number": 129
+  },
+  "LOC": {
+   "digest": "c6bc7c4e7666",
+   "fields": {
+    "Status": "Backlog"
+   },
+   "id": 6291179345,
+   "item": "PVTI_lADOFIc2Jc4Bq4SzzhHRW3Q",
+   "node_id": "I_kwDOVoYHnc8AAAABdvvHUQ",
+   "number": 23
+  },
+  "LOC-API-1": {
+   "deps": [
+    "FND-API-1",
+    "FND-API-4"
+   ],
+   "digest": "91f290fa40b2",
+   "fields": {
+    "Area": "api",
+    "Priority": "P0",
+    "Size": "M",
+    "Status": "Todo"
+   },
+   "id": 6291180047,
+   "item": "PVTI_lADOFIc2Jc4Bq4SzzhHRW4o",
+   "node_id": "I_kwDOVoYHnc8AAAABdvvKDw",
+   "number": 24
+  },
+  "LOC-DSH-1": {
+   "deps": [
+    "LOC-API-1",
+    "ACC-DSH-1"
+   ],
+   "digest": "82aeaa64f72d",
+   "fields": {
+    "Area": "dashboard",
+    "Priority": "P0",
+    "Size": "L",
+    "Status": "Todo"
+   },
+   "id": 6291180774,
+   "item": "PVTI_lADOFIc2Jc4Bq4SzzhHRW50",
+   "node_id": "I_kwDOVoYHnc8AAAABdvvM5g",
+   "number": 25
+  },
+  "LOC-MOB-1": {
+   "deps": [
+    "LOC-API-1",
+    "APP-MOB-1"
+   ],
+   "digest": "c4db0f2ccebb",
+   "fields": {
+    "Area": "mobile",
+    "Priority": "P0",
+    "Size": "M",
+    "Status": "Todo"
+   },
+   "id": 6291181527,
+   "item": "PVTI_lADOFIc2Jc4Bq4SzzhHRW6Y",
+   "node_id": "I_kwDOVoYHnc8AAAABdvvP1w",
+   "number": 26
+  },
+  "LOC-WEB-1": {
+   "deps": [
+    "LOC-API-1",
+    "APP-WEB-1"
+   ],
+   "digest": "dac1ba8bb1b1",
+   "fields": {
+    "Area": "web",
+    "Priority": "P0",
+    "Size": "S",
+    "Status": "Todo"
+   },
+   "id": 6291182336,
+   "item": "PVTI_lADOFIc2Jc4Bq4SzzhHRW7Q",
+   "node_id": "I_kwDOVoYHnc8AAAABdvvTAA",
+   "number": 27
+  },
+  "LOY": {
+   "digest": "f0cfccaa8300",
+   "fields": {
+    "Status": "Backlog"
+   },
+   "id": 6291287798,
+   "item": "PVTI_lADOFIc2Jc4Bq4SzzhHRZhE",
+   "node_id": "I_kwDOVoYHnc8AAAABdv1u9g",
+   "number": 172
+  },
+  "LOY-API-1": {
+   "deps": [
+    "ORD-API-2",
+    "PAY-API-1"
+   ],
+   "digest": "b5bb55a08b0a",
+   "fields": {
+    "Area": "api",
+    "Priority": "P1",
+    "Size": "L",
+    "Status": "Backlog"
+   },
+   "id": 6291288377,
+   "item": "PVTI_lADOFIc2Jc4Bq4SzzhHRZj4",
+   "node_id": "I_kwDOVoYHnc8AAAABdv1xOQ",
+   "number": 173
+  },
+  "LOY-MOB-1": {
+   "deps": [
+    "LOY-API-1"
+   ],
+   "digest": "49235db3f753",
+   "fields": {
+    "Area": "mobile",
+    "Priority": "P1",
+    "Size": "L",
+    "Status": "Backlog"
+   },
+   "id": 6291288996,
+   "item": "PVTI_lADOFIc2Jc4Bq4SzzhHRZko",
+   "node_id": "I_kwDOVoYHnc8AAAABdv1zpA",
+   "number": 174
+  },
+  "MSL": {
+   "digest": "be0848090868",
+   "fields": {
+    "Status": "Backlog"
+   },
+   "id": 6291295850,
+   "item": "PVTI_lADOFIc2Jc4Bq4SzzhHRZ3I",
+   "node_id": "I_kwDOVoYHnc8AAAABdv2Oag",
+   "number": 184
+  },
+  "MSL-API-1": {
+   "deps": [
+    "SCH-API-2"
+   ],
+   "digest": "d8d41f1f8ae8",
+   "fields": {
+    "Area": "api",
+    "Priority": "P1",
+    "Size": "L",
+    "Status": "Backlog"
+   },
+   "id": 6291296525,
+   "item": "PVTI_lADOFIc2Jc4Bq4SzzhHRZ5M",
+   "node_id": "I_kwDOVoYHnc8AAAABdv2RDQ",
+   "number": 185
+  },
+  "MSL-MOB-1": {
+   "deps": [
+    "MSL-API-1"
+   ],
+   "digest": "6b1ad481a5dd",
+   "fields": {
+    "Area": "mobile",
+    "Priority": "P1",
+    "Size": "M",
+    "Status": "Backlog"
+   },
+   "id": 6291297230,
+   "item": "PVTI_lADOFIc2Jc4Bq4SzzhHRZ54",
+   "node_id": "I_kwDOVoYHnc8AAAABdv2Tzg",
+   "number": 186
+  },
+  "NOT": {
+   "digest": "71668bc93ebd",
+   "fields": {
+    "Status": "Backlog"
+   },
+   "id": 6291238288,
+   "item": "PVTI_lADOFIc2Jc4Bq4SzzhHRYKQ",
+   "node_id": "I_kwDOVoYHnc8AAAABdvytkA",
+   "number": 103
+  },
+  "NOT-API-1": {
+   "deps": [
+    "ACC-API-2",
+    "ORD-API-2"
+   ],
+   "digest": "4ba401ed0363",
+   "fields": {
+    "Area": "api",
+    "Priority": "P0",
+    "Size": "L",
+    "Status": "Backlog"
+   },
+   "id": 6291239008,
+   "item": "PVTI_lADOFIc2Jc4Bq4SzzhHRYNA",
+   "node_id": "I_kwDOVoYHnc8AAAABdvywYA",
+   "number": 104
+  },
+  "NOT-DSH-1": {
+   "deps": [
+    "NOT-API-1"
+   ],
+   "digest": "94df4b56ebaa",
+   "fields": {
+    "Area": "dashboard",
+    "Priority": "P1",
+    "Size": "S",
+    "Status": "Backlog"
+   },
+   "id": 6291240281,
+   "item": "PVTI_lADOFIc2Jc4Bq4SzzhHRYOI",
+   "node_id": "I_kwDOVoYHnc8AAAABdvy1WQ",
+   "number": 106
+  },
+  "NOT-MOB-1": {
+   "deps": [
+    "NOT-API-1",
+    "ORD-MOB-2",
+    "SCH-API-1"
+   ],
+   "digest": "0b1db684d4e7",
+   "fields": {
+    "Area": "mobile",
+    "Priority": "P0",
+    "Size": "M",
+    "Status": "Backlog"
+   },
+   "id": 6291239660,
+   "item": "PVTI_lADOFIc2Jc4Bq4SzzhHRYNs",
+   "node_id": "I_kwDOVoYHnc8AAAABdvyy7A",
+   "number": 105
+  },
+  "OCC": {
+   "digest": "404ed2137021",
+   "fields": {
+    "Status": "Backlog"
+   },
+   "id": 6291249520,
+   "item": "PVTI_lADOFIc2Jc4Bq4SzzhHRYk4",
+   "node_id": "I_kwDOVoYHnc8AAAABdvzZcA",
+   "number": 119
+  },
+  "OCC-API-1": {
+   "deps": [
+    "CAT-API-1",
+    "ORD-API-2",
+    "SCH-API-2",
+    "KIT-API-1"
+   ],
+   "digest": "4c495aeba930",
+   "fields": {
+    "Area": "api",
+    "Priority": "P0",
+    "Size": "XL",
+    "Status": "Backlog"
+   },
+   "id": 6291250871,
+   "item": "PVTI_lADOFIc2Jc4Bq4SzzhHRYoc",
+   "node_id": "I_kwDOVoYHnc8AAAABdvzetw",
+   "number": 121
+  },
+  "OCC-API-2": {
+   "deps": [
+    "OCC-API-1",
+    "PAY-API-1"
+   ],
+   "digest": "06e0a8b91da0",
+   "fields": {
+    "Area": "api",
+    "Priority": "P0",
+    "Size": "M",
+    "Status": "Backlog"
+   },
+   "id": 6291251527,
+   "item": "PVTI_lADOFIc2Jc4Bq4SzzhHRYow",
+   "node_id": "I_kwDOVoYHnc8AAAABdvzhRw",
+   "number": 122
+  },
+  "OCC-DES-1": {
+   "deps": [
+    "DSN-DES-1"
+   ],
+   "digest": "a1cb5074e57f",
+   "fields": {
+    "Area": "design",
+    "Priority": "P0",
+    "Size": "L",
+    "Status": "Backlog"
+   },
+   "id": 6291250190,
+   "item": "PVTI_lADOFIc2Jc4Bq4SzzhHRYno",
+   "node_id": "I_kwDOVoYHnc8AAAABdvzcDg",
+   "number": 120
+  },
+  "OCC-DSH-1": {
+   "deps": [
+    "OCC-API-1"
+   ],
+   "digest": "b3d2f8ed75aa",
+   "fields": {
+    "Area": "dashboard",
+    "Priority": "P0",
+    "Size": "M",
+    "Status": "Backlog"
+   },
+   "id": 6291252237,
+   "item": "PVTI_lADOFIc2Jc4Bq4SzzhHRYpU",
+   "node_id": "I_kwDOVoYHnc8AAAABdvzkDQ",
+   "number": 123
+  },
+  "OCC-MOB-1": {
+   "deps": [
+    "OCC-API-2",
+    "OCC-DSH-1",
+    "OCC-DES-1",
+    "PAY-MOB-1"
+   ],
+   "digest": "f0e958a6d00f",
+   "fields": {
+    "Area": "mobile",
+    "Priority": "P0",
+    "Size": "L",
+    "Status": "Backlog"
+   },
+   "id": 6291252946,
+   "item": "PVTI_lADOFIc2Jc4Bq4SzzhHRYpw",
+   "node_id": "I_kwDOVoYHnc8AAAABdvzm0g",
+   "number": 124
+  },
+  "ORD": {
+   "digest": "f91778bb2fb3",
+   "fields": {
+    "Status": "Backlog"
+   },
+   "id": 6291219961,
+   "item": "PVTI_lADOFIc2Jc4Bq4SzzhHRXxU",
+   "node_id": "I_kwDOVoYHnc8AAAABdvxl-Q",
+   "number": 80
+  },
+  "ORD-API-1": {
+   "deps": [
+    "CRT-API-3",
+    "SCH-API-2",
+    "LOC-API-1",
+    "PAY-API-1",
+    "WAL-API-1"
+   ],
+   "digest": "8f253c3e8c2a",
+   "fields": {
+    "Area": "api",
+    "Priority": "P0",
+    "Size": "L",
+    "Status": "Backlog"
+   },
+   "id": 6291220814,
+   "item": "PVTI_lADOFIc2Jc4Bq4SzzhHRXz8",
+   "node_id": "I_kwDOVoYHnc8AAAABdvxpTg",
+   "number": 81
+  },
+  "ORD-API-2": {
+   "deps": [
+    "ORD-API-1"
+   ],
+   "digest": "d57bea4046d4",
+   "fields": {
+    "Area": "api",
+    "Priority": "P0",
+    "Size": "M",
+    "Status": "Backlog"
+   },
+   "id": 6291221686,
+   "item": "PVTI_lADOFIc2Jc4Bq4SzzhHRX0k",
+   "node_id": "I_kwDOVoYHnc8AAAABdvxstg",
+   "number": 82
+  },
+  "ORD-API-3": {
+   "deps": [
+    "ORD-API-2",
+    "FND-API-4"
+   ],
+   "digest": "7ef1498e7754",
+   "fields": {
+    "Area": "api",
+    "Priority": "P0",
+    "Size": "L",
+    "Status": "Backlog"
+   },
+   "id": 6291222604,
+   "item": "PVTI_lADOFIc2Jc4Bq4SzzhHRX1o",
+   "node_id": "I_kwDOVoYHnc8AAAABdvxwTA",
+   "number": 83
+  },
+  "ORD-DSH-1": {
+   "deps": [
+    "ORD-API-3"
+   ],
+   "digest": "dcfa79f3e67a",
+   "fields": {
+    "Area": "dashboard",
+    "Priority": "P0",
+    "Size": "M",
+    "Status": "Backlog"
+   },
+   "id": 6291226444,
+   "item": "PVTI_lADOFIc2Jc4Bq4SzzhHRX4c",
+   "node_id": "I_kwDOVoYHnc8AAAABdvx_TA",
+   "number": 88
+  },
+  "ORD-MOB-1": {
+   "deps": [
+    "ORD-API-1",
+    "SCH-MOB-1"
+   ],
+   "digest": "909e00e93c8f",
+   "fields": {
+    "Area": "mobile",
+    "Priority": "P0",
+    "Size": "M",
+    "Status": "Backlog"
+   },
+   "id": 6291223492,
+   "item": "PVTI_lADOFIc2Jc4Bq4SzzhHRX2Y",
+   "node_id": "I_kwDOVoYHnc8AAAABdvxzxA",
+   "number": 84
+  },
+  "ORD-MOB-2": {
+   "deps": [
+    "ORD-API-3"
+   ],
+   "digest": "44aeef8878a8",
+   "fields": {
+    "Area": "mobile",
+    "Priority": "P0",
+    "Size": "M",
+    "Status": "Backlog"
+   },
+   "id": 6291224213,
+   "item": "PVTI_lADOFIc2Jc4Bq4SzzhHRX2w",
+   "node_id": "I_kwDOVoYHnc8AAAABdvx2lQ",
+   "number": 85
+  },
+  "ORD-WEB-1": {
+   "deps": [
+    "ORD-API-1",
+    "SCH-WEB-1",
+    "PAY-API-1"
+   ],
+   "digest": "34a9a176e29c",
+   "fields": {
+    "Area": "web",
+    "Priority": "P0",
+    "Size": "L",
+    "Status": "Backlog"
+   },
+   "id": 6291224984,
+   "item": "PVTI_lADOFIc2Jc4Bq4SzzhHRX3Y",
+   "node_id": "I_kwDOVoYHnc8AAAABdvx5mA",
+   "number": 86
+  },
+  "ORD-WEB-2": {
+   "deps": [
+    "ORD-API-3"
+   ],
+   "digest": "6eaf1d772778",
+   "fields": {
+    "Area": "web",
+    "Priority": "P0",
+    "Size": "M",
+    "Status": "Backlog"
+   },
+   "id": 6291225635,
+   "item": "PVTI_lADOFIc2Jc4Bq4SzzhHRX4E",
+   "node_id": "I_kwDOVoYHnc8AAAABdvx8Iw",
+   "number": 87
+  },
+  "PAY": {
+   "digest": "6bc5c2a2fe2f",
+   "fields": {
+    "Status": "Backlog"
+   },
+   "id": 6291215642,
+   "item": "PVTI_lADOFIc2Jc4Bq4SzzhHRXqw",
+   "node_id": "I_kwDOVoYHnc8AAAABdvxVGg",
+   "number": 74
+  },
+  "PAY-API-1": {
+   "deps": [
+    "FND-API-4",
+    "WAL-API-1",
+    "SCH-API-1"
+   ],
+   "digest": "17e37ea29307",
+   "fields": {
+    "Area": "api",
+    "Priority": "P0",
+    "Size": "L",
+    "Status": "Backlog"
+   },
+   "id": 6291216931,
+   "item": "PVTI_lADOFIc2Jc4Bq4SzzhHRXuY",
+   "node_id": "I_kwDOVoYHnc8AAAABdvxaIw",
+   "number": 76
+  },
+  "PAY-API-2": {
+   "deps": [
+    "PAY-API-1",
+    "PAY-DOC-1"
+   ],
+   "digest": "252d242c7ae1",
+   "fields": {
+    "Area": "api",
+    "Priority": "P0",
+    "Size": "L",
+    "Status": "Backlog"
+   },
+   "id": 6291217674,
+   "item": "PVTI_lADOFIc2Jc4Bq4SzzhHRXu8",
+   "node_id": "I_kwDOVoYHnc8AAAABdvxdCg",
+   "number": 77
+  },
+  "PAY-DOC-1": {
+   "digest": "c6b80916fe14",
+   "fields": {
+    "Area": "api",
+    "Priority": "P0",
+    "Size": "S",
+    "Status": "Backlog"
+   },
+   "id": 6291216241,
+   "item": "PVTI_lADOFIc2Jc4Bq4SzzhHRXt0",
+   "node_id": "I_kwDOVoYHnc8AAAABdvxXcQ",
+   "number": 75
+  },
+  "PAY-MOB-1": {
+   "deps": [
+    "PAY-API-1",
+    "ORD-MOB-1"
+   ],
+   "digest": "b792314d0e1a",
+   "fields": {
+    "Area": "mobile",
+    "Priority": "P0",
+    "Size": "L",
+    "Status": "Backlog"
+   },
+   "id": 6291218396,
+   "item": "PVTI_lADOFIc2Jc4Bq4SzzhHRXvs",
+   "node_id": "I_kwDOVoYHnc8AAAABdvxf3A",
+   "number": 78
+  },
+  "PAY-MOB-2": {
+   "deps": [
+    "PAY-API-2",
+    "PAY-MOB-1",
+    "ORD-WEB-1"
+   ],
+   "digest": "66991ca1ce30",
+   "fields": {
+    "Area": "mobile",
+    "Priority": "P0",
+    "Size": "M",
+    "Status": "Backlog"
+   },
+   "id": 6291219183,
+   "item": "PVTI_lADOFIc2Jc4Bq4SzzhHRXwc",
+   "node_id": "I_kwDOVoYHnc8AAAABdvxi7w",
+   "number": 79
+  },
+  "RAT": {
+   "digest": "022191256154",
+   "fields": {
+    "Status": "Backlog"
+   },
+   "id": 6291277164,
+   "item": "PVTI_lADOFIc2Jc4Bq4SzzhHRZKc",
+   "node_id": "I_kwDOVoYHnc8AAAABdv1FbA",
+   "number": 157
+  },
+  "RAT-API-1": {
+   "deps": [
+    "ORD-API-2",
+    "NOT-API-1"
+   ],
+   "digest": "f1d6cf4db54f",
+   "fields": {
+    "Area": "api",
+    "Priority": "P1",
+    "Size": "S",
+    "Status": "Backlog"
+   },
+   "id": 6291277777,
+   "item": "PVTI_lADOFIc2Jc4Bq4SzzhHRZNc",
+   "node_id": "I_kwDOVoYHnc8AAAABdv1H0Q",
+   "number": 158
+  },
+  "RAT-DSH-1": {
+   "deps": [
+    "RAT-API-1"
+   ],
+   "digest": "64321a9e6767",
+   "fields": {
+    "Area": "dashboard",
+    "Priority": "P1",
+    "Size": "XS",
+    "Status": "Backlog"
+   },
+   "id": 6291279307,
+   "item": "PVTI_lADOFIc2Jc4Bq4SzzhHRZOs",
+   "node_id": "I_kwDOVoYHnc8AAAABdv1Nyw",
+   "number": 160
+  },
+  "RAT-MOB-1": {
+   "deps": [
+    "RAT-API-1",
+    "ORD-MOB-2",
+    "ORD-WEB-2"
+   ],
+   "digest": "02560fc0ef73",
+   "fields": {
+    "Area": "mobile",
+    "Priority": "P1",
+    "Size": "M",
+    "Status": "Backlog"
+   },
+   "id": 6291278544,
+   "item": "PVTI_lADOFIc2Jc4Bq4SzzhHRZOI",
+   "node_id": "I_kwDOVoYHnc8AAAABdv1K0A",
+   "number": 159
+  },
+  "REL": {
+   "digest": "5a129c475817",
+   "fields": {
+    "Status": "Backlog"
+   },
+   "id": 6291186571,
+   "item": "PVTI_lADOFIc2Jc4Bq4SzzhHRXDM",
+   "node_id": "I_kwDOVoYHnc8AAAABdvvjiw",
+   "number": 33
+  },
+  "REL-INF-1": {
+   "deps": [
+    "FND-INF-5",
+    "APP-MOB-1",
+    "APP-WEB-1",
+    "APP-DSH-1",
+    "ACC-MOB-1",
+    "ACC-MOB-3",
+    "ACC-WEB-1",
+    "ACC-DSH-1",
+    "LOC-DSH-1",
+    "LOC-WEB-1"
+   ],
+   "digest": "d7b6fb74f0c9",
+   "fields": {
+    "Area": "infra",
+    "Priority": "P0",
+    "Size": "XS",
+    "Status": "Todo"
+   },
+   "id": 6291187115,
+   "item": "PVTI_lADOFIc2Jc4Bq4SzzhHRXFY",
+   "node_id": "I_kwDOVoYHnc8AAAABdvvlqw",
+   "number": 34
+  },
+  "REL-INF-2": {
+   "deps": [
+    "VND-DSH-2",
+    "VND-DSH-1",
+    "CAT-DSH-2",
+    "STF-MOB-1",
+    "STF-MOB-3",
+    "STF-MOB-4",
+    "STF-WEB-1",
+    "STF-WEB-2"
+   ],
+   "digest": "a913633818a6",
+   "fields": {
+    "Area": "infra",
+    "Priority": "P0",
+    "Size": "XS",
+    "Status": "Backlog"
+   },
+   "id": 6291187894,
+   "item": "PVTI_lADOFIc2Jc4Bq4SzzhHRXF0",
+   "node_id": "I_kwDOVoYHnc8AAAABdvvotg",
+   "number": 35
+  },
+  "REL-INF-3": {
+   "deps": [
+    "CRT-MOB-1",
+    "CRT-WEB-1",
+    "CRT-DSH-1",
+    "SCH-DSH-1",
+    "SCH-MOB-1",
+    "SCH-WEB-1",
+    "SCH-QA-1",
+    "PAY-MOB-1",
+    "ORD-WEB-1",
+    "ORD-MOB-2",
+    "ORD-WEB-2",
+    "ORD-DSH-1"
+   ],
+   "digest": "4d8d06813b8c",
+   "fields": {
+    "Area": "infra",
+    "Priority": "P0",
+    "Size": "XS",
+    "Status": "Backlog"
+   },
+   "id": 6291188655,
+   "item": "PVTI_lADOFIc2Jc4Bq4SzzhHRXGE",
+   "node_id": "I_kwDOVoYHnc8AAAABdvvrrw",
+   "number": 36
+  },
+  "REL-INF-4": {
+   "deps": [
+    "DLV-DSH-1",
+    "DLV-MOB-1",
+    "NOT-MOB-1",
+    "VOP-DSH-1",
+    "ADM-DSH-1",
+    "ADM-DSH-2",
+    "FIN-DSH-1",
+    "CAN-MOB-1",
+    "CAN-DSH-1",
+    "PAY-MOB-2"
+   ],
+   "digest": "8bd7efe75387",
+   "fields": {
+    "Area": "infra",
+    "Priority": "P0",
+    "Size": "XS",
+    "Status": "Backlog"
+   },
+   "id": 6291189431,
+   "item": "PVTI_lADOFIc2Jc4Bq4SzzhHRXGs",
+   "node_id": "I_kwDOVoYHnc8AAAABdvvutw",
+   "number": 37
+  },
+  "REL-INF-5": {
+   "deps": [
+    "OCC-MOB-1",
+    "KIT-MOB-1",
+    "KIT-DSH-1",
+    "ADH-MOB-1",
+    "SVC-WEB-1",
+    "SVC-QA-1"
+   ],
+   "digest": "7d2404293873",
+   "fields": {
+    "Area": "infra",
+    "Priority": "P0",
+    "Size": "XS",
+    "Status": "Backlog"
+   },
+   "id": 6291190100,
+   "item": "PVTI_lADOFIc2Jc4Bq4SzzhHRXHE",
+   "node_id": "I_kwDOVoYHnc8AAAABdvvxVA",
+   "number": 38
+  },
+  "REL-INF-6": {
+   "deps": [
+    "FED-MOB-1",
+    "CHT-MOB-1",
+    "FED-DSH-1",
+    "INV-API-2",
+    "INV-MOB-1",
+    "VIS-MOB-1",
+    "VIS-WEB-1",
+    "RAT-MOB-1",
+    "CMS-MOB-1"
+   ],
+   "digest": "839d6dc04896",
+   "fields": {
+    "Area": "infra",
+    "Priority": "P0",
+    "Size": "XS",
+    "Status": "Backlog"
+   },
+   "id": 6291190809,
+   "item": "PVTI_lADOFIc2Jc4Bq4SzzhHRXHw",
+   "node_id": "I_kwDOVoYHnc8AAAABdvv0GQ",
+   "number": 39
+  },
+  "REL-INF-7": {
+   "deps": [
+    "HRD-INF-3",
+    "HRD-QA-2",
+    "HRD-WEB-1"
+   ],
+   "digest": "597af07afcd3",
+   "fields": {
+    "Area": "infra",
+    "Priority": "P0",
+    "Size": "XS",
+    "Status": "Backlog"
+   },
+   "id": 6291191537,
+   "item": "PVTI_lADOFIc2Jc4Bq4SzzhHRXIY",
+   "node_id": "I_kwDOVoYHnc8AAAABdvv28Q",
+   "number": 40
+  },
+  "RGF": {
+   "digest": "998de3d94ea4",
+   "fields": {
+    "Status": "Backlog"
+   },
+   "id": 6291298011,
+   "item": "PVTI_lADOFIc2Jc4Bq4SzzhHRZ80",
+   "node_id": "I_kwDOVoYHnc8AAAABdv2W2w",
+   "number": 187
+  },
+  "RGF-API-1": {
+   "deps": [
+    "ORD-API-1"
+   ],
+   "digest": "a47c64a7956c",
+   "fields": {
+    "Area": "api",
+    "Priority": "P1",
+    "Size": "M",
+    "Status": "Backlog"
+   },
+   "id": 6291298696,
+   "item": "PVTI_lADOFIc2Jc4Bq4SzzhHRZ_k",
+   "node_id": "I_kwDOVoYHnc8AAAABdv2ZiA",
+   "number": 188
+  },
+  "RGF-MOB-1": {
+   "deps": [
+    "RGF-API-1"
+   ],
+   "digest": "73063a5068de",
+   "fields": {
+    "Area": "mobile",
+    "Priority": "P1",
+    "Size": "M",
+    "Status": "Backlog"
+   },
+   "id": 6291299483,
+   "item": "PVTI_lADOFIc2Jc4Bq4SzzhHRaAI",
+   "node_id": "I_kwDOVoYHnc8AAAABdv2cmw",
+   "number": 189
+  },
+  "SCH": {
+   "digest": "c63021a9a36f",
+   "fields": {
+    "Status": "Backlog"
+   },
+   "id": 6291209537,
+   "item": "PVTI_lADOFIc2Jc4Bq4SzzhHRXk0",
+   "node_id": "I_kwDOVoYHnc8AAAABdvw9QQ",
+   "number": 66
+  },
+  "SCH-API-1": {
+   "deps": [
+    "FND-API-4"
+   ],
+   "digest": "922f5d19cf1d",
+   "fields": {
+    "Area": "api",
+    "Priority": "P0",
+    "Size": "M",
+    "Status": "Backlog"
+   },
+   "id": 6291211148,
+   "item": "PVTI_lADOFIc2Jc4Bq4SzzhHRXpE",
+   "node_id": "I_kwDOVoYHnc8AAAABdvxDjA",
+   "number": 68
+  },
+  "SCH-API-2": {
+   "deps": [
+    "SCH-API-1",
+    "CAT-API-1",
+    "CRT-API-1"
+   ],
+   "digest": "842d88fde132",
+   "fields": {
+    "Area": "api",
+    "Priority": "P0",
+    "Size": "XL",
+    "Status": "Backlog"
+   },
+   "id": 6291211942,
+   "item": "PVTI_lADOFIc2Jc4Bq4SzzhHRXqE",
+   "node_id": "I_kwDOVoYHnc8AAAABdvxGpg",
+   "number": 69
+  },
+  "SCH-DES-1": {
+   "deps": [
+    "DSN-DES-1"
+   ],
+   "digest": "c60ec9411880",
+   "fields": {
+    "Area": "design",
+    "Priority": "P0",
+    "Size": "S",
+    "Status": "Backlog"
+   },
+   "id": 6291210367,
+   "item": "PVTI_lADOFIc2Jc4Bq4SzzhHRXoU",
+   "node_id": "I_kwDOVoYHnc8AAAABdvxAfw",
+   "number": 67
+  },
+  "SCH-DSH-1": {
+   "deps": [
+    "SCH-API-1",
+    "SCH-DES-1",
+    "SCH-API-2",
+    "VND-DSH-2"
+   ],
+   "digest": "b8c9170ef1fa",
+   "fields": {
+    "Area": "dashboard",
+    "Priority": "P0",
+    "Size": "L",
+    "Status": "Backlog"
+   },
+   "id": 6291212681,
+   "item": "PVTI_lADOFIc2Jc4Bq4SzzhHRXrI",
+   "node_id": "I_kwDOVoYHnc8AAAABdvxJiQ",
+   "number": 70
+  },
+  "SCH-MOB-1": {
+   "deps": [
+    "SCH-API-2",
+    "ACC-MOB-3",
+    "CRT-MOB-1",
+    "SCH-DES-1"
+   ],
+   "digest": "332ae8f7b852",
+   "fields": {
+    "Area": "mobile",
+    "Priority": "P0",
+    "Size": "M",
+    "Status": "Backlog"
+   },
+   "id": 6291213496,
+   "item": "PVTI_lADOFIc2Jc4Bq4SzzhHRXsI",
+   "node_id": "I_kwDOVoYHnc8AAAABdvxMuA",
+   "number": 71
+  },
+  "SCH-QA-1": {
+   "deps": [
+    "SCH-API-2"
+   ],
+   "digest": "d909b661c5cc",
+   "fields": {
+    "Area": "qa",
+    "Priority": "P0",
+    "Size": "S",
+    "Status": "Backlog"
+   },
+   "id": 6291214980,
+   "item": "PVTI_lADOFIc2Jc4Bq4SzzhHRXtM",
+   "node_id": "I_kwDOVoYHnc8AAAABdvxShA",
+   "number": 73
+  },
+  "SCH-WEB-1": {
+   "deps": [
+    "SCH-API-2",
+    "ACC-WEB-1",
+    "CRT-WEB-1",
+    "SCH-DES-1"
+   ],
+   "digest": "ed4ffb5b1ee3",
+   "fields": {
+    "Area": "web",
+    "Priority": "P0",
+    "Size": "M",
+    "Status": "Backlog"
+   },
+   "id": 6291214285,
+   "item": "PVTI_lADOFIc2Jc4Bq4SzzhHRXsg",
+   "node_id": "I_kwDOVoYHnc8AAAABdvxPzQ",
+   "number": 72
+  },
+  "STF": {
+   "digest": "2c17b529eee4",
+   "fields": {
+    "Status": "Backlog"
+   },
+   "id": 6291200138,
+   "item": "PVTI_lADOFIc2Jc4Bq4SzzhHRXV4",
+   "node_id": "I_kwDOVoYHnc8AAAABdvwYig",
+   "number": 53
+  },
+  "STF-DES-1": {
+   "deps": [
+    "DSN-DES-1"
+   ],
+   "digest": "48afca855093",
+   "fields": {
+    "Area": "design",
+    "Priority": "P0",
+    "Size": "M",
+    "Status": "Backlog"
+   },
+   "id": 6291200768,
+   "item": "PVTI_lADOFIc2Jc4Bq4SzzhHRXYo",
+   "node_id": "I_kwDOVoYHnc8AAAABdvwbAA",
+   "number": 54
+  },
+  "STF-MOB-1": {
+   "deps": [
+    "CAT-API-5",
+    "STF-DES-1",
+    "LOC-MOB-1"
+   ],
+   "digest": "7304c7b6733f",
+   "fields": {
+    "Area": "mobile",
+    "Priority": "P0",
+    "Size": "L",
+    "Status": "Backlog"
+   },
+   "id": 6291201561,
+   "item": "PVTI_lADOFIc2Jc4Bq4SzzhHRXZI",
+   "node_id": "I_kwDOVoYHnc8AAAABdvweGQ",
+   "number": 55
+  },
+  "STF-MOB-3": {
+   "deps": [
+    "CAT-API-5",
+    "CAT-API-1",
+    "STF-DES-1"
+   ],
+   "digest": "dbb81de92652",
+   "fields": {
+    "Area": "mobile",
+    "Priority": "P0",
+    "Size": "L",
+    "Status": "Backlog"
+   },
+   "id": 6291202254,
+   "item": "PVTI_lADOFIc2Jc4Bq4SzzhHRXZ8",
+   "node_id": "I_kwDOVoYHnc8AAAABdvwgzg",
+   "number": 56
+  },
+  "STF-MOB-4": {
+   "deps": [
+    "CAT-API-5",
+    "STF-DES-1"
+   ],
+   "digest": "f03115fdffbf",
+   "fields": {
+    "Area": "mobile",
+    "Priority": "P0",
+    "Size": "M",
+    "Status": "Backlog"
+   },
+   "id": 6291203040,
+   "item": "PVTI_lADOFIc2Jc4Bq4SzzhHRXa4",
+   "node_id": "I_kwDOVoYHnc8AAAABdvwj4A",
+   "number": 57
+  },
+  "STF-WEB-1": {
+   "deps": [
+    "CAT-API-5",
+    "STF-DES-1",
+    "APP-WEB-1"
+   ],
+   "digest": "b8812bed10d3",
+   "fields": {
+    "Area": "web",
+    "Priority": "P0",
+    "Size": "L",
+    "Status": "Backlog"
+   },
+   "id": 6291203740,
+   "item": "PVTI_lADOFIc2Jc4Bq4SzzhHRXbc",
+   "node_id": "I_kwDOVoYHnc8AAAABdvwmnA",
+   "number": 58
+  },
+  "STF-WEB-2": {
+   "deps": [
+    "CAT-API-5",
+    "STF-DES-1"
+   ],
+   "digest": "1f5b6ebde358",
+   "fields": {
+    "Area": "web",
+    "Priority": "P0",
+    "Size": "L",
+    "Status": "Backlog"
+   },
+   "id": 6291204520,
+   "item": "PVTI_lADOFIc2Jc4Bq4SzzhHRXcE",
+   "node_id": "I_kwDOVoYHnc8AAAABdvwpqA",
+   "number": 59
+  },
+  "STY": {
+   "digest": "07471db5dd95",
+   "fields": {
+    "Status": "Backlog"
+   },
+   "id": 6291289652,
+   "item": "PVTI_lADOFIc2Jc4Bq4SzzhHRZmA",
+   "node_id": "I_kwDOVoYHnc8AAAABdv12NA",
+   "number": 175
+  },
+  "STY-API-1": {
+   "deps": [
+    "FND-API-4",
+    "ORD-API-2",
+    "ADM-API-1"
+   ],
+   "digest": "d421dcf547f7",
+   "fields": {
+    "Area": "api",
+    "Priority": "P1",
+    "Size": "M",
+    "Status": "Backlog"
+   },
+   "id": 6291290338,
+   "item": "PVTI_lADOFIc2Jc4Bq4SzzhHRZpk",
+   "node_id": "I_kwDOVoYHnc8AAAABdv144g",
+   "number": 176
+  },
+  "STY-MOB-1": {
+   "deps": [
+    "STY-API-1"
+   ],
+   "digest": "e0c2dd0e377b",
+   "fields": {
+    "Area": "mobile",
+    "Priority": "P1",
+    "Size": "L",
+    "Status": "Backlog"
+   },
+   "id": 6291290959,
+   "item": "PVTI_lADOFIc2Jc4Bq4SzzhHRZqY",
+   "node_id": "I_kwDOVoYHnc8AAAABdv17Tw",
+   "number": 177
+  },
+  "SVC": {
+   "digest": "f0a62009ca1a",
+   "fields": {
+    "Status": "Backlog"
+   },
+   "id": 6291260237,
+   "item": "PVTI_lADOFIc2Jc4Bq4SzzhHRY1k",
+   "node_id": "I_kwDOVoYHnc8AAAABdv0DTQ",
+   "number": 134
+  },
+  "SVC-QA-1": {
+   "deps": [
+    "OCC-API-2",
+    "KIT-API-2",
+    "ADH-API-1"
+   ],
+   "digest": "0e0054a158f8",
+   "fields": {
+    "Area": "qa",
+    "Priority": "P0",
+    "Size": "M",
+    "Status": "Backlog"
+   },
+   "id": 6291261695,
+   "item": "PVTI_lADOFIc2Jc4Bq4SzzhHRY4k",
+   "node_id": "I_kwDOVoYHnc8AAAABdv0I_w",
+   "number": 136
+  },
+  "SVC-WEB-1": {
+   "deps": [
+    "OCC-API-2",
+    "KIT-API-2",
+    "ADH-API-1",
+    "ORD-WEB-1"
+   ],
+   "digest": "27c71ad5b69a",
+   "fields": {
+    "Area": "web",
+    "Priority": "P0",
+    "Size": "XL",
+    "Status": "Backlog"
+   },
+   "id": 6291260885,
+   "item": "PVTI_lADOFIc2Jc4Bq4SzzhHRY4Y",
+   "node_id": "I_kwDOVoYHnc8AAAABdv0F1Q",
+   "number": 135
+  },
+  "VIS": {
+   "digest": "7f320fb4869c",
+   "fields": {
+    "Status": "Backlog"
+   },
+   "id": 6291282896,
+   "item": "PVTI_lADOFIc2Jc4Bq4SzzhHRZb4",
+   "node_id": "I_kwDOVoYHnc8AAAABdv1b0A",
+   "number": 165
+  },
+  "VIS-API-1": {
+   "deps": [
+    "VND-API-2",
+    "NOT-API-1",
+    "PAY-API-1"
+   ],
+   "digest": "e23a42aca496",
+   "fields": {
+    "Area": "api",
+    "Priority": "P0",
+    "Size": "L",
+    "Status": "Backlog"
+   },
+   "id": 6291283620,
+   "item": "PVTI_lADOFIc2Jc4Bq4SzzhHRZeU",
+   "node_id": "I_kwDOVoYHnc8AAAABdv1epA",
+   "number": 166
+  },
+  "VIS-API-2": {
+   "deps": [
+    "VIS-API-1",
+    "OCC-API-1"
+   ],
+   "digest": "9e43365a1a1d",
+   "fields": {
+    "Area": "api",
+    "Priority": "P0",
+    "Size": "M",
+    "Status": "Backlog"
+   },
+   "id": 6291284332,
+   "item": "PVTI_lADOFIc2Jc4Bq4SzzhHRZe0",
+   "node_id": "I_kwDOVoYHnc8AAAABdv1hbA",
+   "number": 167
+  },
+  "VIS-API-3": {
+   "deps": [
+    "VIS-API-2",
+    "FIN-API-2"
+   ],
+   "digest": "99fe48ceac1c",
+   "fields": {
+    "Area": "api",
+    "Priority": "P0",
+    "Size": "M",
+    "Status": "Backlog"
+   },
+   "id": 6291286438,
+   "item": "PVTI_lADOFIc2Jc4Bq4SzzhHRZgE",
+   "node_id": "I_kwDOVoYHnc8AAAABdv1ppg",
+   "number": 170
+  },
+  "VIS-DSH-1": {
+   "deps": [
+    "VIS-API-2"
+   ],
+   "digest": "f60ec98121ae",
+   "fields": {
+    "Area": "dashboard",
+    "Priority": "P0",
+    "Size": "M",
+    "Status": "Backlog"
+   },
+   "id": 6291284925,
+   "item": "PVTI_lADOFIc2Jc4Bq4SzzhHRZfU",
+   "node_id": "I_kwDOVoYHnc8AAAABdv1jvQ",
+   "number": 168
+  },
+  "VIS-MOB-1": {
+   "deps": [
+    "VIS-API-2",
+    "VIS-DSH-1",
+    "OCC-DES-1",
+    "PAY-MOB-1"
+   ],
+   "digest": "5f24aaceb223",
+   "fields": {
+    "Area": "mobile",
+    "Priority": "P0",
+    "Size": "L",
+    "Status": "Backlog"
+   },
+   "id": 6291285691,
+   "item": "PVTI_lADOFIc2Jc4Bq4SzzhHRZfs",
+   "node_id": "I_kwDOVoYHnc8AAAABdv1muw",
+   "number": 169
+  },
+  "VIS-WEB-1": {
+   "deps": [
+    "VIS-API-2",
+    "ORD-WEB-1"
+   ],
+   "digest": "2ad88feaa324",
+   "fields": {
+    "Area": "web",
+    "Priority": "P1",
+    "Size": "M",
+    "Status": "Backlog"
+   },
+   "id": 6291287149,
+   "item": "PVTI_lADOFIc2Jc4Bq4SzzhHRZgk",
+   "node_id": "I_kwDOVoYHnc8AAAABdv1sbQ",
+   "number": 171
+  },
+  "VND": {
+   "digest": "4acb043a1232",
+   "fields": {
+    "Status": "Backlog"
+   },
+   "id": 6291192121,
+   "item": "PVTI_lADOFIc2Jc4Bq4SzzhHRXIs",
+   "node_id": "I_kwDOVoYHnc8AAAABdvv5OQ",
+   "number": 41
+  },
+  "VND-API-1": {
+   "deps": [
+    "ACC-API-1",
+    "FND-API-4"
+   ],
+   "digest": "16d7da733472",
+   "fields": {
+    "Area": "api",
+    "Priority": "P0",
+    "Size": "M",
+    "Status": "Backlog"
+   },
+   "id": 6291193460,
+   "item": "PVTI_lADOFIc2Jc4Bq4SzzhHRXKg",
+   "node_id": "I_kwDOVoYHnc8AAAABdvv-dA",
+   "number": 43
+  },
+  "VND-API-2": {
+   "deps": [
+    "VND-API-1"
+   ],
+   "digest": "408cfa5a143b",
+   "fields": {
+    "Area": "api",
+    "Priority": "P0",
+    "Size": "M",
+    "Status": "Backlog"
+   },
+   "id": 6291194188,
+   "item": "PVTI_lADOFIc2Jc4Bq4SzzhHRXLU",
+   "node_id": "I_kwDOVoYHnc8AAAABdvwBTA",
+   "number": 44
+  },
+  "VND-DES-1": {
+   "deps": [
+    "DSN-DES-1"
+   ],
+   "digest": "c443f48926cc",
+   "fields": {
+    "Area": "design",
+    "Priority": "P0",
+    "Size": "M",
+    "Status": "Backlog"
+   },
+   "id": 6291192823,
+   "item": "PVTI_lADOFIc2Jc4Bq4SzzhHRXKE",
+   "node_id": "I_kwDOVoYHnc8AAAABdvv79w",
+   "number": 42
+  },
+  "VND-DSH-1": {
+   "deps": [
+    "VND-API-1",
+    "VND-DES-1",
+    "ACC-DSH-1",
+    "VND-API-2"
+   ],
+   "digest": "cc754c0cc313",
+   "fields": {
+    "Area": "dashboard",
+    "Priority": "P0",
+    "Size": "L",
+    "Status": "Backlog"
+   },
+   "id": 6291194806,
+   "item": "PVTI_lADOFIc2Jc4Bq4SzzhHRXMA",
+   "node_id": "I_kwDOVoYHnc8AAAABdvwDtg",
+   "number": 45
+  },
+  "VND-DSH-2": {
+   "deps": [
+    "VND-API-2",
+    "VND-DES-1"
+   ],
+   "digest": "ec5d872060c0",
+   "fields": {
+    "Area": "dashboard",
+    "Priority": "P0",
+    "Size": "M",
+    "Status": "Backlog"
+   },
+   "id": 6291195447,
+   "item": "PVTI_lADOFIc2Jc4Bq4SzzhHRXMk",
+   "node_id": "I_kwDOVoYHnc8AAAABdvwGNw",
+   "number": 46
+  },
+  "VOP": {
+   "digest": "ae4d641402bb",
+   "fields": {
+    "Status": "Backlog"
+   },
+   "id": 6291241039,
+   "item": "PVTI_lADOFIc2Jc4Bq4SzzhHRYPU",
+   "node_id": "I_kwDOVoYHnc8AAAABdvy4Tw",
+   "number": 107
+  },
+  "VOP-API-1": {
+   "deps": [
+    "ORD-API-3",
+    "FND-API-4"
+   ],
+   "digest": "a4e784e62f37",
+   "fields": {
+    "Area": "api",
+    "Priority": "P0",
+    "Size": "M",
+    "Status": "Backlog"
+   },
+   "id": 6291241778,
+   "item": "PVTI_lADOFIc2Jc4Bq4SzzhHRYTc",
+   "node_id": "I_kwDOVoYHnc8AAAABdvy7Mg",
+   "number": 108
+  },
+  "VOP-DSH-1": {
+   "deps": [
+    "VOP-API-1",
+    "ORD-DSH-1"
+   ],
+   "digest": "a98c1968ab4e",
+   "fields": {
+    "Area": "dashboard",
+    "Priority": "P0",
+    "Size": "L",
+    "Status": "Backlog"
+   },
+   "id": 6291242464,
+   "item": "PVTI_lADOFIc2Jc4Bq4SzzhHRYUE",
+   "node_id": "I_kwDOVoYHnc8AAAABdvy94A",
+   "number": 109
+  },
+  "VRF": {
+   "digest": "10147c89b96a",
+   "fields": {
+    "Status": "Backlog"
+   },
+   "id": 6291300223,
+   "item": "PVTI_lADOFIc2Jc4Bq4SzzhHRaCg",
+   "node_id": "I_kwDOVoYHnc8AAAABdv2ffw",
+   "number": 190
+  },
+  "VRF-API-1": {
+   "deps": [
+    "VOP-API-1",
+    "ADH-API-1"
+   ],
+   "digest": "a1140ca08e44",
+   "fields": {
+    "Area": "api",
+    "Priority": "P2",
+    "Size": "S",
+    "Status": "Backlog"
+   },
+   "id": 6291300990,
+   "item": "PVTI_lADOFIc2Jc4Bq4SzzhHRaEE",
+   "node_id": "I_kwDOVoYHnc8AAAABdv2ifg",
+   "number": 191
+  },
+  "VRF-MOB-1": {
+   "deps": [
+    "VRF-API-1"
+   ],
+   "digest": "2ee4e4a8dcc0",
+   "fields": {
+    "Area": "mobile",
+    "Priority": "P2",
+    "Size": "M",
+    "Status": "Backlog"
+   },
+   "id": 6291301776,
+   "item": "PVTI_lADOFIc2Jc4Bq4SzzhHRaEw",
+   "node_id": "I_kwDOVoYHnc8AAAABdv2lkA",
+   "number": 192
+  },
+  "VST": {
+   "digest": "1ee7c77bb298",
+   "fields": {
+    "Status": "Backlog"
+   },
+   "id": 6291304308,
+   "item": "PVTI_lADOFIc2Jc4Bq4SzzhHRaNw",
+   "node_id": "I_kwDOVoYHnc8AAAABdv2vdA",
+   "number": 196
+  },
+  "VST-API-1": {
+   "deps": [
+    "ADM-API-1",
+    "VND-API-2"
+   ],
+   "digest": "d9004543f758",
+   "fields": {
+    "Area": "api",
+    "Priority": "P1",
+    "Size": "M",
+    "Status": "Backlog"
+   },
+   "id": 6291304967,
+   "item": "PVTI_lADOFIc2Jc4Bq4SzzhHRaQg",
+   "node_id": "I_kwDOVoYHnc8AAAABdv2yBw",
+   "number": 197
+  },
+  "VST-DSH-1": {
+   "deps": [
+    "VST-API-1"
+   ],
+   "digest": "9a5969afc9b5",
+   "fields": {
+    "Area": "dashboard",
+    "Priority": "P1",
+    "Size": "S",
+    "Status": "Backlog"
+   },
+   "id": 6291305662,
+   "item": "PVTI_lADOFIc2Jc4Bq4SzzhHRaRA",
+   "node_id": "I_kwDOVoYHnc8AAAABdv20vg",
+   "number": 198
+  },
+  "WAL": {
+   "digest": "5a102a29830a",
+   "fields": {
+    "Status": "Backlog"
+   },
+   "id": 6291227302,
+   "item": "PVTI_lADOFIc2Jc4Bq4SzzhHRX5U",
+   "node_id": "I_kwDOVoYHnc8AAAABdvyCpg",
+   "number": 89
+  },
+  "WAL-API-1": {
+   "deps": [
+    "ACC-API-1"
+   ],
+   "digest": "c809c4a3378e",
+   "fields": {
+    "Area": "api",
+    "Priority": "P0",
+    "Size": "M",
+    "Status": "Backlog"
+   },
+   "id": 6291228105,
+   "item": "PVTI_lADOFIc2Jc4Bq4SzzhHRX7o",
+   "node_id": "I_kwDOVoYHnc8AAAABdvyFyQ",
+   "number": 90
+  }
+ },
+ "milestones": {
+  "Post-launch — Phase 2 features": 8,
+  "Sprint 1 — Foundation, accounts & coverage": 1,
+  "Sprint 2 — Vendors, catalog & storefront": 2,
+  "Sprint 3 — Cart, scheduling, checkout, payments & orders": 3,
+  "Sprint 4 — Delivery, notifications, after-sales & dashboards": 4,
+  "Sprint 5 — Special services: occasions, kitchens & Eid al-Adha (+ production environment)": 5,
+  "Sprint 6 — Farm visits, feed marketplace & chat, ratings, content & ZATCA": 6,
+  "Sprint 7 — Hardening, UAT & store launch": 7
+ },
+ "predicted": {
+  "ACC": 15,
+  "ACC-API-1": 17,
+  "ACC-API-2": 18,
+  "ACC-DES-1": 16,
+  "ACC-DSH-1": 22,
+  "ACC-MOB-1": 19,
+  "ACC-MOB-3": 20,
+  "ACC-WEB-1": 21,
+  "ADH": 130,
+  "ADH-API-1": 131,
+  "ADH-DSH-1": 132,
+  "ADH-MOB-1": 133,
+  "ADM": 110,
+  "ADM-API-1": 111,
+  "ADM-API-2": 112,
+  "ADM-DSH-1": 113,
+  "ADM-DSH-2": 114,
+  "APP": 9,
+  "APP-DSH-1": 12,
+  "APP-MOB-1": 10,
+  "APP-WEB-1": 11,
+  "BNPL": 181,
+  "BNPL-API-1": 182,
+  "BNPL-MOB-1": 183,
+  "CAN": 91,
+  "CAN-API-1": 92,
+  "CAN-DSH-1": 93,
+  "CAN-MOB-1": 94,
+  "CAN-WEB-1": 95,
+  "CAT": 47,
+  "CAT-API-1": 48,
+  "CAT-API-3": 49,
+  "CAT-API-5": 50,
+  "CAT-DSH-1": 51,
+  "CAT-DSH-2": 52,
+  "CHR": 178,
+  "CHR-API-1": 179,
+  "CHR-MOB-1": 180,
+  "CHT": 154,
+  "CHT-API-1": 155,
+  "CHT-MOB-1": 156,
+  "CMS": 161,
+  "CMS-API-1": 162,
+  "CMS-DSH-1": 163,
+  "CMS-MOB-1": 164,
+  "CRT": 60,
+  "CRT-API-1": 61,
+  "CRT-API-3": 62,
+  "CRT-DSH-1": 63,
+  "CRT-MOB-1": 64,
+  "CRT-WEB-1": 65,
+  "DLV": 96,
+  "DLV-API-1": 98,
+  "DLV-API-2": 99,
+  "DLV-DOC-1": 97,
+  "DLV-DSH-1": 100,
+  "DLV-MOB-1": 101,
+  "DLV-WEB-1": 102,
+  "DSN": 13,
+  "DSN-DES-1": 14,
+  "FED": 147,
+  "FED-API-1": 149,
+  "FED-API-2": 150,
+  "FED-DES-1": 148,
+  "FED-DSH-1": 151,
+  "FED-MOB-1": 152,
+  "FED-WEB-1": 153,
+  "FIN": 115,
+  "FIN-API-1": 116,
+  "FIN-API-2": 117,
+  "FIN-DSH-1": 118,
+  "FND": 1,
+  "FND-API-1": 3,
+  "FND-API-3": 4,
+  "FND-API-4": 5,
+  "FND-INF-1": 2,
+  "FND-INF-3": 6,
+  "FND-INF-4": 7,
+  "FND-INF-5": 8,
+  "FTX": 193,
+  "FTX-API-1": 194,
+  "FTX-MOB-1": 195,
+  "HRD": 137,
+  "HRD-API-1": 140,
+  "HRD-DOC-1": 143,
+  "HRD-INF-1": 138,
+  "HRD-INF-2": 139,
+  "HRD-INF-3": 146,
+  "HRD-MOB-1": 144,
+  "HRD-QA-1": 141,
+  "HRD-QA-2": 142,
+  "HRD-WEB-1": 145,
+  "INV": 28,
+  "INV-API-1": 30,
+  "INV-API-2": 31,
+  "INV-DOC-1": 29,
+  "INV-MOB-1": 32,
+  "KIT": 125,
+  "KIT-API-1": 126,
+  "KIT-API-2": 127,
+  "KIT-DSH-1": 128,
+  "KIT-MOB-1": 129,
+  "LOC": 23,
+  "LOC-API-1": 24,
+  "LOC-DSH-1": 25,
+  "LOC-MOB-1": 26,
+  "LOC-WEB-1": 27,
+  "LOY": 172,
+  "LOY-API-1": 173,
+  "LOY-MOB-1": 174,
+  "MSL": 184,
+  "MSL-API-1": 185,
+  "MSL-MOB-1": 186,
+  "NOT": 103,
+  "NOT-API-1": 104,
+  "NOT-DSH-1": 106,
+  "NOT-MOB-1": 105,
+  "OCC": 119,
+  "OCC-API-1": 121,
+  "OCC-API-2": 122,
+  "OCC-DES-1": 120,
+  "OCC-DSH-1": 123,
+  "OCC-MOB-1": 124,
+  "ORD": 80,
+  "ORD-API-1": 81,
+  "ORD-API-2": 82,
+  "ORD-API-3": 83,
+  "ORD-DSH-1": 88,
+  "ORD-MOB-1": 84,
+  "ORD-MOB-2": 85,
+  "ORD-WEB-1": 86,
+  "ORD-WEB-2": 87,
+  "PAY": 74,
+  "PAY-API-1": 76,
+  "PAY-API-2": 77,
+  "PAY-DOC-1": 75,
+  "PAY-MOB-1": 78,
+  "PAY-MOB-2": 79,
+  "RAT": 157,
+  "RAT-API-1": 158,
+  "RAT-DSH-1": 160,
+  "RAT-MOB-1": 159,
+  "REL": 33,
+  "REL-INF-1": 34,
+  "REL-INF-2": 35,
+  "REL-INF-3": 36,
+  "REL-INF-4": 37,
+  "REL-INF-5": 38,
+  "REL-INF-6": 39,
+  "REL-INF-7": 40,
+  "RGF": 187,
+  "RGF-API-1": 188,
+  "RGF-MOB-1": 189,
+  "SCH": 66,
+  "SCH-API-1": 68,
+  "SCH-API-2": 69,
+  "SCH-DES-1": 67,
+  "SCH-DSH-1": 70,
+  "SCH-MOB-1": 71,
+  "SCH-QA-1": 73,
+  "SCH-WEB-1": 72,
+  "STF": 53,
+  "STF-DES-1": 54,
+  "STF-MOB-1": 55,
+  "STF-MOB-3": 56,
+  "STF-MOB-4": 57,
+  "STF-WEB-1": 58,
+  "STF-WEB-2": 59,
+  "STY": 175,
+  "STY-API-1": 176,
+  "STY-MOB-1": 177,
+  "SVC": 134,
+  "SVC-QA-1": 136,
+  "SVC-WEB-1": 135,
+  "VIS": 165,
+  "VIS-API-1": 166,
+  "VIS-API-2": 167,
+  "VIS-API-3": 170,
+  "VIS-DSH-1": 168,
+  "VIS-MOB-1": 169,
+  "VIS-WEB-1": 171,
+  "VND": 41,
+  "VND-API-1": 43,
+  "VND-API-2": 44,
+  "VND-DES-1": 42,
+  "VND-DSH-1": 45,
+  "VND-DSH-2": 46,
+  "VOP": 107,
+  "VOP-API-1": 108,
+  "VOP-DSH-1": 109,
+  "VRF": 190,
+  "VRF-API-1": 191,
+  "VRF-MOB-1": 192,
+  "VST": 196,
+  "VST-API-1": 197,
+  "VST-DSH-1": 198,
+  "WAL": 89,
+  "WAL-API-1": 90
+ },
+ "project": {
+  "fields": {
+   "Area": {
+    "id": "PVTSSF_lADOFIc2Jc4Bq4SzzhpNbHc",
+    "options": {
+     "api": "127701ac",
+     "dashboard": "3e52bea3",
+     "design": "a5cb869d",
+     "docs": "f47c695b",
+     "infra": "66b73eb8",
+     "mobile": "827b2347",
+     "qa": "81776ac6",
+     "web": "854676f6"
+    }
+   },
+   "Priority": {
+    "id": "PVTSSF_lADOFIc2Jc4Bq4SzzhpNbDY",
+    "options": {
+     "P0": "668e387e",
+     "P1": "f60246c6",
+     "P2": "97fa0da6"
+    }
+   },
+   "Size": {
+    "id": "PVTSSF_lADOFIc2Jc4Bq4SzzhpNbE8",
+    "options": {
+     "L": "48e85ddb",
+     "M": "8518d3a4",
+     "S": "635729d6",
+     "XL": "9cb38b50",
+     "XS": "b42f0dfb"
+    }
+   },
+   "Status": {
+    "id": "PVTSSF_lADOFIc2Jc4Bq4SzzhpNa54",
+    "options": {
+     "Backlog": "5977ad54",
+     "Done": "759f40b8",
+     "In Progress": "5f213b57",
+     "In Review": "8b1a9483",
+     "QA": "30a0daf5",
+     "Todo": "67dad8f2"
+    }
+   }
+  },
+  "id": "PVT_kwDOFIc2Jc4Bq4Sz",
+  "number": 1
+ }
+}
