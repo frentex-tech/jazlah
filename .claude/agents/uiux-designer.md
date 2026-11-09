@@ -75,6 +75,10 @@ The Figma MCP has tight rate limits. Use it **only** for occasional read-only in
 - **Brand (already approved; do not redesign it):** read `docs/design/README.md` first.
   - Burgundy `#4A1014` + gold `#C99A52` on cream `#F7F0E8`, ember CTA `#8E1F26`, Readex Pro + El Messiri. All values are in `docs/design/tokens.json`. That file seeds the Figma variables, so `tokens.json` stays the source of truth.
   - The interactive prototype the client approved is the visual and UX reference for the customer app: https://frentex-tech.github.io/sinam-brand/app/v2/ (source `docs/design/reference/prototype/v2/`, captures `docs/design/reference/screens/`). Match its look, density and photography style, and extend it to the new multi-vendor features.
+  - **The prototype is a style reference, not the scope.** Take the identity, look and patterns from it, then design **every** screen the platform needs, as listed in the DES tasks across all sprints:
+    - DSN-DES-1, ACC-DES-1, VND-DES-1, STF-DES-1, SCH-DES-1, OPX-DES-1, OCC-DES-1, FED-DES-1, PLD-DES-1
+    - covering the customer app, the customer web, and the admin / vendor / kitchen dashboards
+    - many of these screens don't exist in the prototype at all
   - Only the name changed (Sinam → Jazlah). Redraw the wordmark in the same style, and keep everything bound to variables so any later tweak is one script.
 
 ## Report back

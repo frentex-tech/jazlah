@@ -8,6 +8,22 @@
 
 **Merge points:** same rules as the launch sprints. Each epic's API task merges first, behind a feature flag (`features.<name>` setting) so it can ship dark and be switched on from the dashboard.
 
+## EPIC PLD — Post-launch design
+- reqs: NFR-USB
+Design for the post-launch features. The approved prototype already has first versions of points, Sahm Al-Khair and stories, so adapt them to Jazlah rather than starting from zero.
+
+### PLD-DES-1 — Screens: loyalty, stories, Sahm Al-Khair, installments, slots, reorder/gift/favorites, feed checkout, vendor staff
+`type: Task · area: design · size: XL · prio: P1 · reqs: FR-LOY-02, FR-STR-01, FR-CHR-01, FR-PAY-04, FR-SCH-08, FR-ORD-06, FR-ORD-07, FR-CAT-04, FR-FED-07, FR-VND-07 · depends: DSN-DES-1`
+
+**What:** design the phase-2 features before each one is scheduled.
+
+**Output:** points screen and checkout redeem; stories bar, viewer and posting (from the prototype's story view); Sahm Al-Khair (from the prototype); installments at checkout; time-slot picker; reorder, gift form and favorites; feed "buy now" and feed orders; vendor staff management; seasonal theme variant. All in AR and EN with every state.
+
+**Where:** Figma file «Jazlah — Product Design», `design/figma/scripts/`, `docs/design/post-launch/`
+
+**Acceptance:**
+- [ ] Each feature's screens are designed and prototyped before its epic is scheduled
+
 ## EPIC LOY — Loyalty points & engagement
 - reqs: FR-LOY-01, FR-LOY-02, FR-LOY-03, FR-LOY-04, FR-ADM-13, FR-PRD-01
 Platform-wide points earned on completed orders and actions, redeemable at checkout.

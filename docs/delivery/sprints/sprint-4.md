@@ -37,6 +37,28 @@ Live gateway hookup in the clients once the client's gateway is integrated (PAY-
 - [ ] Sandbox payments succeed on a real iPhone (Apple Pay) and an Android device (mada test card)
 - [ ] Apple Pay works on Safari against the staging domain
 
+## EPIC OPX — Operations UX (design)
+- reqs: NFR-USB
+Design for everything Sprint 4 builds: after-sales, tracking, notifications, the vendor live board, and the admin core and finance dashboards.
+
+### OPX-DES-1 — Screens: after-sales, tracking, notifications, vendor board, admin & finance
+`type: Task · area: design · size: XL · prio: P0 · reqs: FR-CAN-01, FR-CAN-03, FR-ORD-05, FR-NOT-03, FR-VND-04, FR-VND-06, FR-ADM-01, FR-ADM-03, FR-ADM-06, FR-ADM-12 · depends: DSN-DES-1`
+
+**What:** design every screen Sprint 4 implements, in the approved Jazlah identity. Ideally done during Sprint 3, so development isn't waiting.
+
+**Output:**
+- Customer (mobile + web): cancel order flow with refund choice, complaint form with photos and status, tracking card (courier, call, track link/map), freshness card on the order, notification center, support contact, marketing opt-in
+- Vendor dashboard: live orders board (columns, new-order alert state, card actions, slaughter time picker, freshness upload), A6 order label, earnings (summary, entries, payouts)
+- Admin dashboard: overview KPIs and charts, full orders list and detail timeline with actions (cancel/refund, reschedule, label), customers list and detail, complaints queue, delivery operations (shipments, manual assign, failed deliveries, COD settlements), staff and roles permission matrix, audit log with diff, finance (balances, payouts, reports), campaign composer
+- All in AR and EN with loading, empty, error and permission-denied states
+
+**Where:** Figma file «Jazlah — Product Design» (pages `10 Customer App`, `20 Customer Web`, `30 Admin`, `31 Vendor`), scripts in `design/figma/scripts/`, exports in `docs/design/operations/`
+
+**Acceptance:**
+- [ ] Every screen listed is designed in AR and EN with all states, using only design-system components
+- [ ] The vendor board and admin order detail are prototyped end-to-end
+- [ ] Both developers signed off
+
 ## EPIC CAN — Cancellation & complaints
 - reqs: FR-CAN-01, FR-CAN-02, FR-CAN-03
 Free cancellation before slaughter with a refund choice, then customer-service-only cancellation, and post-delivery complaints with photos.
@@ -71,7 +93,7 @@ This task also covers:
 - [ ] Resolving with a refund credits the wallet and notifies the customer (event)
 
 ### CAN-DSH-1 — Dashboard: complaints queue & customer wallet adjustments
-`type: Feature · area: dashboard · size: M · prio: P0 · reqs: FR-CAN-03, FR-WAL-02 · depends: CAN-API-1, WAL-API-1`
+`type: Feature · area: dashboard · size: M · prio: P0 · reqs: FR-CAN-03, FR-WAL-02 · depends: CAN-API-1, WAL-API-1, OPX-DES-1`
 
 **What:** customer service handles complaints.
 
@@ -93,7 +115,7 @@ This task also covers:
 - [ ] The adjustment shows immediately in the customer's app
 
 ### CAN-MOB-1 — Mobile: cancel order, complaints & wallet
-`type: Feature · area: mobile · size: L · prio: P0 · reqs: FR-CAN-01, FR-CAN-02, FR-CAN-03, FR-WAL-01 · depends: CAN-API-1, ORD-MOB-2, WAL-API-1`
+`type: Feature · area: mobile · size: L · prio: P0 · reqs: FR-CAN-01, FR-CAN-02, FR-CAN-03, FR-WAL-01 · depends: CAN-API-1, ORD-MOB-2, WAL-API-1, OPX-DES-1`
 
 **What:** self-service cancellation and complaints.
 
@@ -115,7 +137,7 @@ This task also covers:
 - [ ] The list paginates and links to the related order
 
 ### CAN-WEB-1 — Web: cancel order, complaints & wallet
-`type: Feature · area: web · size: M · prio: P1 · reqs: FR-CAN-01, FR-CAN-03, FR-WAL-01 · depends: CAN-API-1, ORD-WEB-2, WAL-API-1`
+`type: Feature · area: web · size: M · prio: P1 · reqs: FR-CAN-01, FR-CAN-03, FR-WAL-01 · depends: CAN-API-1, ORD-WEB-2, WAL-API-1, OPX-DES-1`
 
 **What:** the same on the website.
 
@@ -203,7 +225,7 @@ This task also covers:
 - [ ] Out-of-order webhooks never move an order backwards
 
 ### DLV-DSH-1 — Dashboard: delivery operations
-`type: Feature · area: dashboard · size: M · prio: P0 · reqs: INT-DLV-04, INT-DLV-05 · depends: DLV-API-1`
+`type: Feature · area: dashboard · size: M · prio: P0 · reqs: INT-DLV-04, INT-DLV-05 · depends: DLV-API-1, OPX-DES-1`
 
 **What:** admins watch and fix deliveries.
 
@@ -215,7 +237,7 @@ This task also covers:
 - [ ] Every manual action updates the order and notifies the customer
 
 ### DLV-MOB-1 — Mobile: order tracking & freshness block
-`type: Feature · area: mobile · size: M · prio: P0 · reqs: FR-ORD-05, INT-DLV-03, FR-FRS-01, FR-FRS-02 · depends: ORD-MOB-2, VOP-API-1, DLV-API-1`
+`type: Feature · area: mobile · size: M · prio: P0 · reqs: FR-ORD-05, INT-DLV-03, FR-FRS-01, FR-FRS-02 · depends: ORD-MOB-2, VOP-API-1, DLV-API-1, OPX-DES-1`
 
 **What:** customers see who is bringing their order.
 
@@ -306,7 +328,7 @@ This task also covers:
 - [ ] The preview count matches the delivered count in a seeded test
 
 ### NOT-MOB-1 — Mobile: push, deep links, notification center & support contact
-`type: Feature · area: mobile · size: M · prio: P0 · reqs: FR-NOT-01, FR-NOT-03 · depends: NOT-API-1, ORD-MOB-2, SCH-API-1`
+`type: Feature · area: mobile · size: M · prio: P0 · reqs: FR-NOT-01, FR-NOT-03 · depends: NOT-API-1, ORD-MOB-2, SCH-API-1, OPX-DES-1`
 
 **What:** receive and act on notifications.
 
@@ -329,7 +351,7 @@ This task also covers:
 - [ ] WhatsApp opens with the order number in the message
 
 ### NOT-DSH-1 — Dashboard: campaign composer
-`type: Feature · area: dashboard · size: S · prio: P1 · reqs: FR-NOT-02, FR-ADM-09 · depends: NOT-API-1`
+`type: Feature · area: dashboard · size: S · prio: P1 · reqs: FR-NOT-02, FR-ADM-09 · depends: NOT-API-1, OPX-DES-1`
 
 **What:** admins create and schedule campaigns.
 
@@ -368,7 +390,7 @@ This task also covers:
 - [ ] e2e: the record shows on the customer's order; video over 30 MB is rejected
 
 ### VOP-DSH-1 — Dashboard: vendor live orders board
-`type: Feature · area: dashboard · size: L · prio: P0 · reqs: FR-VND-04, FR-FRS-01, FR-FRS-02 · depends: VOP-API-1, ORD-DSH-1`
+`type: Feature · area: dashboard · size: L · prio: P0 · reqs: FR-VND-04, FR-FRS-01, FR-FRS-02 · depends: VOP-API-1, ORD-DSH-1, OPX-DES-1`
 
 **What:** the screen vendors keep open all day.
 
@@ -422,7 +444,7 @@ The Jazlah team's daily console: staff and roles, the audit log, the KPI overvie
 - [ ] A blocked customer gets `USER_BLOCKED` on checkout
 
 ### ADM-DSH-1 — Dashboard: overview, staff & roles, audit log
-`type: Feature · area: dashboard · size: L · prio: P0 · reqs: FR-ADM-01, FR-ADM-12 · depends: ADM-API-1, ADM-API-2`
+`type: Feature · area: dashboard · size: L · prio: P0 · reqs: FR-ADM-01, FR-ADM-12 · depends: ADM-API-1, ADM-API-2, OPX-DES-1`
 
 **What:** the admin landing page and team management.
 
@@ -438,7 +460,7 @@ The Jazlah team's daily console: staff and roles, the audit log, the KPI overvie
 - [ ] Charts render correctly in RTL
 
 ### ADM-DSH-2 — Dashboard: full order operations & customers
-`type: Feature · area: dashboard · size: L · prio: P0 · reqs: FR-ADM-03, FR-ADM-10 · depends: ORD-DSH-1, CAN-API-1, ADM-API-2, DLV-DSH-1`
+`type: Feature · area: dashboard · size: L · prio: P0 · reqs: FR-ADM-03, FR-ADM-10 · depends: ORD-DSH-1, CAN-API-1, ADM-API-2, DLV-DSH-1, OPX-DES-1`
 
 **What:** customer service and operations handle any order and any customer.
 
@@ -493,7 +515,7 @@ Idempotency: `sale`/`commission` unique by (orderId, type); `refund_adjustment` 
 - [ ] VAT report total equals the sum of order VAT for the period
 
 ### FIN-DSH-1 — Dashboard: admin finance & vendor earnings
-`type: Feature · area: dashboard · size: L · prio: P0 · reqs: FR-ADM-06, FR-VND-06 · depends: FIN-API-2, ADM-DSH-1`
+`type: Feature · area: dashboard · size: L · prio: P0 · reqs: FR-ADM-06, FR-VND-06 · depends: FIN-API-2, ADM-DSH-1, OPX-DES-1`
 
 **What:** finance screens for both sides.
 
