@@ -1,0 +1,30 @@
+# OS / editors
+.DS_Store
+.idea/
+.vscode/*
+!.vscode/extensions.json
+# Env & secrets
+.env
+.env.*
+!.env.example
+*.pem
+*.p12
+*.keystore
+*.jks
+**/google-services.json
+**/GoogleService-Info.plist
+# Node
+node_modules/
+.next/
+dist/
+coverage/
+*.log
+.turbo/
+# Flutter / Dart
+.dart_tool/
+build/
+.flutter-plugins*
+*.iml
+**/ios/Pods/
+**/android/.gradle/
+**/android/local.properties

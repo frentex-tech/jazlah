@@ -1,0 +1,20 @@
+name: Feature
+description: User-facing capability (usually a sub-issue of an Epic)
+type: Feature
+body:
+  - type: input
+    id: reqs
+    attributes: { label: SRS requirements, placeholder: "FR-SCH-03, FR-SCH-06" }
+    validations: { required: true }
+  - type: dropdown
+    id: area
+    attributes: { label: Area, options: [api, mobile, web, dashboard, design, infra, qa] }
+    validations: { required: true }
+  - type: textarea
+    id: scope
+    attributes: { label: Scope, description: What should be built }
+    validations: { required: true }
+  - type: textarea
+    id: ac
+    attributes: { label: Acceptance criteria, value: "- [ ] \n- [ ] " }
+    validations: { required: true }

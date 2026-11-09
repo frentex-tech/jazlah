@@ -1,0 +1,15 @@
+name: Task
+description: Technical task (setup, refactor, integration, spike)
+type: Task
+body:
+  - type: dropdown
+    id: area
+    attributes: { label: Area, options: [api, mobile, web, dashboard, design, infra, qa, docs] }
+    validations: { required: true }
+  - type: textarea
+    id: scope
+    attributes: { label: Scope }
+    validations: { required: true }
+  - type: textarea
+    id: ac
+    attributes: { label: Done when, value: "- [ ] " }

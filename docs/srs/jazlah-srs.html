@@ -1,0 +1,532 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="utf-8">
+<title>وثيقة متطلبات منصة جزلة</title>
+<link href="https://fonts.googleapis.com/css2?family=El+Messiri:wght@500;600;700&family=Readex+Pro:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{--p:#4A1014;--a:#C99A52;--a2:#E9D3A6;--paper:#FBF7F1;--ink:#2A1215;--mut:#7A6563;--line:#E7DCCF}
+  @page{size:A4;margin:17mm 15mm}
+  @page:first{margin:0}
+  *{box-sizing:border-box}
+  body{margin:0;color:var(--ink);font-family:'Readex Pro',sans-serif;font-size:10pt;line-height:1.75}
+  h1,h2,h3,h4{font-family:'El Messiri',serif;color:var(--p);margin:0}
+  .en{font-family:'Readex Pro';direction:ltr;unicode-bidi:isolate;color:var(--mut);font-size:.88em}
+  .cover{height:297mm;width:210mm;background:var(--p);color:#fff;position:relative;overflow:hidden;page-break-after:always;display:flex;flex-direction:column;justify-content:space-between;padding:26mm 22mm}
+  .cover:before{content:"";position:absolute;inset:0;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='40' height='40'%3E%3Cpath d='M20 2 L38 20 L20 38 L2 20 Z' fill='none' stroke='%23C99A52' stroke-width='.8' opacity='.25'/%3E%3C/svg%3E")}
+  .cover>*{position:relative}
+  .cover .tag{font-size:10pt;color:var(--a2);border:1px solid rgba(201,154,82,.5);display:inline-block;padding:4px 14px;border-radius:30px}
+  .cover .brand{font-family:'El Messiri';font-size:64pt;color:var(--a);line-height:1;margin-top:20mm}
+  .cover h1{color:#fff;font-size:24pt;margin-top:6mm;line-height:1.45}
+  .cover .sub{font-size:12pt;color:var(--a2);margin-top:5mm;max-width:150mm}
+  .cover .meta{border-top:1px solid rgba(201,154,82,.45);padding-top:7mm;display:grid;grid-template-columns:repeat(3,1fr);gap:6mm;font-size:9.5pt}
+  .cover .meta b{display:block;color:var(--a);font-weight:500;font-size:8.5pt}
+  section{margin-bottom:8mm}
+  .sec-h{display:flex;align-items:center;gap:10px;border-bottom:2px solid var(--a);padding-bottom:5px;margin-bottom:4mm;page-break-after:avoid}
+  .sec-h .n{background:var(--p);color:var(--a);font-family:'El Messiri';font-weight:700;min-width:30px;height:30px;padding:0 6px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:12pt}
+  .sec-h h2{font-size:16pt}
+  h3{font-size:12.5pt;margin:5mm 0 2mm;page-break-after:avoid;display:flex;gap:8px;align-items:baseline}
+  h3 .id{font-family:'Readex Pro';font-size:8.5pt;color:var(--a);direction:ltr}
+  h4{font-size:11pt;margin:3mm 0 1.5mm;page-break-after:avoid}
+  ul{margin:0 0 2mm;padding-inline-start:18px}
+  li{margin-bottom:1.3mm}
+  li::marker{color:var(--a)}
+  b{color:var(--p);font-weight:600}
+  .req{list-style:none;padding:0;margin:0 0 3mm}
+  .req li{display:grid;grid-template-columns:72px 1fr;gap:8px;padding:2.2mm 0;border-bottom:1px solid var(--line);page-break-inside:avoid}
+  .req li .k{font-size:8.3pt;color:var(--p);background:var(--paper);border:1px solid var(--line);border-radius:5px;text-align:center;direction:ltr;height:fit-content;padding:1px 0;font-weight:500}
+  .req li .ph{display:inline-block;font-size:7.8pt;padding:0 7px;border-radius:20px;margin-inline-start:6px;vertical-align:1px}
+  .ph.l{background:#EAF1E3;color:#41632A}.ph.p{background:#F4EADA;color:#8A5E1E}
+  table{width:100%;border-collapse:collapse;margin:2mm 0 4mm;font-size:9.4pt;page-break-inside:avoid}
+  th{background:var(--p);color:#fff;font-weight:500;text-align:right;padding:6px 8px}
+  td{padding:5px 8px;border-bottom:1px solid var(--line);vertical-align:top}
+  tr:nth-child(even) td{background:var(--paper)}
+  .box{background:var(--paper);border:1px solid var(--line);border-right:4px solid var(--a);border-radius:8px;padding:3.5mm 5mm;margin:3mm 0;page-break-inside:avoid}
+  .box h4{margin-top:0}
+  .lead{color:var(--mut);margin:0 0 3mm}
+  .toc{columns:2;column-gap:10mm;list-style:none;padding:0}
+  .toc li{border-bottom:1px dotted var(--line);padding:1.2mm 0;break-inside:avoid}
+  .pb{page-break-before:always}
+  .flow{display:flex;flex-wrap:wrap;gap:4px;align-items:center;margin:2mm 0 3mm}
+  .flow span{background:var(--p);color:#fff;border-radius:6px;padding:2px 9px;font-size:9pt}
+  .flow i{color:var(--a);font-style:normal}
+  .sign{display:grid;grid-template-columns:1fr 1fr;gap:10mm;margin-top:8mm}
+  .sign div{border:1px solid var(--line);border-radius:8px;padding:5mm;min-height:38mm}
+  .sign b{display:block;margin-bottom:12mm}
+  .muted{color:var(--mut);font-size:9pt}
+</style>
+</head>
+<body>
+
+<div class="cover">
+  <div>
+    <span class="tag">وثيقة متطلبات البرمجيات · <span style="direction:ltr;unicode-bidi:isolate">SRS v1.0</span></span>
+    <div class="brand">جزلة</div>
+    <h1>وثيقة متطلبات منصة جزلة<br>لبيع اللحوم والذبائح وخدماتها</h1>
+    <p class="sub">تطبيق جوال وموقع إلكتروني ولوحات تحكم للإدارة والتجار والمطابخ، مع سوق للأعلاف وخدمات المناسبات والزيارات.</p>
+  </div>
+  <div class="meta">
+    <div><b>الإصدار</b>1.0 · مسودة للاعتماد</div>
+    <div><b>التاريخ</b>نوفمبر ٢٠٢٦</div>
+    <div><b>الحالة</b>بانتظار مراجعة العميل</div>
+  </div>
+</div>
+
+<section>
+  <div class="sec-h"><span class="n">٠</span><h2>المحتويات</h2></div>
+  <ol class="toc">
+    <li>١. مقدمة الوثيقة</li>
+    <li>٢. الوصف العام للمنصة</li>
+    <li>٣. فئات المستخدمين وصلاحياتهم</li>
+    <li>٤. المتطلبات الوظيفية: تطبيق العميل والموقع</li>
+    <li>٥. المتطلبات الوظيفية: الطلب والتوصيل والدفع</li>
+    <li>٦. المتطلبات الوظيفية: الخدمات الخاصة</li>
+    <li>٧. المتطلبات الوظيفية: الولاء والمحتوى والمجتمع</li>
+    <li>٨. المتطلبات الوظيفية: سوق الأعلاف</li>
+    <li>٩. المتطلبات الوظيفية: لوحات التحكم</li>
+    <li>١٠. التكاملات الخارجية</li>
+    <li>١١. المتطلبات غير الوظيفية</li>
+    <li>١٢. البنية التقنية</li>
+    <li>١٣. مراحل التنفيذ</li>
+    <li>١٤. الافتراضات والنقاط المفتوحة</li>
+    <li>١٥. الاعتماد</li>
+  </ol>
+</section>
+
+<section>
+  <div class="sec-h"><span class="n">١</span><h2>مقدمة الوثيقة</h2></div>
+  <h4>١.١ الغرض</h4>
+  <p>تحدد هذه الوثيقة جميع المتطلبات الوظيفية وغير الوظيفية لمنصة «جزلة»، وتمثل المرجع المتفق عليه بين العميل وفريق التطوير لما سيُبنى وكيف سيعمل، وتُعتمد أساسًا للتصميم والتطوير والاختبار والقبول.</p>
+  <h4>١.٢ النطاق</h4>
+  <ul>
+    <li>تطبيق جوال للعملاء على نظامي <span class="en">iOS</span> و<span class="en">Android</span>.</li>
+    <li>موقع إلكتروني للعملاء بنفس وظائف التطبيق.</li>
+    <li>لوحة تحكم لإدارة المنصة، ولوحة تحكم للتجار الشركاء، ولوحة تحكم للمطابخ المتعاقدة.</li>
+    <li>خادم مركزي وواجهات برمجية <span class="en">(Backend &amp; APIs)</span> تخدم جميع ما سبق.</li>
+    <li>تكاملات مع بوابة الدفع وشركة التوصيل ومزود الرسائل النصية والفوترة الإلكترونية.</li>
+  </ul>
+  <h4>١.٣ المصطلحات</h4>
+  <table>
+    <tr><th>المصطلح</th><th>المعنى</th></tr>
+    <tr><td>جزلة</td><td>المنصة والمتجر الرئيسي في آن واحد، وتبيع منتجاتها الخاصة بصفتها البائع الأساسي.</td></tr>
+    <tr><td>التاجر الشريك <span class="en">(Vendor)</span></td><td>ملحمة أو مسلخ أو مزرعة أو صاحب حلال يعرض منتجاته داخل جزلة مقابل عمولة.</td></tr>
+    <tr><td>المطبخ المتعاقد</td><td>مطبخ تتعاقد معه جزلة لطبخ اللحم الذي يطلبه العميل مطبوخًا.</td></tr>
+    <tr><td>بائع الأعلاف</td><td>مستخدم معتمد يعرض البرسيم والأعلاف في قسم سوق الأعلاف.</td></tr>
+    <tr><td>فترة التوصيل</td><td>نافذة زمنية يومية واحدة تحددها المنصة يتم فيها توصيل الطلبات.</td></tr>
+    <tr><td>آخر وقت للطلب <span class="en">(Cut-off)</span></td><td>الوقت الذي يُغلق بعده استقبال الطلبات لفترة يوم معيّن.</td></tr>
+    <tr><td>الدفع عند الاستلام <span class="en">(COD)</span></td><td>دفع قيمة الطلب نقدًا أو بالشبكة عند التسليم.</td></tr>
+    <tr><td>العربون</td><td>مبلغ مقدم يُدفع لحجز ذبيحة بعد اختيارها في الزيارة.</td></tr>
+  </table>
+  <h4>١.٤ ترميز المتطلبات</h4>
+  <p>لكل متطلب رمز فريد مثل <span class="en">FR-ORD-03</span>، ويظهر بجانبه وسم المرحلة: <span class="ph l" style="padding:0 7px;border-radius:20px">الإطلاق</span> للمتطلبات اللازمة لإطلاق المنصة، و<span class="ph p" style="padding:0 7px;border-radius:20px">بعد الإطلاق</span> للتحسينات اللاحقة.</p>
+</section>
+
+<section class="pb">
+  <div class="sec-h"><span class="n">٢</span><h2>الوصف العام للمنصة</h2></div>
+  <h4>٢.١ رؤية المنتج</h4>
+  <p>جزلة متجر إلكتروني متخصص في اللحوم والذبائح، يبيع منتجاته بصفته البائع الأساسي، ويتيح لملاحم ومسالخ ومزارع أخرى عرض منتجاتها داخله. وتضيف المنصة خدمات لا يقدمها المنافسون مجتمعة: ذبائح المناسبات، وزيارة المزرعة لاختيار الذبيحة، وطبخ اللحم عبر مطابخ متعاقدة، وسوقًا للأعلاف بين أصحاب الحلال، وسهم الخير.</p>
+  <h4>٢.٢ مكونات النظام</h4>
+  <table>
+    <tr><th>المكوّن</th><th>المستخدم</th><th>الوظيفة الرئيسية</th></tr>
+    <tr><td>تطبيق العميل <span class="en">(Flutter)</span></td><td>العملاء</td><td>التصفح والشراء والمناسبات والزيارات والطبخ وسوق الأعلاف والولاء</td></tr>
+    <tr><td>الموقع الإلكتروني <span class="en">(Next.js)</span></td><td>العملاء</td><td>نفس وظائف التطبيق عبر المتصفح، مع تهيئة لمحركات البحث</td></tr>
+    <tr><td>لوحة الإدارة</td><td>فريق جزلة</td><td>إدارة المنتجات والتجار والطلبات والمواعيد والمالية والمحتوى والإعدادات</td></tr>
+    <tr><td>لوحة التاجر</td><td>التجار الشركاء</td><td>إدارة منتجاتهم وطلباتهم والزيارات ومستحقاتهم</td></tr>
+    <tr><td>لوحة المطبخ</td><td>المطابخ المتعاقدة</td><td>استقبال طلبات الطبخ وتحديث حالتها</td></tr>
+    <tr><td>الخادم المركزي <span class="en">(NestJS + PostgreSQL)</span></td><td>جميع المكونات</td><td>منطق الأعمال والبيانات والتكاملات والإشعارات</td></tr>
+  </table>
+  <h4>٢.٣ قواعد العمل الأساسية</h4>
+  <ul>
+    <li><b>جزلة هي المتجر الرئيسي:</b> الواجهة الرئيسية تعرض منتجات جزلة أولًا، ويظهر التجار الشركاء في قسم مخصص وفي نتائج البحث مع اسم التاجر على كل منتج.</li>
+    <li><b>السلة من بائع واحد:</b> لا يجمع الطلب الواحد منتجات من أكثر من بائع، وعند محاولة الإضافة من بائع آخر يُخيَّر العميل بين إفراغ السلة أو الإلغاء.</li>
+    <li><b>المنصة تستلم المدفوعات:</b> تُحصّل جزلة قيمة الطلبات كاملة، ثم تحوّل مستحقات التجار أسبوعيًا بعد خصم العمولة.</li>
+    <li><b>مصدر الدخل:</b> عمولة نسبية على كل طلب لدى التجار الشركاء، تُضبط لكل تاجر من لوحة الإدارة.</li>
+    <li><b>إعدادات موحدة من المنصة:</b> الحد الأدنى للطلب، ورسوم التوصيل، وفترة التوصيل، وتفعيل الدفع عند الاستلام، وموسم الأضاحي.</li>
+    <li><b>التوصيل عبر شركة متعاقدة</b> مع جزلة لجميع الطلبات، مع إتاحة الاستلام من موقع البائع.</li>
+    <li><b>نطاق الإطلاق الجغرافي:</b> الرياض والطائف والمدن القريبة من الرياض، وقابل للتوسع من الإعدادات.</li>
+    <li><b>الأصناف:</b> لحوم الغنم والعجل والحاشي والماعز وما في حكمها فقط، دون دواجن أو أسماك أو منتجات بقالة.</li>
+  </ul>
+</section>
+
+<section>
+  <div class="sec-h"><span class="n">٣</span><h2>فئات المستخدمين وصلاحياتهم</h2></div>
+  <table>
+    <tr><th>الفئة</th><th>الوصف</th><th>أبرز الصلاحيات</th></tr>
+    <tr><td>الزائر</td><td>مستخدم غير مسجل</td><td>التصفح والبحث والإضافة للسلة، ويُطلب التسجيل عند إتمام الطلب</td></tr>
+    <tr><td>العميل</td><td>مستخدم مسجل برقم الجوال</td><td>الطلب والدفع والتتبع والتقييم والمناسبات والزيارات والولاء والستوريز وسوق الأعلاف</td></tr>
+    <tr><td>بائع الأعلاف</td><td>عميل معتمد للبيع في سوق الأعلاف</td><td>نشر الإعلانات والرد على المحادثات</td></tr>
+    <tr><td>التاجر الشريك</td><td>منشأة معتمدة بسجل تجاري وشهادة صحية</td><td>إدارة متجره ومنتجاته وطلباته وزياراته ومستحقاته</td></tr>
+    <tr><td>موظفو التاجر</td><td>حسابات فرعية للتاجر</td><td>صلاحيات يحددها التاجر (طلبات فقط، منتجات فقط...)</td></tr>
+    <tr><td>المطبخ المتعاقد</td><td>مطبخ تتعاقد معه جزلة</td><td>استقبال طلبات الطبخ وتحديث حالتها</td></tr>
+    <tr><td>مدير المنصة</td><td>فريق جزلة</td><td>كل الصلاحيات، مع أدوار فرعية: عمليات، خدمة عملاء، مالية، محتوى، مشرف سوق الأعلاف</td></tr>
+  </table>
+</section>
+
+<section class="pb">
+  <div class="sec-h"><span class="n">٤</span><h2>المتطلبات الوظيفية: تطبيق العميل والموقع</h2></div>
+
+  <h3>٤.١ الحساب والتسجيل <span class="id">FR-ACC</span></h3>
+  <ul class="req">
+    <li><span class="k">FR-ACC-01</span><div>التسجيل والدخول برقم الجوال ورمز تحقق <span class="en">(OTP)</span> يُرسل برسالة نصية، دون كلمة مرور.<span class="ph l">الإطلاق</span></div></li>
+    <li><span class="k">FR-ACC-02</span><div>استكمال الملف الشخصي: الاسم والبريد الإلكتروني (اختياري) واللغة المفضلة.<span class="ph l">الإطلاق</span></div></li>
+    <li><span class="k">FR-ACC-03</span><div>إدارة العناوين: إضافة عنوان بتحديده على الخريطة، وتسميته (المنزل، العمل)، وإرشادات للسائق، وتعيين عنوان افتراضي. لا يمكن تعديل أو حذف عنوان مرتبط بطلب قائم.<span class="ph l">الإطلاق</span></div></li>
+    <li><span class="k">FR-ACC-04</span><div>التبديل بين العربية والإنجليزية في أي وقت، مع اتجاه الواجهة المناسب لكل لغة.<span class="ph l">الإطلاق</span></div></li>
+    <li><span class="k">FR-ACC-05</span><div>حذف الحساب من داخل التطبيق وفق متطلبات المتاجر ونظام حماية البيانات الشخصية.<span class="ph l">الإطلاق</span></div></li>
+  </ul>
+
+  <h3>٤.٢ تحديد الموقع والتغطية <span class="id">FR-LOC</span></h3>
+  <ul class="req">
+    <li><span class="k">FR-LOC-01</span><div>تحديد موقع العميل عند فتح التطبيق، أو اختياره يدويًا من الخريطة أو العناوين المحفوظة.<span class="ph l">الإطلاق</span></div></li>
+    <li><span class="k">FR-LOC-02</span><div>تحديد مناطق التغطية كمضلعات على الخريطة من لوحة الإدارة، وإظهار رسالة واضحة إذا كان العميل خارج التغطية مع إتاحة التصفح والاستلام من موقع البائع.<span class="ph l">الإطلاق</span></div></li>
+    <li><span class="k">FR-LOC-03</span><div>التحقق من وقوع العنوان داخل التغطية في الخادم عند إتمام الطلب.<span class="ph l">الإطلاق</span></div></li>
+  </ul>
+
+  <h3>٤.٣ الواجهة الرئيسية والتصفح <span class="id">FR-CAT</span></h3>
+  <ul class="req">
+    <li><span class="k">FR-CAT-01</span><div>واجهة رئيسية تعرض: البنرات والعروض، وأقسام منتجات جزلة (ذبائح، لحوم بالكيلو، مفروم، مشاوي، ذبائح المناسبات، أطباق مطبوخة)، والأكثر طلبًا، وقسم «متاجر شريكة»، وشريط الستوريز.<span class="ph l">الإطلاق</span></div></li>
+    <li><span class="k">FR-CAT-02</span><div>صفحة لكل تاجر شريك تعرض شعاره وتقييمه وأقسامه ومنتجاته.<span class="ph l">الإطلاق</span></div></li>
+    <li><span class="k">FR-CAT-03</span><div>بحث عام في جميع المنتجات مع إظهار اسم البائع على كل نتيجة، وتصفية حسب القسم ونوع اللحم والبائع والسعر.<span class="ph l">الإطلاق</span></div></li>
+    <li><span class="k">FR-CAT-04</span><div>المفضلة: حفظ المنتجات للرجوع إليها.<span class="ph p">بعد الإطلاق</span></div></li>
+  </ul>
+
+  <h3>٤.٤ صفحة المنتج والتخصيص <span class="id">FR-PRD</span></h3>
+  <ul class="req">
+    <li><span class="k">FR-PRD-01</span><div>عرض الصور والوصف والسعر واسم البائع والتقييم والنقاط المكتسبة من الشراء.<span class="ph l">الإطلاق</span></div></li>
+    <li><span class="k">FR-PRD-02</span><div><b>الأحجام:</b> لكل منتج أحجام بوزن تقريبي وسعر مستقل، مع وسوم توضيحية مثل «يجزئ العقيقة».<span class="ph l">الإطلاق</span></div></li>
+    <li><span class="k">FR-PRD-03</span><div><b>التقطيع:</b> قائمة أنواع التقطيع لكل منتج، ولكل نوع سعر إضافي اختياري.<span class="ph l">الإطلاق</span></div></li>
+    <li><span class="k">FR-PRD-04</span><div><b>التغليف:</b> أطباق، تكييس، فاكيوم، بدون تغليف، مع قواعد توافق تمنع الجمع بين تغليف وتقطيع غير متوافقين.<span class="ph l">الإطلاق</span></div></li>
+    <li><span class="k">FR-PRD-05</span><div><b>الاستثناءات:</b> خيارات «بدون» مثل الرأس والكوارع والكرشة والكبدة واللية.<span class="ph l">الإطلاق</span></div></li>
+    <li><span class="k">FR-PRD-06</span><div>حقل ملاحظات حر، واختيار الكمية، وعرض السعر الإجمالي محدثًا مع كل اختيار.<span class="ph l">الإطلاق</span></div></li>
+    <li><span class="k">FR-PRD-07</span><div>إمكانية تحديد المنتج للتوصيل فقط أو للاستلام فقط أو للاثنين.<span class="ph l">الإطلاق</span></div></li>
+  </ul>
+</section>
+
+<section class="pb">
+  <div class="sec-h"><span class="n">٥</span><h2>المتطلبات الوظيفية: الطلب والتوصيل والدفع</h2></div>
+
+  <h3>٥.١ السلة <span class="id">FR-CRT</span></h3>
+  <ul class="req">
+    <li><span class="k">FR-CRT-01</span><div>سلة واحدة لكل بائع؛ إضافة منتج من بائع آخر تُظهر تنبيهًا بإفراغ السلة الحالية أو الإلغاء.<span class="ph l">الإطلاق</span></div></li>
+    <li><span class="k">FR-CRT-02</span><div>حفظ السلة للزائر محليًا ونقلها لحسابه بعد التسجيل.<span class="ph l">الإطلاق</span></div></li>
+    <li><span class="k">FR-CRT-03</span><div>عرض المتبقي للوصول للحد الأدنى للطلب، ومنع الإتمام قبل بلوغه.<span class="ph l">الإطلاق</span></div></li>
+    <li><span class="k">FR-CRT-04</span><div>تطبيق كوبون خصم واحد على الطلب وفق شروطه (البائع، القسم، الحد الأدنى، مدة الصلاحية، عدد مرات الاستخدام).<span class="ph l">الإطلاق</span></div></li>
+  </ul>
+
+  <h3>٥.٢ طريقة الاستلام والمواعيد <span class="id">FR-SCH</span></h3>
+  <ul class="req">
+    <li><span class="k">FR-SCH-01</span><div>اختيار طريقة الاستلام: توصيل للعنوان، أو استلام من موقع البائع.<span class="ph l">الإطلاق</span></div></li>
+    <li><span class="k">FR-SCH-02</span><div><b>فترة توصيل يومية واحدة</b> تحددها المنصة (وقت البداية والنهاية)، ويختار العميل يوم التوصيل فقط.<span class="ph l">الإطلاق</span></div></li>
+    <li><span class="k">FR-SCH-03</span><div><b>آخر وقت للطلب:</b> يُضبط من لوحة الإدارة لكل نوع طلب (لحوم جاهزة، ذبيحة، طبخ، مناسبة)، وبعده تنتقل الطلبات تلقائيًا لليوم التالي المتاح. يُحسب على الخادم بتوقيت الرياض.<span class="ph l">الإطلاق</span></div></li>
+    <li><span class="k">FR-SCH-04</span><div><b>مدة الحجز المسبق:</b> عدد الأيام المتاحة للاختيار يُضبط من الإعدادات.<span class="ph l">الإطلاق</span></div></li>
+    <li><span class="k">FR-SCH-05</span><div><b>الأيام المغلقة:</b> إغلاق أيام محددة للتوصيل أو الاستلام (إجازات، أعياد، ظروف تشغيلية).<span class="ph l">الإطلاق</span></div></li>
+    <li><span class="k">FR-SCH-06</span><div><b>السعة اليومية:</b> حد أقصى لعدد الطلبات وعدد الذبائح في اليوم، يُغلق اليوم تلقائيًا عند بلوغه.<span class="ph l">الإطلاق</span></div></li>
+    <li><span class="k">FR-SCH-07</span><div>زر في لوحة الإدارة لإيقاف استقبال الطلبات فورًا مع رسالة تظهر للعملاء.<span class="ph l">الإطلاق</span></div></li>
+    <li><span class="k">FR-SCH-08</span><div>تعدد فترات التوصيل في اليوم الواحد، بسعة لكل فترة.<span class="ph p">بعد الإطلاق</span></div></li>
+  </ul>
+
+  <h3>٥.٣ الدفع <span class="id">FR-PAY</span></h3>
+  <ul class="req">
+    <li><span class="k">FR-PAY-01</span><div>الدفع الإلكتروني عبر بوابة دفع سعودية يختارها العميل من بين <span class="en">Moyasar, Tap, HyperPay, PayTabs</span>، وتشمل مدى والبطاقات الائتمانية و<span class="en">Apple Pay</span>.<span class="ph l">الإطلاق</span></div></li>
+    <li><span class="k">FR-PAY-02</span><div>الدفع عند الاستلام (نقدًا أو بالشبكة)، ويُفعّل أو يُوقف من لوحة الإدارة على مستوى المنصة، مع إمكانية تقييده بسقف لقيمة الطلب أو بأنواع طلبات معينة.<span class="ph l">الإطلاق</span></div></li>
+    <li><span class="k">FR-PAY-03</span><div>الخصم من رصيد المحفظة كليًا أو جزئيًا.<span class="ph l">الإطلاق</span></div></li>
+    <li><span class="k">FR-PAY-04</span><div>التقسيط عبر <span class="en">Tamara</span> أو <span class="en">Tabby</span> بحسب ما يعتمده العميل.<span class="ph p">بعد الإطلاق</span></div></li>
+    <li><span class="k">FR-PAY-05</span><div>إصدار فاتورة ضريبية إلكترونية لكل طلب متوافقة مع متطلبات هيئة الزكاة والضريبة والجمارك <span class="en">(ZATCA)</span>، وإرسالها للعميل.<span class="ph l">الإطلاق</span></div></li>
+  </ul>
+
+  <h3>٥.٤ تأكيد الطلب ومراحله <span class="id">FR-ORD</span></h3>
+  <ul class="req">
+    <li><span class="k">FR-ORD-01</span><div><b>التأكيد:</b> الطلب المدفوع إلكترونيًا يُؤكد تلقائيًا بعد نجاح الدفع. الطلب بالدفع عند الاستلام يُؤكد تلقائيًا أو بعد مراجعة، حسب إعداد في لوحة الإدارة.<span class="ph l">الإطلاق</span></div></li>
+    <li><span class="k">FR-ORD-02</span><div><b>إسناد الطلب:</b> طلبات جزلة تظهر في لوحة الإدارة، وطلبات التجار الشركاء تظهر في لوحة التاجر المعني فورًا مع تنبيه.<span class="ph l">الإطلاق</span></div></li>
+    <li><span class="k">FR-ORD-03</span><div><b>مراحل الطلب:</b> تُحدّث من اللوحات ومن شركة التوصيل، ويُشعَر العميل بكل مرحلة.<span class="ph l">الإطلاق</span>
+      <div class="flow"><span>جديد</span><i>←</i><span>مؤكد</span><i>←</i><span>جارٍ الذبح والتجهيز</span><i>←</i><span>جاهز</span><i>←</i><span>استلمه المندوب</span><i>←</i><span>في الطريق</span><i>←</i><span>تم التسليم</span></div>
+      وحالات استثنائية: ملغي، فشل التسليم، مُرتجع.</div></li>
+    <li><span class="k">FR-ORD-04</span><div>صفحة «طلباتي» بالطلبات الحالية والسابقة، وتفاصيل كل طلب وفاتورته.<span class="ph l">الإطلاق</span></div></li>
+    <li><span class="k">FR-ORD-05</span><div>تتبع الطلب: الحالة الحالية، واسم المندوب ورقمه، وموقعه على الخريطة أو رابط التتبع الذي توفره شركة التوصيل.<span class="ph l">الإطلاق</span></div></li>
+    <li><span class="k">FR-ORD-06</span><div>إعادة الطلب بضغطة واحدة، مع تنبيه بالمنتجات غير المتاحة.<span class="ph p">بعد الإطلاق</span></div></li>
+    <li><span class="k">FR-ORD-07</span><div>إرسال الطلب هدية لشخص آخر مع بطاقة إهداء وبيانات المستلم.<span class="ph p">بعد الإطلاق</span></div></li>
+  </ul>
+
+  <h3>٥.٥ الإلغاء والاسترجاع <span class="id">FR-CAN</span></h3>
+  <ul class="req">
+    <li><span class="k">FR-CAN-01</span><div>إلغاء مجاني من التطبيق قبل بدء الذبح أو التجهيز، مع استرداد كامل للمبلغ لنفس وسيلة الدفع أو للمحفظة حسب اختيار العميل.<span class="ph l">الإطلاق</span></div></li>
+    <li><span class="k">FR-CAN-02</span><div>منع الإلغاء من التطبيق بعد بدء الذبح، ويبقى متاحًا عبر خدمة العملاء وفق السياسة.<span class="ph l">الإطلاق</span></div></li>
+    <li><span class="k">FR-CAN-03</span><div>تقديم شكوى أو طلب استرجاع بعد الاستلام خلال مدة تحددها المنصة، مع إرفاق صور، ومتابعتها من لوحة الإدارة.<span class="ph l">الإطلاق</span></div></li>
+  </ul>
+
+  <h3>٥.٦ التقييم <span class="id">FR-RAT</span></h3>
+  <ul class="req">
+    <li><span class="k">FR-RAT-01</span><div>طلب تقييم بعد التسليم: تقييم الطلب والبائع والتوصيل من ٥ نجوم مع تعليق اختياري.<span class="ph l">الإطلاق</span></div></li>
+    <li><span class="k">FR-RAT-02</span><div>عرض متوسط التقييم على صفحة البائع والمنتج، مع إمكانية إخفاء التعليقات المسيئة من الإدارة.<span class="ph l">الإطلاق</span></div></li>
+  </ul>
+</section>
+
+<section class="pb">
+  <div class="sec-h"><span class="n">٦</span><h2>المتطلبات الوظيفية: الخدمات الخاصة</h2></div>
+
+  <h3>٦.١ ذبائح المناسبات <span class="id">FR-OCC</span></h3>
+  <p class="lead">مسار طلب مخصص للعقيقة والأفراح والعزائم، يختلف عن الطلب العادي.</p>
+  <ul class="req">
+    <li><span class="k">FR-OCC-01</span><div>نموذج طلب مناسبة يحدد: نوع المناسبة، وعدد الذبائح ونوعها وحجمها، والتاريخ والوقت، ومكان التسليم، والتقطيع والتغليف، وخيار الطبخ عبر المطابخ المتعاقدة، وملاحظات.<span class="ph l">الإطلاق</span></div></li>
+    <li><span class="k">FR-OCC-02</span><div>عرض السعر التقديري فورًا، مع إمكانية مراجعة الطلب وتأكيد السعر من الإدارة للطلبات الكبيرة أو الخاصة.<span class="ph l">الإطلاق</span></div></li>
+    <li><span class="k">FR-OCC-03</span><div>دفع كامل أو دفع عربون يُحدد نسبته من الإعدادات، وسداد الباقي قبل موعد المناسبة أو عند التسليم.<span class="ph l">الإطلاق</span></div></li>
+    <li><span class="k">FR-OCC-04</span><div>مهلة حجز مسبق دنيا لطلبات المناسبات تُضبط من الإعدادات، وسعة مستقلة لعدد الذبائح في اليوم.<span class="ph l">الإطلاق</span></div></li>
+    <li><span class="k">FR-OCC-05</span><div>تذكير للعميل قبل المناسبة، ومتابعة الطلب بنفس مراحل الطلب العادي.<span class="ph l">الإطلاق</span></div></li>
+  </ul>
+
+  <h3>٦.٢ زيارة المزرعة واختيار الذبيحة <span class="id">FR-VIS</span></h3>
+  <ul class="req">
+    <li><span class="k">FR-VIS-01</span><div>حجز زيارة لدى جزلة أو تاجر شريك يتيح الخدمة: يختار العميل يومًا وموعدًا من المواعيد المتاحة وعدد الزوار.<span class="ph l">الإطلاق</span></div></li>
+    <li><span class="k">FR-VIS-02</span><div>مواعيد افتراضية للزيارات تحددها المنصة، ويستطيع كل بائع تعديل مواعيده وإغلاق أيام من لوحته، ويصله الحجز فورًا.<span class="ph l">الإطلاق</span></div></li>
+    <li><span class="k">FR-VIS-03</span><div>رسوم الزيارة اختيارية يحددها البائع، وتُخصم من قيمة الذبيحة عند الشراء إن رغب.<span class="ph l">الإطلاق</span></div></li>
+    <li><span class="k">FR-VIS-04</span><div>أثناء الزيارة يسجل البائع الذبيحة المختارة باسم العميل (رقم الوسم وصورة اختيارية) من لوحته، فتظهر في حساب العميل.<span class="ph l">الإطلاق</span></div></li>
+    <li><span class="k">FR-VIS-05</span><div>دفع عربون لحجز الذبيحة، ثم تحديد موعد الذبح والتقطيع والتسليم أو ربطها بطلب مناسبة.<span class="ph l">الإطلاق</span></div></li>
+    <li><span class="k">FR-VIS-06</span><div>عرض موقع المزرعة على الخريطة وزر الاتجاهات، وتذكير قبل الموعد.<span class="ph l">الإطلاق</span></div></li>
+  </ul>
+
+  <h3>٦.٣ طبخ اللحم عبر المطابخ المتعاقدة <span class="id">FR-KIT</span></h3>
+  <ul class="req">
+    <li><span class="k">FR-KIT-01</span><div>قسم «أطباق مطبوخة» يعرض وجبات من لحوم جزلة (مثل المندي والكبسة والمفطح) بأحجام وأعداد أشخاص، وتظهر كمنتجات جزلة.<span class="ph l">الإطلاق</span></div></li>
+    <li><span class="k">FR-KIT-02</span><div>إضافة خيار «اطبخها لي» لذبائح جزلة وطلبات المناسبات مع اختيار نوع الطبخة.<span class="ph l">الإطلاق</span></div></li>
+    <li><span class="k">FR-KIT-03</span><div>إسناد طلب الطبخ لمطبخ متعاقد يدويًا من الإدارة أو تلقائيًا حسب المنطقة والسعة، فتنتقل اللحوم من جزلة إلى المطبخ ثم يُسلَّم الطبق للعميل عبر شركة التوصيل.<span class="ph l">الإطلاق</span>
+      <div class="flow"><span>طلب العميل</span><i>←</i><span>تجهيز اللحم في جزلة</span><i>←</i><span>نقله للمطبخ</span><i>←</i><span>الطبخ</span><i>←</i><span>جاهز</span><i>←</i><span>التوصيل للعميل</span></div></div></li>
+    <li><span class="k">FR-KIT-04</span><div>مهلة تجهيز أطول لطلبات الطبخ تُضبط من الإعدادات، وسعة يومية لكل مطبخ.<span class="ph l">الإطلاق</span></div></li>
+  </ul>
+
+  <h3>٦.٤ موسم الأضاحي <span class="id">FR-ADH</span></h3>
+  <ul class="req">
+    <li><span class="k">FR-ADH-01</span><div>تفعيل موسم الأضاحي من لوحة الإدارة لجميع البائعين في وقت واحد، مع تحديد أيام الموسم وآخر يوم للحجز.<span class="ph l">الإطلاق</span></div></li>
+    <li><span class="k">FR-ADH-02</span><div>فترات تسليم خاصة بأيام العيد وسعة لكل يوم بعدد الذبائح، مستقلة عن الأيام العادية.<span class="ph l">الإطلاق</span></div></li>
+    <li><span class="k">FR-ADH-03</span><div>تحديد أنواع التقطيع المتاحة وطريقة التسليم (توصيل، استلام) لكل يوم من أيام العيد.<span class="ph l">الإطلاق</span></div></li>
+    <li><span class="k">FR-ADH-04</span><div>دفع مسبق إلزامي للأضاحي، ومنع جمع الأضحية مع منتجات عادية في سلة واحدة.<span class="ph l">الإطلاق</span></div></li>
+    <li><span class="k">FR-ADH-05</span><div>واجهة وتصميم موسمي للتطبيق يتفعّل مع الموسم.<span class="ph p">بعد الإطلاق</span></div></li>
+  </ul>
+
+  <h3>٦.٥ الطزاجة والشفافية <span class="id">FR-FRS</span></h3>
+  <ul class="req">
+    <li><span class="k">FR-FRS-01</span><div>عرض تاريخ ووقت الذبح على تفاصيل كل طلب ذبيحة يُدخلها البائع عند تحويل الطلب لمرحلة «جارٍ الذبح».<span class="ph l">الإطلاق</span></div></li>
+    <li><span class="k">FR-FRS-02</span><div>رفع صورة أو مقطع قصير للذبيحة وقت الذبح وختم أو اسم الطبيب البيطري، ويظهر للعميل في صفحة الطلب. يُوصى به للبائعين وليس إلزاميًا.<span class="ph l">الإطلاق</span></div></li>
+    <li><span class="k">FR-FRS-03</span><div>شارة «موثّق» للبائعين الملتزمين برفع التوثيق بنسبة تحددها الإدارة.<span class="ph p">بعد الإطلاق</span></div></li>
+  </ul>
+</section>
+
+<section class="pb">
+  <div class="sec-h"><span class="n">٧</span><h2>المتطلبات الوظيفية: الولاء والمحتوى والمجتمع</h2></div>
+
+  <h3>٧.١ نقاط الولاء <span class="id">FR-LOY</span></h3>
+  <ul class="req">
+    <li><span class="k">FR-LOY-01</span><div>نقاط على مستوى المنصة كلها تُكتسب من كل طلب مكتمل بمعدل تحدده الإدارة، وتُضاف بعد التسليم.<span class="ph p">بعد الإطلاق</span></div></li>
+    <li><span class="k">FR-LOY-02</span><div>استبدال النقاط بخصم عند الدفع، مع حد أدنى للاستبدال وتاريخ انتهاء للنقاط.<span class="ph p">بعد الإطلاق</span></div></li>
+    <li><span class="k">FR-LOY-03</span><div>سجل النقاط المكتسبة والمستخدمة والمنتهية.<span class="ph p">بعد الإطلاق</span></div></li>
+    <li><span class="k">FR-LOY-04</span><div>نقاط إضافية على أفعال محددة مثل نشر ستوري أو تقييم أو دعوة صديق.<span class="ph p">بعد الإطلاق</span></div></li>
+  </ul>
+
+  <h3>٧.٢ المحفظة <span class="id">FR-WAL</span></h3>
+  <ul class="req">
+    <li><span class="k">FR-WAL-01</span><div>محفظة لكل عميل يُضاف إليها المسترد من الإلغاءات والتعويضات والاسترداد النقدي، ويُستخدم رصيدها في الدفع.<span class="ph l">الإطلاق</span></div></li>
+    <li><span class="k">FR-WAL-02</span><div>سجل حركات المحفظة، وإمكانية إضافة أو خصم رصيد يدويًا من الإدارة مع سبب.<span class="ph l">الإطلاق</span></div></li>
+  </ul>
+
+  <h3>٧.٣ الستوريز <span class="id">FR-STR</span></h3>
+  <ul class="req">
+    <li><span class="k">FR-STR-01</span><div>نشر ستوري من العميل (صورة أو مقطع قصير لطلبه بعد الاستلام) مرتبط بالطلب.<span class="ph p">بعد الإطلاق</span></div></li>
+    <li><span class="k">FR-STR-02</span><div>نشر ستوري من البائعين لعروضهم ومنتجاتهم، ومن جزلة.<span class="ph p">بعد الإطلاق</span></div></li>
+    <li><span class="k">FR-STR-03</span><div>مراجعة الستوريز قبل النشر أو بعده من الإدارة، ومدة ظهور تحددها الإعدادات، والانتقال من الستوري لصفحة المنتج أو البائع.<span class="ph p">بعد الإطلاق</span></div></li>
+  </ul>
+
+  <h3>٧.٤ سهم الخير <span class="id">FR-CHR</span></h3>
+  <ul class="req">
+    <li><span class="k">FR-CHR-01</span><div>قسم يتيح للعميل المساهمة بسهم في ذبيحة صدقة تحت إدارة جزلة، مع عرض عدد الأسهم المتبقية لكل ذبيحة.<span class="ph p">بعد الإطلاق</span></div></li>
+    <li><span class="k">FR-CHR-02</span><div>إشعار المساهمين عند اكتمال الأسهم وتنفيذ الذبيحة، مع صورة أو مقطع للتوثيق.<span class="ph p">بعد الإطلاق</span></div></li>
+    <li><span class="k">FR-CHR-03</span><div>تقرير في لوحة الإدارة بالمساهمات والذبائح المنفذة.<span class="ph p">بعد الإطلاق</span></div></li>
+  </ul>
+
+  <h3>٧.٥ الإشعارات والتواصل <span class="id">FR-NOT</span></h3>
+  <ul class="req">
+    <li><span class="k">FR-NOT-01</span><div>إشعارات فورية <span class="en">(Push)</span> لكل تغيير في حالة الطلب أو الزيارة أو المحادثة، ورسالة نصية للمراحل الحرجة.<span class="ph l">الإطلاق</span></div></li>
+    <li><span class="k">FR-NOT-02</span><div>إرسال إشعارات تسويقية من الإدارة لكل العملاء أو لشريحة محددة.<span class="ph l">الإطلاق</span></div></li>
+    <li><span class="k">FR-NOT-03</span><div>مركز إشعارات داخل التطبيق، وزر تواصل مع خدمة العملاء عبر واتساب أو الاتصال.<span class="ph l">الإطلاق</span></div></li>
+  </ul>
+</section>
+
+<section>
+  <div class="sec-h"><span class="n">٨</span><h2>المتطلبات الوظيفية: سوق الأعلاف</h2></div>
+  <p class="lead">قسم داخل التطبيق يعمل كسوق إعلانات بين بائعي البرسيم والأعلاف وأصحاب الحلال، والتعامل المالي يتم بين الطرفين في المرحلة الأولى.</p>
+  <ul class="req">
+    <li><span class="k">FR-FED-01</span><div>طلب التسجيل كبائع أعلاف مع بيانات النشاط، وموافقة الإدارة قبل النشر.<span class="ph l">الإطلاق</span></div></li>
+    <li><span class="k">FR-FED-02</span><div>نشر إعلان يتضمن: نوع العلف، والكمية والوحدة، والسعر، والمدينة والموقع، والصور، وإمكانية التوصيل.<span class="ph l">الإطلاق</span></div></li>
+    <li><span class="k">FR-FED-03</span><div>تصفح الإعلانات والبحث فيها والتصفية حسب النوع والمدينة والسعر.<span class="ph l">الإطلاق</span></div></li>
+    <li><span class="k">FR-FED-04</span><div><b>محادثة داخل التطبيق</b> بين المشتري والبائع، تدعم النص والصور، مع إشعار بالرسائل الجديدة.<span class="ph l">الإطلاق</span></div></li>
+    <li><span class="k">FR-FED-05</span><div>نشر طلب شراء من صاحب حلال («أحتاج برسيم بكمية كذا») يرد عليه البائعون.<span class="ph l">الإطلاق</span></div></li>
+    <li><span class="k">FR-FED-06</span><div>الإبلاغ عن إعلان أو محادثة مخالفة، وحظر المستخدم، ولوحة إشراف للإدارة.<span class="ph l">الإطلاق</span></div></li>
+    <li><span class="k">FR-FED-07</span><div>الشراء والدفع والتوصيل للأعلاف من داخل المنصة مقابل عمولة.<span class="ph p">بعد الإطلاق</span></div></li>
+  </ul>
+</section>
+
+<section class="pb">
+  <div class="sec-h"><span class="n">٩</span><h2>المتطلبات الوظيفية: لوحات التحكم</h2></div>
+
+  <h3>٩.١ لوحة إدارة المنصة <span class="id">FR-ADM</span></h3>
+  <ul class="req">
+    <li><span class="k">FR-ADM-01</span><div><b>لوحة المؤشرات:</b> المبيعات والطلبات اليومية، والطلبات حسب الحالة، وأداء البائعين، والعملاء الجدد.<span class="ph l">الإطلاق</span></div></li>
+    <li><span class="k">FR-ADM-02</span><div><b>إدارة منتجات جزلة:</b> الأقسام والمنتجات والأحجام والتقطيع والتغليف والاستثناءات والأسعار والصور والإتاحة.<span class="ph l">الإطلاق</span></div></li>
+    <li><span class="k">FR-ADM-03</span><div><b>إدارة الطلبات:</b> عرض كل طلبات المنصة وتصفيتها، وتغيير الحالة، وإسناد الطبخ، والإلغاء والاسترداد، وطباعة ملصق الطلب.<span class="ph l">الإطلاق</span></div></li>
+    <li><span class="k">FR-ADM-04</span><div><b>إدارة التجار:</b> مراجعة طلبات الانضمام ووثائقها، والقبول أو الرفض، وتحديد نسبة العمولة، والإيقاف، ومراجعة منتجاتهم قبل النشر.<span class="ph l">الإطلاق</span></div></li>
+    <li><span class="k">FR-ADM-05</span><div><b>إعدادات التشغيل:</b> مناطق التغطية، وفترة التوصيل، وآخر وقت للطلب لكل نوع، والسعة اليومية، والأيام المغلقة، والحد الأدنى، ورسوم التوصيل، والدفع عند الاستلام، وإيقاف الطلبات فورًا.<span class="ph l">الإطلاق</span></div></li>
+    <li><span class="k">FR-ADM-06</span><div><b>المالية:</b> كشف حساب لكل تاجر، وحساب العمولات، وجدول التحويلات الأسبوعية وتسجيل تنفيذها، وتقارير المبيعات والضريبة.<span class="ph l">الإطلاق</span></div></li>
+    <li><span class="k">FR-ADM-07</span><div><b>المطابخ:</b> إضافة المطابخ وأطباقها وسعتها وإسناد الطلبات لها.<span class="ph l">الإطلاق</span></div></li>
+    <li><span class="k">FR-ADM-08</span><div><b>المناسبات والزيارات:</b> مراجعة طلبات المناسبات وتسعيرها، والمواعيد الافتراضية للزيارات.<span class="ph l">الإطلاق</span></div></li>
+    <li><span class="k">FR-ADM-09</span><div><b>التسويق والمحتوى:</b> البنرات، والكوبونات، والإشعارات، والنوافذ المنبثقة، والصفحات الثابتة (الشروط والخصوصية والأسئلة الشائعة).<span class="ph l">الإطلاق</span></div></li>
+    <li><span class="k">FR-ADM-10</span><div><b>العملاء:</b> البحث عن العملاء وطلباتهم ومحافظهم، والشكاوى، والحظر.<span class="ph l">الإطلاق</span></div></li>
+    <li><span class="k">FR-ADM-11</span><div><b>سوق الأعلاف:</b> اعتماد البائعين والإعلانات والبلاغات.<span class="ph l">الإطلاق</span></div></li>
+    <li><span class="k">FR-ADM-12</span><div><b>المستخدمون والصلاحيات:</b> حسابات فريق جزلة بأدوار وصلاحيات، وسجل لكل العمليات الحساسة <span class="en">(Audit Log)</span>.<span class="ph l">الإطلاق</span></div></li>
+    <li><span class="k">FR-ADM-13</span><div>إعدادات الولاء والستوريز وسهم الخير وموسم الأضاحي.<span class="ph l">الإطلاق</span></div></li>
+  </ul>
+
+  <h3>٩.٢ لوحة التاجر الشريك <span class="id">FR-VND</span></h3>
+  <ul class="req">
+    <li><span class="k">FR-VND-01</span><div>التسجيل بطلب انضمام يتضمن السجل التجاري والشهادة الصحية والحساب البنكي (IBAN) والموقع وصور المنشأة.<span class="ph l">الإطلاق</span></div></li>
+    <li><span class="k">FR-VND-02</span><div>إدارة ملف المتجر: الشعار والوصف والموقع وساعات العمل وإتاحة الاستلام والزيارات.<span class="ph l">الإطلاق</span></div></li>
+    <li><span class="k">FR-VND-03</span><div>إدارة المنتجات بنفس خيارات التخصيص، وتخضع للمراجعة قبل الظهور.<span class="ph l">الإطلاق</span></div></li>
+    <li><span class="k">FR-VND-04</span><div>استقبال الطلبات بتنبيه صوتي، وتحديث الحالة، وإدخال وقت الذبح ورفع التوثيق، وطلب المندوب.<span class="ph l">الإطلاق</span></div></li>
+    <li><span class="k">FR-VND-05</span><div>إدارة الزيارات: المواعيد، والحجوزات، وتسجيل الذبيحة المختارة باسم العميل.<span class="ph l">الإطلاق</span></div></li>
+    <li><span class="k">FR-VND-06</span><div>كشف المستحقات: المبيعات والعمولة والصافي والتحويلات السابقة والقادمة.<span class="ph l">الإطلاق</span></div></li>
+    <li><span class="k">FR-VND-07</span><div>حسابات فرعية لموظفي التاجر بصلاحيات محددة، ونشر ستوري للمتجر.<span class="ph p">بعد الإطلاق</span></div></li>
+  </ul>
+
+  <h3>٩.٣ لوحة المطبخ <span class="id">FR-KDB</span></h3>
+  <ul class="req">
+    <li><span class="k">FR-KDB-01</span><div>عرض طلبات الطبخ المسندة للمطبخ بموعد التسليم ونوع الطبخة والكمية.<span class="ph l">الإطلاق</span></div></li>
+    <li><span class="k">FR-KDB-02</span><div>تحديث الحالة: استلام اللحم، جاري الطبخ، جاهز للتسليم، مع طلب المندوب عند الجاهزية.<span class="ph l">الإطلاق</span></div></li>
+  </ul>
+</section>
+
+<section class="pb">
+  <div class="sec-h"><span class="n">١٠</span><h2>التكاملات الخارجية</h2></div>
+
+  <h3>١٠.١ شركة التوصيل <span class="id">INT-DLV</span></h3>
+  <p class="lead">تتعاقد جزلة مع شركة توصيل، ويُبنى التكامل معها عبر واجهتها البرمجية بحيث لا يحتاج النظام تطبيق سائقين خاصًا.</p>
+  <ul class="req">
+    <li><span class="k">INT-DLV-01</span><div>إنشاء شحنة تلقائيًا لدى شركة التوصيل عند تحويل الطلب لحالة «جاهز»، متضمنة عنوان الاستلام (البائع أو المطبخ) وعنوان التسليم وبيانات العميل وقيمة التحصيل للدفع عند الاستلام.<span class="ph l">الإطلاق</span></div></li>
+    <li><span class="k">INT-DLV-02</span><div>استقبال تحديثات الحالة من شركة التوصيل عبر <span class="en">Webhooks</span> (تعيين مندوب، الاستلام، في الطريق، التسليم، فشل التسليم) وتحديث حالة الطلب وإشعار العميل تلقائيًا.<span class="ph l">الإطلاق</span></div></li>
+    <li><span class="k">INT-DLV-03</span><div>عرض بيانات المندوب ورابط التتبع أو موقعه المباشر للعميل بحسب ما تتيحه شركة التوصيل.<span class="ph l">الإطلاق</span></div></li>
+    <li><span class="k">INT-DLV-04</span><div>تسوية مبالغ الدفع عند الاستلام المحصلة من شركة التوصيل في التقارير المالية.<span class="ph l">الإطلاق</span></div></li>
+    <li><span class="k">INT-DLV-05</span><div>طبقة تكامل مستقلة <span class="en">(Adapter)</span> تتيح تغيير شركة التوصيل أو إضافة أخرى دون تعديل باقي النظام، مع إمكانية الإسناد اليدوي وتحديث الحالة يدويًا عند تعطل التكامل.<span class="ph l">الإطلاق</span></div></li>
+  </ul>
+
+  <h3>١٠.٢ باقي التكاملات</h3>
+  <table>
+    <tr><th>الخدمة</th><th>الغرض</th><th>المزود</th></tr>
+    <tr><td>بوابة الدفع</td><td>مدى، البطاقات، Apple Pay، الاسترداد</td><td>يختار العميل من: Moyasar, Tap, HyperPay, PayTabs</td></tr>
+    <tr><td>التقسيط</td><td>الشراء بالتقسيط</td><td>Tamara أو Tabby (بعد الإطلاق)</td></tr>
+    <tr><td>الرسائل النصية</td><td>رموز التحقق والتنبيهات</td><td>مزود سعودي معتمد يُحدد لاحقًا (مثل Unifonic أو Taqnyat)</td></tr>
+    <tr><td>الفوترة الإلكترونية</td><td>الفواتير الضريبية</td><td>ZATCA (المرحلة الثانية: الربط والتكامل)</td></tr>
+    <tr><td>الخرائط</td><td>تحديد المواقع والتغطية</td><td>Google Maps Platform</td></tr>
+    <tr><td>الإشعارات</td><td>إشعارات الجوال</td><td>Firebase Cloud Messaging</td></tr>
+    <tr><td>التخزين</td><td>الصور والمقاطع</td><td>تخزين سحابي متوافق مع S3 داخل المملكة</td></tr>
+  </table>
+</section>
+
+<section>
+  <div class="sec-h"><span class="n">١١</span><h2>المتطلبات غير الوظيفية</h2></div>
+  <table>
+    <tr><th>الرمز</th><th>البند</th><th>المتطلب</th></tr>
+    <tr><td class="en">NFR-PER</td><td>الأداء</td><td>تحميل الشاشات الرئيسية خلال ثانيتين على اتصال 4G، واستجابة الواجهات البرمجية خلال ٥٠٠ ملي ثانية لمعظم الطلبات، وتحمل ذروة المواسم دون تعطل.</td></tr>
+    <tr><td class="en">NFR-AVL</td><td>التوفر</td><td>توفر لا يقل عن ٩٩.٥٪، ونسخ احتياطي يومي لقاعدة البيانات مع الاحتفاظ ٣٠ يومًا، وخطة استعادة موثقة.</td></tr>
+    <tr><td class="en">NFR-SEC</td><td>الأمان</td><td>تشفير الاتصال عبر HTTPS، وتشفير البيانات الحساسة، وعدم تخزين بيانات البطاقات (تُعالج لدى بوابة الدفع وفق PCI-DSS)، وصلاحيات مبنية على الأدوار، وحماية من الهجمات الشائعة (OWASP)، وتقييد محاولات رمز التحقق.</td></tr>
+    <tr><td class="en">NFR-PRV</td><td>الخصوصية</td><td>الالتزام بنظام حماية البيانات الشخصية السعودي (PDPL)، وسياسة خصوصية واضحة، وموافقة صريحة، وحذف البيانات عند طلب العميل.</td></tr>
+    <tr><td class="en">NFR-HST</td><td>الاستضافة</td><td>يُفضّل استضافة البيانات داخل المملكة على مزود سحابي بمنطقة سعودية.</td></tr>
+    <tr><td class="en">NFR-LNG</td><td>اللغات</td><td>دعم كامل للعربية (من اليمين لليسار) والإنجليزية في كل الواجهات والإشعارات والفواتير.</td></tr>
+    <tr><td class="en">NFR-CMP</td><td>التوافق</td><td>iOS 14 فأحدث، وAndroid 8 فأحدث، وآخر إصدارين من المتصفحات الرئيسية، وواجهات متجاوبة للجوال والحاسب.</td></tr>
+    <tr><td class="en">NFR-USB</td><td>سهولة الاستخدام</td><td>إتمام طلب عادي في أقل من ٦ خطوات، ومراعاة معايير الوصول (أحجام الخطوط والتباين).</td></tr>
+    <tr><td class="en">NFR-SCL</td><td>قابلية التوسع</td><td>بنية تسمح بإضافة مدن وبائعين وفترات توصيل وطرق دفع دون إعادة بناء.</td></tr>
+    <tr><td class="en">NFR-OBS</td><td>المراقبة</td><td>تسجيل الأخطاء ومراقبة الأداء والتنبيه عند الأعطال، وتحليلات لاستخدام التطبيق.</td></tr>
+    <tr><td class="en">NFR-STR</td><td>المتاجر</td><td>الالتزام بسياسات Apple App Store وGoogle Play للنشر.</td></tr>
+  </table>
+</section>
+
+<section class="pb">
+  <div class="sec-h"><span class="n">١٢</span><h2>البنية التقنية</h2></div>
+  <table>
+    <tr><th>الطبقة</th><th>التقنية</th><th>سبب الاختيار</th></tr>
+    <tr><td>تطبيق الجوال</td><td class="en">Flutter</td><td>تطبيق واحد لنظامي iOS وAndroid بأداء قريب من الأصلي.</td></tr>
+    <tr><td>الموقع ولوحات التحكم</td><td class="en">Next.js (React)</td><td>سرعة وتهيئة لمحركات البحث، وقاعدة كود واحدة للوحات الثلاث.</td></tr>
+    <tr><td>الخادم والواجهات البرمجية</td><td class="en">Node.js · NestJS · REST APIs</td><td>بنية منظمة قابلة للتوسع، ومناسبة للتكاملات الكثيرة.</td></tr>
+    <tr><td>قاعدة البيانات</td><td class="en">PostgreSQL</td><td>موثوقية عالية للبيانات المالية، ودعم البيانات الجغرافية للتغطية (PostGIS).</td></tr>
+    <tr><td>التخزين المؤقت والمهام</td><td class="en">Redis · Job Queues</td><td>سرعة الاستجابة، والمهام المجدولة (التحويلات، التذكيرات، إغلاق الأيام).</td></tr>
+    <tr><td>المحادثة الفورية</td><td class="en">WebSockets</td><td>محادثات سوق الأعلاف وتحديثات الطلبات اللحظية.</td></tr>
+    <tr><td>الإشعارات</td><td class="en">Firebase Cloud Messaging</td><td>إشعارات موحدة لكل الأجهزة.</td></tr>
+    <tr><td>الملفات</td><td class="en">S3-compatible Storage + CDN</td><td>تخزين الصور والمقاطع وعرضها بسرعة.</td></tr>
+    <tr><td>الاستضافة</td><td>مزود سحابي بمنطقة داخل المملكة</td><td>الأداء المحلي والالتزام بتفضيل بقاء البيانات داخل المملكة.</td></tr>
+  </table>
+  <div class="box"><h4>مبادئ معمارية</h4>
+    <ul>
+      <li>خادم واحد يخدم التطبيق والموقع وجميع اللوحات، فأي تعديل في المنتجات أو الإعدادات يظهر فورًا في كل القنوات.</li>
+      <li>كل قواعد العمل (الأسعار، المواعيد، السعة، الصلاحيات) تُطبق على الخادم ولا تعتمد على جهاز العميل.</li>
+      <li>التكاملات الخارجية معزولة في طبقات مستقلة لتسهيل تغيير المزودين.</li>
+      <li>بيئات منفصلة للتطوير والاختبار والإنتاج.</li>
+    </ul>
+  </div>
+</section>
+
+<section>
+  <div class="sec-h"><span class="n">١٣</span><h2>مراحل التنفيذ</h2></div>
+  <p class="lead">يُبنى ما يلزم لإطلاق المنصة والبيع أولًا، ثم تُضاف التحسينات على مراحل بعد الإطلاق. توزيع البنود قابل للتعديل باتفاق الطرفين.</p>
+  <div class="box"><h4>مرحلة الإطلاق</h4>
+    <ul>
+      <li>تطبيق العميل والموقع: الحساب، التغطية، التصفح، المنتج والتخصيص، السلة، الطلب، التتبع، الإلغاء، التقييم، الإشعارات، العربية والإنجليزية.</li>
+      <li>جزلة كمتجر رئيسي مع التجار الشركاء، وسلة من بائع واحد.</li>
+      <li>فترة توصيل يومية واحدة، وآخر وقت للطلب، والسعة، والأيام المغلقة، والاستلام من موقع البائع.</li>
+      <li>بوابة الدفع، والدفع عند الاستلام، والمحفظة، والكوبونات، والفاتورة الإلكترونية.</li>
+      <li>التكامل مع شركة التوصيل.</li>
+      <li>ذبائح المناسبات، وزيارة المزرعة بالعربون، والطبخ عبر المطابخ المتعاقدة، وموسم الأضاحي، وتوثيق الطزاجة.</li>
+      <li>سوق الأعلاف بالإعلانات والمحادثة.</li>
+      <li>لوحة الإدارة، ولوحة التاجر، ولوحة المطبخ.</li>
+    </ul>
+  </div>
+  <div class="box"><h4>مراحل ما بعد الإطلاق</h4>
+    <ul>
+      <li>نقاط الولاء، والستوريز، وسهم الخير.</li>
+      <li>التقسيط عبر تمارا أو تابي.</li>
+      <li>تعدد فترات التوصيل في اليوم.</li>
+      <li>الهدايا، وإعادة الطلب، والمفضلة، وشارة البائع الموثّق، والتصميم الموسمي.</li>
+      <li>الشراء والدفع داخل سوق الأعلاف.</li>
+      <li>حسابات موظفي التاجر.</li>
+    </ul>
+  </div>
+</section>
+
+<section class="pb">
+  <div class="sec-h"><span class="n">١٤</span><h2>الافتراضات والنقاط المفتوحة</h2></div>
+  <h4>الافتراضات</h4>
+  <ul>
+    <li>توفر لدى العميل سجل تجاري سعودي وتسجيل في ضريبة القيمة المضافة لتفعيل بوابة الدفع والفوترة.</li>
+    <li>توفر شركة التوصيل المتعاقدة واجهة برمجية (API) لإنشاء الشحنات وتحديثات الحالة.</li>
+    <li>تتولى جزلة التعاقد مع المطابخ والتجار وتحديد نسب العمولة.</li>
+    <li>بائعو الأعلاف يخضعون لموافقة الإدارة، والمشترون هم مستخدمو المنصة المسجلون.</li>
+    <li>الحسابات والتراخيص لدى المزودين الخارجيين (المتاجر، الدفع، الرسائل، الخرائط، الاستضافة) تُفتح باسم العميل.</li>
+  </ul>
+  <h4>نقاط تنتظر قرار العميل</h4>
+  <table>
+    <tr><th>البند</th><th>المطلوب</th></tr>
+    <tr><td>بوابة الدفع</td><td>اختيار إحدى البوابات المذكورة</td></tr>
+    <tr><td>التقسيط</td><td>تمارا أو تابي أو كلاهما</td></tr>
+    <tr><td>مزود الرسائل النصية</td><td>اختيار المزود وتسجيل اسم المرسل</td></tr>
+    <tr><td>شركة التوصيل</td><td>تزويدنا بوثائق الواجهة البرمجية الخاصة بها</td></tr>
+    <tr><td>الأرقام التشغيلية</td><td>وقت فترة التوصيل، وآخر وقت للطلب لكل نوع، والسعة اليومية، والحد الأدنى، ورسوم التوصيل، ونسب العمولة</td></tr>
+    <tr><td>الجهة الخيرية</td><td>تحديد آلية تنفيذ سهم الخير والجهة المرخصة إن وجدت</td></tr>
+    <tr><td>الاستضافة</td><td>اعتماد المزود السحابي داخل المملكة</td></tr>
+  </table>
+  <p class="muted">أي متطلب جديد أو تعديل على ما ورد في هذه الوثيقة بعد اعتمادها يُوثّق كطلب تغيير ويُتفق عليه بين الطرفين.</p>
+</section>
+
+<section>
+  <div class="sec-h"><span class="n">١٥</span><h2>الاعتماد</h2></div>
+  <p>يقر الطرفان بأن هذه الوثيقة تمثل المتطلبات المتفق عليها لمنصة جزلة في إصدارها الحالي.</p>
+  <div class="sign">
+    <div><b>عن العميل</b>الاسم:<br><br>التوقيع:<br><br>التاريخ:</div>
+    <div><b>عن فريق التطوير</b>الاسم:<br><br>التوقيع:<br><br>التاريخ:</div>
+  </div>
+</section>
+
+</body>
+</html>

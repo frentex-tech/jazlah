@@ -1,0 +1,23 @@
+name: Bug
+description: Something is broken
+type: Bug
+body:
+  - type: dropdown
+    id: area
+    attributes: { label: Area, options: [api, mobile, web, dashboard, infra] }
+    validations: { required: true }
+  - type: dropdown
+    id: env
+    attributes: { label: Environment, options: [local, staging, production] }
+    validations: { required: true }
+  - type: textarea
+    id: steps
+    attributes: { label: Steps to reproduce, value: "1. \n2. \n3. " }
+    validations: { required: true }
+  - type: textarea
+    id: expected
+    attributes: { label: Expected vs actual }
+    validations: { required: true }
+  - type: textarea
+    id: extra
+    attributes: { label: Screenshots / logs / device }
