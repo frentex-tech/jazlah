@@ -37,7 +37,10 @@ packages/
 infra/
   docker/        docker-compose for local dev (postgres+postgis, redis, minio)
   deploy/        staging / production deployment manifests
+design/figma/    Figma Plugin API scripts run through Scripter (idempotent, versioned)
 docs/            SRS, requirements index, ADRs, delivery plan
+tools/           backlog sync + validator, progress dashboard, dev task helper
+.claude/         Claude Code agents, commands and team workflow (internal)
 ```
 JS/TS packages use **pnpm workspaces** with **Turborepo** (`pnpm-workspace.yaml`, `turbo.json` at the root). Flutter lives outside the JS workspace and has its own tooling.
 

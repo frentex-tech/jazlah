@@ -9,6 +9,9 @@ Jazlah (جزلة) is a multi-vendor meat & livestock platform for Saudi Arabia, 
 4. `CONTRIBUTING.md`: branches, commits, PR rules, Definition of Done
 5. `docs/requirements.md`: SRS requirement IDs cited by tasks (the full SRS PDF is in `docs/srs/`)
 
+## Team workflow
+Developers use `/task <issue>` (`.claude/commands/task.md`), which delegates to the role agents in `.claude/agents/` and always runs the `reviewer` agent before the PR. See `.claude/WORKFLOW.md`. Keep agent and workflow details out of GitHub issue text.
+
 ## When asked to work on a task
 - Find it by key (e.g. `SCH-API-2`) in `docs/delivery/sprints/` or by issue number via `docs/delivery/issue-map.json`.
 - Check that its **Blocked by** tasks are merged into `develop`. If not, say so before starting.
