@@ -28,3 +28,4 @@ build/
 **/ios/Pods/
 **/android/.gradle/
 **/android/local.properties
+site/

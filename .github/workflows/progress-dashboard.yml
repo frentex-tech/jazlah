@@ -1,26 +1,42 @@
 name: Progress dashboard
 on:
   schedule:
-    - cron: "0 5 * * *"   # daily 08:00 Riyadh
+    - cron: "0 */6 * * *"   # every 6 hours
   issues:
-    types: [closed, reopened, assigned]
+    types: [closed, reopened, assigned, unassigned, labeled, unlabeled]
   pull_request:
-    types: [closed]
+    types: [opened, closed]
+  push:
+    branches: [develop]
+    paths: ["docs/delivery/**", "tools/backlog/**"]
   workflow_dispatch:
 permissions:
   contents: read
   issues: write
   pull-requests: read
+  pages: write
+  id-token: write
 concurrency:
   group: progress-dashboard
   cancel-in-progress: true
 jobs:
-  update:
+  build:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
         with: { ref: develop }
-      - name: Update pinned dashboard issue
+      - name: Build dashboard page and update pinned issue
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: python3 tools/backlog/progress.py
+      - uses: actions/upload-pages-artifact@v3
+        with: { path: site }
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - id: deployment
+        uses: actions/deploy-pages@v4
