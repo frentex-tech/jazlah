@@ -373,7 +373,7 @@ def ensure_project(state):
                       {projectV2{id number title}}}""", o=org["id"], t=PROJECT_TITLE, r=repo_id)["createProjectV2"]["projectV2"]
     readme = (backlog.ROOT / "docs" / "delivery" / "board.md").read_text(encoding="utf-8")
     if not DRY:
-        gql("""mutation($p:ID!,$s:String!,$r:String!){updateProjectV2(input:{projectId:$p,shortDescription:$s,readme:$r,public:false}){projectV2{id}}}""",
+        gql("""mutation($p:ID!,$s:String!,$r:String!){updateProjectV2(input:{projectId:$p,shortDescription:$s,readme:$r}){projectV2{id}}}""",
             p=proj["id"], s="Jazlah (جزلة) build plan — 7 sprints to v1.0.0, then post-launch. Generated from docs/delivery.", r=readme)
     fields = {f["name"]: f for f in gql(Q_FIELDS, id=proj["id"])["node"]["fields"]["nodes"] if f}
     if not DRY:

@@ -11,7 +11,7 @@
 | Last release | — |
 | Scope baseline | SRS v1.0 (approved 2026-11-09), 44 client decisions (`docs/decisions/`) |
 | Team | Abdulrhman Magdy (`@abdulrhmanmagdy1`), Kerolles Sobhy (`@kerolles2003`) |
-| Board | GitHub Project "Jazlah — Delivery Board" (org `frentex-tech`) |
+| Board | GitHub Project "Jazlah — Delivery Board" (org `frentex-tech`). Repo + board are **public** for now (decided 2026-11-09), to be made private later on request |
 
 ## Waiting on the client
 
