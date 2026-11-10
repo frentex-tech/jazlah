@@ -109,10 +109,10 @@ function card(name, w) {
 function wrap(name, gap) {
   const r = stack(name, "HORIZONTAL", 0, 0)
   r.layoutWrap = "WRAP"; r.setBoundVariable("itemSpacing", SP[gap]); r.setBoundVariable("counterAxisSpacing", SP[gap])
-  r.layoutSizingHorizontal = "FILL"
   return r
 }
-const fill = n => { n.layoutSizingHorizontal = "FILL"; return n }
+// FILL only works once the node sits inside an auto-layout parent
+function add(p, n, f = true) { p.appendChild(n); if (f) n.layoutSizingHorizontal = "FILL"; return n }
 
 let cursorY = 0
 async function section(id, title, build) {
@@ -122,7 +122,7 @@ async function section(id, title, build) {
   const body = box(id, "VERTICAL", 32, 40, "bg")
   body.resize(1200, 100); body.primaryAxisSizingMode = "AUTO"; body.counterAxisSizingMode = "FIXED"
   s.appendChild(body); body.x = 40; body.y = 40
-  body.appendChild(fill(await text(title, "Display/L")))
+  add(body, await text(title, "Display/L"))
   await build(body)
   s.resizeWithoutConstraints(body.width + 80, body.height + 80)
   s.x = 0; s.y = cursorY
@@ -132,25 +132,25 @@ async function section(id, title, build) {
 // 4.1 colors
 await section("sec-colors", "الألوان · Colors", async body => {
   for (const [label, keys] of GROUPS) {
-    body.appendChild(fill(await text(label, "Heading/H3")))
-    const row = wrap("row", 16); body.appendChild(row)
+    add(body, await text(label, "Heading/H3"))
+    const row = wrap("row", 16); add(body, row)
     for (const k of keys) {
       const c = card("color/" + k, 232)
       const sw = figma.createRectangle(); sw.name = "swatch"; sw.resize(208, 88); sw.fills = [boundFill(V[k])]; radius(sw, "sm")
       sw.strokes = [boundFill(V.line)]; sw.strokeWeight = 1
       c.appendChild(sw)
-      c.appendChild(fill(await text(AR[k], "Label/M")))
-      c.appendChild(fill(await text(`color/${k}  ${T.color[k].value}`, "Caption", "ink-2")))
-      c.appendChild(fill(await text(T.color[k].use, "Caption", "muted", "LEFT")))
+      add(c, await text(AR[k], "Label/M"))
+      add(c, await text(`color/${k}  ${T.color[k].value}`, "Caption", "ink-2"))
+      add(c, await text(T.color[k].use, "Caption", "muted", "LEFT"))
       row.appendChild(c)
     }
     if (label.startsWith("الذهبي")) {
       const c = card("gradient/gold", 232)
       const sw = figma.createRectangle(); sw.name = "swatch"; sw.resize(208, 88); await sw.setFillStyleIdAsync(goldGrad.id); radius(sw, "sm")
       c.appendChild(sw)
-      c.appendChild(fill(await text("تدرّج ذهبي", "Label/M")))
-      c.appendChild(fill(await text("Brand/Gold gradient", "Caption", "ink-2")))
-      c.appendChild(fill(await text("logo / emblem only, never body UI", "Caption", "muted", "LEFT")))
+      add(c, await text("تدرّج ذهبي", "Label/M"))
+      add(c, await text("Brand/Gold gradient", "Caption", "ink-2"))
+      add(c, await text("logo / emblem only, never body UI", "Caption", "muted", "LEFT"))
       row.appendChild(c)
     }
   }
@@ -158,40 +158,40 @@ await section("sec-colors", "الألوان · Colors", async body => {
 
 // 4.2 typography
 await section("sec-type", "الخطوط · Typography", async body => {
-  body.appendChild(fill(await text("Readex Pro للواجهة (عربي + لاتيني) · El Messiri للعناوين والأرقام الكبيرة", "Body/L", "ink-2")))
+  add(body, await text("Readex Pro للواجهة (عربي + لاتيني) · El Messiri للعناوين والأرقام الكبيرة", "Body/L", "ink-2"))
   for (const [name, family, style, , size, lh] of TYPE) {
     const c = card(name, 1120)
-    c.appendChild(fill(await text("جزلة — لحوم ومواشي طازجة من أفضل المتاجر", name)))
-    c.appendChild(fill(await text("Jazlah — fresh meat & livestock · 1234567890", name, "ink", "LEFT")))
-    c.appendChild(fill(await text(`${name} · ${family} ${style} · ${size}/${lh}%`, "Caption", "muted", "LEFT")))
+    add(c, await text("جزلة — لحوم ومواشي طازجة من أفضل المتاجر", name))
+    add(c, await text("Jazlah — fresh meat & livestock · 1234567890", name, "ink", "LEFT"))
+    add(c, await text(`${name} · ${family} ${style} · ${size}/${lh}%`, "Caption", "muted", "LEFT"))
     body.appendChild(c)
   }
 })
 
 // 4.3 spacing & radius
 await section("sec-space", "المسافات والزوايا · Spacing & Radius", async body => {
-  body.appendChild(fill(await text("المسافات (أساس 4) · Spacing", "Heading/H3")))
-  const sp = box("spacing", "VERTICAL", 8, 0); body.appendChild(fill(sp))
+  add(body, await text("المسافات (أساس 4) · Spacing", "Heading/H3"))
+  const sp = box("spacing", "VERTICAL", 8, 0); add(body, sp)
   for (const n of T.spacing.scale) {
     const r = stack("space/" + n, "HORIZONTAL", 0, 0); r.counterAxisAlignItems = "CENTER"; r.setBoundVariable("itemSpacing", SP[16])
     const bar = figma.createRectangle(); bar.name = "bar"; bar.resize(n, 16); bar.setBoundVariable("width", SP[n]); bar.fills = [boundFill(V.ember)]
     r.appendChild(bar); r.appendChild(await text(`space/${n} = ${n}`, "Caption", "ink-2", "LEFT")); sp.appendChild(r)
   }
-  body.appendChild(fill(await text("الزوايا · Radius", "Heading/H3")))
-  const rr = wrap("radius", 24); body.appendChild(rr)
+  add(body, await text("الزوايا · Radius", "Heading/H3"))
+  const rr = wrap("radius", 24); add(body, rr)
   for (const [k, n] of Object.entries(T.radius)) {
     const c = card("radius/" + k, 160)
     const sq = figma.createRectangle(); sq.name = "sample"; sq.resize(136, 88); sq.fills = [boundFill(V.sand)]; radius(sq, k)
     sq.strokes = [boundFill(V.line)]; sq.strokeWeight = 1
-    c.appendChild(sq); c.appendChild(fill(await text(`radius/${k} = ${n}`, "Caption", "ink-2", "LEFT"))); rr.appendChild(c)
+    c.appendChild(sq); add(c, await text(`radius/${k} = ${n}`, "Caption", "ink-2", "LEFT")); rr.appendChild(c)
   }
 })
 
 // 4.4 elevation
 await section("sec-elev", "الظلال · Elevation", async body => {
   const c = card("Shadow/Card", 320)
-  c.appendChild(fill(await text("ظل البطاقة", "Label/M")))
-  c.appendChild(fill(await text("Shadow/Card · 0 1 2 / 0 8 24 -12", "Caption", "ink-2", "LEFT")))
+  add(c, await text("ظل البطاقة", "Label/M"))
+  add(c, await text("Shadow/Card · 0 1 2 / 0 8 24 -12", "Caption", "ink-2", "LEFT"))
   await c.setEffectStyleIdAsync(shadow.id)
   body.appendChild(c)
 })
@@ -203,18 +203,18 @@ const PAIRS = [["ink", "bg"], ["ink", "paper"], ["ink-2", "bg"], ["muted", "bg"]
   ["gold-text", "bg"], ["gold-text", "paper"], ["gold", "brand"], ["gold-light", "brand"], ["gold", "bg"], ["success", "paper"], ["info", "paper"], ["ember", "bg"]]
 const report = []
 await section("sec-contrast", "التباين · Contrast (WCAG AA)", async body => {
-  body.appendChild(fill(await text("النص العادي يحتاج 4.5:1، والنص الكبير (18 فأكثر أو 14 سميك) يحتاج 3:1", "Body/M", "ink-2")))
-  const grid = wrap("pairs", 16); body.appendChild(grid)
+  add(body, await text("النص العادي يحتاج 4.5:1، والنص الكبير (18 فأكثر أو 14 سميك) يحتاج 3:1", "Body/M", "ink-2"))
+  const grid = wrap("pairs", 16); add(body, grid)
   for (const [fg, bg] of PAIRS) {
     const r = ratio(fg, bg), ok = r >= 4.5, large = r >= 3
     report.push(`${fg} على ${bg}: ${r.toFixed(2)} ${ok ? "✅ AA" : large ? "⚠️ كبير فقط" : "❌"}`)
     const c = card(`${fg}/${bg}`, 360)
-    const demo = box("demo", "HORIZONTAL", 8, 16, bg); demo.primaryAxisSizingMode = "FIXED"; demo.layoutSizingHorizontal = "FILL"; radius(demo, "sm")
+    const demo = box("demo", "HORIZONTAL", 8, 16, bg); radius(demo, "sm")
     demo.strokes = [boundFill(V.line)]; demo.strokeWeight = 1
-    demo.appendChild(fill(await text("أبجد Aa — لحم طازج", "Body/L", fg)))
-    c.appendChild(demo)
-    c.appendChild(fill(await text(`${fg} على ${bg}`, "Label/M")))
-    c.appendChild(fill(await text(`${r.toFixed(2)}:1 · ${ok ? "AA ✓ نص عادي" : large ? "AA نص كبير فقط" : "لا يجتاز AA"}`, "Caption", ok ? "success" : "ember")))
+    add(demo, await text("أبجد Aa — لحم طازج", "Body/L", fg))
+    add(c, demo)
+    add(c, await text(`${fg} على ${bg}`, "Label/M"))
+    add(c, await text(`${r.toFixed(2)}:1 · ${ok ? "AA ✓ نص عادي" : large ? "AA نص كبير فقط" : "لا يجتاز AA"}`, "Caption", ok ? "success" : "ember"))
     grid.appendChild(c)
   }
 })
