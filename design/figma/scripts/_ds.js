@@ -211,3 +211,142 @@ async function icon(name, size = 24, color = "ink", weight = "regular") {
   n.clipsContent = false
   return n
 }
+
+// ================================================================================================
+// Screen templates and helpers (used by every screen batch). All screens are Arabic RTL, built from components only.
+// Frame names follow <Area>/<Feature>/<Screen> — <State>. Mobile 390x844, web 1440.
+// ================================================================================================
+
+// Replace the text of the first TEXT node inside `node` whose characters equal `from` (component copy override).
+async function retext(node, from, to) {
+  const t = node.findOne(n => n.type === "TEXT" && n.characters === from)
+  if (!t) { print("⚠️ retext: no text '" + from + "' in " + node.name); return null }
+  await figma.loadFontAsync(t.fontName)
+  t.characters = String(to)
+  return t
+}
+// Replace every text in `node` that equals `from` (e.g. repeated row labels).
+async function retextAll(node, from, to) {
+  for (const t of node.findAll(n => n.type === "TEXT" && n.characters === from)) { await figma.loadFontAsync(t.fontName); t.characters = String(to) }
+}
+
+// An Input instance with its label, value (or placeholder) and hint set. state: default|focused|filled|error|disabled
+async function field(label, value, state = "default", hint) {
+  const i = inst("input", { state })
+  await retext(i, "الاسم الكامل", label)
+  if (value != null) await retext(i, state === "filled" || state === "error" ? "عبدالرحمن محمد" : "اكتب هنا", value)
+  if (hint != null) await retext(i, state === "error" ? "هذا الحقل مطلوب" : "نص مساعد", hint)
+  return i
+}
+// A Button instance (variant primary|secondary|ghost|danger, state default|pressed|disabled|loading, size L|S).
+async function button(label, variant = "primary", state = "default", size = "L") {
+  const b = inst("button", { variant, state, size }); await retext(b, "اطلب الآن", label); return b
+}
+// A Chip instance (state default|selected|disabled)
+async function chip(label, state = "default") { const c = inst("chip", { state }); await retext(c, "خروف نعيمي", label); return c }
+
+function statusBarRow(dark) {
+  const r = frame("status bar", { dir: "HORIZONTAL", ltr: true, w: 390, h: 44, px: 24, main: "SPACE_BETWEEN", cross: "CENTER" })
+  return r
+}
+async function statusBar() {
+  const r = statusBarRow()
+  r.appendChild(await txt("9:41", "Label/M", "ink", { align: "LEFT" }))
+  const ic = frame("system icons", { dir: "HORIZONTAL", ltr: true, gap: 6, cross: "CENTER" })
+  for (const n of ["cell-signal-full", "wifi-high", "battery-full"]) ic.appendChild(await icon(n, 16, "ink", "fill"))
+  r.appendChild(ic)
+  return r
+}
+
+// Mobile screen shell: status bar, optional header (home|page), scrolling body, optional bottom tab bar.
+// o: path ("Account/Login/Phone"), state ("Default"), header {type, title, cart} | null, tab "1".."4" | null, bg ("bg"), pad (16), gap (16)
+// Returns { screen, body }. Put content into `body` with add(body, node, "h").
+async function mobileScreen(o) {
+  const screen = frame(`App/${o.path} — ${o.state || "Default"}`, { w: 390, h: 844, fill: o.bg || "bg", stroke: "line", r: "lg", clip: true, cross: "MIN" })
+  screen.setSharedPluginData(NS, "screen", o.path)
+  add(screen, await statusBar(), "h")
+  if (o.header) {
+    const h = inst("app-header", { type: o.header.type || "page", cart: o.header.cart || "empty" })
+    add(screen, h, "h"); if (o.header.title) await retext(h, "عنوان الصفحة", o.header.title)
+  }
+  const body = frame("body", { w: 390, pad: o.pad == null ? 16 : o.pad, gap: o.gap == null ? 16 : o.gap, clip: true })
+  add(screen, body, "h"); body.layoutSizingVertical = "FILL"
+  if (o.tab) add(screen, inst("bottom-tab-bar", { active: o.tab }), "h")
+  return { screen, body }
+}
+
+// Web screen shell (1440): top nav (wordmark, links, search, cart), centered 1200 content column, footer.
+// o: path, state, nav (true) , active (index of the active link 0..3). Returns { screen, body } where body is 1200 wide.
+async function webScreen(o) {
+  const screen = frame(`Web/${o.path} — ${o.state || "Default"}`, { w: 1440, fill: "bg", stroke: "line", clip: true, cross: "CENTER" })
+  screen.setSharedPluginData(NS, "screen", o.path)
+  if (o.nav !== false) {
+    const nav = frame("nav", { dir: "HORIZONTAL", w: 1440, h: 72, px: 120, gap: 32, cross: "CENTER", fill: "paper", stroke: "line", main: "SPACE_BETWEEN" })
+    add(nav, await txt("جزلة", "Display/L", "brand", { name: "wordmark" }))
+    const links = frame("links", { dir: "HORIZONTAL", gap: 24 })
+    for (const [i, t] of ["الرئيسية", "المتاجر", "الخدمات", "حسابي"].entries()) add(links, await txt(t, "Label/M", i === (o.active == null ? 0 : o.active) ? "ember" : "ink-2"))
+    add(nav, links)
+    const s = frame("search", { dir: "HORIZONTAL", w: 360, h: 44, px: 16, gap: 8, cross: "CENTER", fill: "bg", stroke: "line", r: "pill" })
+    add(s, await icon("magnifying-glass", 20, "ink-2")); add(s, await txt("ابحث عن لحوم أو متاجر", "Body/M", "muted"), "h"); add(nav, s)
+    const cart = frame("cart", { dir: "HORIZONTAL", gap: 12, cross: "CENTER" })
+    add(cart, await icon("shopping-bag", 24, "ink")); add(cart, await icon("bell", 24, "ink")); add(nav, cart)
+    add(screen, nav, "h")
+    chk("web nav link", "ink-2", "paper"); chk("web nav active", "ember", "paper"); chk("web nav wordmark", "brand", "paper"); chk("web nav search", "muted", "bg")
+  }
+  const body = frame("body", { w: 1200, py: 40, gap: 24, cross: "MAX" })
+  add(screen, body)
+  if (o.footer !== false) {
+    const f = frame("footer", { dir: "HORIZONTAL", w: 1440, h: 120, px: 120, cross: "CENTER", main: "SPACE_BETWEEN", fill: "brand-deep" })
+    add(f, await txt("جزلة", "Display/L", "gold-light")); add(f, await txt("منصة اللحوم والمواشي في المملكة العربية السعودية", "Body/M", "sand"))
+    add(screen, f, "h"); chk("web footer", "sand", "brand-deep")
+  }
+  return { screen, body }
+}
+
+// Copy a screen as another state: the clone keeps status bar, header and tab bar; `body` is emptied for you to refill.
+// Returns { screen, body } named "<path> — <state>". Use retext(clone.screen, ...) to change header text etc.
+function stateCopy(base, state, keepBody = false) {
+  const c = base.screen.clone()
+  const path = base.screen.getSharedPluginData(NS, "screen")
+  c.name = base.screen.name.replace(/ — .*$/, "") + " — " + state
+  const body = c.findOne(n => n.name === "body" && n.type === "FRAME")
+  if (!keepBody) body.children.slice().forEach(k => k.remove())
+  return { screen: c, body }
+}
+
+// A heading + helper paragraph block for forms and empty content
+async function titleBlock(title, sub, align = "RIGHT") {
+  const f = frame("title block", { gap: 8, w: 358 })
+  add(f, await txt(title, "Heading/H1", "ink", { w: 358, align }), "h")
+  if (sub) add(f, await txt(sub, "Body/M", "ink-2", { w: 358, align }), "h")
+  return f
+}
+async function skeletonRows(n = 4) { const f = frame("loading", { gap: 12, w: 358 }); for (let i = 0; i < n; i++) add(f, inst("skeleton-row"), "h"); return f }
+function spacer() { const s = frame("spacer", {}); return s }
+
+// Lay out a feature section: first row = main screens in flow order (left to right), second row = their states. Gap 80.
+// build receives S = { main: [], states: [] } of screen nodes (frames). Section hugs the widest row.
+async function screenSection(ctx, pageName, id, title, build) {
+  return sectionOn(ctx, pageName, id, title, async body => {
+    const S = { main: [], states: [] }
+    await build(S)
+    body.counterAxisSizingMode = "AUTO"
+    const mk = (name, nodes) => { const r = frame(name, { dir: "HORIZONTAL", ltr: true, gap: 80, cross: "MIN" }); for (const n of nodes) r.appendChild(n); return r }
+    if (S.main.length) body.appendChild(mk("flow", S.main))
+    if (S.states.length) { add(body, await txt("الحالات · States", "Heading/H3"), "h"); body.appendChild(mk("states", S.states)) }
+  }, 1280)
+}
+
+// Prototype: tapping `from` (any node, usually a Button instance) navigates to the `to` screen frame.
+async function tap(from, to) {
+  await from.setReactionsAsync([{ trigger: { type: "ON_CLICK" }, actions: [{ type: "NODE", destinationId: to.id, navigation: "NAVIGATE", transition: null, preserveScrollPosition: false }] }])
+}
+// Register a named flow starting point on the page that holds `screen`.
+function flowStart(pageName, screen, name) {
+  const pg = page(pageName); const cur = pg.flowStartingPoints.filter(f => f.name !== name)
+  pg.flowStartingPoints = [...cur, { nodeId: screen.id, name }]
+}
+// First Button instance in `screen` whose label text equals `label`
+function findButton(screen, label) {
+  return screen.findOne(n => n.type === "INSTANCE" && n.name === "Button" && n.findOne(t => t.type === "TEXT" && t.characters === label)) || screen.findOne(n => n.type === "TEXT" && n.characters === label)
+}
