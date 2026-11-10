@@ -324,17 +324,31 @@ async function titleBlock(title, sub, align = "RIGHT") {
 async function skeletonRows(n = 4) { const f = frame("loading", { gap: 12, w: 358 }); for (let i = 0; i < n; i++) add(f, inst("skeleton-row"), "h"); return f }
 function spacer() { const s = frame("spacer", {}); return s }
 
-// Lay out a feature section: first row = main screens in flow order (left to right), second row = their states. Gap 80.
-// build receives S = { main: [], states: [] } of screen nodes (frames). Section hugs the widest row.
+// Lay out a feature section: title, then a row of main screens in flow order (left to right), then a row of their states. Gap 80.
+// Screens are placed directly inside the Figma Section (not in auto-layout frames) because prototype flow starting points must be top-level.
+// build receives S = { main: [], states: [] } of screen frames. Rebuilds the section in place when it exists.
 async function screenSection(ctx, pageName, id, title, build) {
-  return sectionOn(ctx, pageName, id, title, async body => {
-    const S = { main: [], states: [] }
-    await build(S)
-    body.counterAxisSizingMode = "AUTO"
-    const mk = (name, nodes) => { const r = frame(name, { dir: "HORIZONTAL", ltr: true, gap: 80, cross: "MIN" }); for (const n of nodes) r.appendChild(n); return r }
-    if (S.main.length) body.appendChild(mk("flow", S.main))
-    if (S.states.length) { add(body, await txt("الحالات · States", "Heading/H3"), "h"); body.appendChild(mk("states", S.states)) }
-  }, 1280)
+  const pg = page(pageName)
+  await figma.setCurrentPageAsync(pg)
+  let s = pg.children.find(n => n.type === "SECTION" && n.getSharedPluginData(NS, "id") === id)
+  if (s) s.children.slice().forEach(c => c.remove()); else { s = figma.createSection(); s.setSharedPluginData(NS, "id", id); pg.appendChild(s) }
+  s.name = title; s.fills = [paint("bg")]
+  const S = { main: [], states: [] }
+  await build(S)
+  const M = 40, GAP = 80
+  const t = await txt(title, "Display/L"); s.appendChild(t); t.x = M; t.y = M
+  let y = M + 96, maxW = t.width + 2 * M
+  const row = nodes => { let x = M, h = 0; for (const n of nodes) { s.appendChild(n); n.x = x; n.y = y; x += n.width + GAP; h = Math.max(h, n.height) } maxW = Math.max(maxW, x - GAP + M); y += h }
+  row(S.main)
+  if (S.states.length) {
+    y += 64; const c = await txt("الحالات · States", "Heading/H3"); s.appendChild(c); c.x = M; c.y = y; y += 56
+    row(S.states)
+  }
+  s.resizeWithoutConstraints(maxW, y + M)
+  s.x = 0; s.y = ctx.y
+  ;(ctx.ids = ctx.ids || []).push(s.id + " " + title)
+  ctx.y += s.height + 200
+  return s
 }
 
 // Prototype: tapping `from` (any node, usually a Button instance) navigates to the `to` screen frame.

@@ -83,5 +83,4 @@ const profErr = stateCopy(prof, "Error"); await fillProfile(profErr.body, "error
 const profLoad = stateCopy(prof, "Loading"); await fillProfile(profLoad.body, "filled", "loading")
 await screenSection(ctx, P, "sec-acc-profile", "إكمال الملف · Complete profile", async S => { S.main.push(prof.screen); S.states.push(profFilled.screen, profErr.screen, profLoad.screen) })
 
-figma.viewport.scrollAndZoomIntoView(page(P).children)
 print("✅ ACC auth done (prototype links are in 11-ACC-DES-1-proto.js)\n" + ctx.ids.join("\n") + "\n" + contrastReport())
