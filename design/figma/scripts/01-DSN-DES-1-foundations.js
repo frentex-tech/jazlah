@@ -27,12 +27,14 @@ const GROUPS = [["العنابي · Brand", ["brand", "brand-2", "brand-deep"]],
 const FONTS = [...new Set(TYPE.map(t => t[1] + "|" + t[2]))].map(s => ({ family: s.split("|")[0], style: s.split("|")[1] }))
 await fonts(...FONTS, { family: "Inter", style: "Regular" })
 
+print('step: inputs ok')
 // ---- 1. pages --------------------------------------------------------------
 const PAGES = ["00 Cover", "01 Foundations", "02 Components", "10 Customer App", "20 Customer Web", "30 Admin", "31 Vendor", "32 Kitchen", "90 Flows", "99 LTR Rules", "🗄 Archive"]
 const p1 = figma.root.children.find(p => p.name === "Page 1")
 if (p1 && p1.children.length === 0 && !figma.root.children.some(p => p.name === "00 Cover")) p1.name = "00 Cover"
 PAGES.forEach(page)
 
+print('step: pages ok')
 // ---- 2. variables ----------------------------------------------------------
 async function setVar(c, name, type, value, scopes) {
   const v = await variable(c, name, type, value)
@@ -51,6 +53,7 @@ for (const n of T.spacing.scale) SP[n] = await setVar(cSpace, "space/" + n, "FLO
 for (const [k, n] of Object.entries(T.radius)) RD[k] = await setVar(cRadius, "radius/" + k, "FLOAT", n, ["CORNER_RADIUS"])
 for (const t of TYPE) FS[t[3]] = await setVar(cType, "font-size/" + t[3], "FLOAT", t[4], ["FONT_SIZE"])
 
+print('step: variables ok')
 // ---- 3. styles -------------------------------------------------------------
 const textStyles = await figma.getLocalTextStylesAsync()
 const S = {}
@@ -75,6 +78,7 @@ goldGrad.name = "Brand/Gold gradient" // logo / emblem only
 goldGrad.paints = [{ type: "GRADIENT_LINEAR", gradientTransform: [[0.8, 0.6, 0], [-0.6, 0.8, 0.3]],
   gradientStops: T.color["gold-gradient"].value.map((h, i, a) => ({ position: i / (a.length - 1), color: { ...rgb(h), a: 1 } })) }]
 
+print('step: styles ok')
 // ---- 4. Foundations page ---------------------------------------------------
 const FP = page("01 Foundations")
 await figma.setCurrentPageAsync(FP)
@@ -113,6 +117,7 @@ function add(p, n, f = true) { p.appendChild(n); if (f) n.layoutSizingHorizontal
 
 let cursorY = 0
 async function section(id, title, build) {
+  print('section: ' + title)
   const s = upsert(FP, id, () => figma.createSection())
   s.name = title
   s.children.slice().forEach(c => c.remove())
