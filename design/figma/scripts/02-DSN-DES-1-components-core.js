@@ -1,5 +1,6 @@
 // DSN-DES-1, batch 2: core components (buttons, inputs, selection, navigation, feedback) on page 02 Components.
 // Needs batch 01 first (variables and text styles). All components are RTL; horizontal rows list children start→end (right→left).
+// Text properties are exposed only where every variant shares the same text (they would override the per-variant copy).
 await loadDS()
 const ctx = { y: 0 }
 const P = "02 Components"
@@ -41,7 +42,7 @@ await sectionOn(ctx, P, "sec-inputs", "الحقول · Inputs", async body => {
     if (!val && !dis) chk("input placeholder", "muted", "paper")
     chk(`input ${state} hint`, err ? "danger" : "muted", "bg")
     return c
-  }, ["label", "value", "hint"])
+  }, ["label"])
 
   await label(body, "رقم الجوال", "Phone input (+966, number stays LTR)")
   await defineSet(body, "phone-input", "Phone input", { state: ["default", "error", "disabled"] }, async ({ state }) => {
@@ -57,7 +58,7 @@ await sectionOn(ctx, P, "sec-inputs", "الحقول · Inputs", async body => {
     add(c, await txt(err ? "رقم الجوال غير مكتمل" : "سنرسل لك رمز التحقق", "Caption", err ? "danger" : "muted", { name: "hint", w: 342 }), "h")
     chk("phone hint", err ? "danger" : "muted", "bg")
     return c
-  }, ["label", "value", "hint"])
+  }, ["label"])
 
   await label(body, "رمز التحقق", "OTP field (4 digits, LTR order)")
   await defineSet(body, "otp-field", "OTP field", { state: ["default", "filled", "error"] }, async ({ state }) => {
@@ -128,7 +129,7 @@ await sectionOn(ctx, P, "sec-select", "الاختيار · Selection", async bod
     add(c, await btn("−", "minus"))
     chk("stepper plus", "paper", "ember"); chk("stepper minus", "ember", "paper")
     return c
-  }, ["qty"])
+  })
 })
 
 // ---- Navigation ----------------------------------------------------------------
@@ -176,7 +177,7 @@ await sectionOn(ctx, P, "sec-feedback", "التنبيهات والنوافذ · 
     add(c, await txt(MSG[type], "Body/M", "paper", { name: "label", w: 280 }), "h")
     chk(`toast ${type}`, "paper", "ink")
     return c
-  }, ["label"])
+  })
 
   await label(body, "نافذة تأكيد", "Dialog")
   await defineSet(body, "dialog", "Dialog", { type: ["default", "destructive"] }, async ({ type }) => {
@@ -191,7 +192,7 @@ await sectionOn(ctx, P, "sec-feedback", "التنبيهات والنوافذ · 
     await shade(c)
     chk("dialog title", "ink", "paper"); chk("dialog body", "ink-2", "paper")
     return c
-  }, ["title", "body"])
+  })
 
   await label(body, "ورقة سفلية", "Bottom sheet")
   const sh = frame("bottom-sheet", { comp: true, w: 390, pad: 24, gap: 16, fill: "paper", cross: "MIN" })
