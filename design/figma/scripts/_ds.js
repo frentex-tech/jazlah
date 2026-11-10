@@ -56,7 +56,9 @@ function frame(name, o = {}) {
   bind(f, "paddingLeft", px); bind(f, "paddingRight", px); bind(f, "paddingTop", py); bind(f, "paddingBottom", py)
   const flip = { MIN: "MAX", MAX: "MIN" }
   f.primaryAxisAlignItems = rtl && flip[o.main] ? flip[o.main] : o.main || "MIN"
-  f.counterAxisAlignItems = o.cross || "MIN"
+  // RTL: children of a vertical stack hug the right edge unless the caller says otherwise
+  f.counterAxisAlignItems = o.cross || (!H && !o.ltr ? "MAX" : "MIN")
+  if (o.ltr) f.setSharedPluginData(NS, "ltr", "1")
   setRadius(f, o.r)
   if (o.stroke) { f.strokes = [paint(o.stroke)]; f.strokeWeight = o.sw || 1; f.strokeAlign = "INSIDE" }
   if (o.clip) f.clipsContent = true
