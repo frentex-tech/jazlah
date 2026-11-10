@@ -13,7 +13,7 @@ async function column(title, en, items, tone = "brand") {
   add(head, await txt(en, "Caption", tone === "brand" ? "sand" : "ink-2", { w: 268, align: "RIGHT" }), "h")
   add(col, head, "h")
   for (const it of items) {
-    const [t, subs] = Array.isArray(it) ? it : [it, []]
+    const [t, subs = []] = Array.isArray(it) ? it : [it]
     const card = frame("item", { pad: 12, gap: 6, fill: "paper", stroke: "line", r: "sm" })
     add(card, await txt(t, "Label/M", "ink", { w: 276 }), "h")
     for (const s of subs) {
