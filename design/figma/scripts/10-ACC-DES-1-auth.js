@@ -70,7 +70,7 @@ await screenSection(ctx, P, "sec-acc-otp", "رمز التحقق · OTP", async S
 // ---- Complete profile ------------------------------------------------------------------------------------
 async function fillProfile(b, nameState, btn) {
   add(b, await titleBlock("أكمل ملفك", "نحتاج اسمك لنُجهّز طلباتك ونتواصل معك."), "h")
-  add(b, await field("الاسم الكامل", nameState === "error" ? "" : null, nameState, nameState === "error" ? "الاسم مطلوب" : undefined), "h")
+  add(b, await field("الاسم الكامل", nameState === "error" ? "اكتب هنا" : null, nameState, nameState === "error" ? "الاسم مطلوب" : undefined), "h")
   add(b, await field("البريد الإلكتروني (اختياري)", null, "default", "لن نرسل لك إلا إشعارات طلباتك"), "h")
   const consent = inst("checkbox", { checked: "no", state: "default" }); await retext(consent, "إضافة تغليف هدية", "أوافق على استلام العروض والأخبار"); add(b, consent)
   const sp = spacer(); add(b, sp); sp.layoutSizingVertical = "FILL"

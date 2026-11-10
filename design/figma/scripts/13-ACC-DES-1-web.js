@@ -56,7 +56,7 @@ await screenSection(ctx, P, "sec-acc-web-otp", "رمز التحقق · Web OTP",
 // ---- Complete profile ---------------------------------------------------------------------------------------
 async function profCard(c, nameState, btn) {
   add(c, await titleBlock("أكمل ملفك", "نحتاج اسمك لنُجهّز طلباتك ونتواصل معك."), "h")
-  add(c, await field("الاسم الكامل", nameState === "error" ? "" : null, nameState, nameState === "error" ? "الاسم مطلوب" : undefined), "h")
+  add(c, await field("الاسم الكامل", nameState === "error" ? "اكتب هنا" : null, nameState, nameState === "error" ? "الاسم مطلوب" : undefined), "h")
   add(c, await field("البريد الإلكتروني (اختياري)", null, "default", "لن نرسل لك إلا إشعارات طلباتك"), "h")
   const k = inst("checkbox", { checked: "no", state: "default" }); await retext(k, "إضافة تغليف هدية", "أوافق على استلام العروض والأخبار"); add(c, k)
   add(c, await button("حفظ ومتابعة", "primary", btn), "h")

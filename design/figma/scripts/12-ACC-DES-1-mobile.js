@@ -79,7 +79,7 @@ await screenSection(ctx, P, "sec-acc-addresses", "قائمة العناوين ·
 async function fillEdit(b, districtErr, btn) {
   add(b, await field("اسم العنوان", "المنزل", "filled"), "h")
   add(b, await field("المدينة", "الرياض", "filled"), "h")
-  add(b, districtErr ? await field("الحي", "", "error", "الحي مطلوب") : await field("الحي", "الملقا", "filled"), "h")
+  add(b, districtErr ? await field("الحي", "اكتب هنا", "error", "الحي مطلوب") : await field("الحي", "الملقا", "filled"), "h")
   add(b, await field("الشارع وتفاصيل المبنى", "شارع أنس بن مالك، مبنى 12", "filled"), "h")
   fillSp(b)
   add(b, await button("حفظ التغييرات", "primary", btn), "h")

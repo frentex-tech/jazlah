@@ -70,7 +70,7 @@ async function formScreen(state, districtErr, btn) {
   const f = frame("form", { w: 390, pad: 16, gap: 16, fill: "paper", stroke: "line", r: "lg" })
   add(f, await field("اسم العنوان", "المنزل", "filled"), "h")
   add(f, await field("المدينة", "الرياض", "filled"), "h")
-  add(f, districtErr ? await field("الحي", "", "error", "الحي مطلوب") : await field("الحي", "الملقا", "filled"), "h")
+  add(f, districtErr ? await field("الحي", "اكتب هنا", "error", "الحي مطلوب") : await field("الحي", "الملقا", "filled"), "h")
   add(f, await field("الشارع وتفاصيل المبنى", "شارع أنس بن مالك، مبنى 12", "filled"), "h")
   add(f, await button("حفظ العنوان", "primary", btn), "h")
   add(row, f)
