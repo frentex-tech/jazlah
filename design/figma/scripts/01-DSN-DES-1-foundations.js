@@ -82,6 +82,7 @@ print('step: styles ok')
 // ---- 4. Foundations page ---------------------------------------------------
 const FP = page("01 Foundations")
 await figma.setCurrentPageAsync(FP)
+FP.children.filter(n => n.type !== "SECTION").forEach(n => n.remove()) // stray node left by the first failed run
 
 async function text(str, style, colorKey = "ink", align = "RIGHT") {
   const t = figma.createText()
