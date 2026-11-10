@@ -43,7 +43,7 @@ async function setVar(c, name, type, value, scopes) {
   if (scopes) v.scopes = scopes
   return v
 }
-const cColor = await collection("Color", ["light", "dark"])
+const cColor = await collection("Color", ["light"]) // shortcut: Figma Free allows 1 mode only, add "dark" when the plan is upgraded
 const cSpace = await collection("Spacing", ["default"])
 const cRadius = await collection("Radius", ["default"])
 const cType = await collection("Type", ["default"])
