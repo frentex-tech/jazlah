@@ -39,7 +39,7 @@ await screenSection(ctx, P, "sec-acc-onboarding", "التعريف · Onboarding"
 const phone = await mobileScreen({ path: "Login/Phone", header: { type: "page", title: "تسجيل الدخول" } })
 add(phone.body, await titleBlock("أهلًا بك في جزلة", "أدخل رقم جوالك وسنرسل لك رمز التحقق."), "h")
 add(phone.body, inst("phone-input", { state: "default" }), "h")
-add(phone.body, await txt("بالمتابعة فأنت توافق على الشروط وسياسة الخصوصية.", "Caption", "ink-2", { w: 358 }), "h")
+add(phone.body, await txt("بالمتابعة فأنت توافق على الشروط وسياسة الخصوصية.", "Body/M", "ink-2", { w: 358 }), "h")
 { const sp = spacer(); add(phone.body, sp); sp.layoutSizingVertical = "FILL" }
 add(phone.body, await button("إرسال الرمز", "primary", "disabled"), "h")
 const phoneErr = stateCopy(phone, "Error"); add(phoneErr.body, await titleBlock("أهلًا بك في جزلة", "أدخل رقم جوالك وسنرسل لك رمز التحقق."), "h")

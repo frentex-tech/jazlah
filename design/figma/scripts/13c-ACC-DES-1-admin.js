@@ -28,7 +28,7 @@ async function phoneCard(c, phoneState, btn, err) {
   if (err) await retext(p, "رقم الجوال غير مكتمل", "هذا الرقم غير مسجّل كموظف")
   add(c, p, "h")
   add(c, await button("إرسال الرمز", "primary", btn), "h")
-  add(c, await txt("هذه اللوحة للموظفين المصرّح لهم فقط.", "Caption", "ink-2", { w: 358 }), "h")
+  add(c, await txt("هذه اللوحة للموظفين المصرّح لهم فقط.", "Body/M", "ink-2", { w: 358 }), "h")
 }
 const ph = await adminLogin("Login/Phone", "Default", c => phoneCard(c, "default", "disabled"))
 const phErr = await adminLogin("Login/Phone", "Error", c => phoneCard(c, "error", "disabled", true))

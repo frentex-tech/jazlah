@@ -72,7 +72,7 @@ async function mapScreen(state, o) {
   else {
     const l = frame("location", { dir: "HORIZONTAL", gap: 8, cross: "CENTER" })
     add(l, await icon("map-pin", 20, "ember", "fill")); add(l, await txt("حي الملقا، شارع أنس بن مالك", "Label/M"), "h"); add(pn, l, "h")
-    add(pn, await txt("حرّك الخريطة لضبط الدبوس على موقعك.", "Caption", "ink-2", { w: 358 }), "h")
+    add(pn, await txt("حرّك الخريطة لضبط الدبوس على موقعك.", "Body/M", "ink-2", { w: 358 }), "h")
     if (o.panel === "outside") add(pn, await banner("عذرًا، لا نوصّل إلى هذا الموقع حاليًا."), "h")
   }
   chk("address panel text", "ink", "paper"); chk("address panel caption", "ink-2", "paper")
@@ -116,7 +116,7 @@ await screenSection(ctx, P, "sec-acc-location-permission", "إذن الموقع 
 // ---- Out of coverage ---------------------------------------------------------------------------------
 const cov = await mobileScreen({ path: "Location/OutOfCoverage", header: { type: "page", title: "الموقع" } })
 mid(cov.body, await panel("denied", "خارج نطاق التوصيل", "لا نوصّل إلى هذا الموقع حتى الآن. اختر موقعًا آخر داخل مناطق الخدمة.", "تغيير الموقع", "map-trifold"))
-add(cov.body, await txt("المناطق المتاحة حاليًا: الرياض، جدة، الدمام.", "Caption", "ink-2", { w: 358, align: "CENTER" }), "h")
+add(cov.body, await txt("المناطق المتاحة حاليًا: الرياض، جدة، الدمام.", "Body/M", "ink-2", { w: 358, align: "CENTER" }), "h")
 chk("coverage caption", "ink-2", "bg")
 const covLoad = stateCopy(cov, "Loading"); add(covLoad.body, await txt("نتحقق من تغطية موقعك…", "Body/M", "ink-2", { w: 358 }), "h"); add(covLoad.body, await skeletonRows(2), "h")
 const covErr = stateCopy(cov, "Error"); mid(covErr.body, await panel("error", "تعذّر التحقق من التغطية", "حدث خطأ أثناء التحقق من موقعك. حاول مرة أخرى.", "إعادة المحاولة"))

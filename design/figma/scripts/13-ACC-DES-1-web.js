@@ -33,7 +33,7 @@ async function loginCard(c, phoneState, btn, err) {
   const p = inst("phone-input", { state: phoneState })
   if (err) await retext(p, "رقم الجوال غير مكتمل", "أدخل رقم جوال سعودي صحيح مكوّن من 9 أرقام")
   add(c, p, "h")
-  add(c, await txt("بالمتابعة فأنت توافق على الشروط وسياسة الخصوصية.", "Caption", "ink-2", { w: 358 }), "h")
+  add(c, await txt("بالمتابعة فأنت توافق على الشروط وسياسة الخصوصية.", "Body/M", "ink-2", { w: 358 }), "h")
   add(c, await button("إرسال الرمز", "primary", btn), "h")
 }
 const lg = await webAuth("Login/Phone", "Default", c => loginCard(c, "default", "disabled"))
