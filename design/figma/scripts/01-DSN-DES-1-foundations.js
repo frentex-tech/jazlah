@@ -1,6 +1,6 @@
 // DSN-DES-1, batch 1: file structure, variables (from tokens.json), text/effect/paint styles, Foundations page.
 // Re-runnable: variables and styles are found by name, Foundations sections are rebuilt in place.
-await ready()
+// no loadAllPagesAsync: with 10+ populated pages it takes over a minute; setCurrentPageAsync loads the page we touch
 
 // ---- 0. inputs -------------------------------------------------------------
 const T = await (await fetch(new URL("../../../docs/design/tokens.json", B).href)).json() // B = scripts URL pinned to the commit, passed by the loader
