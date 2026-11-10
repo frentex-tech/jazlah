@@ -10,3 +10,5 @@ Two emblem options. The choice, and the written approval of the «جزلة / Jaz
 Lockups: `lockup-{a-shield,b-roundel}-{ar,en}.svg`. They use live `<text>` in El Messiri Bold and Readex Pro, so install those fonts to render them correctly; outlined versions come from Figma when the option is chosen. The gold gradient is for the logo only, never for body UI (`docs/design/tokens.json`).
 
 Figma (page `01 Foundations`, section «الشعار · Logo»): lockups on dark and light, app icon (iOS squircle, Android adaptive with safe zone), favicons, splash, for each option.
+
+Figma: [Logo section](https://www.figma.com/design/puWXbmOVpnQpjc7mUahTnw/Jazlah-Product-Design?node-id=21-2) · [Option A](https://www.figma.com/design/puWXbmOVpnQpjc7mUahTnw/Jazlah-Product-Design?node-id=21-6) · [Option B](https://www.figma.com/design/puWXbmOVpnQpjc7mUahTnw/Jazlah-Product-Design?node-id=21-438)
