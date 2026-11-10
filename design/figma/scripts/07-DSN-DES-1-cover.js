@@ -2,6 +2,7 @@
 // Run it last: it reads the sections that the other batches created and links to them (text hyperlinks to node ids).
 await loadDS()
 const ctx = { y: 0 }
+{ const c = page("00 Cover"); await c.loadAsync(); c.children.filter(n => n.type !== "SECTION").forEach(n => n.remove()) } // strays from a failed run
 const SKIP = ["00 Cover", "🗄 Archive"]
 const SOON = { "10 Customer App": "تصاميم تطبيق العملاء (ACC, STF, SCH, OCC, FED, OPX)", "20 Customer Web": "نسخة الويب من شاشات العملاء", "30 Admin": "لوحة الإدارة", "31 Vendor": "لوحة البائع", "32 Kitchen": "لوحة المطبخ" }
 
@@ -21,7 +22,7 @@ const link = async (str, nodeId, style = "Label/M") => {
 
 await sectionOn(ctx, "00 Cover", "sec-cover", "الغلاف والفهرس · Cover & index", async body => {
   const hero = frame("hero", { w: 1200, pad: 48, gap: 12, fill: "brand-deep", r: "lg" })
-  add(hero, await txt("جزلة", "Display XL", "gold-light", { name: "wordmark" }), "h")
+  add(hero, await txt("جزلة", "Display/XL", "gold-light", { name: "wordmark" }), "h")
   add(hero, await txt("Jazlah — Product Design", "Heading/H1", "paper", { align: "LEFT" }), "h")
   add(hero, await txt("منصة اللحوم والمواشي متعددة المتاجر في المملكة العربية السعودية", "Body/L", "sand", { w: 1100 }), "h")
   const d = new Date().toISOString().slice(0, 10)
