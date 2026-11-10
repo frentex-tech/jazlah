@@ -224,7 +224,7 @@ const load = await mobileScreen({ path: "Product/Detail", state: "Loading", head
 add(load.body, rect("gallery skeleton", 358, 240, "sand", "lg"), "h"); add(load.body, await skeletonRows(3), "h")
 add(load.screen, await bar("0.00", "أضف إلى السلة", "disabled"), "h")
 const err = await mobileScreen({ path: "Product/Detail", state: "Error", header: { type: "page", title: "تفاصيل المنتج" } })
-add(err.body, await panel("error", "تعذّر تحميل المنتج", "حدث خطأ أثناء جلب تفاصيل المنتج. حاول مرة أخرى."), "h")
+add(err.body, await panel("error", "تعذّر تحميل المنتج", "حدث خطأ أثناء جلب تفاصيل المنتج. حاول مرة أخرى.", "إعادة المحاولة"), "h")
 const sel = await mobileScreen({ path: "Product/Detail", state: "Add error", header: { type: "page", title: "تفاصيل المنتج", cart: "filled" }, gap: 16 })
 add(sel.body, await head("التقطيع", "مطلوب · اختر واحدًا"), "h")
 { const e = frame("error line", { dir: "HORIZONTAL", w: 358, gap: 8, cross: "CENTER" }); add(e, await icon("warning", 20, "danger")); add(e, await txt("اختر طريقة التقطيع قبل الإضافة إلى السلة", "Label/M", "danger", { w: 322 }), "h"); add(sel.body, e, "h"); chk("add error", "danger", "bg") }

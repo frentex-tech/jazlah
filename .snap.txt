@@ -216,12 +216,12 @@ uid=58_0 RootWebArea "Jazlah — Product Design – Figma" url="https://www.figm
                 uid=58_187 RootWebArea url="data:text/html;base64,PHNjcmlwdD4KICAgICAgb25tZXNzYWdlID0gKGV2ZW50KSA9PiB7CiAgICAgICAgaWYgKGV2ZW50LnNvdXJjZSA9PT0gd2luZG93LnBhcmVudC5wYXJlbnQucGFyZW50ICYmIGV2ZW50Lm9yaWdpbiA9PT0gImh0dHBzOi8vd3d3LmZpZ21hLmNvbSIpIHsKICAgICAgICAgIGRvY3VtZW50LndyaXRlKCI8c2Nya... <truncated>"
                   uid=58_188 Iframe
                     uid=58_189 RootWebArea url="https://scripter.rsms.me/?v=d3437b962d147cebdb6d6f81f13b93a64db72d9d&figma=1.0.0"
-                      uid=61_160 textbox "Editor content;Press Alt+F1 for Accessibility Options." autocomplete="both" focusable focused multiline
+                      uid=62_0 textbox "Editor content;Press Alt+F1 for Accessibility Options." autocomplete="both" focusable focused multiline
                       uid=58_191 generic description="Show menu ⌃M"
                       uid=58_192 generic description="Go Back in navigation history"
                       uid=58_193 generic description="Go Forward in navigation history"
                       uid=58_194 generic description="New script"
-                      uid=58_195 textbox value="Untitled 50"
+                      uid=58_195 textbox value="Untitled 52"
                       uid=58_196 generic description="Save to Figma file"
                       uid=58_197 generic description="Clear messages ⌘K"
                       uid=58_198 generic description="Run ⌘⏎"
