@@ -4,17 +4,18 @@ Figma file: https://www.figma.com/design/puWXbmOVpnQpjc7mUahTnw/Jazlah-Product-D
 Order: #14, #16, #54, #42, #67, #201, #120, #148, then #204 (client presentation). Scope: the nine design tasks only.
 
 ## #14 DSN-DES-1 (branch `docs/14-brand-assets-information-architecture-design`, not yet PR'd)
-Plan: 5 batches. Batches 1, 2 done; next is 3, then 5, then 4 (logo, alone, reviewed by the owner).
+Plan: batches 1, 2, 3a, 3b done; next 5 (IA, flows, LTR rules, Cover), then 4 (logo, alone, reviewed by the owner).
 
 | Batch | Status | Script |
 |---|---|---|
 | 1 Foundations: pages, variables, text/effect styles, colors/type/spacing/elevation/contrast | done, reviewed | `01-DSN-DES-1-foundations.js` |
 | 2 Core components: button, input, phone, OTP, chip, radio/checkbox/switch, stepper, tabs, bottom tab bar, toast, dialog, bottom sheet | done, 77 contrast checks, 0 failing | `02-DSN-DES-1-components-core.js` |
-| 3 Composite + dashboard components: card, product card, badge, empty/error states, map pin, status timeline, table, filters, form layout, side nav (split in two if large) | next | not written |
+| 3a Mobile composites: app header (cart icon + counter), search bar, section header, badge, card, product card, store card, category tile, state panel (empty/no results/error/offline/denied), skeleton, map pin, status timeline | done, 84 contrast checks, 0 failing | `03-DSN-DES-1-components-mobile.js` |
+| 3b Dashboard: nav item, side nav (admin/vendor/kitchen), top bar, page header, KPI card, data table (default/loading/empty/error), select, filters bar, form section, form actions | done, 47 checks, 0 failing | `04-DSN-DES-1-components-dashboard.js` |
 | 5 IA + flows + `99 LTR Rules` + Cover index + `tokens.json` export | after 3 | not written |
 | 4 Logo: «جزلة / Jazlah» lockups, ram-in-shield kept + one lightly adapted option, app icon, splash, favicon, export to `docs/design/brand/` | last, alone | not written |
 
-Section node ids on `02 Components`: Buttons 1:713, Inputs 1:790, Selection 1:875, Navigation 1:956, Feedback 1:1045. Open one with `...?node-id=1-713`.
+Section node ids on `02 Components`: Buttons 1:713, Inputs 1:790, Selection 1:875, Navigation 1:956, Feedback 1:1045, Header & search 10:7, Badges 10:98, Cards 10:139, Empty & error 10:210, Map pin & timeline 10:269, Dashboard shell 14:514, Data table 14:675, Filters 14:964, Form layout 14:1046. Open one with `...?node-id=1-713` (colon becomes a dash).
 
 ## Owner decisions applied
 - `tokens.json`: added `danger`, `danger-bg`, `warning`, `warning-bg`; `muted` -> #806865, `gold-text` -> #8E6129 (both AA on bg and paper); old values kept as `muted-soft` and `gold-deco` for large text/decoration. Errors use `danger`, never `ember`.
