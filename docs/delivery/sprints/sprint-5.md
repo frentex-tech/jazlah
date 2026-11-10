@@ -15,23 +15,11 @@
 - MP-2: dashboard tasks (OCC-DSH-1, KIT-DSH-1, ADH-DSH-1) merge before their customer flows.
 - MP-4: REL-INF-5.
 
-**Parallel tracks:** Backend: OCC/KIT/ADH-API · Dashboard: OCC-DSH-1, KIT-DSH-1, ADH-DSH-1 · Mobile: OCC-MOB-1, KIT-MOB-1, ADH-MOB-1 · Web: SVC-WEB-1 · DevOps: HRD-INF-1 · Design: OCC-DES-1 · QA: SVC-QA-1
+**Parallel tracks:** Backend: OCC/KIT/ADH-API · Dashboard: OCC-DSH-1, KIT-DSH-1, ADH-DSH-1 · Mobile: OCC-MOB-1, KIT-MOB-1, ADH-MOB-1 · Web: SVC-WEB-1 · DevOps: HRD-INF-1 · QA: SVC-QA-1
 
 ## EPIC OCC — Occasion sacrifices
 - reqs: FR-OCC-01, FR-OCC-02, FR-OCC-03, FR-OCC-04, FR-OCC-05, FR-ADM-08
 Custom orders for weddings, aqiqah and similar events: an instant estimate, an admin quote for large orders, a deposit then the balance, separate lead time and capacity.
-
-### OCC-DES-1 — Screens: occasions, visits, cooking & Adha (mobile, web, dashboard)
-`type: Task · area: design · size: L · prio: P0 · reqs: FR-OCC-01, FR-VIS-01, FR-KIT-01, FR-ADH-01 · depends: DSN-DES-1`
-
-**What:** every screen this sprint needs, designed together because the four flows share components (date and slot pickers, deposits, status timelines).
-
-**Output:** occasion request wizard, quote review and accept, deposit/balance payment; visit booking, booking detail with map, "my animals" with deposit and scheduling; cooked dishes section and "cook it for me" option; Adha season landing, day picker, cut restrictions; dashboard screens for occasion review/pricing, vendor visits calendar and animal registration, kitchens admin, kitchen board, Adha settings and per-day board
-
-**Where:** Figma (link in the issue)
-
-**Acceptance:**
-- [ ] AR/EN with all states; both developers signed off
 
 ### OCC-API-1 — Occasion requests, estimate, quote & conversion to orders
 `type: Feature · area: api · size: XL · prio: P0 · reqs: FR-OCC-01, FR-OCC-02, FR-OCC-04, FR-OCC-05, FR-ADM-08 · depends: CAT-API-1, ORD-API-2, SCH-API-2, KIT-API-1`

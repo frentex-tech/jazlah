@@ -15,23 +15,11 @@
 - INV-API-2 depends on the client's ZATCA onboarding (`needs-client`). Use the ZATCA developer sandbox until then.
 - MP-4: REL-INF-6. After this release, the scope is frozen for launch: only fixes and Sprint 7 hardening.
 
-**Parallel tracks:** Backend: VIS-API-*, FED-API-*, CHT-API-1, RAT-API-1, CMS-API-1, INV-API-* · Mobile: VIS-MOB-1, FED-MOB-1, CHT-MOB-1, RAT-MOB-1, CMS-MOB-1, INV-MOB-1 · Web: VIS-WEB-1, FED-WEB-1 · Dashboard: VIS-DSH-1, FED-DSH-1, RAT-DSH-1, CMS-DSH-1 · Design: FED-DES-1
+**Parallel tracks:** Backend: VIS-API-*, FED-API-*, CHT-API-1, RAT-API-1, CMS-API-1, INV-API-* · Mobile: VIS-MOB-1, FED-MOB-1, CHT-MOB-1, RAT-MOB-1, CMS-MOB-1, INV-MOB-1 · Web: VIS-WEB-1, FED-WEB-1 · Dashboard: VIS-DSH-1, FED-DSH-1, RAT-DSH-1, CMS-DSH-1
 
 ## EPIC FED — Feed marketplace
 - reqs: FR-FED-01, FR-FED-02, FR-FED-03, FR-FED-05, FR-FED-06, FR-ADM-11
 Listings and buy requests between livestock owners and feed sellers. At launch the deal happens off-platform after the chat. Paid transactions come post-launch (FR-FED-07).
-
-### FED-DES-1 — Screens: feed marketplace & chat
-`type: Task · area: design · size: M · prio: P0 · reqs: FR-FED-02, FR-FED-03, FR-FED-04, FR-FED-05 · depends: DSN-DES-1`
-
-**What:** the feed section and chat UX.
-
-**Output:** feed home (types, nearby listings, buy requests), filters, listing detail (gallery, price per unit, seller, contact), post/edit listing, seller application, my listings, buy-request board and form, conversations list, chat screen (text, images, report/block), moderation screens in the dashboard
-
-**Where:** Figma (link in the issue)
-
-**Acceptance:**
-- [ ] AR/EN, all states; signed off by both developers
 
 ### FED-API-1 — Feed sellers, listings & buy requests
 `type: Feature · area: api · size: L · prio: P0 · reqs: FR-FED-01, FR-FED-02, FR-FED-03, FR-FED-05 · depends: ACC-API-2, FND-API-4, LOC-API-1`

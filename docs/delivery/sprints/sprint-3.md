@@ -115,18 +115,6 @@ This task also covers:
 - reqs: FR-SCH-01, FR-SCH-02, FR-SCH-03, FR-SCH-04, FR-SCH-05, FR-SCH-06, FR-SCH-07, FR-ADM-05
 Delivery vs pickup, one daily delivery window, cutoffs per order type in Riyadh time, booking horizon, closed days, daily capacity and the pause switch.
 
-### SCH-DES-1 — Screens: fulfilment & day selection, operations settings
-`type: Task · area: design · size: S · prio: P0 · reqs: FR-SCH-01, FR-SCH-02, FR-SCH-05, FR-SCH-07, FR-ADM-05 · depends: DSN-DES-1`
-
-**What:** checkout step 1 and the admin operations screen.
-
-**Output:** delivery/pickup toggle, address picker (covered only), pickup info card, day picker with disabled days and reasons, window display, paused banner; admin operations settings page (grouped sections, closed-days calendar, prominent pause switch)
-
-**Where:** Figma (link in the issue)
-
-**Acceptance:**
-- [ ] Each disabled-day reason has its own copy (closed, full, past cutoff)
-
 ### SCH-API-1 — Operations settings API
 `type: Feature · area: api · size: M · prio: P0 · reqs: FR-ADM-05, FR-SCH-02, FR-SCH-03, FR-SCH-04, FR-SCH-05, FR-SCH-06, FR-SCH-07, FR-PAY-02 · depends: FND-API-4`
 

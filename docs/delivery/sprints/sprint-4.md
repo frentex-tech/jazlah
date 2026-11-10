@@ -37,28 +37,6 @@ Live gateway hookup in the clients once the client's gateway is integrated (PAY-
 - [ ] Sandbox payments succeed on a real iPhone (Apple Pay) and an Android device (mada test card)
 - [ ] Apple Pay works on Safari against the staging domain
 
-## EPIC OPX — Operations UX (design)
-- reqs: NFR-USB
-Design for everything Sprint 4 builds: after-sales, tracking, notifications, the vendor live board, and the admin core and finance dashboards.
-
-### OPX-DES-1 — Screens: after-sales, tracking, notifications, vendor board, admin & finance
-`type: Task · area: design · size: XL · prio: P0 · reqs: FR-CAN-01, FR-CAN-03, FR-ORD-05, FR-NOT-03, FR-VND-04, FR-VND-06, FR-ADM-01, FR-ADM-03, FR-ADM-06, FR-ADM-12 · depends: DSN-DES-1`
-
-**What:** design every screen Sprint 4 implements, in the approved Jazlah identity. Ideally done during Sprint 3, so development isn't waiting.
-
-**Output:**
-- Customer (mobile + web): cancel order flow with refund choice, complaint form with photos and status, tracking card (courier, call, track link/map), freshness card on the order, notification center, support contact, marketing opt-in
-- Vendor dashboard: live orders board (columns, new-order alert state, card actions, slaughter time picker, freshness upload), A6 order label, earnings (summary, entries, payouts)
-- Admin dashboard: overview KPIs and charts, full orders list and detail timeline with actions (cancel/refund, reschedule, label), customers list and detail, complaints queue, delivery operations (shipments, manual assign, failed deliveries, COD settlements), staff and roles permission matrix, audit log with diff, finance (balances, payouts, reports), campaign composer
-- All in AR and EN with loading, empty, error and permission-denied states
-
-**Where:** Figma file «Jazlah — Product Design» (pages `10 Customer App`, `20 Customer Web`, `30 Admin`, `31 Vendor`), scripts in `design/figma/scripts/`, exports in `docs/design/operations/`
-
-**Acceptance:**
-- [ ] Every screen listed is designed in AR and EN with all states, using only design-system components
-- [ ] The vendor board and admin order detail are prototyped end-to-end
-- [ ] Both developers signed off
-
 ## EPIC CAN — Cancellation & complaints
 - reqs: FR-CAN-01, FR-CAN-02, FR-CAN-03
 Free cancellation before slaughter with a refund choice, then customer-service-only cancellation, and post-delivery complaints with photos.

@@ -1,23 +1,26 @@
-# Sprint 1 — Foundation, accounts & coverage
+# Sprint 1 — Full product design + foundation, accounts & coverage
 
-> **Goal:** a production-shaped skeleton of the API and the three apps, wired through CI and deployed to staging, plus the design system. On top of it: customers sign in with OTP and manage profile and addresses, staff sign in to the dashboard, and admins draw coverage zones.
+> **Goal:** two tracks in parallel. **Design track:** the complete launch design (every screen of the customer app, customer web and admin/vendor/kitchen dashboards) in the approved Jazlah identity, signed off by the client. **Engineering track:** a production-shaped skeleton of the API and the three apps, CI and staging, then accounts (OTP), addresses and coverage zones.
 
 **Release:** v0.1.0
 
 **Exit criteria (demo on staging):**
+- The client has approved the full launch design in writing (DSN-DES-2); every launch screen is listed in `docs/design/screens.md` with its Figma link.
 - `GET /v1/public/health/ready` is green on staging; Swagger at `/docs`. Merging to `develop` auto-deploys; a failing test blocks the PR.
 - Web, dashboard and the Flutter staging build open, switch AR/EN and render RTL correctly with the design-system components.
 - New customer: phone → OTP (fixed code on staging) → profile → add an address on the map, in the app and on the web.
 - Admin draws a Riyadh polygon. A point inside shows as covered and a point outside shows the out-of-coverage message.
-- Account deletion works and revokes all sessions.
+
+**Design-first rule:** no customer or dashboard screen is implemented before its design exists and DSN-DES-2 (client sign-off) is done. The backend, infra and app scaffolds do not need designs and start on day one.
 
 **Merge points:**
-- MP-1 (foundation chain, strictly in order): FND-INF-1 → FND-API-1 → FND-API-3 → FND-API-4. FND-INF-3 (CI + client generation) merges right after FND-API-1.
+- Design track order: DSN-DES-1 (brand + design system) → screen tasks in any order (ACC, VND, STF, SCH, OPX, OCC, FED) → DSN-DES-2 sign-off.
+- Engineering MP-1 (strictly in order): FND-INF-1 → FND-API-1 → FND-API-3 → FND-API-4. FND-INF-3 (CI + client generation) right after FND-API-1.
 - MP-2: the app scaffolds (APP-MOB-1, APP-WEB-1, APP-DSH-1) merge before any feature task in their app.
-- MP-3: ACC-API-1 and LOC-API-1 merge before the account and location client tasks. LOC-MOB-1 (map picker) merges before ACC-MOB-3.
+- MP-3: ACC-API-1 and LOC-API-1 merge before the account and location client tasks, which also wait for DSN-DES-2.
 - MP-4: REL-INF-1 → `release/v0.1.0` → `main`.
 
-**Parallel tracks:** Backend: FND-API-*, ACC-API-*, LOC-API-1 · Mobile: APP-MOB-1, ACC-MOB-*, LOC-MOB-1 · Web: APP-WEB-1, ACC-WEB-1, LOC-WEB-1 · Dashboard: APP-DSH-1, ACC-DSH-1, LOC-DSH-1 · DevOps: FND-INF-* · Design: DSN-DES-1, ACC-DES-1
+**Parallel tracks:** Design: DSN-DES-1, ACC-DES-1, VND-DES-1, STF-DES-1, SCH-DES-1, OPX-DES-1, OCC-DES-1, FED-DES-1, DSN-DES-2 · Backend: FND-API-*, ACC-API-*, LOC-API-1 · DevOps: FND-INF-* · Mobile: APP-MOB-1, then ACC-MOB-*, LOC-MOB-1 · Web: APP-WEB-1, then ACC-WEB-1, LOC-WEB-1 · Dashboard: APP-DSH-1, then ACC-DSH-1, LOC-DSH-1
 
 ## EPIC FND — Platform foundation
 - reqs: NFR-SEC, NFR-SCL, NFR-HST, NFR-OBS
@@ -403,6 +406,21 @@ This task also covers:
 - [ ] `tokens.json` exported and committed
 - [ ] Every component has RTL and LTR variants
 
+### DSN-DES-2 — Full design review & client sign-off
+`type: Task · area: design · size: S · prio: P0 · reqs: NFR-USB · depends: DSN-DES-1, ACC-DES-1, VND-DES-1, STF-DES-1, SCH-DES-1, OPX-DES-1, OCC-DES-1, FED-DES-1 · labels: needs-client`
+
+**What:** present the complete launch design (every screen of the customer app, customer web and admin/vendor/kitchen dashboards) to the client and get written approval before front-end implementation starts.
+
+**Output:** a review deck/prototype walkthrough of all flows (Figma prototype links per flow), a consolidated feedback list turned into design fixes, the client's written sign-off recorded in `docs/design/signoff.md`, and a screen inventory `docs/design/screens.md` (screen → Figma link → implementing task)
+
+**How:** walk the client through flows, not pages: order, occasions, visits, cooking, Adha, feed, vendor day, admin day. Batch feedback into one revision round; anything new beyond the SRS goes to the change log, not the design.
+
+**Where:** Figma «Jazlah — Product Design», `docs/design/signoff.md`, `docs/design/screens.md`
+
+**Acceptance:**
+- [ ] Every launch screen in `docs/design/screens.md` has a Figma link and an implementing task
+- [ ] Client approval recorded in writing in `docs/design/signoff.md`
+
 ## EPIC ACC — Accounts & authentication
 - reqs: FR-ACC-01, FR-ACC-02, FR-ACC-03, FR-ACC-04, FR-ACC-05
 Phone + OTP sign-in for customers and staff, profile, language, addresses and account deletion.
@@ -490,7 +508,7 @@ This task also covers:
 - [ ] e2e: after deletion the old refresh token fails and the phone can register as a brand-new user
 
 ### ACC-MOB-1 — Mobile: onboarding, OTP sign-in, profile & settings
-`type: Feature · area: mobile · size: L · prio: P0 · reqs: FR-ACC-01, FR-ACC-02, FR-ACC-04, FR-ACC-05 · depends: ACC-API-1, ACC-DES-1, APP-MOB-1, ACC-API-2`
+`type: Feature · area: mobile · size: L · prio: P0 · reqs: FR-ACC-01, FR-ACC-02, FR-ACC-04, FR-ACC-05 · depends: ACC-API-1, ACC-DES-1, APP-MOB-1, ACC-API-2, DSN-DES-2`
 
 **What:** first-run experience and login.
 
@@ -519,7 +537,7 @@ This task also covers:
 - [ ] Deleting the account returns to onboarding and clears secure storage
 
 ### ACC-MOB-3 — Mobile: address management
-`type: Feature · area: mobile · size: M · prio: P0 · reqs: FR-ACC-03 · depends: ACC-API-2, LOC-MOB-1`
+`type: Feature · area: mobile · size: M · prio: P0 · reqs: FR-ACC-03 · depends: ACC-API-2, LOC-MOB-1, DSN-DES-2`
 
 **What:** list, add, edit and delete addresses.
 
@@ -532,7 +550,7 @@ This task also covers:
 - [ ] Out-of-coverage addresses can be saved but are flagged
 
 ### ACC-WEB-1 — Web: OTP sign-in, profile, language & addresses
-`type: Feature · area: web · size: L · prio: P0 · reqs: FR-ACC-01, FR-ACC-02, FR-ACC-04, FR-ACC-05, FR-ACC-03 · depends: ACC-API-1, ACC-API-2, APP-WEB-1, LOC-WEB-1`
+`type: Feature · area: web · size: L · prio: P0 · reqs: FR-ACC-01, FR-ACC-02, FR-ACC-04, FR-ACC-05, FR-ACC-03 · depends: ACC-API-1, ACC-API-2, APP-WEB-1, LOC-WEB-1, DSN-DES-2`
 
 **What:** customer login and account pages on the website.
 
@@ -555,7 +573,7 @@ This task also covers:
 - [ ] Add/edit/delete work and respect the lock rule
 
 ### ACC-DSH-1 — Dashboard: staff OTP login & role routing
-`type: Feature · area: dashboard · size: S · prio: P0 · reqs: FR-ACC-01 · depends: ACC-API-1, APP-DSH-1`
+`type: Feature · area: dashboard · size: S · prio: P0 · reqs: FR-ACC-01 · depends: ACC-API-1, APP-DSH-1, DSN-DES-2`
 
 **What:** admins, vendors and kitchen users sign in to the dashboard.
 
@@ -591,7 +609,7 @@ Coverage polygons managed by the admin, location detection in the apps, and serv
 - [ ] Invalid polygon returns `INVALID_POLYGON`
 
 ### LOC-DSH-1 — Dashboard: coverage zones map editor
-`type: Feature · area: dashboard · size: L · prio: P0 · reqs: FR-LOC-02, FR-ADM-05 · depends: LOC-API-1, ACC-DSH-1`
+`type: Feature · area: dashboard · size: L · prio: P0 · reqs: FR-LOC-02, FR-ADM-05 · depends: LOC-API-1, ACC-DSH-1, DSN-DES-2`
 
 **What:** admins draw and manage delivery coverage on a map.
 
@@ -604,7 +622,7 @@ Coverage polygons managed by the admin, location detection in the apps, and serv
 - [ ] The test-point tool matches the API result
 
 ### LOC-MOB-1 — Mobile: location bootstrap, map picker & out-of-coverage state
-`type: Feature · area: mobile · size: M · prio: P0 · reqs: FR-LOC-01, FR-LOC-02 · depends: LOC-API-1, APP-MOB-1`
+`type: Feature · area: mobile · size: M · prio: P0 · reqs: FR-LOC-01, FR-LOC-02 · depends: LOC-API-1, APP-MOB-1, DSN-DES-2`
 
 **What:** the app knows the customer's location from the first screen.
 
@@ -617,7 +635,7 @@ Coverage polygons managed by the admin, location detection in the apps, and serv
 - [ ] Out-of-coverage locations show the banner and the pickup suggestion
 
 ### LOC-WEB-1 — Web: location selector & coverage notice
-`type: Feature · area: web · size: S · prio: P0 · reqs: FR-LOC-01, FR-LOC-02 · depends: LOC-API-1, APP-WEB-1`
+`type: Feature · area: web · size: S · prio: P0 · reqs: FR-LOC-01, FR-LOC-02 · depends: LOC-API-1, APP-WEB-1, DSN-DES-2`
 
 **What:** location selection in the website header.
 
@@ -646,11 +664,118 @@ The tax and invoicing decisions that shape the order, VAT and finance data model
 **Acceptance:**
 - [ ] ADR accepted with the client's written confirmation on the seller-of-record question
 
+## EPIC VND — Vendor onboarding & store profile
+Design for this module is done up-front in Sprint 1 (design-first).
+
+### VND-DES-1 — Screens: vendor onboarding, store profile & product management
+`type: Task · area: design · size: M · prio: P0 · reqs: FR-VND-01, FR-VND-02, FR-ADM-04, FR-ADM-02, FR-VND-03 · depends: DSN-DES-1`
+
+**What:** dashboard screens for vendor onboarding.
+
+This task also covers:
+- **Screens: product management (admin & vendor):** dashboard product management UX.
+
+**Output:**
+
+*Screens: vendor application, store profile, admin review*
+- public apply page (multi-step: business info, documents, bank, location, photos), application status page, vendor store profile form, admin vendor list and review page (document viewer, approve with commission, reject with reason, suspend)
+
+*Screens: product management (admin & vendor)*
+- categories list, product list, product form with sections (basics, images, sizes, cuts, packaging, exclusions, compatibility matrix, fulfilment, availability), review queue, rejection feedback for vendors
+
+**Where:** Figma (link in the issue)
+
+**Acceptance:**
+- [ ] AR/EN, all states, reviewed by developers
+- [ ] The compatibility matrix is usable with 6 cuts × 4 packaging options
+
+## EPIC STF — Storefront (customer browsing)
+Design for this module is done up-front in Sprint 1 (design-first).
+
+### STF-DES-1 — Screens: home, category, store, product detail, search
+`type: Task · area: design · size: M · prio: P0 · reqs: FR-CAT-01, FR-CAT-02, FR-CAT-03, FR-PRD-01, FR-PRD-06 · depends: DSN-DES-1`
+
+**What:** customer browsing screens for mobile and web.
+
+**Output:** home (banners, categories, best sellers, partner stores, hidden stories row slot), category list, store page, product detail with customization (size, cut, packaging with disabled states, exclusions, notes, quantity, sticky total + add to cart), search with filters sheet
+
+**Where:** Figma (link in the issue)
+
+**Acceptance:**
+- [ ] Product detail shows how an incompatible option looks and why
+
+## EPIC SCH — Fulfilment, scheduling & operations settings
+Design for this module is done up-front in Sprint 1 (design-first).
+
+### SCH-DES-1 — Screens: fulfilment & day selection, operations settings
+`type: Task · area: design · size: S · prio: P0 · reqs: FR-SCH-01, FR-SCH-02, FR-SCH-05, FR-SCH-07, FR-ADM-05 · depends: DSN-DES-1`
+
+**What:** checkout step 1 and the admin operations screen.
+
+**Output:** delivery/pickup toggle, address picker (covered only), pickup info card, day picker with disabled days and reasons, window display, paused banner; admin operations settings page (grouped sections, closed-days calendar, prominent pause switch)
+
+**Where:** Figma (link in the issue)
+
+**Acceptance:**
+- [ ] Each disabled-day reason has its own copy (closed, full, past cutoff)
+
+## EPIC OPX — Operations UX (design)
+- reqs: NFR-USB
+Design for everything Sprint 4 builds: after-sales, tracking, notifications, the vendor live board, and the admin core and finance dashboards.
+
+### OPX-DES-1 — Screens: after-sales, tracking, notifications, vendor board, admin & finance
+`type: Task · area: design · size: XL · prio: P0 · reqs: FR-CAN-01, FR-CAN-03, FR-ORD-05, FR-NOT-03, FR-VND-04, FR-VND-06, FR-ADM-01, FR-ADM-03, FR-ADM-06, FR-ADM-12 · depends: DSN-DES-1`
+
+**What:** design every screen Sprint 4 implements, in the approved Jazlah identity. Ideally done during Sprint 3, so development isn't waiting.
+
+**Output:**
+- Customer (mobile + web): cancel order flow with refund choice, complaint form with photos and status, tracking card (courier, call, track link/map), freshness card on the order, notification center, support contact, marketing opt-in
+- Vendor dashboard: live orders board (columns, new-order alert state, card actions, slaughter time picker, freshness upload), A6 order label, earnings (summary, entries, payouts)
+- Admin dashboard: overview KPIs and charts, full orders list and detail timeline with actions (cancel/refund, reschedule, label), customers list and detail, complaints queue, delivery operations (shipments, manual assign, failed deliveries, COD settlements), staff and roles permission matrix, audit log with diff, finance (balances, payouts, reports), campaign composer
+- All in AR and EN with loading, empty, error and permission-denied states
+
+**Where:** Figma file «Jazlah — Product Design» (pages `10 Customer App`, `20 Customer Web`, `30 Admin`, `31 Vendor`), scripts in `design/figma/scripts/`, exports in `docs/design/operations/`
+
+**Acceptance:**
+- [ ] Every screen listed is designed in AR and EN with all states, using only design-system components
+- [ ] The vendor board and admin order detail are prototyped end-to-end
+- [ ] Both developers signed off
+
+## EPIC OCC — Occasion sacrifices
+Design for this module is done up-front in Sprint 1 (design-first).
+
+### OCC-DES-1 — Screens: occasions, visits, cooking & Adha (mobile, web, dashboard)
+`type: Task · area: design · size: L · prio: P0 · reqs: FR-OCC-01, FR-VIS-01, FR-KIT-01, FR-ADH-01 · depends: DSN-DES-1`
+
+**What:** every screen this sprint needs, designed together because the four flows share components (date and slot pickers, deposits, status timelines).
+
+**Output:** occasion request wizard, quote review and accept, deposit/balance payment; visit booking, booking detail with map, "my animals" with deposit and scheduling; cooked dishes section and "cook it for me" option; Adha season landing, day picker, cut restrictions; dashboard screens for occasion review/pricing, vendor visits calendar and animal registration, kitchens admin, kitchen board, Adha settings and per-day board
+
+**Where:** Figma (link in the issue)
+
+**Acceptance:**
+- [ ] AR/EN with all states; both developers signed off
+
+## EPIC FED — Feed marketplace
+Design for this module is done up-front in Sprint 1 (design-first).
+
+### FED-DES-1 — Screens: feed marketplace & chat
+`type: Task · area: design · size: M · prio: P0 · reqs: FR-FED-02, FR-FED-03, FR-FED-04, FR-FED-05 · depends: DSN-DES-1`
+
+**What:** the feed section and chat UX.
+
+**Output:** feed home (types, nearby listings, buy requests), filters, listing detail (gallery, price per unit, seller, contact), post/edit listing, seller application, my listings, buy-request board and form, conversations list, chat screen (text, images, report/block), moderation screens in the dashboard
+
+**Where:** Figma (link in the issue)
+
+**Acceptance:**
+- [ ] AR/EN, all states; signed off by both developers
+
 ## EPIC REL — Releases & merge points
 Sprint-end merge points. Each task cuts a release branch, verifies the sprint's exit criteria on staging, merges to `main`, tags, back-merges to `develop` and updates STATUS.md.
 
 ### REL-INF-1 — Release v0.1.0 (Sprint 1 merge point)
-`type: Task · area: infra · size: XS · prio: P0 · depends: FND-INF-5, APP-MOB-1, APP-WEB-1, APP-DSH-1, ACC-MOB-1, ACC-MOB-3, ACC-WEB-1, ACC-DSH-1, LOC-DSH-1, LOC-WEB-1`
+`type: Task · area: infra · size: XS · prio: P0 · depends: FND-INF-5, APP-MOB-1, APP-WEB-1, APP-DSH-1, ACC-MOB-1, ACC-MOB-3, ACC-WEB-1, ACC-DSH-1, LOC-DSH-1, LOC-WEB-1, DSN-DES-2`
 
 **What:** close Sprint 1 with the first tagged release.
 

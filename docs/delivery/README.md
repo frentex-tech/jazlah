@@ -19,7 +19,7 @@ Lost mid-project? Start with [`STATUS.md`](STATUS.md), then the current sprint f
 
 | Sprint | Theme | Release |
 |---|---|---|
-| 1 | Foundation (monorepo, CI, staging, API core, app scaffolds, design system) + accounts (OTP), addresses, coverage zones | v0.1.0 |
+| 1 | **Full product design (all launch screens, client sign-off)** in parallel with foundation (monorepo, CI, staging, API core, app scaffolds) + accounts (OTP), addresses, coverage zones | v0.1.0 |
 | 2 | Vendor onboarding, catalog & product customization, storefront (home, stores, product, search) | v0.2.0 |
 | 3 | Cart & coupons, scheduling engine & operations settings, checkout, payments (port + gateway), orders, wallet ledger | v0.3.0 (first E2E order demo) |
 | 4 | Live gateway in clients, cancellation & complaints, delivery-company integration, notifications, vendor live board & freshness, admin core, finance & payouts | v0.4.0 |

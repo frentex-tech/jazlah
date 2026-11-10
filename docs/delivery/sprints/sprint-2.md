@@ -15,33 +15,11 @@
 - MP-2: dashboard catalog (CAT-DSH-1) merges before the storefront client tasks so staging has real data.
 - MP-4: REL-INF-2.
 
-**Parallel tracks:** Backend: VND-API-*, CAT-API-* · Dashboard: VND-DSH-*, CAT-DSH-* · Mobile: STF-MOB-* · Web: STF-WEB-* · Design: VND-DES-1, STF-DES-1
+**Parallel tracks:** Backend: VND-API-*, CAT-API-* · Dashboard: VND-DSH-*, CAT-DSH-* · Mobile: STF-MOB-* · Web: STF-WEB-*
 
 ## EPIC VND — Vendor onboarding & store profile
 - reqs: FR-VND-01, FR-VND-02, FR-ADM-04
 Partner butchers and slaughterhouses apply, get reviewed, and manage their store. **Jazlah itself is vendor #1** (`isPlatform = true`), so all catalog and order logic treats Jazlah and partners the same way.
-
-### VND-DES-1 — Screens: vendor onboarding, store profile & product management
-`type: Task · area: design · size: M · prio: P0 · reqs: FR-VND-01, FR-VND-02, FR-ADM-04, FR-ADM-02, FR-VND-03 · depends: DSN-DES-1`
-
-**What:** dashboard screens for vendor onboarding.
-
-This task also covers:
-- **Screens: product management (admin & vendor):** dashboard product management UX.
-
-**Output:**
-
-*Screens: vendor application, store profile, admin review*
-- public apply page (multi-step: business info, documents, bank, location, photos), application status page, vendor store profile form, admin vendor list and review page (document viewer, approve with commission, reject with reason, suspend)
-
-*Screens: product management (admin & vendor)*
-- categories list, product list, product form with sections (basics, images, sizes, cuts, packaging, exclusions, compatibility matrix, fulfilment, availability), review queue, rejection feedback for vendors
-
-**Where:** Figma (link in the issue)
-
-**Acceptance:**
-- [ ] AR/EN, all states, reviewed by developers
-- [ ] The compatibility matrix is usable with 6 cuts × 4 packaging options
 
 ### VND-API-1 — Vendor model & application submission
 `type: Feature · area: api · size: M · prio: P0 · reqs: FR-VND-01 · depends: ACC-API-1, FND-API-4`
@@ -274,18 +252,6 @@ This task also covers:
 ## EPIC STF — Storefront (customer browsing)
 - reqs: FR-CAT-01, FR-CAT-02, FR-CAT-03, FR-PRD-01, FR-PRD-06
 Home, category, store, product detail with customization, and search, in the app and on the web.
-
-### STF-DES-1 — Screens: home, category, store, product detail, search
-`type: Task · area: design · size: M · prio: P0 · reqs: FR-CAT-01, FR-CAT-02, FR-CAT-03, FR-PRD-01, FR-PRD-06 · depends: DSN-DES-1`
-
-**What:** customer browsing screens for mobile and web.
-
-**Output:** home (banners, categories, best sellers, partner stores, hidden stories row slot), category list, store page, product detail with customization (size, cut, packaging with disabled states, exclusions, notes, quantity, sticky total + add to cart), search with filters sheet
-
-**Where:** Figma (link in the issue)
-
-**Acceptance:**
-- [ ] Product detail shows how an incompatible option looks and why
 
 ### STF-MOB-1 — Mobile: home, category & store pages
 `type: Feature · area: mobile · size: L · prio: P0 · reqs: FR-CAT-01, FR-CAT-02 · depends: CAT-API-5, STF-DES-1, LOC-MOB-1`

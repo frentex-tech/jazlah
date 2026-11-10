@@ -29,5 +29,5 @@ The mapping lives in `tools/dev/task.py`. A task whose **Where** spans several a
 - One task = one branch = one PR. Never work on `develop` or `main`.
 - Always assign yourself (`/task` does it). The progress dashboard credits work by assignee and PR author.
 - Don't edit issue text on GitHub. Change the plan in `docs/delivery/sprints/*.md` and run `python3 tools/backlog/sync.py`.
-- Design runs a sprint ahead: DES tasks of sprint N+1 should be done while sprint N is being built.
+- Design-first: all launch screens are designed and client-approved in Sprint 1 (DSN-DES-2) before any front-end screen is built. The backend and infra don't wait for design.
 - Before starting a design task, the designer agent needs a browser signed in to Figma with the editing account. Start Chrome with remote debugging so the agent can drive it.

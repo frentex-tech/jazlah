@@ -27,7 +27,7 @@ DES (screens) ─┐
 
 - **API first.** Client tasks list their API task under `depends`. They may start early against a Prism mock of the API PR's spec, but they **merge after** it.
 - **Dashboard before customer** when the customer feature needs data someone must enter first. For example, products need admin product management, and checkout days need operations settings.
-- **Design** tasks for an epic finish before (or in the first days of) the sprint that implements it. Ideally design runs one sprint ahead.
+- **Design-first:** the whole launch design is produced and signed off by the client in Sprint 1 (DSN-DES-2). Front-end tasks implement approved screens; design changes after sign-off go through the change log.
 
 ## 3. Merge points per sprint
 
