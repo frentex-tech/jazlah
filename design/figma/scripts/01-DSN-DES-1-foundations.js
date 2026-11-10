@@ -3,7 +3,7 @@
 await ready()
 
 // ---- 0. inputs -------------------------------------------------------------
-const T = await (await fetch("https://raw.githubusercontent.com/frentex-tech/jazlah/develop/docs/design/tokens.json")).json()
+const T = await (await fetch(new URL("../../../docs/design/tokens.json", B).href)).json() // B = scripts URL pinned to the commit, passed by the loader
 
 const TYPE = [ // [style name, family, weight, variable, size, line-height %]
   ["Display/XL", "El Messiri", "Bold", "display-xl", 36, 130],
@@ -16,12 +16,12 @@ const TYPE = [ // [style name, family, weight, variable, size, line-height %]
   ["Label/M", "Readex Pro", "Medium", "label-m", 14, 150],
   ["Caption", "Readex Pro", "Regular", "caption", 12, 150],
 ]
-const AR = { brand: "العنابي الأساسي", "brand-2": "عنابي — ضغط", "brand-deep": "عنابي داكن", gold: "ذهبي", "gold-text": "ذهبي للنص", "gold-light": "ذهبي فاتح",
+const AR = { brand: "العنابي الأساسي", "brand-2": "عنابي — ضغط", "brand-deep": "عنابي داكن", gold: "ذهبي", "gold-text": "ذهبي للنص", "gold-light": "ذهبي فاتح", "gold-deco": "ذهبي — زخرفة فقط", "muted-soft": "باهت — كبير/معطّل فقط", danger: "خطر (أخطاء)", "danger-bg": "خلفية الخطأ", warning: "تحذير", "warning-bg": "خلفية التحذير",
   ember: "أحمر الإجراء (CTA)", "ember-2": "أحمر — ضغط", bg: "كريمي — الخلفية", paper: "ورقي — البطاقات", sand: "رملي", line: "خط فاصل",
   ink: "حبر — النص", "ink-2": "حبر ثانوي", muted: "باهت", success: "نجاح", info: "معلومة" }
-const GROUPS = [["العنابي · Brand", ["brand", "brand-2", "brand-deep"]], ["الذهبي · Gold", ["gold", "gold-text", "gold-light"]],
+const GROUPS = [["العنابي · Brand", ["brand", "brand-2", "brand-deep"]], ["الذهبي · Gold", ["gold", "gold-text", "gold-light", "gold-deco"]],
   ["الإجراء · Action", ["ember", "ember-2"]], ["الأسطح · Surfaces", ["bg", "paper", "sand", "line"]],
-  ["النص · Text", ["ink", "ink-2", "muted"]], ["الحالة · Status", ["success", "info"]]]
+  ["النص · Text", ["ink", "ink-2", "muted", "muted-soft"]], ["الحالة · Status", ["success", "info", "danger", "danger-bg", "warning", "warning-bg"]]]
 
 // stop early if the fonts are not installed in this Figma account
 const avail = await figma.listAvailableFontsAsync()
@@ -96,7 +96,7 @@ function radius(n, r) { for (const k of ["topLeftRadius", "topRightRadius", "bot
 function box(name, dir, gap, pad, fillKey) {
   const f = stack(name, dir, 0, 0)
   f.setBoundVariable("itemSpacing", SP[gap])
-  for (const k of ["paddingTop", "paddingBottom", "paddingLeft", "paddingRight"]) f.setBoundVariable(k, SP[pad])
+  if (SP[pad]) for (const k of ["paddingTop", "paddingBottom", "paddingLeft", "paddingRight"]) f.setBoundVariable(k, SP[pad])
   if (fillKey) f.fills = [boundFill(V[fillKey])]
   return f
 }
@@ -173,9 +173,9 @@ await section("sec-space", "المسافات والزوايا · Spacing & Radiu
   add(body, await text("المسافات (أساس 4) · Spacing", "Heading/H3"))
   const sp = box("spacing", "VERTICAL", 8, 0); add(body, sp)
   for (const n of T.spacing.scale) {
-    const r = stack("space/" + n, "HORIZONTAL", 0, 0); r.counterAxisAlignItems = "CENTER"; r.setBoundVariable("itemSpacing", SP[16])
+    const r = stack("space/" + n, "HORIZONTAL", 0, 0); r.counterAxisAlignItems = "CENTER"; r.setBoundVariable("itemSpacing", SP[16]); r.primaryAxisSizingMode = "FIXED"; r.primaryAxisAlignItems = "MAX"
     const bar = figma.createRectangle(); bar.name = "bar"; bar.resize(n, 16); bar.setBoundVariable("width", SP[n]); bar.fills = [boundFill(V.ember)]
-    r.appendChild(bar); r.appendChild(await text(`space/${n} = ${n}`, "Caption", "ink-2", "LEFT")); sp.appendChild(r)
+    r.appendChild(await text(`space/${n} = ${n}`, "Caption", "ink-2", "RIGHT")); r.appendChild(bar); add(sp, r)
   }
   add(body, await text("الزوايا · Radius", "Heading/H3"))
   const rr = wrap("radius", 24); add(body, rr)
@@ -200,7 +200,9 @@ await section("sec-elev", "الظلال · Elevation", async body => {
 const lum = h => { const c = rgb(h); const f = x => x <= 0.03928 ? x / 12.92 : ((x + 0.055) / 1.055) ** 2.4; return 0.2126 * f(c.r) + 0.7152 * f(c.g) + 0.0722 * f(c.b) }
 const ratio = (a, b) => { const [x, y] = [lum(T.color[a].value), lum(T.color[b].value)]; return (Math.max(x, y) + 0.05) / (Math.min(x, y) + 0.05) }
 const PAIRS = [["ink", "bg"], ["ink", "paper"], ["ink-2", "bg"], ["muted", "bg"], ["muted", "paper"], ["paper", "brand"], ["paper", "ember"], ["paper", "ember-2"],
-  ["gold-text", "bg"], ["gold-text", "paper"], ["gold", "brand"], ["gold-light", "brand"], ["gold", "bg"], ["success", "paper"], ["info", "paper"], ["ember", "bg"]]
+  ["gold-text", "bg"], ["gold-text", "paper"], ["gold", "brand"], ["gold-light", "brand"], ["success", "paper"], ["info", "paper"], ["ember", "bg"],
+  ["danger", "bg"], ["danger", "paper"], ["danger", "danger-bg"], ["paper", "danger"], ["warning", "bg"], ["warning", "paper"], ["warning", "warning-bg"], ["paper", "warning"],
+  ["muted-soft", "bg"], ["gold-deco", "bg"], ["gold", "bg"]] // last three: large text / decoration only
 const report = []
 await section("sec-contrast", "التباين · Contrast (WCAG AA)", async body => {
   add(body, await text("النص العادي يحتاج 4.5:1، والنص الكبير (18 فأكثر أو 14 سميك) يحتاج 3:1", "Body/M", "ink-2"))
