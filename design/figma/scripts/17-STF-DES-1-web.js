@@ -81,7 +81,7 @@ const PD = { cart: ["سلتك فارغة", "أضف منتجات من المتا�
 // state-panel with new copy and (optionally) another Phosphor icon: ic = [name, colorKey]
 async function panel(kind, title, body, cta, ic) {
   let p = inst("state-panel", { kind }); const d = PD[kind]
-  await retext(p, d[0], title); await retext(p, d[1], body); await retext(p, d[2], cta)
+  await retext(p, d[0], title); await retext(p, d[1], body); if (cta != null) await retext(p, d[2], cta)
   if (ic) { p = await slot(p, "icon", async s => add(s, await icon(ic[0], 40, ic[1]))); chk("panel icon", ic[1], "sand", 3) }
   return p
 }
