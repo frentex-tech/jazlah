@@ -357,8 +357,10 @@ async function tap(from, to) {
 }
 // Register a named flow starting point on the page that holds `screen`.
 function flowStart(pageName, screen, name) {
-  const pg = page(pageName); const cur = pg.flowStartingPoints.filter(f => f.name !== name)
-  pg.flowStartingPoints = [...cur, { nodeId: screen.id, name }]
+  const pg = page(pageName), m = new Map()
+  for (const f of pg.flowStartingPoints) if (f.name !== name && f.nodeId !== screen.id && figma.getNodeById(f.nodeId)) m.set(f.nodeId, f)
+  m.set(screen.id, { nodeId: screen.id, name })
+  pg.flowStartingPoints = [...m.values()]
 }
 // First Button instance in `screen` whose label text equals `label`
 function findButton(screen, label) {

@@ -118,7 +118,7 @@ uid=44_0 RootWebArea "Jazlah — Product Design – Figma" url="https://www.figm
       uid=47_103 gridcell "Vector"
     uid=44_68 slider "Resize handle" orientation="horizontal" value="240" valuemax="443" valuemin="240" valuetext=""
   uid=44_69 region "Right sidebar"
-    uid=49_0 button "Multiplayer tools" expandable haspopup="dialog"
+    uid=50_0 button "Multiplayer tools" expandable haspopup="dialog"
     uid=44_71 button "Present"
     uid=44_72 button "Prototype view" expandable haspopup="menu"
     uid=44_73 button "Share"
@@ -217,12 +217,12 @@ uid=44_0 RootWebArea "Jazlah — Product Design – Figma" url="https://www.figm
                 uid=45_8 RootWebArea url="data:text/html;base64,PHNjcmlwdD4KICAgICAgb25tZXNzYWdlID0gKGV2ZW50KSA9PiB7CiAgICAgICAgaWYgKGV2ZW50LnNvdXJjZSA9PT0gd2luZG93LnBhcmVudC5wYXJlbnQucGFyZW50ICYmIGV2ZW50Lm9yaWdpbiA9PT0gImh0dHBzOi8vd3d3LmZpZ21hLmNvbSIpIHsKICAgICAgICAgIGRvY3VtZW50LndyaXRlKCI8c2Nya... <truncated>"
                   uid=45_9 Iframe
                     uid=45_10 RootWebArea url="https://scripter.rsms.me/?v=d3437b962d147cebdb6d6f81f13b93a64db72d9d&figma=1.0.0"
-                      uid=49_1 textbox "Editor content;Press Alt+F1 for Accessibility Options." autocomplete="both" focusable focused multiline
+                      uid=50_1 textbox "Editor content;Press Alt+F1 for Accessibility Options." autocomplete="both" focusable focused multiline
                       uid=45_12 generic description="Show menu ⌃M"
                       uid=45_13 generic description="Go Back in navigation history"
                       uid=45_14 generic description="Go Forward in navigation history"
                       uid=45_15 generic description="New script"
-                      uid=45_16 textbox value="Untitled 36"
+                      uid=45_16 textbox value="Untitled 37"
                       uid=45_17 generic description="Save to Figma file"
                       uid=45_18 generic description="Clear messages ⌘K"
                       uid=45_19 generic description="Run ⌘⏎"
