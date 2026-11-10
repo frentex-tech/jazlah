@@ -31,7 +31,7 @@ await sectionOn(ctx, "00 Cover", "sec-cover", "الغلاف والفهرس · Co
   add(body, hero, "h"); chk("cover wordmark", "gold-light", "brand-deep"); chk("cover tagline", "sand", "brand-deep"); chk("cover title", "paper", "brand-deep")
 
   add(body, await txt("الفهرس · Index (اضغط على أي عنوان للانتقال)", "Heading/H2"), "h")
-  const grid = frame("index", { dir: "HORIZONTAL", gap: 24, ltr: true }); grid.layoutWrap = "WRAP"; grid.counterAxisSpacing = 24; grid.layoutSizingHorizontal = "FILL"
+  const grid = frame("index", { dir: "HORIZONTAL", gap: 24, ltr: true }); grid.layoutWrap = "WRAP"; grid.counterAxisSpacing = 24
   body.appendChild(grid); grid.layoutSizingHorizontal = "FILL"
   for (const p of pages) {
     const card = frame("page " + p.name, { w: 384, pad: 16, gap: 8, fill: "paper", stroke: "line", r: "md" })

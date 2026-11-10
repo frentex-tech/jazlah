@@ -1,10 +1,10 @@
-uid=30_0 RootWebArea "Jazlah — Product Design – Figma" url="https://www.figma.com/design/puWXbmOVpnQpjc7mUahTnw/Jazlah-%E2%80%94-Product-Design?node-id=16-2379&t=DO4udXEPrMUJD9Kr-0"
-  uid=30_1 application "Figma Design, 1 item selected"
+uid=30_0 RootWebArea "Jazlah — Product Design – Figma" url="https://www.figma.com/design/puWXbmOVpnQpjc7mUahTnw/Jazlah-%E2%80%94-Product-Design?node-id=0-1&p=f&t=DO4udXEPrMUJD9Kr-0"
+  uid=30_1 application "Figma Design"
   uid=30_2 status atomic live="polite" relevant="additions text"
     uid=30_3 "Screenreader support for the board is currently disabled. To enable it via Accessibility settings, press ⌘K, type Accessibility Settings, and press Enter. To see available keyboard shortcuts, enter ⌃⇧Question mark ."
   uid=30_4 status live="polite" relevant="additions text"
-  uid=30_5 region "Comments on canvas"
-    uid=30_6 button "Create new comment"
+  uid=32_0 region "Comments on canvas"
+    uid=32_1 button "Create new comment"
   uid=30_7 region "Left sidebar"
     uid=30_8 button "Main menu" expandable haspopup="menu"
     uid=30_9 button "File" expandable expanded
@@ -47,14 +47,17 @@ uid=30_0 RootWebArea "Jazlah — Product Design – Figma" url="https://www.figm
     uid=30_47 generic
     uid=30_48 slider "Resize handle" orientation="vertical" value="100" valuemax="100" valuemin="0" valuetext=""
     uid=30_49 button "Layers" expandable expanded
-    uid=30_50 row "جدول الإدارة · Admin table" description="Section" expandable level="1" selectable
-      uid=30_51 gridcell "جدول الإدارة · Admin table"
-    uid=30_53 row "الدفع · Checkout" description="Section" expandable level="1" selectable
-      uid=30_54 gridcell "الدفع · Checkout"
-    uid=30_56 row "تفاصيل المنتج · Product" description="Section" expandable level="1" selectable
-      uid=30_57 gridcell "تفاصيل المنتج · Product"
-    uid=30_59 row "الرئيسية · Home" description="Section" expandable level="1" selectable selected
-      uid=30_60 gridcell "الرئيسية · Home"
+    uid=32_2 button "Collapse layers"
+    uid=32_3 row "Text" description="Text" level="1" selectable
+      uid=32_4 gridcell "Text"
+    uid=32_6 row "hero" description="Auto layout" level="1" selectable
+      uid=32_7 gridcell "hero"
+    uid=32_9 row "الغلاف والفهرس · Cover & index" description="Section" expandable expanded level="1" selectable
+      uid=32_10 gridcell "الغلاف والفهرس · Cover & index"
+    uid=32_12 row "sec-cover" description="Auto layout" expandable expanded level="1" selectable
+      uid=32_13 gridcell "sec-cover"
+    uid=32_15 row "الغلاف والفهرس · Cover & ind" description="Text" level="2" selectable
+      uid=32_16 gridcell "الغلاف والفهرس · Cover & ind"
     uid=30_62 slider "Resize handle" orientation="horizontal" value="240" valuemax="443" valuemin="240" valuetext=""
   uid=30_63 region "Right sidebar"
     uid=30_64 button "Multiplayer tools" expandable haspopup="dialog"
@@ -63,79 +66,65 @@ uid=30_0 RootWebArea "Jazlah — Product Design – Figma" url="https://www.figm
     uid=30_67 button "Share"
     uid=30_68 tab "Design" selectable selected
     uid=30_69 tab "Prototype" selectable
-    uid=30_70 button "49%, zoom and view options" expandable haspopup="menu"
-    uid=30_71 button "Section, Frame Dimension Presets" expandable haspopup="menu"
-    uid=30_72 checkbox "Toggle ready for dev status"
-    uid=30_73 "Toggle ready for dev status"
-    uid=30_74 heading "Position" level="2"
-    uid=30_75 "Alignment"
-    uid=30_76 button "Align left"
-    uid=30_77 button "Align horizontal centers"
-    uid=30_78 button "Align right"
-    uid=30_79 button "Align top"
-    uid=30_80 button "Align vertical centers"
-    uid=30_81 button "Align bottom"
-    uid=30_82 button "More actions"
-    uid=30_83 "Position"
-    uid=30_84 spinbutton "X-position" value="0" valuemax="0" valuemin="0" valuetext="0"
-    uid=30_85 spinbutton "Y-position" value="0" valuemax="0" valuemin="0" valuetext="0"
-    uid=30_86 heading "Layout" level="2"
-    uid=30_87 button "Resize to fit"
-    uid=30_88 "Dimensions"
-    uid=30_89 "W"
-    uid=30_90 textbox "Width" description="Press = to apply a variable" value="1280"
-    uid=30_91 "H"
-    uid=30_92 textbox "Height" description="Press = to apply a variable" value="1124"
-    uid=30_93 checkbox "Lock aspect ratio"
-    uid=30_94 "Lock aspect ratio"
-    uid=30_95 heading "Appearance" level="2"
-    uid=30_96 checkbox "Hide"
-    uid=30_97 "Hide"
-    uid=30_98 button "Apply blend mode" expandable haspopup="menu"
-    uid=30_99 textbox description="Press = to apply a variable" value="100%"
-    uid=30_100 textbox description="Press = to apply a variable" value="2"
-    uid=30_101 button "Individual corners" expandable haspopup="dialog"
-    uid=30_102 generic
-      uid=30_103 heading "Fill" level="2"
-    uid=30_104 button "Fill, Apply styles and variables" expandable haspopup="dialog"
-    uid=30_105 button "Add fill"
-    uid=30_106 generic
-    uid=30_107 gridcell "Solid color hex: 444444 Color 444444 100 %"
-      uid=30_108 button "Solid color hex: 444444"
-      uid=30_109 "Color"
-      uid=30_110 combobox "Color" autocomplete="list" description="Autofill available. Type to see suggestions." expandable haspopup="listbox" value="444444"
-      uid=30_111 textbox "%" value="100"
-      uid=30_112 "%"
-    uid=30_113 gridcell "Toggle visibility"
-      uid=30_114 checkbox "Toggle visibility" checked
-      uid=30_115 "Toggle visibility"
-    uid=30_116 gridcell "Remove"
-      uid=30_117 button "Remove"
-    uid=30_118 generic
-    uid=30_119 generic
-      uid=30_120 heading "Stroke" level="2"
-    uid=30_121 button "Stroke, Apply styles and variables" expandable haspopup="dialog"
-    uid=30_122 button "Add stroke fill"
-    uid=30_123 generic
-    uid=30_124 gridcell "Solid color hex: FFFFFF Color FFFFFF 10 %"
-      uid=30_125 button "Solid color hex: FFFFFF"
-      uid=30_126 "Color"
-      uid=30_127 combobox "Color" autocomplete="list" description="Autofill available. Type to see suggestions." expandable haspopup="listbox" value="FFFFFF"
-      uid=30_128 textbox "%" value="10"
-      uid=30_129 "%"
-    uid=30_130 gridcell "Toggle visibility"
-      uid=30_131 checkbox "Toggle visibility" checked
-      uid=30_132 "Toggle visibility"
-    uid=30_133 gridcell "Remove"
-      uid=30_134 button "Remove"
-    uid=30_135 generic
-    uid=30_136 "Stroke align"
-    uid=30_137 combobox "Stroke align" expandable haspopup="listbox" value="Inside"
-    uid=30_138 textbox "Stroke weight" description="Press = to apply a variable" value="1"
-    uid=30_139 button "Advanced stroke settings" expandable haspopup="dialog"
-    uid=30_140 button "Selection colors +11"
+    uid=30_70 button "100%, zoom and view options" expandable haspopup="menu"
+    uid=32_18 generic
+      uid=32_19 "Page"
+    uid=32_20 button "Solid color hex: 1E1E1E"
+    uid=32_21 "Color"
+    uid=32_22 spinbutton "Color" value="0" valuemax="0" valuemin="0" valuetext="1E1E1E"
+    uid=32_23 textbox "%" value="100"
+    uid=32_24 "%"
+    uid=32_25 checkbox "Toggle visibility" checked
+    uid=32_26 "Toggle visibility"
+    uid=32_27 heading "Styles" level="2"
+    uid=32_28 button "Create style" expandable haspopup="menu"
+    uid=32_29 heading "Text styles" level="3"
+    uid=32_30 button "Create text style"
+    uid=32_31 tree multiselectable orientation="vertical"
+      uid=32_32 treeitem "Caption Caption · 12/150" expandable level="1" selectable
+        uid=32_33 button "Caption"
+      uid=32_34 row expandable level="1"
+        uid=32_35 button "Toggle folder" expandable
+        uid=32_36 gridcell "Display"
+          uid=32_37 button "Display"
+        uid=32_38 button "Create style"
+      uid=32_39 row expandable level="1"
+        uid=32_40 button "Toggle folder" expandable
+        uid=32_41 gridcell "Heading"
+          uid=32_42 button "Heading"
+        uid=32_43 button "Create style"
+      uid=32_44 row expandable level="1"
+        uid=32_45 button "Toggle folder" expandable
+        uid=32_46 gridcell "Body"
+          uid=32_47 button "Body"
+        uid=32_48 button "Create style"
+      uid=32_49 row expandable level="1"
+        uid=32_50 button "Toggle folder" expandable
+        uid=32_51 gridcell "Label"
+          uid=32_52 button "Label"
+        uid=32_53 button "Create style"
+    uid=32_54 heading "Color styles" level="3"
+    uid=32_55 button "Create color style"
+    uid=32_56 tree multiselectable orientation="vertical"
+      uid=32_57 row expandable level="1"
+        uid=32_58 button "Toggle folder" expandable
+        uid=32_59 gridcell "Brand"
+          uid=32_60 button "Brand"
+        uid=32_61 button "Create style"
+    uid=32_62 heading "Effect styles" level="3"
+    uid=32_63 button "Create effect style"
+    uid=32_64 tree multiselectable orientation="vertical"
+      uid=32_65 row expandable level="1"
+        uid=32_66 button "Toggle folder" expandable
+        uid=32_67 gridcell "Shadow"
+          uid=32_68 button "Shadow"
+        uid=32_69 button "Create style"
     uid=30_141 button "Export"
     uid=30_142 button "Add export settings"
+    uid=32_70 generic
+      uid=32_71 "MCP"
+      uid=32_72 "2 connections"
+    uid=32_73 button "Set up agents for Figma MCP"
     uid=30_143 slider "Resize handle" orientation="horizontal" value="241" valuemax="500" valuemin="241" valuetext=""
   uid=30_144 region "Application toolbar"
     uid=30_145 button "Move" pressed
@@ -170,12 +159,12 @@ uid=30_0 RootWebArea "Jazlah — Product Design – Figma" url="https://www.figm
                 uid=30_174 RootWebArea url="data:text/html;base64,PHNjcmlwdD4KICAgICAgb25tZXNzYWdlID0gKGV2ZW50KSA9PiB7CiAgICAgICAgaWYgKGV2ZW50LnNvdXJjZSA9PT0gd2luZG93LnBhcmVudC5wYXJlbnQucGFyZW50ICYmIGV2ZW50Lm9yaWdpbiA9PT0gImh0dHBzOi8vd3d3LmZpZ21hLmNvbSIpIHsKICAgICAgICAgIGRvY3VtZW50LndyaXRlKCI8c2Nya... <truncated>"
                   uid=30_175 Iframe
                     uid=30_176 RootWebArea url="https://scripter.rsms.me/?v=d3437b962d147cebdb6d6f81f13b93a64db72d9d&figma=1.0.0"
-                      uid=31_0 textbox "Editor content;Press Alt+F1 for Accessibility Options." autocomplete="both" focusable focused multiline
+                      uid=32_74 textbox "Editor content;Press Alt+F1 for Accessibility Options." autocomplete="both" focusable focused multiline
                       uid=30_178 generic description="Show menu ⌃M"
                       uid=30_179 generic description="Go Back in navigation history"
                       uid=30_180 generic description="Go Forward in navigation history"
                       uid=30_181 generic description="New script"
-                      uid=30_182 textbox value="Untitled 28"
+                      uid=30_182 textbox value="Untitled 29"
                       uid=30_183 generic description="Save to Figma file"
                       uid=30_184 generic description="Clear messages ⌘K"
                       uid=30_185 generic description="Run ⌘⏎"
