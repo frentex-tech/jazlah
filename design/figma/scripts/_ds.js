@@ -337,11 +337,11 @@ async function screenSection(ctx, pageName, id, title, build) {
   await build(S)
   const M = 40, GAP = 80
   const t = await txt(title, "Display/L"); s.appendChild(t); t.x = M; t.y = M
-  let y = M + 96, maxW = t.width + 2 * M
+  let y = M + 120, maxW = t.width + 2 * M
   const row = nodes => { let x = M, h = 0; for (const n of nodes) { s.appendChild(n); n.x = x; n.y = y; x += n.width + GAP; h = Math.max(h, n.height) } maxW = Math.max(maxW, x - GAP + M); y += h }
   row(S.main)
   if (S.states.length) {
-    y += 64; const c = await txt("الحالات · States", "Heading/H3"); s.appendChild(c); c.x = M; c.y = y; y += 56
+    y += 64; const c = await txt("الحالات · States", "Heading/H3"); s.appendChild(c); c.x = M; c.y = y; y += 80
     row(S.states)
   }
   s.resizeWithoutConstraints(maxW, y + M)
