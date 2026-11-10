@@ -5,7 +5,7 @@ var DS = null
 // Read variables, styles and tokens that batch 01 created in this file.
 async function loadDS() {
   await page("02 Components").loadAsync() // inst() looks components up here; loadAllPagesAsync is too slow
-  const T = await (await fetch(new URL("../../../docs/design/tokens.json", B).href)).json()
+  const T = await (await fetch(B.replace("design/figma/scripts/", "docs/design/tokens.json"))).json()
   const cols = await figma.variables.getLocalVariableCollectionsAsync()
   const vars = await figma.variables.getLocalVariablesAsync()
   const by = n => {

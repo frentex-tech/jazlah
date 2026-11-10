@@ -3,7 +3,7 @@
 // no loadAllPagesAsync: with 10+ populated pages it takes over a minute; setCurrentPageAsync loads the page we touch
 
 // ---- 0. inputs -------------------------------------------------------------
-const T = await (await fetch(new URL("../../../docs/design/tokens.json", B).href)).json() // B = scripts URL pinned to the commit, passed by the loader
+const T = await (await fetch(B.replace("design/figma/scripts/", "docs/design/tokens.json"))).json() // B = scripts URL pinned to the commit, passed by the loader
 
 const TYPE = [ // [style name, family, weight, variable, size, line-height %]
   ["Display/XL", "El Messiri", "Bold", "display-xl", 36, 130],
