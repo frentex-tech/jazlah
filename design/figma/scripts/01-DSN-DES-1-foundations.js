@@ -23,10 +23,7 @@ const GROUPS = [["العنابي · Brand", ["brand", "brand-2", "brand-deep"]],
   ["الإجراء · Action", ["ember", "ember-2"]], ["الأسطح · Surfaces", ["bg", "paper", "sand", "line"]],
   ["النص · Text", ["ink", "ink-2", "muted", "muted-soft"]], ["الحالة · Status", ["success", "info", "danger", "danger-bg", "warning", "warning-bg"]]]
 
-// stop early if the fonts are not installed in this Figma account
-const avail = await figma.listAvailableFontsAsync()
-const missing = TYPE.filter(t => !avail.some(a => a.fontName.family === t[1] && a.fontName.style === t[2])).map(t => `${t[1]} ${t[2]}`)
-if (missing.length) { print("❌ خطوط ناقصة: " + [...new Set(missing)].join(", ")); return }
+// fonts were verified installed in batch 1's first run; listAvailableFontsAsync takes over a minute, so loadFontAsync below is the check
 const FONTS = [...new Set(TYPE.map(t => t[1] + "|" + t[2]))].map(s => ({ family: s.split("|")[0], style: s.split("|")[1] }))
 await fonts(...FONTS, { family: "Inter", style: "Regular" })
 
