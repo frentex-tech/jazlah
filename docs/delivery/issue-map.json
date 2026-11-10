@@ -2,7 +2,7 @@
  "dashboard": 199,
  "issues": {
   "ACC": {
-   "digest": "86eaae1d16d5",
+   "digest": "69174afa9895",
    "fields": {
     "Status": "Backlog"
    },
@@ -16,7 +16,7 @@
     "FND-API-3",
     "FND-API-4"
    ],
-   "digest": "432bcd575edb",
+   "digest": "a3d743a49365",
    "fields": {
     "Area": "api",
     "Priority": "P0",
@@ -33,7 +33,7 @@
     "ACC-API-1",
     "LOC-API-1"
    ],
-   "digest": "a3dc002a8594",
+   "digest": "edcd5e4699ab",
    "fields": {
     "Area": "api",
     "Priority": "P0",
@@ -49,7 +49,7 @@
    "deps": [
     "DSN-DES-1"
    ],
-   "digest": "524c7e364a06",
+   "digest": "6627028a8c70",
    "fields": {
     "Area": "design",
     "Priority": "P0",
@@ -64,9 +64,10 @@
   "ACC-DSH-1": {
    "deps": [
     "ACC-API-1",
-    "APP-DSH-1"
+    "APP-DSH-1",
+    "DSN-DES-2"
    ],
-   "digest": "90cb89f4ef09",
+   "digest": "55f066cdf11a",
    "fields": {
     "Area": "dashboard",
     "Priority": "P0",
@@ -83,9 +84,10 @@
     "ACC-API-1",
     "ACC-DES-1",
     "APP-MOB-1",
-    "ACC-API-2"
+    "ACC-API-2",
+    "DSN-DES-2"
    ],
-   "digest": "f26cb43a748b",
+   "digest": "8ebb4ea3ae55",
    "fields": {
     "Area": "mobile",
     "Priority": "P0",
@@ -100,9 +102,10 @@
   "ACC-MOB-3": {
    "deps": [
     "ACC-API-2",
-    "LOC-MOB-1"
+    "LOC-MOB-1",
+    "DSN-DES-2"
    ],
-   "digest": "5f874f93db72",
+   "digest": "6e90f229f3e1",
    "fields": {
     "Area": "mobile",
     "Priority": "P0",
@@ -119,9 +122,10 @@
     "ACC-API-1",
     "ACC-API-2",
     "APP-WEB-1",
-    "LOC-WEB-1"
+    "LOC-WEB-1",
+    "DSN-DES-2"
    ],
-   "digest": "6acf411e401d",
+   "digest": "ad4206475d54",
    "fields": {
     "Area": "web",
     "Priority": "P0",
@@ -279,7 +283,7 @@
    "number": 114
   },
   "APP": {
-   "digest": "aa126196d147",
+   "digest": "51455f6e9d73",
    "fields": {
     "Status": "Backlog"
    },
@@ -293,7 +297,7 @@
     "FND-INF-3",
     "FND-API-3"
    ],
-   "digest": "0da64f71ed77",
+   "digest": "214aea87cad5",
    "fields": {
     "Area": "dashboard",
     "Priority": "P0",
@@ -309,7 +313,7 @@
    "deps": [
     "FND-INF-3"
    ],
-   "digest": "ccdd3436f3ef",
+   "digest": "e25acd1b37d0",
    "fields": {
     "Area": "mobile",
     "Priority": "P0",
@@ -326,7 +330,7 @@
     "FND-INF-3",
     "APP-DSH-1"
    ],
-   "digest": "dbebf7ed4c71",
+   "digest": "fe6387c029df",
    "fields": {
     "Area": "web",
     "Priority": "P0",
@@ -917,7 +921,7 @@
    "number": 102
   },
   "DSN": {
-   "digest": "bed03dc19801",
+   "digest": "45846a8c5115",
    "fields": {
     "Status": "Backlog"
    },
@@ -927,7 +931,7 @@
    "number": 13
   },
   "DSN-DES-1": {
-   "digest": "c2012607be7a",
+   "digest": "8a1cc240710d",
    "fields": {
     "Area": "design",
     "Priority": "P0",
@@ -939,8 +943,31 @@
    "node_id": "I_kwDOVoYHnc8AAAABdvusNg",
    "number": 14
   },
+  "DSN-DES-2": {
+   "deps": [
+    "DSN-DES-1",
+    "ACC-DES-1",
+    "VND-DES-1",
+    "STF-DES-1",
+    "SCH-DES-1",
+    "OPX-DES-1",
+    "OCC-DES-1",
+    "FED-DES-1"
+   ],
+   "digest": "325caf67c98d",
+   "fields": {
+    "Area": "design",
+    "Priority": "P0",
+    "Size": "S",
+    "Status": "Todo"
+   },
+   "id": 6297832549,
+   "item": "PVTI_lADOFIc2Jc4Bq4SzzhHXJL8",
+   "node_id": "I_kwDOVoYHnc8AAAABd2FMZQ",
+   "number": 204
+  },
   "FED": {
-   "digest": "8d69ea941a02",
+   "digest": "68eabc7ede95",
    "fields": {
     "Status": "Backlog"
    },
@@ -989,7 +1016,7 @@
    "deps": [
     "DSN-DES-1"
    ],
-   "digest": "06dec9a0d427",
+   "digest": "13785b520efc",
    "fields": {
     "Area": "design",
     "Priority": "P0",
@@ -1114,7 +1141,7 @@
    "number": 118
   },
   "FND": {
-   "digest": "09798795510a",
+   "digest": "11f433e093c9",
    "fields": {
     "Status": "Backlog"
    },
@@ -1127,7 +1154,7 @@
    "deps": [
     "FND-INF-1"
    ],
-   "digest": "266d830c88bf",
+   "digest": "69a0576f4b8f",
    "fields": {
     "Area": "api",
     "Priority": "P0",
@@ -1143,7 +1170,7 @@
    "deps": [
     "FND-API-1"
    ],
-   "digest": "95975ada4fcf",
+   "digest": "6e2ea6678d05",
    "fields": {
     "Area": "api",
     "Priority": "P0",
@@ -1160,7 +1187,7 @@
     "FND-API-3",
     "FND-API-1"
    ],
-   "digest": "b1d6fdef8130",
+   "digest": "d1687a408db5",
    "fields": {
     "Area": "api",
     "Priority": "P0",
@@ -1173,7 +1200,7 @@
    "number": 5
   },
   "FND-INF-1": {
-   "digest": "3a09026f5f45",
+   "digest": "12c992ee96ec",
    "fields": {
     "Area": "infra",
     "Priority": "P0",
@@ -1189,7 +1216,7 @@
    "deps": [
     "FND-API-1"
    ],
-   "digest": "2f030e5f7bca",
+   "digest": "fc8c0ad342cf",
    "fields": {
     "Area": "infra",
     "Priority": "P0",
@@ -1202,7 +1229,7 @@
    "number": 6
   },
   "FND-INF-4": {
-   "digest": "d7b959f99b5e",
+   "digest": "5040a6b878ef",
    "fields": {
     "Area": "infra",
     "Priority": "P0",
@@ -1220,7 +1247,7 @@
     "FND-API-1",
     "FND-INF-3"
    ],
-   "digest": "196f7d494952",
+   "digest": "830805391090",
    "fields": {
     "Area": "infra",
     "Priority": "P0",
@@ -1434,7 +1461,7 @@
    "number": 145
   },
   "INV": {
-   "digest": "85678e1b6ac0",
+   "digest": "23fb49f6ea07",
    "fields": {
     "Status": "Backlog"
    },
@@ -1480,7 +1507,7 @@
    "number": 31
   },
   "INV-DOC-1": {
-   "digest": "7022792477e1",
+   "digest": "9048edeaf598",
    "fields": {
     "Area": "docs",
     "Priority": "P0",
@@ -1590,7 +1617,7 @@
    "number": 129
   },
   "LOC": {
-   "digest": "c6bc7c4e7666",
+   "digest": "af79be92b6c1",
    "fields": {
     "Status": "Backlog"
    },
@@ -1604,7 +1631,7 @@
     "FND-API-1",
     "FND-API-4"
    ],
-   "digest": "91f290fa40b2",
+   "digest": "473f71f7deba",
    "fields": {
     "Area": "api",
     "Priority": "P0",
@@ -1619,9 +1646,10 @@
   "LOC-DSH-1": {
    "deps": [
     "LOC-API-1",
-    "ACC-DSH-1"
+    "ACC-DSH-1",
+    "DSN-DES-2"
    ],
-   "digest": "82aeaa64f72d",
+   "digest": "e98f596b9cab",
    "fields": {
     "Area": "dashboard",
     "Priority": "P0",
@@ -1636,9 +1664,10 @@
   "LOC-MOB-1": {
    "deps": [
     "LOC-API-1",
-    "APP-MOB-1"
+    "APP-MOB-1",
+    "DSN-DES-2"
    ],
-   "digest": "c4db0f2ccebb",
+   "digest": "d0425248bbce",
    "fields": {
     "Area": "mobile",
     "Priority": "P0",
@@ -1653,9 +1682,10 @@
   "LOC-WEB-1": {
    "deps": [
     "LOC-API-1",
-    "APP-WEB-1"
+    "APP-WEB-1",
+    "DSN-DES-2"
    ],
-   "digest": "dac1ba8bb1b1",
+   "digest": "0e50bb61c53b",
    "fields": {
     "Area": "web",
     "Priority": "P0",
@@ -1816,7 +1846,7 @@
    "number": 105
   },
   "OCC": {
-   "digest": "404ed2137021",
+   "digest": "2a17b7ef8dfa",
    "fields": {
     "Status": "Backlog"
    },
@@ -1865,7 +1895,7 @@
    "deps": [
     "DSN-DES-1"
    ],
-   "digest": "a1cb5074e57f",
+   "digest": "c75117b332bb",
    "fields": {
     "Area": "design",
     "Priority": "P0",
@@ -1913,7 +1943,7 @@
    "number": 124
   },
   "OPX": {
-   "digest": "5a813a90f639",
+   "digest": "4b61160d42b3",
    "fields": {
     "Status": "Backlog"
    },
@@ -1926,7 +1956,7 @@
    "deps": [
     "DSN-DES-1"
    ],
-   "digest": "0ea301b6a281",
+   "digest": "c3c1340356dc",
    "fields": {
     "Area": "design",
     "Priority": "P0",
@@ -2265,7 +2295,7 @@
    "number": 159
   },
   "REL": {
-   "digest": "5a129c475817",
+   "digest": "797e9eeb6ffa",
    "fields": {
     "Status": "Backlog"
    },
@@ -2285,9 +2315,10 @@
     "ACC-WEB-1",
     "ACC-DSH-1",
     "LOC-DSH-1",
-    "LOC-WEB-1"
+    "LOC-WEB-1",
+    "DSN-DES-2"
    ],
-   "digest": "d7b6fb74f0c9",
+   "digest": "12dd5392c8b7",
    "fields": {
     "Area": "infra",
     "Priority": "P0",
@@ -2480,7 +2511,7 @@
    "number": 189
   },
   "SCH": {
-   "digest": "c63021a9a36f",
+   "digest": "2c820a348ea2",
    "fields": {
     "Status": "Backlog"
    },
@@ -2527,7 +2558,7 @@
    "deps": [
     "DSN-DES-1"
    ],
-   "digest": "c60ec9411880",
+   "digest": "cd1674252e5d",
    "fields": {
     "Area": "design",
     "Priority": "P0",
@@ -2613,7 +2644,7 @@
    "number": 72
   },
   "STF": {
-   "digest": "2c17b529eee4",
+   "digest": "632b1fc05e13",
    "fields": {
     "Status": "Backlog"
    },
@@ -2626,7 +2657,7 @@
    "deps": [
     "DSN-DES-1"
    ],
-   "digest": "48afca855093",
+   "digest": "566ab6bdb29a",
    "fields": {
     "Area": "design",
     "Priority": "P0",
@@ -2932,7 +2963,7 @@
    "number": 171
   },
   "VND": {
-   "digest": "4acb043a1232",
+   "digest": "b8c0dd18b90e",
    "fields": {
     "Status": "Backlog"
    },
@@ -2978,7 +3009,7 @@
    "deps": [
     "DSN-DES-1"
    ],
-   "digest": "c443f48926cc",
+   "digest": "1eb8f81440ce",
    "fields": {
     "Area": "design",
     "Priority": "P0",
@@ -3187,6 +3218,7 @@
  "milestones": {
   "Post-launch — Phase 2 features": 8,
   "Sprint 1 — Foundation, accounts & coverage": 1,
+  "Sprint 1 — Full product design + foundation, accounts & coverage": 9,
   "Sprint 2 — Vendors, catalog & storefront": 2,
   "Sprint 3 — Cart, scheduling, checkout, payments & orders": 3,
   "Sprint 4 — Delivery, notifications, after-sales & dashboards": 4,
