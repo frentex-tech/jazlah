@@ -24,11 +24,12 @@ Scripts are plain JavaScript files in `scripts/`. Scripter fetches them from Git
 1. Commit and push the script on your branch, and note the commit SHA (`git rev-parse HEAD`). Pin the URL to the SHA, because raw.githubusercontent caches branch URLs for minutes.
 2. In Figma: **Plugins → Scripter → New script (+)**, type this one line (replace `<sha>` and the file name), then press **⌘↩**:
 ```js
-const B="https://raw.githubusercontent.com/frentex-tech/jazlah/<sha>/design/figma/scripts/"; const AF=Object.getPrototypeOf(async function(){}).constructor; const src=(await Promise.all(["_lib.js","_ds.js","00-inspect.js"].map(async f=>(await (await fetch(B+f)).text())))).join("\n"); await new AF("figma","print","B",src)(figma,print,B)
+const B="https://raw.githubusercontent.com/frentex-tech/jazlah/<sha>/design/figma/scripts/"; const AF=Object.getPrototypeOf(async function(){}).constructor; let src=""; for(const f of ["_lib.js","_ds.js","00-inspect.js"]) src+=(await (await fetch(B+f)).text())+"\n"; await new AF("figma","print","B",src)(figma,print,B)
 ```
 3. Read the output in Scripter. Scripts are idempotent, so re-running them updates in place.
 
 Notes, verified on 2026-11-10:
+- Fetch the files **one after another** (a `for` loop): parallel `Promise.all` fetches hang Scripter silently.
 - Scripter can `fetch` raw GitHub URLs and run code with `AsyncFunction`.
 - `figma.currentUser` is **not** available in Scripter, so don't use it.
 - Before typing, take a snapshot and check the Scripter editor is the focused element (otherwise keystrokes hit the Figma canvas and trigger shortcuts). ⌘A does not reliably select the editor text, so click **New script (+)** for every run.
