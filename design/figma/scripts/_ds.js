@@ -193,3 +193,19 @@ function setProp(i, key, val) {
   const k = Object.keys(i.componentProperties).find(x => x.startsWith(key + "#"))
   if (k) i.setProperties({ [k]: val })
 }
+
+// ---- Phosphor icons (regular; weight "fill" for the active state) -----------------
+// Fetched from the Phosphor core repo at run time, colored through a Color variable. Directional icons: in RTL, "forward" is caret-left.
+var _svgCache = {}
+async function icon(name, size = 24, color = "ink", weight = "regular") {
+  const file = weight === "fill" ? name + "-fill" : name
+  const url = "https://raw.githubusercontent.com/phosphor-icons/core/main/assets/" + weight + "/" + file + ".svg"
+  if (!_svgCache[url]) { const r = await fetch(url); if (!r.ok) throw new Error("icon " + name + " " + r.status); _svgCache[url] = await r.text() }
+  const n = figma.createNodeFromSvg(_svgCache[url])
+  n.name = "ph/" + name + (weight === "fill" ? "-fill" : "")
+  n.resize(size, size)
+  for (const v of n.findAll(x => "fills" in x && x.type !== "FRAME")) v.fills = [paint(color)]
+  n.fills = []
+  n.clipsContent = false
+  return n
+}

@@ -14,15 +14,14 @@ await sectionOn(ctx, P, "sec-buttons", "الأزرار · Buttons", async body =
     const L = size === "L"
     const base = { primary: ["ember", "paper", null], secondary: ["paper", "ember", "ember"], ghost: [null, "ember", null], danger: ["danger", "paper", null] }[variant]
     let [fill, text, stroke] = base
-    if (state === "pressed") fill = { primary: "ember-2", secondary: "sand", ghost: "sand", danger: "danger" }[variant]
+    if (state === "pressed") fill = { primary: "ember-2", secondary: "sand", ghost: "sand", danger: "danger-pressed" }[variant]
     if (state === "disabled") { fill = variant === "primary" || variant === "danger" ? "sand" : variant === "secondary" ? "paper" : null; text = "muted-soft"; stroke = variant === "secondary" ? "line" : null }
     const c = frame("button", { comp: true, dir: "HORIZONTAL", h: L ? 52 : 36, px: L ? 24 : 16, gap: 8, main: "CENTER", cross: "CENTER", fill, stroke, r: L ? "md" : "sm" })
-    if (variant === "danger" && state === "pressed") c.fills = [paint("danger", 0.85)]
     if (state === "loading") {
       const sp = circle("spinner", 16, text); sp.arcData = { startingAngle: 0, endingAngle: 4.71, innerRadius: 0.7 }; add(c, sp)
     }
     add(c, await txt("اطلب الآن", L ? "Heading/H3" : "Label/M", text, { name: "label" }))
-    if (state !== "disabled") chk(`button ${variant}/${state}`, text, variant === "danger" && state === "pressed" ? ["danger", 0.85, "paper"] : fill || "bg")
+    if (state !== "disabled") chk(`button ${variant}/${state}`, text, fill || "bg")
     return c
   }, ["label"])
 })
@@ -100,7 +99,7 @@ await sectionOn(ctx, P, "sec-select", "الاختيار · Selection", async bod
       }
       else if (kind === "checkbox") {
         ctrl = frame("checkbox", { dir: "HORIZONTAL", w: 24, h: 24, main: "CENTER", cross: "CENTER", fill: on && !dis ? "ember" : on ? "sand" : null, stroke: on && !dis ? "ember" : col, sw: 2, r: 6, ltr: true })
-        if (on) add(ctrl, await txt("✓", "Label/M", dis ? "muted-soft" : "paper", { align: "CENTER" }))
+        if (on) add(ctrl, await icon("check", 16, dis ? "muted-soft" : "paper", "regular"))
       } else {
         ctrl = frame("switch", { dir: "HORIZONTAL", ltr: true, w: 48, h: 28, px: 3, cross: "CENTER", main: on ? "MIN" : "MAX", fill: on && !dis ? "ember" : "sand", stroke: on && !dis ? null : col, r: "pill" })
         add(ctrl, circle("knob", 22, on && !dis ? "paper" : col))
@@ -121,7 +120,7 @@ await sectionOn(ctx, P, "sec-select", "الاختيار · Selection", async bod
     const btn = async (g, kind) => {
       const off = state === "disabled" || (state === "min" && kind === "minus")
       const b = frame(kind, { dir: "HORIZONTAL", w: 44, h: 44, main: "CENTER", cross: "CENTER", ltr: true, r: "pill", fill: off ? "sand" : kind === "plus" ? "ember" : "paper", stroke: off || kind === "plus" ? null : "ember", sw: 2 })
-      add(b, await txt(g, "Heading/H2", off ? "muted-soft" : kind === "plus" ? "paper" : "ember", { align: "CENTER" }))
+      add(b, await icon(kind, 20, off ? "muted-soft" : kind === "plus" ? "paper" : "ember"))
       return b
     }
     add(c, await btn("+", "plus"))
@@ -150,15 +149,15 @@ await sectionOn(ctx, P, "sec-nav", "التنقل · Navigation", async body => {
     return c
   })
 
-  await label(body, "شريط التنقل السفلي", "Bottom tab bar (Home, Services, Orders, Account; icons are placeholders)")
-  const NAV = ["الرئيسية", "الخدمات", "الطلبات", "حسابي"]
+  await label(body, "شريط التنقل السفلي", "Bottom tab bar (Home, Services, Orders, Account; Phosphor regular, fill when active)")
+  const NAV = ["الرئيسية", "الخدمات", "الطلبات", "حسابي"], NAVI = ["house", "squares-four", "receipt", "user"]
   await defineSet(body, "bottom-tab-bar", "Bottom tab bar", { active: ["1", "2", "3", "4"] }, async ({ active }) => {
     const c = frame("bottom-tab-bar", { comp: true, dir: "HORIZONTAL", w: 390, h: 84, px: 8, py: 8, fill: "paper" })
     c.strokes = [paint("line")]; c.strokeTopWeight = 1; c.strokeBottomWeight = 0; c.strokeLeftWeight = 0; c.strokeRightWeight = 0
     for (let i = 0; i < 4; i++) {
       const on = String(i + 1) === active
       const it = frame("item", { gap: 4, main: "CENTER", cross: "CENTER", ltr: true })
-      add(it, circle("icon", 24, on ? "ember" : null, { stroke: on ? "ember" : "muted", sw: 2 }))
+      add(it, await icon(NAVI[i], 24, on ? "ember" : "muted", on ? "fill" : "regular"))
       add(it, await txt(NAV[i], "Label/M", on ? "ember" : "muted", { align: "CENTER" }))
       add(c, it); it.layoutSizingHorizontal = "FILL"; it.layoutSizingVertical = "FILL"
     }
@@ -172,10 +171,11 @@ await sectionOn(ctx, P, "sec-feedback", "التنبيهات والنوافذ · 
   await label(body, "رسالة عابرة", "Toast")
   const MSG = { success: "تمت إضافة المنتج إلى السلة", error: "تعذّر إتمام العملية، حاول مرة أخرى", warning: "الكمية المتاحة محدودة", info: "سيصلك إشعار عند تجهيز الطلب" }
   await defineSet(body, "toast", "Toast", { type: ["success", "error", "warning", "info"] }, async ({ type }) => {
-    const c = frame("toast", { comp: true, dir: "HORIZONTAL", w: 342, px: 16, py: 12, gap: 12, cross: "CENTER", fill: "ink", r: "md" })
-    add(c, circle("status", 12, type === "error" ? "danger" : type))
-    add(c, await txt(MSG[type], "Body/M", "paper", { name: "label", w: 280 }), "h")
-    chk(`toast ${type}`, "paper", "ink")
+    const c = frame("toast", { comp: true, dir: "HORIZONTAL", w: 342, px: 16, py: 12, gap: 12, cross: "CENTER", fill: "paper", stroke: "line", r: "md" })
+    add(c, await icon({ success: "check-circle", error: "x-circle", warning: "warning", info: "info" }[type], 24, { success: "success", error: "danger", warning: "warning", info: "info" }[type], "fill"))
+    add(c, await txt(MSG[type], "Body/M", "ink", { name: "label", w: 280 }), "h")
+    await shade(c)
+    chk(`toast ${type} text`, "ink", "paper"); chk(`toast ${type} icon`, type === "error" ? "danger" : type, "paper", 3)
     return c
   })
 

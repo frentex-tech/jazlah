@@ -16,12 +16,12 @@ const TYPE = [ // [style name, family, weight, variable, size, line-height %]
   ["Label/M", "Readex Pro", "Medium", "label-m", 14, 150],
   ["Caption", "Readex Pro", "Regular", "caption", 12, 150],
 ]
-const AR = { brand: "العنابي الأساسي", "brand-2": "عنابي — ضغط", "brand-deep": "عنابي داكن", gold: "ذهبي", "gold-text": "ذهبي للنص", "gold-light": "ذهبي فاتح", "gold-deco": "ذهبي — زخرفة فقط", "muted-soft": "باهت — كبير/معطّل فقط", danger: "خطر (أخطاء)", "danger-bg": "خلفية الخطأ", warning: "تحذير", "warning-bg": "خلفية التحذير",
+const AR = { brand: "العنابي الأساسي", "brand-2": "عنابي — ضغط", "brand-deep": "عنابي داكن", gold: "ذهبي", "gold-text": "ذهبي للنص", "gold-light": "ذهبي فاتح", "gold-deco": "ذهبي — زخرفة فقط", "muted-soft": "باهت — كبير/معطّل فقط", danger: "خطر (أخطاء)", "danger-pressed": "خطر — ضغط", "danger-bg": "خلفية الخطأ", warning: "تحذير", "warning-bg": "خلفية التحذير",
   ember: "أحمر الإجراء (CTA)", "ember-2": "أحمر — ضغط", bg: "كريمي — الخلفية", paper: "ورقي — البطاقات", sand: "رملي", line: "خط فاصل",
   ink: "حبر — النص", "ink-2": "حبر ثانوي", muted: "باهت", success: "نجاح", info: "معلومة" }
 const GROUPS = [["العنابي · Brand", ["brand", "brand-2", "brand-deep"]], ["الذهبي · Gold", ["gold", "gold-text", "gold-light", "gold-deco"]],
   ["الإجراء · Action", ["ember", "ember-2"]], ["الأسطح · Surfaces", ["bg", "paper", "sand", "line"]],
-  ["النص · Text", ["ink", "ink-2", "muted", "muted-soft"]], ["الحالة · Status", ["success", "info", "danger", "danger-bg", "warning", "warning-bg"]]]
+  ["النص · Text", ["ink", "ink-2", "muted", "muted-soft"]], ["الحالة · Status", ["success", "info", "danger", "danger-pressed", "danger-bg", "warning", "warning-bg"]]]
 
 // fonts were verified installed in batch 1's first run; listAvailableFontsAsync takes over a minute, so loadFontAsync below is the check
 const FONTS = [...new Set(TYPE.map(t => t[1] + "|" + t[2]))].map(s => ({ family: s.split("|")[0], style: s.split("|")[1] }))
@@ -203,7 +203,7 @@ const lum = h => { const c = rgb(h); const f = x => x <= 0.03928 ? x / 12.92 : (
 const ratio = (a, b) => { const [x, y] = [lum(T.color[a].value), lum(T.color[b].value)]; return (Math.max(x, y) + 0.05) / (Math.min(x, y) + 0.05) }
 const PAIRS = [["ink", "bg"], ["ink", "paper"], ["ink-2", "bg"], ["muted", "bg"], ["muted", "paper"], ["paper", "brand"], ["paper", "ember"], ["paper", "ember-2"],
   ["gold-text", "bg"], ["gold-text", "paper"], ["gold", "brand"], ["gold-light", "brand"], ["success", "paper"], ["info", "paper"], ["ember", "bg"],
-  ["danger", "bg"], ["danger", "paper"], ["danger", "danger-bg"], ["paper", "danger"], ["warning", "bg"], ["warning", "paper"], ["warning", "warning-bg"], ["paper", "warning"],
+  ["danger", "bg"], ["danger", "paper"], ["danger", "danger-bg"], ["paper", "danger"], ["paper", "danger-pressed"], ["warning", "bg"], ["warning", "paper"], ["warning", "warning-bg"], ["paper", "warning"],
   ["muted-soft", "bg"], ["gold-deco", "bg"], ["gold", "bg"]] // last three: large text / decoration only
 const report = []
 await section("sec-contrast", "التباين · Contrast (WCAG AA)", async body => {
