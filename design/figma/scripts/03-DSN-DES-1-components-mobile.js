@@ -192,7 +192,8 @@ await sectionOn(ctx, P, "sec-map-timeline", "الخريطة وتتبع الطل�
     const cur = Number(stage) - 1
     const c = frame("status-timeline", { comp: true, w: 342, pad: 16, fill: "paper", stroke: "line", r: "md" })
     for (let i = 0; i < STEPS.length; i++) {
-      const done = i < cur, now = i === cur, last = i === STEPS.length - 1
+      const last = i === STEPS.length - 1, delivered = cur === STEPS.length - 1 // stage 5 = delivered: every step done
+      const done = i < cur || delivered, now = i === cur && !delivered
       const row = frame("step", { dir: "HORIZONTAL", gap: 12 })
       const mark = frame("marker", { gap: 0, cross: "CENTER" })
       const dot = frame("dot", { dir: "HORIZONTAL", w: 24, h: 24, main: "CENTER", cross: "CENTER", fill: done ? "success" : now ? "paper" : "sand", stroke: now ? "ember" : null, sw: 3, r: "pill" })
