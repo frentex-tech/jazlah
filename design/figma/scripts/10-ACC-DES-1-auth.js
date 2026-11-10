@@ -83,13 +83,5 @@ const profErr = stateCopy(prof, "Error"); await fillProfile(profErr.body, "error
 const profLoad = stateCopy(prof, "Loading"); await fillProfile(profLoad.body, "filled", "loading")
 await screenSection(ctx, P, "sec-acc-profile", "إكمال الملف · Complete profile", async S => { S.main.push(prof.screen); S.states.push(profFilled.screen, profErr.screen, profLoad.screen) })
 
-// prototype: onboarding -> phone -> otp -> profile
-await tap(findButton(slides[0].screen, "التالي"), slides[1].screen)
-await tap(findButton(slides[1].screen, "التالي"), slides[2].screen)
-await tap(findButton(slides[2].screen, "ابدأ الآن"), phoneFilled.screen)
-await tap(findButton(phoneFilled.screen, "إرسال الرمز"), otpFilled.screen)
-await tap(findButton(otpFilled.screen, "تأكيد"), profFilled.screen)
-flowStart(P, slides[0].screen, "ACC — first launch to profile")
-
 figma.viewport.scrollAndZoomIntoView(page(P).children)
-print("✅ ACC auth done\n" + ctx.ids.join("\n") + "\n" + contrastReport())
+print("✅ ACC auth done (prototype links are in 11-ACC-DES-1-proto.js)\n" + ctx.ids.join("\n") + "\n" + contrastReport())

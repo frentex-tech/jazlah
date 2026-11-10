@@ -1,10 +1,10 @@
-uid=44_0 RootWebArea "Jazlah — Product Design – Figma" url="https://www.figma.com/design/puWXbmOVpnQpjc7mUahTnw/Jazlah-%E2%80%94-Product-Design?node-id=21-438&t=f2pvZIiTsj80ivkR-0"
-  uid=44_1 application "Figma Design, 1 item selected"
+uid=44_0 RootWebArea "Jazlah — Product Design – Figma" url="https://www.figma.com/design/puWXbmOVpnQpjc7mUahTnw/Jazlah-%E2%80%94-Product-Design?node-id=1-4&p=f&t=f2pvZIiTsj80ivkR-0"
+  uid=44_1 application "Figma Design"
   uid=44_2 status atomic live="polite" relevant="additions text"
     uid=44_3 "Screenreader support for the board is currently disabled. To enable it via Accessibility settings, press ⌘K, type Accessibility Settings, and press Enter. To see available keyboard shortcuts, enter ⌃⇧Question mark ."
   uid=44_4 status live="polite" relevant="additions text"
-  uid=44_5 region "Comments on canvas"
-    uid=44_6 button "Create new comment"
+  uid=47_0 region "Comments on canvas"
+    uid=47_1 button "Create new comment"
   uid=44_7 region "Left sidebar"
     uid=44_8 button "Main menu" expandable haspopup="menu"
     uid=44_9 button "File" expandable expanded
@@ -47,18 +47,75 @@ uid=44_0 RootWebArea "Jazlah — Product Design – Figma" url="https://www.figm
     uid=44_47 generic
     uid=44_48 slider "Resize handle" orientation="vertical" value="100" valuemax="100" valuemin="0" valuetext=""
     uid=44_49 button "Layers" expandable expanded
-    uid=44_50 row "الشعار · Logo" description="Section" expandable level="1" selectable
-      uid=44_51 gridcell "الشعار · Logo"
-    uid=44_53 row "التباين · Contrast (WCAG AA)" description="Section" expandable level="1" selectable
-      uid=44_54 gridcell "التباين · Contrast (WCAG AA)"
-    uid=44_56 row "الظلال · Elevation" description="Section" expandable level="1" selectable
-      uid=44_57 gridcell "الظلال · Elevation"
-    uid=44_59 row "المسافات والزوايا · Spacing & Radius" description="Section" expandable level="1" selectable
-      uid=44_60 gridcell "المسافات والزوايا · Spacing & Radius"
-    uid=44_62 row "الخطوط · Typography" description="Section" expandable level="1" selectable
-      uid=44_63 gridcell "الخطوط · Typography"
-    uid=44_65 row "الألوان · Colors" description="Section" expandable level="1" selectable
-      uid=44_66 gridcell "الألوان · Colors"
+    uid=47_2 button "Collapse layers"
+    uid=47_3 row "إكمال الملف · Complete profile" description="Section" expandable expanded level="1" selectable
+      uid=47_4 gridcell "إكمال الملف · Complete profile"
+    uid=47_6 row "sec-acc-profile" description="Auto layout" expandable expanded level="1" selectable
+      uid=47_7 gridcell "sec-acc-profile"
+    uid=47_9 row "إكمال الملف · Complete profi" description="Text" level="2" selectable
+      uid=47_10 gridcell "إكمال الملف · Complete profi"
+    uid=47_12 row "flow" description="Auto layout" expandable expanded level="2" selectable
+      uid=47_13 gridcell "flow"
+    uid=47_15 row "App/Login/Profile — Default" description="Auto layout" expandable expanded level="3" selectable
+      uid=47_16 gridcell "App/Login/Profile — Default"
+    uid=47_18 row "status bar" description="Auto layout" expandable expanded level="4" selectable
+      uid=47_19 gridcell "status bar"
+    uid=47_21 row "9:41" description="Text" level="5" selectable
+      uid=47_22 gridcell "9:41"
+    uid=47_24 row "system icons" description="Auto layout" expandable expanded level="5" selectable
+      uid=47_25 gridcell "system icons"
+    uid=47_27 row "ph/cell-signal-full-fill" description="Frame" expandable expanded level="6" selectable
+      uid=47_28 gridcell "ph/cell-signal-full-fill"
+    uid=47_30 row "Vector" description="Vector" level="7" selectable
+      uid=47_31 gridcell "Vector"
+    uid=47_33 row "ph/wifi-high-fill" description="Frame" expandable expanded level="6" selectable
+      uid=47_34 gridcell "ph/wifi-high-fill"
+    uid=47_36 row "Vector" description="Vector" level="7" selectable
+      uid=47_37 gridcell "Vector"
+    uid=47_39 row "ph/battery-full-fill" description="Frame" expandable expanded level="6" selectable
+      uid=47_40 gridcell "ph/battery-full-fill"
+    uid=47_42 row "Vector" description="Vector" level="7" selectable
+      uid=47_43 gridcell "Vector"
+    uid=47_45 row "App header" description="Instance" expandable level="4" selectable
+      uid=47_46 gridcell "App header"
+    uid=47_48 row "body" description="Auto layout" expandable expanded level="4" selectable
+      uid=47_49 gridcell "body"
+    uid=47_51 row "title block" description="Auto layout" expandable expanded level="5" selectable
+      uid=47_52 gridcell "title block"
+    uid=47_54 row "أكمل ملفك" description="Text" level="6" selectable
+      uid=47_55 gridcell "أكمل ملفك"
+    uid=47_57 row "نحتاج اسمك لنُجهّز طلباتك ون" description="Text" level="6" selectable
+      uid=47_58 gridcell "نحتاج اسمك لنُجهّز طلباتك ون"
+    uid=47_60 row "Input" description="Instance" expandable level="5" selectable
+      uid=47_61 gridcell "Input"
+    uid=47_63 row "Input" description="Instance" expandable level="5" selectable
+      uid=47_64 gridcell "Input"
+    uid=47_66 row "Checkbox" description="Instance" expandable level="5" selectable
+      uid=47_67 gridcell "Checkbox"
+    uid=47_69 row "spacer" description="Auto layout" level="5" selectable
+      uid=47_70 gridcell "spacer"
+    uid=47_72 row "Button" description="Instance" expandable level="5" selectable
+      uid=47_73 gridcell "Button"
+    uid=47_75 row "الحالات · States" description="Text" level="2" selectable
+      uid=47_76 gridcell "الحالات · States"
+    uid=47_78 row "states" description="Auto layout" expandable expanded level="2" selectable
+      uid=47_79 gridcell "states"
+    uid=47_81 row "App/Login/Profile — Filled" description="Auto layout" expandable expanded level="3" selectable
+      uid=47_82 gridcell "App/Login/Profile — Filled"
+    uid=47_84 row "status bar" description="Auto layout" expandable expanded level="4" selectable
+      uid=47_85 gridcell "status bar"
+    uid=47_87 row "9:41" description="Text" level="5" selectable
+      uid=47_88 gridcell "9:41"
+    uid=47_90 row "system icons" description="Auto layout" expandable expanded level="5" selectable
+      uid=47_91 gridcell "system icons"
+    uid=47_93 row "ph/cell-signal-full-fill" description="Frame" expandable expanded level="6" selectable
+      uid=47_94 gridcell "ph/cell-signal-full-fill"
+    uid=47_96 row "Vector" description="Vector" level="7" selectable
+      uid=47_97 gridcell "Vector"
+    uid=47_99 row "ph/wifi-high-fill" description="Frame" expandable expanded level="6" selectable
+      uid=47_100 gridcell "ph/wifi-high-fill"
+    uid=47_102 row "Vector" description="Vector" level="7" selectable
+      uid=47_103 gridcell "Vector"
     uid=44_68 slider "Resize handle" orientation="horizontal" value="240" valuemax="443" valuemin="240" valuetext=""
   uid=44_69 region "Right sidebar"
     uid=44_70 button "Multiplayer tools" expandable haspopup="dialog"
@@ -67,123 +124,65 @@ uid=44_0 RootWebArea "Jazlah — Product Design – Figma" url="https://www.figm
     uid=44_73 button "Share"
     uid=44_74 tab "Design" selectable selected
     uid=44_75 tab "Prototype" selectable
-    uid=44_76 button "29%, zoom and view options" expandable haspopup="menu"
-    uid=44_77 button "Frame, Frame Dimension Presets" expandable haspopup="menu"
-    uid=44_78 button "Select matching layers"
-    uid=44_79 button "Create component"
-    uid=44_80 checkbox "Use as mask"
-    uid=44_81 "Use as mask"
-    uid=44_82 button "Union"
-    uid=44_83 button "Boolean operations" expandable haspopup="menu"
-    uid=44_84 heading "Position" level="2"
-    uid=44_85 checkbox "Ignore auto layout"
-    uid=44_86 "Ignore auto layout"
-    uid=44_87 "Alignment"
-    uid=44_88 button "Align left" disableable disabled
-    uid=44_89 button "Align horizontal centers" disableable disabled
-    uid=44_90 button "Align right" disableable disabled
-    uid=44_91 button "Align top" disableable disabled
-    uid=44_92 button "Align vertical centers" disableable disabled
-    uid=44_93 button "Align bottom" disableable disabled
-    uid=44_94 button "More actions"
-    uid=44_95 "Position"
-    uid=44_96 spinbutton "X-position" disableable disabled value="40" valuemax="0" valuemin="0" valuetext="40"
-    uid=44_97 spinbutton "Y-position" disableable disabled value="2235" valuemax="0" valuemin="0" valuetext="2235"
-    uid=44_98 "Rotation"
-    uid=44_99 spinbutton "Rotation" value="0" valuemax="0" valuemin="0" valuetext="0Â°"
-    uid=44_100 button "Rotate 90˚ right"
-    uid=44_101 button "Flip horizontal"
-    uid=44_102 button "Flip vertical"
-    uid=44_103 heading "Auto layout" level="2"
-    uid=44_104 checkbox "Toggle auto layout" checked
-    uid=44_105 "Toggle auto layout"
-    uid=44_106 "Flow"
-    uid=44_107 "Layout"
-    uid=44_108 radio "Freeform"
-    uid=44_109 radio "Vertical" checked
-    uid=44_110 radio "Horizontal"
-    uid=44_111 radio "Grid"
-    uid=44_112 checkbox "Wrap"
-    uid=44_113 "Wrap"
-    uid=44_114 "Resizing"
-    uid=44_115 listbox orientation="vertical"
-    uid=44_116 combobox "Horizontal resizing" description="Press ⌘↓ to select an option." expandable haspopup="listbox" value="1200"
-    uid=44_117 listbox orientation="vertical"
-    uid=44_118 combobox "Vertical resizing" description="Press ⌘↓ to select an option." expandable haspopup="listbox" value="2037"
-    uid=44_119 "Hug"
-    uid=44_120 checkbox "Lock aspect ratio"
-    uid=44_121 "Lock aspect ratio"
-    uid=44_122 "Alignment"
-    uid=44_123 radio "Align top left"
-    uid=44_124 radio "Align top center"
-    uid=44_125 radio "Align top right" checked
-    uid=44_126 radio "Align left"
-    uid=44_127 radio "Align center"
-    uid=44_128 radio "Align right"
-    uid=44_129 radio "Align bottom left"
-    uid=44_130 radio "Align bottom center"
-    uid=44_131 radio "Align bottom right"
-    uid=44_132 listbox orientation="vertical"
-    uid=44_133 button "24, variable value for space/24"
-    uid=44_134 combobox "Vertical gap between objects" description="Press ⌘↓ to select an option. Press = to apply a variable." expandable haspopup="listbox"
-    uid=44_135 button "Auto layout settings" expandable haspopup="dialog"
-    uid=44_136 button "32, variable value for space/32"
-    uid=44_137 textbox "Horizontal padding" description="Press = to apply a variable"
-    uid=44_138 button "32, variable value for space/32"
-    uid=44_139 textbox "Vertical padding" description="Press = to apply a variable"
-    uid=44_140 button "Individual padding" expandable haspopup="dialog"
-    uid=44_141 checkbox "Clip content" checked
-    uid=44_142 "Clip content"
-    uid=44_143 heading "Appearance" level="2"
-    uid=44_144 checkbox "Hide"
-    uid=44_145 "Hide"
-    uid=44_146 button "Apply blend mode" expandable haspopup="menu"
-    uid=44_147 textbox description="Press = to apply a variable" value="100%"
-    uid=44_148 button "26, variable value for radius/lg"
-    uid=44_149 textbox description="Press = to apply a variable"
-    uid=44_150 button "Individual corners" expandable haspopup="dialog"
-    uid=44_151 generic
-      uid=44_152 heading "Fill" level="2"
-    uid=44_153 button "Fill, Apply styles and variables" expandable haspopup="dialog"
-    uid=44_154 button "Add fill"
-    uid=44_155 generic
-    uid=44_156 gridcell "Color Variable color/paper with value #FFFBF7 · 100%"
-      uid=44_157 button "Color Variable color/paper with value #FFFBF7 · 100%" description="Click to edit color variable"
-    uid=44_158 gridcell "Toggle visibility"
-      uid=44_159 checkbox "Toggle visibility" checked
-      uid=44_160 "Toggle visibility"
-    uid=44_161 gridcell "Remove"
-      uid=44_162 button "Remove"
-    uid=44_163 generic
-    uid=44_164 generic
-      uid=44_165 heading "Stroke" level="2"
-    uid=44_166 button "Stroke, Apply styles and variables" expandable haspopup="dialog"
-    uid=44_167 button "Add stroke fill"
-    uid=44_168 generic
-    uid=44_169 gridcell "Color Variable color/line with value #E9D9CD · 100%"
-      uid=44_170 button "Color Variable color/line with value #E9D9CD · 100%" description="Click to edit color variable"
-    uid=44_171 gridcell "Toggle visibility"
-      uid=44_172 checkbox "Toggle visibility" checked
-      uid=44_173 "Toggle visibility"
-    uid=44_174 gridcell "Remove"
-      uid=44_175 button "Remove"
-    uid=44_176 generic
-    uid=44_177 "Stroke align"
-    uid=44_178 combobox "Stroke align" expandable haspopup="listbox" value="Inside"
-    uid=44_179 textbox "Stroke weight" description="Press = to apply a variable" value="1"
-    uid=44_180 button "Advanced stroke settings" expandable haspopup="dialog"
-    uid=44_181 button "Individual strokes" expandable haspopup="menu"
-    uid=44_182 "End points"
-    uid=44_183 combobox "End points" expandable haspopup="listbox" value="None"
-    uid=44_184 button "Effects"
-    uid=44_185 button "Effects, Apply styles" expandable haspopup="dialog"
-    uid=44_186 button "Add effect"
-    uid=44_187 button "Selection colors +12"
-    uid=44_188 button "Layout guide"
-    uid=44_189 button "Layout guide, Apply styles" expandable haspopup="dialog"
-    uid=44_190 button "Add layout guide"
+    uid=44_76 button "100%, zoom and view options" expandable haspopup="menu"
+    uid=47_105 generic
+      uid=47_106 "Page"
+    uid=47_107 button "Solid color hex: 1E1E1E"
+    uid=47_108 "Color"
+    uid=47_109 spinbutton "Color" value="0" valuemax="0" valuemin="0" valuetext="1E1E1E"
+    uid=47_110 textbox "%" value="100"
+    uid=47_111 "%"
+    uid=47_112 checkbox "Toggle visibility" checked
+    uid=47_113 "Toggle visibility"
+    uid=47_114 heading "Styles" level="2"
+    uid=47_115 button "Create style" expandable haspopup="menu"
+    uid=47_116 heading "Text styles" level="3"
+    uid=47_117 button "Create text style"
+    uid=47_118 tree multiselectable orientation="vertical"
+      uid=47_119 treeitem "Caption Caption · 12/150" expandable level="1" selectable
+        uid=47_120 button "Caption"
+      uid=47_121 row expandable level="1"
+        uid=47_122 button "Toggle folder" expandable
+        uid=47_123 gridcell "Display"
+          uid=47_124 button "Display"
+        uid=47_125 button "Create style"
+      uid=47_126 row expandable level="1"
+        uid=47_127 button "Toggle folder" expandable
+        uid=47_128 gridcell "Heading"
+          uid=47_129 button "Heading"
+        uid=47_130 button "Create style"
+      uid=47_131 row expandable level="1"
+        uid=47_132 button "Toggle folder" expandable
+        uid=47_133 gridcell "Body"
+          uid=47_134 button "Body"
+        uid=47_135 button "Create style"
+      uid=47_136 row expandable level="1"
+        uid=47_137 button "Toggle folder" expandable
+        uid=47_138 gridcell "Label"
+          uid=47_139 button "Label"
+        uid=47_140 button "Create style"
+    uid=47_141 heading "Color styles" level="3"
+    uid=47_142 button "Create color style"
+    uid=47_143 tree multiselectable orientation="vertical"
+      uid=47_144 row expandable level="1"
+        uid=47_145 button "Toggle folder" expandable
+        uid=47_146 gridcell "Brand"
+          uid=47_147 button "Brand"
+        uid=47_148 button "Create style"
+    uid=47_149 heading "Effect styles" level="3"
+    uid=47_150 button "Create effect style"
+    uid=47_151 tree multiselectable orientation="vertical"
+      uid=47_152 row expandable level="1"
+        uid=47_153 button "Toggle folder" expandable
+        uid=47_154 gridcell "Shadow"
+          uid=47_155 button "Shadow"
+        uid=47_156 button "Create style"
     uid=44_191 button "Export"
     uid=44_192 button "Add export settings"
+    uid=47_157 generic
+      uid=47_158 "MCP"
+      uid=47_159 "2 connections"
+    uid=47_160 button "Set up agents for Figma MCP"
     uid=44_193 slider "Resize handle" orientation="horizontal" value="241" valuemax="500" valuemin="241" valuetext=""
   uid=44_194 region "Application toolbar"
     uid=44_195 button "Move" pressed
@@ -218,12 +217,12 @@ uid=44_0 RootWebArea "Jazlah — Product Design – Figma" url="https://www.figm
                 uid=45_8 RootWebArea url="data:text/html;base64,PHNjcmlwdD4KICAgICAgb25tZXNzYWdlID0gKGV2ZW50KSA9PiB7CiAgICAgICAgaWYgKGV2ZW50LnNvdXJjZSA9PT0gd2luZG93LnBhcmVudC5wYXJlbnQucGFyZW50ICYmIGV2ZW50Lm9yaWdpbiA9PT0gImh0dHBzOi8vd3d3LmZpZ21hLmNvbSIpIHsKICAgICAgICAgIGRvY3VtZW50LndyaXRlKCI8c2Nya... <truncated>"
                   uid=45_9 Iframe
                     uid=45_10 RootWebArea url="https://scripter.rsms.me/?v=d3437b962d147cebdb6d6f81f13b93a64db72d9d&figma=1.0.0"
-                      uid=46_0 textbox "Editor content;Press Alt+F1 for Accessibility Options." autocomplete="both" focusable focused multiline
+                      uid=48_0 textbox "Editor content;Press Alt+F1 for Accessibility Options." autocomplete="both" focusable focused multiline
                       uid=45_12 generic description="Show menu ⌃M"
                       uid=45_13 generic description="Go Back in navigation history"
                       uid=45_14 generic description="Go Forward in navigation history"
                       uid=45_15 generic description="New script"
-                      uid=45_16 textbox value="Untitled 34"
+                      uid=45_16 textbox value="Untitled 35"
                       uid=45_17 generic description="Save to Figma file"
                       uid=45_18 generic description="Clear messages ⌘K"
                       uid=45_19 generic description="Run ⌘⏎"
