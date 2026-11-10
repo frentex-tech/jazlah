@@ -4,7 +4,7 @@ All Figma work for Jazlah is done by scripts in this folder, run through the **S
 
 | Item | Value |
 |---|---|
-| Figma file | _the designer agent creates "Jazlah — Product Design" in DSN-DES-1 and adds the link here_ |
+| Figma file | [Jazlah — Product Design](https://www.figma.com/design/puWXbmOVpnQpjc7mUahTnw/Jazlah-%E2%80%94-Product-Design) (Drafts of abdulrhmanmagdy13@gmail.com) |
 | Editing account | abdulrhmanmagdy13@gmail.com |
 | Plugin | [Scripter](https://www.figma.com/community/plugin/757836922707087381) (install once per account) |
 
@@ -18,12 +18,23 @@ The designer agent drives a real Chrome window through the chrome-devtools MCP. 
 2. Keep the window open while the agent works. Next time, run the same command and you'll still be signed in.
 3. Each developer does this once on their own machine. Kerolles signs in with the same Figma account, or with his own if it's invited as an editor to the file.
 
-## How to run a script
-1. Open the Figma file in the browser and run **Plugins → Scripter**.
-2. Create a new script, paste the contents of `scripts/_lib.ts`, then the script you want, and press **Run**.
-3. Check the output panel and the canvas. Scripts are idempotent, so re-running them updates in place.
+## How to run a script (loader: no copy-paste)
+Scripts are plain JavaScript files in `scripts/`. Scripter fetches them from GitHub and runs them, so you never paste long code into Scripter:
+
+1. Commit and push the script on your branch, and note the commit SHA (`git rev-parse HEAD`). Pin the URL to the SHA, because raw.githubusercontent caches branch URLs for minutes.
+2. In Figma: **Plugins → Scripter → New script (+)**, type this one line (replace `<sha>` and the file name), then press **⌘↩**:
+```js
+const B="https://raw.githubusercontent.com/frentex-tech/jazlah/<sha>/design/figma/scripts/"; const AF=Object.getPrototypeOf(async function(){}).constructor; const src=(await (await fetch(B+"_lib.js")).text())+"\n"+(await (await fetch(B+"00-inspect.js")).text()); await new AF("figma","print",src)(figma,print)
+```
+3. Read the output in Scripter. Scripts are idempotent, so re-running them updates in place.
+
+Notes, verified on 2026-11-10:
+- Scripter can `fetch` raw GitHub URLs and run code with `AsyncFunction`.
+- `figma.currentUser` is **not** available in Scripter, so don't use it.
+- Pasting with ⌘V into the Scripter editor doesn't work through browser automation. Use the keyboard-typing tool for the one-line loader.
+- Monaco auto-closes brackets and quotes, but typed balanced code comes out correct.
 
 ## Files
-- `scripts/_lib.ts`: shared helpers (find-or-create, fonts, variables, auto layout, components).
-- `scripts/00-inspect.ts`: prints the file structure. **Always run this first.**
-- `scripts/NN-<task-key>-<what>.ts`: one file per change batch, numbered in the order they ran.
+- `scripts/_lib.js`: shared helpers (find-or-create, fonts, variables, auto layout, components). The loader prepends it to every script.
+- `scripts/00-inspect.js`: prints the file structure. **Always run this first.**
+- `scripts/NN-<task-key>-<what>.js`: one file per change batch, numbered in the order they ran. Plain JS only (no TypeScript types), top-level `await` allowed, with globals `figma` and `print`.

@@ -37,16 +37,19 @@ The Figma MCP has tight rate limits. Use it **only** for occasional read-only in
 ### Workflow
 1. **Open the file:**
    - Work in the dedicated Chrome profile described in `design/figma/README.md` ("Browser setup"). It's already signed in to Figma with the editing account, **abdulrhmanmagdy13@gmail.com**. Connect to it through the chrome-devtools MCP (remote debugging port 9222).
-   - Open the Jazlah Figma file (link in `design/figma/README.md`) with `new_page` / `navigate_page`. If there's no file yet (first design task, DSN-DES-1), create it from Figma's home ("New design file"), name it **"Jazlah — Product Design"**, and write its link in the README.
+   - Open the Jazlah Figma file (link in `design/figma/README.md`) with `new_page` / `navigate_page`. The file already exists: https://www.figma.com/design/puWXbmOVpnQpjc7mUahTnw (in the user's Drafts). The Chrome on port 9222 is already signed in as abdulrhmanmagdy13@gmail.com, and Scripter is installed.
    - If Figma shows a login screen or a different account, **stop and ask the human to sign in** in that Chrome window. Never type passwords or one-time codes yourself.
 2. **Open Scripter:** run it from the plugins menu (Main menu → Plugins → Scripter, or Quick actions `Ctrl/Cmd+/` → "Scripter"). If Scripter isn't installed for this account, ask the human to install it once from the Figma Community.
-3. **Inspect before changing:** always run `design/figma/scripts/00-inspect.ts` first and read its output. It lists the pages, sections, top-level frames and screen names, components and variants, variable collections, and prototype connections. Plan your changes against what already exists.
+3. **Inspect before changing:** always run `design/figma/scripts/00-inspect.js` first and read its output. It lists the pages, sections, top-level frames and screen names, components and variants, variable collections, and prototype connections. Plan your changes against what already exists.
 4. **Write the script into the repo first:**
-   - Save each change batch as a file in `design/figma/scripts/NN-<task-key>-<what>.ts`, e.g. `12-CRT-DES-1-cart-screens.ts`, using the helpers in `design/figma/scripts/_lib.ts` (paste `_lib.ts` above the script when running).
+   - Save each change batch as a **plain JavaScript** file `design/figma/scripts/NN-<task-key>-<what>.js`, e.g. `12-STF-DES-1-home.js`.
+   - No TypeScript types. Globals are `figma` and `print`, top-level `await` is allowed, and every helper in `_lib.js` is available.
+   - Commit and push it on the task branch.
    - Scripts are versioned project code, so they must be re-runnable and editable later.
 5. **Run it in Scripter:**
-   - Open a new script in Scripter, replace the editor content with `_lib.ts` + your script, and press Run.
-   - To set the editor content, click into the editor and use select-all + paste (put the text on the clipboard through `evaluate_script` with `navigator.clipboard.writeText`, or type it with the keyboard tools).
+   - Use the **one-line loader** in `design/figma/README.md`. It fetches `_lib.js` + your script from `raw.githubusercontent.com` at the pushed **commit SHA** and runs them.
+   - In Scripter, click **New script (+)** so the editor is empty and focused, type the loader with `type_text`, then press `Meta+Enter`.
+   - Don't paste: ⌘V doesn't reach Scripter's nested iframe. Don't type long scripts either; always go through the loader.
    - Read Scripter's output and the canvas result (`take_screenshot`) to verify.
 6. **Test the prototype:** after each batch, open Present/Prototype in Chrome and click through the flow manually (`click` + `take_screenshot`), in Arabic. Fix broken links before moving on.
 7. **Commit** the scripts, `tokens.json` and exports on the task branch (`docs/<issue>-<slug>`), then open the PR with screenshots.
