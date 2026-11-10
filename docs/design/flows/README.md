@@ -16,5 +16,5 @@ Figma file: [Jazlah — Product Design](https://www.figma.com/design/puWXbmOVpnQ
 Notes for developers
 - Regular order: product → customize → cart → fulfilment and day → payment → order placed. Six steps.
 - English (LTR) is not a second design: each frame on `99 LTR Rules` is the Arabic frame mirrored by script (rows reversed, directional icons swapped, copy translated). Numbers, prices and the logo do not mirror.
-- The stepper keeps "+" at the start edge in both directions (right in RTL, left in LTR).
+- The quantity stepper mirrors like everything else: "+" sits at the start edge (right in RTL, left in LTR).
 - PNG exports are not committed yet: Figma's own export is needed (see `docs/design/progress.md`).
