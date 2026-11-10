@@ -17,7 +17,7 @@ Design for the post-launch features. The approved prototype already has first ve
 
 **What:** design the phase-2 features before each one is scheduled.
 
-**Output:** points screen and checkout redeem; stories bar, viewer and posting (from the prototype's story view); Sahm Al-Khair (from the prototype); installments at checkout; time-slot picker; reorder, gift form and favorites; feed "buy now" and feed orders; vendor staff management; seasonal theme variant. All in AR and EN with every state.
+**Output:** points screen and checkout redeem; stories bar, viewer and posting (from the prototype's story view); Sahm Al-Khair (from the prototype); installments at checkout; time-slot picker; reorder, gift form and favorites; feed "buy now" and feed orders; vendor staff management; seasonal theme variant. All in Arabic (RTL) with every state.
 
 **Where:** Figma file «Jazlah — Product Design», `design/figma/scripts/`, `docs/design/post-launch/`
 

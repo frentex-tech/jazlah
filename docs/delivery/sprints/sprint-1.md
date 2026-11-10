@@ -395,6 +395,9 @@ This task also covers:
 *Jazlah brand assets (logo, colors, app icon, splash)*
 - The palette and fonts are already approved, so don't re-open them. Get written client approval on the new wordmark only.
 - Use the approved prototype's screens (`docs/design/reference/screens/`) as the visual reference for components.
+- **Design once, in Arabic (RTL).** No separate English screens. Add a `99 LTR Rules` page with 3–4 key screens in English and annotations on what mirrors.
+- **File structure:** pages `00 Cover` (clickable index) · `01 Foundations` · `02 Components` · `10 Customer App` · `20 Customer Web` · `30 Admin` · `31 Vendor` · `32 Kitchen` · `90 Flows` · `99 LTR Rules`. One Section per feature, in journey order, so each link opens a readable overview.
+- **Prototypes:** only the 8 main flows (order, occasion, visit, cooking, Adha, feed + chat, vendor day, admin day), reusing the screens.
 
 **Where:** `docs/design/brand/`, `docs/design/flows/`, `docs/design/tokens.json`
 
@@ -404,7 +407,7 @@ This task also covers:
 - [ ] The regular order flow reaches "order placed" in ≤ 6 steps
 - [ ] Both developers reviewed the flows
 - [ ] `tokens.json` exported and committed
-- [ ] Every component has RTL and LTR variants
+- [ ] Components are built RTL; the `99 LTR Rules` page shows 3–4 key screens in English with mirroring notes
 
 ### DSN-DES-2 — Full design review & client sign-off
 `type: Task · area: design · size: S · prio: P0 · reqs: NFR-USB · depends: DSN-DES-1, ACC-DES-1, VND-DES-1, STF-DES-1, SCH-DES-1, OPX-DES-1, OCC-DES-1, FED-DES-1 · labels: needs-client`
@@ -435,7 +438,7 @@ Phone + OTP sign-in for customers and staff, profile, language, addresses and ac
 **Where:** Figma (link in the issue)
 
 **Acceptance:**
-- [ ] Every screen has AR and EN, empty, loading and error states
+- [ ] Every screen has empty, loading and error states (Arabic, RTL)
 - [ ] Developers signed off in the issue comments
 
 ### ACC-API-1 — OTP authentication (customers & staff) with SMS port
@@ -686,7 +689,7 @@ This task also covers:
 **Where:** Figma (link in the issue)
 
 **Acceptance:**
-- [ ] AR/EN, all states, reviewed by developers
+- [ ] Arabic (RTL), all states, reviewed by developers
 - [ ] The compatibility matrix is usable with 6 cuts × 4 packaging options
 
 ## EPIC STF — Storefront (customer browsing)
@@ -732,12 +735,12 @@ Design for everything Sprint 4 builds: after-sales, tracking, notifications, the
 - Customer (mobile + web): cancel order flow with refund choice, complaint form with photos and status, tracking card (courier, call, track link/map), freshness card on the order, notification center, support contact, marketing opt-in
 - Vendor dashboard: live orders board (columns, new-order alert state, card actions, slaughter time picker, freshness upload), A6 order label, earnings (summary, entries, payouts)
 - Admin dashboard: overview KPIs and charts, full orders list and detail timeline with actions (cancel/refund, reschedule, label), customers list and detail, complaints queue, delivery operations (shipments, manual assign, failed deliveries, COD settlements), staff and roles permission matrix, audit log with diff, finance (balances, payouts, reports), campaign composer
-- All in AR and EN with loading, empty, error and permission-denied states
+- All in Arabic (RTL) with loading, empty, error and permission-denied states
 
 **Where:** Figma file «Jazlah — Product Design» (pages `10 Customer App`, `20 Customer Web`, `30 Admin`, `31 Vendor`), scripts in `design/figma/scripts/`, exports in `docs/design/operations/`
 
 **Acceptance:**
-- [ ] Every screen listed is designed in AR and EN with all states, using only design-system components
+- [ ] Every screen listed is designed in Arabic (RTL) with all states, using only design-system components
 - [ ] The vendor board and admin order detail are prototyped end-to-end
 - [ ] Both developers signed off
 
@@ -754,7 +757,7 @@ Design for this module is done up-front in Sprint 1 (design-first).
 **Where:** Figma (link in the issue)
 
 **Acceptance:**
-- [ ] AR/EN with all states; both developers signed off
+- [ ] Arabic (RTL) with all states; both developers signed off
 
 ## EPIC FED — Feed marketplace
 Design for this module is done up-front in Sprint 1 (design-first).
@@ -769,7 +772,7 @@ Design for this module is done up-front in Sprint 1 (design-first).
 **Where:** Figma (link in the issue)
 
 **Acceptance:**
-- [ ] AR/EN, all states; signed off by both developers
+- [ ] Arabic (RTL), all states; signed off by both developers
 
 ## EPIC REL — Releases & merge points
 Sprint-end merge points. Each task cuts a release branch, verifies the sprint's exit criteria on staging, merges to `main`, tags, back-merges to `develop` and updates STATUS.md.
