@@ -1,234 +1,190 @@
-uid=21_0 RootWebArea "Jazlah — Product Design – Figma" url="https://www.figma.com/design/puWXbmOVpnQpjc7mUahTnw/Jazlah-%E2%80%94-Product-Design?node-id=1-9&p=f&t=vJvbotDEGrMCBAme-0"
-  uid=21_1 application "Figma Design"
-  uid=21_2 status atomic live="polite" relevant="additions text"
-    uid=21_3 "Screenreader support for the board is currently disabled. To enable it via Accessibility settings, press ⌘K, type Accessibility Settings, and press Enter. To see available keyboard shortcuts, enter ⌃⇧Question mark ."
-  uid=21_4 status live="polite" relevant="additions text"
-  uid=24_0 region "Comments on canvas"
-    uid=24_1 button "Create new comment"
-  uid=21_7 region "Left sidebar"
-    uid=21_8 button "Main menu" expandable haspopup="menu"
-    uid=21_9 button "File" expandable expanded
-    uid=21_10 button "Agents" expandable
-    uid=21_11 button "Assets" expandable
-    uid=21_12 button "Tools" expandable
-    uid=21_13 button "Variables" expandable
-    uid=21_14 button "Jazlah — Product Design, file name"
-    uid=21_15 "File name"
-    uid=21_16 button "Edit file menu" expandable haspopup="menu"
-    uid=21_17 button "Minimize UI"
-    uid=21_18 link "Drafts" url="https://www.figma.com/files/team/1542841502780196277/project/441846225"
-    uid=21_20 button "Free"
-    uid=21_21 button "Pages" expandable expanded
-    uid=21_22 button "Find"
-    uid=21_23 button "Add new page"
-    uid=21_24 generic
-    uid=21_25 gridcell "00 Cover"
-      uid=21_26 button "00 Cover"
-    uid=21_27 gridcell "01 Foundations"
-      uid=21_28 button "01 Foundations"
-    uid=21_29 gridcell "02 Components"
-      uid=21_30 button "02 Components"
-    uid=21_31 gridcell "10 Customer App"
-      uid=21_32 button "10 Customer App"
-    uid=21_33 gridcell "20 Customer Web"
-      uid=21_34 button "20 Customer Web"
-    uid=21_35 gridcell "30 Admin"
-      uid=21_36 button "30 Admin"
-    uid=21_37 gridcell "31 Vendor"
-      uid=21_38 button "31 Vendor"
-    uid=21_39 gridcell "32 Kitchen"
-      uid=21_40 button "32 Kitchen"
-    uid=21_41 gridcell "90 Flows"
-      uid=21_42 button "90 Flows"
-    uid=21_43 gridcell "99 LTR Rules"
-      uid=21_44 button "99 LTR Rules"
-    uid=21_45 gridcell "🗄 Archive"
-      uid=21_46 button "🗄 Archive"
-    uid=21_47 generic
-    uid=21_48 slider "Resize handle" orientation="vertical" value="100" valuemax="100" valuemin="0" valuetext=""
-    uid=21_49 button "Layers" expandable expanded
-    uid=24_2 button "Collapse layers"
-    uid=24_3 row "item" description="Auto layout" expandable expanded level="1" selectable
-      uid=24_4 gridcell "item"
-    uid=24_6 row "الإلغاء والاسترجاع" description="Text" level="1" selectable
-      uid=24_7 gridcell "الإلغاء والاسترجاع"
-    uid=24_9 row "ia/Orders" description="Auto layout" expandable expanded level="1" selectable
-      uid=24_10 gridcell "ia/Orders"
-    uid=24_12 row "head" description="Auto layout" expandable expanded level="1" selectable
-      uid=24_13 gridcell "head"
-    uid=24_15 row "الطلبات" description="Text" level="2" selectable
-      uid=24_16 gridcell "الطلبات"
-    uid=24_18 row "Orders" description="Text" level="2" selectable
-      uid=24_19 gridcell "Orders"
-    uid=24_21 row "item" description="Auto layout" expandable expanded level="1" selectable
-      uid=24_22 gridcell "item"
-    uid=24_24 row "طلباتي" description="Text" level="2" selectable
-      uid=24_25 gridcell "طلباتي"
-    uid=24_27 row "sub" description="Auto layout" expandable expanded level="2" selectable
-      uid=24_28 gridcell "sub"
-    uid=24_30 row "الحالية" description="Text" level="3" selectable
-      uid=24_31 gridcell "الحالية"
-    uid=24_33 row "bullet" description="Ellipse" level="3" selectable
-      uid=24_34 gridcell "bullet"
-    uid=24_36 row "sub" description="Auto layout" expandable expanded level="2" selectable
-      uid=24_37 gridcell "sub"
-    uid=24_39 row "السابقة" description="Text" level="3" selectable
-      uid=24_40 gridcell "السابقة"
-    uid=24_42 row "bullet" description="Ellipse" level="3" selectable
-      uid=24_43 gridcell "bullet"
-    uid=24_45 row "item" description="Auto layout" expandable expanded level="1" selectable
-      uid=24_46 gridcell "item"
-    uid=24_48 row "تفاصيل الطلب" description="Text" level="2" selectable
-      uid=24_49 gridcell "تفاصيل الطلب"
-    uid=24_51 row "sub" description="Auto layout" expandable expanded level="2" selectable
-      uid=24_52 gridcell "sub"
-    uid=24_54 row "الخط الزمني" description="Text" level="3" selectable
-      uid=24_55 gridcell "الخط الزمني"
-    uid=24_57 row "bullet" description="Ellipse" level="3" selectable
-      uid=24_58 gridcell "bullet"
-    uid=24_60 row "sub" description="Auto layout" expandable expanded level="2" selectable
-      uid=24_61 gridcell "sub"
-    uid=24_63 row "بطاقة الطزاجة" description="Text" level="3" selectable
-      uid=24_64 gridcell "بطاقة الطزاجة"
-    uid=24_66 row "bullet" description="Ellipse" level="3" selectable
-      uid=24_67 gridcell "bullet"
-    uid=24_69 row "item" description="Auto layout" expandable expanded level="1" selectable
-      uid=24_70 gridcell "item"
-    uid=24_72 row "تتبع الطلب" description="Text" level="2" selectable
-      uid=24_73 gridcell "تتبع الطلب"
-    uid=24_75 row "sub" description="Auto layout" expandable expanded level="2" selectable
-      uid=24_76 gridcell "sub"
-    uid=24_78 row "المندوب والخريطة" description="Text" level="3" selectable
-      uid=24_79 gridcell "المندوب والخريطة"
-    uid=24_81 row "bullet" description="Ellipse" level="3" selectable
-      uid=24_82 gridcell "bullet"
-    uid=24_84 row "tabs" description="Auto layout" expandable expanded level="1" selectable
-      uid=24_85 gridcell "tabs"
-    uid=24_87 row "ia/Services" description="Auto layout" expandable expanded level="1" selectable
-      uid=24_88 gridcell "ia/Services"
-    uid=24_90 row "head" description="Auto layout" expandable expanded level="2" selectable
-      uid=24_91 gridcell "head"
-    uid=24_93 row "الخدمات" description="Text" level="3" selectable
-      uid=24_94 gridcell "الخدمات"
-    uid=24_96 row "Services" description="Text" level="3" selectable
-      uid=24_97 gridcell "Services"
-    uid=24_99 row "item" description="Auto layout" expandable expanded level="2" selectable
-      uid=24_100 gridcell "item"
-    uid=24_102 row "المناسبات" description="Text" level="3" selectable
-      uid=24_103 gridcell "المناسبات"
-    uid=21_92 slider "Resize handle" orientation="horizontal" value="240" valuemax="443" valuemin="240" valuetext=""
-  uid=21_93 region "Right sidebar"
-    uid=21_94 button "Multiplayer tools" expandable haspopup="dialog"
-    uid=21_95 button "Present"
-    uid=21_96 button "Prototype view" expandable haspopup="menu"
-    uid=21_97 button "Share"
-    uid=21_98 tab "Design" selectable selected
-    uid=21_99 tab "Prototype" selectable
-    uid=21_100 button "100%, zoom and view options" expandable haspopup="menu"
-    uid=24_105 generic
-      uid=24_106 "Page"
-    uid=24_107 button "Solid color hex: 1E1E1E"
-    uid=24_108 "Color"
-    uid=24_109 spinbutton "Color" value="0" valuemax="0" valuemin="0" valuetext="1E1E1E"
-    uid=24_110 textbox "%" value="100"
-    uid=24_111 "%"
-    uid=24_112 checkbox "Toggle visibility" checked
-    uid=24_113 "Toggle visibility"
-    uid=24_114 heading "Styles" level="2"
-    uid=24_115 button "Create style" expandable haspopup="menu"
-    uid=24_116 heading "Text styles" level="3"
-    uid=24_117 button "Create text style"
-    uid=24_118 tree multiselectable orientation="vertical"
-      uid=24_119 treeitem "Caption Caption · 12/150" expandable level="1" selectable
-        uid=24_120 button "Caption"
-      uid=24_121 row expandable level="1"
-        uid=24_122 button "Toggle folder" expandable
-        uid=24_123 gridcell "Display"
-          uid=24_124 button "Display"
-        uid=24_125 button "Create style"
-      uid=24_126 row expandable level="1"
-        uid=24_127 button "Toggle folder" expandable
-        uid=24_128 gridcell "Heading"
-          uid=24_129 button "Heading"
-        uid=24_130 button "Create style"
-      uid=24_131 row expandable level="1"
-        uid=24_132 button "Toggle folder" expandable
-        uid=24_133 gridcell "Body"
-          uid=24_134 button "Body"
-        uid=24_135 button "Create style"
-      uid=24_136 row expandable level="1"
-        uid=24_137 button "Toggle folder" expandable
-        uid=24_138 gridcell "Label"
-          uid=24_139 button "Label"
-        uid=24_140 button "Create style"
-    uid=24_141 heading "Color styles" level="3"
-    uid=24_142 button "Create color style"
-    uid=24_143 tree multiselectable orientation="vertical"
-      uid=24_144 row expandable level="1"
-        uid=24_145 button "Toggle folder" expandable
-        uid=24_146 gridcell "Brand"
-          uid=24_147 button "Brand"
-        uid=24_148 button "Create style"
-    uid=24_149 heading "Effect styles" level="3"
-    uid=24_150 button "Create effect style"
-    uid=24_151 tree multiselectable orientation="vertical"
-      uid=24_152 row expandable level="1"
-        uid=24_153 button "Toggle folder" expandable
-        uid=24_154 gridcell "Shadow"
-          uid=24_155 button "Shadow"
-        uid=24_156 button "Create style"
-    uid=21_171 button "Export"
-    uid=21_172 button "Add export settings"
-    uid=24_157 generic
-      uid=24_158 "MCP"
-      uid=24_159 "2 connections"
-    uid=24_160 button "Set up agents for Figma MCP"
-    uid=21_173 slider "Resize handle" orientation="horizontal" value="241" valuemax="500" valuemin="241" valuetext=""
-  uid=21_174 region "Application toolbar"
-    uid=21_175 button "Move" pressed
-    uid=21_176 button "Move tools" expandable haspopup="menu"
-    uid=21_177 button "Frame"
-    uid=21_178 button "Region tools" expandable haspopup="menu"
-    uid=21_179 button "Rectangle"
-    uid=21_180 button "Shape tools" expandable haspopup="menu"
-    uid=21_181 button "Pen"
-    uid=21_182 button "Creation tools" expandable haspopup="menu"
-    uid=21_183 button "Text"
-    uid=21_184 button "Type tools" expandable haspopup="menu"
-    uid=21_185 button "Code"
-    uid=21_186 button "Code tools" expandable haspopup="menu"
-    uid=21_187 button "Comment"
-    uid=21_188 button "Actions"
-    uid=21_189 "Toolbelt Mode"
-    uid=21_190 radio "Draw"
-    uid=21_191 radio "Design" checked
-    uid=21_192 radio "Motion"
-    uid=21_193 radio "Dev Mode"
-  uid=21_194 region "Help/zoom toolbar"
-    uid=21_195 button "Help" expandable haspopup="menu"
-  uid=22_0 dialog "Scripter"
-    uid=22_1 region "Plugin"
-      uid=22_2 heading "Scripter" level="2"
-      uid=22_3 Iframe "Plugin: Scripter"
-        uid=22_4 RootWebArea url="https://www.figma.com/plugin-sandbox"
-          uid=22_5 Iframe
-            uid=22_6 RootWebArea url="about:blank"
-              uid=22_7 Iframe focusable focused
-                uid=22_8 RootWebArea url="data:text/html;base64,PHNjcmlwdD4KICAgICAgb25tZXNzYWdlID0gKGV2ZW50KSA9PiB7CiAgICAgICAgaWYgKGV2ZW50LnNvdXJjZSA9PT0gd2luZG93LnBhcmVudC5wYXJlbnQucGFyZW50ICYmIGV2ZW50Lm9yaWdpbiA9PT0gImh0dHBzOi8vd3d3LmZpZ21hLmNvbSIpIHsKICAgICAgICAgIGRvY3VtZW50LndyaXRlKCI8c2Nya... <truncated>"
-                  uid=22_9 Iframe
-                    uid=22_10 RootWebArea url="https://scripter.rsms.me/?v=d3437b962d147cebdb6d6f81f13b93a64db72d9d&figma=1.0.0"
-                      uid=24_161 textbox "Editor content;Press Alt+F1 for Accessibility Options." autocomplete="both" focusable focused multiline
-                      uid=22_12 generic description="Show menu ⌃M"
-                      uid=22_13 generic description="Go Back in navigation history"
-                      uid=22_14 generic description="Go Forward in navigation history"
-                      uid=22_15 generic description="New script"
-                      uid=22_16 textbox value="Untitled 26"
-                      uid=22_17 generic description="Save to Figma file"
-                      uid=22_18 generic description="Clear messages ⌘K"
-                      uid=22_19 generic description="Run ⌘⏎"
-                      uid=22_20 alert atomic live="assertive" relevant="additions text"
-                      uid=22_21 status atomic live="polite" relevant="additions text"
-    uid=22_22 button "Close"
-  uid=21_196 status atomic live="polite" relevant="all"
-  uid=22_23 alert atomic live="assertive" relevant="all"
-  uid=22_24 alert atomic live="assertive" relevant="all"
+uid=26_0 RootWebArea "Jazlah — Product Design – Figma" url="https://www.figma.com/design/puWXbmOVpnQpjc7mUahTnw/Jazlah-%E2%80%94-Product-Design?node-id=15-642&t=UcsEaPXFDWILCgDS-0"
+  uid=26_1 status atomic live="polite" relevant="additions text"
+    uid=26_2 "Screenreader support for the board is currently disabled. To enable it via Accessibility settings, press ⌘K, type Accessibility Settings, and press Enter. To see available keyboard shortcuts, enter ⌃⇧Question mark ."
+  uid=26_3 status live="polite" relevant="additions text"
+  uid=26_4 region "Comments on canvas"
+    uid=26_5 button "Create new comment"
+  uid=26_6 region "Left sidebar"
+    uid=26_7 button "Main menu" expandable haspopup="menu"
+    uid=26_8 button "File" expandable expanded
+    uid=26_9 button "Agents" expandable
+    uid=26_10 button "Assets" expandable
+    uid=26_11 button "Tools" expandable
+    uid=26_12 button "Variables" expandable
+    uid=26_13 button "Jazlah — Product Design, file name"
+    uid=26_14 "File name"
+    uid=26_15 button "Edit file menu" expandable haspopup="menu"
+    uid=26_16 button "Minimize UI"
+    uid=26_17 link "Drafts" url="https://www.figma.com/files/team/1542841502780196277/project/441846225"
+    uid=26_19 button "Free"
+    uid=26_20 button "Pages" expandable expanded
+    uid=26_21 button "Find"
+    uid=26_22 button "Add new page"
+    uid=26_23 generic
+    uid=26_24 gridcell "00 Cover"
+      uid=26_25 button "00 Cover"
+    uid=26_26 gridcell "01 Foundations"
+      uid=26_27 button "01 Foundations"
+    uid=26_28 gridcell "02 Components"
+      uid=26_29 button "02 Components"
+    uid=26_30 gridcell "10 Customer App"
+      uid=26_31 button "10 Customer App"
+    uid=26_32 gridcell "20 Customer Web"
+      uid=26_33 button "20 Customer Web"
+    uid=26_34 gridcell "30 Admin"
+      uid=26_35 button "30 Admin"
+    uid=26_36 gridcell "31 Vendor"
+      uid=26_37 button "31 Vendor"
+    uid=26_38 gridcell "32 Kitchen"
+      uid=26_39 button "32 Kitchen"
+    uid=26_40 gridcell "90 Flows"
+      uid=26_41 button "90 Flows"
+    uid=26_42 gridcell "99 LTR Rules"
+      uid=26_43 button "99 LTR Rules"
+    uid=26_44 gridcell "🗄 Archive"
+      uid=26_45 button "🗄 Archive"
+    uid=26_46 generic
+    uid=26_47 slider "Resize handle" orientation="vertical" value="100" valuemax="100" valuemin="0" valuetext=""
+    uid=26_48 button "Layers" expandable expanded
+    uid=26_49 row "التدفقات الرئيسية · Key user flows" description="Section" expandable level="1" selectable selected
+      uid=26_50 gridcell "التدفقات الرئيسية · Key user flows"
+    uid=26_52 row "خرائط لوحات التحكم · Dashboard sitemaps" description="Section" expandable level="1" selectable
+      uid=26_53 gridcell "خرائط لوحات التحكم · Dashboard sitemaps"
+    uid=26_55 row "item" description="Auto layout" expandable level="1" selectable
+      uid=26_56 gridcell "item"
+    uid=26_58 row "ia/Orders" description="Auto layout" expandable level="1" selectable
+      uid=26_59 gridcell "ia/Orders"
+    uid=26_61 row "tabs" description="Auto layout" expandable level="1" selectable
+      uid=26_62 gridcell "tabs"
+    uid=26_64 row "خريطة التطبيق · Customer app map" description="Section" expandable level="1" selectable
+      uid=26_65 gridcell "خريطة التطبيق · Customer app map"
+    uid=26_67 slider "Resize handle" orientation="horizontal" value="240" valuemax="443" valuemin="240" valuetext=""
+  uid=26_68 region "Right sidebar"
+    uid=26_69 button "Multiplayer tools" expandable haspopup="dialog"
+    uid=26_70 button "Present"
+    uid=26_71 button "Prototype view" expandable haspopup="menu"
+    uid=26_72 button "Share"
+    uid=26_73 tab "Design" selectable selected
+    uid=26_74 tab "Prototype" selectable
+    uid=26_75 button "35%, zoom and view options" expandable haspopup="menu"
+    uid=26_76 button "Section, Frame Dimension Presets" expandable haspopup="menu"
+    uid=26_77 checkbox "Toggle ready for dev status"
+    uid=26_78 "Toggle ready for dev status"
+    uid=26_79 heading "Position" level="2"
+    uid=26_80 "Alignment"
+    uid=26_81 button "Align left"
+    uid=26_82 button "Align horizontal centers"
+    uid=26_83 button "Align right"
+    uid=26_84 button "Align top"
+    uid=26_85 button "Align vertical centers"
+    uid=26_86 button "Align bottom"
+    uid=26_87 button "More actions"
+    uid=26_88 "Position"
+    uid=26_89 spinbutton "X-position" value="0" valuemax="0" valuemin="0" valuetext="0"
+    uid=26_90 spinbutton "Y-position" value="3234" valuemax="0" valuemin="0" valuetext="3234"
+    uid=26_91 heading "Layout" level="2"
+    uid=26_92 button "Resize to fit"
+    uid=26_93 "Dimensions"
+    uid=26_94 "W"
+    uid=26_95 textbox "Width" description="Press = to apply a variable" value="1780"
+    uid=26_96 "H"
+    uid=26_97 textbox "Height" description="Press = to apply a variable" value="1564"
+    uid=26_98 checkbox "Lock aspect ratio"
+    uid=26_99 "Lock aspect ratio"
+    uid=26_100 heading "Appearance" level="2"
+    uid=26_101 checkbox "Hide"
+    uid=26_102 "Hide"
+    uid=26_103 button "Apply blend mode" expandable haspopup="menu"
+    uid=26_104 textbox description="Press = to apply a variable" value="100%"
+    uid=26_105 textbox description="Press = to apply a variable" value="2"
+    uid=26_106 button "Individual corners" expandable haspopup="dialog"
+    uid=26_107 generic
+      uid=26_108 heading "Fill" level="2"
+    uid=26_109 button "Fill, Apply styles and variables" expandable haspopup="dialog"
+    uid=26_110 button "Add fill"
+    uid=26_111 generic
+    uid=26_112 gridcell "Solid color hex: 444444 Color 444444 100 %"
+      uid=26_113 button "Solid color hex: 444444"
+      uid=26_114 "Color"
+      uid=26_115 combobox "Color" autocomplete="list" description="Autofill available. Type to see suggestions." expandable haspopup="listbox" value="444444"
+      uid=26_116 textbox "%" value="100"
+      uid=26_117 "%"
+    uid=26_118 gridcell "Toggle visibility"
+      uid=26_119 checkbox "Toggle visibility" checked
+      uid=26_120 "Toggle visibility"
+    uid=26_121 gridcell "Remove"
+      uid=26_122 button "Remove"
+    uid=26_123 generic
+    uid=26_124 generic
+      uid=26_125 heading "Stroke" level="2"
+    uid=26_126 button "Stroke, Apply styles and variables" expandable haspopup="dialog"
+    uid=26_127 button "Add stroke fill"
+    uid=26_128 generic
+    uid=26_129 gridcell "Solid color hex: FFFFFF Color FFFFFF 10 %"
+      uid=26_130 button "Solid color hex: FFFFFF"
+      uid=26_131 "Color"
+      uid=26_132 combobox "Color" autocomplete="list" description="Autofill available. Type to see suggestions." expandable haspopup="listbox" value="FFFFFF"
+      uid=26_133 textbox "%" value="10"
+      uid=26_134 "%"
+    uid=26_135 gridcell "Toggle visibility"
+      uid=26_136 checkbox "Toggle visibility" checked
+      uid=26_137 "Toggle visibility"
+    uid=26_138 gridcell "Remove"
+      uid=26_139 button "Remove"
+    uid=26_140 generic
+    uid=26_141 "Stroke align"
+    uid=26_142 combobox "Stroke align" expandable haspopup="listbox" value="Inside"
+    uid=26_143 textbox "Stroke weight" description="Press = to apply a variable" value="1"
+    uid=26_144 button "Advanced stroke settings" expandable haspopup="dialog"
+    uid=26_145 button "Selection colors +6"
+    uid=26_146 button "Export"
+    uid=26_147 button "Add export settings"
+    uid=26_148 slider "Resize handle" orientation="horizontal" value="241" valuemax="500" valuemin="241" valuetext=""
+  uid=26_149 region "Application toolbar"
+    uid=26_150 button "Move" pressed
+    uid=26_151 button "Move tools" expandable haspopup="menu"
+    uid=26_152 button "Frame"
+    uid=26_153 button "Region tools" expandable haspopup="menu"
+    uid=26_154 button "Rectangle"
+    uid=26_155 button "Shape tools" expandable haspopup="menu"
+    uid=26_156 button "Pen"
+    uid=26_157 button "Creation tools" expandable haspopup="menu"
+    uid=26_158 button "Text"
+    uid=26_159 button "Type tools" expandable haspopup="menu"
+    uid=26_160 button "Code"
+    uid=26_161 button "Code tools" expandable haspopup="menu"
+    uid=26_162 button "Comment"
+    uid=26_163 button "Actions"
+    uid=26_164 "Toolbelt Mode"
+    uid=26_165 radio "Draw"
+    uid=26_166 radio "Design" checked
+    uid=26_167 radio "Motion"
+    uid=26_168 radio "Dev Mode"
+  uid=26_169 region "Help/zoom toolbar"
+    uid=26_170 button "Help" expandable haspopup="menu"
+  uid=26_171 dialog "Scripter"
+    uid=26_172 region "Plugin"
+      uid=26_173 heading "Scripter" level="2"
+      uid=26_174 Iframe "Plugin: Scripter"
+        uid=26_175 RootWebArea url="https://www.figma.com/plugin-sandbox"
+          uid=26_176 Iframe
+            uid=26_177 RootWebArea url="about:blank"
+              uid=26_178 Iframe focusable focused
+                uid=26_179 RootWebArea url="data:text/html;base64,PHNjcmlwdD4KICAgICAgb25tZXNzYWdlID0gKGV2ZW50KSA9PiB7CiAgICAgICAgaWYgKGV2ZW50LnNvdXJjZSA9PT0gd2luZG93LnBhcmVudC5wYXJlbnQucGFyZW50ICYmIGV2ZW50Lm9yaWdpbiA9PT0gImh0dHBzOi8vd3d3LmZpZ21hLmNvbSIpIHsKICAgICAgICAgIGRvY3VtZW50LndyaXRlKCI8c2Nya... <truncated>"
+                  uid=26_180 Iframe
+                    uid=26_181 RootWebArea url="https://scripter.rsms.me/?v=d3437b962d147cebdb6d6f81f13b93a64db72d9d&figma=1.0.0"
+                      uid=27_0 textbox "Editor content;Press Alt+F1 for Accessibility Options." autocomplete="both" focusable focused multiline
+                      uid=26_183 generic description="Show menu ⌃M"
+                      uid=26_184 generic description="Go Back in navigation history"
+                      uid=26_185 generic description="Go Forward in navigation history"
+                      uid=26_186 generic description="New script"
+                      uid=26_187 textbox value="Untitled 27"
+                      uid=26_188 generic description="Save to Figma file"
+                      uid=26_189 generic description="Clear messages ⌘K"
+                      uid=26_190 generic description="Run ⌘⏎"
+                      uid=26_191 alert atomic live="assertive" relevant="additions text"
+                      uid=26_192 status atomic live="polite" relevant="additions text"
+    uid=26_193 button "Close"
+  uid=26_194 status atomic live="polite" relevant="all"
+  uid=26_195 alert atomic live="assertive" relevant="all"
+  uid=26_196 alert atomic live="assertive" relevant="all"

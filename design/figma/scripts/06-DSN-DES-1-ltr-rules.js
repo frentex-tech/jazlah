@@ -34,7 +34,7 @@ async function toLTR(root) {
   for (const n of all) {
     if (n.type === "TEXT") {
       if (n.textAlignHorizontal === "RIGHT") n.textAlignHorizontal = "LEFT"; else if (n.textAlignHorizontal === "LEFT") n.textAlignHorizontal = "RIGHT"
-      const t = EN[n.characters]
+      const t = EN[n.characters] || (n.characters.includes("ر.س") ? n.characters.replace("ر.س", "SAR") : null)
       if (t) n.characters = t; else if (/[؀-ۿ]/.test(n.characters)) unmapped.add(n.characters)
     }
   }
@@ -71,7 +71,6 @@ const kv = async (k, v, strong) => {
 }
 // build the Arabic screen, then its mirrored clone, side by side
 async function pair(body, ar, en, build, notes, vertical) {
-  add(body, await txt(`${ar} · ${en}`, "Heading/H2"), "h")
   const row = frame("pair", { dir: vertical ? "VERTICAL" : "HORIZONTAL", gap: vertical ? 40 : 120, ltr: true })
   const a = await build()
   const e = await toLTR(a.clone())
