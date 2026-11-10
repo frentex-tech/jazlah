@@ -350,3 +350,33 @@ function flowStart(pageName, screen, name) {
 function findButton(screen, label) {
   return screen.findOne(n => n.type === "INSTANCE" && n.name === "Button" && n.findOne(t => t.type === "TEXT" && t.characters === label)) || screen.findOne(n => n.type === "TEXT" && n.characters === label)
 }
+
+// Instances cannot gain or lose children. To fill a slot (bottom sheet content, card body, state panel...), detach the instance
+// (it becomes a plain frame that looks identical) and replace the children of the named slot frame.
+async function slot(i, slotName, build) {
+  const f = i.type === "INSTANCE" ? i.detachInstance() : i
+  const s = f.findOne(n => n.name === slotName)
+  if (!s) throw new Error("slot not found: " + slotName + " in " + f.name)
+  s.children.slice().forEach(k => k.remove())
+  await build(s)
+  return f
+}
+
+// Dashboard screen (1440): side nav on the right (RTL start), top bar, page header, content column of 1132.
+// o: path ("Orders/List"), state, role (admin|vendor|kitchen), title, crumb, actions (true: primary + secondary buttons).
+// Frame name is <Area>/<path> — <state> with Area = Admin | Vendor | Kitchen. Returns { screen, body }.
+async function dashScreen(o) {
+  const role = o.role || "admin", area = { admin: "Admin", vendor: "Vendor", kitchen: "Kitchen" }[role]
+  const screen = frame(`${area}/${o.path} — ${o.state || "Default"}`, { dir: "HORIZONTAL", w: 1440, h: o.h || 1024, fill: "bg", stroke: "line", clip: true, cross: "MIN" })
+  screen.setSharedPluginData(NS, "screen", o.path)
+  add(screen, inst("side-nav", { role }))
+  const main = frame("main", { w: 1180, gap: 0, cross: "MIN" }); add(screen, main); main.layoutSizingVertical = "FILL"
+  add(main, inst("top-bar"), "h")
+  const content = frame("content", { w: 1180, pad: 24, gap: 24 }); add(main, content, "h"); content.layoutSizingVertical = "FILL"
+  const ph = inst("page-header"); add(content, ph, "h")
+  if (o.title) await retext(ph, "الطلبات", o.title)
+  if (o.crumb) await retext(ph, "الطلبات / كل الطلبات", o.crumb)
+  if (o.actions === false) { const a = ph.findOne(n => n.name === "actions"); if (a) a.visible = false }
+  const body = frame("body", { w: 1132, gap: 24 }); add(content, body, "h"); body.layoutSizingVertical = "FILL"
+  return { screen, body }
+}
