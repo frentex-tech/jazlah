@@ -159,8 +159,8 @@ async function defineSet(host, id, name, def, mk, textProps = [], width = 1200) 
   const set = figma.combineAsVariants(comps, host)
   set.name = name; set.setSharedPluginData(NS, "id", id)
   set.layoutMode = "HORIZONTAL"; set.layoutWrap = "WRAP"
+  set.resize(width, 100) // resize() makes both axes FIXED, so set the sizing modes after it
   set.primaryAxisSizingMode = "FIXED"; set.counterAxisSizingMode = "AUTO"
-  set.resize(width, 100)
   set.itemSpacing = 24; set.counterAxisSpacing = 24
   set.paddingLeft = set.paddingRight = set.paddingTop = set.paddingBottom = 24
   for (const t of textProps) {
