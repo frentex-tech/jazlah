@@ -206,4 +206,4 @@ await sectionOn(ctx, P, "sec-feedback", "التنبيهات والنوافذ · 
 })
 
 figma.viewport.scrollAndZoomIntoView(page(P).children)
-print("✅ batch 2 done\n" + contrastReport())
+print("✅ batch 2 done\n" + ctx.ids.join("\n") + "\n" + contrastReport())

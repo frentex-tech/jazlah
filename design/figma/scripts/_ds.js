@@ -115,9 +115,11 @@ function chk(where, fg, bg, min = 4.5) {
   DS.pairs.push({ where, fg, bg: Array.isArray(bg) ? bg.join("/") : bg, ratio, min, ok: ratio >= min })
   return ratio >= min
 }
+// compact report: totals, every failure, and the 6 lowest passing ratios
 function contrastReport() {
-  const bad = DS.pairs.filter(p => !p.ok)
-  return [`contrast checks: ${DS.pairs.length}, failing: ${bad.length}`, ...DS.pairs.map(p => `${p.ok ? "✅" : "❌"} ${p.ratio.toFixed(2)} (min ${p.min})  ${p.where}: ${p.fg} on ${p.bg}`)].join("\n")
+  const bad = DS.pairs.filter(p => !p.ok), low = DS.pairs.filter(p => p.ok).sort((a, b) => a.ratio - b.ratio).slice(0, 6)
+  const line = p => `${p.ok ? "OK" : "FAIL"} ${p.ratio.toFixed(2)} (min ${p.min}) ${p.where}: ${p.fg} on ${p.bg}`
+  return [`contrast checks: ${DS.pairs.length}, failing: ${bad.length}`, ...bad.map(line), "lowest passing:", ...low.map(line)].join("\n")
 }
 
 // ---- sections and components ---------------------------------------------------
@@ -142,6 +144,7 @@ async function sectionOn(ctx, pageName, id, title, build, width = 1280) {
   await build(body)
   s.resizeWithoutConstraints(body.width + 80, body.height + 80)
   s.x = 0; s.y = ctx.y
+  ;(ctx.ids = ctx.ids || []).push(s.id + " " + title)
   ctx.y += s.height + 200
   return s
 }
