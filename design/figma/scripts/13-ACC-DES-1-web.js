@@ -32,6 +32,7 @@ async function loginCard(c, phoneState, btn, err) {
   add(c, await titleBlock("أهلًا بك في جزلة", "أدخل رقم جوالك وسنرسل لك رمز التحقق."), "h")
   const p = inst("phone-input", { state: phoneState })
   if (err) await retext(p, "رقم الجوال غير مكتمل", "أدخل رقم جوال سعودي صحيح مكوّن من 9 أرقام")
+  if (btn === "loading") phoneValue(p)
   add(c, p, "h")
   add(c, await txt("بالمتابعة فأنت توافق على الشروط وسياسة الخصوصية.", "Body/M", "ink-2", { w: 358 }), "h")
   add(c, await button("إرسال الرمز", "primary", btn), "h")
@@ -43,7 +44,7 @@ await screenSection(ctx, P, "sec-acc-web-login", "تسجيل الدخول · Web
 
 // ---- OTP --------------------------------------------------------------------------------------------------
 async function otpCard(c, otpState, resend, btn) {
-  add(c, await titleBlock("أدخل رمز التحقق", "أرسلنا رمزًا من 4 أرقام إلى +966 5X XXX XXXX"), "h")
+  add(c, await titleBlock("أدخل رمز التحقق", "أرسلنا رمزًا من 4 أرقام إلى +966 55 123 4567"), "h")
   const row = frame("center", { dir: "HORIZONTAL", main: "CENTER", w: 358 }); row.appendChild(inst("otp-field", { state: otpState })); add(c, row, "h")
   add(c, await button(resend, "ghost", resend.includes("بعد") ? "disabled" : "default", "S"))
   add(c, await button("تأكيد", "primary", btn), "h")
@@ -57,7 +58,7 @@ await screenSection(ctx, P, "sec-acc-web-otp", "رمز التحقق · Web OTP",
 async function profCard(c, nameState, btn) {
   add(c, await titleBlock("أكمل ملفك", "نحتاج اسمك لنُجهّز طلباتك ونتواصل معك."), "h")
   add(c, await field("الاسم الكامل", nameState === "error" ? "اكتب هنا" : null, nameState, nameState === "error" ? "الاسم مطلوب" : undefined), "h")
-  add(c, await field("البريد الإلكتروني (اختياري)", null, "default", "لن نرسل لك إلا إشعارات طلباتك"), "h")
+  add(c, await field("البريد الإلكتروني (اختياري)", nameState === "default" ? null : "name@example.com", nameState === "default" ? "default" : "filled", "لن نرسل لك إلا إشعارات طلباتك"), "h")
   const k = inst("checkbox", { checked: "no", state: "default" }); await retext(k, "إضافة تغليف هدية", "أوافق على استلام العروض والأخبار"); add(c, k)
   add(c, await button("حفظ ومتابعة", "primary", btn), "h")
 }

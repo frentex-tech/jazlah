@@ -18,12 +18,13 @@ const SLIDES = [
 ]
 const slides = []
 for (let i = 0; i < 3; i++) {
-  const { screen, body } = await mobileScreen({ path: `Onboarding/Slide ${i + 1}`, pad: 24, gap: 24 })
-  const img = frame("photo", { dir: "HORIZONTAL", w: 342, h: 380, main: "CENTER", cross: "CENTER", fill: "sand", r: "lg" })
-  add(img, await icon("image", 56, "ink-2")); add(body, img, "h")
+  const { screen, body } = await mobileScreen({ path: `Onboarding/Slide ${i + 1}`, pad: 24, gap: 16 })
+  const brandRow = frame("brand", { dir: "HORIZONTAL", w: 342, gap: 8, cross: "CENTER" })
+  add(brandRow, await emblemNode(44)); add(brandRow, await txt("جزلة", "Display/L", "brand")); add(body, brandRow, "h")
+  const img = frame("photo", { dir: "HORIZONTAL", w: 342, h: 300, main: "CENTER", cross: "CENTER", fill: "sand", r: "lg" })
+  add(img, await icon("image", 56, "ink-2")); img.setSharedPluginData(NS, "photo", ["lamb-spit", "butchers", "mandi"][i]); add(body, img, "h"); img.layoutSizingVertical = "FILL"
   add(body, dots(i))
   add(body, await titleBlock(SLIDES[i][0], SLIDES[i][1]), "h")
-  const sp = spacer(); add(body, sp); sp.layoutSizingVertical = "FILL"
   add(body, await button(i === 2 ? "ابدأ الآن" : "التالي"), "h")
   if (i < 2) add(body, await button("تخطي", "ghost"), "h")
   slides.push({ screen, body })
@@ -36,7 +37,7 @@ await screenSection(ctx, P, "sec-acc-onboarding", "التعريف · Onboarding"
 })
 
 // ---- Phone entry --------------------------------------------------------------------------------------
-const phone = await mobileScreen({ path: "Login/Phone", header: { type: "page", title: "تسجيل الدخول" } })
+const phone = await authScreen({ path: "Login/Phone", heroH: 300 })
 add(phone.body, await titleBlock("أهلًا بك في جزلة", "أدخل رقم جوالك وسنرسل لك رمز التحقق."), "h")
 add(phone.body, inst("phone-input", { state: "default" }), "h")
 add(phone.body, await txt("بالمتابعة فأنت توافق على الشروط وسياسة الخصوصية.", "Body/M", "ink-2", { w: 358 }), "h")
@@ -46,15 +47,15 @@ const phoneErr = stateCopy(phone, "Error"); add(phoneErr.body, await titleBlock(
 { const e = inst("phone-input", { state: "error" }); await retext(e, "رقم الجوال غير مكتمل", "أدخل رقم جوال سعودي صحيح مكوّن من 9 أرقام"); add(phoneErr.body, e, "h")
   const sp = spacer(); add(phoneErr.body, sp); sp.layoutSizingVertical = "FILL"; add(phoneErr.body, await button("إرسال الرمز", "primary", "disabled"), "h") }
 const phoneLoad = stateCopy(phone, "Loading"); add(phoneLoad.body, await titleBlock("أهلًا بك في جزلة", "أدخل رقم جوالك وسنرسل لك رمز التحقق."), "h")
-{ add(phoneLoad.body, inst("phone-input", { state: "default" }), "h"); const sp = spacer(); add(phoneLoad.body, sp); sp.layoutSizingVertical = "FILL"; add(phoneLoad.body, await button("إرسال الرمز", "primary", "loading"), "h") }
+{ add(phoneLoad.body, phoneValue(inst("phone-input", { state: "default" })), "h"); const sp = spacer(); add(phoneLoad.body, sp); sp.layoutSizingVertical = "FILL"; add(phoneLoad.body, await button("إرسال الرمز", "primary", "loading"), "h") }
 const phoneFilled = stateCopy(phone, "Filled"); add(phoneFilled.body, await titleBlock("أهلًا بك في جزلة", "أدخل رقم جوالك وسنرسل لك رمز التحقق."), "h")
-{ add(phoneFilled.body, inst("phone-input", { state: "default" }), "h"); const sp = spacer(); add(phoneFilled.body, sp); sp.layoutSizingVertical = "FILL"; add(phoneFilled.body, await button("إرسال الرمز", "primary", "default"), "h") }
+{ add(phoneFilled.body, phoneValue(inst("phone-input", { state: "default" })), "h"); const sp = spacer(); add(phoneFilled.body, sp); sp.layoutSizingVertical = "FILL"; add(phoneFilled.body, await button("إرسال الرمز", "primary", "default"), "h") }
 await screenSection(ctx, P, "sec-acc-phone", "رقم الجوال · Phone entry", async S => { S.main.push(phone.screen); S.states.push(phoneFilled.screen, phoneErr.screen, phoneLoad.screen) })
 
 // ---- OTP ------------------------------------------------------------------------------------------------
-const base = await mobileScreen({ path: "Login/OTP", header: { type: "page", title: "رمز التحقق" } })
+const base = await authScreen({ path: "Login/OTP", heroH: 240, back: true, photo: "butchers" })
 async function fillOtp(b, otpState, hint, resendLabel, resendVariant, btnState) {
-  add(b, await titleBlock("أدخل رمز التحقق", "أرسلنا رمزًا من 4 أرقام إلى +966 5X XXX XXXX"), "h")
+  add(b, await titleBlock("أدخل رمز التحقق", "أرسلنا رمزًا من 4 أرقام إلى +966 55 123 4567"), "h")
   const o = inst("otp-field", { state: otpState })
   const c = frame("center", { dir: "HORIZONTAL", main: "CENTER", w: 358 }); c.appendChild(o); add(b, c, "h")
   add(b, await button(resendLabel, resendVariant, resendVariant === "ghost" && resendLabel.includes("بعد") ? "disabled" : "default", "S"))
@@ -71,12 +72,12 @@ await screenSection(ctx, P, "sec-acc-otp", "رمز التحقق · OTP", async S
 async function fillProfile(b, nameState, btn) {
   add(b, await titleBlock("أكمل ملفك", "نحتاج اسمك لنُجهّز طلباتك ونتواصل معك."), "h")
   add(b, await field("الاسم الكامل", nameState === "error" ? "اكتب هنا" : null, nameState, nameState === "error" ? "الاسم مطلوب" : undefined), "h")
-  add(b, await field("البريد الإلكتروني (اختياري)", null, "default", "لن نرسل لك إلا إشعارات طلباتك"), "h")
+  add(b, await field("البريد الإلكتروني (اختياري)", nameState === "default" ? null : "name@example.com", nameState === "default" ? "default" : "filled", "لن نرسل لك إلا إشعارات طلباتك"), "h")
   const consent = inst("checkbox", { checked: "no", state: "default" }); await retext(consent, "إضافة تغليف هدية", "أوافق على استلام العروض والأخبار"); add(b, consent)
   const sp = spacer(); add(b, sp); sp.layoutSizingVertical = "FILL"
   add(b, await button("حفظ ومتابعة", "primary", btn), "h")
 }
-const prof = await mobileScreen({ path: "Login/Profile", header: { type: "page", title: "إكمال الملف" } })
+const prof = await authScreen({ path: "Login/Profile", heroH: 220, back: true, photo: "mandi" })
 await fillProfile(prof.body, "default", "disabled")
 const profFilled = stateCopy(prof, "Filled"); await fillProfile(profFilled.body, "filled", "default")
 const profErr = stateCopy(prof, "Error"); await fillProfile(profErr.body, "error", "disabled")

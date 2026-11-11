@@ -26,6 +26,7 @@ async function phoneCard(c, phoneState, btn, err) {
   add(c, await titleBlock("تسجيل دخول الموظفين", "أدخل رقم جوالك المسجّل لدى الإدارة."), "h")
   const p = inst("phone-input", { state: phoneState })
   if (err) await retext(p, "رقم الجوال غير مكتمل", "هذا الرقم غير مسجّل كموظف")
+  if (btn === "loading") phoneValue(p)
   add(c, p, "h")
   add(c, await button("إرسال الرمز", "primary", btn), "h")
   add(c, await txt("هذه اللوحة للموظفين المصرّح لهم فقط.", "Body/M", "ink-2", { w: 358 }), "h")
@@ -37,7 +38,7 @@ await screenSection(ctx, P, "sec-acc-admin-login-phone", "دخول الإدار�
 
 // ---- OTP -----------------------------------------------------------------------------------------------------
 async function otpCard(c, otpState, resend, btn) {
-  add(c, await titleBlock("أدخل رمز التحقق", "أرسلنا رمزًا من 4 أرقام إلى +966 5X XXX XXXX"), "h")
+  add(c, await titleBlock("أدخل رمز التحقق", "أرسلنا رمزًا من 4 أرقام إلى +966 55 123 4567"), "h")
   const row = frame("center", { dir: "HORIZONTAL", main: "CENTER", w: 358 }); row.appendChild(inst("otp-field", { state: otpState })); add(c, row, "h")
   add(c, await button(resend, "ghost", resend.includes("بعد") ? "disabled" : "default", "S"))
   add(c, await button("تأكيد", "primary", btn), "h")
