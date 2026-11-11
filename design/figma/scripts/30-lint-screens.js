@@ -14,8 +14,8 @@ for (const pn of PAGES) {
     const sb = s.absoluteBoundingBox
     const hasImg = n => Array.isArray(n.fills) && n.fills.some(f => f.type === "IMAGE" && f.visible !== false)
     for (const n of s.findAll(x => x.visible !== false)) {
-      if (n.name === "ph/image" || n.name === "ph/storefront") push(res.images, s.name + " > icon in " + n.parent.name)
-      else if (/(^|[\/ ])map($|[\/ ])/i.test(n.name) && "fills" in n && !hasImg(n) && n.width > 60) push(res.images, s.name + " > map " + n.name)
+      if (n.name === "ph/image" || (n.name === "ph/storefront" && n.parent.width >= 40 && n.parent.height >= 40)) push(res.images, s.name + " > icon in " + n.parent.name)
+      else if (/(^|[\/ ])map($|[\/ ])/i.test(n.name) && !/pin/i.test(n.name) && "fills" in n && !hasImg(n) && n.width > 60) push(res.images, s.name + " > map " + n.name)
     }
     for (const t of s.findAll(n => n.type === "TEXT")) {
       const c = t.characters
