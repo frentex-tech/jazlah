@@ -9,9 +9,10 @@ for (const pn of PAGES) {
   const pg = figma.root.children.find(p => p.name === pn); if (!pg) continue; await pg.loadAsync()
   const kinds = { icon: [], map: [], photoLike: [] }
   for (const n of pg.findAll(x => x.visible !== false)) {
-    if ((n.name === "ph/image" || n.name === "ph/storefront") && n.visible !== false) { kinds.icon.push(path(n)); continue }
+    // ph/storefront is a Phosphor icon: only a placeholder when it fills a logo-size container (>= 40px)
+    if ((n.name === "ph/image" || (n.name === "ph/storefront" && n.parent && n.parent.width >= 40 && n.parent.height >= 40)) && n.visible !== false) { kinds.icon.push(path(n)); continue }
     if (!("fills" in n) || n.type === "TEXT" || n.type === "SECTION") continue
-    if (/(^|[\/ ])map($|[\/ ])/i.test(n.name) && !hasImg(n) && n.width > 60) kinds.map.push(path(n))
+    if (/(^|[\/ ])map($|[\/ ])/i.test(n.name) && !/pin/i.test(n.name) && !hasImg(n) && n.width > 60) kinds.map.push(path(n))
     else if (/photo|gallery|cover|banner|hero|thumb|avatar|logo/i.test(n.name) && !/skeleton|icon|label|row|text|caption/i.test(n.name) && n.width > 30 && n.height > 30 && !hasImg(n) && !(n.type === "FRAME" && n.findOne(c => hasImg(c)))) kinds.photoLike.push(path(n))
   }
   const c = kinds.icon.length + kinds.map.length + kinds.photoLike.length; total += c
