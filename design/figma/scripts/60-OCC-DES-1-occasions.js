@@ -5,10 +5,10 @@ const yOf = async (pg, own) => { await page(pg).loadAsync(); const r = page(pg).
 const T = (s, st = "Body/M", c = "ink", w, a) => txt(s, st, c, { w, align: a })
 const ICON = { warning: "warning", danger: "warning-circle", info: "info", success: "check-circle" }
 async function note(w, kind, title, body) {
-  const f = frame("banner " + kind, { dir: "HORIZONTAL", w, px: 16, py: 12, gap: 12, fill: kind + "-bg", r: "md" })
+  const f = frame("banner " + kind, { dir: "HORIZONTAL", w, px: 16, py: 12, gap: 12, fill: ({ success: "sand", info: "sand" }[kind] || kind + "-bg"), r: "md" })
   add(f, await icon(ICON[kind], 24, kind, "fill"))
   const c = frame("copy", { gap: 4, w: w - 52 }); add(c, await T(title, "Label/M", "ink", w - 52), "h"); if (body) add(c, await T(body, "Body/M", "ink-2", w - 52), "h")
-  add(f, c); chk("banner ink " + kind, "ink", kind + "-bg"); chk("banner sub " + kind, "ink-2", kind + "-bg"); chk("banner icon " + kind, kind, kind + "-bg", 3); return f
+  add(f, c); chk("banner ink " + kind, "ink", ({ success: "sand", info: "sand" }[kind] || kind + "-bg")); chk("banner sub " + kind, "ink-2", ({ success: "sand", info: "sand" }[kind] || kind + "-bg")); chk("banner icon " + kind, kind, ({ success: "sand", info: "sand" }[kind] || kind + "-bg"), 3); return f
 }
 async function box(w, fn, o = {}) {
   const p = o.pad == null ? 16 : o.pad, bg = o.fill || "paper"
@@ -19,7 +19,7 @@ async function kv(w, k, v, bold) {
   const r = frame("row", { dir: "HORIZONTAL", w, main: "SPACE_BETWEEN", cross: "CENTER" })
   add(r, await T(k, bold ? "Label/M" : "Body/M", bold ? "ink" : "ink-2")); add(r, await T(v, bold ? "Heading/H3" : "Body/M", "ink")); return r
 }
-async function pill(label, kind) { const f = frame("pill " + kind, { dir: "HORIZONTAL", px: 12, py: 4, fill: kind + "-bg", r: "pill" }); add(f, await T(label, "Label/M", kind)); chk("pill " + kind, kind, kind + "-bg"); return f }
+async function pill(label, kind) { const f = frame("pill " + kind, { dir: "HORIZONTAL", px: 12, py: 4, fill: ({ success: "sand", info: "sand" }[kind] || kind + "-bg"), r: "pill" }); add(f, await T(label, "Label/M", kind)); chk("pill " + kind, kind, ({ success: "sand", info: "sand" }[kind] || kind + "-bg")); return f }
 async function photo(w, h, key, name = "photo", r = "md") { const f = frame(name, { dir: "HORIZONTAL", w, h, main: "CENTER", cross: "CENTER", fill: "sand", r, clip: true }); add(f, await icon("image", 32, "ink-2")); f.setSharedPluginData(NS, "photo", key); return f }
 async function map(w, h, r = "md") { const f = frame("map", { dir: "HORIZONTAL", w, h, main: "CENTER", cross: "CENTER", fill: "sand", r, clip: true }); add(f, await icon("map-pin", 36, "ember", "fill")); return f }
 async function steps(w, i, n, label) {
