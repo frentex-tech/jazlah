@@ -332,7 +332,7 @@ async function screenSection(ctx, pageName, id, title, build) {
   await figma.setCurrentPageAsync(pg)
   let s = pg.children.find(n => n.type === "SECTION" && n.getSharedPluginData(NS, "id") === id)
   if (s) s.children.slice().forEach(c => c.remove()); else { s = figma.createSection(); s.setSharedPluginData(NS, "id", id); pg.appendChild(s) }
-  s.name = title; s.fills = [paint("bg")]
+  s.name = title; s.fills = [{ type: "SOLID", color: rgb(DS.T.color.bg.value) }] // variable-bound paints render black on Sections
   const S = { main: [], states: [] }
   await build(S)
   const M = 40, GAP = 80
