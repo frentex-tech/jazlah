@@ -249,11 +249,11 @@ function statusBarRow(dark) {
   const r = frame("status bar", { dir: "HORIZONTAL", ltr: true, w: 390, h: 44, px: 24, main: "SPACE_BETWEEN", cross: "CENTER" })
   return r
 }
-async function statusBar() {
+async function statusBar(color = "ink") {
   const r = statusBarRow()
-  r.appendChild(await txt("9:41", "Label/M", "ink", { align: "LEFT" }))
+  r.appendChild(await txt("9:41", "Label/M", color, { align: "LEFT" }))
   const ic = frame("system icons", { dir: "HORIZONTAL", ltr: true, gap: 6, cross: "CENTER" })
-  for (const n of ["cell-signal-full", "wifi-high", "battery-full"]) ic.appendChild(await icon(n, 16, "ink", "fill"))
+  for (const n of ["cell-signal-full", "wifi-high", "battery-full"]) ic.appendChild(await icon(n, 16, color, "fill"))
   r.appendChild(ic)
   return r
 }
@@ -332,12 +332,15 @@ async function screenSection(ctx, pageName, id, title, build) {
   await figma.setCurrentPageAsync(pg)
   let s = pg.children.find(n => n.type === "SECTION" && n.getSharedPluginData(NS, "id") === id)
   if (s) s.children.slice().forEach(c => c.remove()); else { s = figma.createSection(); s.setSharedPluginData(NS, "id", id); pg.appendChild(s) }
-  s.name = title; s.fills = [paint("bg")]
+  s.name = title; s.fills = [{ type: "SOLID", color: rgb(DS.T.color.bg.value) }] // variable-bound paints render black on Sections
   const S = { main: [], states: [] }
   await build(S)
   const M = 40, GAP = 80
-  const t = await txt(title, "Display/L"); s.appendChild(t); t.x = M; t.y = M
+  const t = await txt(title, "Heading/H1"); s.appendChild(t); t.x = M; t.y = M
   let y = M + 120, maxW = t.width + 2 * M
+  if (S.note) { // design annotation: lives outside the screens, under the section title
+    const nt = await txt(S.note, "Body/M", "ink-2", { w: 900, align: "RIGHT" }); s.appendChild(nt); nt.x = M; nt.y = M + 64; y += 56; maxW = Math.max(maxW, 900 + 2 * M)
+  }
   const row = nodes => { let x = M, h = 0; for (const n of nodes) { s.appendChild(n); n.x = x; n.y = y; x += n.width + GAP; h = Math.max(h, n.height) } maxW = Math.max(maxW, x - GAP + M); y += h }
   row(S.main)
   if (S.states.length) {
@@ -394,5 +397,67 @@ async function dashScreen(o) {
   if (o.crumb) await retext(ph, "الطلبات / كل الطلبات", o.crumb)
   if (o.actions === false) { const a = ph.findOne(n => n.name === "actions"); if (a) a.visible = false }
   const body = frame("body", { w: 1132, gap: 24 }); add(content, body, "h"); body.layoutSizingVertical = "FILL"
+  return { screen, body }
+}
+
+
+// ================================================================================================
+// Photos, brand emblem, auth screen template, phone value
+// ================================================================================================
+var _img = {}
+// Reference photos live in docs/design/reference/prototype/img (jpg; marks are png). `key` is the file name without extension.
+async function photoPaint(key, mode = "FILL") {
+  const ext = key.startsWith("mark-") || key.startsWith("logo-") || key.startsWith("word-") ? ".png" : ".jpg"
+  if (!_img[key]) {
+    const r = await fetch(B.replace("design/figma/scripts/", "docs/design/reference/prototype/img/") + key + ext)
+    if (!r.ok) throw new Error("photo " + key + " " + r.status)
+    _img[key] = figma.createImage(new Uint8Array(await r.arrayBuffer()))
+  }
+  return { type: "IMAGE", imageHash: _img[key].hash, scaleMode: mode }
+}
+// Put a photo into a placeholder container (hides its icon). Safe on instance children.
+async function setPhoto(node, key, mode = "FILL") {
+  node.fills = [await photoPaint(key, mode)]
+  node.findAll(n => n.name === "ph/image" || n.name === "ph/storefront").forEach(n => (n.visible = false))
+}
+var _emb = null
+// The approved emblem (ram in shield), from docs/design/brand. h = height in px.
+async function emblemNode(h = 100, file = "emblem-a-shield.svg") {
+  if (!_emb) _emb = await (await fetch(B.replace("design/figma/scripts/", "docs/design/brand/") + file)).text()
+  const n = figma.createNodeFromSvg(_emb); n.name = "emblem"
+  const k = h / n.height; n.resize(n.width * k, h); n.clipsContent = false
+  return n
+}
+// A phone-input instance showing a typed number (value text in ink, not placeholder color)
+function phoneValue(i, value = "55 123 4567") {
+  const t = i.findOne(n => n.type === "TEXT" && /^5X/.test(n.characters))
+  if (!t) return i
+  t.characters = value; t.fills = [paint("ink")]
+  return i
+}
+// Auth mobile screen: brand hero (photo + brand-deep scrim + emblem + wordmark) over a form body. o: path, state, heroH, back, photo
+async function authScreen(o) {
+  const H = o.heroH || 300
+  const screen = frame(`App/${o.path} — ${o.state || "Default"}`, { w: 390, h: 844, fill: "bg", stroke: "line", r: "lg", clip: true, cross: "MIN" })
+  screen.setSharedPluginData(NS, "screen", o.path)
+  const hero = frame("hero", { w: 390, h: H, clip: true, cross: "MIN" })
+  hero.topLeftRadius = 0; hero.topRightRadius = 0; hero.bottomLeftRadius = 26; hero.bottomRightRadius = 26
+  const ph = frame("photo", { dir: "HORIZONTAL", w: 390, h: H, fill: "sand", main: "CENTER", cross: "CENTER" })
+  add(ph, await icon("image", 32, "ink-2")); ph.setSharedPluginData(NS, "photo", o.photo || "lamb-spit")
+  hero.appendChild(ph); ph.layoutPositioning = "ABSOLUTE"; ph.x = 0; ph.y = 0
+  const ov = rect("scrim", 390, H, "brand-deep", null, { alpha: 0.74 }); hero.appendChild(ov); ov.layoutPositioning = "ABSOLUTE"; ov.x = 0; ov.y = 0
+  add(hero, await statusBar("paper"), "h")
+  if (o.back) {
+    const row = frame("nav", { dir: "HORIZONTAL", w: 390, px: 16, py: 4 })
+    const b = frame("back", { dir: "HORIZONTAL", w: 44, h: 44, main: "CENTER", cross: "CENTER", fill: "paper", r: "pill" })
+    add(b, await icon("caret-right", 20, "ink")); add(row, b); add(hero, row, "h")
+  }
+  const brand = frame("brand", { w: 390, gap: 8, main: "CENTER", cross: "CENTER" })
+  add(brand, await emblemNode(H > 260 ? 110 : 72)); add(brand, await txt("جزلة", H > 260 ? "Display/XL" : "Display/L", "gold-light", { align: "CENTER" }))
+  add(hero, brand, "h"); brand.layoutSizingVertical = "FILL"
+  chk("auth wordmark", "gold-light", "brand-deep")
+  add(screen, hero, "h")
+  const body = frame("body", { w: 390, pad: 24, gap: 16, clip: true })
+  add(screen, body, "h"); body.layoutSizingVertical = "FILL"
   return { screen, body }
 }

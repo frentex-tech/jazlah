@@ -138,7 +138,7 @@ async function opt(kind, label, right, o = {}) {
 }
 
 const S_ = {
-  gallery: async b => { add(b, await photo(358, 240, 56, "lg", "gallery"), "h"); add(b, center(dots(0, 4)), "h") },
+  gallery: async b => { add(b, await photo(358, 260, 56, "lg", "gallery"), "h"); add(b, center(dots(0, 4)), "h") },
   info: async (b, st) => {
     const v = frame("vendor", { dir: "HORIZONTAL", w: 358, gap: 8, cross: "CENTER" })
     add(v, await icon("storefront", 20, "ink-2")); add(v, await txt("مجازر الفلاح", "Label/M", "ink-2"))
@@ -191,7 +191,7 @@ const S_ = {
     add(r, await txt("الكمية", "Heading/H3")); add(r, inst("stepper", { state: "min" })); add(b, r, "h")
   },
 }
-const ORDER = ["gallery", "info", "price", "size", "cut", "pack", "excl", "notes", "qty"]
+const ORDER = ["gallery", "info", "size", "cut", "pack", "excl", "notes", "qty"] // price breakdown is not on the page: it opens from the sticky total
 
 // sticky bottom bar: live total + add to cart
 async function bar(total, label, btnState = "default", note) {
@@ -199,7 +199,7 @@ async function bar(total, label, btnState = "default", note) {
   if (note) add(f, await txt(note, "Body/M", "ink-2", { w: 358 }), "h")
   const r = frame("row", { dir: "HORIZONTAL", w: 358, gap: 16, cross: "CENTER" })
   const t = frame("total", { gap: 0 })
-  add(t, await txt("الإجمالي", "Body/M", "ink-2"))
+  { const lab = frame("label", { dir: "HORIZONTAL", gap: 4, cross: "CENTER" }); add(lab, await txt("الإجمالي", "Body/M", "ink-2")); add(lab, await icon("caret-up", 16, "ink-2")); add(t, lab) }
   const pr = frame("price", { dir: "HORIZONTAL", gap: 4, cross: "MAX" })
   add(pr, await txt(total, "Heading/H1", btnState === "disabled" ? "ink-2" : "ink")); add(pr, await txt("ر.س", "Body/M", "ink-2")); add(t, pr)
   add(r, t); add(r, await button(label, "primary", btnState), "h"); add(f, r, "h")
@@ -217,6 +217,21 @@ async function product(state, sections, o = {}) {
 
 const main = await product("Default", ORDER)
 const scroll = await product("Scroll", ORDER); scrollify(scroll)
+// price breakdown: bottom sheet that opens when the sticky total is tapped
+const brk = await product("Price breakdown", ORDER)
+{
+  const sc = rect("scrim", 390, 844, "ink", null, { alpha: 0.5 }); brk.screen.appendChild(sc); sc.layoutPositioning = "ABSOLUTE"; sc.x = 0; sc.y = 0
+  let sh = inst("bottom-sheet")
+  sh = await slot(sh, "content", async c => {
+    c.fills = []; c.primaryAxisSizingMode = "AUTO"; c.primaryAxisAlignItems = "MIN"; c.counterAxisAlignItems = "MAX"; c.itemSpacing = 12
+    const line = async (k, v, strong) => { const r = frame("line", { dir: "HORIZONTAL", w: 342, main: "SPACE_BETWEEN", cross: "CENTER" }); add(r, await txt(k, strong ? "Heading/H3" : "Body/M", strong ? "ink" : "ink-2")); add(r, await txt(v, strong ? "Heading/H3" : "Body/M", "ink")); add(c, r, "h") }
+    await line("1 كجم × 89.00 ر.س", "89.00 ر.س"); await line("التقطيع (شرائح)", "مجاني"); await line("التغليف المفرغ", "+5.00 ر.س"); await line("التوصيل", "يُحسب في الدفع")
+    add(c, rect("divider", 342, 1, "line"), "h"); await line("الإجمالي", "94.00 ر.س", true)
+  })
+  await retext(sh, "اختر الحجم", "تفاصيل السعر"); await retext(sh, "اطلب الآن", "أضف إلى السلة")
+  brk.screen.appendChild(sh); sh.layoutPositioning = "ABSOLUTE"; sh.x = 0; sh.y = 844 - sh.height
+  chk("breakdown", "ink-2", "paper")
+}
 const tapped = await product("Incompatible option", ["cut", "pack"], { st: "tap" })
 const oos = await product("Out of stock", ["gallery", "info", "size", "cut", "pack"], { st: "oos", notice: "هذا المنتج غير متاح حاليًا. يمكنك طلب إشعار عند توفره.", total: "0.00", label: "غير متاح", btn: "disabled" })
 
@@ -232,7 +247,7 @@ add(sel.body, await head("التقطيع", "مطلوب · اختر واحدًا"
 add(sel.screen, await bar("89.00", "أضف إلى السلة", "default"), "h")
 
 await screenSection(ctx, P, "sec-stf-product", "تفاصيل المنتج · Product detail", async S => {
-  S.main.push(main.screen, scroll.screen)
+  S.main.push(main.screen, scroll.screen, brk.screen)
   S.states.push(tapped.screen, load.screen, oos.screen, err.screen, sel.screen)
 })
 

@@ -107,7 +107,6 @@ async function fillHome(b, closed) {
   if (closed) add(b, await notice("المتاجر القريبة منك متوقفة مؤقتًا. تصفّح الآن واطلب عند عودتها."), "h")
   add(b, await banner("لحم طازج يصل في يومك", "ذُبح اليوم وتوصيل سريع من متاجر موثّقة"), "h")
   add(b, center(dots(0)), "h")
-  add(b, await storiesSlot(), "h")
   add(b, await secHead("الأقسام"), "h")
   add(b, rowOf(await tiles(CATS.slice(0, 4)), 358, { main: "SPACE_BETWEEN", gap: 4 }), "h")
   add(b, await secHead("الأكثر مبيعًا"), "h")
@@ -134,6 +133,7 @@ add(homeErr.body, await panel("error", "تعذّر تحميل الصفحة ال�
 const homeOff = await mobileScreen({ path: "Home/Home", state: "Offline", header: { type: "home", cart: "empty" }, tab: "1" })
 add(homeOff.body, await panel("offline", "لا يوجد اتصال بالإنترنت", "تحقق من اتصالك ثم أعد المحاولة."), "h")
 await screenSection(ctx, P, "sec-stf-home", "الرئيسية · Home", async S => {
+  S.note = "ملاحظة تصميم: صف «قصص الاستلام» محجوز بين البانر والأقسام ويُخفى عند الإطلاق؛ يُضاف لاحقًا بعد الإطلاق."
   S.main.push(home.screen, homeScroll.screen)
   S.states.push(homeLoad.screen, homeEmpty.screen, homeErr.screen, homeOff.screen, homeClosed.screen)
 })
