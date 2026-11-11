@@ -315,10 +315,10 @@ function stateCopy(base, state, keepBody = false) {
 }
 
 // A heading + helper paragraph block for forms and empty content
-async function titleBlock(title, sub, align = "RIGHT") {
-  const f = frame("title block", { gap: 8, w: 358 })
-  add(f, await txt(title, "Heading/H1", "ink", { w: 358, align }), "h")
-  if (sub) add(f, await txt(sub, "Body/M", "ink-2", { w: 358, align }), "h")
+async function titleBlock(title, sub, align = "RIGHT", w = 358) {
+  const f = frame("title block", { gap: 8, w })
+  add(f, await txt(title, "Heading/H1", "ink", { w, align }), "h")
+  if (sub) add(f, await txt(sub, "Body/M", "ink-2", { w, align }), "h")
   return f
 }
 async function skeletonRows(n = 4) { const f = frame("loading", { gap: 12, w: 358 }); for (let i = 0; i < n; i++) add(f, inst("skeleton-row"), "h"); return f }
@@ -445,7 +445,7 @@ async function authScreen(o) {
   const ph = frame("photo", { dir: "HORIZONTAL", w: 390, h: H, fill: "sand", main: "CENTER", cross: "CENTER" })
   add(ph, await icon("image", 32, "ink-2")); ph.setSharedPluginData(NS, "photo", o.photo || "lamb-spit")
   hero.appendChild(ph); ph.layoutPositioning = "ABSOLUTE"; ph.x = 0; ph.y = 0
-  const ov = rect("scrim", 390, H, "brand-deep", null, { alpha: 0.74 }); hero.appendChild(ov); ov.layoutPositioning = "ABSOLUTE"; ov.x = 0; ov.y = 0
+  const ov = rect("scrim", 390, H, "brand-deep", null, { alpha: 0.58 }); hero.appendChild(ov); ov.layoutPositioning = "ABSOLUTE"; ov.x = 0; ov.y = 0
   add(hero, await statusBar("paper"), "h")
   if (o.back) {
     const row = frame("nav", { dir: "HORIZONTAL", w: 390, px: 16, py: 4 })
@@ -460,4 +460,16 @@ async function authScreen(o) {
   const body = frame("body", { w: 390, pad: 24, gap: 16, clip: true })
   add(screen, body, "h"); body.layoutSizingVertical = "FILL"
   return { screen, body }
+}
+
+// Three short brand promises with icons (fills empty auth screens with identity, not placeholders)
+async function trustRow(w = 342) {
+  const f = frame("trust", { dir: "HORIZONTAL", w, main: "SPACE_BETWEEN", cross: "MIN" })
+  for (const [ic, t] of [["seal-check", "متاجر موثّقة"], ["thermometer", "طازج يوم الذبح"], ["truck", "توصيل في يومك"]]) {
+    const c = frame("point", { w: 104, gap: 8, cross: "CENTER" })
+    const r = frame("ring", { dir: "HORIZONTAL", w: 52, h: 52, main: "CENTER", cross: "CENTER", fill: "sand", r: "pill" })
+    add(r, await icon(ic, 26, "brand")); add(c, r); add(c, await txt(t, "Label/M", "ink", { align: "CENTER", w: 104 }), "h"); f.appendChild(c)
+  }
+  chk("trust label", "ink", "bg"); chk("trust icon", "brand", "sand", 3)
+  return f
 }
