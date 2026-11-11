@@ -102,12 +102,12 @@ async function sheetScreen(state, o) {
     if (o.menu) for (const [ic, tx, col] of [["flag", "إبلاغ عن المحادثة", "ink"], ["prohibit", "حظر المستخدم", "danger"]]) { const r = frame("option", { dir: "HORIZONTAL", w: 342, h: 56, gap: 12, cross: "CENTER" }); add(r, await icon(ic, 24, col)); add(r, await txt(tx, "Body/L", "ink")); add(c, r, "h") }
     if (o.reasons) { add(c, await txt("لماذا تبلّغ؟", "Label/M", "ink", { w: 342 }), "h"); for (const [i, t] of ["محتوى مخالف أو مسيء", "احتيال أو سعر مضلل", "إزعاج أو تحرش", "سبب آخر"].entries()) { const r = inst("radio", { checked: o.sel === i ? "yes" : "no", state: "default" }); await retext(r, "إضافة تغليف هدية", t); add(c, r, "h") } }
     if (o.err) add(c, await note(o.err, 342), "h")
-    if (o.done) { const ring = frame("icon", { dir: "HORIZONTAL", w: 88, h: 88, main: "CENTER", cross: "CENTER", fill: "success-bg", r: "pill" }); add(ring, await icon("check-circle", 40, "success", "fill")); c.counterAxisAlignItems = "CENTER"; add(c, ring); add(c, await txt(o.done, "Body/M", "ink-2", { w: 342, align: "CENTER" }), "h") }
+    if (o.done) { const ring = frame("icon", { dir: "HORIZONTAL", w: 88, h: 88, main: "CENTER", cross: "CENTER", fill: "sand", r: "pill" }); add(ring, await icon("check-circle", 40, "success", "fill")); c.counterAxisAlignItems = "CENTER"; add(c, ring); add(c, await txt(o.done, "Body/M", "ink-2", { w: 342, align: "CENTER" }), "h") }
   })
   const bt = s.findOne(n => n.type === "INSTANCE" && n.findOne(t => t.type === "TEXT" && t.characters === o.cta)); if (bt && o.btn) bt.setProperties({ state: o.btn })
   overlay(m.screen, s, 0, 844 - s.height); return m.screen
 }
-chk("ink-2 on paper", "ink-2", "paper"); chk("danger on paper", "danger", "paper"); chk("ink on success-bg", "ink", "success-bg")
+chk("ink-2 on paper", "ink-2", "paper"); chk("danger on paper", "danger", "paper"); chk("ink on success-bg", "ink", "sand")
 const sf = [await sheetScreen("Menu", { title: "خيارات المحادثة", cta: "إلغاء", menu: true }),
   await sheetScreen("Report", { title: "الإبلاغ عن المحادثة", cta: "إرسال البلاغ", reasons: true, btn: "disabled" }),
   await sheetScreen("ReportSelected", { title: "الإبلاغ عن المحادثة", cta: "إرسال البلاغ", reasons: true, sel: 1 }),

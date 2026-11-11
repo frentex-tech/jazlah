@@ -50,7 +50,7 @@ async function lcard(l) {
   add(t, await txt(l[0], "Heading/H3", "ink", { w }), "h"); add(t, await txt(`${l[4]} · ${l[5]}`, "Body/M", "ink-2", { w }), "h")
   add(t, await txt(`${l[2]} ر.س / ${l[3]}`, "Label/M", "brand", { w }), "h"); add(t, await bdg("neutral", l[1])); add(c, t, "h"); return c
 }
-chk("brand on bg", "brand", "bg"); chk("ink on success-bg", "ink", "success-bg")
+chk("brand on bg", "brand", "bg"); chk("ink on success-bg", "ink", "sand")
 const L = LST[0], UNITS = ["كيس 50 كجم", "حزمة 20 كجم", "بالة 15 كجم", "طن"]
 const note = async (text, w, bgk = "danger-bg", ic = "warning", col = "danger") => { const n = frame("notice", { dir: "HORIZONTAL", w, px: 16, py: 12, gap: 12, cross: "CENTER", fill: bgk, r: "md" }); add(n, await icon(ic, 24, col)); add(n, await txt(text, "Body/M", "ink", { w: w - 76 }), "h"); return n }
 const kv = async (k, v, w) => row([await txt(k, "Body/M", "ink-2"), await txt(v, "Label/M", "ink")], w, { main: "SPACE_BETWEEN", cross: "CENTER" })
