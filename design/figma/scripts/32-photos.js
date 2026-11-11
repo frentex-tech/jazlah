@@ -16,7 +16,7 @@ for (const pn of ["02 Components", "10 Customer App", "20 Customer Web", "30 Adm
     const anc = chain(ic), hint = c.getSharedPluginData(NS, "photo")
     if (ic.name === "ph/storefront") {
       if (!/logo/i.test(c.name)) continue
-      c.fills = [await photoPaint("mark-gold", "FIT"), paint("brand-deep")]; ic.visible = false; stat.logos++; continue
+      c.fills = [paint("brand-deep"), await photoPaint("mark-gold", "FIT")]; ic.visible = false; stat.logos++; continue
     }
     let key = hint
     if (!key && anc.some(a => /category.?tile/i.test(a))) { const t = c.parent.findOne(x => x.type === "TEXT"); key = (t && CAT[t.characters]) || "sheep" }
