@@ -8,7 +8,7 @@ for (const pn of ["02 Components", "10 Customer App", "20 Customer Web", "30 Adm
     { let a = c.parent, inInst = false; while (a && a.type !== "PAGE") { if (a.type === "INSTANCE") inInst = true; a = a.parent } if (inInst) continue } // instances follow their main component
     c.resize(20, 20); c.clipsContent = false; c.cornerRadius = 10; c.strokes = [paint("paper")]; c.strokeWeight = 2; c.strokeAlign = "OUTSIDE"
     c.x = -6; c.y = -6; n++
-    if (c.parent) c.parent.clipsContent = false
+    for (let a = c.parent; a && a.type !== "SECTION" && a.type !== "PAGE"; a = a.parent) if ("clipsContent" in a) a.clipsContent = false // the badge overhangs the icon, so no ancestor may clip it
   }
 }
 print("counters fixed: " + n)

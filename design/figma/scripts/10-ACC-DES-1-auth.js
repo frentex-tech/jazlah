@@ -40,16 +40,17 @@ await screenSection(ctx, P, "sec-acc-onboarding", "التعريف · Onboarding"
 const phone = await authScreen({ path: "Login/Phone", heroH: 300 })
 add(phone.body, await titleBlock("أهلًا بك في جزلة", "أدخل رقم جوالك وسنرسل لك رمز التحقق."), "h")
 add(phone.body, inst("phone-input", { state: "default" }), "h")
-add(phone.body, await txt("بالمتابعة فأنت توافق على الشروط وسياسة الخصوصية.", "Body/M", "ink-2", { w: 358 }), "h")
+add(phone.body, await trustRow(342), "h")
+add(phone.body, await txt("بالمتابعة فأنت توافق على الشروط وسياسة الخصوصية.", "Body/M", "ink-2", { w: 342 }), "h")
 { const sp = spacer(); add(phone.body, sp); sp.layoutSizingVertical = "FILL" }
 add(phone.body, await button("إرسال الرمز", "primary", "disabled"), "h")
 const phoneErr = stateCopy(phone, "Error"); add(phoneErr.body, await titleBlock("أهلًا بك في جزلة", "أدخل رقم جوالك وسنرسل لك رمز التحقق."), "h")
 { const e = inst("phone-input", { state: "error" }); await retext(e, "رقم الجوال غير مكتمل", "أدخل رقم جوال سعودي صحيح مكوّن من 9 أرقام"); add(phoneErr.body, e, "h")
-  const sp = spacer(); add(phoneErr.body, sp); sp.layoutSizingVertical = "FILL"; add(phoneErr.body, await button("إرسال الرمز", "primary", "disabled"), "h") }
+  add(phoneErr.body, await trustRow(342), "h"); const sp = spacer(); add(phoneErr.body, sp); sp.layoutSizingVertical = "FILL"; add(phoneErr.body, await button("إرسال الرمز", "primary", "disabled"), "h") }
 const phoneLoad = stateCopy(phone, "Loading"); add(phoneLoad.body, await titleBlock("أهلًا بك في جزلة", "أدخل رقم جوالك وسنرسل لك رمز التحقق."), "h")
-{ add(phoneLoad.body, phoneValue(inst("phone-input", { state: "default" })), "h"); const sp = spacer(); add(phoneLoad.body, sp); sp.layoutSizingVertical = "FILL"; add(phoneLoad.body, await button("إرسال الرمز", "primary", "loading"), "h") }
+{ add(phoneLoad.body, phoneValue(inst("phone-input", { state: "default" })), "h"); add(phoneLoad.body, await trustRow(342), "h"); const sp = spacer(); add(phoneLoad.body, sp); sp.layoutSizingVertical = "FILL"; add(phoneLoad.body, await button("إرسال الرمز", "primary", "loading"), "h") }
 const phoneFilled = stateCopy(phone, "Filled"); add(phoneFilled.body, await titleBlock("أهلًا بك في جزلة", "أدخل رقم جوالك وسنرسل لك رمز التحقق."), "h")
-{ add(phoneFilled.body, phoneValue(inst("phone-input", { state: "default" })), "h"); const sp = spacer(); add(phoneFilled.body, sp); sp.layoutSizingVertical = "FILL"; add(phoneFilled.body, await button("إرسال الرمز", "primary", "default"), "h") }
+{ add(phoneFilled.body, phoneValue(inst("phone-input", { state: "default" })), "h"); add(phoneFilled.body, await trustRow(342), "h"); const sp = spacer(); add(phoneFilled.body, sp); sp.layoutSizingVertical = "FILL"; add(phoneFilled.body, await button("إرسال الرمز", "primary", "default"), "h") }
 await screenSection(ctx, P, "sec-acc-phone", "رقم الجوال · Phone entry", async S => { S.main.push(phone.screen); S.states.push(phoneFilled.screen, phoneErr.screen, phoneLoad.screen) })
 
 // ---- OTP ------------------------------------------------------------------------------------------------
