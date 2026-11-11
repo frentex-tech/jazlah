@@ -180,7 +180,7 @@ const d6 = await dfamily({ path: "Visits/Calendar", role: "vendor", title: "جد
   await dcols(b, async (m, w) => { const g = frame("week", { dir: "HORIZONTAL", w, gap: 8, cross: "MIN" })
     for (const [i, n] of [18, 19, 20, 21, 22].entries()) { const c = frame("day " + n, { w: 136, pad: 8, gap: 8, fill: "paper", stroke: n === 19 ? "ember" : "line", sw: n === 19 ? 2 : 1, r: "md" }); c.minHeight = 400
       add(c, await T(DOW[i] + " " + n, "Label/M", "ink", 120, "CENTER"), "h")
-      if (VIS[n] === null) add(c, await pill("مغلق", "danger")); else for (const [t, who] of VIS[n]) { const v = frame("visit", { w: 120, pad: 8, gap: 4, fill: "info-bg", r: "sm" }); add(v, await T(t, "Label/M", "ink", 104), "h"); add(v, await T(who, "Body/M", "ink-2", 104), "h"); chk("visit", "ink-2", "info-bg"); add(c, v, "h") }
+      if (VIS[n] === null) add(c, await pill("مغلق", "danger")); else for (const [t, who] of VIS[n]) { const v = frame("visit", { w: 120, pad: 8, gap: 4, fill: "sand", r: "sm" }); add(v, await T(t, "Label/M", "ink", 104), "h"); add(v, await T(who, "Body/M", "ink-2", 104), "h"); chk("visit", "ink-2", "sand"); add(c, v, "h") }
       add(g, c) }
     add(m, g, "h") }, async (s, w) => add(s, await box(w, async (c, iw) => { add(c, await T("اليوم الخميس 19 نوفمبر", "Heading/H3", "ink", iw), "h")
     for (const [t, who, n] of [["10:00 ص", "فهد الحربي", "3 زوار · 0555 123 456"], ["4:00 م", "نورة القحطاني", "2 زوار · 0500 987 654"]]) add(c, await opt(iw, "calendar-check", t + " · " + who, n, false), "h")
