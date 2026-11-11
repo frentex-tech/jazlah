@@ -17,3 +17,9 @@ for (const t of pg.findAll(x => x.type === "TEXT" && x.name === "hint" && x.text
 let e = 0
 for (const pn of ["10 Customer App", "20 Customer Web", "30 Admin"]) { const p = page(pn); await p.loadAsync(); for (const t of p.findAll(x => x.type === "TEXT" && x.characters.trim() === "")) { t.remove(); e++ } }
 print("hints promoted: " + h + ", empty texts removed: " + e)
+
+// Section containers: a variable-bound paint renders black on Sections in this file, so give the Section canvas the cream hex directly.
+// (Screens inside stay bound to variables; this only colors the organizing Section.)
+let sc = 0
+for (const pn of ["10 Customer App", "20 Customer Web", "30 Admin"]) { const p = page(pn); await p.loadAsync(); for (const s of p.children.filter(x => x.type === "SECTION")) { s.fills = [{ type: "SOLID", color: rgb(DS.T.color.bg.value) }]; sc++ } }
+print("section fills set: " + sc)
