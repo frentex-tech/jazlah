@@ -72,3 +72,5 @@ Section node ids on `02 Components`: Buttons 1:713, Inputs 1:790, Selection 1:87
 - Added: `34-audit-images.js` (lists remaining image placeholders per page), static map image `docs/design/reference/prototype/img/map.jpg`, 32-photos now covers pages 31/32, map frames and photo-named frames; `30-lint-screens` fails when an image placeholder remains.
 - Scripts for #42 (40-42), #148 (50-53), #120 (60-63), #201 (70-77) written by subagents; not yet run in Figma.
 - BLOCKER: the chrome-devtools MCP server was disconnected, so nothing could be run in Figma. Next: reconnect, run 34 audit → 32-photos until 0 → lint, then run task scripts in order #42, #148, #120, #201 (start each with `task.py start N`, PR with "Closes #N").
+- Scripts committed to per-task branches (written, never run in Figma): docs/42-… (40-44), docs/148-… (50-53), docs/120-… (60-63), docs/201-… (70-77). Cards for #42, #148, #120, #201 are In Progress. No PRs yet for these four.
+- Known gaps flagged by the script authors: side-nav active item is fixed, filters-bar labels fixed, no prototype links for OPX admin, tables/charts hand-built, component default texts assumed (retext may only warn).
