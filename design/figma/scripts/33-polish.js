@@ -5,6 +5,7 @@ let n = 0
 for (const pn of ["02 Components", "10 Customer App", "20 Customer Web", "30 Admin"]) {
   const pg = page(pn); await pg.loadAsync()
   for (const c of pg.findAll(x => x.type === "FRAME" && x.name === "counter")) {
+    { let a = c.parent, inInst = false; while (a && a.type !== "PAGE") { if (a.type === "INSTANCE") inInst = true; a = a.parent } if (inInst) continue } // instances follow their main component
     c.resize(20, 20); c.clipsContent = false; c.cornerRadius = 10; c.strokes = [paint("paper")]; c.strokeWeight = 2; c.strokeAlign = "OUTSIDE"
     c.x = -6; c.y = -6; n++
     if (c.parent) c.parent.clipsContent = false
