@@ -2,7 +2,7 @@
 // Role comes from the frame prefix (Admin/Vendor/Kitchen), the item from keywords in the path. Unmatched screens are listed, left as they are.
 await loadDS()
 const MAP = {
-  Admin: [["الإعدادات", /setting|operation|config/], ["المالية", /financ|payout|settle|invoice|commission/], ["التوصيل", /deliver|driver|shipping|logistic/], ["العملاء", /customer|user/], ["المنتجات", /product|catalog/], ["المتاجر", /vendor|store|shop/], ["الطلبات", /order/], ["لوحة المعلومات", /dashboard|home|overview|kpi/]],
+  Admin: [["الإعدادات", /setting|operation|config/], ["المالية", /financ|payout|settle|invoice|commission/], ["التوصيل", /deliver|driver|shipping|logistic/], ["العملاء", /customer|user/], ["المنتجات", /product|catalog|listing|feed\/listings/], ["العملاء", /report/], ["المتاجر", /vendor|store|shop/], ["الطلبات", /order/], ["لوحة المعلومات", /dashboard|home|overview|kpi/]],
   Vendor: [["الإعدادات", /setting/], ["الأرباح", /earn|payout|wallet/], ["منتجاتي", /product|catalog/], ["ملف المتجر", /profile|store|apply|status|onboard/], ["لوحة الطلبات", /order|dashboard|home/]],
   Kitchen: [["الإعدادات", /setting/], ["الأطباق", /dish|menu|product/], ["الجدول", /schedule|calendar|slot/], ["الطلبات الجارية", /order|queue|live|dashboard|home/]],
 }
