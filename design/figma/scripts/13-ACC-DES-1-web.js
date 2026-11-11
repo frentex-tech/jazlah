@@ -44,7 +44,7 @@ await screenSection(ctx, P, "sec-acc-web-login", "تسجيل الدخول · Web
 
 // ---- OTP --------------------------------------------------------------------------------------------------
 async function otpCard(c, otpState, resend, btn) {
-  add(c, await titleBlock("أدخل رمز التحقق", "أرسلنا رمزًا من 4 أرقام إلى +966 55 123 4567"), "h")
+  add(c, await titleBlock("أدخل رمز التحقق", "أرسلنا رمزًا من 4 أرقام إلى ⁦+966 55 123 4567⁩"), "h")
   const row = frame("center", { dir: "HORIZONTAL", main: "CENTER", w: 358 }); row.appendChild(inst("otp-field", { state: otpState })); add(c, row, "h")
   add(c, await button(resend, "ghost", resend.includes("بعد") ? "disabled" : "default", "S"))
   add(c, await button("تأكيد", "primary", btn), "h")

@@ -315,10 +315,10 @@ function stateCopy(base, state, keepBody = false) {
 }
 
 // A heading + helper paragraph block for forms and empty content
-async function titleBlock(title, sub, align = "RIGHT") {
-  const f = frame("title block", { gap: 8, w: 358 })
-  add(f, await txt(title, "Heading/H1", "ink", { w: 358, align }), "h")
-  if (sub) add(f, await txt(sub, "Body/M", "ink-2", { w: 358, align }), "h")
+async function titleBlock(title, sub, align = "RIGHT", w = 358) {
+  const f = frame("title block", { gap: 8, w })
+  add(f, await txt(title, "Heading/H1", "ink", { w, align }), "h")
+  if (sub) add(f, await txt(sub, "Body/M", "ink-2", { w, align }), "h")
   return f
 }
 async function skeletonRows(n = 4) { const f = frame("loading", { gap: 12, w: 358 }); for (let i = 0; i < n; i++) add(f, inst("skeleton-row"), "h"); return f }
