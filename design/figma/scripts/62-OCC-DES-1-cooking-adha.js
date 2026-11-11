@@ -19,7 +19,7 @@ async function kv(w, k, v, bold) {
   const r = frame("row", { dir: "HORIZONTAL", w, main: "SPACE_BETWEEN", cross: "CENTER" })
   add(r, await T(k, bold ? "Label/M" : "Body/M", bold ? "ink" : "ink-2")); add(r, await T(v, bold ? "Heading/H3" : "Body/M", "ink")); return r
 }
-async function pill(label, kind) { const f = frame("pill " + kind, { dir: "HORIZONTAL", px: 12, py: 4, fill: ({ success: "sand", info: "sand" }[kind] || kind + "-bg"), r: "pill" }); add(f, await T(label, "Label/M", kind)); chk("pill " + kind, kind, ({ success: "sand", info: "sand" }[kind] || kind + "-bg")); return f }
+async function pill(label, kind) { const f = frame("pill " + kind, { dir: "HORIZONTAL", px: 12, py: 4, fill: ({ success: "sand", info: "sand" }[kind] || kind + "-bg"), r: "pill" }); add(f, await T(label, "Label/M", ({ success: "ink", info: "ink" }[kind] || kind))); chk("pill " + kind, ({ success: "ink", info: "ink" }[kind] || kind), ({ success: "sand", info: "sand" }[kind] || kind + "-bg")); return f }
 async function photo(w, h, key, name = "photo", r = "md") { const f = frame(name, { dir: "HORIZONTAL", w, h, main: "CENTER", cross: "CENTER", fill: "sand", r, clip: true }); add(f, await icon("image", 32, "ink-2")); f.setSharedPluginData(NS, "photo", key); return f }
 async function map(w, h, r = "md") { const f = frame("map", { dir: "HORIZONTAL", w, h, main: "CENTER", cross: "CENTER", fill: "sand", r, clip: true }); add(f, await icon("map-pin", 36, "ember", "fill")); return f }
 async function steps(w, i, n, label) {
