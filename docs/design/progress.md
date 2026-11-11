@@ -74,3 +74,8 @@ Section node ids on `02 Components`: Buttons 1:713, Inputs 1:790, Selection 1:87
 - BLOCKER: the chrome-devtools MCP server was disconnected, so nothing could be run in Figma. Next: reconnect, run 34 audit → 32-photos until 0 → lint, then run task scripts in order #42, #148, #120, #201 (start each with `task.py start N`, PR with "Closes #N").
 - Scripts committed to per-task branches (written, never run in Figma): docs/42-… (40-44), docs/148-… (50-53), docs/120-… (60-63), docs/201-… (70-77). Cards for #42, #148, #120, #201 are In Progress. No PRs yet for these four.
 - Known gaps flagged by the script authors: side-nav active item is fixed, filters-bar labels fixed, no prototype links for OPX admin, tables/charts hand-built, component default texts assumed (retext may only warn).
+
+## Session 8 (images to zero, then #42)
+- Ran 34 audit (168) -> 32-photos (twice; the second pass catches maps) -> audit again. Remaining hits were audit false positives: `ph/storefront` is a Phosphor glyph (14-20px in vendor rows and nav items) and "Map pin" matched the map rule. 34 and 30 now judge `ph/storefront` by its own size (>= 32px) and skip pins. Result: 0 image placeholders on all pages, `LINT OK images`.
+- Lint over 142 screens: undefined/empty none, placeholder none, outside none, no-state-suffix none. Still listed and accepted: 6+ small-Arabic 3-word badge labels (12px), unbound fills on the emblem Vector inside onboarding/login.
+- Audit/lint fix cherry-picked to all eight design branches (14, 16, 54, 67, 42, 148, 120, 201).
