@@ -145,7 +145,7 @@ async function fbBody(body, st) {
       const r = frame("issue", { dir: "HORIZONTAL", w: 700, gap: 12, pad: 16, cross: "MIN", fill: "danger-bg", r: "md" }); add(r, await icon("warning-circle", 24, "danger", "fill"))
       const t2 = frame("text", { gap: 4 }); add(t2, await tx(t, "Label/M", "ink", "danger-bg", 480)); add(t2, await tx(d, "Body/M", "ink", "danger-bg", 480)); add(r, t2, "h"); add(r, await button(a, "secondary", "default", "S")); add(L, r, "h") }
     chk("issue icon", "danger", "danger-bg", 3)
-  } else add(L, await note(st === "pending" ? "أُرسل المنتج للمراجعة بعد تعديل الملاحظات. سنخبرك بالقرار خلال يوم عمل." : "تمت الموافقة ونُشر المنتج في المتجر بعد تعديل الصور والوصف.", 700, st === "pending" ? "clock" : "check-circle", st === "pending" ? "sand" : "success-bg"), "h")
+  } else add(L, await note(st === "pending" ? "أُرسل المنتج للمراجعة بعد تعديل الملاحظات. سنخبرك بالقرار خلال يوم عمل." : "تمت الموافقة ونُشر المنتج في المتجر بعد تعديل الصور والوصف.", 700, st === "pending" ? "clock" : "check-circle", st === "pending" ? "sand" : "sand"), "h")
   if (st === "default") add(L, await btnRow([["تعديل وإعادة الإرسال", "primary"], ["حذف المنتج", "ghost"]], 460)); add(row, L)
   const R = await card("المنتج", 360, { name: "product" }); add(R, await photoBox("photo product cover", 312, 200, "ribeye-paper"), "h")
   add(R, await kv([["الاسم", "ريب آي بقري طازج"], ["التصنيف", "الأبقار"], ["السعر من", "45.00 ر.س"], ["محاولات الإرسال", st === "default" ? "1" : "2"]], 312), "h"); add(row, R); add(body, row)
