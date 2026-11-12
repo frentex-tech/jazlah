@@ -115,7 +115,7 @@ const c1 = await cancelBase("Cancel/Reason", "إلغاء الطلب"); await fil
 const c2 = await cancelBase("Cancel/Refund", "إلغاء الطلب"); await fillRefund(c2.body)
 const c3 = stateCopy(c2, "Confirm", true); dim(c3.screen)
 { const d = inst("dialog", { type: "destructive" }); await retext(d, "حذف العنوان؟", "إلغاء الطلب #10482؟"); await retext(d, "لن تتمكن من استرجاع هذا العنوان بعد الحذف.", "سيُلغى طلبك ويُسترد 338.00 ر.س إلى محفظة جزلة. لا يمكن التراجع عن الإلغاء."); await retext(d, "حذف", "نعم، ألغِ الطلب"); await retext(d, "إلغاء", "تراجع"); overlay(c3.screen, d, 35, 300) }
-const c4 = await cancelBase("Cancel/Done", null); c4.screen.findOne(n => n.name === "body").children.forEach(k => k.remove())
+const c4 = await cancelBase("Cancel/Done", "إلغاء الطلب"); c4.screen.findOne(n => n.name === "body").children.forEach(k => k.remove())
 { const col = frame("done", { w: 358, gap: 16, cross: "CENTER" }), ring = frame("ok", { dir: "HORIZONTAL", w: 88, h: 88, main: "CENTER", cross: "CENTER", fill: "sand", r: "pill" }); add(ring, await icon("check-circle", 48, "success", "fill")); add(col, ring)
   add(col, await T("تم إلغاء الطلب", "Heading/H1", "ink", 358)); add(col, await T("سيصل 338.00 ر.س إلى محفظة جزلة خلال دقائق، وسنرسل لك تأكيدًا بالإشعار.", "Body/M", "ink-2", 326)); col.children.slice(1).forEach(n => n.textAlignHorizontal = "CENTER")
   mid(c4.body, col); add(c4.body, await button("العودة إلى الطلبات", "primary"), "h") }
