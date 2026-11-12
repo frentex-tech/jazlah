@@ -7,7 +7,7 @@ const GALLERY = ["ribeye-paper", "steaks-dark", "tbone-pan"]
 const CAT = { "الأغنام": "sheep", "الأبقار": "steaks-white", "الإبل": "camel", "الدواجن": "roast-paper", "المفرومات": "strips", "المشويات": "bbq", "العقائق": "lamb-raw", "الولائم": "mandi", "الأضاحي": "camel-calf", "المجمّدات": "cuts", "الأسماك": "dryage", "البهارات": "chops-wood" }
 const chain = n => { const a = []; for (let p = n.parent; p && p.type !== "PAGE"; p = p.parent) a.push(p.name); return a }
 let stat = { photos: 0, logos: 0 }
-for (const pn of ["02 Components", "10 Customer App", "20 Customer Web", "30 Admin", "31 Vendor", "32 Kitchen"]) {
+for (const pn of ["Design System"].concat(figma.root.children.filter(p => /^0[1-7] /.test(p.name)).map(p => p.name))) {
   if (!figma.root.children.find(p => p.name === pn)) continue
   const pg = figma.root.children.find(p => p.name === pn); await pg.loadAsync()
   let i = 0

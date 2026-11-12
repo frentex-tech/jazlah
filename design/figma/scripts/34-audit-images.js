@@ -1,6 +1,6 @@
 // Audit: lists every remaining image placeholder (visible ph/image or ph/storefront icon, map frames without an image fill,
 // photo-like frames without an IMAGE fill). Pages 02, 10, 20, 30, 31, 32. Prints counts per page and the first paths per kind.
-const PAGES = ["10 Customer App", "20 Customer Web", "30 Admin", "31 Vendor", "32 Kitchen"]
+const PAGES = figma.root.children.filter(p => /^0[1-7] /.test(p.name)).map(p => p.name)
 const hasImg = n => Array.isArray(n.fills) && n.fills.some(f => f.type === "IMAGE" && f.visible !== false)
 const path = n => { const a = []; for (let p = n; p && p.type !== "PAGE"; p = p.parent) a.unshift(p.name); return a.slice(-4).join(" > ") }
 const out = []
