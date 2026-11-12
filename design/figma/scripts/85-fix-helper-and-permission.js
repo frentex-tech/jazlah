@@ -5,8 +5,8 @@ for (const pg of figma.root.children.filter(p => /^0[1-7] /.test(p.name))) { awa
 let helper = 0, perm = 0
 for (const s of nodes) for (const t of s.findAll(n => n.type === "TEXT" && n.characters === "نص مساعد" && n.visible !== false)) { t.visible = false; helper++ }
 const p1 = figma.root.children.find(p => p.name.startsWith("01 "))
-const add = p1.children.find(n => n.type === "FRAME" && n.getSharedPluginData(NS, "en") === "App/Addresses/Add — Default")
-const bbody = add && add.findOne(n => n.type === "FRAME" && n.name === "body")
+const addScreen = p1.children.find(n => n.type === "FRAME" && n.getSharedPluginData(NS, "en") === "App/Addresses/Add — Default")
+const bbody = addScreen && addScreen.findOne(n => n.type === "FRAME" && n.name === "body")
 for (const s of p1.children.filter(n => n.type === "FRAME" && n.getSharedPluginData(NS, "en").startsWith("App/Location/Permission"))) {
   const body = s.findOne(n => n.type === "FRAME" && n.name === "body")
   if (body && bbody) { body.children.slice().forEach(k => k.remove()); for (const k of bbody.children) body.appendChild(k.clone()); perm++ }
