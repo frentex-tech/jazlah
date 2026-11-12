@@ -4,7 +4,7 @@ var DS = null
 
 // Read variables, styles and tokens that batch 01 created in this file.
 async function loadDS() {
-  await page("02 Components").loadAsync() // inst() looks components up here; loadAllPagesAsync is too slow
+  await page("Design System").loadAsync() // inst() looks components up here; loadAllPagesAsync is too slow
   const T = await (await fetch(B.replace("design/figma/scripts/", "docs/design/tokens.json"))).json()
   const cols = await figma.variables.getLocalVariableCollectionsAsync()
   const vars = await figma.variables.getLocalVariablesAsync()
@@ -185,7 +185,7 @@ function defineOne(host, id, name, comp) {
 function inst(id, props = {}) {
   const key = "c:" + id
   let n = DS.sets[key]
-  if (!n) n = DS.sets[key] = page("02 Components").findOne(x => (x.type === "COMPONENT_SET" || x.type === "COMPONENT") && x.getSharedPluginData(NS, "id") === id)
+  if (!n) n = DS.sets[key] = page("Design System").findOne(x => (x.type === "COMPONENT_SET" || x.type === "COMPONENT") && x.getSharedPluginData(NS, "id") === id)
   if (!n) throw new Error("component not found: " + id)
   if (n.type === "COMPONENT") return n.createInstance()
   const v = n.children.find(c => c.name === _name(props)) || n.defaultVariant
