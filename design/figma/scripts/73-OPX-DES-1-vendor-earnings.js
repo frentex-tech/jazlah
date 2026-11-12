@@ -24,7 +24,7 @@ async function irow(ic, title, sub, w, col = "ink") {
   const c = frame("text", { gap: 2, w: w - 56 }); add(c, await T(title, "Label/M", "ink", w - 56), "h"); if (sub) add(c, await T(sub, "Body/M", "ink-2", w - 56), "h")
   return add(r, c)
 }
-for (const [w, f, b] of [["card", "ink", "paper"], ["card sub", "ink-2", "paper"], ["title on bg", "ink", "bg"], ["sub on bg", "ink-2", "bg"], ["link", "brand", "paper"], ["danger on tint", "danger", "danger-bg"], ["ink on sand", "ink", "sand"], ["sub on sand", "ink-2", "sand"], ["success on tint", "success", "sand"], ["warning on tint", "warning", "warning-bg"], ["ink on warning tint", "ink", "warning-bg"], ["ink on danger tint", "ink", "danger-bg"], ["paper on ember", "paper", "ember"]]) chk(w, f, b)
+for (const [w, f, b] of [["card", "ink", "paper"], ["card sub", "ink-2", "paper"], ["title on bg", "ink", "bg"], ["sub on bg", "ink-2", "bg"], ["link", "brand", "paper"], ["danger on tint", "danger", "danger-bg"], ["ink on sand", "ink", "sand"], ["sub on sand", "ink-2", "sand"], ["success on paper", "success", "paper"], ["warning on tint", "warning", "warning-bg"], ["ink on warning tint", "ink", "warning-bg"], ["ink on danger tint", "ink", "danger-bg"], ["paper on ember", "paper", "ember"]]) chk(w, f, b)
 function dmid(b, node, h = 560) { const w = frame("center", { dir: "HORIZONTAL", main: "CENTER", cross: "CENTER", w: 1132, h }); w.appendChild(node); add(b, w, "h") }
 async function std(base, o) {
   const out = []

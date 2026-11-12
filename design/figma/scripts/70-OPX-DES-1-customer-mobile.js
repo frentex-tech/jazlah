@@ -41,7 +41,7 @@ async function std(base, o) {
   if (o.denied) { const s = stateCopy(base, "Permission denied"); mid(s.body, await panel("denied", ...o.denied)); out.push(s.screen) }
   return out
 }
-for (const [w, f, b] of [["card", "ink", "paper"], ["card sub", "ink-2", "paper"], ["title on bg", "ink", "bg"], ["sub on bg", "ink-2", "bg"], ["link", "brand", "paper"], ["danger on tint", "danger", "danger-bg"], ["info on tint", "info", "sand"], ["ink on sand", "ink", "sand"], ["sub on sand", "ink-2", "sand"], ["success on tint", "success", "sand"], ["warning on tint", "warning", "warning-bg"]]) chk(w, f, b)
+for (const [w, f, b] of [["card", "ink", "paper"], ["card sub", "ink-2", "paper"], ["title on bg", "ink", "bg"], ["sub on bg", "ink-2", "bg"], ["link", "brand", "paper"], ["danger on tint", "danger", "danger-bg"], ["info on paper", "info", "paper"], ["ink on sand", "ink", "sand"], ["sub on sand", "ink-2", "sand"], ["success on paper", "success", "paper"], ["warning on tint", "warning", "warning-bg"]]) chk(w, f, b)
 const MD = (t) => "⁦" + t + "⁩"
 
 // ---- Orders list ---------------------------------------------------------------------------------
