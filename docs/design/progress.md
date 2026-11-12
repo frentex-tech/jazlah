@@ -89,3 +89,8 @@ Section node ids on `02 Components`: Buttons 1:713, Inputs 1:790, Selection 1:87
 ## #148 FED-DES-1 (run in Figma, PR opened)
 - Scripts 50-53 ran first time (contrast failing 0: 11, 13, 14, 20). Lint found text outside frame: filter and unit chip rows did not wrap (342/358 px) -> `layoutWrap` in 50 and 51. `35-nav-active.js` got Admin/Feed paths (92 screens matched, 0 unmatched).
 - Lint: 285 screens, undefined/placeholder/outside none, image placeholders 0.
+
+## #120 OCC-DES-1 (run in Figma, PR opened)
+- First run: the 60-63 scripts failed on `kind + "-bg"` pills (no `success-bg`/`info-bg` tokens). Fixed to `sand` surface with `ink` text (success on sand was 3.93, failing). Final contrast checks 188 / 192 / 184 / 83, failing 0. `35-nav-active.js` got Occasions/Kitchens/Adha/Board paths (121 screens matched; Vendor/Visits/Calendar and Vendor/Animals/Register have no nav item).
+- Lint: 405 screens, undefined/placeholder/outside none, `LINT OK images`.
+- Figma showed "Connection issue affecting saving" once during this run; it cleared afterwards. If anything is missing in the file, rerun the task scripts (idempotent).
