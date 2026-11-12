@@ -14,6 +14,7 @@ for (const pg of figma.root.children.filter(p => /^0[1-7] /.test(p.name))) {
     for (const n of s.findAll(x => "fills" in x && x.type !== "TEXT" && hasImg(x))) {
       const m = /^banner (danger|info|warning|success)$/.exec(n.name)
       if (m) { n.fills = [paint(TINT[m[1]])]; banners++; continue }
+      if (n.name === "banner" && n.height < 120) { n.fills = [paint("warning-bg")]; banners++; continue } // plain notice banner (e.g. outside coverage); the 190 high Adha banner is a photo hero on purpose
       if (n.name === "paused banner") { n.fills = [paint("warning-bg")]; banners++; continue }
       if (n.name === "thumb") { let sk = false; for (let p = n.parent; p && p.type !== "PAGE"; p = p.parent) if (/skeleton/i.test(p.name)) sk = true; if (sk) { n.fills = [paint("sand")]; thumbs++ } }
     }
