@@ -189,12 +189,13 @@ const d6 = await dfamily({ path: "Visits/Calendar", role: "vendor", title: "جد
 // ---- vendor: animal registration ------------------------------------------------------------------------
 const d7 = await dfamily({ path: "Animals/Register", role: "vendor", title: "تسجيل حيوان", crumb: "المواشي / تسجيل جديد", add: "حفظ وإتاحة", exp: "حفظ مسودة", states: ["Filled", "Validation", "Loading", "Error"] }, async (b, st) => {
   const f = st === "Filled", bad = st === "Validation", fs = (l, v, h) => field(l, bad && l.startsWith("السعر") ? "اكتب هنا" : f || bad ? v : null, bad && l.startsWith("السعر") ? "error" : f || bad ? "filled" : "default", bad && l.startsWith("السعر") ? "أدخل سعر الحيوان" : h)
-  await dcols(b, async (m, w) => {
+  { const m = b // single column: the 1132 wide form section does not fit a 720 column
     await fsec(m, "بيانات الحيوان", "تظهر للعميل عند حجز الزيارة وفي بطاقة الحيوان.", async c => { const r = frame("types", { dir: "HORIZONTAL", gap: 8 }); for (const [i, t] of ["خروف نعيمي", "خروف حري", "ماعز بلدي", "حاشي"].entries()) add(r, await chip(t, i === 0 && (f || bad) ? "selected" : "default")); add(c, r)
       await pair(c, await fs("رقم الأذن", "0142"), await fs("الوزن (كجم)", "48")); await pair(c, await fs("العمر (أشهر)", "9"), await fs("السعر (ر.س)", "1,350.00", "شامل الذبح والتقطيع")) })
-  }, async (s, w) => add(s, await box(w, async (c, iw) => { add(c, await T("صور الحيوان", "Heading/H3", "ink", iw), "h"); const g = frame("gallery row", { dir: "HORIZONTAL", gap: 8 })
+  }
+  { const s = b, w = 1132; add(s, await box(w, async (c, iw) => { add(c, await T("صور الحيوان", "Heading/H3", "ink", iw), "h"); const g = frame("gallery row", { dir: "HORIZONTAL", gap: 8 })
     for (const k of f || bad ? ["sheep", "sheep", "camel-calf"] : ["sheep"]) add(g, await photo(112, 112, k, "gallery")); add(c, g)
-    add(c, await button("رفع صورة", "secondary"), "h"); add(c, await button("حفظ وإتاحة للحجز", "primary", f ? "default" : "disabled"), "h") }, { pad: 24 }), "h"), 720, 388)
+    add(c, await button("رفع صورة", "secondary"), "h"); add(c, await button("حفظ وإتاحة للحجز", "primary", f ? "default" : "disabled"), "h") }, { pad: 24 }), "h") }
 })
 // ---- kitchen: board -------------------------------------------------------------------------------------
 const COLS = [["جديد", "info", [["مندي لحم × 4", "#OC-1042 · عقيقة", "12:30 ظهرًا"], ["كبسة لحم × 2", "#OC-1043 · وليمة", "1:00 ظهرًا"]]], ["قيد الطبخ", "warning", [["مظبي ضأن × 3", "#OC-1040 · تفطير", "11:30 صباحًا"]]], ["جاهز", "success", [["مندي لحم × 6", "#OC-1038 · وليمة", "11:00 صباحًا"]]], ["تم التسليم", "neutral", [["مشاوي مشكّلة × 2", "#OC-1036 · عزيمة", "10:00 صباحًا"]]]]
