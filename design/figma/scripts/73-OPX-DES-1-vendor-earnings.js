@@ -24,7 +24,7 @@ async function irow(ic, title, sub, w, col = "ink") {
   const c = frame("text", { gap: 2, w: w - 56 }); add(c, await T(title, "Label/M", "ink", w - 56), "h"); if (sub) add(c, await T(sub, "Body/M", "ink-2", w - 56), "h")
   return add(r, c)
 }
-for (const [w, f, b] of [["card", "ink", "paper"], ["card sub", "ink-2", "paper"], ["title on bg", "ink", "bg"], ["sub on bg", "ink-2", "bg"], ["link", "brand", "paper"], ["danger on tint", "danger", "danger-bg"], ["ink on sand", "ink", "sand"], ["sub on sand", "ink-2", "sand"], ["success on tint", "success", "success-bg"], ["warning on tint", "warning", "warning-bg"], ["ink on warning tint", "ink", "warning-bg"], ["ink on danger tint", "ink", "danger-bg"], ["paper on ember", "paper", "ember"]]) chk(w, f, b)
+for (const [w, f, b] of [["card", "ink", "paper"], ["card sub", "ink-2", "paper"], ["title on bg", "ink", "bg"], ["sub on bg", "ink-2", "bg"], ["link", "brand", "paper"], ["danger on tint", "danger", "danger-bg"], ["ink on sand", "ink", "sand"], ["sub on sand", "ink-2", "sand"], ["success on tint", "success", "sand"], ["warning on tint", "warning", "warning-bg"], ["ink on warning tint", "ink", "warning-bg"], ["ink on danger tint", "ink", "danger-bg"], ["paper on ember", "paper", "ember"]]) chk(w, f, b)
 function dmid(b, node, h = 560) { const w = frame("center", { dir: "HORIZONTAL", main: "CENTER", cross: "CENTER", w: 1132, h }); w.appendChild(node); add(b, w, "h") }
 async function std(base, o) {
   const out = []
@@ -34,7 +34,7 @@ async function std(base, o) {
   if (o.denied) { const s = stateCopy(base, "Permission denied"); dmid(s.body, await panel("denied", ...o.denied)); out.push(s.screen) }
   return out
 }
-chk("ink on info tint", "ink", "info-bg"); chk("brand id link", "brand", "paper")
+chk("ink on info tint", "ink", "sand"); chk("brand id link", "brand", "paper")
 const VD = (path, title, crumb) => dashScreen({ path, role: "vendor", title, crumb, actions: false })
 // table: cols [[title, width]] (sum 1068), rows of strings or { b: [badgeType, label] }; mode default | loading
 async function table(cols, rows, mode) {
@@ -63,7 +63,7 @@ async function fillEarn(b, mode) {
     for (const [l, v, d, up] of [["الرصيد القابل للسحب", "4,860.00 ر.س", "12% عن الأسبوع الماضي", 1], ["مبيعات نوفمبر", "18,420.00 ر.س", "8% عن الشهر الماضي", 1], ["عمولة جزلة (12%)", "2,210.40 ر.س", "8% عن الشهر الماضي", 1], ["طلبات مكتملة", "142", "3% عن الشهر الماضي", 0]]) {
       const k = inst("kpi-card", { trend: up ? "up" : "down" }); await retext(k, "طلبات اليوم", l); await retext(k, "128", v); await retext(k, up ? "12% عن أمس" : "5% عن أمس", d)
       if (mode === "loading") k.findAll(n => n.type === "TEXT").forEach(t => (t.opacity = 0.2)); add(r, k) } return r })(), "h")
-  const nx = frame("next payout", { dir: "HORIZONTAL", w: 1132, px: 16, py: 16, gap: 12, cross: "CENTER", fill: "info-bg", r: "md" }); add(nx, await icon("bank", 28, "info")); add(nx, await T("الدفعة القادمة الخميس 12 نوفمبر 2026 بقيمة 4,860.00 ر.س إلى الحساب المنتهي بـ 7741.", "Label/M", "ink", 880), "h"); add(nx, await button("عرض الدفعات", "secondary", "default", "S")); add(b, nx, "h")
+  const nx = frame("next payout", { dir: "HORIZONTAL", w: 1132, px: 16, py: 16, gap: 12, cross: "CENTER", fill: "sand", r: "md" }); add(nx, await icon("bank", 28, "info")); add(nx, await T("الدفعة القادمة الخميس 12 نوفمبر 2026 بقيمة 4,860.00 ر.س إلى الحساب المنتهي بـ 7741.", "Label/M", "ink", 880), "h"); add(nx, await button("عرض الدفعات", "secondary", "default", "S")); add(b, nx, "h")
   await filters(b, "تصدير CSV"); add(b, await table(EC, ENT, mode), "h")
 }
 const ea = await VD("Earnings/Summary", "الأرباح", "المالية / الأرباح"); await fillEarn(ea.body)

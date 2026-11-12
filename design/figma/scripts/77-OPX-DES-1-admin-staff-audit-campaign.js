@@ -94,7 +94,7 @@ async function feature(S, path, title, crumb, fill, o = {}) {
   return base
 }
 for (const [f, b] of [["ink", "paper"], ["ink-2", "paper"], ["ember", "paper"], ["ink", "sand"], ["ink-2", "bg"], ["paper", "ember"], ["ink", "bg"]]) chk("admin " + f + " on " + b, f, b)
-chk("diff removed", "ink", "danger-bg"); chk("diff added", "ink", "success-bg")
+chk("diff removed", "ink", "danger-bg"); chk("diff added", "ink", "sand")
 const SDEN = "إدارة الموظفين والصلاحيات متاحة للمدير العام فقط."
 // ---- Staff and roles -----------------------------------------------------------------------------------------
 const ROLES = ["مدير عام", "مشرف عمليات", "المالية", "دعم العملاء", "مشرف توصيل"]
@@ -117,7 +117,7 @@ await screenSection(ctx, P, "sec-opx-a-audit", "سجل التدقيق · Admin a
     add(b, filters(false), "h")
     add(b, await table([["الوقت", 190], ["الموظف", 190], ["الإجراء", 250], ["الكيان", 190], ["عنوان IP", 264]], [["10 نوفمبر 2026 · 11:42 ص", "ليلى الغامدي", { l: "استرجاع مبلغ" }, "الطلب #10479", L("185.93.12.40")], ["10 نوفمبر 2026 · 10:05 ص", "عبدالله السهلي", { l: "تعديل صلاحيات" }, "دور المالية", L("185.93.12.18")], ["9 نوفمبر 2026 · 4:30 م", "هند القرني", { l: "اعتماد دفعة" }, "الدفعة #P-0403", L("94.99.201.7")], ["9 نوفمبر 2026 · 1:12 م", "عبدالله السهلي", { l: "تعديل سعر توصيل" }, "إعدادات التوصيل", L("185.93.12.18")]], { pg: "عرض 1 إلى 4 من 1,204" }), "h")
   }, { acts: ["تصدير السجل", "تصدير"], denied: "سجل التدقيق متاح للمدير العام والمالية فقط.", h: 860, empty: ["لا توجد سجلات", "جرّب توسيع نطاق التاريخ أو إزالة المرشحات.", "مسح المرشحات"] })
-  const side = async (title, rows, tone) => { const c = await card(title, { w: 554 }); for (const [k, v, ch] of rows) { const r = row(12, { w: 514, main: "SPACE_BETWEEN", cross: "CENTER" }); r.fills = ch ? [paint(ch === "-" ? "danger-bg" : "success-bg")] : []; r.paddingLeft = r.paddingRight = 12; r.paddingTop = r.paddingBottom = 8; add(r, await txt(k, "Body/M", "ink")); add(r, await txt(v, "Body/M", "ink")); add(c, r, "h") } return c }
+  const side = async (title, rows, tone) => { const c = await card(title, { w: 554 }); for (const [k, v, ch] of rows) { const r = row(12, { w: 514, main: "SPACE_BETWEEN", cross: "CENTER" }); r.fills = ch ? [paint(ch === "-" ? "danger-bg" : "sand")] : []; r.paddingLeft = r.paddingRight = 12; r.paddingTop = r.paddingBottom = 8; add(r, await txt(k, "Body/M", "ink")); add(r, await txt(v, "Body/M", "ink")); add(c, r, "h") } return c }
   await feature(S, "Audit/Diff", "تعديل صلاحيات #A-9120", "سجل التدقيق / #A-9120", async b => {
     const m = await card("تفاصيل الإجراء", { w: 1132 }); await kv(m, [["الموظف", "عبدالله السهلي"], ["الوقت", "10 نوفمبر 2026 · 10:05 ص"], ["الكيان", "دور المالية"], ["عنوان IP", L("185.93.12.18")]], 1092); add(b, m, "h")
     const r = row(24, { w: 1132, cross: "MIN" })

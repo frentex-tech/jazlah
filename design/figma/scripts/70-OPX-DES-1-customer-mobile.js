@@ -41,7 +41,7 @@ async function std(base, o) {
   if (o.denied) { const s = stateCopy(base, "Permission denied"); mid(s.body, await panel("denied", ...o.denied)); out.push(s.screen) }
   return out
 }
-for (const [w, f, b] of [["card", "ink", "paper"], ["card sub", "ink-2", "paper"], ["title on bg", "ink", "bg"], ["sub on bg", "ink-2", "bg"], ["link", "brand", "paper"], ["danger on tint", "danger", "danger-bg"], ["info on tint", "info", "info-bg"], ["ink on sand", "ink", "sand"], ["sub on sand", "ink-2", "sand"], ["success on tint", "success", "success-bg"], ["warning on tint", "warning", "warning-bg"]]) chk(w, f, b)
+for (const [w, f, b] of [["card", "ink", "paper"], ["card sub", "ink-2", "paper"], ["title on bg", "ink", "bg"], ["sub on bg", "ink-2", "bg"], ["link", "brand", "paper"], ["danger on tint", "danger", "danger-bg"], ["info on tint", "info", "sand"], ["ink on sand", "ink", "sand"], ["sub on sand", "ink-2", "sand"], ["success on tint", "success", "sand"], ["warning on tint", "warning", "warning-bg"]]) chk(w, f, b)
 const MD = (t) => "⁦" + t + "⁩"
 
 // ---- Orders list ---------------------------------------------------------------------------------
@@ -116,7 +116,7 @@ const c2 = await cancelBase("Cancel/Refund", "إلغاء الطلب"); await fil
 const c3 = stateCopy(c2, "Confirm", true); dim(c3.screen)
 { const d = inst("dialog", { type: "destructive" }); await retext(d, "حذف العنوان؟", "إلغاء الطلب #10482؟"); await retext(d, "لن تتمكن من استرجاع هذا العنوان بعد الحذف.", "سيُلغى طلبك ويُسترد 338.00 ر.س إلى محفظة جزلة. لا يمكن التراجع عن الإلغاء."); await retext(d, "حذف", "نعم، ألغِ الطلب"); await retext(d, "إلغاء", "تراجع"); overlay(c3.screen, d, 35, 300) }
 const c4 = await cancelBase("Cancel/Done", null); c4.screen.findOne(n => n.name === "body").children.forEach(k => k.remove())
-{ const col = frame("done", { w: 358, gap: 16, cross: "CENTER" }), ring = frame("ok", { dir: "HORIZONTAL", w: 88, h: 88, main: "CENTER", cross: "CENTER", fill: "success-bg", r: "pill" }); add(ring, await icon("check-circle", 48, "success", "fill")); add(col, ring)
+{ const col = frame("done", { w: 358, gap: 16, cross: "CENTER" }), ring = frame("ok", { dir: "HORIZONTAL", w: 88, h: 88, main: "CENTER", cross: "CENTER", fill: "sand", r: "pill" }); add(ring, await icon("check-circle", 48, "success", "fill")); add(col, ring)
   add(col, await T("تم إلغاء الطلب", "Heading/H1", "ink", 358)); add(col, await T("سيصل 338.00 ر.س إلى محفظة جزلة خلال دقائق، وسنرسل لك تأكيدًا بالإشعار.", "Body/M", "ink-2", 326)); col.children.slice(1).forEach(n => n.textAlignHorizontal = "CENTER")
   mid(c4.body, col); add(c4.body, await button("العودة إلى الطلبات", "primary"), "h") }
 const c2L = stateCopy(c2, "Loading"); await fillRefund(c2L.body, "loading")
@@ -144,7 +144,7 @@ async function fillStatus(b, done) {
   add(h, await T("جودة المنتج · طلب #10455 · قُدّمت اليوم 10:42 ص", "Body/M", "ink-2", 326), "h"); add(b, h, "h")
   const s = card(358, 16); add(s, await irow("check-circle", "تم استلام الشكوى", "10:42 ص", 326, "success"), "h"); add(s, await irow(done ? "check-circle" : "hourglass", "مراجعة فريق الدعم", done ? "11:20 ص" : "نرد خلال 24 ساعة", 326, done ? "success" : "ink"), "h"); add(s, await irow(done ? "wallet" : "circle-dashed", "قرار الاسترداد", done ? "89.00 ر.س إلى محفظتك" : "بعد انتهاء المراجعة", 326, done ? "success" : "ink-2"), "h"); add(b, s, "h")
   const p = card(358, 8); add(p, await T("الصور المرفقة", "Label/M", "ink", 326), "h"); const g = frame("g", { dir: "HORIZONTAL", gap: 8 }); for (const k of ["ribeye-paper", "steaks-dark"]) add(g, await photo(k, 100, 76, "thumb")); add(p, g); add(b, p, "h")
-  if (done) { const r = card(358, 4, { fill: "success-bg", stroke: null }); add(r, await T("رد الدعم", "Label/M", "ink", 326), "h"); add(r, await T("نعتذر عن التجربة. أضفنا 89.00 ر.س إلى محفظتك ونراجع الأمر مع المتجر.", "Body/M", "ink-2", 326), "h"); add(b, r, "h") }
+  if (done) { const r = card(358, 4, { fill: "sand", stroke: null }); add(r, await T("رد الدعم", "Label/M", "ink", 326), "h"); add(r, await T("نعتذر عن التجربة. أضفنا 89.00 ر.س إلى محفظتك ونراجع الأمر مع المتجر.", "Body/M", "ink-2", 326), "h"); add(b, r, "h") }
 }
 const cs = await mobileScreen({ path: "Complaint/Status", header: { type: "page", title: "حالة الشكوى" }, gap: 12 }); await fillStatus(cs.body, false)
 const csR = stateCopy(cs, "Resolved"); await fillStatus(csR.body, true)
