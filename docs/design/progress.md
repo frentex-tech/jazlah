@@ -99,3 +99,10 @@ Section node ids on `02 Components`: Buttons 1:713, Inputs 1:790, Selection 1:87
 - Scripts 70-77 ran. Fixes: contrast self-checks for success/info text now use `paper` (3.93 on sand failed); `"ck" in v` guard for string table cells in 74-77; `Cancel/Done` header title set (default "عنوان الصفحة" was left, caught by lint). Contrast checks failing 0 on all eight.
 - Lint over the whole file: 580 screens, undefined/placeholder/outside none, `LINT OK images`. `35-nav-active.js`: 224 dashboard screens set, Admin/Staff has no matching nav item.
 - New `36-export-index.js` prints sections, frames and flows (read from the Scripter DOM with evaluate_script on the editor element). Index: 117 sections, 649 frames, 2 flow starting points so far (ACC first launch, regular order).
+
+## #204 DSN-DES-2 (client review and sign-off; NOT closed, waits for the client)
+- `docs/design/screens.md`: 117 sections, 649 screens, each with its Figma link and implementing task (tasks matched by feature from `docs/delivery/sprints/`; weak matches are noted in the file). Generated from the file with `36-export-index.js`.
+- `38-flows.js`: the 8 main flows wired (27 prototype links in the file, 0 broken), one flow starting point each, listed with links on `90 Flows`. Walked by script from each starting point (the browser tool cannot click canvas hotspots): order 3 screens, occasion 5, visit 2, cooking 2, Adha 3, feed 3, vendor day 5, admin day 6. The order flow stops at checkout step 1 (no cart/payment/"order placed" screens exist yet).
+- `39-client-review.js`: "Client design review" section on `00 Cover` (what to approve, the 8 flows as links, counts).
+- `docs/design/signoff.md`: draft only, no approval recorded.
+- Other: merged PRs 205-211 and 214 under the new self-review rule (PR #213 documents it); cards 14, 16, 54, 67, 42, 148, 120, 201 moved to Done. A commit (37-archive-orphans + a progress line) went to `develop` directly by mistake after a branch deletion switched the local checkout; no force-push, content is harmless.
