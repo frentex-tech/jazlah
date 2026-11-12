@@ -1,13 +1,16 @@
 // DSN-DES-2: the 8 main prototype flows (order, occasion, visit, cooking, Adha, feed + chat, vendor day, admin day).
 // Wires the click links between existing screens, registers one flow starting point per flow (on the page of its first screen),
 // lists the 8 flows with start links on 90 Flows, then validates every prototype link in the file.
-// The order flow (home -> product -> checkout step 1) is wired by 20-DSN-DES-1-order-flow-link.js and only checked here.
+// Flow 1 (order) stops at checkout step 1: cart, payment and "order placed" screens are not designed yet.
 // Re-runnable: a tap replaces the node's previous reaction; the 90 Flows index is rebuilt in place.
 await loadDS()
 const T = (p, ms = 25000) => Promise.race([p, new Promise((_, r) => setTimeout(() => r(new Error("timeout")), ms))])
 const out = []
 // step: [fromFrame, trigger, toFrame]. trigger: {b: button label} | {nav: side-nav label} | {row: true} | {named: frame name} | {card: true} | {bottom: true} | {} (the whole frame)
 const FLOWS = [
+  { name: "Regular order: home → product → checkout", page: "10 Customer App", steps: [
+    ["App/Home/Home — Default", { inst: "Product card" }, "App/Product/Detail — Default"],
+    ["App/Product/Detail — Default", { b: "أضف إلى السلة" }, "App/Checkout/Fulfilment — Default"]] },
   { name: "2 Occasion: wizard → quote → deposit", page: "10 Customer App", steps: [
     ["App/Occasions/Wizard/Type — Filled", { b: "التالي" }, "App/Occasions/Wizard/Details — Filled"],
     ["App/Occasions/Wizard/Details — Filled", { b: "التالي" }, "App/Occasions/Wizard/Date — Filled"],
@@ -40,6 +43,7 @@ const trigger = (f, s) => {
   if (s.b) return findButton(f, s.b)
   if (s.nav) { const nav = f.findOne(n => n.type === "INSTANCE" && n.name === "Side nav"); return nav && nav.findOne(n => n.type === "TEXT" && n.characters === s.nav) }
   if (s.row) return f.findOne(n => n.type === "FRAME" && n.name === "row" && n.parent && n.parent.name === "table")
+  if (s.inst) return f.findOne(n => n.type === "INSTANCE" && n.name === s.inst)
   if (s.named) return f.findOne(n => n.type === "FRAME" && n.name === s.named)
   if (s.card) return f.findOne(n => n.type === "INSTANCE" && /card|row/i.test(n.name))
   if (s.bottom) { const bs = f.findAll(n => n.type === "INSTANCE" && n.name === "Button"); return bs.sort((a, b) => b.absoluteBoundingBox.y - a.absoluteBoundingBox.y)[0] }
@@ -59,15 +63,10 @@ for (const fl of FLOWS) {
   const first = inSection(pg, fl.steps[0][0]); if (first) { flowStart(fl.page, first, fl.name); starts.push([fl, first]) }
   out.push(fl.name.slice(0, 2) + " links " + ok + "/" + fl.steps.length)
 }
-// flow 1 (order), already wired: check it is still there
-{ const p10 = page("10 Customer App"), home = inSection(p10, "App/Home/Home — Default"), card = home && home.findOne(n => n.type === "INSTANCE" && n.name === "Product card")
-  out.push("1 order start " + (p10.flowStartingPoints.some(f => /^Regular order/.test(f.name)) ? "ok" : "MISSING") + ", card link " + (card && card.reactions.length ? "ok" : "MISSING")) }
-
 // index on 90 Flows: one hyperlink per flow
 const p90 = page("90 Flows"); await p90.loadAsync()
 p90.findAll(n => n.getSharedPluginData(NS, "id") === "flows-index").forEach(n => n.remove())
-const p10 = page("10 Customer App"), home = inSection(p10, "App/Home/Home — Default")
-const rows = [["1 Order: home → product → checkout", home]].concat(starts.map(([fl, f]) => [fl.name, f]))
+const rows = starts.map(([fl, f]) => [fl.name, f])
 const idx = frame("Prototype flows", { w: 900, pad: 32, gap: 14, fill: "paper", stroke: "line", r: "md" }); idx.setSharedPluginData(NS, "id", "flows-index")
 add(idx, await txt("النماذج التفاعلية · Prototype flows (Present ▶)", "Heading/H2", "ink", { w: 836, align: "RIGHT" }), "h")
 for (const [name, f] of rows) { if (!f) continue
