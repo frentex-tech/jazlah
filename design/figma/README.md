@@ -40,3 +40,7 @@ Notes, verified on 2026-11-10:
 - `scripts/_lib.js` and `scripts/_ds.js`: shared helpers (find-or-create, fonts, variables, auto layout) and design-system builders (text, boxes, sections, variable lookups). The loader prepends both to every script and passes `B`, the pinned scripts URL (scripts read `tokens.json` through it).
 - `scripts/00-inspect.js`: prints the file structure. **Always run this first.**
 - `scripts/NN-<task-key>-<what>.js`: one file per change batch, numbered in the order they ran. Plain JS only (no TypeScript types), top-level `await` allowed, with globals `figma` and `print`.
+
+## After the 2026-11-13 restructure
+The file now has pages `01`..`07` and `Design System`; screens are bare top-level frames named in Arabic (the old English name is plugin data `en`, the feature id `blk`, the row `row`). Still re-runnable: `30-lint-screens.js`, `35-nav-active.js`, `36-export-index.js`, `38-flows.js`, the `8x` fix scripts. The per-feature build scripts (`10`..`77`, `80`) built the screens once and cannot be re-run on the restructured file. Retired: `05` (IA and flows), `07` (cover), `20` (order flow link), `33` (polish), `37` (archive), `39` (client review).
+
