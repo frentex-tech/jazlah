@@ -20,9 +20,8 @@ The mapping lives in `tools/dev/task.py`. A task whose **Where** spans several a
 ## Daily loop (each developer)
 1. Open the board. Pick a card in **Todo** for the current sprint whose blockers are merged, so the issue shows no open "Blocked by".
 2. In Claude Code, in the repo: `/task <issue-number>`. It assigns you, moves the card, branches, delegates to the role agent, runs the reviewer and opens the PR.
-3. Ask the other developer to review the PR. **They** merge it (squash) once the checks are green.
-4. After the merge, the card goes to **QA**. Check it on staging (or ask the `qa-engineer`), then move it to **Done**:
-   `python3 tools/dev/task.py move <n> Done`
+3. Self-review the PR (the `reviewer` agent already ran; check CI and, for UI, the screenshots), then merge it yourself: `gh pr merge <n> --squash --delete-branch`. No second reviewer.
+4. After the merge: **design tasks** (and docs-only tasks) go straight to **Done**: `python3 tools/dev/task.py move <n> Done`. Code tasks go to **QA**; check them on staging (or ask the `qa-engineer`), then move them to **Done**. The progress dashboard updates by itself on merge.
 5. At the end of the sprint, run `/release <sprint>`. When needed, `/status` refreshes `STATUS.md` and gives a summary you can forward.
 
 ## Rules that keep it clean
