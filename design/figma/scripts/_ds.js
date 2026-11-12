@@ -20,7 +20,9 @@ async function loadDS() {
 }
 
 function paint(key, alpha) {
-  const p = figma.variables.setBoundVariableForPaint({ type: "SOLID", color: { r: 0, g: 0, b: 0 } }, "color", DS.V[key])
+  // the paint keeps the variable's real color as its fallback: a black base showed as black bars wherever Figma did not re-resolve the variable
+  const val = Object.values(DS.V[key].valuesByMode)[0], base = val && val.r !== undefined ? { r: val.r, g: val.g, b: val.b } : { r: 0, g: 0, b: 0 }
+  const p = figma.variables.setBoundVariableForPaint({ type: "SOLID", color: base }, "color", DS.V[key])
   return alpha == null ? p : { ...p, opacity: alpha }
 }
 
