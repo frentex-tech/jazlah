@@ -56,7 +56,7 @@ async function table(cols, rows, o = {}) {
       if (v && v.b) add(k, await bdg(...v.b))
       else if (v && v.ph) add(k, await photo(v.ph, 40, 40, "thumb"))
       else if (v && v.i) add(k, await icon(v.i, 22, "ink-2"))
-      else if (v && "ck" in v) { const x = inst("checkbox", { checked: v.ck ? "yes" : "no", state: "default" }); x.findAll(n => n.type === "TEXT").forEach(t => (t.visible = false)); add(k, x) }
+      else if (v && typeof v === "object" && "ck" in v) { const x = inst("checkbox", { checked: v.ck ? "yes" : "no", state: "default" }); x.findAll(n => n.type === "TEXT").forEach(t => (t.visible = false)); add(k, x) }
       else if (v != null && v !== "") add(k, await txt(v && v.l ? v.l : v, "Body/M", v && v.l ? "ember" : "ink", { w: cols[i][1] - 16 }))
       add(r, k)
     }
