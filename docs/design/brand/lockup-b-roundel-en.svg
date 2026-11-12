@@ -1,0 +1,16 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 560 190">
+<defs>
+<linearGradient id="sg" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#F7E6BC"/><stop offset=".4" stop-color="#DDB46A"/><stop offset=".72" stop-color="#AE7C37"/><stop offset="1" stop-color="#EBCB8C"/></linearGradient>
+<linearGradient id="sg2" x1="1" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#C99A52"/><stop offset="1" stop-color="#8E6129"/></linearGradient>
+</defs>
+<text x="230" y="112" font-family="El Messiri, serif" font-weight="700" font-size="104" fill="url(#sg)">Jazlah</text><text x="232" y="156" font-family="Readex Pro, sans-serif" font-weight="500" font-size="26" fill="#D9AE62">جزلة</text><g transform="translate(0 0)"><circle cx="100" cy="95" r="90" fill="none" stroke="url(#sg)" stroke-width="5"/>
+<circle cx="100" cy="95" r="82" fill="none" stroke="url(#sg)" stroke-width="1.2" opacity=".75"/><g transform="translate(14 8) scale(.86)"><g><path d="M126 96 C136 92 152 94 162 104 C150 110 134 108 124 102 Z" fill="url(#sg2)"/></g><g transform="translate(200 0) scale(-1 1)"><path d="M126 96 C136 92 152 94 162 104 C150 110 134 108 124 102 Z" fill="url(#sg2)"/></g>
+<g><path d="M110 60 C118 36 156 26 170 52 C182 76 168 100 146 98 C128 96 126 76 140 71 C150 68 156 78 149 84" fill="none" stroke="url(#sg)" stroke-width="13" stroke-linecap="round" stroke-linejoin="round"/>
+<g fill="none" stroke="#3A0D10" stroke-width="1.5" stroke-linecap="round" opacity=".5"><path d="M128 39 l3 10"/><path d="M142 35 l1 11"/><path d="M156 39 l-3 10"/><path d="M166 50 l-9 6"/><path d="M169 66 l-11 1"/><path d="M164 82 l-9 -5"/></g></g><g transform="translate(200 0) scale(-1 1)"><path d="M110 60 C118 36 156 26 170 52 C182 76 168 100 146 98 C128 96 126 76 140 71 C150 68 156 78 149 84" fill="none" stroke="url(#sg)" stroke-width="13" stroke-linecap="round" stroke-linejoin="round"/>
+<g fill="none" stroke="#3A0D10" stroke-width="1.5" stroke-linecap="round" opacity=".5"><path d="M128 39 l3 10"/><path d="M142 35 l1 11"/><path d="M156 39 l-3 10"/><path d="M166 50 l-9 6"/><path d="M169 66 l-11 1"/><path d="M164 82 l-9 -5"/></g></g>
+<path d="M100 56 C117 56 129 66 129 82 C129 98 121 114 115 130 C111 142 107 154 100 156 C93 154 89 142 85 130 C79 114 71 98 71 82 C71 66 83 56 100 56 Z" fill="url(#sg)"/>
+<path d="M100 56 C83 56 71 66 71 82 C71 98 79 114 85 130 C89 142 93 154 100 156 Z" fill="#8E6129" opacity=".28"/>
+<g fill="#3A0D10"><path d="M79 90 C85 85 93 86 96 93 C89 95 83 94 79 90 Z"/><path d="M121 90 C115 85 107 86 104 93 C111 95 117 94 121 90 Z"/>
+<path d="M95 141 c-3 1 -5 4 -4 7 c2 -1 4 -3 4 -7z"/><path d="M105 141 c3 1 5 4 4 7 c-2 -1 -4 -3 -4 -7z"/></g>
+<g fill="none" stroke="#3A0D10" stroke-width="1.6" stroke-linecap="round" opacity=".55"><path d="M90 100 C95 112 97 124 97 136"/><path d="M110 100 C105 112 103 124 103 136"/><path d="M88 70 C94 74 106 74 112 70"/></g></g></g>
+</svg>
