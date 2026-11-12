@@ -6,7 +6,7 @@
 await loadDS()
 const T = (p, ms = 25000) => Promise.race([p, new Promise((_, r) => setTimeout(() => r(new Error("timeout")), ms))])
 const out = []
-// step: [fromFrame, trigger, toFrame]. trigger: {b: button label} | {nav: side-nav label} | {row: true} | {card: true} | {bottom: true} | {} (the whole frame)
+// step: [fromFrame, trigger, toFrame]. trigger: {b: button label} | {nav: side-nav label} | {row: true} | {named: frame name} | {card: true} | {bottom: true} | {} (the whole frame)
 const FLOWS = [
   { name: "2 Occasion: wizard → quote → deposit", page: "10 Customer App", steps: [
     ["App/Occasions/Wizard/Type — Filled", { b: "التالي" }, "App/Occasions/Wizard/Details — Filled"],
@@ -16,12 +16,12 @@ const FLOWS = [
   { name: "3 Visit: booking → confirmation", page: "10 Customer App", steps: [
     ["App/Visits/Booking — Filled", { b: "تأكيد الحجز" }, "App/Visits/Detail — Default"]] },
   { name: "4 Cooking: dishes → cook it for me", page: "10 Customer App", steps: [
-    ["App/Cooking/Dishes — Default", { card: true }, "App/Cooking/CookItForMe — Filled"]] },
+    ["App/Cooking/Dishes — Default", { named: "dishes" }, "App/Cooking/CookItForMe — Filled"]] },
   { name: "5 Adha: landing → day → cuts", page: "10 Customer App", steps: [
     ["App/Adha/Landing — Default", { b: "احجز أضحيتك" }, "App/Adha/DayPicker — Filled"],
     ["App/Adha/DayPicker — Filled", { b: "التالي" }, "App/Adha/Cuts — Filled"]] },
   { name: "6 Feed and chat: feed → listing → chat", page: "10 Customer App", steps: [
-    ["App/Feed/Home — Default", { card: true }, "App/Feed/Listing — Default"],
+    ["App/Feed/Home — Default", { named: "listing card" }, "App/Feed/Listing — Default"],
     ["App/Feed/Listing — Default", { b: "ابدأ محادثة" }, "App/Feed/Chat — Default"]] },
   { name: "7 Vendor day: board → slaughter time → freshness → label → earnings", page: "31 Vendor", steps: [
     ["Vendor/Orders/Board — Default", { b: "تحديد وقت الذبح" }, "Vendor/Orders/Board — Slaughter time picker"],
@@ -40,6 +40,7 @@ const trigger = (f, s) => {
   if (s.b) return findButton(f, s.b)
   if (s.nav) { const nav = f.findOne(n => n.type === "INSTANCE" && n.name === "Side nav"); return nav && nav.findOne(n => n.type === "TEXT" && n.characters === s.nav) }
   if (s.row) return f.findOne(n => n.type === "FRAME" && n.name === "row" && n.parent && n.parent.name === "table")
+  if (s.named) return f.findOne(n => n.type === "FRAME" && n.name === s.named)
   if (s.card) return f.findOne(n => n.type === "INSTANCE" && /card|row/i.test(n.name))
   if (s.bottom) { const bs = f.findAll(n => n.type === "INSTANCE" && n.name === "Button"); return bs.sort((a, b) => b.absoluteBoundingBox.y - a.absoluteBoundingBox.y)[0] }
   return f
@@ -53,7 +54,7 @@ for (const fl of FLOWS) {
     if (!f || !to) { out.push("MISSING frame " + (f ? tn : fn)); continue }
     const t = trigger(f, sp) || (sp.b || sp.nav ? null : f)
     if (!t) { out.push("NO TRIGGER " + JSON.stringify(sp) + " in " + fn); continue }
-    try { await T(tap(t, to)); ok++ } catch (e) { out.push("FAIL " + fn + " " + e.message) }
+    try { if (t !== f && f.reactions.length) await f.setReactionsAsync([]); await T(tap(t, to)); ok++ } catch (e) { out.push("FAIL " + fn + " " + e.message) }
   }
   const first = inSection(pg, fl.steps[0][0]); if (first) { flowStart(fl.page, first, fl.name); starts.push([fl, first]) }
   out.push(fl.name.slice(0, 2) + " links " + ok + "/" + fl.steps.length)
