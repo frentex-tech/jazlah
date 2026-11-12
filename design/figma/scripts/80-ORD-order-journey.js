@@ -46,7 +46,7 @@ async function lineRow(w, L, pw, web) {
   if (web) { add(r, col); add(r, await qty(L.qty)); add(r, await T(sar(L.qty * L.unit), "Heading/H3", "ink", 110, "LEFT")); return r }
   const bot = frame("qty row", { dir: "HORIZONTAL", w: cw, main: "SPACE_BETWEEN", cross: "CENTER" })
   add(bot, await qty(L.qty)); add(bot, await T(sar(L.qty * L.unit), "Label/M", "ink", null, "LEFT")); add(col, bot, "h")
-  return add(r, col)
+  add(r, col); return r
 }
 async function linesCard(w, lines, pw, web, pad = 16) {
   const c = card(w, 16, { pad }), iw = w - 2 * pad
@@ -56,7 +56,7 @@ async function linesCard(w, lines, pw, web, pad = 16) {
 async function promoCard(w, pad = 16) {
   const c = card(w, 8, { pad }), iw = w - 2 * pad
   const r = frame("promo row", { dir: "HORIZONTAL", w: iw, gap: 8, cross: "MAX" })
-  add(r, await field("رمز الخصم", "أدخل رمز الخصم", "default", "اختياري"), "h"); add(r, await button("تطبيق", "secondary", "default", "S"))
+  add(r, await field("رمز الخصم · اختياري", "أدخل رمز الخصم", "default"), "h"); add(r, await button("تطبيق", "secondary", "default", "S"))
   return add(c, r, "h")
 }
 async function mrow(w, l, v, st = "Body/M", fg = "ink-2") {
