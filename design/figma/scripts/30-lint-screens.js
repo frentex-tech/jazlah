@@ -32,3 +32,4 @@ for (const pn of PAGES) {
 }
 const line = (k, a) => k + ": " + (a.length ? a.length + "+ e.g. " + a.slice(0, 4).join(" | ") : "none")
 print(["LINT screens=" + res.screens, line("undefined/empty", res.undefinedTxt), line("placeholder", res.placeholder), line("small-arabic", res.smallAr), line("outside", res.outside), line("unbound-fill", res.unbound), line("no-state-suffix", res.noState), line("IMAGE-PLACEHOLDERS (must be none)", res.images), res.images.length ? "LINT FAIL: image placeholders remain" : "LINT OK images"].join("\n"))
+if (typeof LIMIT === "number") print("DETAIL outside: " + res.outside.join(" | ") + "\nDETAIL images: " + res.images.join(" | "))
