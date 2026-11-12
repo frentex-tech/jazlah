@@ -10,7 +10,7 @@ for (const pn of PAGES) {
   const kinds = { icon: [], map: [], photoLike: [] }
   for (const n of pg.findAll(x => x.visible !== false)) {
     // ph/storefront is a Phosphor icon: only a placeholder when it fills a logo-size icon (>= 32px), smaller ones are glyphs
-    if ((n.name === "ph/image" || (n.name === "ph/storefront" && n.parent && n.width >= 32)) && n.visible !== false) { kinds.icon.push(path(n)); continue }
+    if ((n.name === "ph/image" || (n.name === "ph/storefront" && n.parent && n.width >= 32 && n.parent.name !== "icon")) && n.visible !== false) { kinds.icon.push(path(n)); continue }
     if (!("fills" in n) || n.type === "TEXT" || n.type === "SECTION") continue
     if (/(^|[\/ ])map($|[\/ ])/i.test(n.name) && !/pin/i.test(n.name) && !hasImg(n) && n.width > 60) kinds.map.push(path(n))
     else if (/photo|gallery|cover|banner|hero|thumb|avatar|logo/i.test(n.name) && !/skeleton|icon|label|row|text|caption/i.test(n.name) && n.width > 30 && n.height > 30 && !hasImg(n) && !(n.type === "FRAME" && n.findOne(c => hasImg(c)))) kinds.photoLike.push(path(n))

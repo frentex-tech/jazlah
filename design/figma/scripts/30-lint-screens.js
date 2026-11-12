@@ -4,7 +4,7 @@
 const PAGES = figma.root.children.filter(p => /^0[1-7] /.test(p.name)).map(p => p.name) // product pages; screens are bare top-level frames
 const PLACE = ["نص مساعد", "اكتب هنا", "المحتوى", "عنوان البطاقة", "نص توضيحي قصير يصف محتوى البطاقة.", "عنوان الصفحة"]
 const res = { screens: 0, undefinedTxt: [], placeholder: [], smallAr: [], outside: [], unbound: [], noState: [], images: [] }
-const push = (a, s) => { if (a.length < 6) a.push(s) }
+const push = (a, s) => { if (a.length < (typeof LIMIT === "number" ? LIMIT : 6)) a.push(s) } // LIMIT: set it before the script to list more examples
 for (const pn of PAGES) {
   const pg = figma.root.children.find(p => p.name === pn); if (!pg) continue; await pg.loadAsync()
   const screens = pg.children.filter(n => n.type === "FRAME")
@@ -13,7 +13,7 @@ for (const pn of PAGES) {
     const sb = s.absoluteBoundingBox
     const hasImg = n => Array.isArray(n.fills) && n.fills.some(f => f.type === "IMAGE" && f.visible !== false)
     for (const n of s.findAll(x => x.visible !== false)) {
-      if (n.name === "ph/image" || (n.name === "ph/storefront" && n.width >= 32)) push(res.images, s.name + " > icon in " + n.parent.name)
+      if (n.name === "ph/image" || (n.name === "ph/storefront" && n.width >= 32 && !(n.parent && n.parent.name === "icon"))) push(res.images, s.name + " > icon in " + n.parent.name)
       else if (/(^|[\/ ])map($|[\/ ])/i.test(n.name) && !/pin/i.test(n.name) && "fills" in n && !hasImg(n) && n.width > 60) push(res.images, s.name + " > map " + n.name)
     }
     for (const t of s.findAll(n => n.type === "TEXT")) {
