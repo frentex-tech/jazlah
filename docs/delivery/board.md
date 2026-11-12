@@ -14,7 +14,7 @@
 | Backlog | Planned for a later sprint |
 | Todo | In the current sprint, not started |
 | In Progress | Someone is working on it (the assignee) |
-| In Review | Code is done and waiting for the other developer's review |
+| In Review | PR is open; the author is self-reviewing and waiting for CI, then merges it |
 | QA | Merged and being checked on the staging environment |
 | Done | Finished and verified |
 
