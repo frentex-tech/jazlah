@@ -4,7 +4,6 @@
 // Every screen is renamed to its Arabic name only (data/frame-ar.json, or the `ar` plugin data of the new screens). The old English name is kept in
 // plugin data `en`, the old Section id in `blk`, so scripts and the review can still find a screen. Sections, captions, notes, the cover, the
 // flow index (90 Flows) and the Archive disappear with their pages (Figma version history keeps them). Run once, after 80-ORD-order-journey.js.
-const NS = "jazlah"
 const GAP_X = 120, GAP_Y = 240
 const AR = await (await fetch(B + "data/frame-ar.json")).json()
 const PAGES = [
