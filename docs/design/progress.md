@@ -80,3 +80,8 @@ Section node ids on `02 Components`: Buttons 1:713, Inputs 1:790, Selection 1:87
 - Lint over 142 screens: undefined/empty none, placeholder none, outside none, no-state-suffix none. Still listed and accepted: 6+ small-Arabic 3-word badge labels (12px), unbound fills on the emblem Vector inside onboarding/login.
 - Audit/lint fix cherry-picked to all eight design branches (14, 16, 54, 67, 42, 148, 120, 201).
 - Cleanup: the first (crashed) runs of 40/44, 60-63 and 74/77 left 319 half-built frames at page level outside any Section (99 on page 10, 131 on 20, 49 on 30, 40 on 31). Moved to `🗄 Archive` (`37-archive-orphans.js`; screens are never deleted). Reviewed by screenshot: 13 of the 82 new sections (FED app, OCC wizard/Adha, OPX order detail, VND apply, admin overview, vendor board); the rest relied on lint, contrast and the same templates.
+
+## #42 VND-DES-1 (run in Figma, PR opened)
+- First-run fixes: `tokens.json` was stale on the #42/#148/#120/#201 branches (synced); `info-bg` / `success-bg` colors do not exist (notices use `sand`, in 40-44); new `35-nav-active.js` sets the side-nav active item per screen (74 screens, no unmatched paths; the component bakes a fixed active item).
+- Result: 194 screens, lint clean, 0 image placeholders, 0 failing contrast checks (40: 77, 41: 22, 42: 27, 43: 22, 44: 31). Vendor page: 23 frames, no overlaps. Not done: Present-mode click-through, per-screen close-ups.
+- Next: #148 (50-53), #120 (60-63), #201 (70-77). Branches need `35-nav-active.js` (cherry-pick from the #42 branch).
