@@ -85,3 +85,7 @@ Section node ids on `02 Components`: Buttons 1:713, Inputs 1:790, Selection 1:87
 - First-run fixes: `tokens.json` was stale on the #42/#148/#120/#201 branches (synced); `info-bg` / `success-bg` colors do not exist (notices use `sand`, in 40-44); new `35-nav-active.js` sets the side-nav active item per screen (74 screens, no unmatched paths; the component bakes a fixed active item).
 - Result: 194 screens, lint clean, 0 image placeholders, 0 failing contrast checks (40: 77, 41: 22, 42: 27, 43: 22, 44: 31). Vendor page: 23 frames, no overlaps. Not done: Present-mode click-through, per-screen close-ups.
 - Next: #148 (50-53), #120 (60-63), #201 (70-77). Branches need `35-nav-active.js` (cherry-pick from the #42 branch).
+
+## #148 FED-DES-1 (run in Figma, PR opened)
+- Scripts 50-53 ran first time (contrast failing 0: 11, 13, 14, 20). Lint found text outside frame: filter and unit chip rows did not wrap (342/358 px) -> `layoutWrap` in 50 and 51. `35-nav-active.js` got Admin/Feed paths (92 screens matched, 0 unmatched).
+- Lint: 285 screens, undefined/placeholder/outside none, image placeholders 0.
