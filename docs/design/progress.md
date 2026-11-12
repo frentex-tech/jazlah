@@ -42,3 +42,40 @@ Section node ids on `02 Components`: Buttons 1:713, Inputs 1:790, Selection 1:87
 - Exports: `exportAsync` works (PNG 2x), but the Scripter output lives in a cross-origin iframe the snapshot cannot read and the sandbox blocks a local receiver, so nothing could be saved to `docs/design/components` or `flows`. Export from Figma by hand, or allow `sandbox.network.allowLocalBinding` and a receiver script.
 - Chrome: the Figma tab had been closed, so a new tab was opened for the file; no other tab was touched.
 - Next: batch 4 (logo) alone, then PR. Open items: written client approval of the wordmark, ram-in-shield vs adapted emblem (owner), dark mode needs a paid plan, icons are Phosphor loaded from GitHub at run time (SVGs are embedded in the file after the run).
+
+## Session 4 (#14 PR, #16 ACC, #54 STF, #67 SCH)
+- #14: PR #205 opened on develop (Closes #14), card In Review. Logo batch 4 done (options A shield, B roundel; Figma section 21:2; SVGs in `docs/design/brand/`). Pending the client: wordmark approval and the A/B choice.
+- Owner decisions: stepper mirrors in LTR (note updated); PNG exports cancelled for good (Figma and its links are the reference); dark mode deferred.
+- Speed-ups: `_ds.js` now has mobileScreen/webScreen/dashScreen templates, stateCopy, screenSection (screens placed directly in the Section so flow starts work), slot(), retext(), tap/flowStart. `design/figma/COMPONENTS.md` documents the component API so subagents can write scripts without Figma access. Three subagents wrote the ACC, STF and SCH scripts in parallel (files 12-19); only the lead ran them in Figma.
+- Branches: #16 `docs/16-screens-onboarding-otp-profile-addresses` (also holds the STF and SCH scripts: they were written and run before their own branches existed), #54 and #67 branches not started, because `task.py start` for them is still to be run and their scripts live on the #16 branch for now.
+- Ran in Figma: 10 (auth), 12/12b (settings, addresses, map, permission, coverage), 13/13b/13c (web + admin login), 14-17 (STF), 18-19 (SCH), 20 (order flow link: home → product → checkout step 1; cart, payment and tracking are later tasks). Contrast: every run 0 failing.
+- Known defects to fix on the next run: STF product "Error" state button said "undefined" (fixed in the script, rerun 15 to apply); not reviewed visually yet: web STF/SCH/ACC sections, search sheet, SCH checkout and admin ops pages (only contrast reports and section/screens counts were checked); `Product/Detail` uses Caption (12) for some helper text, Arabic body should be >= 14.
+- Prototype: ACC first-launch flow wired (5 links, flow start on page 10). Regular order: 2 links + flow start on page 10 + a hyperlink on `90 Flows` (a flow start must live on the page of its frame).
+- Next session: (1) run `task.py start 54` and `start 67`, move their scripts to those branches (git mv per task, or cherry-pick), (2) review the unreviewed sections by screenshot, rerun 15, (3) READMEs per epic in `docs/design/<epic>/`, (4) open PRs for #16, #54, #67 (Closes), then #42 (OPX is next in the owner's order after #67: #201 #120 #148 #204 follow).
+
+## Session 5 (quality pass; PRs for #16, #54, #67 NOT opened yet)
+- Cleanup done: `task.py start 54` and `67`; STF scripts (14-17, 20) live on `docs/54-…`, SCH scripts (18, 19) on `docs/67-…`, ACC (10-13c) on `docs/16-…`. Shared files (`_ds.js`, `_lib.js`, COMPONENTS.md, README) are on each branch.
+- Fixes applied in Figma and scripts: "undefined" button in STF state panels (cta optional); empty-value error fields now show the placeholder; multi-word Arabic Caption (12) text promoted to Body/M (14) in screens and component hints; empty text nodes removed; Section canvases were rendering black (variable-bound paint on Sections), now the cream hex. Patch scripts: `31-fix-component-captions.js` (on the #14 branch, rerunnable), lint: `30-lint-screens.js`.
+- Lint over 141 screens now: undefined/empty none, placeholders none, text outside frame none, unbound fills none, state suffix none. Remaining small-Arabic hits are 3-word size-S badge labels ("غير متاح حاليًا", 12), accepted as short labels.
+- NOT done (be honest): the screen-by-screen close-up visual review of every section in #16, #54, #67 (only Home, Product, Settings, Address map, Onboarding, Logo and the component sections were looked at); Present-mode click-through of the prototypes; per-epic READMEs (`docs/design/<epic>/README.md`); PRs for #16, #54, #67; tasks #42, #201, #120, #148, #204 not started.
+- Next session, in this order: (1) rebase the #14 patch scripts onto the other branches if needed, (2) close-up review of each section (use node ids from the Figma file: ACC sections 24:78 … 45:2864, STF 63:1749 … 63:3831, SCH `sec-sch-*`), (3) Present test of the ACC and order flows, (4) READMEs + PRs #16/#54/#67, (5) #42 with subagents.
+
+## Session 6 (polish round, code ready, NOT yet run in Figma)
+- Owner review of page 10 turned into: real photos, no internal notes in screens, filled phone values, header/cart badge, brand hero on auth screens, product page order + price-breakdown sheet, sections as a grid with Readex titles, Home as the prototype start, same review for web and admin ops.
+- Written and pushed (not run): `_ds.js` (photoPaint/setPhoto/emblemNode/phoneValue/authScreen, section annotations S.note, Readex section titles), 10/13/13c (auth hero, onboarding logo + photo, phone "55 123 4567"), 14/15 (stories slot removed from the screen and moved to a section annotation, product page reordered, breakdown sheet opened from the sticky total), `32-photos.js` (placeholder -> real photo pass), `33-polish.js` (cart badge, section fit + grid rows, Home first in flow starts).
+- Run order in Figma: #16 scripts 10, 13, 13c, 11; #54 scripts 14, 15, 20; then 32, then 33. Commits: #16 825509f, #54 f7abeff, #67 67be6ef.
+- Blocked: the Chrome tab with Figma edit access was not available (open tabs were view-only or denied), so nothing was executed.
+
+## Session 7
+- PRs open: #205 (#14), #206 (#16), #207 (#54), #208 (#67). Not merged. Cards in In Review.
+- Store-logo layer-order bug fixed in 32-photos; re-run done.
+- Added: `34-audit-images.js` (lists remaining image placeholders per page), static map image `docs/design/reference/prototype/img/map.jpg`, 32-photos now covers pages 31/32, map frames and photo-named frames; `30-lint-screens` fails when an image placeholder remains.
+- Scripts for #42 (40-42), #148 (50-53), #120 (60-63), #201 (70-77) written by subagents; not yet run in Figma.
+- BLOCKER: the chrome-devtools MCP server was disconnected, so nothing could be run in Figma. Next: reconnect, run 34 audit → 32-photos until 0 → lint, then run task scripts in order #42, #148, #120, #201 (start each with `task.py start N`, PR with "Closes #N").
+- Scripts committed to per-task branches (written, never run in Figma): docs/42-… (40-44), docs/148-… (50-53), docs/120-… (60-63), docs/201-… (70-77). Cards for #42, #148, #120, #201 are In Progress. No PRs yet for these four.
+- Known gaps flagged by the script authors: side-nav active item is fixed, filters-bar labels fixed, no prototype links for OPX admin, tables/charts hand-built, component default texts assumed (retext may only warn).
+
+## Session 8 (images to zero, then #42)
+- Ran 34 audit (168) -> 32-photos (twice; the second pass catches maps) -> audit again. Remaining hits were audit false positives: `ph/storefront` is a Phosphor glyph (14-20px in vendor rows and nav items) and "Map pin" matched the map rule. 34 and 30 now judge `ph/storefront` by its own size (>= 32px) and skip pins. Result: 0 image placeholders on all pages, `LINT OK images`.
+- Lint over 142 screens: undefined/empty none, placeholder none, outside none, no-state-suffix none. Still listed and accepted: 6+ small-Arabic 3-word badge labels (12px), unbound fills on the emblem Vector inside onboarding/login.
+- Audit/lint fix cherry-picked to all eight design branches (14, 16, 54, 67, 42, 148, 120, 201).
