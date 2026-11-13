@@ -1,6 +1,6 @@
 # Screen inventory
 
-Every launch screen in the Figma file [Jazlah — Product Design](https://www.figma.com/design/puWXbmOVpnQpjc7mUahTnw/Jazlah-Product-Design): its Arabic name, its Figma link, and the task that will build it. 676 screens on 7 area pages plus the `Design System` page (generated from the file with `design/figma/scripts/36-export-index.js`; tasks matched by feature against `docs/delivery/sprints/`).
+Every launch screen in the Figma file [Jazlah — Product Design](https://www.figma.com/design/puWXbmOVpnQpjc7mUahTnw/Jazlah-Product-Design): its Arabic name, its Figma link, and the task that will build it. 681 screens on 7 area pages plus the `Design System` page (generated from the file with `design/figma/scripts/36-export-index.js`; tasks matched by feature against `docs/delivery/sprints/`).
 
 How the file is laid out (since 2026-11-13): one design page per platform. `01 التطبيق` holds every app screen, `02 الويب` every web screen, `03 لوحات التحكم` the admin, vendor and kitchen dashboards. Inside a page the main screens are grouped by product area (dashboards: by role), right to left in journey order, and every state sits in the `الحالات` section at the bottom of the page. The lists below are still grouped by product area, because that is how the build tasks are cut; the App / Web / Dashboard columns say which page a screen is on. Screens are Arabic RTL only; English comes from mirroring and i18n (rules on the `Design System` page).
 
@@ -8,12 +8,12 @@ How the file is laid out (since 2026-11-13): one design page per platform. `01 �
 |---|---|---|
 | 01 التطبيق | 277 (65 main, 212 states) | [open](https://www.figma.com/design/puWXbmOVpnQpjc7mUahTnw/Jazlah-Product-Design?node-id=199-6633) |
 | 02 الويب | 142 (39 main, 103 states) | [open](https://www.figma.com/design/puWXbmOVpnQpjc7mUahTnw/Jazlah-Product-Design?node-id=199-6634) |
-| 03 لوحات التحكم | 257 (48 main, 209 states) | [open](https://www.figma.com/design/puWXbmOVpnQpjc7mUahTnw/Jazlah-Product-Design?node-id=199-6635) |
+| 03 لوحات التحكم | 262 (49 main, 213 states) | [open](https://www.figma.com/design/puWXbmOVpnQpjc7mUahTnw/Jazlah-Product-Design?node-id=199-6635) |
 | Design System | | [open](https://www.figma.com/design/puWXbmOVpnQpjc7mUahTnw/Jazlah-Product-Design?node-id=199-6640) |
 
 ## Prototype flows
 
-**Start here (for the client):** [▶ ابدأ من هنا](https://www.figma.com/proto/puWXbmOVpnQpjc7mUahTnw/Jazlah-Product-Design?page-id=239%3A97236&node-id=239-97309&starting-point-node-id=239%3A97309&scaling=scale-down&hide-ui=1) is one screen with four cards (customer app, website, Jazlah admin dashboard, vendor dashboard). Each card opens that prototype in a new tab. The kitchen dashboard is not on it.
+**Start here (for the client):** [▶ ابدأ من هنا](https://www.figma.com/proto/puWXbmOVpnQpjc7mUahTnw/Jazlah-Product-Design?page-id=239%3A97236&node-id=239-97309&starting-point-node-id=239%3A97309&scaling=scale-down&hide-ui=1) is one screen with five cards (customer app, website, Jazlah admin dashboard, vendor dashboard, kitchen board). Each card opens that prototype in a new tab.
 
 The clickable versions are on three pages at the end of the file. The screens there are copies of the main screens on the design pages, rebuilt by `jzMobile()`, `jzWeb()` and `jzDash()` in `design/figma/scripts/90-DSN-DES-2-client-ready.js`, so a design change needs the prototype pages rebuilt.
 
@@ -21,11 +21,11 @@ The clickable versions are on three pages at the end of the file. The screens th
 |---|---|---|---|---|
 | تجربة التطبيق (mobile) | [▶ تجربة التطبيق](https://www.figma.com/design/puWXbmOVpnQpjc7mUahTnw/Jazlah-Product-Design?node-id=227-44237) | [present](https://www.figma.com/proto/puWXbmOVpnQpjc7mUahTnw/Jazlah-Product-Design?page-id=227%3A44237&node-id=230-73237&starting-point-node-id=230%3A73237&scaling=scale-down) | 63 + 2 bottom sheets | 265 |
 | تجربة الويب | [▶ تجربة الويب](https://www.figma.com/design/puWXbmOVpnQpjc7mUahTnw/Jazlah-Product-Design?node-id=227-54426) | [present](https://www.figma.com/proto/puWXbmOVpnQpjc7mUahTnw/Jazlah-Product-Design?page-id=227%3A54426&node-id=230-78382&starting-point-node-id=230%3A78382&scaling=scale-down) | 33 | 582 |
-| لوحة الإدارة | [▶ تجربة لوحة التحكم](https://www.figma.com/design/puWXbmOVpnQpjc7mUahTnw/Jazlah-Product-Design?node-id=227-61372) | [present](https://www.figma.com/proto/puWXbmOVpnQpjc7mUahTnw/Jazlah-Product-Design?page-id=227%3A61372&node-id=230-86701&starting-point-node-id=230%3A86701&scaling=scale-down) | 34 + login | 435 on the page (all three roles) |
+| لوحة الإدارة | [▶ تجربة لوحة التحكم](https://www.figma.com/design/puWXbmOVpnQpjc7mUahTnw/Jazlah-Product-Design?node-id=227-61372) | [present](https://www.figma.com/proto/puWXbmOVpnQpjc7mUahTnw/Jazlah-Product-Design?page-id=227%3A61372&node-id=230-86701&starting-point-node-id=230%3A86701&scaling=scale-down) | 35 + login | 446 on the page (all three roles) |
 | لوحة البائع | same page | [present](https://www.figma.com/proto/puWXbmOVpnQpjc7mUahTnw/Jazlah-Product-Design?page-id=227%3A61372&node-id=230-92841&starting-point-node-id=230%3A92841&scaling=scale-down) | 11 + login | |
 | لوحة المطبخ | same page | [present](https://www.figma.com/proto/puWXbmOVpnQpjc7mUahTnw/Jazlah-Product-Design?page-id=227%3A61372&node-id=230-94947&starting-point-node-id=230%3A94947&scaling=scale-down) | 1 | |
 
-Link check by script on 2026-11-13, after the last rebuild: 1,282 links, 0 pointing to a missing screen, 0 enabled primary buttons without a link.
+Link check by script on 2026-11-13, after the last rebuild: 1,293 links, 0 pointing to a missing screen, 0 enabled primary buttons without a link.
 
 Clicked through in Present on 2026-11-13: app (onboarding → sign-in → home → product → cart → checkout step 1, and the services tab), web (home → store → cart → account settings), admin (sign-in → overview → orders from the side menu). The other journeys were checked by reading the button → destination list, not by clicking.
 
@@ -449,6 +449,11 @@ Clicked through in Present on 2026-11-13: app (onboarding → sign-in → home �
 | تسعير المناسبة · خطأ | [open](https://www.figma.com/design/puWXbmOVpnQpjc7mUahTnw/Jazlah-Product-Design?node-id=131-77142) | OCC-DSH-1 (#123) |
 | تسعير المناسبة · غير مسموح | [open](https://www.figma.com/design/puWXbmOVpnQpjc7mUahTnw/Jazlah-Product-Design?node-id=131-77217) | OCC-DSH-1 (#123) |
 | المطابخ | [open](https://www.figma.com/design/puWXbmOVpnQpjc7mUahTnw/Jazlah-Product-Design?node-id=131-77292) | KIT-DSH-1 (#128) |
+| مهام الطبخ | [open](https://www.figma.com/design/puWXbmOVpnQpjc7mUahTnw/Jazlah-Product-Design?node-id=253-97310) | KIT-DSH-1 |
+| مهام الطبخ · تحميل | [open](https://www.figma.com/design/puWXbmOVpnQpjc7mUahTnw/Jazlah-Product-Design?node-id=253-97631) | KIT-DSH-1 |
+| مهام الطبخ · فارغة | [open](https://www.figma.com/design/puWXbmOVpnQpjc7mUahTnw/Jazlah-Product-Design?node-id=253-97704) | KIT-DSH-1 |
+| مهام الطبخ · خطأ | [open](https://www.figma.com/design/puWXbmOVpnQpjc7mUahTnw/Jazlah-Product-Design?node-id=253-97780) | KIT-DSH-1 |
+| مهام الطبخ · غير مسموح | [open](https://www.figma.com/design/puWXbmOVpnQpjc7mUahTnw/Jazlah-Product-Design?node-id=253-97857) | KIT-DSH-1 |
 | المطابخ · تحميل | [open](https://www.figma.com/design/puWXbmOVpnQpjc7mUahTnw/Jazlah-Product-Design?node-id=131-77428) | KIT-DSH-1 (#128) |
 | المطابخ · فارغة | [open](https://www.figma.com/design/puWXbmOVpnQpjc7mUahTnw/Jazlah-Product-Design?node-id=131-77499) | KIT-DSH-1 (#128) |
 | المطابخ · خطأ | [open](https://www.figma.com/design/puWXbmOVpnQpjc7mUahTnw/Jazlah-Product-Design?node-id=131-77583) | KIT-DSH-1 (#128) |
