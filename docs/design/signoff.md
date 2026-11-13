@@ -2,11 +2,11 @@
 
 Status: **draft prepared for the client review. Nothing below is approved.** The client's written approval is recorded in the "Approval" section by the owner, not by the design agent.
 
-Figma file: [Jazlah — Product Design](https://www.figma.com/design/puWXbmOVpnQpjc7mUahTnw/Jazlah-Product-Design). Open it on page [01 الحساب والدخول](https://www.figma.com/design/puWXbmOVpnQpjc7mUahTnw/Jazlah-Product-Design?node-id=199-6633): the first page is the app screens. Every screen with its Figma link and the task that builds it: [screens.md](screens.md).
+Figma file: [Jazlah — Product Design](https://www.figma.com/design/puWXbmOVpnQpjc7mUahTnw/Jazlah-Product-Design). Open it on page [01 التطبيق](https://www.figma.com/design/puWXbmOVpnQpjc7mUahTnw/Jazlah-Product-Design?node-id=199-6633): the first page is the app screens. Every screen with its Figma link and the task that builds it: [screens.md](screens.md).
 
 ## How the file is organised
-- Seven area pages in this order: 01 الحساب والدخول, 02 المتجر والطلب, 03 المواعيد والزيارة, 04 المناسبات والأضاحي, 05 الأعلاف والمحادثة, 06 البائع, 07 الإدارة. The `Design System` page comes last.
-- On each page, right to left: the app (mobile) row, the web row, then that area's dashboard row. Only the main screens are in these rows; every state is in the `الحالات` section at the bottom of the page. Only the Arabic screen name is above each screen.
+- Three design pages, one per platform: `01 التطبيق` (app), `02 الويب` (web), `03 لوحات التحكم` (admin, vendor and kitchen dashboards). The `Design System` page follows.
+- Inside a page the main screens are grouped by product area (dashboards: by role), right to left in journey order; every state is in the `الحالات` section at the bottom of the page. Only the Arabic screen name is above each screen.
 - Three pages at the end hold the clickable versions: `▶ تجربة التطبيق`, `▶ تجربة الويب`, `▶ تجربة لوحة التحكم`.
 - Every screen has its states as separate screens (default, filled, loading, empty, error, disabled where they apply).
 
@@ -27,7 +27,7 @@ Present ▶ links for the app, the web and the admin, vendor and kitchen dashboa
 ## Checks run on the file (2026-11-13)
 - Script lint over all 676 screens after the last changes: no empty or "undefined" text, no text outside its screen, no missing icon.
 - Clipped layouts: a script found 110 auto-layout frames on web and dashboard screens whose content was cut off (among them the whole animal-registration form) and opened them up. 28 small ones remain (tab labels 7 to 9 px taller than their tab, and the Adha settings body).
-- Looked at in Figma: every main screen on pages 01 to 07, and the state screens of pages 01 and 02 (app). The other state screens were covered by the lint only.
+- Looked at in Figma: every main screen on the design pages, and the state screens of pages 01 and 02 (app). The other state screens were covered by the lint only.
 - Prototype: 1,282 links, none broken, no enabled primary button without a link (script). What was clicked through in Present is listed in [screens.md](screens.md#prototype-flows).
 - Coverage against the Output of ACC-DES-1, VND-DES-1, STF-DES-1, SCH-DES-1, OPX-DES-1, OCC-DES-1 and FED-DES-1: every listed screen exists in the file. PLD-DES-1 (post-launch) is not designed.
 

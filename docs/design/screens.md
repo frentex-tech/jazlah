@@ -2,22 +2,18 @@
 
 Every launch screen in the Figma file [Jazlah — Product Design](https://www.figma.com/design/puWXbmOVpnQpjc7mUahTnw/Jazlah-Product-Design): its Arabic name, its Figma link, and the task that will build it. 676 screens on 7 area pages plus the `Design System` page (generated from the file with `design/figma/scripts/36-export-index.js`; tasks matched by feature against `docs/delivery/sprints/`).
 
-How the file is laid out (after the 2026-11-13 client-ready pass): one page per product area. Each page reads right to left, like the app: the app (mobile) row first, then the web row, then that area's dashboard row, each under one title. Only the main screens sit in these rows, in journey order (wrapped, so no row is longer than about 9,000 px). Every state (loading, error, empty, filled and the rest) sits in the `الحالات` section at the bottom of the same page. The area pages carry no prototype arrows: the clickable versions live on three pages at the end of the file (below). Screens are Arabic RTL only; English comes from mirroring and i18n (rules on the `Design System` page).
+How the file is laid out (since 2026-11-13): one design page per platform. `01 التطبيق` holds every app screen, `02 الويب` every web screen, `03 لوحات التحكم` the admin, vendor and kitchen dashboards. Inside a page the main screens are grouped by product area (dashboards: by role), right to left in journey order, and every state sits in the `الحالات` section at the bottom of the page. The lists below are still grouped by product area, because that is how the build tasks are cut; the App / Web / Dashboard columns say which page a screen is on. Screens are Arabic RTL only; English comes from mirroring and i18n (rules on the `Design System` page).
 
-| Page | App | Web | Dashboard | Open |
-|---|---|---|---|---|
-| 01 الحساب والدخول | 39 | 20 | 6 | [open](https://www.figma.com/design/puWXbmOVpnQpjc7mUahTnw/Jazlah-Product-Design?node-id=199-6633) |
-| 02 المتجر والطلب | 99 | 62 | 0 | [open](https://www.figma.com/design/puWXbmOVpnQpjc7mUahTnw/Jazlah-Product-Design?node-id=199-6634) |
-| 03 المواعيد والزيارة | 22 | 8 | 10 | [open](https://www.figma.com/design/puWXbmOVpnQpjc7mUahTnw/Jazlah-Product-Design?node-id=199-6635) |
-| 04 المناسبات والأضاحي | 50 | 18 | 29 | [open](https://www.figma.com/design/puWXbmOVpnQpjc7mUahTnw/Jazlah-Product-Design?node-id=199-6636) |
-| 05 الأعلاف والمحادثة | 65 | 8 | 18 | [open](https://www.figma.com/design/puWXbmOVpnQpjc7mUahTnw/Jazlah-Product-Design?node-id=199-6637) |
-| 06 البائع | 0 | 20 | 52 | [open](https://www.figma.com/design/puWXbmOVpnQpjc7mUahTnw/Jazlah-Product-Design?node-id=199-6638) |
-| 07 الإدارة | 0 | 0 | 142 | [open](https://www.figma.com/design/puWXbmOVpnQpjc7mUahTnw/Jazlah-Product-Design?node-id=199-6639) |
-| Design System | | | | [open](https://www.figma.com/design/puWXbmOVpnQpjc7mUahTnw/Jazlah-Product-Design?node-id=199-6640) |
+| Design page | Screens | Open |
+|---|---|---|
+| 01 التطبيق | 277 (65 main, 212 states) | [open](https://www.figma.com/design/puWXbmOVpnQpjc7mUahTnw/Jazlah-Product-Design?node-id=199-6633) |
+| 02 الويب | 142 (39 main, 103 states) | [open](https://www.figma.com/design/puWXbmOVpnQpjc7mUahTnw/Jazlah-Product-Design?node-id=199-6634) |
+| 03 لوحات التحكم | 257 (48 main, 209 states) | [open](https://www.figma.com/design/puWXbmOVpnQpjc7mUahTnw/Jazlah-Product-Design?node-id=199-6635) |
+| Design System | | [open](https://www.figma.com/design/puWXbmOVpnQpjc7mUahTnw/Jazlah-Product-Design?node-id=199-6640) |
 
 ## Prototype flows
 
-The clickable versions are on three pages at the end of the file. The screens there are copies of the main screens on pages 01 to 07, rebuilt by `jzMobile()`, `jzWeb()` and `jzDash()` in `design/figma/scripts/90-DSN-DES-2-client-ready.js`, so a design change needs the prototype pages rebuilt.
+The clickable versions are on three pages at the end of the file. The screens there are copies of the main screens on the design pages, rebuilt by `jzMobile()`, `jzWeb()` and `jzDash()` in `design/figma/scripts/90-DSN-DES-2-client-ready.js`, so a design change needs the prototype pages rebuilt.
 
 | Prototype | Figma page | Present ▶ | Screens | Links |
 |---|---|---|---|---|
@@ -31,7 +27,7 @@ Link check by script on 2026-11-13, after the last rebuild: 1,282 links, 0 point
 
 Clicked through in Present on 2026-11-13: app (onboarding → sign-in → home → product → cart → checkout step 1, and the services tab), web (home → store → cart → account settings), admin (sign-in → overview → orders from the side menu). The other journeys were checked by reading the button → destination list, not by clicking.
 
-## [01 الحساب والدخول](https://www.figma.com/design/puWXbmOVpnQpjc7mUahTnw/Jazlah-Product-Design?node-id=199-6633)
+## الحساب والدخول
 
 ### التطبيق (جوال) · Customer app (mobile) (39)
 
@@ -114,7 +110,7 @@ Clicked through in Present on 2026-11-13: app (onboarding → sign-in → home �
 | دخول الإدارة: رمز التحقق · خطأ | [open](https://www.figma.com/design/puWXbmOVpnQpjc7mUahTnw/Jazlah-Product-Design?node-id=118-6942) | ACC-DSH-1 (#22) |
 | دخول الإدارة: رمز التحقق · تحميل | [open](https://www.figma.com/design/puWXbmOVpnQpjc7mUahTnw/Jazlah-Product-Design?node-id=118-6967) | ACC-DSH-1 (#22) |
 
-## [02 المتجر والطلب](https://www.figma.com/design/puWXbmOVpnQpjc7mUahTnw/Jazlah-Product-Design?node-id=199-6634)
+## المتجر والطلب
 
 ### التطبيق (جوال) · Customer app (mobile) (99)
 
@@ -298,7 +294,7 @@ Clicked through in Present on 2026-11-13: app (onboarding → sign-in → home �
 | الدفع والمراجعة (ويب جوال 390) | [open](https://www.figma.com/design/puWXbmOVpnQpjc7mUahTnw/Jazlah-Product-Design?node-id=230-72693) | STF-WEB-1 |
 | تم الطلب (ويب جوال 390) | [open](https://www.figma.com/design/puWXbmOVpnQpjc7mUahTnw/Jazlah-Product-Design?node-id=230-72759) | STF-WEB-1 |
 
-## [03 المواعيد والزيارة](https://www.figma.com/design/puWXbmOVpnQpjc7mUahTnw/Jazlah-Product-Design?node-id=199-6635)
+## المواعيد والزيارة
 
 ### التطبيق (جوال) · Customer app (mobile) (22)
 
@@ -355,7 +351,7 @@ Clicked through in Present on 2026-11-13: app (onboarding → sign-in → home �
 | تسجيل الحيوان · تحميل | [open](https://www.figma.com/design/puWXbmOVpnQpjc7mUahTnw/Jazlah-Product-Design?node-id=131-79384) | VIS-DSH-1 (#168) |
 | تسجيل الحيوان · خطأ | [open](https://www.figma.com/design/puWXbmOVpnQpjc7mUahTnw/Jazlah-Product-Design?node-id=131-79443) | VIS-DSH-1 (#168) |
 
-## [04 المناسبات والأضاحي](https://www.figma.com/design/puWXbmOVpnQpjc7mUahTnw/Jazlah-Product-Design?node-id=199-6636)
+## المناسبات والأضاحي
 
 ### التطبيق (جوال) · Customer app (mobile) (50)
 
@@ -470,7 +466,7 @@ Clicked through in Present on 2026-11-13: app (onboarding → sign-in → home �
 | لوحة المطبخ · فارغة | [open](https://www.figma.com/design/puWXbmOVpnQpjc7mUahTnw/Jazlah-Product-Design?node-id=131-79653) | KIT-DSH-1 (#128) |
 | لوحة المطبخ · خطأ | [open](https://www.figma.com/design/puWXbmOVpnQpjc7mUahTnw/Jazlah-Product-Design?node-id=131-79720) | KIT-DSH-1 (#128) |
 
-## [05 الأعلاف والمحادثة](https://www.figma.com/design/puWXbmOVpnQpjc7mUahTnw/Jazlah-Product-Design?node-id=199-6637)
+## الأعلاف والمحادثة
 
 ### التطبيق (جوال) · Customer app (mobile) (65)
 
@@ -578,7 +574,7 @@ Clicked through in Present on 2026-11-13: app (onboarding → sign-in → home �
 | تفاصيل البلاغ · غير مسموح | [open](https://www.figma.com/design/puWXbmOVpnQpjc7mUahTnw/Jazlah-Product-Design?node-id=131-48464) | FED-DSH-1 (#151) |
 | تفاصيل البلاغ · نافذة الحظر | [open](https://www.figma.com/design/puWXbmOVpnQpjc7mUahTnw/Jazlah-Product-Design?node-id=131-48602) | FED-DSH-1 (#151) |
 
-## [06 البائع](https://www.figma.com/design/puWXbmOVpnQpjc7mUahTnw/Jazlah-Product-Design?node-id=199-6638)
+## البائع
 
 ### الويب · Customer web (20)
 
@@ -662,7 +658,7 @@ Clicked through in Present on 2026-11-13: app (onboarding → sign-in → home �
 | دفعات الأرباح · خطأ | [open](https://www.figma.com/design/puWXbmOVpnQpjc7mUahTnw/Jazlah-Product-Design?node-id=135-44374) | FIN-DSH-1 (#118) |
 | دفعات الأرباح · غير مسموح | [open](https://www.figma.com/design/puWXbmOVpnQpjc7mUahTnw/Jazlah-Product-Design?node-id=135-44516) | FIN-DSH-1 (#118) |
 
-## [07 الإدارة](https://www.figma.com/design/puWXbmOVpnQpjc7mUahTnw/Jazlah-Product-Design?node-id=199-6639)
+## الإدارة
 
 ### لوحات التحكم · Dashboards (142)
 
