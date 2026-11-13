@@ -1,13 +1,13 @@
 # Screen inventory
 
-Every launch screen in the Figma file [Jazlah — Product Design](https://www.figma.com/design/puWXbmOVpnQpjc7mUahTnw/Jazlah-Product-Design): its Arabic name, its Figma link, and the task that will build it. 585 screens on 7 area pages plus the `Design System` page (generated from the file with `design/figma/scripts/36-export-index.js`; tasks matched by feature against `docs/delivery/sprints/`).
+Every launch screen in the Figma file [Jazlah — Product Design](https://www.figma.com/design/puWXbmOVpnQpjc7mUahTnw/Jazlah-Product-Design): its Arabic name, its Figma link, and the task that will build it. 587 screens on 7 area pages plus the `Design System` page (generated from the file with `design/figma/scripts/36-export-index.js`; tasks matched by feature against `docs/delivery/sprints/`).
 
 How the file is laid out (since 2026-11-13): one design page per platform. `01 التطبيق` holds every app screen and `02 لوحات التحكم` the admin, vendor and kitchen dashboards. The customer web design was removed from the file on 2026-11-13 at the owner's request (the client wants the app and the dashboards only); the list of what was removed is in [archive/web-screens-2026-11-13.md](archive/web-screens-2026-11-13.md). Inside a page the main screens are grouped by product area (dashboards: by role), right to left in journey order, and every state sits in the `الحالات` section at the bottom of the page. The lists below are grouped by product area, because that is how the build tasks are cut. Screens are Arabic RTL only; English comes from mirroring and i18n (rules on the `Design System` page).
 
 | Design page | Screens | Open |
 |---|---|---|
 | 01 التطبيق | 310 (78 main, 232 states) | [open](https://www.figma.com/design/puWXbmOVpnQpjc7mUahTnw/Jazlah-Product-Design?node-id=199-6633) |
-| 02 لوحات التحكم | 275 (53 main, 222 states) | [open](https://www.figma.com/design/puWXbmOVpnQpjc7mUahTnw/Jazlah-Product-Design?node-id=199-6635) |
+| 02 لوحات التحكم | 277 (55 main, 222 states) | [open](https://www.figma.com/design/puWXbmOVpnQpjc7mUahTnw/Jazlah-Product-Design?node-id=199-6635) |
 | Design System | | [open](https://www.figma.com/design/puWXbmOVpnQpjc7mUahTnw/Jazlah-Product-Design?node-id=199-6640) |
 
 ## Prototype flows
@@ -25,7 +25,7 @@ The clickable versions are on two pages at the end of the file. The screens ther
 
 Link check by script on 2026-11-13, after the last rebuild: 928 links, 0 pointing to a missing screen. One dashboard screen has an enabled primary button without a link.
 
-Clicked through in Present after the last rebuild: app only (onboarding → sign-in → the new home → a customer story → points → rewards). The dashboards and the other app journeys were not clicked again after the rebuild.
+Clicked through in Present after the last rebuild (2026-11-13): app: onboarding → sign-in → home → customer story → points → rewards; services → Sahm Al-Khair → share → intention → contribution done → my contributions; product → cart → checkout (scrolled) → payment → order placed → tracking timeline. Vendor: sign-in → code → live orders board → earnings → visits. Admin: sign-in → code → overview → stories review → loyalty → Sahm batches. The kitchen board's primary button has no link.
 
 ## الحساب والدخول
 
@@ -692,6 +692,15 @@ Added on 2026-11-13 at the client's request, from the earlier prototype. In the 
 | دفعات سهم الخير · فارغة | [open](https://www.figma.com/design/puWXbmOVpnQpjc7mUahTnw/Jazlah-Product-Design?node-id=352-41666) | PLD-DES-1 (post-launch plan) |
 | دفعات سهم الخير · خطأ | [open](https://www.figma.com/design/puWXbmOVpnQpjc7mUahTnw/Jazlah-Product-Design?node-id=352-41916) | PLD-DES-1 (post-launch plan) |
 | رفع توثيق الدفعة | [open](https://www.figma.com/design/puWXbmOVpnQpjc7mUahTnw/Jazlah-Product-Design?node-id=352-35085) | PLD-DES-1 (post-launch plan) |
+
+### دخول التاجر · Vendor sign-in (2)
+
+Added on 2026-11-13: the vendor dashboard had no sign-in of its own.
+
+| Screen | Figma | Implementing task |
+|---|---|---|
+| دخول التاجر: رقم الجوال | [open](https://www.figma.com/design/puWXbmOVpnQpjc7mUahTnw/Jazlah-Product-Design?node-id=352-59207) | ACC-DSH-1 (#22) |
+| دخول التاجر: رمز التحقق | [open](https://www.figma.com/design/puWXbmOVpnQpjc7mUahTnw/Jazlah-Product-Design?node-id=352-59258) | ACC-DSH-1 (#22) |
 
 ## English (LTR) examples
 
