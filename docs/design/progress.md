@@ -110,3 +110,6 @@ The file was restructured on 2026-11-13 so it reads like a delivered design, not
 - `docs/design/screens.md` regenerated for the new pages (668 screens with Figma links and tasks); `docs/design/signoff.md` redrafted (no approval recorded).
 - Retired scripts: 05 (IA + flows), 07 (cover), 20 (order flow link), 33 (polish), 37 (archive), 39 (client review). The per-section build scripts (10-77) cannot be re-run on the restructured file; they remain as the record of how the screens were built.
 - Earlier this task: merged PRs 205-211 and 214 under the new self-review rule (PR #213 documents it); cards 14, 16, 54, 67, 42, 148, 120, 201 moved to Done. A commit (37-archive-orphans + a progress line) went to `develop` directly by mistake (no force-push).
+
+## 2026-11-13, later: pages regrouped by platform
+- The seven area pages listed above no longer exist. The design pages are `01 التطبيق`, `02 الويب` and `03 لوحات التحكم`, then `Design System` and the three prototype pages. Current layout and links: [screens.md](screens.md).

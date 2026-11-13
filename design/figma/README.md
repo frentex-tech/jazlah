@@ -42,7 +42,7 @@ Notes, verified on 2026-11-10:
 - `scripts/NN-<task-key>-<what>.js`: one file per change batch, numbered in the order they ran. Plain JS only (no TypeScript types), top-level `await` allowed, with globals `figma` and `print`.
 
 ## After the 2026-11-13 restructure
-The file now has pages `01`..`07` and `Design System`; screens are bare top-level frames named in Arabic (the old English name is plugin data `en`, the feature id `blk`, the row `row`). Still re-runnable: `30-lint-screens.js`, `35-nav-active.js`, `36-export-index.js`, `38-flows.js`, the `8x` fix scripts. The per-feature build scripts (`10`..`77`, `80`) built the screens once and cannot be re-run on the restructured file. Retired: `05` (IA and flows), `07` (cover), `20` (order flow link), `33` (polish), `37` (archive), `39` (client review).
+(Superseded later the same day: the design pages are now grouped by platform, see the end of this file.) The file then had pages `01`..`07` and `Design System`; screens are bare top-level frames named in Arabic (the old English name is plugin data `en`, the feature id `blk`, the row `row`). Still re-runnable: `30-lint-screens.js`, `35-nav-active.js`, `36-export-index.js`, `38-flows.js`, the `8x` fix scripts. The per-feature build scripts (`10`..`77`, `80`) built the screens once and cannot be re-run on the restructured file. Retired: `05` (IA and flows), `07` (cover), `20` (order flow link), `33` (polish), `37` (archive), `39` (client review).
 
 
 ## After the 2026-11-13 client-ready pass (DSN-DES-2)
@@ -50,3 +50,4 @@ The file now has pages `01`..`07` and `Design System`; screens are bare top-leve
 - `scripts/91-DSN-DES-2-fixes.js`: detail fixes (badges, filters, scrims, cart icon, address map, export button, delete-account link, default payment method).
 - These two were run from the browser console (`figma` is available there in an editable file), not through Scripter. They were recovered from the live session and have not been re-run from the repo: try them on a duplicate of the file first.
 - The prototype pages hold copies of the main screens. After a design change, re-run `jzMobile()`, `jzWeb()` and `jzDash()`.
+- `scripts/92-DSN-DES-2-pages-by-platform.js`: regroups the design pages by platform (`01 التطبيق`, `02 الويب`, `03 لوحات التحكم`). The seven area pages no longer exist; a screen's area and a dashboard screen's role are kept as shared plugin data (`area`, `role`).
