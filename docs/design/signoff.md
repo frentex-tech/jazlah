@@ -32,7 +32,7 @@ Present ▶ links for the app, the web and the admin, vendor and kitchen dashboa
 
 ## Known gaps (stated, not hidden)
 - Prototype screens are copies, not instances: after a design change the prototype pages must be rebuilt by script.
-- The scripts for the 2026-11-13 pass (layout, web header and footer, account side menu, split sign-in, image fixes, prototypes) were run live in the file and are not in `design/figma/scripts/` yet.
+- The scripts for the 2026-11-13 pass are in `design/figma/scripts/90-…` and `91-…` (layout, web header and footer, prototypes, detail fixes). They were recovered from the live session and not re-run from the repo. The one-off passes (header/footer swap, account side menu, split sign-in, image remapping, the two new app screens) were applied directly and have no script.
 - Buttons with no specific target in a prototype go to the next screen of the journey. The device frame and scroll settings were left at Figma's defaults.
 - Only part of the screens was looked at after this pass (pages 01, 02 and 07 main rows, the new screens, the sign-in screens); the state screens were changed by script and not reviewed one by one.
 - New photos (goat, feed, grain, feed sacks, kitchen, chicken, fish, spices and others) are from Unsplash (free licence).
