@@ -11,7 +11,7 @@ Figma file: [Jazlah — Product Design](https://www.figma.com/design/puWXbmOVpnQ
 - Every screen has its states as separate screens (default, filled, loading, empty, error, disabled where they apply).
 
 ## What is being approved
-- The launch design for the customer app and the admin, vendor and kitchen dashboards: 539 screens, Arabic (RTL). English (LTR) is produced by mirroring and i18n (rules on the `Design System` page).
+- The launch design for the customer app and the admin, vendor and kitchen dashboards: 585 screens, Arabic (RTL). English (LTR) is produced by mirroring and i18n (rules on the `Design System` page).
 - The two clickable prototypes (app, dashboards): links in [screens.md](screens.md#prototype-flows).
 - The brand: wordmark «جزلة / Jazlah» and the gold profile mark (the ram head in side view, `docs/design/reference/prototype/img/mark-gold.png`).
 
@@ -26,14 +26,29 @@ Send the client one link: the start page `▶ ابدأ من هنا` (link in [sc
 
 Present ▶ links for the app, the web and the admin, vendor and kitchen dashboards are in [screens.md](screens.md#prototype-flows). The app prototype starts at the first onboarding slide and runs through sign-in to the home screen; the bottom bar, back buttons, cards and the order journey up to *order placed* and tracking are linked.
 
+## Client round 2 (2026-11-13)
+What changed after the client saw the design:
+- **Typeface:** all text is now the Thmanyah typeface (Thmanyah Sans for the interface, Thmanyah Serif Display for large headings), replacing Readex Pro and El Messiri. The font has no SemiBold, so those texts are Bold. The font is installed on the designer's machine only: it is not a Figma cloud font, and its licence forbids redistributing the files, so they are not in the repo. Read the licence that ships with the download before bundling the font in the app.
+- **Home screen:** rebuilt in a trust-first order: points balance and delivery/pickup switch, customer stories, loyalty banner, then categories as large image tiles (the feed category included) and best sellers.
+- **New app features**, taken from the earlier prototype: receipt stories with sharing (4 screens), loyalty points (4), Sahm Al-Khair charity shares (5), each list screen with loading, empty and error states. Entry points were added to the home, account, services, cart and order-placed screens.
+- **New admin screens** for those features: story review, points and rewards settings, Sahm batches, batch proof upload. The admin side menu has three new items.
+- **Order tracking** is a timeline with times, freshness photos and the courier card; the map was removed.
+- **RTL fixes:** radio, checkbox and switch rows now line up on the right. A language switch was added to onboarding and sign-in, and two English (LTR) example screens show the mirroring.
+- **Scope note:** stories, loyalty and Sahm are post-launch in the delivery plan (PLD-DES-1). They were designed now at the client's request; the sprint plan was not changed.
+
 ## Checks run on the file (2026-11-13)
-- Script lint over all 539 screens after the last changes: no empty or "undefined" text, no text outside its screen, no missing icon.
+- Script lint over all 585 screens after the last changes: no empty or "undefined" text, no text outside its screen, no missing icon.
 - Clipped layouts: a script found 110 auto-layout frames on web and dashboard screens whose content was cut off (among them the whole animal-registration form) and opened them up. 28 small ones remain (tab labels 7 to 9 px taller than their tab, and the Adha settings body).
 - Looked at in Figma: every main screen on the design pages, and the state screens of pages 01 and 02 (app). The other state screens were covered by the lint only.
-- Prototype: 711 links, none broken, no enabled primary button without a link (script). What was clicked through in Present is listed in [screens.md](screens.md#prototype-flows).
+- Prototype: 928 links, none broken (script, after the round-2 rebuild). What was clicked through in Present is listed in [screens.md](screens.md#prototype-flows).
 - Coverage against the Output of ACC-DES-1, VND-DES-1, STF-DES-1, SCH-DES-1, OPX-DES-1, OCC-DES-1 and FED-DES-1: every listed screen exists in the file. PLD-DES-1 (post-launch) is not designed.
 
 ## Known gaps (stated, not hidden)
+- Round 2 was applied directly in the file; it has no script in `design/figma/scripts/`. The layout script now in use differs from `92` (two pages, areas 7 and 8 added).
+- After round 2 the lint was re-run over all 585 screens (clean except six filter bars, fixed). Screens looked at: the new and changed ones, and the main app rows. The dashboards and state screens were not looked at again one by one after the font change.
+- Scrims behind sheets had become opaque on 39 screens during round 1 and were restored to 55% in round 2.
+- The home screen's state screens (loading, empty, error) still show the older home structure.
+- The new features have no build tasks, API contracts or SRS requirement IDs yet.
 - No customer web design in the file since 2026-11-13 (removed at the owner's request). The web build tasks (`*-WEB-*`) have no screens to build from until the scope is confirmed with the client, and the public vendor-application pages went with it.
 - No PNG exports of the key screens in `docs/design/<epic>/` (the DES tasks ask for them): they need a Figma export or API token, which the design session did not have.
 - The kitchen role is one screen, the kitchen board, which is what KIT-DSH-1 asks for; its side menu now shows that one item only. The admin `مهام الطبخ` (cooking jobs: by day and status, manual assign, meat-sent action) was added on 2026-11-13 with loading, empty, error and permission-denied states; it is reached from a link row on the `المطابخ` screen, because the admin side menu has no item for it.

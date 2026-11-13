@@ -1,31 +1,31 @@
 # Screen inventory
 
-Every launch screen in the Figma file [Jazlah — Product Design](https://www.figma.com/design/puWXbmOVpnQpjc7mUahTnw/Jazlah-Product-Design): its Arabic name, its Figma link, and the task that will build it. 539 screens on 7 area pages plus the `Design System` page (generated from the file with `design/figma/scripts/36-export-index.js`; tasks matched by feature against `docs/delivery/sprints/`).
+Every launch screen in the Figma file [Jazlah — Product Design](https://www.figma.com/design/puWXbmOVpnQpjc7mUahTnw/Jazlah-Product-Design): its Arabic name, its Figma link, and the task that will build it. 585 screens on 7 area pages plus the `Design System` page (generated from the file with `design/figma/scripts/36-export-index.js`; tasks matched by feature against `docs/delivery/sprints/`).
 
 How the file is laid out (since 2026-11-13): one design page per platform. `01 التطبيق` holds every app screen and `02 لوحات التحكم` the admin, vendor and kitchen dashboards. The customer web design was removed from the file on 2026-11-13 at the owner's request (the client wants the app and the dashboards only); the list of what was removed is in [archive/web-screens-2026-11-13.md](archive/web-screens-2026-11-13.md). Inside a page the main screens are grouped by product area (dashboards: by role), right to left in journey order, and every state sits in the `الحالات` section at the bottom of the page. The lists below are grouped by product area, because that is how the build tasks are cut. Screens are Arabic RTL only; English comes from mirroring and i18n (rules on the `Design System` page).
 
 | Design page | Screens | Open |
 |---|---|---|
-| 01 التطبيق | 277 (65 main, 212 states) | [open](https://www.figma.com/design/puWXbmOVpnQpjc7mUahTnw/Jazlah-Product-Design?node-id=199-6633) |
-| 02 لوحات التحكم | 262 (49 main, 213 states) | [open](https://www.figma.com/design/puWXbmOVpnQpjc7mUahTnw/Jazlah-Product-Design?node-id=199-6635) |
+| 01 التطبيق | 310 (78 main, 232 states) | [open](https://www.figma.com/design/puWXbmOVpnQpjc7mUahTnw/Jazlah-Product-Design?node-id=199-6633) |
+| 02 لوحات التحكم | 275 (53 main, 222 states) | [open](https://www.figma.com/design/puWXbmOVpnQpjc7mUahTnw/Jazlah-Product-Design?node-id=199-6635) |
 | Design System | | [open](https://www.figma.com/design/puWXbmOVpnQpjc7mUahTnw/Jazlah-Product-Design?node-id=199-6640) |
 
 ## Prototype flows
 
 **Start here (for the client):** [▶ ابدأ من هنا](https://www.figma.com/proto/puWXbmOVpnQpjc7mUahTnw/Jazlah-Product-Design?page-id=239%3A97236&node-id=239-97309&starting-point-node-id=239%3A97309&scaling=scale-down&hide-ui=1) is one screen with four cards (customer app, Jazlah admin dashboard, vendor dashboard, kitchen board). Each card opens that prototype in a new tab.
 
-The clickable versions are on two pages at the end of the file (app and dashboards). The screens there are copies of the main screens on the design pages, rebuilt by `jzMobile()` and `jzDash()` in `design/figma/scripts/90-DSN-DES-2-client-ready.js`, so a design change needs the prototype pages rebuilt.
+The clickable versions are on two pages at the end of the file. The screens there are copies of the main screens, so a design change needs the prototype pages rebuilt.
 
 | Prototype | Figma page | Present ▶ | Screens | Links |
 |---|---|---|---|---|
-| تجربة التطبيق (mobile) | [▶ تجربة التطبيق](https://www.figma.com/design/puWXbmOVpnQpjc7mUahTnw/Jazlah-Product-Design?node-id=227-44237) | [present](https://www.figma.com/proto/puWXbmOVpnQpjc7mUahTnw/Jazlah-Product-Design?page-id=227%3A44237&node-id=230-73237&starting-point-node-id=230%3A73237&scaling=scale-down) | 63 + 2 bottom sheets | 265 |
-| لوحة الإدارة | [▶ تجربة لوحة التحكم](https://www.figma.com/design/puWXbmOVpnQpjc7mUahTnw/Jazlah-Product-Design?node-id=227-61372) | [present](https://www.figma.com/proto/puWXbmOVpnQpjc7mUahTnw/Jazlah-Product-Design?page-id=227%3A61372&node-id=230-86701&starting-point-node-id=230%3A86701&scaling=scale-down) | 35 + login | 446 on the page (all three roles) |
-| لوحة البائع | same page | [present](https://www.figma.com/proto/puWXbmOVpnQpjc7mUahTnw/Jazlah-Product-Design?page-id=227%3A61372&node-id=230-92841&starting-point-node-id=230%3A92841&scaling=scale-down) | 11 + login | |
-| لوحة المطبخ | same page | [present](https://www.figma.com/proto/puWXbmOVpnQpjc7mUahTnw/Jazlah-Product-Design?page-id=227%3A61372&node-id=230-94947&starting-point-node-id=230%3A94947&scaling=scale-down) | 1 | |
+| تجربة التطبيق (mobile) | [▶ تجربة التطبيق](https://www.figma.com/design/puWXbmOVpnQpjc7mUahTnw/Jazlah-Product-Design?node-id=227-44237) | [present](https://www.figma.com/proto/puWXbmOVpnQpjc7mUahTnw/Jazlah-Product-Design?page-id=227%3A44237&node-id=352-42301&starting-point-node-id=352%3A42301&scaling=scale-down) | 76 + 2 bottom sheets | 320 |
+| لوحة الإدارة | [▶ تجربة لوحة التحكم](https://www.figma.com/design/puWXbmOVpnQpjc7mUahTnw/Jazlah-Product-Design?node-id=227-61372) | [present](https://www.figma.com/proto/puWXbmOVpnQpjc7mUahTnw/Jazlah-Product-Design?page-id=227%3A61372&node-id=352-48216&starting-point-node-id=352%3A48216&scaling=scale-down) | 39 + login | 608 on the page (all three roles) |
+| لوحة البائع | same page | [present](https://www.figma.com/proto/puWXbmOVpnQpjc7mUahTnw/Jazlah-Product-Design?page-id=227%3A61372&node-id=352-55869&starting-point-node-id=352%3A55869&scaling=scale-down) | 11 + login | |
+| لوحة المطبخ | same page | [present](https://www.figma.com/proto/puWXbmOVpnQpjc7mUahTnw/Jazlah-Product-Design?page-id=227%3A61372&node-id=352-57997&starting-point-node-id=352%3A57997&scaling=scale-down) | 1 | |
 
-Link check by script on 2026-11-13, after the last rebuild: 711 links, 0 pointing to a missing screen, 0 enabled primary buttons without a link.
+Link check by script on 2026-11-13, after the last rebuild: 928 links, 0 pointing to a missing screen. One dashboard screen has an enabled primary button without a link.
 
-Clicked through in Present on 2026-11-13: app (onboarding → sign-in → home → product → cart → checkout step 1, and the services tab), admin (sign-in → overview → orders from the side menu). The other journeys were checked by reading the button → destination list, not by clicking.
+Clicked through in Present after the last rebuild: app only (onboarding → sign-in → the new home → a customer story → points → rewards). The dashboards and the other app journeys were not clicked again after the rebuild.
 
 ## الحساب والدخول
 
@@ -634,3 +634,71 @@ Clicked through in Present on 2026-11-13: app (onboarding → sign-in → home �
 | رفض الصلاحية | [open](https://www.figma.com/design/puWXbmOVpnQpjc7mUahTnw/Jazlah-Product-Design?node-id=135-63396) | ADM-DSH-1 (#113) |
 | رفض الصلاحية · تحميل | [open](https://www.figma.com/design/puWXbmOVpnQpjc7mUahTnw/Jazlah-Product-Design?node-id=135-63471) | ADM-DSH-1 (#113) |
 | رفض الصلاحية · خطأ | [open](https://www.figma.com/design/puWXbmOVpnQpjc7mUahTnw/Jazlah-Product-Design?node-id=135-63543) | ADM-DSH-1 (#113) |
+
+## القصص والنقاط وسهم الخير
+
+Added on 2026-11-13 at the client's request, from the earlier prototype. In the delivery plan these features are post-launch (PLD-DES-1); no build task exists for them yet.
+
+### التطبيق · App (31)
+
+| Screen | Figma | Implementing task |
+|---|---|---|
+| قصص الاستلام | [open](https://www.figma.com/design/puWXbmOVpnQpjc7mUahTnw/Jazlah-Product-Design?node-id=352-32934) | PLD-DES-1 (post-launch plan) |
+| قصص الاستلام · تحميل | [open](https://www.figma.com/design/puWXbmOVpnQpjc7mUahTnw/Jazlah-Product-Design?node-id=352-38725) | PLD-DES-1 (post-launch plan) |
+| قصص الاستلام · فارغة | [open](https://www.figma.com/design/puWXbmOVpnQpjc7mUahTnw/Jazlah-Product-Design?node-id=352-38807) | PLD-DES-1 (post-launch plan) |
+| قصص الاستلام · خطأ | [open](https://www.figma.com/design/puWXbmOVpnQpjc7mUahTnw/Jazlah-Product-Design?node-id=352-38867) | PLD-DES-1 (post-launch plan) |
+| عرض القصة | [open](https://www.figma.com/design/puWXbmOVpnQpjc7mUahTnw/Jazlah-Product-Design?node-id=352-33025) | PLD-DES-1 (post-launch plan) |
+| تصوير القصة | [open](https://www.figma.com/design/puWXbmOVpnQpjc7mUahTnw/Jazlah-Product-Design?node-id=352-33121) | PLD-DES-1 (post-launch plan) |
+| تم نشر القصة | [open](https://www.figma.com/design/puWXbmOVpnQpjc7mUahTnw/Jazlah-Product-Design?node-id=352-33202) | PLD-DES-1 (post-launch plan) |
+| نقاطي | [open](https://www.figma.com/design/puWXbmOVpnQpjc7mUahTnw/Jazlah-Product-Design?node-id=352-33278) | PLD-DES-1 (post-launch plan) |
+| نقاطي · تحميل | [open](https://www.figma.com/design/puWXbmOVpnQpjc7mUahTnw/Jazlah-Product-Design?node-id=352-39484) | PLD-DES-1 (post-launch plan) |
+| نقاطي · فارغة | [open](https://www.figma.com/design/puWXbmOVpnQpjc7mUahTnw/Jazlah-Product-Design?node-id=352-39589) | PLD-DES-1 (post-launch plan) |
+| نقاطي · خطأ | [open](https://www.figma.com/design/puWXbmOVpnQpjc7mUahTnw/Jazlah-Product-Design?node-id=352-39672) | PLD-DES-1 (post-launch plan) |
+| المكافآت | [open](https://www.figma.com/design/puWXbmOVpnQpjc7mUahTnw/Jazlah-Product-Design?node-id=352-33396) | PLD-DES-1 (post-launch plan) |
+| المكافآت · تحميل | [open](https://www.figma.com/design/puWXbmOVpnQpjc7mUahTnw/Jazlah-Product-Design?node-id=352-39240) | PLD-DES-1 (post-launch plan) |
+| المكافآت · فارغة | [open](https://www.figma.com/design/puWXbmOVpnQpjc7mUahTnw/Jazlah-Product-Design?node-id=352-39336) | PLD-DES-1 (post-launch plan) |
+| المكافآت · خطأ | [open](https://www.figma.com/design/puWXbmOVpnQpjc7mUahTnw/Jazlah-Product-Design?node-id=352-39410) | PLD-DES-1 (post-launch plan) |
+| تم الاستبدال | [open](https://www.figma.com/design/puWXbmOVpnQpjc7mUahTnw/Jazlah-Product-Design?node-id=352-33503) | PLD-DES-1 (post-launch plan) |
+| سجل النقاط | [open](https://www.figma.com/design/puWXbmOVpnQpjc7mUahTnw/Jazlah-Product-Design?node-id=352-33580) | PLD-DES-1 (post-launch plan) |
+| سجل النقاط · تحميل | [open](https://www.figma.com/design/puWXbmOVpnQpjc7mUahTnw/Jazlah-Product-Design?node-id=352-38927) | PLD-DES-1 (post-launch plan) |
+| سجل النقاط · فارغة | [open](https://www.figma.com/design/puWXbmOVpnQpjc7mUahTnw/Jazlah-Product-Design?node-id=352-39046) | PLD-DES-1 (post-launch plan) |
+| سجل النقاط · خطأ | [open](https://www.figma.com/design/puWXbmOVpnQpjc7mUahTnw/Jazlah-Product-Design?node-id=352-39143) | PLD-DES-1 (post-launch plan) |
+| سهم الخير | [open](https://www.figma.com/design/puWXbmOVpnQpjc7mUahTnw/Jazlah-Product-Design?node-id=352-33711) | PLD-DES-1 (post-launch plan) |
+| سهم الخير · تحميل | [open](https://www.figma.com/design/puWXbmOVpnQpjc7mUahTnw/Jazlah-Product-Design?node-id=352-39755) | PLD-DES-1 (post-launch plan) |
+| سهم الخير · فارغة | [open](https://www.figma.com/design/puWXbmOVpnQpjc7mUahTnw/Jazlah-Product-Design?node-id=352-39866) | PLD-DES-1 (post-launch plan) |
+| سهم الخير · خطأ | [open](https://www.figma.com/design/puWXbmOVpnQpjc7mUahTnw/Jazlah-Product-Design?node-id=352-39955) | PLD-DES-1 (post-launch plan) |
+| اختيار السهم | [open](https://www.figma.com/design/puWXbmOVpnQpjc7mUahTnw/Jazlah-Product-Design?node-id=352-33831) | PLD-DES-1 (post-launch plan) |
+| النيّة والإهداء | [open](https://www.figma.com/design/puWXbmOVpnQpjc7mUahTnw/Jazlah-Product-Design?node-id=352-33928) | PLD-DES-1 (post-launch plan) |
+| تمت المساهمة | [open](https://www.figma.com/design/puWXbmOVpnQpjc7mUahTnw/Jazlah-Product-Design?node-id=352-34022) | PLD-DES-1 (post-launch plan) |
+| صدقاتي والتوثيق | [open](https://www.figma.com/design/puWXbmOVpnQpjc7mUahTnw/Jazlah-Product-Design?node-id=352-34115) | PLD-DES-1 (post-launch plan) |
+| صدقاتي والتوثيق · تحميل | [open](https://www.figma.com/design/puWXbmOVpnQpjc7mUahTnw/Jazlah-Product-Design?node-id=352-40044) | PLD-DES-1 (post-launch plan) |
+| صدقاتي والتوثيق · فارغة | [open](https://www.figma.com/design/puWXbmOVpnQpjc7mUahTnw/Jazlah-Product-Design?node-id=352-40142) | PLD-DES-1 (post-launch plan) |
+| صدقاتي والتوثيق · خطأ | [open](https://www.figma.com/design/puWXbmOVpnQpjc7mUahTnw/Jazlah-Product-Design?node-id=352-40218) | PLD-DES-1 (post-launch plan) |
+
+### لوحات التحكم · Dashboards (13)
+
+| Screen | Figma | Implementing task |
+|---|---|---|
+| مراجعة القصص | [open](https://www.figma.com/design/puWXbmOVpnQpjc7mUahTnw/Jazlah-Product-Design?node-id=352-34228) | PLD-DES-1 (post-launch plan) |
+| مراجعة القصص · تحميل | [open](https://www.figma.com/design/puWXbmOVpnQpjc7mUahTnw/Jazlah-Product-Design?node-id=352-40294) | PLD-DES-1 (post-launch plan) |
+| مراجعة القصص · فارغة | [open](https://www.figma.com/design/puWXbmOVpnQpjc7mUahTnw/Jazlah-Product-Design?node-id=352-40470) | PLD-DES-1 (post-launch plan) |
+| مراجعة القصص · خطأ | [open](https://www.figma.com/design/puWXbmOVpnQpjc7mUahTnw/Jazlah-Product-Design?node-id=352-40629) | PLD-DES-1 (post-launch plan) |
+| النقاط والمكافآت | [open](https://www.figma.com/design/puWXbmOVpnQpjc7mUahTnw/Jazlah-Product-Design?node-id=352-34455) | PLD-DES-1 (post-launch plan) |
+| النقاط والمكافآت · تحميل | [open](https://www.figma.com/design/puWXbmOVpnQpjc7mUahTnw/Jazlah-Product-Design?node-id=352-40788) | PLD-DES-1 (post-launch plan) |
+| النقاط والمكافآت · فارغة | [open](https://www.figma.com/design/puWXbmOVpnQpjc7mUahTnw/Jazlah-Product-Design?node-id=352-41003) | PLD-DES-1 (post-launch plan) |
+| النقاط والمكافآت · خطأ | [open](https://www.figma.com/design/puWXbmOVpnQpjc7mUahTnw/Jazlah-Product-Design?node-id=352-41201) | PLD-DES-1 (post-launch plan) |
+| دفعات سهم الخير | [open](https://www.figma.com/design/puWXbmOVpnQpjc7mUahTnw/Jazlah-Product-Design?node-id=352-34760) | PLD-DES-1 (post-launch plan) |
+| دفعات سهم الخير · تحميل | [open](https://www.figma.com/design/puWXbmOVpnQpjc7mUahTnw/Jazlah-Product-Design?node-id=352-41399) | PLD-DES-1 (post-launch plan) |
+| دفعات سهم الخير · فارغة | [open](https://www.figma.com/design/puWXbmOVpnQpjc7mUahTnw/Jazlah-Product-Design?node-id=352-41666) | PLD-DES-1 (post-launch plan) |
+| دفعات سهم الخير · خطأ | [open](https://www.figma.com/design/puWXbmOVpnQpjc7mUahTnw/Jazlah-Product-Design?node-id=352-41916) | PLD-DES-1 (post-launch plan) |
+| رفع توثيق الدفعة | [open](https://www.figma.com/design/puWXbmOVpnQpjc7mUahTnw/Jazlah-Product-Design?node-id=352-35085) | PLD-DES-1 (post-launch plan) |
+
+## English (LTR) examples
+
+Two app screens mirrored and translated, only to show how the Arabic design flips for English. English is not designed screen by screen.
+
+| Screen | Figma | Implementing task |
+|---|---|---|
+| Cancel order · English (LTR) | [open](https://www.figma.com/design/puWXbmOVpnQpjc7mUahTnw/Jazlah-Product-Design?node-id=352-38462) | — |
+| Account · English (LTR) | [open](https://www.figma.com/design/puWXbmOVpnQpjc7mUahTnw/Jazlah-Product-Design?node-id=352-38532) | — |
+
