@@ -22,6 +22,8 @@ Figma file: [Jazlah — Product Design](https://www.figma.com/design/puWXbmOVpnQ
 | 2 | Emblem: the project owner chose the gold profile mark on 2026-11-13 (neither option A nor B). It is applied across the file. The client's written approval is still to be recorded below | chosen by the owner, client approval pending |
 
 ## Flows to walk through
+Send the client one link: the start page `▶ ابدأ من هنا` (link in [screens.md](screens.md#prototype-flows)). It was opened in Present on 2026-11-13 and the customer-app card was clicked; the other three cards carry the same kind of link and were not clicked.
+
 Present ▶ links for the app, the web and the admin, vendor and kitchen dashboards are in [screens.md](screens.md#prototype-flows). The app prototype starts at the first onboarding slide and runs through sign-in to the home screen; the bottom bar, back buttons, cards and the order journey up to *order placed* and tracking are linked.
 
 ## Checks run on the file (2026-11-13)
