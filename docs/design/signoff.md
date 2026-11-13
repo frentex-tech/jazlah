@@ -11,7 +11,7 @@ Figma file: [Jazlah — Product Design](https://www.figma.com/design/puWXbmOVpnQ
 - Every screen has its states as separate screens (default, filled, loading, empty, error, disabled where they apply).
 
 ## What is being approved
-- The launch design for the customer app, customer web, and the admin, vendor and kitchen dashboards: 670 screens, Arabic (RTL). English (LTR) is produced by mirroring and i18n (rules on the `Design System` page).
+- The launch design for the customer app, customer web, and the admin, vendor and kitchen dashboards: 676 screens, Arabic (RTL). English (LTR) is produced by mirroring and i18n (rules on the `Design System` page).
 - The three clickable prototypes (app, web, dashboards): links in [screens.md](screens.md#prototype-flows).
 - The brand: wordmark «جزلة / Jazlah» and one of the two emblem options.
 
@@ -25,19 +25,22 @@ Figma file: [Jazlah — Product Design](https://www.figma.com/design/puWXbmOVpnQ
 Present ▶ links for the app, the web and the admin, vendor and kitchen dashboards are in [screens.md](screens.md#prototype-flows). The app prototype starts at the first onboarding slide and runs through sign-in to the home screen; the bottom bar, back buttons, cards and the order journey up to *order placed* and tracking are linked.
 
 ## Checks run on the file (2026-11-13)
-- Every screen was looked at in Figma, page by page, after the last fixes (image, spacing, text, empty look, consistency with the rest).
-- Lint over the 670 screens: no empty or "undefined" text, no leftover placeholders, no text outside its screen, no image placeholders.
-- 1,215 prototype links on the three prototype pages, none broken, no enabled primary button without a link (script check, 2026-11-13). The app flow onboarding → sign-in → home → services tab was clicked through in Present.
-- Order flow: the DSN-DES-1 acceptance "the regular order flow reaches *order placed* in ≤ 6 steps" is met on mobile and web.
+- Script lint over all 676 screens after the last changes: no empty or "undefined" text, no text outside its screen, no missing icon.
+- Clipped layouts: a script found 110 auto-layout frames on web and dashboard screens whose content was cut off (among them the whole animal-registration form) and opened them up. 28 small ones remain (tab labels 7 to 9 px taller than their tab, and the Adha settings body).
+- Looked at in Figma: every main screen on pages 01 to 07, and the state screens of pages 01 and 02 (app). The other state screens were covered by the lint only.
+- Prototype: 1,282 links, none broken, no enabled primary button without a link (script). What was clicked through in Present is listed in [screens.md](screens.md#prototype-flows).
+- Coverage against the Output of ACC-DES-1, VND-DES-1, STF-DES-1, SCH-DES-1, OPX-DES-1, OCC-DES-1 and FED-DES-1: every listed screen exists in the file. PLD-DES-1 (post-launch) is not designed.
 
 ## Known gaps (stated, not hidden)
-- Prototype screens are copies, not instances: after a design change the prototype pages must be rebuilt by script.
-- The scripts for the 2026-11-13 pass (layout, web header and footer, account side menu, split sign-in, image fixes, prototypes) were run live in the file and are not in `design/figma/scripts/` yet.
-- Buttons with no specific target in a prototype go to the next screen of the journey. The device frame and scroll settings were left at Figma's defaults.
-- Only part of the screens was looked at after this pass (pages 01, 02 and 07 main rows, the new screens, the sign-in screens); the state screens were changed by script and not reviewed one by one.
-- New photos (goat, feed, grain, feed sacks, kitchen, chicken, fish, spices and others) are from Unsplash (free licence).
-- Two app screens were added because the bottom bar needs them: `حسابي` (account hub) and `الخدمات` (services hub).
-- Icons are Phosphor; photos come from the approved prototype's image set.
+- No PNG exports of the key screens in `docs/design/<epic>/` (the DES tasks ask for them): they need a Figma export or API token, which the design session did not have.
+- Web at 390 covers six key screens only (home, store, product, cart, payment review, order placed), built from the app screens with the `Web header (390)` and `Web footer (390)` components. The other web screens exist at 1440 only.
+- The kitchen role has one screen (the kitchen board, as OCC-DES-1 lists); its side menu shows three more items that have no screen.
+- Prototype screens are copies, not instances. The device frame was left at Figma's default; long app screens scroll inside their body.
+- Scripts `90` and `91` were recovered from the live session and not re-run from the repo. Later one-off passes of the same day (account side menu, split sign-in, image remapping, store monograms, the two new app screens, the 390 web set, the clipped-layout fix, the explicit prototype button map) were applied directly in the file and have no script.
+- Some fills added on 2026-11-13 use raw colours instead of variables (gradient overlays on photos, the store monogram green, canvas titles).
+- Web page heights follow their content (about 1,000 to 1,900 px); dashboards are 900 px or taller.
+- New photos are from Unsplash (free licence). Store logos are letter monograms, not real logos.
+- The `deploy` check of the progress dashboard fails on pull requests: the `github-pages` environment only accepts `develop`.
 - The logo and emblem wait for the client's choice (decisions 1 and 2); the screens use the current wordmark.
 
 ## Feedback round
