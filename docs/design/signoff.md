@@ -13,13 +13,13 @@ Figma file: [Jazlah — Product Design](https://www.figma.com/design/puWXbmOVpnQ
 ## What is being approved
 - The launch design for the customer app, customer web, and the admin, vendor and kitchen dashboards: 676 screens, Arabic (RTL). English (LTR) is produced by mirroring and i18n (rules on the `Design System` page).
 - The three clickable prototypes (app, web, dashboards): links in [screens.md](screens.md#prototype-flows).
-- The brand: wordmark «جزلة / Jazlah» and one of the two emblem options.
+- The brand: wordmark «جزلة / Jazlah» and the gold profile mark (the ram head in side view, `docs/design/reference/prototype/img/mark-gold.png`).
 
 ## Decisions needed from the client
 | # | Decision | Status |
 |---|---|---|
 | 1 | Written approval of the new wordmark (palette and fonts were approved earlier) | pending |
-| 2 | Choice between emblem A and emblem B (see `docs/design/brand/`) | pending |
+| 2 | Emblem: the project owner chose the gold profile mark on 2026-11-13 (neither option A nor B). It is applied across the file. The client's written approval is still to be recorded below | chosen by the owner, client approval pending |
 
 ## Flows to walk through
 Present ▶ links for the app, the web and the admin, vendor and kitchen dashboards are in [screens.md](screens.md#prototype-flows). The app prototype starts at the first onboarding slide and runs through sign-in to the home screen; the bottom bar, back buttons, cards and the order journey up to *order placed* and tracking are linked.
@@ -41,7 +41,8 @@ Present ▶ links for the app, the web and the admin, vendor and kitchen dashboa
 - Web page heights follow their content (about 1,000 to 1,900 px); dashboards are 900 px or taller.
 - New photos are from Unsplash (free licence). Store logos are letter monograms, not real logos.
 - The `deploy` check of the progress dashboard fails on pull requests: the `github-pages` environment only accepts `develop`.
-- The logo and emblem wait for the client's choice (decisions 1 and 2); the screens use the current wordmark.
+- The emblem in the file is a PNG, not a vector: on light backgrounds (web header, onboarding) it is darkened with an image filter. A vector redraw in two colours (gold for dark, gold-text for light) is still needed, and `docs/design/brand/` still holds only options A and B.
+- The wordmark waits for the client's written approval (decision 1).
 
 ## Feedback round
 One batched round. Anything beyond the SRS goes to the change log, not into the design.
@@ -53,5 +54,5 @@ One batched round. Anything beyond the SRS goes to the change log, not into the 
 | Item | Approved by | Date | How it was given (message, email, signed document) |
 |---|---|---|---|
 | Wordmark | | | |
-| Emblem (A or B) | | | |
+| Emblem (gold profile mark) | | | |
 | Full design (screens.md + 10 flows) | | | |
