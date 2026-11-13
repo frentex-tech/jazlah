@@ -13,6 +13,8 @@ How the file is laid out (since 2026-11-13): one design page per platform. `01 �
 
 ## Prototype flows
 
+**Start here (for the client):** [▶ ابدأ من هنا](https://www.figma.com/proto/puWXbmOVpnQpjc7mUahTnw/Jazlah-Product-Design?page-id=239%3A97236&node-id=239-97309&starting-point-node-id=239%3A97309&scaling=scale-down&hide-ui=1) is one screen with four cards (customer app, website, Jazlah admin dashboard, vendor dashboard). Each card opens that prototype in a new tab. The kitchen dashboard is not on it.
+
 The clickable versions are on three pages at the end of the file. The screens there are copies of the main screens on the design pages, rebuilt by `jzMobile()`, `jzWeb()` and `jzDash()` in `design/figma/scripts/90-DSN-DES-2-client-ready.js`, so a design change needs the prototype pages rebuilt.
 
 | Prototype | Figma page | Present ▶ | Screens | Links |
