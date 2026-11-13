@@ -11,7 +11,7 @@ Figma file: [Jazlah — Product Design](https://www.figma.com/design/puWXbmOVpnQ
 - Every screen has its states as separate screens (default, filled, loading, empty, error, disabled where they apply).
 
 ## What is being approved
-- The launch design for the customer app and the admin, vendor and kitchen dashboards: 585 screens, Arabic (RTL). English (LTR) is produced by mirroring and i18n (rules on the `Design System` page).
+- The launch design for the customer app and the admin, vendor and kitchen dashboards: 587 screens, Arabic (RTL). English (LTR) is produced by mirroring and i18n (rules on the `Design System` page).
 - The two clickable prototypes (app, dashboards): links in [screens.md](screens.md#prototype-flows).
 - The brand: wordmark «جزلة / Jazlah» and the gold profile mark (the ram head in side view, `docs/design/reference/prototype/img/mark-gold.png`).
 
@@ -37,7 +37,7 @@ What changed after the client saw the design:
 - **Scope note:** stories, loyalty and Sahm are post-launch in the delivery plan (PLD-DES-1). They were designed now at the client's request; the sprint plan was not changed.
 
 ## Checks run on the file (2026-11-13)
-- Script lint over all 585 screens after the last changes: no empty or "undefined" text, no text outside its screen, no missing icon.
+- Script lint over all 587 screens after the last changes: no empty or "undefined" text, no text outside its screen, no missing icon.
 - Clipped layouts: a script found 110 auto-layout frames on web and dashboard screens whose content was cut off (among them the whole animal-registration form) and opened them up. 28 small ones remain (tab labels 7 to 9 px taller than their tab, and the Adha settings body).
 - Looked at in Figma: every main screen on the design pages, and the state screens of pages 01 and 02 (app). The other state screens were covered by the lint only.
 - Prototype: 928 links, none broken (script, after the round-2 rebuild). What was clicked through in Present is listed in [screens.md](screens.md#prototype-flows).
@@ -45,9 +45,8 @@ What changed after the client saw the design:
 
 ## Known gaps (stated, not hidden)
 - Round 2 was applied directly in the file; it has no script in `design/figma/scripts/`. The layout script now in use differs from `92` (two pages, areas 7 and 8 added).
-- After round 2 the lint was re-run over all 585 screens (clean except six filter bars, fixed). Screens looked at: the new and changed ones, and the main app rows. The dashboards and state screens were not looked at again one by one after the font change.
+- After round 2 the lint was re-run over all 587 screens (clean except six filter bars, fixed). Screens looked at: the new and changed ones, and the main app rows. The dashboards and state screens were not looked at again one by one after the font change.
 - Scrims behind sheets had become opaque on 39 screens during round 1 and were restored to 55% in round 2.
-- The home screen's state screens (loading, empty, error) still show the older home structure.
 - The new features have no build tasks, API contracts or SRS requirement IDs yet.
 - No customer web design in the file since 2026-11-13 (removed at the owner's request). The web build tasks (`*-WEB-*`) have no screens to build from until the scope is confirmed with the client, and the public vendor-application pages went with it.
 - No PNG exports of the key screens in `docs/design/<epic>/` (the DES tasks ask for them): they need a Figma export or API token, which the design session did not have.
