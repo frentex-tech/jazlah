@@ -51,3 +51,4 @@ Notes, verified on 2026-11-10:
 - These two were run from the browser console (`figma` is available there in an editable file), not through Scripter. They were recovered from the live session and have not been re-run from the repo: try them on a duplicate of the file first.
 - The prototype pages hold copies of the main screens. After a design change, re-run `jzMobile()`, `jzWeb()` and `jzDash()`.
 - `scripts/92-DSN-DES-2-pages-by-platform.js`: regroups the design pages by platform (`01 التطبيق`, `02 الويب`, `03 لوحات التحكم`). The seven area pages no longer exist; a screen's area and a dashboard screen's role are kept as shared plugin data (`area`, `role`).
+- 2026-11-13, later: the customer web design was removed from the file (pages `02 الويب` and `▶ تجربة الويب`); the dashboards page is now `02 لوحات التحكم`. `jzWeb()` in script 90 has nothing to build from any more. Details: `docs/design/archive/web-screens-2026-11-13.md`.

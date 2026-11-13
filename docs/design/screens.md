@@ -1,33 +1,31 @@
 # Screen inventory
 
-Every launch screen in the Figma file [Jazlah — Product Design](https://www.figma.com/design/puWXbmOVpnQpjc7mUahTnw/Jazlah-Product-Design): its Arabic name, its Figma link, and the task that will build it. 681 screens on 7 area pages plus the `Design System` page (generated from the file with `design/figma/scripts/36-export-index.js`; tasks matched by feature against `docs/delivery/sprints/`).
+Every launch screen in the Figma file [Jazlah — Product Design](https://www.figma.com/design/puWXbmOVpnQpjc7mUahTnw/Jazlah-Product-Design): its Arabic name, its Figma link, and the task that will build it. 539 screens on 7 area pages plus the `Design System` page (generated from the file with `design/figma/scripts/36-export-index.js`; tasks matched by feature against `docs/delivery/sprints/`).
 
-How the file is laid out (since 2026-11-13): one design page per platform. `01 التطبيق` holds every app screen, `02 الويب` every web screen, `03 لوحات التحكم` the admin, vendor and kitchen dashboards. Inside a page the main screens are grouped by product area (dashboards: by role), right to left in journey order, and every state sits in the `الحالات` section at the bottom of the page. The lists below are still grouped by product area, because that is how the build tasks are cut; the App / Web / Dashboard columns say which page a screen is on. Screens are Arabic RTL only; English comes from mirroring and i18n (rules on the `Design System` page).
+How the file is laid out (since 2026-11-13): one design page per platform. `01 التطبيق` holds every app screen and `02 لوحات التحكم` the admin, vendor and kitchen dashboards. The customer web design was removed from the file on 2026-11-13 at the owner's request (the client wants the app and the dashboards only); the list of what was removed is in [archive/web-screens-2026-11-13.md](archive/web-screens-2026-11-13.md). Inside a page the main screens are grouped by product area (dashboards: by role), right to left in journey order, and every state sits in the `الحالات` section at the bottom of the page. The lists below are grouped by product area, because that is how the build tasks are cut. Screens are Arabic RTL only; English comes from mirroring and i18n (rules on the `Design System` page).
 
 | Design page | Screens | Open |
 |---|---|---|
 | 01 التطبيق | 277 (65 main, 212 states) | [open](https://www.figma.com/design/puWXbmOVpnQpjc7mUahTnw/Jazlah-Product-Design?node-id=199-6633) |
-| 02 الويب | 142 (39 main, 103 states) | [open](https://www.figma.com/design/puWXbmOVpnQpjc7mUahTnw/Jazlah-Product-Design?node-id=199-6634) |
-| 03 لوحات التحكم | 262 (49 main, 213 states) | [open](https://www.figma.com/design/puWXbmOVpnQpjc7mUahTnw/Jazlah-Product-Design?node-id=199-6635) |
+| 02 لوحات التحكم | 262 (49 main, 213 states) | [open](https://www.figma.com/design/puWXbmOVpnQpjc7mUahTnw/Jazlah-Product-Design?node-id=199-6635) |
 | Design System | | [open](https://www.figma.com/design/puWXbmOVpnQpjc7mUahTnw/Jazlah-Product-Design?node-id=199-6640) |
 
 ## Prototype flows
 
-**Start here (for the client):** [▶ ابدأ من هنا](https://www.figma.com/proto/puWXbmOVpnQpjc7mUahTnw/Jazlah-Product-Design?page-id=239%3A97236&node-id=239-97309&starting-point-node-id=239%3A97309&scaling=scale-down&hide-ui=1) is one screen with five cards (customer app, website, Jazlah admin dashboard, vendor dashboard, kitchen board). Each card opens that prototype in a new tab.
+**Start here (for the client):** [▶ ابدأ من هنا](https://www.figma.com/proto/puWXbmOVpnQpjc7mUahTnw/Jazlah-Product-Design?page-id=239%3A97236&node-id=239-97309&starting-point-node-id=239%3A97309&scaling=scale-down&hide-ui=1) is one screen with four cards (customer app, Jazlah admin dashboard, vendor dashboard, kitchen board). Each card opens that prototype in a new tab.
 
-The clickable versions are on three pages at the end of the file. The screens there are copies of the main screens on the design pages, rebuilt by `jzMobile()`, `jzWeb()` and `jzDash()` in `design/figma/scripts/90-DSN-DES-2-client-ready.js`, so a design change needs the prototype pages rebuilt.
+The clickable versions are on two pages at the end of the file (app and dashboards). The screens there are copies of the main screens on the design pages, rebuilt by `jzMobile()` and `jzDash()` in `design/figma/scripts/90-DSN-DES-2-client-ready.js`, so a design change needs the prototype pages rebuilt.
 
 | Prototype | Figma page | Present ▶ | Screens | Links |
 |---|---|---|---|---|
 | تجربة التطبيق (mobile) | [▶ تجربة التطبيق](https://www.figma.com/design/puWXbmOVpnQpjc7mUahTnw/Jazlah-Product-Design?node-id=227-44237) | [present](https://www.figma.com/proto/puWXbmOVpnQpjc7mUahTnw/Jazlah-Product-Design?page-id=227%3A44237&node-id=230-73237&starting-point-node-id=230%3A73237&scaling=scale-down) | 63 + 2 bottom sheets | 265 |
-| تجربة الويب | [▶ تجربة الويب](https://www.figma.com/design/puWXbmOVpnQpjc7mUahTnw/Jazlah-Product-Design?node-id=227-54426) | [present](https://www.figma.com/proto/puWXbmOVpnQpjc7mUahTnw/Jazlah-Product-Design?page-id=227%3A54426&node-id=230-78382&starting-point-node-id=230%3A78382&scaling=scale-down) | 33 | 582 |
 | لوحة الإدارة | [▶ تجربة لوحة التحكم](https://www.figma.com/design/puWXbmOVpnQpjc7mUahTnw/Jazlah-Product-Design?node-id=227-61372) | [present](https://www.figma.com/proto/puWXbmOVpnQpjc7mUahTnw/Jazlah-Product-Design?page-id=227%3A61372&node-id=230-86701&starting-point-node-id=230%3A86701&scaling=scale-down) | 35 + login | 446 on the page (all three roles) |
 | لوحة البائع | same page | [present](https://www.figma.com/proto/puWXbmOVpnQpjc7mUahTnw/Jazlah-Product-Design?page-id=227%3A61372&node-id=230-92841&starting-point-node-id=230%3A92841&scaling=scale-down) | 11 + login | |
 | لوحة المطبخ | same page | [present](https://www.figma.com/proto/puWXbmOVpnQpjc7mUahTnw/Jazlah-Product-Design?page-id=227%3A61372&node-id=230-94947&starting-point-node-id=230%3A94947&scaling=scale-down) | 1 | |
 
-Link check by script on 2026-11-13, after the last rebuild: 1,293 links, 0 pointing to a missing screen, 0 enabled primary buttons without a link.
+Link check by script on 2026-11-13, after the last rebuild: 711 links, 0 pointing to a missing screen, 0 enabled primary buttons without a link.
 
-Clicked through in Present on 2026-11-13: app (onboarding → sign-in → home → product → cart → checkout step 1, and the services tab), web (home → store → cart → account settings), admin (sign-in → overview → orders from the side menu). The other journeys were checked by reading the button → destination list, not by clicking.
+Clicked through in Present on 2026-11-13: app (onboarding → sign-in → home → product → cart → checkout step 1, and the services tab), admin (sign-in → overview → orders from the side menu). The other journeys were checked by reading the button → destination list, not by clicking.
 
 ## الحساب والدخول
 
@@ -75,31 +73,6 @@ Clicked through in Present on 2026-11-13: app (onboarding → sign-in → home �
 | خارج النطاق | [open](https://www.figma.com/design/puWXbmOVpnQpjc7mUahTnw/Jazlah-Product-Design?node-id=86-3823) | LOC-MOB-1 (#26) |
 | خارج النطاق · تحميل | [open](https://www.figma.com/design/puWXbmOVpnQpjc7mUahTnw/Jazlah-Product-Design?node-id=86-3864) | LOC-MOB-1 (#26) |
 | خارج النطاق · خطأ | [open](https://www.figma.com/design/puWXbmOVpnQpjc7mUahTnw/Jazlah-Product-Design?node-id=86-3907) | LOC-MOB-1 (#26) |
-
-### الويب · Customer web (20)
-
-| Screen | Figma | Implementing task |
-|---|---|---|
-| رقم الجوال | [open](https://www.figma.com/design/puWXbmOVpnQpjc7mUahTnw/Jazlah-Product-Design?node-id=123-4045) | ACC-WEB-1 (#21) |
-| رقم الجوال · خطأ | [open](https://www.figma.com/design/puWXbmOVpnQpjc7mUahTnw/Jazlah-Product-Design?node-id=123-4082) | ACC-WEB-1 (#21) |
-| رقم الجوال · تحميل | [open](https://www.figma.com/design/puWXbmOVpnQpjc7mUahTnw/Jazlah-Product-Design?node-id=123-4119) | ACC-WEB-1 (#21) |
-| رمز التحقق | [open](https://www.figma.com/design/puWXbmOVpnQpjc7mUahTnw/Jazlah-Product-Design?node-id=123-5742) | ACC-WEB-1 (#21) |
-| رمز التحقق · خطأ | [open](https://www.figma.com/design/puWXbmOVpnQpjc7mUahTnw/Jazlah-Product-Design?node-id=123-5779) | ACC-WEB-1 (#21) |
-| رمز التحقق · تحميل | [open](https://www.figma.com/design/puWXbmOVpnQpjc7mUahTnw/Jazlah-Product-Design?node-id=123-5821) | ACC-WEB-1 (#21) |
-| إكمال الملف الشخصي | [open](https://www.figma.com/design/puWXbmOVpnQpjc7mUahTnw/Jazlah-Product-Design?node-id=123-5865) | ACC-WEB-1 (#21) |
-| إكمال الملف الشخصي · خطأ | [open](https://www.figma.com/design/puWXbmOVpnQpjc7mUahTnw/Jazlah-Product-Design?node-id=123-5906) | ACC-WEB-1 (#21) |
-| إكمال الملف الشخصي · تحميل | [open](https://www.figma.com/design/puWXbmOVpnQpjc7mUahTnw/Jazlah-Product-Design?node-id=123-5947) | ACC-WEB-1 (#21) |
-| الإعدادات | [open](https://www.figma.com/design/puWXbmOVpnQpjc7mUahTnw/Jazlah-Product-Design?node-id=86-10172) | ACC-WEB-1 (#21) |
-| الإعدادات · تأكيد الحذف | [open](https://www.figma.com/design/puWXbmOVpnQpjc7mUahTnw/Jazlah-Product-Design?node-id=86-10218) | ACC-WEB-1 (#21) |
-| الإعدادات · تحميل | [open](https://www.figma.com/design/puWXbmOVpnQpjc7mUahTnw/Jazlah-Product-Design?node-id=86-10273) | ACC-WEB-1 (#21) |
-| الإعدادات · خطأ | [open](https://www.figma.com/design/puWXbmOVpnQpjc7mUahTnw/Jazlah-Product-Design?node-id=86-10319) | ACC-WEB-1 (#21) |
-| العناوين | [open](https://www.figma.com/design/puWXbmOVpnQpjc7mUahTnw/Jazlah-Product-Design?node-id=86-9770) | ACC-WEB-1 (#21) |
-| العناوين · فارغة | [open](https://www.figma.com/design/puWXbmOVpnQpjc7mUahTnw/Jazlah-Product-Design?node-id=86-9844) | ACC-WEB-1 (#21) |
-| العناوين · تحميل | [open](https://www.figma.com/design/puWXbmOVpnQpjc7mUahTnw/Jazlah-Product-Design?node-id=86-9885) | ACC-WEB-1 (#21) |
-| العناوين · خطأ | [open](https://www.figma.com/design/puWXbmOVpnQpjc7mUahTnw/Jazlah-Product-Design?node-id=86-9943) | ACC-WEB-1 (#21) |
-| إضافة وتعديل العنوان | [open](https://www.figma.com/design/puWXbmOVpnQpjc7mUahTnw/Jazlah-Product-Design?node-id=86-9977) | ACC-WEB-1 (#21), LOC-WEB-1 (#27) |
-| إضافة وتعديل العنوان · خطأ | [open](https://www.figma.com/design/puWXbmOVpnQpjc7mUahTnw/Jazlah-Product-Design?node-id=86-10041) | ACC-WEB-1 (#21), LOC-WEB-1 (#27) |
-| إضافة وتعديل العنوان · تحميل | [open](https://www.figma.com/design/puWXbmOVpnQpjc7mUahTnw/Jazlah-Product-Design?node-id=86-10105) | ACC-WEB-1 (#21), LOC-WEB-1 (#27) |
 
 ### لوحات التحكم · Dashboards (6)
 
@@ -218,84 +191,6 @@ Clicked through in Present on 2026-11-13: app (onboarding → sign-in → home �
 | الموافقة على العروض · خطأ | [open](https://www.figma.com/design/puWXbmOVpnQpjc7mUahTnw/Jazlah-Product-Design?node-id=135-66836) | NOT-MOB-1 (#105) |
 | الموافقة على العروض · غير مسموح | [open](https://www.figma.com/design/puWXbmOVpnQpjc7mUahTnw/Jazlah-Product-Design?node-id=135-66880) | NOT-MOB-1 (#105) |
 
-### الويب · Customer web (62)
-
-| Screen | Figma | Implementing task |
-|---|---|---|
-| الرئيسية | [open](https://www.figma.com/design/puWXbmOVpnQpjc7mUahTnw/Jazlah-Product-Design?node-id=86-13360) | STF-WEB-1 (#58) |
-| الرئيسية · تحميل | [open](https://www.figma.com/design/puWXbmOVpnQpjc7mUahTnw/Jazlah-Product-Design?node-id=86-13649) | STF-WEB-1 (#58) |
-| الرئيسية · فارغة | [open](https://www.figma.com/design/puWXbmOVpnQpjc7mUahTnw/Jazlah-Product-Design?node-id=86-13734) | STF-WEB-1 (#58) |
-| الرئيسية · خطأ | [open](https://www.figma.com/design/puWXbmOVpnQpjc7mUahTnw/Jazlah-Product-Design?node-id=86-13774) | STF-WEB-1 (#58) |
-| الأقسام | [open](https://www.figma.com/design/puWXbmOVpnQpjc7mUahTnw/Jazlah-Product-Design?node-id=86-13806) | STF-WEB-1 (#58) |
-| الأقسام · تحميل | [open](https://www.figma.com/design/puWXbmOVpnQpjc7mUahTnw/Jazlah-Product-Design?node-id=86-14095) | STF-WEB-1 (#58) |
-| الأقسام · فارغة | [open](https://www.figma.com/design/puWXbmOVpnQpjc7mUahTnw/Jazlah-Product-Design?node-id=86-14234) | STF-WEB-1 (#58) |
-| الأقسام · خطأ | [open](https://www.figma.com/design/puWXbmOVpnQpjc7mUahTnw/Jazlah-Product-Design?node-id=86-14319) | STF-WEB-1 (#58) |
-| صفحة المتجر | [open](https://www.figma.com/design/puWXbmOVpnQpjc7mUahTnw/Jazlah-Product-Design?node-id=86-14406) | STF-WEB-1 (#58) |
-| صفحة المتجر · تحميل | [open](https://www.figma.com/design/puWXbmOVpnQpjc7mUahTnw/Jazlah-Product-Design?node-id=86-14713) | STF-WEB-1 (#58) |
-| صفحة المتجر · فارغة | [open](https://www.figma.com/design/puWXbmOVpnQpjc7mUahTnw/Jazlah-Product-Design?node-id=86-14779) | STF-WEB-1 (#58) |
-| صفحة المتجر · مغلق | [open](https://www.figma.com/design/puWXbmOVpnQpjc7mUahTnw/Jazlah-Product-Design?node-id=86-14829) | STF-WEB-1 (#58) |
-| صفحة المتجر · خطأ | [open](https://www.figma.com/design/puWXbmOVpnQpjc7mUahTnw/Jazlah-Product-Design?node-id=86-15002) | STF-WEB-1 (#58) |
-| تفاصيل المنتج | [open](https://www.figma.com/design/puWXbmOVpnQpjc7mUahTnw/Jazlah-Product-Design?node-id=86-15034) | STF-WEB-2 (#59) |
-| تفاصيل المنتج · خيار غير متوافق | [open](https://www.figma.com/design/puWXbmOVpnQpjc7mUahTnw/Jazlah-Product-Design?node-id=86-15212) | STF-WEB-2 (#59) |
-| تفاصيل المنتج · تحميل | [open](https://www.figma.com/design/puWXbmOVpnQpjc7mUahTnw/Jazlah-Product-Design?node-id=86-15574) | STF-WEB-2 (#59) |
-| تفاصيل المنتج · نفد المخزون | [open](https://www.figma.com/design/puWXbmOVpnQpjc7mUahTnw/Jazlah-Product-Design?node-id=86-15396) | STF-WEB-2 (#59) |
-| تفاصيل المنتج · خطأ | [open](https://www.figma.com/design/puWXbmOVpnQpjc7mUahTnw/Jazlah-Product-Design?node-id=86-15620) | STF-WEB-2 (#59) |
-| نتائج البحث | [open](https://www.figma.com/design/puWXbmOVpnQpjc7mUahTnw/Jazlah-Product-Design?node-id=86-15652) | STF-WEB-2 (#59) |
-| نتائج البحث · تحميل | [open](https://www.figma.com/design/puWXbmOVpnQpjc7mUahTnw/Jazlah-Product-Design?node-id=86-15941) | STF-WEB-2 (#59) |
-| نتائج البحث · لا نتائج | [open](https://www.figma.com/design/puWXbmOVpnQpjc7mUahTnw/Jazlah-Product-Design?node-id=86-16080) | STF-WEB-2 (#59) |
-| نتائج البحث · خطأ | [open](https://www.figma.com/design/puWXbmOVpnQpjc7mUahTnw/Jazlah-Product-Design?node-id=86-16165) | STF-WEB-2 (#59) |
-| السلة | [open](https://www.figma.com/design/puWXbmOVpnQpjc7mUahTnw/Jazlah-Product-Design?node-id=170-29522) | CRT-WEB-1 (#65) |
-| السلة · فارغة | [open](https://www.figma.com/design/puWXbmOVpnQpjc7mUahTnw/Jazlah-Product-Design?node-id=170-29602) | CRT-WEB-1 (#65) |
-| السلة · تحميل | [open](https://www.figma.com/design/puWXbmOVpnQpjc7mUahTnw/Jazlah-Product-Design?node-id=170-29633) | CRT-WEB-1 (#65) |
-| السلة · خطأ | [open](https://www.figma.com/design/puWXbmOVpnQpjc7mUahTnw/Jazlah-Product-Design?node-id=170-29668) | CRT-WEB-1 (#65) |
-| السلة · معطّلة | [open](https://www.figma.com/design/puWXbmOVpnQpjc7mUahTnw/Jazlah-Product-Design?node-id=170-29699) | CRT-WEB-1 (#65) |
-| الدفع: الاستلام واليوم | [open](https://www.figma.com/design/puWXbmOVpnQpjc7mUahTnw/Jazlah-Product-Design?node-id=118-10595) | SCH-WEB-1 (#72) |
-| الدفع: الاستلام واليوم · استلام من المتجر | [open](https://www.figma.com/design/puWXbmOVpnQpjc7mUahTnw/Jazlah-Product-Design?node-id=118-10731) | SCH-WEB-1 (#72) |
-| الدفع: الاستلام واليوم · متوقف مؤقتًا | [open](https://www.figma.com/design/puWXbmOVpnQpjc7mUahTnw/Jazlah-Product-Design?node-id=118-10867) | SCH-WEB-1 (#72) |
-| الدفع: الاستلام واليوم · تحميل | [open](https://www.figma.com/design/puWXbmOVpnQpjc7mUahTnw/Jazlah-Product-Design?node-id=118-11007) | SCH-WEB-1 (#72) |
-| الدفع: الاستلام واليوم · خطأ | [open](https://www.figma.com/design/puWXbmOVpnQpjc7mUahTnw/Jazlah-Product-Design?node-id=118-11059) | SCH-WEB-1 (#72) |
-| الدفع والمراجعة | [open](https://www.figma.com/design/puWXbmOVpnQpjc7mUahTnw/Jazlah-Product-Design?node-id=170-29773) | ORD-WEB-1 (#86) |
-| الدفع والمراجعة · مختارة | [open](https://www.figma.com/design/puWXbmOVpnQpjc7mUahTnw/Jazlah-Product-Design?node-id=170-29864) | ORD-WEB-1 (#86) |
-| الدفع والمراجعة · جارٍ المعالجة | [open](https://www.figma.com/design/puWXbmOVpnQpjc7mUahTnw/Jazlah-Product-Design?node-id=170-29956) | ORD-WEB-1 (#86) |
-| الدفع والمراجعة · فشل الدفع | [open](https://www.figma.com/design/puWXbmOVpnQpjc7mUahTnw/Jazlah-Product-Design?node-id=170-30049) | ORD-WEB-1 (#86) |
-| الدفع والمراجعة · معطّلة | [open](https://www.figma.com/design/puWXbmOVpnQpjc7mUahTnw/Jazlah-Product-Design?node-id=170-30145) | ORD-WEB-1 (#86) |
-| تم الطلب | [open](https://www.figma.com/design/puWXbmOVpnQpjc7mUahTnw/Jazlah-Product-Design?node-id=170-30243) | ORD-WEB-1 (#86) |
-| تفاصيل الطلب | [open](https://www.figma.com/design/puWXbmOVpnQpjc7mUahTnw/Jazlah-Product-Design?node-id=135-37124) | ORD-WEB-2 (#87), DLV-WEB-1 (#102) |
-| تفاصيل الطلب · تحميل | [open](https://www.figma.com/design/puWXbmOVpnQpjc7mUahTnw/Jazlah-Product-Design?node-id=135-37244) | ORD-WEB-2 (#87), DLV-WEB-1 (#102) |
-| تفاصيل الطلب · خطأ | [open](https://www.figma.com/design/puWXbmOVpnQpjc7mUahTnw/Jazlah-Product-Design?node-id=135-37328) | ORD-WEB-2 (#87), DLV-WEB-1 (#102) |
-| تفاصيل الطلب · غير مسموح | [open](https://www.figma.com/design/puWXbmOVpnQpjc7mUahTnw/Jazlah-Product-Design?node-id=135-37405) | ORD-WEB-2 (#87), DLV-WEB-1 (#102) |
-| الاسترداد | [open](https://www.figma.com/design/puWXbmOVpnQpjc7mUahTnw/Jazlah-Product-Design?node-id=135-37494) | CAN-WEB-1 (#95) |
-| الاسترداد · تحميل | [open](https://www.figma.com/design/puWXbmOVpnQpjc7mUahTnw/Jazlah-Product-Design?node-id=135-37577) | CAN-WEB-1 (#95) |
-| الاسترداد · خطأ | [open](https://www.figma.com/design/puWXbmOVpnQpjc7mUahTnw/Jazlah-Product-Design?node-id=135-37702) | CAN-WEB-1 (#95) |
-| الاسترداد · غير مسموح | [open](https://www.figma.com/design/puWXbmOVpnQpjc7mUahTnw/Jazlah-Product-Design?node-id=135-37829) | CAN-WEB-1 (#95) |
-| تقديم شكوى | [open](https://www.figma.com/design/puWXbmOVpnQpjc7mUahTnw/Jazlah-Product-Design?node-id=135-37912) | CAN-WEB-1 (#95) |
-| تقديم شكوى · معبّأة | [open](https://www.figma.com/design/puWXbmOVpnQpjc7mUahTnw/Jazlah-Product-Design?node-id=135-37988) | CAN-WEB-1 (#95) |
-| تقديم شكوى · خطأ | [open](https://www.figma.com/design/puWXbmOVpnQpjc7mUahTnw/Jazlah-Product-Design?node-id=135-38098) | CAN-WEB-1 (#95) |
-| تقديم شكوى · تحميل | [open](https://www.figma.com/design/puWXbmOVpnQpjc7mUahTnw/Jazlah-Product-Design?node-id=135-38206) | CAN-WEB-1 (#95) |
-| تقديم شكوى · غير مسموح | [open](https://www.figma.com/design/puWXbmOVpnQpjc7mUahTnw/Jazlah-Product-Design?node-id=135-38317) | CAN-WEB-1 (#95) |
-| تقديم شكوى · فارغة | [open](https://www.figma.com/design/puWXbmOVpnQpjc7mUahTnw/Jazlah-Product-Design?node-id=135-38389) | CAN-WEB-1 (#95) |
-| مركز الإشعارات | [open](https://www.figma.com/design/puWXbmOVpnQpjc7mUahTnw/Jazlah-Product-Design?node-id=135-38463) | DLV-WEB-1 (#102) |
-| مركز الإشعارات · تحميل | [open](https://www.figma.com/design/puWXbmOVpnQpjc7mUahTnw/Jazlah-Product-Design?node-id=135-38539) | DLV-WEB-1 (#102) |
-| مركز الإشعارات · فارغة | [open](https://www.figma.com/design/puWXbmOVpnQpjc7mUahTnw/Jazlah-Product-Design?node-id=135-38617) | DLV-WEB-1 (#102) |
-| مركز الإشعارات · خطأ | [open](https://www.figma.com/design/puWXbmOVpnQpjc7mUahTnw/Jazlah-Product-Design?node-id=135-38692) | DLV-WEB-1 (#102) |
-| مركز الإشعارات · غير مسموح | [open](https://www.figma.com/design/puWXbmOVpnQpjc7mUahTnw/Jazlah-Product-Design?node-id=135-38759) | DLV-WEB-1 (#102) |
-| التواصل مع الدعم | [open](https://www.figma.com/design/puWXbmOVpnQpjc7mUahTnw/Jazlah-Product-Design?node-id=135-38837) | DLV-WEB-1 (#102) |
-| التواصل مع الدعم · تحميل | [open](https://www.figma.com/design/puWXbmOVpnQpjc7mUahTnw/Jazlah-Product-Design?node-id=135-39003) | DLV-WEB-1 (#102) |
-| التواصل مع الدعم · فارغة | [open](https://www.figma.com/design/puWXbmOVpnQpjc7mUahTnw/Jazlah-Product-Design?node-id=135-39064) | DLV-WEB-1 (#102) |
-| التواصل مع الدعم · خطأ | [open](https://www.figma.com/design/puWXbmOVpnQpjc7mUahTnw/Jazlah-Product-Design?node-id=135-39127) | DLV-WEB-1 (#102) |
-| التواصل مع الدعم · غير مسموح | [open](https://www.figma.com/design/puWXbmOVpnQpjc7mUahTnw/Jazlah-Product-Design?node-id=135-38907) | DLV-WEB-1 (#102) |
-
-### Web at 390 (key screens)
-
-| Screen | Figma | Task |
-|---|---|---|
-| الرئيسية (ويب جوال 390) | [open](https://www.figma.com/design/puWXbmOVpnQpjc7mUahTnw/Jazlah-Product-Design?node-id=230-72301) | STF-WEB-1 |
-| صفحة المتجر (ويب جوال 390) | [open](https://www.figma.com/design/puWXbmOVpnQpjc7mUahTnw/Jazlah-Product-Design?node-id=230-72392) | STF-WEB-1 |
-| تفاصيل المنتج (ويب جوال 390) | [open](https://www.figma.com/design/puWXbmOVpnQpjc7mUahTnw/Jazlah-Product-Design?node-id=230-72457) | STF-WEB-1 |
-| السلة (ويب جوال 390) | [open](https://www.figma.com/design/puWXbmOVpnQpjc7mUahTnw/Jazlah-Product-Design?node-id=230-72590) | STF-WEB-1 |
-| الدفع والمراجعة (ويب جوال 390) | [open](https://www.figma.com/design/puWXbmOVpnQpjc7mUahTnw/Jazlah-Product-Design?node-id=230-72693) | STF-WEB-1 |
-| تم الطلب (ويب جوال 390) | [open](https://www.figma.com/design/puWXbmOVpnQpjc7mUahTnw/Jazlah-Product-Design?node-id=230-72759) | STF-WEB-1 |
-
 ## المواعيد والزيارة
 
 ### التطبيق (جوال) · Customer app (mobile) (22)
@@ -324,19 +219,6 @@ Clicked through in Present on 2026-11-13: app (onboarding → sign-in → home �
 | تفاصيل الحيوان · تم تحديد الموعد | [open](https://www.figma.com/design/puWXbmOVpnQpjc7mUahTnw/Jazlah-Product-Design?node-id=131-73884) | VIS-MOB-1 (#169) |
 | تفاصيل الحيوان · تحميل | [open](https://www.figma.com/design/puWXbmOVpnQpjc7mUahTnw/Jazlah-Product-Design?node-id=131-73951) | VIS-MOB-1 (#169) |
 | تفاصيل الحيوان · خطأ | [open](https://www.figma.com/design/puWXbmOVpnQpjc7mUahTnw/Jazlah-Product-Design?node-id=131-73990) | VIS-MOB-1 (#169) |
-
-### الويب · Customer web (8)
-
-| Screen | Figma | Implementing task |
-|---|---|---|
-| حجز زيارة | [open](https://www.figma.com/design/puWXbmOVpnQpjc7mUahTnw/Jazlah-Product-Design?node-id=131-74029) | VIS-WEB-1 (#171) |
-| حجز زيارة · معبّأة | [open](https://www.figma.com/design/puWXbmOVpnQpjc7mUahTnw/Jazlah-Product-Design?node-id=131-74125) | VIS-WEB-1 (#171) |
-| حجز زيارة · تحميل | [open](https://www.figma.com/design/puWXbmOVpnQpjc7mUahTnw/Jazlah-Product-Design?node-id=131-74221) | VIS-WEB-1 (#171) |
-| حجز زيارة · خطأ | [open](https://www.figma.com/design/puWXbmOVpnQpjc7mUahTnw/Jazlah-Product-Design?node-id=131-74266) | VIS-WEB-1 (#171) |
-| تفاصيل حجز الزيارة | [open](https://www.figma.com/design/puWXbmOVpnQpjc7mUahTnw/Jazlah-Product-Design?node-id=131-74296) | VIS-WEB-1 (#171) |
-| تفاصيل حجز الزيارة · ملغاة | [open](https://www.figma.com/design/puWXbmOVpnQpjc7mUahTnw/Jazlah-Product-Design?node-id=131-74362) | VIS-WEB-1 (#171) |
-| تفاصيل حجز الزيارة · تحميل | [open](https://www.figma.com/design/puWXbmOVpnQpjc7mUahTnw/Jazlah-Product-Design?node-id=131-74426) | VIS-WEB-1 (#171) |
-| تفاصيل حجز الزيارة · خطأ | [open](https://www.figma.com/design/puWXbmOVpnQpjc7mUahTnw/Jazlah-Product-Design?node-id=131-74471) | VIS-WEB-1 (#171) |
 
 ### لوحات التحكم · Dashboards (10)
 
@@ -410,29 +292,6 @@ Clicked through in Present on 2026-11-13: app (onboarding → sign-in → home �
 | قيود التقطيع · معبّأة | [open](https://www.figma.com/design/puWXbmOVpnQpjc7mUahTnw/Jazlah-Product-Design?node-id=131-75749) | ADH-MOB-1 (#133) |
 | قيود التقطيع · تحميل | [open](https://www.figma.com/design/puWXbmOVpnQpjc7mUahTnw/Jazlah-Product-Design?node-id=131-75803) | ADH-MOB-1 (#133) |
 | قيود التقطيع · خطأ | [open](https://www.figma.com/design/puWXbmOVpnQpjc7mUahTnw/Jazlah-Product-Design?node-id=131-75842) | ADH-MOB-1 (#133) |
-
-### الويب · Customer web (18)
-
-| Screen | Figma | Implementing task |
-|---|---|---|
-| طلب مناسبة | [open](https://www.figma.com/design/puWXbmOVpnQpjc7mUahTnw/Jazlah-Product-Design?node-id=131-72349) | SVC-WEB-1 (#135) |
-| طلب مناسبة · معبّأة | [open](https://www.figma.com/design/puWXbmOVpnQpjc7mUahTnw/Jazlah-Product-Design?node-id=131-72440) | SVC-WEB-1 (#135) |
-| طلب مناسبة · تحقق | [open](https://www.figma.com/design/puWXbmOVpnQpjc7mUahTnw/Jazlah-Product-Design?node-id=131-72531) | SVC-WEB-1 (#135) |
-| طلب مناسبة · تحميل | [open](https://www.figma.com/design/puWXbmOVpnQpjc7mUahTnw/Jazlah-Product-Design?node-id=131-72622) | SVC-WEB-1 (#135) |
-| طلب مناسبة · خطأ | [open](https://www.figma.com/design/puWXbmOVpnQpjc7mUahTnw/Jazlah-Product-Design?node-id=131-72667) | SVC-WEB-1 (#135) |
-| عرض السعر | [open](https://www.figma.com/design/puWXbmOVpnQpjc7mUahTnw/Jazlah-Product-Design?node-id=131-72697) | SVC-WEB-1 (#135) |
-| عرض السعر · منتهي | [open](https://www.figma.com/design/puWXbmOVpnQpjc7mUahTnw/Jazlah-Product-Design?node-id=131-72787) | SVC-WEB-1 (#135) |
-| عرض السعر · تحميل | [open](https://www.figma.com/design/puWXbmOVpnQpjc7mUahTnw/Jazlah-Product-Design?node-id=131-72880) | SVC-WEB-1 (#135) |
-| عرض السعر · فارغة | [open](https://www.figma.com/design/puWXbmOVpnQpjc7mUahTnw/Jazlah-Product-Design?node-id=131-72925) | SVC-WEB-1 (#135) |
-| عرض السعر · خطأ | [open](https://www.figma.com/design/puWXbmOVpnQpjc7mUahTnw/Jazlah-Product-Design?node-id=131-72964) | SVC-WEB-1 (#135) |
-| موسم الأضحى | [open](https://www.figma.com/design/puWXbmOVpnQpjc7mUahTnw/Jazlah-Product-Design?node-id=131-75883) | SVC-WEB-1 (#135) |
-| موسم الأضحى · الحجز مغلق | [open](https://www.figma.com/design/puWXbmOVpnQpjc7mUahTnw/Jazlah-Product-Design?node-id=131-75948) | SVC-WEB-1 (#135) |
-| موسم الأضحى · تحميل | [open](https://www.figma.com/design/puWXbmOVpnQpjc7mUahTnw/Jazlah-Product-Design?node-id=131-76013) | SVC-WEB-1 (#135) |
-| موسم الأضحى · خطأ | [open](https://www.figma.com/design/puWXbmOVpnQpjc7mUahTnw/Jazlah-Product-Design?node-id=131-76058) | SVC-WEB-1 (#135) |
-| يوم الذبح والتقطيع | [open](https://www.figma.com/design/puWXbmOVpnQpjc7mUahTnw/Jazlah-Product-Design?node-id=131-76088) | SVC-WEB-1 (#135) |
-| يوم الذبح والتقطيع · معبّأة | [open](https://www.figma.com/design/puWXbmOVpnQpjc7mUahTnw/Jazlah-Product-Design?node-id=131-76171) | SVC-WEB-1 (#135) |
-| يوم الذبح والتقطيع · تحميل | [open](https://www.figma.com/design/puWXbmOVpnQpjc7mUahTnw/Jazlah-Product-Design?node-id=131-76254) | SVC-WEB-1 (#135) |
-| يوم الذبح والتقطيع · خطأ | [open](https://www.figma.com/design/puWXbmOVpnQpjc7mUahTnw/Jazlah-Product-Design?node-id=131-76299) | SVC-WEB-1 (#135) |
 
 ### لوحات التحكم · Dashboards (29)
 
@@ -545,19 +404,6 @@ Clicked through in Present on 2026-11-13: app (onboarding → sign-in → home �
 | حظر المستخدم · تأكيد | [open](https://www.figma.com/design/puWXbmOVpnQpjc7mUahTnw/Jazlah-Product-Design?node-id=131-44519) | CHT-MOB-1 (#156) |
 | الإبلاغ عن الإعلان | [open](https://www.figma.com/design/puWXbmOVpnQpjc7mUahTnw/Jazlah-Product-Design?node-id=131-44591) | CHT-MOB-1 (#156) |
 
-### الويب · Customer web (8)
-
-| Screen | Figma | Implementing task |
-|---|---|---|
-| سوق الأعلاف | [open](https://www.figma.com/design/puWXbmOVpnQpjc7mUahTnw/Jazlah-Product-Design?node-id=131-50623) | FED-WEB-1 (#153) |
-| سوق الأعلاف · تحميل | [open](https://www.figma.com/design/puWXbmOVpnQpjc7mUahTnw/Jazlah-Product-Design?node-id=131-50727) | FED-WEB-1 (#153) |
-| سوق الأعلاف · فارغة | [open](https://www.figma.com/design/puWXbmOVpnQpjc7mUahTnw/Jazlah-Product-Design?node-id=131-50814) | FED-WEB-1 (#153) |
-| سوق الأعلاف · خطأ | [open](https://www.figma.com/design/puWXbmOVpnQpjc7mUahTnw/Jazlah-Product-Design?node-id=131-50901) | FED-WEB-1 (#153) |
-| تفاصيل الإعلان | [open](https://www.figma.com/design/puWXbmOVpnQpjc7mUahTnw/Jazlah-Product-Design?node-id=131-52696) | FED-WEB-1 (#153) |
-| تفاصيل الإعلان · تحميل | [open](https://www.figma.com/design/puWXbmOVpnQpjc7mUahTnw/Jazlah-Product-Design?node-id=131-52778) | FED-WEB-1 (#153) |
-| تفاصيل الإعلان · محذوف | [open](https://www.figma.com/design/puWXbmOVpnQpjc7mUahTnw/Jazlah-Product-Design?node-id=131-52851) | FED-WEB-1 (#153) |
-| تفاصيل الإعلان · خطأ | [open](https://www.figma.com/design/puWXbmOVpnQpjc7mUahTnw/Jazlah-Product-Design?node-id=131-52924) | FED-WEB-1 (#153) |
-
 ### لوحات التحكم · Dashboards (18)
 
 | Screen | Figma | Implementing task |
@@ -582,31 +428,6 @@ Clicked through in Present on 2026-11-13: app (onboarding → sign-in → home �
 | تفاصيل البلاغ · نافذة الحظر | [open](https://www.figma.com/design/puWXbmOVpnQpjc7mUahTnw/Jazlah-Product-Design?node-id=131-48602) | FED-DSH-1 (#151) |
 
 ## البائع
-
-### الويب · Customer web (20)
-
-| Screen | Figma | Implementing task |
-|---|---|---|
-| طلب بائع: بيانات المنشأة | [open](https://www.figma.com/design/puWXbmOVpnQpjc7mUahTnw/Jazlah-Product-Design?node-id=131-29735) | VND-DSH-1 (#45) |
-| طلب بائع: بيانات المنشأة · معبّأة | [open](https://www.figma.com/design/puWXbmOVpnQpjc7mUahTnw/Jazlah-Product-Design?node-id=131-30239) | VND-DSH-1 (#45) |
-| طلب بائع: بيانات المنشأة · خطأ | [open](https://www.figma.com/design/puWXbmOVpnQpjc7mUahTnw/Jazlah-Product-Design?node-id=131-30412) | VND-DSH-1 (#45) |
-| طلب بائع: بيانات المنشأة · تم الإرسال | [open](https://www.figma.com/design/puWXbmOVpnQpjc7mUahTnw/Jazlah-Product-Design?node-id=131-31612) | VND-DSH-1 (#45) |
-| طلب بائع: المستندات | [open](https://www.figma.com/design/puWXbmOVpnQpjc7mUahTnw/Jazlah-Product-Design?node-id=131-29848) | VND-DSH-1 (#45) |
-| طلب بائع: المستندات · معبّأة | [open](https://www.figma.com/design/puWXbmOVpnQpjc7mUahTnw/Jazlah-Product-Design?node-id=131-30585) | VND-DSH-1 (#45) |
-| طلب بائع: المستندات · خطأ | [open](https://www.figma.com/design/puWXbmOVpnQpjc7mUahTnw/Jazlah-Product-Design?node-id=131-30784) | VND-DSH-1 (#45) |
-| طلب بائع: الحساب البنكي | [open](https://www.figma.com/design/puWXbmOVpnQpjc7mUahTnw/Jazlah-Product-Design?node-id=131-29959) | VND-DSH-1 (#45) |
-| طلب بائع: الحساب البنكي · خطأ | [open](https://www.figma.com/design/puWXbmOVpnQpjc7mUahTnw/Jazlah-Product-Design?node-id=131-30982) | VND-DSH-1 (#45) |
-| طلب بائع: الموقع | [open](https://www.figma.com/design/puWXbmOVpnQpjc7mUahTnw/Jazlah-Product-Design?node-id=131-30055) | VND-DSH-1 (#45) |
-| طلب بائع: الموقع · معبّأة | [open](https://www.figma.com/design/puWXbmOVpnQpjc7mUahTnw/Jazlah-Product-Design?node-id=131-31139) | VND-DSH-1 (#45) |
-| طلب بائع: الصور | [open](https://www.figma.com/design/puWXbmOVpnQpjc7mUahTnw/Jazlah-Product-Design?node-id=131-30154) | VND-DSH-1 (#45) |
-| طلب بائع: الصور · معبّأة | [open](https://www.figma.com/design/puWXbmOVpnQpjc7mUahTnw/Jazlah-Product-Design?node-id=131-31302) | VND-DSH-1 (#45) |
-| طلب بائع: الصور · تحميل | [open](https://www.figma.com/design/puWXbmOVpnQpjc7mUahTnw/Jazlah-Product-Design?node-id=131-31456) | VND-DSH-1 (#45) |
-| حالة طلب البائع · قيد المراجعة | [open](https://www.figma.com/design/puWXbmOVpnQpjc7mUahTnw/Jazlah-Product-Design?node-id=131-31705) | VND-DSH-1 (#45) |
-| حالة طلب البائع · مقبول | [open](https://www.figma.com/design/puWXbmOVpnQpjc7mUahTnw/Jazlah-Product-Design?node-id=131-31787) | VND-DSH-1 (#45) |
-| حالة طلب البائع · مرفوض | [open](https://www.figma.com/design/puWXbmOVpnQpjc7mUahTnw/Jazlah-Product-Design?node-id=131-31927) | VND-DSH-1 (#45) |
-| حالة طلب البائع · تحميل | [open](https://www.figma.com/design/puWXbmOVpnQpjc7mUahTnw/Jazlah-Product-Design?node-id=131-32063) | VND-DSH-1 (#45) |
-| حالة طلب البائع · فارغة | [open](https://www.figma.com/design/puWXbmOVpnQpjc7mUahTnw/Jazlah-Product-Design?node-id=131-32148) | VND-DSH-1 (#45) |
-| حالة طلب البائع · خطأ | [open](https://www.figma.com/design/puWXbmOVpnQpjc7mUahTnw/Jazlah-Product-Design?node-id=131-32235) | VND-DSH-1 (#45) |
 
 ### لوحات التحكم · Dashboards (52)
 
