@@ -1,8 +1,8 @@
 # Screen inventory
 
-Every launch screen in the Figma file [Jazlah — Product Design](https://www.figma.com/design/puWXbmOVpnQpjc7mUahTnw/Jazlah-Product-Design): its Arabic name, its Figma link, and the task that will build it. 668 screens on 7 area pages plus the `Design System` page (generated from the file with `design/figma/scripts/36-export-index.js`; tasks matched by feature against `docs/delivery/sprints/`).
+Every launch screen in the Figma file [Jazlah — Product Design](https://www.figma.com/design/puWXbmOVpnQpjc7mUahTnw/Jazlah-Product-Design): its Arabic name, its Figma link, and the task that will build it. 670 screens on 7 area pages plus the `Design System` page (generated from the file with `design/figma/scripts/36-export-index.js`; tasks matched by feature against `docs/delivery/sprints/`).
 
-How the file is laid out: one page per product area, in this order. On each page the first row is the app (mobile), the second row is the web twin of each app screen directly under it, the third row is that area's dashboard. Every screen carries only its Arabic name above it. Screens are Arabic RTL only; English comes from mirroring and i18n (rules on the `Design System` page).
+How the file is laid out (after the 2026-11-13 client-ready pass): one page per product area. Each page reads right to left, like the app: the app (mobile) row first, then the web row, then that area's dashboard row, each under one title. Only the main screens sit in these rows, in journey order (wrapped, so no row is longer than about 9,000 px). Every state (loading, error, empty, filled and the rest) sits in the `الحالات` section at the bottom of the same page. The area pages carry no prototype arrows: the clickable versions live on three pages at the end of the file (below). Screens are Arabic RTL only; English comes from mirroring and i18n (rules on the `Design System` page).
 
 | Page | App | Web | Dashboard | Open |
 |---|---|---|---|---|
@@ -17,20 +17,17 @@ How the file is laid out: one page per product area, in this order. On each page
 
 ## Prototype flows
 
-Each flow has a starting point on the page of its first screen (Present ▶ from that screen).
+The clickable versions are on three pages at the end of the file. The screens there are copies of the main screens on pages 01 to 07, rebuilt by script, so a design change needs the prototype pages rebuilt.
 
-| Flow | Page | Starts at |
-|---|---|---|
-| الحساب: أول تشغيل ← الملف الشخصي | 01 الحساب والدخول | [التعريف: الشريحة الأولى](https://www.figma.com/design/puWXbmOVpnQpjc7mUahTnw/Jazlah-Product-Design?node-id=199-28039) |
-| الطلب: الرئيسية ← المنتج ← السلة ← الدفع ← تم الطلب | 02 المتجر والطلب | [الرئيسية](https://www.figma.com/design/puWXbmOVpnQpjc7mUahTnw/Jazlah-Product-Design?node-id=118-6999) |
-| الطلب (ويب): الرئيسية ← المنتج ← السلة ← الدفع ← تم الطلب | 02 المتجر والطلب | [الرئيسية](https://www.figma.com/design/puWXbmOVpnQpjc7mUahTnw/Jazlah-Product-Design?node-id=86-13360) |
-| زيارة المزرعة: الحجز ← التأكيد | 03 المواعيد والزيارة | [حجز زيارة · معبّأة](https://www.figma.com/design/puWXbmOVpnQpjc7mUahTnw/Jazlah-Product-Design?node-id=131-73077) |
-| المناسبات: الطلب ← العرض ← العربون | 04 المناسبات والأضاحي | [طلب مناسبة: النوع · معبّأة](https://www.figma.com/design/puWXbmOVpnQpjc7mUahTnw/Jazlah-Product-Design?node-id=131-71063) |
-| الطبخ: الأطباق ← اطبخها لي | 04 المناسبات والأضاحي | [الأطباق الجاهزة](https://www.figma.com/design/puWXbmOVpnQpjc7mUahTnw/Jazlah-Product-Design?node-id=131-74505) |
-| الأضاحي: الصفحة ← اليوم ← التقطيع | 04 المناسبات والأضاحي | [موسم الأضحى](https://www.figma.com/design/puWXbmOVpnQpjc7mUahTnw/Jazlah-Product-Design?node-id=131-75170) |
-| سوق الأعلاف: الإعلانات ← الإعلان ← المحادثة | 05 الأعلاف والمحادثة | [سوق الأعلاف](https://www.figma.com/design/puWXbmOVpnQpjc7mUahTnw/Jazlah-Product-Design?node-id=131-48754) |
-| يوم البائع: اللوحة ← وقت الذبح ← الصور ← الملصق ← الأرباح | 06 البائع | [لوحة الطلبات المباشرة](https://www.figma.com/design/puWXbmOVpnQpjc7mUahTnw/Jazlah-Product-Design?node-id=135-39184) |
-| يوم الإدارة: النظرة العامة ← الطلبات ← الشكاوى ← المالية | 07 الإدارة | [نظرة عامة](https://www.figma.com/design/puWXbmOVpnQpjc7mUahTnw/Jazlah-Product-Design?node-id=135-46622) |
+| Prototype | Figma page | Present ▶ | Screens | Links |
+|---|---|---|---|---|
+| تجربة التطبيق (mobile) | [▶ تجربة التطبيق](https://www.figma.com/design/puWXbmOVpnQpjc7mUahTnw/Jazlah-Product-Design?node-id=227-44237) | [present](https://www.figma.com/proto/puWXbmOVpnQpjc7mUahTnw/Jazlah-Product-Design?page-id=227%3A44237&node-id=227-49280&starting-point-node-id=227%3A49280&scaling=scale-down) | 63 + 2 bottom sheets | 263 |
+| تجربة الويب | [▶ تجربة الويب](https://www.figma.com/design/puWXbmOVpnQpjc7mUahTnw/Jazlah-Product-Design?node-id=227-54426) | [present](https://www.figma.com/proto/puWXbmOVpnQpjc7mUahTnw/Jazlah-Product-Design?page-id=227%3A54426&node-id=227-54427&starting-point-node-id=227%3A54427&scaling=scale-down) | 33 | 538 |
+| لوحة الإدارة | [▶ تجربة لوحة التحكم](https://www.figma.com/design/puWXbmOVpnQpjc7mUahTnw/Jazlah-Product-Design?node-id=227-61372) | [present](https://www.figma.com/proto/puWXbmOVpnQpjc7mUahTnw/Jazlah-Product-Design?page-id=227%3A61372&node-id=227-61373&starting-point-node-id=227%3A61373&scaling=scale-down) | 34 + login | 414 on the page (all three roles) |
+| لوحة البائع | same page | [present](https://www.figma.com/proto/puWXbmOVpnQpjc7mUahTnw/Jazlah-Product-Design?page-id=227%3A61372&node-id=227-67513&starting-point-node-id=227%3A67513&scaling=scale-down) | 11 + login | |
+| لوحة المطبخ | same page | [present](https://www.figma.com/proto/puWXbmOVpnQpjc7mUahTnw/Jazlah-Product-Design?page-id=227%3A61372&node-id=227-69575&starting-point-node-id=227%3A69575&scaling=scale-down) | 1 | |
+
+Link check run on 2026-11-13 by script over the three pages: 1,215 links, 0 pointing to a missing screen, 0 enabled primary buttons without a link. Buttons with no specific target go to the next screen of the journey.
 
 ## [01 الحساب والدخول](https://www.figma.com/design/puWXbmOVpnQpjc7mUahTnw/Jazlah-Product-Design?node-id=199-6633)
 
@@ -54,6 +51,7 @@ Each flow has a starting point on the page of its first screen (Present ▶ from
 | إكمال الملف الشخصي · معبّأة | [open](https://www.figma.com/design/puWXbmOVpnQpjc7mUahTnw/Jazlah-Product-Design?node-id=123-3754) | ACC-MOB-1 (#19) |
 | إكمال الملف الشخصي · خطأ | [open](https://www.figma.com/design/puWXbmOVpnQpjc7mUahTnw/Jazlah-Product-Design?node-id=123-3850) | ACC-MOB-1 (#19) |
 | إكمال الملف الشخصي · تحميل | [open](https://www.figma.com/design/puWXbmOVpnQpjc7mUahTnw/Jazlah-Product-Design?node-id=123-3946) | ACC-MOB-1 (#19) |
+| حسابي | [open](https://www.figma.com/design/puWXbmOVpnQpjc7mUahTnw/Jazlah-Product-Design?node-id=227-44073) | ACC-MOB-1 (#19) |
 | الإعدادات | [open](https://www.figma.com/design/puWXbmOVpnQpjc7mUahTnw/Jazlah-Product-Design?node-id=86-8608) | ACC-MOB-1 (#19), NOT-MOB-1 (#105) |
 | الإعدادات · تأكيد الحذف | [open](https://www.figma.com/design/puWXbmOVpnQpjc7mUahTnw/Jazlah-Product-Design?node-id=86-8667) | ACC-MOB-1 (#19), NOT-MOB-1 (#105) |
 | الإعدادات · تحميل | [open](https://www.figma.com/design/puWXbmOVpnQpjc7mUahTnw/Jazlah-Product-Design?node-id=86-8735) | ACC-MOB-1 (#19), NOT-MOB-1 (#105) |
@@ -350,6 +348,7 @@ Each flow has a starting point on the page of its first screen (Present ▶ from
 
 | Screen | Figma | Implementing task |
 |---|---|---|
+| الخدمات | [open](https://www.figma.com/design/puWXbmOVpnQpjc7mUahTnw/Jazlah-Product-Design?node-id=227-43938) | OCC-MOB-1 |
 | طلب مناسبة: النوع | [open](https://www.figma.com/design/puWXbmOVpnQpjc7mUahTnw/Jazlah-Product-Design?node-id=131-71002) | OCC-MOB-1 (#124) |
 | طلب مناسبة: النوع · معبّأة | [open](https://www.figma.com/design/puWXbmOVpnQpjc7mUahTnw/Jazlah-Product-Design?node-id=131-71063) | OCC-MOB-1 (#124) |
 | طلب مناسبة: النوع · تحميل | [open](https://www.figma.com/design/puWXbmOVpnQpjc7mUahTnw/Jazlah-Product-Design?node-id=131-71124) | OCC-MOB-1 (#124) |
