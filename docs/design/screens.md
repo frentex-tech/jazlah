@@ -1,6 +1,6 @@
 # Screen inventory
 
-Every launch screen in the Figma file [Jazlah — Product Design](https://www.figma.com/design/puWXbmOVpnQpjc7mUahTnw/Jazlah-Product-Design): its Arabic name, its Figma link, and the task that will build it. 670 screens on 7 area pages plus the `Design System` page (generated from the file with `design/figma/scripts/36-export-index.js`; tasks matched by feature against `docs/delivery/sprints/`).
+Every launch screen in the Figma file [Jazlah — Product Design](https://www.figma.com/design/puWXbmOVpnQpjc7mUahTnw/Jazlah-Product-Design): its Arabic name, its Figma link, and the task that will build it. 676 screens on 7 area pages plus the `Design System` page (generated from the file with `design/figma/scripts/36-export-index.js`; tasks matched by feature against `docs/delivery/sprints/`).
 
 How the file is laid out (after the 2026-11-13 client-ready pass): one page per product area. Each page reads right to left, like the app: the app (mobile) row first, then the web row, then that area's dashboard row, each under one title. Only the main screens sit in these rows, in journey order (wrapped, so no row is longer than about 9,000 px). Every state (loading, error, empty, filled and the rest) sits in the `الحالات` section at the bottom of the same page. The area pages carry no prototype arrows: the clickable versions live on three pages at the end of the file (below). Screens are Arabic RTL only; English comes from mirroring and i18n (rules on the `Design System` page).
 
@@ -17,17 +17,19 @@ How the file is laid out (after the 2026-11-13 client-ready pass): one page per 
 
 ## Prototype flows
 
-The clickable versions are on three pages at the end of the file. The screens there are copies of the main screens on pages 01 to 07, rebuilt by script, so a design change needs the prototype pages rebuilt.
+The clickable versions are on three pages at the end of the file. The screens there are copies of the main screens on pages 01 to 07, rebuilt by `jzMobile()`, `jzWeb()` and `jzDash()` in `design/figma/scripts/90-DSN-DES-2-client-ready.js`, so a design change needs the prototype pages rebuilt.
 
 | Prototype | Figma page | Present ▶ | Screens | Links |
 |---|---|---|---|---|
-| تجربة التطبيق (mobile) | [▶ تجربة التطبيق](https://www.figma.com/design/puWXbmOVpnQpjc7mUahTnw/Jazlah-Product-Design?node-id=227-44237) | [present](https://www.figma.com/proto/puWXbmOVpnQpjc7mUahTnw/Jazlah-Product-Design?page-id=227%3A44237&node-id=227-49280&starting-point-node-id=227%3A49280&scaling=scale-down) | 63 + 2 bottom sheets | 263 |
-| تجربة الويب | [▶ تجربة الويب](https://www.figma.com/design/puWXbmOVpnQpjc7mUahTnw/Jazlah-Product-Design?node-id=227-54426) | [present](https://www.figma.com/proto/puWXbmOVpnQpjc7mUahTnw/Jazlah-Product-Design?page-id=227%3A54426&node-id=227-54427&starting-point-node-id=227%3A54427&scaling=scale-down) | 33 | 538 |
-| لوحة الإدارة | [▶ تجربة لوحة التحكم](https://www.figma.com/design/puWXbmOVpnQpjc7mUahTnw/Jazlah-Product-Design?node-id=227-61372) | [present](https://www.figma.com/proto/puWXbmOVpnQpjc7mUahTnw/Jazlah-Product-Design?page-id=227%3A61372&node-id=227-61373&starting-point-node-id=227%3A61373&scaling=scale-down) | 34 + login | 414 on the page (all three roles) |
-| لوحة البائع | same page | [present](https://www.figma.com/proto/puWXbmOVpnQpjc7mUahTnw/Jazlah-Product-Design?page-id=227%3A61372&node-id=227-67513&starting-point-node-id=227%3A67513&scaling=scale-down) | 11 + login | |
-| لوحة المطبخ | same page | [present](https://www.figma.com/proto/puWXbmOVpnQpjc7mUahTnw/Jazlah-Product-Design?page-id=227%3A61372&node-id=227-69575&starting-point-node-id=227%3A69575&scaling=scale-down) | 1 | |
+| تجربة التطبيق (mobile) | [▶ تجربة التطبيق](https://www.figma.com/design/puWXbmOVpnQpjc7mUahTnw/Jazlah-Product-Design?node-id=227-44237) | [present](https://www.figma.com/proto/puWXbmOVpnQpjc7mUahTnw/Jazlah-Product-Design?page-id=227%3A44237&node-id=230-73237&starting-point-node-id=230%3A73237&scaling=scale-down) | 63 + 2 bottom sheets | 265 |
+| تجربة الويب | [▶ تجربة الويب](https://www.figma.com/design/puWXbmOVpnQpjc7mUahTnw/Jazlah-Product-Design?node-id=227-54426) | [present](https://www.figma.com/proto/puWXbmOVpnQpjc7mUahTnw/Jazlah-Product-Design?page-id=227%3A54426&node-id=230-78382&starting-point-node-id=230%3A78382&scaling=scale-down) | 33 | 582 |
+| لوحة الإدارة | [▶ تجربة لوحة التحكم](https://www.figma.com/design/puWXbmOVpnQpjc7mUahTnw/Jazlah-Product-Design?node-id=227-61372) | [present](https://www.figma.com/proto/puWXbmOVpnQpjc7mUahTnw/Jazlah-Product-Design?page-id=227%3A61372&node-id=230-86701&starting-point-node-id=230%3A86701&scaling=scale-down) | 34 + login | 435 on the page (all three roles) |
+| لوحة البائع | same page | [present](https://www.figma.com/proto/puWXbmOVpnQpjc7mUahTnw/Jazlah-Product-Design?page-id=227%3A61372&node-id=230-92841&starting-point-node-id=230%3A92841&scaling=scale-down) | 11 + login | |
+| لوحة المطبخ | same page | [present](https://www.figma.com/proto/puWXbmOVpnQpjc7mUahTnw/Jazlah-Product-Design?page-id=227%3A61372&node-id=230-94947&starting-point-node-id=230%3A94947&scaling=scale-down) | 1 | |
 
-Link check run on 2026-11-13 by script over the three pages: 1,215 links, 0 pointing to a missing screen, 0 enabled primary buttons without a link. Buttons with no specific target go to the next screen of the journey.
+Link check by script on 2026-11-13, after the last rebuild: 1,282 links, 0 pointing to a missing screen, 0 enabled primary buttons without a link.
+
+Clicked through in Present on 2026-11-13: app (onboarding → sign-in → home → product → cart → checkout step 1, and the services tab), web (home → store → cart → account settings), admin (sign-in → overview → orders from the side menu). The other journeys were checked by reading the button → destination list, not by clicking.
 
 ## [01 الحساب والدخول](https://www.figma.com/design/puWXbmOVpnQpjc7mUahTnw/Jazlah-Product-Design?node-id=199-6633)
 
@@ -284,6 +286,17 @@ Link check run on 2026-11-13 by script over the three pages: 1,215 links, 0 poin
 | التواصل مع الدعم · فارغة | [open](https://www.figma.com/design/puWXbmOVpnQpjc7mUahTnw/Jazlah-Product-Design?node-id=135-39064) | DLV-WEB-1 (#102) |
 | التواصل مع الدعم · خطأ | [open](https://www.figma.com/design/puWXbmOVpnQpjc7mUahTnw/Jazlah-Product-Design?node-id=135-39127) | DLV-WEB-1 (#102) |
 | التواصل مع الدعم · غير مسموح | [open](https://www.figma.com/design/puWXbmOVpnQpjc7mUahTnw/Jazlah-Product-Design?node-id=135-38907) | DLV-WEB-1 (#102) |
+
+### Web at 390 (key screens)
+
+| Screen | Figma | Task |
+|---|---|---|
+| الرئيسية (ويب جوال 390) | [open](https://www.figma.com/design/puWXbmOVpnQpjc7mUahTnw/Jazlah-Product-Design?node-id=230-72301) | STF-WEB-1 |
+| صفحة المتجر (ويب جوال 390) | [open](https://www.figma.com/design/puWXbmOVpnQpjc7mUahTnw/Jazlah-Product-Design?node-id=230-72392) | STF-WEB-1 |
+| تفاصيل المنتج (ويب جوال 390) | [open](https://www.figma.com/design/puWXbmOVpnQpjc7mUahTnw/Jazlah-Product-Design?node-id=230-72457) | STF-WEB-1 |
+| السلة (ويب جوال 390) | [open](https://www.figma.com/design/puWXbmOVpnQpjc7mUahTnw/Jazlah-Product-Design?node-id=230-72590) | STF-WEB-1 |
+| الدفع والمراجعة (ويب جوال 390) | [open](https://www.figma.com/design/puWXbmOVpnQpjc7mUahTnw/Jazlah-Product-Design?node-id=230-72693) | STF-WEB-1 |
+| تم الطلب (ويب جوال 390) | [open](https://www.figma.com/design/puWXbmOVpnQpjc7mUahTnw/Jazlah-Product-Design?node-id=230-72759) | STF-WEB-1 |
 
 ## [03 المواعيد والزيارة](https://www.figma.com/design/puWXbmOVpnQpjc7mUahTnw/Jazlah-Product-Design?node-id=199-6635)
 
