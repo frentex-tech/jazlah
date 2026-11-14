@@ -1,0 +1,32 @@
+# pre-commit (husky; POSIX sh, so it runs under Git Bash on Windows).
+# Git runs hooks from the repository root. Only staged files under services/api/ concern
+# the API: with none, do nothing.
+if [ -z "$(git diff --cached --name-only -- services/api)" ]; then
+  exit 0
+fi
+
+# husky puts the relative node_modules/.bin on PATH, so work from services/api.
+cd services/api
+
+# Record what is staged, so the guard below can tell what lint-staged changed.
+node .husky/staged-guard.mjs record
+
+# ESLint --fix and Prettier on staged TypeScript, Prettier on staged JSON, YAML and
+# Markdown (lint-staged.config.mjs); fixes to the staged files are added to the commit.
+# --no-stash: without it, a failing task makes lint-staged run `git reset --hard` and
+# restore a backup across the whole repository, rewriting files the commit never
+# touched (it still hides unstaged parts of partially staged files).
+lint_staged_status=0
+lint-staged --no-stash || lint_staged_status=$?
+
+# lint-staged also stages any other file whose diff changed while it ran. Fail, naming
+# the files, when a path became staged or a staged file outside services/api changed;
+# their index entries are put back first (.husky/staged-guard.mjs).
+node .husky/staged-guard.mjs check
+[ "$lint_staged_status" -eq 0 ] || exit "$lint_staged_status"
+
+# Every shared source file still has its registry line.
+node .claude/hooks/check-registry.mjs
+
+# Tests, build, lint:rules and openapi:check run in CI (.github/workflows/api-ci.yml):
+# a hook slow enough to be skipped protects nothing.
