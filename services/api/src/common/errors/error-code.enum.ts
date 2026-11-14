@@ -27,4 +27,17 @@ export enum ErrorCode {
   /** The API cannot reach a dependency it needs (the database) right now. Retryable. */
   SERVICE_UNAVAILABLE = 'SERVICE_UNAVAILABLE',
   INTERNAL_ERROR = 'INTERNAL_ERROR',
+  /** The declared content type is not one the upload purpose accepts. Nothing was created. */
+  MEDIA_CONTENT_TYPE_NOT_ALLOWED = 'MEDIA_CONTENT_TYPE_NOT_ALLOWED',
+  /** No file with this id exists (never requested, or already cleaned up). */
+  MEDIA_NOT_FOUND = 'MEDIA_NOT_FOUND',
+  /** The upload was not confirmed in time; request a new upload. */
+  MEDIA_UPLOAD_EXPIRED = 'MEDIA_UPLOAD_EXPIRED',
+  /**
+   * The uploaded file failed the checks at confirmation (missing, empty, too large, or
+   * its real type not allowed) and was deleted. `details.reason` says which.
+   */
+  MEDIA_UPLOAD_REJECTED = 'MEDIA_UPLOAD_REJECTED',
+  /** The file exists but its upload has not been confirmed, or was rejected. */
+  MEDIA_NOT_READY = 'MEDIA_NOT_READY',
 }

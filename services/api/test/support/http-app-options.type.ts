@@ -8,6 +8,11 @@ import type { RateLimitConfig } from '@config/rate-limit-config.type';
 export type HttpAppOptions = Readonly<{
   /** Test-only controllers mounted beside AppModule. */
   controllers?: Type[];
+  /**
+   * Modules imported beside AppModule, so those controllers can inject what they export
+   * (the same module instance AppModule uses).
+   */
+  imports?: Type[];
   /** Replaces the `http` config namespace (build it with buildHttpConfig). */
   http?: HttpConfig;
   /** Replaces the `rateLimit` config namespace. */
@@ -16,4 +21,14 @@ export type HttpAppOptions = Readonly<{
   rateLimitRedis?: Redis;
   /** Where the application logger writes; set it to capture log lines (LogCapture). */
   logDestination?: DestinationStream;
+  /**
+   * Providers replaced by a value (`{ provide: STORAGE_PORT, useValue: fake }`), for
+   * what has no option of its own above.
+   */
+  overrides?: readonly Readonly<{ provide: unknown; useValue: unknown }>[];
+  /**
+   * The workers (processors, schedulers) to turn on; every other worker stays off, as
+   * QUEUE_WORKERS_ENABLED is false in e2e runs (enableWorkers).
+   */
+  workers?: readonly Type[];
 }>;

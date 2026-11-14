@@ -16,7 +16,7 @@ Where code goes and what may import what. The layout is in `.claude/ARCHITECTURE
 
 ## 2. Boundaries (`pnpm lint`, proven by `pnpm lint:rules`)
 
-A message starts with its rule id. A boundary error means the design is wrong: restructure; never silence a rule or add an exemption; if a rule seems wrong, stop and ask. Elements: `config`, `common`, `infra`, `integration` (each `src/integrations/<name>/`), `module` (each `src/modules/<name>/`), `entry` (files directly in `src/`). Imports inside an element are allowed except as R8 says. Other ids: R9 to R13 and R21 in `invariants.md`, R19 in `http.md`, R20 in `database.md`. Next id: R22.
+A message starts with its rule id. A boundary error means the design is wrong: restructure; never silence a rule or add an exemption; if a rule seems wrong, stop and ask. Elements: `config`, `common`, `infra`, `integration` (each `src/integrations/<name>/`), `module` (each `src/modules/<name>/`), `entry` (files directly in `src/`). Imports inside an element are allowed except as R8 says. Other ids: R9 to R13 and R21 in `invariants.md`, R19 in `http.md`, R20 in `database.md`. Next id: R23.
 
 | Id | Rule | Why / instead |
 |---|---|---|
@@ -26,7 +26,7 @@ A message starts with its rule id. A boundary error means the design is wrong: r
 | R3 | `infra` imports only `config`, `common`, `infra`. | Reusable, acyclic: react through events, the module's processor, the realtime port. |
 | R4 | An integration imports only `config`, `common`, `infra`, itself. | Data arrives as arguments; a module combines integrations. |
 | R5 | A module never imports the entry files. | Cycle; use injection. |
-| R6 | An integration is imported from outside only through its `index.ts`. | A vendor swap touches no business code. |
+| R6 | An integration is imported from outside only through its `index.ts` (tests also through `testing.ts`, R22). | A vendor swap touches no business code. |
 | R7 | A module is imported from outside only through its `index.ts`. | A missing export is a minimal change, named in your report. |
 | R8 | A module's `domain/` imports only its own `domain/` and the plain parts of common (`DOMAIN_SAFE_COMMON` in `eslint.config.mjs`: async, errors, events, i18n, money; no DTO), which themselves import no package or Node core module. | Rules testable without framework or database: declare a port, implement it in `infrastructure/`. A package for `domain/` needs the owner's approval, a DECISIONS line and a fixture. |
 | R14 | The Prisma client is imported only by a four-layer module's `infrastructure/`, a CRUD module's root `<module>.service.ts`, and `src/infra/database/`. No module imports or injects `PrismaService`. | Queries stay findable, one pool: `DbContext` and `TransactionRunner` (`database.md`). |
@@ -34,6 +34,7 @@ A message starts with its rule id. A boundary error means the design is wrong: r
 | R16 | Only `src/infra/event-bus/` imports `@nestjs/event-emitter`. | The wrapper types events and waits for the commit. |
 | R17 | `WorkerHost`, `QueueEvents*`, `@OnQueueEvent`, `FlowProducer` and their helpers only in `src/infra/queue/`. | They bypass logging, bounded add and shutdown: extend `JobProcessor`, or ask. |
 | R18 | A `JobProcessor` subclass defines neither `process` nor `_worker`. | Implement `handle(job, signal)`. |
+| R22 | An integration's `testing.ts` (its fake and test helpers) is imported only by tests: `*.spec.ts` and `test/`; not even by the integration's own code. | Production code never reaches a fake: it imports `index.ts` and injects the port. |
 
 **Changing the layout** (a top-level folder, a layer, what may import what) is one change: the policy in `eslint.config.mjs` with a new id; its row here; violating and conforming fixtures in `lint-fixtures/src/` (first line `// lint-rule: Rn violates|conforms`, or `support`; a closed bypass becomes a fixture); the id in `scripts/check-lint-rules.mjs`; for a top-level folder also the aliases, `LOOSE_FILES` and ARCHITECTURE.md. Then `pnpm lint` and `pnpm lint:rules`.
 
@@ -45,9 +46,9 @@ Every DTO, interface, type, enum and constant set has its own file named for it;
 
 Kebab-case, saying what it is; never a bare `utils.ts`, `helpers.ts`, `types.ts`, `constants.ts`. If code differs, follow the code and correct this.
 
-- Module: `<audience>.controller.ts` (public, customer, vendor, kitchen, admin) in `api/controllers/`; `<verb>-<noun>.dto.ts`, `<noun>-response.dto.ts` in `api/dto/` (CRUD: `controllers/`, `dto/`); `<verb>-<noun>.use-case.ts` in `application/`; `.entity.ts`, `.state-machine.ts`, `domain/events/<name>.event.ts`, `domain/ports/<name>.port.ts`, `domain/fakes/in-memory-<name>.fake.ts`; `prisma-<name>.repository.ts`, `<name>.mapper.ts` in `infrastructure/`; `<name>.processor.ts`, `<name>.subscriber.ts`.
+- Module: `<audience>.controller.ts` (public, customer, vendor, kitchen, admin) in `api/controllers/`; `<verb>-<noun>.dto.ts`, `<noun>-response.dto.ts` in `api/dto/` (CRUD: `controllers/`, `dto/`); `<verb>-<noun>.use-case.ts` in `application/`; `.entity.ts`, `.state-machine.ts`, `domain/events/<name>.event.ts`, `domain/ports/<name>.port.ts`, `domain/fakes/in-memory-<name>.fake.ts`; `prisma-<name>.repository.ts`, `<name>.mapper.ts` in `infrastructure/`; `<name>.processor.ts`, `<name>.subscriber.ts`, `<name>.scheduler.ts` (registers a repeating job).
 - Anywhere: `.interface.ts`, `.type.ts`, `.enum.ts`, `.constants.ts` beside their consumers; one exported function `<verb>-<noun>.ts`; `<name>.guard.ts` (decorator, pipe, filter, interceptor) in `src/common/<kind>/`; infra DTOs in `src/infra/<name>/dto/`; config `<name>.config.ts` + `<name>-config.type.ts`.
-- Integration: `<capability>.port.ts`, `.types.ts`, `.errors.ts`, `.service.ts`, `.module.ts`, `index.ts`, `providers/<vendor>.provider.ts`, `providers/fake.provider.ts`.
+- Integration: `<capability>.port.ts`, `.types.ts`, `.errors.ts`, `.service.ts`, `.module.ts`, `index.ts`, `testing.ts`, `providers/<vendor>.provider.ts`, `providers/fake.provider.ts`.
 - Tests: `<file>.spec.ts` beside the file, `test/<module>.e2e-spec.ts`, support code in `test/support/`.
 
 ## 4a. Aliases

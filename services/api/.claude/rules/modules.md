@@ -29,7 +29,7 @@ Every money movement (payment, commission, payable, refund, COD receivable, tran
 
 ## Other modules, events, jobs
 
-Use only what a module exports from its `index.ts` (R7), never its internals or tables; a missing export is one method on its exported service, named in your report; register exports in the registry. To react, subscribe to its event. Never import the realtime gateway: use the publishing port. Event, queue and realtime names are lookup tables: extend them. A processor or subscriber is an entry point that calls a use case or service and holds no rule.
+Use only what a module exports from its `index.ts` (R7), never its internals or tables; a missing export is one method on its exported service, named in your report; register exports in the registry. To react, subscribe to its event. Never import the realtime gateway: use the publishing port. Event, queue and realtime names are lookup tables: extend them. A module accepting uploads adds its purpose (`<module>.<what>`: visibility, types, size) to `UPLOAD_PURPOSES` in `src/modules/media/` and calls `MediaService`. A processor or subscriber is an entry point that calls a use case or service and holds no rule.
 
 ### Events (`EventPublisher`, `@OnDomainEvent`, R16)
 
@@ -43,6 +43,7 @@ Use only what a module exports from its `index.ts` (R7), never its internals or 
 
 0. Register queues with `QueueRegistrationModule.register({ name: QUEUE_NAMES.<key> })` (R15): it logs queue errors and makes the queue a `BoundedQueue`, whose `add` fails fast with 503 while Redis is unavailable (the job may still land after a timeout: retry only with `buildJobId`).
 1. A processor, `<name>.processor.ts` in the owning module, `@Processor(QUEUE_NAMES.<key>)`, extends `JobProcessor` and implements only `handle(job, signal)` (R17, R18); logging (from worker events) and bounded shutdown come with it.
+1a. Processors and schedulers are provided with `...provideWorkers(Processor, Scheduler)`, never listed in `providers` directly: they start only where QUEUE_WORKERS_ENABLED is true (production runs API and worker processes apart); queues and producers are registered as usual.
 2. Payloads carry ids, never records.
 3. **Every processor is idempotent and safe beside a retry of itself** (a cancelled or lock-expired job may still run): check and effect in one atomic step (conditional update, row lock, `runOnce`), never read then write; pass idempotency keys to vendors. *Why: BullMQ delivers at least once.*
 4. Work keyed by one external event or record uses `buildJobId('payment-webhook', provider, eventId)`. It only ignores an add while that id is waiting, delayed, active or kept (completed: 1 day, at most 1,000; failed: 14 days, blocking re-adds); after removal it enqueues again; retries and stalls rerun the job.

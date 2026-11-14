@@ -5,7 +5,16 @@ import { validateEnv } from './validate-env';
 const DATABASE_URL =
   'postgresql://example-user:example-password@localhost:5432/example';
 const REDIS_URL = 'redis://localhost:6379/0';
-const VALID = { DATABASE_URL, REDIS_URL };
+/** The required storage variables; the credentials are obviously not real. */
+const STORAGE = {
+  STORAGE_REGION: 'us-east-1',
+  STORAGE_ACCESS_KEY_ID: 'example-access-key',
+  STORAGE_SECRET_ACCESS_KEY: 'example-secret-key',
+  STORAGE_PUBLIC_BUCKET: 'example-public',
+  STORAGE_PRIVATE_BUCKET: 'example-private',
+  STORAGE_PUBLIC_BASE_URL: 'https://cdn.example.com/media',
+};
+const VALID = { DATABASE_URL, REDIS_URL, ...STORAGE };
 /** The defaults of the HTTP and rate limit variables. */
 const HTTP_DEFAULTS = {
   SHUTDOWN_DEADLINE_MS: 28_000,
@@ -17,10 +26,19 @@ const HTTP_DEFAULTS = {
   API_DOCS_ENABLED: undefined,
   CORS_ORIGINS: [],
   TRUST_PROXY_HOPS: 0,
+  QUEUE_WORKERS_ENABLED: true,
   REQUEST_BODY_LIMIT_KB: 100,
   RATE_LIMIT_WINDOW_MS: 60_000,
   RATE_LIMIT_MAX_REQUESTS: 300,
   RATE_LIMIT_PRE_ROUTING_MAX_REQUESTS: 600,
+  ...STORAGE,
+  STORAGE_PROVIDER: 's3',
+  STORAGE_ENDPOINT: undefined,
+  STORAGE_FORCE_PATH_STYLE: false,
+  STORAGE_UPLOAD_URL_EXPIRY_SECONDS: 300,
+  STORAGE_DOWNLOAD_URL_EXPIRY_SECONDS: 300,
+  MEDIA_PENDING_UPLOAD_TTL_SECONDS: 3_600,
+  MEDIA_CLEANUP_INTERVAL_SECONDS: 900,
 };
 
 function problemsOf(raw: Record<string, unknown>): readonly string[] {
@@ -65,6 +83,7 @@ describe('validateEnv', () => {
         ...VALID,
         NODE_ENV: 'production',
         TRUST_PROXY_HOPS: '0',
+        QUEUE_WORKERS_ENABLED: 'true',
         PORT: '8080',
         LOG_LEVEL: 'debug',
       }),
@@ -108,7 +127,7 @@ describe('validateEnv', () => {
   });
 
   it('requires DATABASE_URL', () => {
-    const problems = problemsOf({ REDIS_URL });
+    const problems = problemsOf({ ...STORAGE, REDIS_URL });
     expect(problems).toHaveLength(1);
     expect(problems[0]).toMatch(/^DATABASE_URL: required/);
   });
@@ -119,17 +138,18 @@ describe('validateEnv', () => {
     ['no database name', 'postgresql://user:secret-pass-1@localhost:5432/'],
     ['empty', ''],
   ])('rejects a DATABASE_URL that is %s without printing it', (_label, url) => {
-    const problems = problemsOf({ REDIS_URL, DATABASE_URL: url });
+    const problems = problemsOf({ ...STORAGE, REDIS_URL, DATABASE_URL: url });
     expect(problems).toHaveLength(1);
     expect(problems[0]).toMatch(/^DATABASE_URL: expected a PostgreSQL/);
-    expect(messageOf({ REDIS_URL, DATABASE_URL: url })).not.toContain(
-      'secret-pass-1',
-    );
+    expect(
+      messageOf({ ...STORAGE, REDIS_URL, DATABASE_URL: url }),
+    ).not.toContain('secret-pass-1');
   });
 
   it('accepts the postgres:// scheme too', () => {
     expect(
       validateEnv({
+        ...STORAGE,
         REDIS_URL,
         DATABASE_URL: 'postgres://u:p@db.example:5432/app',
       }).DATABASE_URL,
@@ -143,11 +163,17 @@ describe('validateEnv', () => {
       'LOG_LEVEL',
       'PORT',
       'REDIS_URL',
+      'STORAGE_ACCESS_KEY_ID',
+      'STORAGE_PRIVATE_BUCKET',
+      'STORAGE_PUBLIC_BASE_URL',
+      'STORAGE_PUBLIC_BUCKET',
+      'STORAGE_REGION',
+      'STORAGE_SECRET_ACCESS_KEY',
     ]);
   });
 
   it('requires REDIS_URL', () => {
-    const problems = problemsOf({ DATABASE_URL });
+    const problems = problemsOf({ ...STORAGE, DATABASE_URL });
     expect(problems).toHaveLength(1);
     expect(problems[0]).toMatch(/^REDIS_URL: required/);
   });
@@ -165,12 +191,12 @@ describe('validateEnv', () => {
     ['an uppercase scheme', 'REDISS://:secret-pass-2@localhost:6379/0'],
     ['a mixed-case scheme', 'Redis://:secret-pass-2@localhost:6379/0'],
   ])('rejects a REDIS_URL that is %s without printing it', (_label, url) => {
-    const problems = problemsOf({ DATABASE_URL, REDIS_URL: url });
+    const problems = problemsOf({ ...STORAGE, DATABASE_URL, REDIS_URL: url });
     expect(problems).toHaveLength(1);
     expect(problems[0]).toMatch(/^REDIS_URL: expected a Redis connection URL/);
-    expect(messageOf({ DATABASE_URL, REDIS_URL: url })).not.toContain(
-      'secret-pass-2',
-    );
+    expect(
+      messageOf({ ...STORAGE, DATABASE_URL, REDIS_URL: url }),
+    ).not.toContain('secret-pass-2');
   });
 
   it.each([
@@ -182,7 +208,9 @@ describe('validateEnv', () => {
     ['over TLS', 'rediss://user:example-pass@cache.example:6380'],
     ['with database 15', 'redis://localhost:6379/15'],
   ])('accepts a REDIS_URL %s', (_label, url) => {
-    expect(validateEnv({ DATABASE_URL, REDIS_URL: url }).REDIS_URL).toBe(url);
+    expect(
+      validateEnv({ ...STORAGE, DATABASE_URL, REDIS_URL: url }).REDIS_URL,
+    ).toBe(url);
   });
 
   it('never repeats the offending value in the message', () => {
@@ -262,6 +290,7 @@ describe('validateEnv', () => {
           ...VALID,
           NODE_ENV: 'production',
           TRUST_PROXY_HOPS: '1',
+          QUEUE_WORKERS_ENABLED: 'false',
           CORS_ORIGINS: '*',
         }),
       ).toBe(
@@ -271,16 +300,62 @@ describe('validateEnv', () => {
     });
 
     it('requires TRUST_PROXY_HOPS in production, with no default', () => {
-      expect(problemsOf({ ...VALID, NODE_ENV: 'production' })).toEqual([
+      const production = {
+        ...VALID,
+        NODE_ENV: 'production',
+        QUEUE_WORKERS_ENABLED: 'false',
+      };
+      expect(problemsOf(production)).toEqual([
         'TRUST_PROXY_HOPS: required when NODE_ENV is production: the number of proxies (load balancers) in front of the API, usually 1',
       ]);
+      expect(problemsOf({ ...production, TRUST_PROXY_HOPS: '' })).toHaveLength(
+        1,
+      );
       expect(
-        problemsOf({ ...VALID, NODE_ENV: 'production', TRUST_PROXY_HOPS: '' }),
+        validateEnv({ ...production, TRUST_PROXY_HOPS: '0' }).TRUST_PROXY_HOPS,
+      ).toBe(0);
+    });
+
+    it('requires QUEUE_WORKERS_ENABLED in production, with no default', () => {
+      const production = {
+        ...VALID,
+        NODE_ENV: 'production',
+        TRUST_PROXY_HOPS: '1',
+      };
+      expect(problemsOf(production)).toEqual([
+        'QUEUE_WORKERS_ENABLED: required when NODE_ENV is production: true for a worker process, false for an API process',
+      ]);
+      expect(
+        problemsOf({ ...production, QUEUE_WORKERS_ENABLED: '' }),
       ).toHaveLength(1);
       expect(
-        validateEnv({ ...VALID, NODE_ENV: 'production', TRUST_PROXY_HOPS: '0' })
-          .TRUST_PROXY_HOPS,
-      ).toBe(0);
+        validateEnv({ ...production, QUEUE_WORKERS_ENABLED: 'false' })
+          .QUEUE_WORKERS_ENABLED,
+      ).toBe(false);
+      expect(
+        validateEnv({ ...production, QUEUE_WORKERS_ENABLED: 'true' })
+          .QUEUE_WORKERS_ENABLED,
+      ).toBe(true);
+    });
+
+    it('defaults QUEUE_WORKERS_ENABLED to true outside production', () => {
+      expect(
+        validateEnv({ ...VALID, NODE_ENV: 'development' })
+          .QUEUE_WORKERS_ENABLED,
+      ).toBe(true);
+      expect(
+        validateEnv({ ...VALID, NODE_ENV: 'test' }).QUEUE_WORKERS_ENABLED,
+      ).toBe(true);
+      expect(
+        validateEnv({ ...VALID, QUEUE_WORKERS_ENABLED: 'false' })
+          .QUEUE_WORKERS_ENABLED,
+      ).toBe(false);
+    });
+
+    it('rejects a QUEUE_WORKERS_ENABLED other than true or false', () => {
+      expect(problemsOf({ ...VALID, QUEUE_WORKERS_ENABLED: 'yes' })).toEqual([
+        'QUEUE_WORKERS_ENABLED: expected true or false',
+      ]);
     });
 
     it('defaults TRUST_PROXY_HOPS to 0 outside production', () => {
@@ -305,6 +380,150 @@ describe('validateEnv', () => {
       ['SHUTDOWN_DEADLINE_MS', '999'],
     ])('rejects %s=%p', (name, value) => {
       const problems = problemsOf({ ...VALID, [name]: value });
+      expect(problems).toHaveLength(1);
+      expect(problems[0]).toMatch(
+        new RegExp(`^${name}: expected an integer from`),
+      );
+    });
+  });
+
+  describe('storage and media variables', () => {
+    it('converts valid values', () => {
+      expect(
+        validateEnv({
+          ...VALID,
+          STORAGE_ENDPOINT: 'http://localhost:9002',
+          STORAGE_FORCE_PATH_STYLE: 'true',
+          STORAGE_UPLOAD_URL_EXPIRY_SECONDS: '120',
+          STORAGE_DOWNLOAD_URL_EXPIRY_SECONDS: '600',
+          MEDIA_PENDING_UPLOAD_TTL_SECONDS: '7200',
+          MEDIA_CLEANUP_INTERVAL_SECONDS: '60',
+        }),
+      ).toMatchObject({
+        STORAGE_ENDPOINT: 'http://localhost:9002',
+        STORAGE_FORCE_PATH_STYLE: true,
+        STORAGE_UPLOAD_URL_EXPIRY_SECONDS: 120,
+        STORAGE_DOWNLOAD_URL_EXPIRY_SECONDS: 600,
+        MEDIA_PENDING_UPLOAD_TTL_SECONDS: 7_200,
+        MEDIA_CLEANUP_INTERVAL_SECONDS: 60,
+      });
+    });
+
+    it('reads an empty STORAGE_ENDPOINT as unset', () => {
+      expect(
+        validateEnv({ ...VALID, STORAGE_ENDPOINT: '' }).STORAGE_ENDPOINT,
+      ).toBeUndefined();
+    });
+
+    it.each([
+      'STORAGE_REGION',
+      'STORAGE_ACCESS_KEY_ID',
+      'STORAGE_SECRET_ACCESS_KEY',
+      'STORAGE_PUBLIC_BUCKET',
+      'STORAGE_PRIVATE_BUCKET',
+      'STORAGE_PUBLIC_BASE_URL',
+    ])('requires %s, with no default', (name) => {
+      const problems = problemsOf({ ...VALID, [name]: undefined });
+      expect(problems).toHaveLength(1);
+      expect(problems[0]).toMatch(new RegExp(`^${name}: required`));
+    });
+
+    it.each(['', 'S3', 'gcs'])('rejects STORAGE_PROVIDER=%p', (value) => {
+      expect(problemsOf({ ...VALID, STORAGE_PROVIDER: value })).toEqual([
+        'STORAGE_PROVIDER: expected one of s3',
+      ]);
+    });
+
+    it.each([
+      ['uppercase letters', 'Jazla-Public'],
+      ['too short', 'ab'],
+      ['an underscore', 'jazla_public'],
+      ['a leading hyphen', '-jazla'],
+      ['two adjacent dots', 'jazla..public'],
+      ['an IP address shape', '192.168.1.1'],
+    ])('rejects a bucket name with %s', (_label, bucket) => {
+      const problems = problemsOf({ ...VALID, STORAGE_PUBLIC_BUCKET: bucket });
+      expect(problems).toHaveLength(1);
+      expect(problems[0]).toMatch(
+        /^STORAGE_PUBLIC_BUCKET: expected a bucket name/,
+      );
+    });
+
+    it('refuses one bucket for both visibilities', () => {
+      expect(
+        problemsOf({ ...VALID, STORAGE_PRIVATE_BUCKET: 'example-public' }),
+      ).toEqual([
+        'STORAGE_PRIVATE_BUCKET: must differ from STORAGE_PUBLIC_BUCKET: public and private objects are kept in separate buckets',
+      ]);
+    });
+
+    it.each([
+      ['a trailing slash', 'https://cdn.example.com/media/'],
+      ['a query', 'https://cdn.example.com/media?sig=secret-pass-3'],
+      ['credentials', 'https://user:secret-pass-3@cdn.example.com'],
+      ['another scheme', 'ftp://cdn.example.com'],
+      ['no scheme', 'cdn.example.com'],
+    ])(
+      'rejects a STORAGE_PUBLIC_BASE_URL with %s without printing it',
+      (_label, url) => {
+        const problems = problemsOf({ ...VALID, STORAGE_PUBLIC_BASE_URL: url });
+        expect(problems).toHaveLength(1);
+        expect(problems[0]).toMatch(
+          /^STORAGE_PUBLIC_BASE_URL: expected an http/,
+        );
+        expect(
+          messageOf({ ...VALID, STORAGE_PUBLIC_BASE_URL: url }),
+        ).not.toContain('secret-pass-3');
+      },
+    );
+
+    it('rejects a STORAGE_ENDPOINT with a path ending in a slash', () => {
+      expect(
+        problemsOf({ ...VALID, STORAGE_ENDPOINT: 'http://localhost:9002/' })[0],
+      ).toMatch(/^STORAGE_ENDPOINT: expected an http/);
+    });
+
+    it('never repeats a credential in the message', () => {
+      const message = messageOf({
+        ...VALID,
+        STORAGE_ACCESS_KEY_ID: 'leaked-key-1',
+        STORAGE_SECRET_ACCESS_KEY: 'leaked-secret-1',
+        STORAGE_REGION: 'NOT A REGION',
+      });
+      expect(message).not.toContain('leaked-key-1');
+      expect(message).not.toContain('leaked-secret-1');
+    });
+
+    it('requires the pending upload time to outlast the upload URL', () => {
+      expect(
+        problemsOf({
+          ...VALID,
+          STORAGE_UPLOAD_URL_EXPIRY_SECONDS: '600',
+          MEDIA_PENDING_UPLOAD_TTL_SECONDS: '600',
+        }),
+      ).toEqual([
+        'MEDIA_PENDING_UPLOAD_TTL_SECONDS: must be greater than STORAGE_UPLOAD_URL_EXPIRY_SECONDS, so an upload is never removed while its upload URL is still valid',
+      ]);
+    });
+
+    // The other value of each pair keeps the pending time above the upload expiry, so
+    // only the range is reported.
+    it.each([
+      ['STORAGE_UPLOAD_URL_EXPIRY_SECONDS', '59', {}],
+      [
+        'STORAGE_UPLOAD_URL_EXPIRY_SECONDS',
+        '3601',
+        { MEDIA_PENDING_UPLOAD_TTL_SECONDS: '7200' },
+      ],
+      ['STORAGE_DOWNLOAD_URL_EXPIRY_SECONDS', '86401', {}],
+      [
+        'MEDIA_PENDING_UPLOAD_TTL_SECONDS',
+        '299',
+        { STORAGE_UPLOAD_URL_EXPIRY_SECONDS: '60' },
+      ],
+      ['MEDIA_CLEANUP_INTERVAL_SECONDS', '59', {}],
+    ])('rejects %s=%p', (name, value, others) => {
+      const problems = problemsOf({ ...VALID, ...others, [name]: value });
       expect(problems).toHaveLength(1);
       expect(problems[0]).toMatch(
         new RegExp(`^${name}: expected an integer from`),

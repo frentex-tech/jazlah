@@ -4,8 +4,11 @@ import { appConfig } from './app.config';
 import { databaseConfig } from './database.config';
 import { httpConfig } from './http.config';
 import { loggerConfig } from './logger.config';
+import { mediaConfig } from './media.config';
+import { queueConfig } from './queue.config';
 import { rateLimitConfig } from './rate-limit.config';
 import { redisConfig } from './redis.config';
+import { storageConfig } from './storage.config';
 
 /**
  * Loads `.env` files into the environment and provides the typed namespaces
@@ -22,8 +25,11 @@ import { redisConfig } from './redis.config';
         loggerConfig,
         databaseConfig,
         redisConfig,
+        queueConfig,
         httpConfig,
         rateLimitConfig,
+        storageConfig,
+        mediaConfig,
       ],
     }),
   ],

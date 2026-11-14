@@ -55,4 +55,24 @@ export const ERROR_MESSAGES: Readonly<Record<ErrorCode, LocalizedText>> = {
     ar: 'حدث خطأ غير متوقع، يرجى المحاولة لاحقًا.',
     en: 'An unexpected error occurred. Please try again later.',
   },
+  [ErrorCode.MEDIA_CONTENT_TYPE_NOT_ALLOWED]: {
+    ar: 'نوع الملف غير مسموح به لهذا الغرض.',
+    en: 'This file type is not allowed here.',
+  },
+  [ErrorCode.MEDIA_NOT_FOUND]: {
+    ar: 'الملف غير موجود.',
+    en: 'The file was not found.',
+  },
+  [ErrorCode.MEDIA_UPLOAD_EXPIRED]: {
+    ar: 'انتهت مهلة تأكيد رفع الملف، يرجى رفعه من جديد.',
+    en: 'The upload was not confirmed in time. Please upload the file again.',
+  },
+  [ErrorCode.MEDIA_UPLOAD_REJECTED]: {
+    ar: 'رُفض الملف المرفوع لأنه لا يطابق الشروط المطلوبة، يرجى رفع ملف آخر.',
+    en: 'The uploaded file was rejected because it does not meet the requirements. Please upload another file.',
+  },
+  [ErrorCode.MEDIA_NOT_READY]: {
+    ar: 'الملف غير جاهز بعد.',
+    en: 'The file is not ready yet.',
+  },
 };

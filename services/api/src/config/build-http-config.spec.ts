@@ -6,8 +6,15 @@ const REQUIRED = {
   DATABASE_URL:
     'postgresql://example-user:example-password@localhost:5432/example',
   REDIS_URL: 'redis://localhost:6379/0',
+  STORAGE_REGION: 'us-east-1',
+  STORAGE_ACCESS_KEY_ID: 'example-access-key',
+  STORAGE_SECRET_ACCESS_KEY: 'example-secret-key',
+  STORAGE_PUBLIC_BUCKET: 'example-public',
+  STORAGE_PRIVATE_BUCKET: 'example-private',
+  STORAGE_PUBLIC_BASE_URL: 'https://cdn.example.com/media',
   // Required in production.
   TRUST_PROXY_HOPS: '1',
+  QUEUE_WORKERS_ENABLED: 'false',
 };
 
 function envWith(raw: Record<string, string>): Env {

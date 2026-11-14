@@ -2,7 +2,7 @@
 
 The backend of JAZLA: a NestJS modular monolith in which every external service sits behind a port, one provider per vendor. Paths are relative to `services/api/`. **For API work this file and `.claude/` take precedence over the documents at the repository root** (an earlier plan): look nowhere else for layout, workflow or commands. This is the company's first product and later ones build on it, so **consistency and maintainability outrank delivery speed**.
 
-> **State on 2026-11-14: the foundation is complete; no business code exists.** Built: validated config, `AppError` with the error filter and validation pipe, the logger, the database (Prisma 7; tables `audit_logs`, `idempotency_keys`), Redis, BullMQ (no queue yet), the event bus, readiness, the API docs, the security baseline, the shutdown deadline, lint rules R0 to R21, and CI (`.github/workflows/api-ci.yml`). Not built: authentication, caching, Bull Board, an outbox, any integration, `Money` and the other reserved names. Each is a later step: do not start one unless your task asks. Update this note when a step lands.
+> **State on 2026-11-14: the foundation is complete, with the storage integration and the media module (uploads; no endpoints until authentication).** Built: validated config, `AppError` with the error filter and validation pipe, the logger, the database (Prisma 7; tables `audit_logs`, `idempotency_keys`, `media`), Redis, BullMQ (queue `media-cleanup`; workers only where QUEUE_WORKERS_ENABLED), the event bus, readiness, the API docs, the security baseline, the shutdown deadline, lint rules R0 to R22, and CI (`.github/workflows/api-ci.yml`). Not built: authentication, caching, Bull Board, an outbox, other integrations, `Money` and the other reserved names. Each is a later step: do not start one unless your task asks. Update this note when a step lands.
 
 ## Loaded with this file, and what to read when
 
@@ -44,7 +44,7 @@ ARCHITECTURE.md and DECISIONS.md are reference documents: nothing imports them, 
 | Install | `pnpm install`, then `pnpm db:generate` (the Prisma client is generated, not committed) |
 | Lint | `pnpm lint` (runs `--fix`: read the diff), `pnpm lint:rules` (proves every rule against `lint-fixtures/`) |
 | Types | `pnpm build` (`src/` only), `pnpm test:types` (everything, plus `test/types/`) |
-| Tests | `pnpm test` (unit), `pnpm test:e2e` (needs `pnpm infra:up`: Docker, PostgreSQL + PostGIS on 5434, Redis on 6380) |
+| Tests | `pnpm test` (unit), `pnpm test:e2e` (needs `pnpm infra:up`: Docker, PostgreSQL + PostGIS on 5434, Redis on 6380, MinIO on 9002) |
 | OpenAPI | `pnpm openapi:generate` after an endpoint or DTO change, `pnpm openapi:check` |
 | Registry | `node .claude/hooks/check-registry.mjs` |
 | Database | `pnpm db:migrate`, `pnpm db:deploy`, `pnpm db:generate`; `pnpm db:reset` drops data: only when the user asks |

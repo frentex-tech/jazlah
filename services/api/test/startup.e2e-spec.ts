@@ -16,6 +16,7 @@ describe('Startup (e2e)', () => {
     const result = startApi(
       'NODE_ENV=production',
       'TRUST_PROXY_HOPS=1',
+      'QUEUE_WORKERS_ENABLED=false',
       'CORS_ORIGINS=*',
     );
     expect(result.stderr).toBe(

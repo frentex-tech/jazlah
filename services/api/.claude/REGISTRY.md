@@ -10,11 +10,14 @@ One line per building block: name, path, purpose; the detail is in that file's d
 
 ## Reference implementations (the first of each kind becomes the reference)
 
-None built yet: integration with fallback (mail, sms, push), payments integration, four-layer module, CRUD module. Until then follow ARCHITECTURE.md and the area's rule file.
+- **Integration, one provider, no fallback** (storage): `src/integrations/storage/` — the shape every integration copies: port and token, types, errors with `retryable`, service, module selecting the provider from config, `index.ts`, `testing.ts` (the fake, for tests), `providers/` with the vendor provider and the fake.
+- **CRUD-shaped module without a controller** (media): `src/modules/media/` — service through `DbContext`, conditional updates on the status, a processor and its schedule. Its controllers come with authentication.
+
+None built yet: integration with fallback (mail, sms, push), payments integration, four-layer module, CRUD module with controllers. Until then follow ARCHITECTURE.md and the area's rule file.
 
 ## config
 
-- **Typed configuration** — `src/config/` — `AppConfigModule`, `loadEnv` (the only reader of `process.env`), one namespace per area (`app`, `logger`, `database`, `redis`, `http`, `rateLimit`); inject `@Inject(xConfig.KEY)`.
+- **Typed configuration** — `src/config/` — `AppConfigModule`, `loadEnv` (the only reader of `process.env`), one namespace per area (`app`, `logger`, `database`, `redis`, `queue`, `http`, `rateLimit`, `storage`, `media`); inject `@Inject(xConfig.KEY)`.
 
 ## common
 
@@ -31,6 +34,8 @@ None built yet: integration with fallback (mail, sms, push), payments integratio
 - **Language** — `src/common/i18n/resolve-language.ts` — `Accept-Language` to `Language` (`src/common/i18n/language.type.ts`); `LocalizedText` (`src/common/i18n/localized-text.type.ts`).
 - **Validation pipe** — `src/common/pipes/app-validation.pipe.ts` — the global pipe; `toFieldErrors` (`src/common/pipes/to-field-errors.ts`).
 - **Request id** — `src/common/request-id/resolve-request-id.ts` — keeps a safe `x-request-id` or makes one; limits in `src/common/request-id/request-id.constants.ts`.
+- **detectContentType** — `src/common/files/detect-content-type.ts` — a file's real type from its first bytes (JPEG, PNG, WebP, PDF); signatures and CONTENT_SIGNATURE_LENGTH in `src/common/files/content-signatures.constants.ts`, types `src/common/files/content-signature.type.ts`, `src/common/files/detectable-content-type.type.ts`.
+- **sanitizeFileName** — `src/common/files/sanitize-file-name.ts` — a client's file name made safe to store and show; never a path.
 
 ## infra
 
@@ -52,6 +57,8 @@ None built yet: integration with fallback (mail, sms, push), payments integratio
 - **JobProcessor** — `src/infra/queue/job-processor.ts` — the base class of every processor (R17, R18).
 - **buildJobId** — `src/infra/queue/build-job-id.ts` — a deterministic job id: stops duplicate enqueues only.
 - **Default job options** — `src/infra/queue/default-job-options.constants.ts` — `DEFAULT_JOB_OPTIONS` for every queue.
+- **provideWorkers** — `src/infra/queue/provide-workers.ts` — provides a module's processors and schedulers; they start only where QUEUE_WORKERS_ENABLED is true.
+- **keepJobScheduled** — `src/infra/queue/keep-job-scheduled.ts` — registers a repeating job (BullMQ job scheduler) without holding up startup; bounded, retried; `src/infra/queue/job-schedule.type.ts`, `src/infra/queue/job-schedule-handle.type.ts`.
 - **Redis** — `src/infra/redis/` — `RedisModule`, `RedisService` (the one shared client; does not fail fast), `RedisReadinessCheck`. [whole folder: one unit, the shared client and its readiness check]
 - **Logger** — `src/infra/logger/` — `LoggerModule` (pino), the request logger, `serializeError`, `redactSensitiveFields`. [whole folder: one unit, the logger setup and what a log line may hold]
 - **Shutdown** — `src/infra/shutdown/` — the shutdown deadline. [whole folder: one unit, the deadline and the list of closing resources it reports]
@@ -60,14 +67,15 @@ None built yet: integration with fallback (mail, sms, push), payments integratio
 
 ## integrations (each line: providers, the config key that selects them, fallback or not)
 
-_Nothing registered yet._
+- **Storage** — `src/integrations/storage/` — S3-compatible object storage: presigned POST uploads, presigned GET downloads, metadata, first bytes, delete; `StorageService` adds the bucket per visibility and public URLs. Providers: `s3` (`src/integrations/storage/providers/s3.provider.ts`), selected by `STORAGE_PROVIDER`; no fallback. Tests use `FakeStorageProvider` (`src/integrations/storage/providers/fake.provider.ts`) from `testing.ts`, the test-only entry (R22). [whole folder: one unit, reached through index.ts, and testing.ts from tests]
 
 ## Module exports (the only things another module may use)
 
-_Nothing registered yet._
+- **MediaService** — `src/modules/media/media.service.ts` — `requestUpload`, `confirmUpload`, `getDownloadLink` for uploaded files; with `RequestUploadDto` (`src/modules/media/dto/request-upload.dto.ts`) and the types in `src/modules/media/index.ts`.
 
 ## Lookup tables (extend, never duplicate)
 
 - **Error codes** — `src/common/errors/error-code.enum.ts` — every code; a new one also needs its messages (`src/common/errors/error-messages.constants.ts`) and status (`src/common/errors/error-statuses.constants.ts`). Never rename, remove or reuse a code.
-- **Queue names** — `src/infra/queue/queue-names.constants.ts` — `QUEUE_NAMES`, empty until the first queue.
+- **Queue names** — `src/infra/queue/queue-names.constants.ts` — `QUEUE_NAMES`.
+- **Upload purposes** — `src/modules/media/upload-purposes.constants.ts` — `UPLOAD_PURPOSES`: each purpose's visibility, types and size; a module that needs uploads adds its own.
 - **Environment schema** — `src/config/env.schema.ts` — every variable with its default; a new one also goes in a namespace and `.env.example`.

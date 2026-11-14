@@ -9,6 +9,7 @@ import { LOG_DESTINATION } from '@infra/logger/log-destination.constants';
 import { Logger } from 'nestjs-pino';
 import { RATE_LIMIT_REDIS } from '@infra/rate-limit/rate-limit.constants';
 import { AppModule } from '../../src/app.module';
+import { enableWorkers } from './enable-workers';
 import type { HttpAppOptions } from './http-app-options.type';
 
 /**
@@ -19,7 +20,7 @@ export async function createHttpApp(
   options: HttpAppOptions = {},
 ): Promise<NestExpressApplication> {
   let builder = Test.createTestingModule({
-    imports: [AppModule],
+    imports: [AppModule, ...(options.imports ?? [])],
     controllers: options.controllers ?? [],
   });
   if (options.http !== undefined) {
@@ -39,6 +40,12 @@ export async function createHttpApp(
     builder = builder
       .overrideProvider(LOG_DESTINATION)
       .useValue(options.logDestination);
+  }
+  builder = enableWorkers(builder, options.workers ?? []);
+  for (const override of options.overrides ?? []) {
+    builder = builder
+      .overrideProvider(override.provide)
+      .useValue(override.useValue);
   }
   const moduleRef = await builder.compile();
   // As in main.ts: configureHttpApp registers the body parsers with the configured limit.
