@@ -13,6 +13,19 @@ describe('normalizeSaudiMobileNumber', () => {
     ['dashes', '051-234-5678'],
     ['spaces and dashes mixed', ' 00966 - 51 234-5678 '],
     ['a tab between groups', '0512\t345678'],
+    ['Arabic-Indic digits, local', '٠٥١٢٣٤٥٦٧٨'],
+    ['Arabic-Indic digits, without trunk zero', '٥١٢٣٤٥٦٧٨'],
+    ['Arabic-Indic digits, E.164 with spaces', '+٩٦٦ ٥١ ٢٣٤ ٥٦٧٨'],
+    ['Arabic-Indic digits, international prefix 00', '٠٠٩٦٦٥١٢٣٤٥٦٧٨'],
+    ['Extended Arabic-Indic digits, local', '۰۵۱۲۳۴۵۶۷۸'],
+    [
+      'Extended Arabic-Indic digits, country code with dashes',
+      '۹۶۶-۵۱۲-۳۴۵-۶۷۸',
+    ],
+    ['Extended Arabic-Indic digits, E.164', '+۹۶۶۵۱۲۳۴۵۶۷۸'],
+    ['Arabic-Indic mixed with Latin digits', '05١٢٣٤٥678'],
+    ['Extended Arabic-Indic mixed with Latin digits', '+966 ۵۱ 234 ۵۶۷۸'],
+    ['all three digit forms mixed', '٠5۱٢3۴٥6۷٨'],
   ])('normalises %s (%p)', (_label, input) => {
     expect(normalizeSaudiMobileNumber(input)).toBe(E164);
   });
@@ -32,7 +45,10 @@ describe('normalizeSaudiMobileNumber', () => {
     ['parentheses', '(051) 234 5678'],
     ['dots', '051.234.5678'],
     ['letters', '05123456ab'],
-    ['Arabic-Indic digits', '٠٥١٢٣٤٥٦٧٨'],
+    ['a landline in Arabic-Indic digits', '٠١١٢٣٤٥٦٧٨'],
+    ['too short in Arabic-Indic digits', '٠٥١٢٣٤٥٦٧'],
+    ['another country in Extended Arabic-Indic digits', '+۹۷۱۵۰۱۲۳۴۵۶۷'],
+    ['digits of another script (Devanagari)', '०५१२३४५६७८'],
     ['a single 0 international prefix', '0966512345678'],
   ])('rejects %s (%p)', (_label, input) => {
     expect(normalizeSaudiMobileNumber(input)).toBeNull();
