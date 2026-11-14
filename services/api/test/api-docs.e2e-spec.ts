@@ -76,13 +76,21 @@ describe('API documentation (e2e)', () => {
       expect(readiness['500']).toMatchObject({ content: ERROR_SCHEMA });
 
       const schemas = document.components.schemas;
+      // Every schema of the document: a new DTO is added here on purpose.
       expect(Object.keys(schemas).sort()).toEqual([
+        'AuthTokensResponseDto',
         'ErrorCode',
         'ErrorResponseDto',
         'FieldErrorDto',
         'LivenessResponseDto',
+        'OtpRequestedResponseDto',
+        'PrincipalResponseDto',
         'ReadinessChecksDto',
         'ReadinessResponseDto',
+        'RefreshTokenDto',
+        'RequestOtpDto',
+        'SignedInResponseDto',
+        'VerifyOtpDto',
       ]);
       expect(schemas.ErrorResponseDto).toMatchObject({
         required: ['code', 'message', 'requestId'],

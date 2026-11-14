@@ -2,7 +2,7 @@ import type { INestApplication } from '@nestjs/common';
 import request from 'supertest';
 import type { App } from 'supertest/types';
 import type { ErrorResponseBody } from '@common/filters/error-response-body.interface';
-import { RouteWithoutAudienceError } from '@common/guards/route-without-audience.error';
+import { RouteAudienceCheck } from '@common/guards/route-audience.check';
 import { PrismaService } from '@infra/database/prisma.service';
 import { SMS_PORTS } from '@integrations/sms';
 import { FakeSmsProvider } from '@integrations/sms/testing';
@@ -11,7 +11,6 @@ import { AUTH_PROBE_LIMIT } from './support/auth-probe.constants';
 import { AuthProbeController } from './support/auth-probe.controller';
 import { createHttpApp } from './support/create-http-app';
 import { testPhone } from './support/test-phone';
-import { UnmarkedProbeController } from './support/unmarked-probe.controller';
 
 const LIMITED_URL = '/v1/customer/auth-probe/limited';
 
@@ -100,20 +99,12 @@ describe('Authentication guard (e2e)', () => {
     expect(statuses).toEqual([401, 401, 429]);
   });
 
-  it('refuses to start with a controller that has neither an audience prefix nor @Public()', async () => {
-    const error = await createHttpApp({
-      controllers: [UnmarkedProbeController],
-    }).then(
-      async (started) => {
-        await started.close();
-        return undefined;
-      },
-      (reason: unknown) => reason,
+  it('has the startup check that refuses an endpoint with neither an audience prefix nor @Public()', () => {
+    // What the check refuses is proven in src/common/guards/route-audience.check.spec.ts,
+    // on an application that fails to start. Here: the real application runs it, and
+    // started, so every one of its endpoints has an audience or is marked public.
+    expect(app.get(RouteAudienceCheck, { strict: false })).toBeInstanceOf(
+      RouteAudienceCheck,
     );
-
-    expect(error).toBeInstanceOf(RouteWithoutAudienceError);
-    expect(error).toMatchObject({
-      endpoints: ['UnmarkedProbeController.open'],
-    });
   });
 });
