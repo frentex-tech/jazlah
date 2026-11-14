@@ -1,6 +1,6 @@
 # Invariants: money, time, errors, type safety, secrets
 
-These hold in every file. Paths are relative to `services/api/`. Each names a shared building block: find it in the registry; if it is not built, create it once, in its reserved place, with tests, only when your task needs it.
+These hold in every file. Paths are relative to `services/api/`. Each names a shared building block: find it in the registry (index, then the area file); if it is not built, create it once, in its reserved place, with tests, only when your task needs it.
 
 ## Money (integer halalas; prices include 15% VAT)
 

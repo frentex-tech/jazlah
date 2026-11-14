@@ -11,7 +11,7 @@ Work through the steps in order. Do not write a file before step 5.
 
 ## 1. Find what exists
 
-1. Read `.claude/REGISTRY.md`: the "integrations" section; then `.claude/ARCHITECTURE.md`, "Reference implementations".
+1. Read the index `.claude/REGISTRY.md`, then the area file of each integration it lists (`.claude/registry/storage.md`, `sms.md`, …) and of each area you will use; then `.claude/ARCHITECTURE.md`, "Reference implementations".
 2. List `src/integrations/`. The registry can be stale, and the folder cannot.
 3. Decide which case you are in:
    - **The capability exists** (for example `src/integrations/sms/` is there): you are adding a provider. Go to step 2, then follow "Adding a provider" in step 5.
@@ -86,7 +86,7 @@ Run lint, typecheck or build, unit tests and e2e tests with the commands in `CLA
 
 ## 10. Record it
 
-1. Add or update the line in `.claude/REGISTRY.md` under "integrations": the folder, what it does, the providers that exist, the config key that selects them, whether it falls back, and the fake its `testing.ts` exports.
+1. Add or update the integration's line in its area file, `.claude/registry/<capability>.md`. A new capability is a new area: create that file (heading and intro as in the others) and add its line under "Areas" in `.claude/REGISTRY.md`. The line gives the folder, what it does, the providers that exist, the config key that selects them, whether it falls back, and the fake its `testing.ts` exports.
 2. If this is the first integration of its kind, add it to "Reference implementations" in `.claude/ARCHITECTURE.md`.
 3. If you decided anything a later integration should repeat, add a line to the log in `.claude/DECISIONS.md`.
 4. Run `node .claude/hooks/check-registry.mjs`.

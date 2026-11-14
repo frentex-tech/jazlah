@@ -6,7 +6,7 @@ The backend of JAZLA: a NestJS modular monolith in which every external service 
 
 ## Loaded with this file, and what to read when
 
-Always loaded: the registry (imported at the end) and `.claude/rules/` `code-structure.md`, `invariants.md`, `database.md`, `modules.md`, `integrations.md`, `testing.md`. A lint message `[Rn]` names its rule in one of them (`code-structure.md`, section 2). Together with the root CLAUDE.md they stay under 50,000 characters (`pnpm instructions:check`): put detail in doc comments or the files below, never repeat a rule.
+Always loaded: the registry index (imported at the end; its area files are not) and `.claude/rules/` `code-structure.md`, `invariants.md`, `database.md`, `modules.md`, `integrations.md`, `testing.md`. A lint message `[Rn]` names its rule in one of them (`code-structure.md`, section 2). Together with the root CLAUDE.md they stay under 50,000 characters (`pnpm instructions:check`): put detail in doc comments or the files below, never repeat a rule.
 
 | Before you… | Read |
 |---|---|
@@ -20,7 +20,7 @@ Always loaded: the registry (imported at the end) and `.claude/rules/` `code-str
 
 ## Every task that changes code
 
-1. **Find before you build** (`code-structure.md`, section 5). Reuse or extend; never copy.
+1. **Find before you build** (`code-structure.md`, section 5): read the registry index, then open the area file (`.claude/registry/<area>.md`) of every area the task touches, before writing anything. Reuse or extend; never copy.
 2. **Follow the rules of the area**; read the files above for anything not loaded.
 3. **Do what was asked and nothing else.** A refactor, extra feature, new dependency or "while I'm here" fix goes under Suggestions. *Why: a change nobody asked for is a change nobody reviews.*
 4. **Do not guess.** Ask when a requirement or a vendor's behaviour is unclear. If told to proceed, put the assumption behind an interface, mark it `ASSUMPTION:` and report it. Never invent credentials, prices, API fields or vendor behaviour.
@@ -32,7 +32,7 @@ Always loaded: the registry (imported at the end) and `.claude/rules/` `code-str
 
 1. The tests `testing.md` requires exist.
 2. After your last edit you ran every command below, with zero errors and zero warnings.
-3. Recorded: each shared building block added, moved or removed has its registry line; each architectural decision has its DECISIONS.md entry and is reflected in the rule file it affects; a layout change is in ARCHITECTURE.md. *Why: the next session knows only what is written down.*
+3. Recorded: each shared building block added, moved or removed has its line in its registry area file; each architectural decision has its DECISIONS.md entry and is reflected in the rule file it affects; a layout change is in ARCHITECTURE.md. *Why: the next session knows only what is written down.*
 4. The always-loaded instructions are still under the limit (`pnpm instructions:check`).
 5. The report has: **Changed** (files, and what you searched for first), **Evidence** (each command with its real result, failures quoted), **Not verified** (and why; "nothing" only if true), **Assumptions**, **Suggestions**, **Registry and decisions**.
 

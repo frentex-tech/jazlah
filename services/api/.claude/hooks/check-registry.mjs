@@ -1,6 +1,7 @@
 #!/usr/bin/env node
 /**
- * Checks .claude/REGISTRY.md against the code.
+ * Checks the registry against the code: the index .claude/REGISTRY.md (always loaded)
+ * and the area files .claude/registry/<area>.md it points to, read together.
  *
  *   node .claude/hooks/check-registry.mjs               manual or CI: prints problems, exits 1 if any
  *   node .claude/hooks/check-registry.mjs --stop-hook   Claude Code Stop hook (wired in .claude/settings.json)
@@ -13,6 +14,8 @@
  *      the folder's whole contents, with a reason: `[whole folder: <reason>]` on the
  *      same line. A folder named without that declaration covers nothing.
  *   4. The declaration is used only on a folder line, and its reason is not empty.
+ *   5. Every area file in .claude/registry/ is listed by the index, and every area
+ *      file the index lists exists.
  *
  * No dependencies. Paths are resolved from this file's location, so the
  * working directory does not matter.
@@ -25,6 +28,8 @@ import { fileURLToPath } from 'node:url';
 const API_ROOT = resolve(dirname(fileURLToPath(import.meta.url)), '..', '..');
 const REGISTRY_FILE = join(API_ROOT, '.claude', 'REGISTRY.md');
 const ENTRIES_MARKER = '<!-- entries-start';
+/** The area files: the detail behind each line of the index, read on demand. */
+const AREA_FOLDER = join(API_ROOT, '.claude', 'registry');
 
 /** Folders (relative to services/api) whose source files must each be covered by a registry line. */
 const SHARED_ROOTS = ['src/common', 'src/infra', 'src/integrations'];
@@ -80,8 +85,45 @@ function readRegisteredPaths() {
   const text = readFileSync(REGISTRY_FILE, 'utf8');
   const markerAt = text.indexOf(ENTRIES_MARKER);
   if (markerAt === -1) return null;
+  const areaTexts = listAreaFiles().map((name) => readFileSync(join(AREA_FOLDER, name), 'utf8'));
+  return [text.slice(markerAt), ...areaTexts].flatMap(readPathsFrom);
+}
+
+/** The area files present in .claude/registry/, by file name. */
+function listAreaFiles() {
+  if (!isFolder(AREA_FOLDER)) return [];
+  return readdirSync(AREA_FOLDER).filter((name) => name.endsWith('.md')).sort();
+}
+
+/**
+ * Area files the index does not list, and listed ones that do not exist. The index
+ * lists an area as a backticked `.claude/registry/<area>.md` below the marker.
+ */
+function findAreaProblems() {
+  const text = readFileSync(REGISTRY_FILE, 'utf8');
+  const index = text.slice(Math.max(text.indexOf(ENTRIES_MARKER), 0));
+  const listed = new Set(
+    [...index.matchAll(/`\.claude\/registry\/([^`\n]+\.md)`/g)].map((match) => match[1]),
+  );
+  const present = new Set(listAreaFiles());
+  const problems = [];
+  for (const name of present) {
+    if (!listed.has(name)) {
+      problems.push(`Unlisted area: \`.claude/registry/${name}\` exists but the index (REGISTRY.md) has no line pointing to it. Add one, or merge the file into a listed area.`);
+    }
+  }
+  for (const name of listed) {
+    if (!present.has(name)) {
+      problems.push(`Missing area: the index points to \`.claude/registry/${name}\`, which does not exist.`);
+    }
+  }
+  return problems;
+}
+
+/** The backticked src/ paths of one text, each with its line's whole-folder declaration. */
+function readPathsFrom(text) {
   const listed = [];
-  for (const line of text.slice(markerAt).split(/\r?\n/)) {
+  for (const line of text.split(/\r?\n/)) {
     const declaration = WHOLE_FOLDER.exec(line);
     for (const match of line.matchAll(/`([^`\n]+)`/g)) {
       const token = match[1].trim().replace(/\\/g, '/');
@@ -108,7 +150,7 @@ function findProblems() {
     return [`.claude/REGISTRY.md has no "${ENTRIES_MARKER} ... -->" marker line. Restore it above the entries.`];
   }
 
-  const problems = [];
+  const problems = findAreaProblems();
   const coveringFiles = new Set();
   const coveringFolders = [];
 
@@ -152,7 +194,7 @@ function sharedCodeHasUncommittedChanges() {
   try {
     const output = execFileSync(
       'git',
-      ['-C', API_ROOT, 'status', '--porcelain', '--', ...SHARED_ROOTS, '.claude/REGISTRY.md'],
+      ['-C', API_ROOT, 'status', '--porcelain', '--', ...SHARED_ROOTS, '.claude/REGISTRY.md', '.claude/registry'],
       { encoding: 'utf8', stdio: ['ignore', 'pipe', 'ignore'] },
     );
     return output.trim().length > 0;
@@ -178,7 +220,7 @@ function runAsStopHook() {
   const problems = findProblems();
   if (problems.length === 0) return 0;
   const reason = [
-    'The shared-code registry (services/api/.claude/REGISTRY.md) does not match the code:',
+    'The shared-code registry (services/api/.claude/REGISTRY.md and .claude/registry/) does not match the code:',
     ...problems.map((problem) => `- ${problem}`),
     'Update the registry so the next session can find this code, or tell the user why no change is needed.',
   ].join('\n');

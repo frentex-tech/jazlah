@@ -57,7 +57,7 @@ Kebab-case, saying what it is; never a bare `utils.ts`, `helpers.ts`, `types.ts`
 
 ## 5. Find before you build
 
-Read the registry; search the code by concept with synonyms and by kind (`src/**/*.guard.ts`); use what fits, extend what nearly fits (with tests; ask if callers would change), or create it in the right shared folder and register it. Never copy a file and adjust the copy.
+Read the registry index and the area file of every area the task touches; search the code by concept with synonyms and by kind (`src/**/*.guard.ts`); use what fits, extend what nearly fits (with tests; ask if callers would change), or create it in the right shared folder and register it. Never copy a file and adjust the copy.
 
 ## 6. SOLID, as checks
 

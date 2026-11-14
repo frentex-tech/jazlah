@@ -15,7 +15,7 @@ Three business questions are not answered (`.claude/DECISIONS.md`): who the sell
 
 ## 1. Find what exists
 
-1. Read `.claude/REGISTRY.md`: "Module exports" and the shared sections; `.claude/ARCHITECTURE.md`, "Reference implementations".
+1. Read the index `.claude/REGISTRY.md`, then the area file of every area the module touches (its own if it exists, the modules it will call, database, queue, events, errors, auth…); then `.claude/ARCHITECTURE.md`, "Reference implementations".
 2. List `src/modules/`. If a module for this domain exists, you are extending it, not creating one beside it.
 3. For each thing the task needs (a guard, a decorator, a DTO base, an error code, a pagination type, a money or time operation), search before you write. Procedure: `.claude/rules/code-structure.md`, section 5.
 
@@ -76,8 +76,8 @@ Run `pnpm openapi:generate` and read the diff of `openapi.json`: it is what the 
 
 ## 8. Record it
 
-1. Anything the module now exports for others: a line under "Module exports" in `.claude/REGISTRY.md`.
-2. Anything you added to a shared folder: its line in the registry.
+1. Anything the module now exports for others: a line in the module's area file, `.claude/registry/<module>.md`. A new module is a new area: create that file (heading and intro as in the others) and add its line under "Areas" in `.claude/REGISTRY.md`.
+2. Anything you added to a shared folder: its line in the area file it belongs to (a new area also gets its index line).
 3. First module of its shape: add it to "Reference implementations" in `.claude/ARCHITECTURE.md`.
 4. A decision the next module should repeat: a line in the log in `.claude/DECISIONS.md`.
 5. Run `node .claude/hooks/check-registry.mjs`.
