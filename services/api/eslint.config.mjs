@@ -10,7 +10,7 @@ import tseslint from 'typescript-eslint';
 /*
  * Architecture rules of the JAZLA API.
  *
- * Every rule here has an id (R0 to R21) that appears at the start of its error
+ * Every rule here has an id (R0 to R22) that appears at the start of its error
  * message (except R0's loose-file check, whose message the plugin fixes) and in
  * `.claude/rules/code-structure.md`, which explains why the rule exists and what to do
  * instead. Each rule is proven by fixtures in
@@ -117,6 +117,20 @@ const PRISMA_SERVICE = {
   element: { type: 'infra', fileInternalPath: 'database/prisma.service.ts' },
 };
 
+/**
+ * R22: an integration's test-only entry (`testing.ts`: its fake and test helpers) is
+ * imported only by tests. Refused here for every source file, the integration's own
+ * included; the SPEC_FILES block below lints unit tests without this policy, and
+ * `test/` is outside SOURCE_FILES.
+ */
+const TEST_ENTRY_POLICY = {
+  from: from('config', 'common', 'infra', 'integration', 'module', 'entry'),
+  disallow: {
+    to: { element: { type: 'integration', fileInternalPath: 'testing.ts' } },
+  },
+  message: `[R22] {{to.element.captured.integration}}/testing.ts (the fake and test helpers) is imported only by tests: *.spec.ts files and test/. Production code imports the integration through its index.ts and injects its port, never the fake. ${SEE}`,
+};
+
 const DEPENDENCY_POLICIES = [
   // What is allowed. The last matching policy wins, so the refusals below override these.
   { allow: { to: { module: { origin: ['external', 'core'] } } } },
@@ -179,9 +193,14 @@ const DEPENDENCY_POLICIES = [
   {
     from: from('module', 'entry'),
     disallow: {
-      to: { element: { type: 'integration', fileInternalPath: '!index.ts' } },
+      to: {
+        element: {
+          type: 'integration',
+          fileInternalPath: '!{index.ts,testing.ts}',
+        },
+      },
     },
-    message: `[R6] Import an integration only through its index.ts (@integrations/{{to.element.captured.integration}}), never its providers or other files. Inject the integration's service or port token. ${SEE}`,
+    message: `[R6] Import an integration only through its index.ts (@integrations/{{to.element.captured.integration}}), never its providers or other files (tests also have its testing.ts). Inject the integration's service or port token. ${SEE}`,
   },
   {
     from: from('module'),
@@ -284,6 +303,7 @@ const DEPENDENCY_POLICIES = [
     disallow: { to: { module: { origin: ['external', 'core'] } } },
     message: `[R8] This part of src/common is imported by domain code, so it is plain TypeScript: no package and no Node core module. Move code that needs one to another folder of src/common. ${SEE}`,
   },
+  TEST_ENTRY_POLICY,
   ...(DOMAIN_ALLOWED_PACKAGES.length > 0
     ? [
         {
@@ -296,6 +316,21 @@ const DEPENDENCY_POLICIES = [
         },
       ]
     : []),
+];
+
+/** The boundaries rule (R0 to R8, R14, R16, R22) with the given policies. */
+const boundariesRule = (policies) => [
+  'error',
+  {
+    default: 'disallow',
+    // Also check imports of packages (for R8), imports inside one element (for
+    // R8's own-module layers and R22) and local files outside every element.
+    checkAllOrigins: true,
+    checkInternals: true,
+    checkUnknownLocals: true,
+    message: `[R0] No architecture rule allows {{from.element.types.[0]}} to import "{{dependency.source}}". Every import from src/ must fit the folder rules. ${SEE}`,
+    policies,
+  },
 ];
 
 /** Where @Throttle and @SkipThrottle may be used (R19): the rate limit infrastructure. */
@@ -578,7 +613,7 @@ export default tseslint.config(
     },
   },
   {
-    // R0 to R8 and R14 (folder boundaries), R21, and the console half of R13.
+    // R0 to R8, R14, R16 and R22 (folder boundaries), R21, and the console half of R13.
     files: SOURCE_FILES,
     plugins: { boundaries, jazla },
     settings: {
@@ -593,19 +628,7 @@ export default tseslint.config(
       'boundaries/elements': ELEMENTS,
     },
     rules: {
-      'boundaries/dependencies': [
-        'error',
-        {
-          default: 'disallow',
-          // Also check imports of packages (for R8), imports inside one element (for
-          // R8's own-module layers) and local files outside every element.
-          checkAllOrigins: true,
-          checkInternals: true,
-          checkUnknownLocals: true,
-          message: `[R0] No architecture rule allows {{from.element.types.[0]}} to import "{{dependency.source}}". Every import from src/ must fit the folder rules. ${SEE}`,
-          policies: DEPENDENCY_POLICIES,
-        },
-      ],
+      'boundaries/dependencies': boundariesRule(DEPENDENCY_POLICIES),
       'jazla/no-assertion-from-unknown': 'error',
       // R13: the application logger is used instead of console.
       'no-console': 'error',
@@ -614,8 +637,14 @@ export default tseslint.config(
   {
     // A unit test builds partial test doubles (`{ ... } as unknown as RedisService`):
     // typed fakes written in the test, not values from outside the program (R21).
+    // A unit test may also import an integration's testing.ts (R22).
     files: SPEC_FILES,
-    rules: { 'jazla/no-assertion-from-unknown': 'off' },
+    rules: {
+      'jazla/no-assertion-from-unknown': 'off',
+      'boundaries/dependencies': boundariesRule(
+        DEPENDENCY_POLICIES.filter((policy) => policy !== TEST_ENTRY_POLICY),
+      ),
+    },
   },
   {
     // R0: every file under src/ belongs to an element. Last, so it wins for these paths.
