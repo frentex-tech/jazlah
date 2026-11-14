@@ -11,7 +11,7 @@ Work through the steps in order. Do not write a file before step 5.
 
 ## 1. Find what exists
 
-1. Read `.claude/REGISTRY.md`: the "integrations" section and the "Reference implementations" table.
+1. Read `.claude/REGISTRY.md`: the "integrations" section; then `.claude/ARCHITECTURE.md`, "Reference implementations".
 2. List `src/integrations/`. The registry can be stale, and the folder cannot.
 3. Decide which case you are in:
    - **The capability exists** (for example `src/integrations/sms/` is there): you are adding a provider. Go to step 2, then follow "Adding a provider" in step 5.
@@ -19,7 +19,7 @@ Work through the steps in order. Do not write a file before step 5.
 
 ## 2. Read the reference before designing anything
 
-Open every file of the reference integration the registry names. Note its file names, how the module picks providers from configuration, how the service does fallback, how the fake is built and how the tests are laid out. Yours will match it file for file.
+Open every file of the reference integration `.claude/ARCHITECTURE.md` names ("Reference implementations"). Note its file names, how the module picks providers from configuration, how the service does fallback, how the fake is built and how the tests are laid out. Yours will match it file for file.
 
 If no integration exists yet, yours is the reference: follow `.claude/ARCHITECTURE.md` and the rule file exactly, and say in your report that later integrations will copy this one.
 
@@ -87,7 +87,7 @@ Run lint, typecheck or build, unit tests and e2e tests with the commands in `CLA
 ## 10. Record it
 
 1. Add or update the line in `.claude/REGISTRY.md` under "integrations": the folder, what it does, the providers that exist, the config key that selects them, whether it falls back, and the fake its `testing.ts` exports.
-2. If this is the first integration of its kind, fill in the "Reference implementations" table.
+2. If this is the first integration of its kind, add it to "Reference implementations" in `.claude/ARCHITECTURE.md`.
 3. If you decided anything a later integration should repeat, add a line to the log in `.claude/DECISIONS.md`.
 4. Run `node .claude/hooks/check-registry.mjs`.
 

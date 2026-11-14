@@ -135,6 +135,17 @@ scripts/e2e.mjs               pnpm test:e2e: checks the database and Redis, migr
 ../../.github/workflows/api-ci.yml   CI: every command of CLAUDE.md on pull requests and pushes touching services/api
 ```
 
+## Reference implementations
+
+The first of each kind becomes the reference, which later ones copy file for file. Add a line when you build the first of a kind.
+
+- **Integration, one provider, no fallback** (storage): `src/integrations/storage/` — port and token, types, errors with `retryable`, service, module selecting the provider from config, `index.ts`, `testing.ts` (the fake), `providers/` with the vendor provider and the fake.
+- **Integration with ordered fallback** (sms): `src/integrations/sms/` — the storage shape, plus an ordered list of ports (`SMS_PORTS`), a timeout per call, fallback only on a retryable error, one `SmsNotSentError` carrying every attempt, startup refusing unknown or unconfigured providers. Mail and push copy it.
+- **CRUD-shaped module without a controller** (media): `src/modules/media/` — service through `DbContext`, conditional updates on the status, a processor and its schedule.
+- **Four-layer module** (auth): `src/modules/auth/` — `api/` (a controller per audience, DTOs, mapping), `application/` (one use case per class, tested against the fakes through `auth-use-cases.fake.ts`), `domain/` (entities with the rules, one port per file with its token, fakes in `fakes/`), `infrastructure/` (Prisma repositories with mappers, other port implementations); only `auth.module.ts` binds ports. A use case that must commit before refusing returns an outcome from its transaction and throws after it.
+
+None built yet: payments integration, CRUD module with controllers. Until then follow ARCHITECTURE.md and the area's rule file.
+
 ## Target layout (folders appear when their step comes)
 
 ```

@@ -15,7 +15,7 @@ Three business questions are not answered (`.claude/DECISIONS.md`): who the sell
 
 ## 1. Find what exists
 
-1. Read `.claude/REGISTRY.md`: "Module exports", "Reference implementations" and the shared sections.
+1. Read `.claude/REGISTRY.md`: "Module exports" and the shared sections; `.claude/ARCHITECTURE.md`, "Reference implementations".
 2. List `src/modules/`. If a module for this domain exists, you are extending it, not creating one beside it.
 3. For each thing the task needs (a guard, a decorator, a DTO base, an error code, a pagination type, a money or time operation), search before you write. Procedure: `.claude/rules/code-structure.md`, section 5.
 
@@ -25,7 +25,7 @@ Three business questions are not answered (`.claude/DECISIONS.md`): who the sell
 - **Any other module, new or existing:** controllers + service + dto. If the task would add a state machine or money logic to it, stop and propose promoting it to four layers (`.claude/rules/modules.md`).
 - There is no inventory module: availability belongs to `catalog` and slot capacity to `scheduling`.
 
-Then open the reference module of that shape from the registry and mirror it.
+Then open the reference module of that shape (`.claude/ARCHITECTURE.md`, "Reference implementations") and mirror it.
 
 ## 3. Pin down the behaviour
 
@@ -78,7 +78,7 @@ Run `pnpm openapi:generate` and read the diff of `openapi.json`: it is what the 
 
 1. Anything the module now exports for others: a line under "Module exports" in `.claude/REGISTRY.md`.
 2. Anything you added to a shared folder: its line in the registry.
-3. First module of its shape: fill in the "Reference implementations" table.
+3. First module of its shape: add it to "Reference implementations" in `.claude/ARCHITECTURE.md`.
 4. A decision the next module should repeat: a line in the log in `.claude/DECISIONS.md`.
 5. Run `node .claude/hooks/check-registry.mjs`.
 
