@@ -18,5 +18,9 @@ export default defineConfig({
     // Read directly rather than through env(), which throws when the variable is unset:
     // `prisma generate` needs no database, so it must work without DATABASE_URL.
     url: process.env.DATABASE_URL ?? '',
+    // An empty database Prisma may wipe, for `pnpm db:drift` (and `migrate dev` when set):
+    // it replays the migrations there and compares the result with the schema. CI points
+    // it at a database of its Postgres service. Unset, `migrate dev` makes its own.
+    shadowDatabaseUrl: process.env.SHADOW_DATABASE_URL,
   },
 });
