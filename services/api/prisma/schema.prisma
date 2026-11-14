@@ -1,0 +1,17 @@
+// Base file of the multi-file Prisma schema: the generator and the datasource only.
+// Each domain has its own file in prisma/models/ (.claude/rules/database.md).
+// The connection URL is in prisma.config.ts; migrations are in prisma/migrations/.
+
+generator client {
+  provider     = "prisma-client"
+  // Generated code, not committed: `pnpm db:generate` writes it (also run before build and tests).
+  output       = "../src/infra/database/generated/prisma"
+  // The API is a CommonJS project (.claude/DECISIONS.md, "CommonJS").
+  moduleFormat = "cjs"
+  // Bare relative imports between generated files, so Jest resolves them like any CommonJS source.
+  importFileExtension = ""
+}
+
+datasource db {
+  provider = "postgresql"
+}
