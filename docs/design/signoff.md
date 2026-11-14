@@ -36,6 +36,9 @@ What changed after the client saw the design:
 - **RTL fixes:** radio, checkbox and switch rows now line up on the right. A language switch was added to onboarding and sign-in, and two English (LTR) example screens show the mirroring.
 - **Scope note:** stories, loyalty and Sahm are post-launch in the delivery plan (PLD-DES-1). They were designed now at the client's request; the sprint plan was not changed.
 
+## Client logo (2026-11-13)
+The client sent the final logo (gold horns above «جزلة», «JAZLA» below). It replaced the earlier mark in all 365 placements, including the prototype pages, with no change to prototype links (script check: 0 broken). Looked at after the change: app sign-in, code entry, onboarding, admin and vendor sign-in, a vendor dashboard screen with the side menu, the start page, and the Design System logo section. Not clicked through again in Present. The logo is a cut-out from a screenshot; a vector file from the client is still needed. See [brand/README.md](brand/README.md).
+
 ## Checks run on the file (2026-11-13)
 - Script lint over all 587 screens after the last changes: no empty or "undefined" text, no text outside its screen, no missing icon.
 - Clipped layouts: a script found 110 auto-layout frames on web and dashboard screens whose content was cut off (among them the whole animal-registration form) and opened them up. 28 small ones remain (tab labels 7 to 9 px taller than their tab, and the Adha settings body).
