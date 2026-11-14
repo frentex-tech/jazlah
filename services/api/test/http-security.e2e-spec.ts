@@ -1,3 +1,4 @@
+import { request as httpRequest } from 'node:http';
 import type { NestExpressApplication } from '@nestjs/platform-express';
 import request from 'supertest';
 import type { ErrorResponseBody } from '@common/filters/error-response-body.interface';
@@ -119,6 +120,55 @@ describe('HTTP security baseline (e2e)', () => {
         .post('/v1/probe/validate')
         .send({ name: 'lamb', quantity: 1 })
         .expect(201);
+    });
+  });
+
+  describe('bodyless requests', () => {
+    beforeEach(async () => {
+      app = await createHttpApp({ controllers: [ProbeController] });
+      await app.listen(0, '127.0.0.1');
+    });
+
+    /** A raw POST, so the test controls every header (supertest adds its own). */
+    async function rawPost(
+      headers: Record<string, string>,
+      body?: string,
+    ): Promise<{ status: number; body: string }> {
+      const { port } = new URL(await app.getUrl());
+      return new Promise((resolve, reject) => {
+        const req = httpRequest(
+          {
+            host: '127.0.0.1',
+            port: Number(port),
+            method: 'POST',
+            path: '/v1/probe/no-body',
+            headers,
+          },
+          (res) => {
+            let text = '';
+            res.setEncoding('utf8');
+            res.on('data', (chunk: string) => (text += chunk));
+            res.on('end', () =>
+              resolve({ status: res.statusCode ?? 0, body: text }),
+            );
+          },
+        );
+        req.on('error', reject);
+        req.end(body);
+      });
+    }
+
+    it('accepts a POST with Content-Length 0 and no Content-Type', async () => {
+      const res = await rawPost({ 'Content-Length': '0' });
+      expect(res.status).toBe(204);
+    });
+
+    it('refuses a POST that has a body but no Content-Type with 415', async () => {
+      const res = await rawPost({ 'Content-Length': '2' }, '{}');
+      expect(res.status).toBe(415);
+      expect((JSON.parse(res.body) as ErrorResponseBody).code).toBe(
+        'UNSUPPORTED_MEDIA_TYPE',
+      );
     });
   });
 

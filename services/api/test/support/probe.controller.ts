@@ -3,6 +3,8 @@ import {
   Body,
   Controller,
   Get,
+  HttpCode,
+  HttpStatus,
   MethodNotAllowedException,
   Post,
 } from '@nestjs/common';
@@ -17,6 +19,11 @@ export class ProbeController {
   validate(@Body() body: CreateProbeDto): CreateProbeDto {
     return body;
   }
+
+  /** A POST that reads no body, like an action on a resource (confirm an upload). */
+  @Post('no-body')
+  @HttpCode(HttpStatus.NO_CONTENT)
+  noBody(): void {}
 
   @Get('plain-error')
   plainError(): never {
