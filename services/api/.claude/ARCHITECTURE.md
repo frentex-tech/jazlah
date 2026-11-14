@@ -29,7 +29,8 @@ src/
                               registers the global filter and pipe
   generate-openapi.ts         pnpm openapi:generate / openapi:check (Nest preview mode: nothing connects)
   config/                     env.schema.ts (zod), validate-env.ts, load-env.ts (the one reader of process.env),
-                              namespaces app, logger, database, redis, http (build-http-config.ts), rateLimit,
+                              namespaces app, logger, database, redis, queue, http (build-http-config.ts), rateLimit,
+                              storage, media, sms,
                               each with its -config.type.ts; is-postgres-url.ts, is-redis-url.ts,
                               is-cors-origin.ts, integer-env-var.ts, *.constants.ts
   common/
@@ -43,6 +44,9 @@ src/
     events/                   domain-event.ts (DomainEvent, plain TypeScript: domain/ may extend it),
                               event-name.type.ts, event-name-of.type.ts, domain-event-class.type.ts
     files/                    detect-content-type.ts (magic numbers), content signatures, sanitize-file-name.ts
+    phone/                    normalize-saudi-mobile-number.ts (E.164 or null), mask-phone-number.ts (the masking
+                              helper for phone numbers)
+    sms/                      measure-sms-text.ts (GSM-7 or UCS-2, segments), the GSM-7 alphabet, segment sizes
     i18n/  request-id/  async/
     guards/ interceptors/     empty
   infra/
@@ -85,6 +89,11 @@ src/
                               tests only), providers/s3.provider.ts
                               (AWS SDK v3; MinIO with path style), providers/fake.provider.ts (in memory, enforces
                               the upload policy)
+    sms/                      the reference for ordered fallback: sms.port.ts (SmsPort, SMS_PORTS: the ordered
+                              list), .types.ts, .errors.ts (SmsError: reason, retryable; SmsNotSentError: every
+                              attempt; SmsConfigurationError), .service.ts (normalise, try in order with
+                              SMS_PROVIDER_TIMEOUT_MS each, log masked), .module.ts (SMS_PROVIDERS), index.ts,
+                              testing.ts, providers/log.provider.ts (development only), providers/fake.provider.ts
   modules/
     media/                    CRUD-shaped, no controller yet: media.service.ts (request, confirm, download link,
                               removeExpiredUploads), upload-purposes.constants.ts (UPLOAD_PURPOSES), dto/,

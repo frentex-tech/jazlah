@@ -4,20 +4,21 @@ One line per building block: name, path, purpose; the detail is in that file's d
 
 **Keeping it current.** The change that adds, renames, moves or deletes shared code (anything under `src/common/`, `src/infra/`, `src/integrations/`, and each module export) updates its line: `- **Name** — \`path\` — a few words`. Every shared source file is named by a line, or sits in a folder whose line ends `[whole folder: <reason>]`; declare that only for a folder that is one unit, reached through the entries named beside it. `node .claude/hooks/check-registry.mjs` fails on a missing path, an uncovered file, a whole area, or a declaration without a reason.
 
-**Reserved names** (decided, not built; create them only under these names and record the path here): **Money** in `src/common/money/` (all halala arithmetic); **the realtime publishing port** in `src/infra/realtime/` (beside the gateway modules never import); **the time helper** (Asia/Riyadh business calendar); **the masking helper** (phone numbers and addresses in logs).
+**Reserved names** (decided, not built; create them only under these names and record the path here): **Money** in `src/common/money/` (all halala arithmetic); **the realtime publishing port** in `src/infra/realtime/` (beside the gateway modules never import); **the time helper** (Asia/Riyadh business calendar); **the masking helper** (phone numbers and addresses in logs; the phone part is built: `maskPhoneNumber` below, addresses still reserved).
 
 <!-- entries-start: the check script reads every backticked path below this line -->
 
 ## Reference implementations (the first of each kind becomes the reference)
 
 - **Integration, one provider, no fallback** (storage): `src/integrations/storage/` — the shape every integration copies: port and token, types, errors with `retryable`, service, module selecting the provider from config, `index.ts`, `testing.ts` (the fake, for tests), `providers/` with the vendor provider and the fake.
+- **Integration with ordered fallback** (sms): `src/integrations/sms/` — the storage shape, plus: the token is an ordered list of ports (`SMS_PORTS`), the service tries them in order with a timeout per call and moves on only on a retryable `SmsError`, one error (`SmsNotSentError`) carries every attempt, startup refuses unknown, repeated or unconfigured providers (`src/config/`), the log masks the recipient and never holds the text. Mail and push copy it.
 - **CRUD-shaped module without a controller** (media): `src/modules/media/` — service through `DbContext`, conditional updates on the status, a processor and its schedule. Its controllers come with authentication.
 
-None built yet: integration with fallback (mail, sms, push), payments integration, four-layer module, CRUD module with controllers. Until then follow ARCHITECTURE.md and the area's rule file.
+None built yet: payments integration, four-layer module, CRUD module with controllers. Until then follow ARCHITECTURE.md and the area's rule file.
 
 ## config
 
-- **Typed configuration** — `src/config/` — `AppConfigModule`, `loadEnv` (the only reader of `process.env`), one namespace per area (`app`, `logger`, `database`, `redis`, `queue`, `http`, `rateLimit`, `storage`, `media`); inject `@Inject(xConfig.KEY)`.
+- **Typed configuration** — `src/config/` — `AppConfigModule`, `loadEnv` (the only reader of `process.env`), one namespace per area (`app`, `logger`, `database`, `redis`, `queue`, `http`, `rateLimit`, `storage`, `media`, `sms`); `findMissingProviderVariables` (`src/config/find-missing-provider-variables.ts`) names the variables a listed provider lacks; inject `@Inject(xConfig.KEY)`.
 
 ## common
 
@@ -36,6 +37,9 @@ None built yet: integration with fallback (mail, sms, push), payments integratio
 - **Request id** — `src/common/request-id/resolve-request-id.ts` — keeps a safe `x-request-id` or makes one; limits in `src/common/request-id/request-id.constants.ts`.
 - **detectContentType** — `src/common/files/detect-content-type.ts` — a file's real type from its first bytes (JPEG, PNG, WebP, PDF); signatures and CONTENT_SIGNATURE_LENGTH in `src/common/files/content-signatures.constants.ts`, types `src/common/files/content-signature.type.ts`, `src/common/files/detectable-content-type.type.ts`.
 - **sanitizeFileName** — `src/common/files/sanitize-file-name.ts` — a client's file name made safe to store and show; never a path.
+- **normalizeSaudiMobileNumber** — `src/common/phone/normalize-saudi-mobile-number.ts` — a Saudi mobile number in E.164 (`+9665XXXXXXXX`) from the forms people type, or null.
+- **maskPhoneNumber** — `src/common/phone/mask-phone-number.ts` — the masking helper for phone numbers: `+966*******78`; what logs hold instead of a number.
+- **measureSmsText** — `src/common/sms/measure-sms-text.ts` — an SMS text's encoding (GSM-7 or UCS-2), units and segments; alphabet `src/common/sms/gsm-7-alphabet.constants.ts`, sizes `src/common/sms/sms-segment-sizes.constants.ts`, types `src/common/sms/sms-encoding.type.ts`, `src/common/sms/sms-text-measure.type.ts`.
 
 ## infra
 
@@ -68,6 +72,7 @@ None built yet: integration with fallback (mail, sms, push), payments integratio
 ## integrations (each line: providers, the config key that selects them, fallback or not)
 
 - **Storage** — `src/integrations/storage/` — S3-compatible object storage: presigned POST uploads, presigned GET downloads, metadata, first bytes, delete; `StorageService` adds the bucket per visibility and public URLs. Providers: `s3` (`src/integrations/storage/providers/s3.provider.ts`), selected by `STORAGE_PROVIDER`; no fallback. Tests use `FakeStorageProvider` (`src/integrations/storage/providers/fake.provider.ts`) from `testing.ts`, the test-only entry (R22). [whole folder: one unit, reached through index.ts, and testing.ts from tests]
+- **SMS** — `src/integrations/sms/` — send one text to one Saudi mobile number; `SmsService.send` normalises the number, tries the providers in order (SMS_PROVIDER_TIMEOUT_MS each), falls back on retryable failures, and logs the provider with the number masked, never the text. Providers: `log` (`src/integrations/sms/providers/log.provider.ts`, development only: writes the text to the log), listed in order by `SMS_PROVIDERS`; ordered fallback. Msegat pending official documentation of its send response (DECISIONS.md). Tests use `FakeSmsProvider` (`src/integrations/sms/providers/fake.provider.ts`) from `testing.ts` (R22). [whole folder: one unit, reached through index.ts, and testing.ts from tests]
 
 ## Module exports (the only things another module may use)
 
@@ -79,3 +84,4 @@ None built yet: integration with fallback (mail, sms, push), payments integratio
 - **Queue names** — `src/infra/queue/queue-names.constants.ts` — `QUEUE_NAMES`.
 - **Upload purposes** — `src/modules/media/upload-purposes.constants.ts` — `UPLOAD_PURPOSES`: each purpose's visibility, types and size; a module that needs uploads adds its own.
 - **Environment schema** — `src/config/env.schema.ts` — every variable with its default; a new one also goes in a namespace and `.env.example`.
+- **SMS providers** — `src/config/sms-providers.constants.ts` — `SMS_PROVIDERS`, the names SMS_PROVIDERS may list, with each one's variables in `src/config/sms-provider-variables.constants.ts`.

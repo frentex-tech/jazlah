@@ -40,6 +40,8 @@ const HTTP_DEFAULTS = {
   STORAGE_DOWNLOAD_URL_EXPIRY_SECONDS: 300,
   MEDIA_PENDING_UPLOAD_TTL_SECONDS: 3_600,
   MEDIA_CLEANUP_INTERVAL_SECONDS: 900,
+  SMS_PROVIDERS: ['log'],
+  SMS_PROVIDER_TIMEOUT_MS: 5_000,
 };
 
 function problemsOf(raw: Record<string, unknown>): readonly string[] {
@@ -95,6 +97,7 @@ describe('validateEnv', () => {
       DATABASE_URL,
       REDIS_URL,
       ...HTTP_DEFAULTS,
+      SMS_PROVIDERS: [],
     });
   });
 
@@ -546,5 +549,65 @@ describe('validateEnv', () => {
         new RegExp(`^${name}: expected an integer from`),
       );
     });
+  });
+
+  describe('sms variables', () => {
+    it('reads an ordered, comma-separated provider list', () => {
+      expect(
+        validateEnv({ ...VALID, SMS_PROVIDERS: ' log ' }).SMS_PROVIDERS,
+      ).toEqual(['log']);
+    });
+
+    it('defaults to the log provider outside production, and to none in production', () => {
+      expect(validateEnv(VALID).SMS_PROVIDERS).toEqual(['log']);
+      expect(
+        validateEnv({ ...VALID, SMS_PROVIDERS: '' }).SMS_PROVIDERS,
+      ).toEqual(['log']);
+      expect(
+        validateEnv({
+          ...VALID,
+          NODE_ENV: 'production',
+          TRUST_PROXY_HOPS: '1',
+          QUEUE_WORKERS_ENABLED: 'false',
+        }).SMS_PROVIDERS,
+      ).toEqual([]);
+    });
+
+    it('refuses an unknown provider at startup', () => {
+      expect(
+        problemsOf({ ...VALID, SMS_PROVIDERS: 'log,carrier-pigeon' }),
+      ).toEqual(['SMS_PROVIDERS.1: expected a comma-separated list of: log']);
+    });
+
+    it('refuses a provider listed twice', () => {
+      expect(problemsOf({ ...VALID, SMS_PROVIDERS: 'log,log' })).toEqual([
+        'SMS_PROVIDERS: a provider is listed more than once',
+      ]);
+    });
+
+    it('refuses the log provider in production', () => {
+      expect(
+        problemsOf({
+          ...VALID,
+          NODE_ENV: 'production',
+          TRUST_PROXY_HOPS: '1',
+          QUEUE_WORKERS_ENABLED: 'false',
+          SMS_PROVIDERS: 'log',
+        }),
+      ).toEqual([
+        'SMS_PROVIDERS: the log provider writes message text (OTP codes) to the log: not allowed when NODE_ENV is production',
+      ]);
+    });
+
+    it.each(['499', '30001', '1.5'])(
+      'rejects SMS_PROVIDER_TIMEOUT_MS %p',
+      (value) => {
+        expect(
+          problemsOf({ ...VALID, SMS_PROVIDER_TIMEOUT_MS: value }),
+        ).toEqual([
+          'SMS_PROVIDER_TIMEOUT_MS: expected an integer from 500 to 30000',
+        ]);
+      },
+    );
   });
 });

@@ -9,6 +9,9 @@ import { isRedisUrl } from './is-redis-url';
 import { LOG_LEVELS } from './log-levels.constants';
 import { NODE_ENVS } from './node-envs.constants';
 import { STORAGE_PROVIDERS } from './storage-providers.constants';
+import { SMS_PROVIDERS } from './sms-providers.constants';
+import { SMS_PROVIDER_VARIABLES } from './sms-provider-variables.constants';
+import { findMissingProviderVariables } from './find-missing-provider-variables';
 
 const DATABASE_URL_EXPECTED =
   'expected a PostgreSQL connection URL (postgresql://user:password@host:port/database)';
@@ -32,6 +35,10 @@ const BUCKET_NAME_EXPECTED =
   'expected a bucket name: 3 to 63 lowercase letters, digits, dots and hyphens, starting and ending with a letter or digit';
 const PRIVATE_BUCKET_SEPARATE =
   'must differ from STORAGE_PUBLIC_BUCKET: public and private objects are kept in separate buckets';
+const SMS_PROVIDERS_EXPECTED = `expected a comma-separated list of: ${SMS_PROVIDERS.join(', ')}`;
+const SMS_PROVIDERS_REPEATED = 'a provider is listed more than once';
+const SMS_LOG_IN_PRODUCTION =
+  'the log provider writes message text (OTP codes) to the log: not allowed when NODE_ENV is production';
 const PENDING_TTL_AFTER_UPLOAD_EXPIRY =
   'must be greater than STORAGE_UPLOAD_URL_EXPIRY_SECONDS, so an upload is never removed while its upload URL is still valid';
 
@@ -184,6 +191,29 @@ export const envSchema = z
     // often the cleanup runs (src/modules/media/).
     MEDIA_PENDING_UPLOAD_TTL_SECONDS: integerEnvVar(300, 604_800, 3_600),
     MEDIA_CLEANUP_INTERVAL_SECONDS: integerEnvVar(60, 86_400, 900),
+    // The sms providers (src/integrations/sms/), comma-separated, in the order they are
+    // tried: a retryable failure moves to the next. Unset or empty: log outside
+    // production, none in production (the sms integration then refuses to start).
+    SMS_PROVIDERS: z.preprocess(
+      (value) => (value === '' ? undefined : value),
+      z
+        .string()
+        .optional()
+        .transform((value) =>
+          value
+            ?.split(',')
+            .map((name) => name.trim())
+            .filter((name) => name !== ''),
+        )
+        .pipe(
+          z
+            .array(z.enum(SMS_PROVIDERS, { error: SMS_PROVIDERS_EXPECTED }))
+            .optional(),
+        ),
+    ),
+    // How long one provider call may take before it counts as a retryable failure and
+    // the next provider is tried. Each provider gets the whole time.
+    SMS_PROVIDER_TIMEOUT_MS: integerEnvVar(500, 30_000, 5_000),
   })
   .superRefine((env, context) => {
     if (env.NODE_ENV === 'production' && env.TRUST_PROXY_HOPS === undefined) {
@@ -231,8 +261,39 @@ export const envSchema = z
       });
     }
   })
+  .superRefine((env, context) => {
+    const smsProviders = env.SMS_PROVIDERS ?? [];
+    if (new Set(smsProviders).size !== smsProviders.length) {
+      context.addIssue({
+        code: 'custom',
+        path: ['SMS_PROVIDERS'],
+        message: SMS_PROVIDERS_REPEATED,
+      });
+    }
+    if (env.NODE_ENV === 'production' && smsProviders.includes('log')) {
+      context.addIssue({
+        code: 'custom',
+        path: ['SMS_PROVIDERS'],
+        message: SMS_LOG_IN_PRODUCTION,
+      });
+    }
+    for (const { provider, variable } of findMissingProviderVariables(
+      smsProviders,
+      SMS_PROVIDER_VARIABLES,
+      env,
+    )) {
+      context.addIssue({
+        code: 'custom',
+        path: [variable],
+        message: `required when SMS_PROVIDERS lists ${provider}`,
+      });
+    }
+  })
   .transform((env) => ({
     ...env,
+    SMS_PROVIDERS:
+      env.SMS_PROVIDERS ??
+      (env.NODE_ENV === 'production' ? [] : ['log' as const]),
     TRUST_PROXY_HOPS: env.TRUST_PROXY_HOPS ?? 0,
     QUEUE_WORKERS_ENABLED: env.QUEUE_WORKERS_ENABLED ?? true,
   }));
