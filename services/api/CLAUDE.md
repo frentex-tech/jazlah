@@ -36,6 +36,8 @@ Always loaded: the registry index (imported at the end; its area files are not) 
 4. The always-loaded instructions are still under the limit (`pnpm instructions:check`).
 5. The report has: **Changed** (files, and what you searched for first), **Evidence** (each command with its real result, failures quoted), **Not verified** (and why; "nothing" only if true), **Assumptions**, **Suggestions**, **Registry and decisions**.
 
+**Review:** after finishing a module and before asking for merge, run `/api-review` (a separate read-only reviewer) and pass its report on unedited.
+
 ## Commands (from `services/api/`; CI runs the same list)
 
 | Check | Command |
