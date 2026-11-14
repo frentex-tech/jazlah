@@ -1,98 +1,107 @@
 import type { LocalizedText } from '../i18n/localized-text.type';
 import { ErrorCode } from './error-code.enum';
 
-/** The message catalogue: the text a client sees for each error code. */
+/**
+ * The message catalogue: the text a client sees for each error code.
+ *
+ * Arabic is written in simple Saudi dialect, the product's voice: everyday wording a
+ * customer in Riyadh would use, polite and short. Not formal Arabic, not heavy slang, no
+ * Egyptian or Levantine words. Say what happened and what to do next, in one sentence
+ * where possible; no technical terms, no error jargon, no blame on the user; no full
+ * stop at the end. For example «الرمز انتهى، اطلب رمز جديد», not «انتهت صلاحية رمز التحقق».
+ * The backend owner reviews Arabic wording before release. English stays plain English.
+ */
 export const ERROR_MESSAGES: Readonly<Record<ErrorCode, LocalizedText>> = {
   [ErrorCode.VALIDATION_FAILED]: {
-    ar: 'البيانات المرسلة غير صالحة.',
+    ar: 'فيه بيانات ناقصة أو غير صحيحة، راجعها وجرّب مرة ثانية',
     en: 'The request data is invalid.',
   },
   [ErrorCode.BAD_REQUEST]: {
-    ar: 'تعذّرت معالجة الطلب.',
+    ar: 'ما قدرنا ننفّذ طلبك، جرّب مرة ثانية',
     en: 'The request could not be processed.',
   },
   [ErrorCode.METHOD_NOT_ALLOWED]: {
-    ar: 'طريقة الطلب غير مسموح بها لهذا المسار.',
+    ar: 'هذا الطلب غير متاح، حدّث التطبيق وجرّب مرة ثانية',
     en: 'This request method is not allowed for this route.',
   },
   [ErrorCode.PAYLOAD_TOO_LARGE]: {
-    ar: 'حجم الطلب أكبر من المسموح به.',
+    ar: 'حجم البيانات كبير، صغّرها وجرّب مرة ثانية',
     en: 'The request is too large.',
   },
   [ErrorCode.UNSUPPORTED_MEDIA_TYPE]: {
-    ar: 'نوع محتوى الطلب غير مدعوم.',
+    ar: 'هذا النوع من البيانات ما نقبله، حدّث التطبيق وجرّب مرة ثانية',
     en: 'The request content type is not supported.',
   },
   [ErrorCode.NOT_FOUND]: {
-    ar: 'المورد المطلوب غير موجود.',
+    ar: 'ما لقينا اللي تدوّر عليه',
     en: 'The requested resource was not found.',
   },
   [ErrorCode.UNAUTHORIZED]: {
-    ar: 'يلزم تسجيل الدخول.',
+    ar: 'سجّل دخولك عشان تكمل',
     en: 'Authentication is required.',
   },
   [ErrorCode.FORBIDDEN]: {
-    ar: 'ليست لديك صلاحية لتنفيذ هذا الإجراء.',
+    ar: 'هذا الإجراء غير متاح لحسابك',
     en: 'You do not have permission to perform this action.',
   },
   [ErrorCode.CONFLICT]: {
-    ar: 'يتعارض الطلب مع الحالة الحالية للمورد.',
+    ar: 'ما قدرنا ننفّذ طلبك لأن البيانات تغيّرت، حدّث الصفحة وجرّب مرة ثانية',
     en: 'The request conflicts with the current state of the resource.',
   },
   [ErrorCode.RATE_LIMITED]: {
-    ar: 'عدد الطلبات كبير جدًا، يرجى المحاولة لاحقًا.',
+    ar: 'حاولت كثير، انتظر شوي وجرّب بعدين',
     en: 'Too many requests. Please try again later.',
   },
   [ErrorCode.TRANSACTION_CONFLICT]: {
-    ar: 'تعارض الطلب مع طلب آخر متزامن ولم يُحفظ شيء، يرجى إعادة المحاولة.',
+    ar: 'ما انحفظ طلبك لأن فيه طلب ثاني بنفس الوقت، جرّب مرة ثانية',
     en: 'The request clashed with another one made at the same time and nothing was saved. Please try again.',
   },
   [ErrorCode.SERVICE_UNAVAILABLE]: {
-    ar: 'الخدمة غير متاحة مؤقتًا، يرجى المحاولة بعد قليل.',
+    ar: 'الخدمة متوقفة مؤقتًا، جرّب بعد شوي',
     en: 'The service is temporarily unavailable. Please try again shortly.',
   },
   [ErrorCode.INTERNAL_ERROR]: {
-    ar: 'حدث خطأ غير متوقع، يرجى المحاولة لاحقًا.',
+    ar: 'صار خطأ عندنا، جرّب بعد شوي',
     en: 'An unexpected error occurred. Please try again later.',
   },
   [ErrorCode.MEDIA_CONTENT_TYPE_NOT_ALLOWED]: {
-    ar: 'نوع الملف غير مسموح به لهذا الغرض.',
+    ar: 'نوع الملف هذا ما نقبله هنا، ارفع ملف بنوع ثاني',
     en: 'This file type is not allowed here.',
   },
   [ErrorCode.MEDIA_NOT_FOUND]: {
-    ar: 'الملف غير موجود.',
+    ar: 'ما لقينا الملف',
     en: 'The file was not found.',
   },
   [ErrorCode.MEDIA_UPLOAD_EXPIRED]: {
-    ar: 'انتهت مهلة تأكيد رفع الملف، يرجى رفعه من جديد.',
+    ar: 'انتهى وقت رفع الملف، ارفعه مرة ثانية',
     en: 'The upload was not confirmed in time. Please upload the file again.',
   },
   [ErrorCode.MEDIA_UPLOAD_REJECTED]: {
-    ar: 'رُفض الملف المرفوع لأنه لا يطابق الشروط المطلوبة، يرجى رفع ملف آخر.',
+    ar: 'الملف ما يطابق الشروط المطلوبة، ارفع ملف ثاني',
     en: 'The uploaded file was rejected because it does not meet the requirements. Please upload another file.',
   },
   [ErrorCode.MEDIA_NOT_READY]: {
-    ar: 'الملف غير جاهز بعد.',
+    ar: 'الملف للحين ما جهز، جرّب بعد شوي',
     en: 'The file is not ready yet.',
   },
   [ErrorCode.OTP_INVALID]: {
-    ar: 'رمز التحقق غير صحيح.',
+    ar: 'الرمز غير صحيح، تأكد منه وجرّب مرة ثانية',
     en: 'The verification code is incorrect.',
   },
   [ErrorCode.OTP_EXPIRED]: {
-    ar: 'رمز التحقق لم يعد صالحًا، يرجى طلب رمز جديد.',
+    ar: 'الرمز انتهى، اطلب رمز جديد',
     en: 'The verification code is no longer valid. Please request a new one.',
   },
   [ErrorCode.REFRESH_TOKEN_INVALID]: {
-    ar: 'انتهت الجلسة، يرجى تسجيل الدخول من جديد.',
+    ar: 'انتهت جلستك، سجّل دخولك من جديد',
     en: 'Your session has ended. Please sign in again.',
   },
   [ErrorCode.ACCESS_TOKEN_EXPIRED]: {
-    ar: 'انتهت صلاحية رمز الدخول، يرجى تحديثه.',
+    ar: 'انتهت مدة الدخول، جرّب مرة ثانية',
     en: 'The access token has expired. Please refresh it.',
   },
   [ErrorCode.ACCOUNT_DISABLED]: {
-    ar: 'هذا الحساب موقوف.',
+    ar: 'حسابك موقوف، تواصل معنا عشان نساعدك',
     en: 'This account has been disabled.',
   },
 };

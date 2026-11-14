@@ -52,7 +52,7 @@ describe('RequestOtpUseCase', () => {
         consumedAt: null,
       });
       expect(kit.sender.sent).toEqual([
-        { phone: PHONE, text: 'رمز التحقق في جزلة: 482913' },
+        { phone: PHONE, text: 'رمزك في جزلة: 482913' },
       ]);
     });
 
@@ -287,7 +287,7 @@ describe('RequestOtpUseCase', () => {
       expect(kit.detached.started).toEqual(['otp-sms']);
       await kit.detached.settle();
       expect(kit.sender.sent).toEqual([
-        { phone: STAFF_PHONE, text: 'رمز التحقق في جزلة: 482913' },
+        { phone: STAFF_PHONE, text: 'رمزك في جزلة: 482913' },
       ]);
       expect(kit.challenges.rows[0]?.codeHash).toBe(
         `hash(${STAFF_PHONE}|vendor|482913)`,

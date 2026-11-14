@@ -1,9 +1,13 @@
 import type { Language } from '@common/i18n/language.type';
 import type { LocalizedText } from '@common/i18n/localized-text.type';
 
-/** The text before the code, per language. The wording is the backend owner's (2026-11-14). */
+/**
+ * The text before the code, per language. Arabic is in the product's Saudi voice
+ * (error-messages.constants.ts); the whole message must fit one SMS segment (70
+ * characters when it holds Arabic).
+ */
 const OTP_MESSAGE_PREFIX: LocalizedText = {
-  ar: 'رمز التحقق في جزلة: ',
+  ar: 'رمزك في جزلة: ',
   en: 'Your JAZLA verification code: ',
 };
 

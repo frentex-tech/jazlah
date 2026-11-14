@@ -19,6 +19,7 @@ Timestamps are stored and sent in UTC. Business-calendar logic (today, a slot's 
 2. A code is a public contract: never rename or reuse one, never distinguish two situations by message text; search the list before adding.
 3. Never swallow an error: a `catch` handles the failure completely or rethrows it mapped to `AppError`. No empty or log-only catch.
 4. Vendor errors are mapped inside the provider.
+5. **Arabic text a user reads** (error messages, SMS, notifications) is simple Saudi dialect: everyday, polite, short; what happened and what to do next; no formal Arabic, heavy slang, jargon or blame. Style and examples: the doc comment of `error-messages.constants.ts`. The backend owner reviews Arabic wording before release: list new or changed Arabic text in your report.
 
 ## Type safety (lint)
 
