@@ -20,7 +20,8 @@ You are in `services/api/` or above it; every path below is relative to `service
    - `pnpm lint` runs `--fix` and rewrites files: never run it. Lint without fixing is `pnpm exec eslint "{src,test}/**/*.ts" --max-warnings 0`.
    - Never run `pnpm install`, `pnpm add`, `pnpm openapi:generate`, `pnpm db:migrate`, `pnpm db:deploy`, `pnpm db:reset` or `pnpm format`.
    - No shell redirection, `sed -i` or script that writes inside the repository.
-   - You may run: the project's read-only commands (`pnpm lint:rules`, `pnpm test`, `pnpm test:types`, `pnpm test:e2e`, `pnpm build`, `pnpm openapi:check`, `pnpm instructions:check`, `node .claude/hooks/check-registry.mjs`), `pnpm infra:up` to start local infrastructure, `git` and `gh` queries, `curl` against the local API, and read queries or `EXPLAIN` on the local databases through `docker exec`. Rows you create to test something, you delete. Infrastructure you started, you stop; infrastructure already running, you leave.
+   - You may run: the project's read-only commands (`pnpm lint:rules`, `pnpm test`, `pnpm test:types`, `pnpm build`, `pnpm openapi:check`, `pnpm instructions:check`, `node .claude/hooks/check-registry.mjs`), `pnpm infra:up` to start local infrastructure, `git` and `gh` queries, `curl` against the local API, and read queries or `EXPLAIN` on the local databases through `docker exec`. Rows you create to test something, you delete. Infrastructure you started, you stop; infrastructure already running, you leave.
+   - **Never run the full e2e suite (`pnpm test:e2e`) locally: CI is the evidence for e2e.** To test one specific suspicion you may start this project's own infrastructure and run a single e2e file (`pnpm test:e2e <file>`). Other projects' containers on the machine are not yours: never stop them, and never ask for them to be stopped.
    - The one place you may edit is a scratch copy (step 6).
    - Do not open real `.env` files; read `.env.example` and `src/config/`.
 2. **Do not redo the tools' work.** Formatting, the lint rules (R0 onward), the registry check, OpenAPI drift, migration drift and the instruction size are enforced by commands. Never list their individual messages, and never report by hand something they would catch. If one of those checks fails, that is one finding naming the check and quoting its first failure.
@@ -57,7 +58,7 @@ Keep a list of what you read and what you did not. Anything changed that you did
 
 If the target is a pull request and `gh pr checks <n>` shows the API workflow green **for the exact head commit printed in step 1**, the gates passed: do not rerun them. Otherwise run them yourself (the commands in rule 1; lint without `--fix`). A failing gate is one finding, severity high.
 
-Before anything heavy, look at free memory. Run unit tests with `--runInBand` when it is short. `pnpm test:e2e` needs local infrastructure and about 3 GB free; without that, rely on CI and say so under "Not reviewed". If a command is not found in one shell, try the other shell tool before giving up.
+Before anything heavy, look at free memory. Run unit tests with `--runInBand` when it is short. For e2e, read the CI result of the head commit; when there is none, say so under "Not reviewed". If a command is not found in one shell, try the other shell tool before giving up.
 
 ### 5. Look for defects
 
