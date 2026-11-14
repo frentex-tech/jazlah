@@ -1,0 +1,267 @@
+{
+  "openapi": "3.0.0",
+  "paths": {
+    "/v1/health": {
+      "get": {
+        "operationId": "HealthController_check",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "The process answers.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/LivenessResponseDto"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Error. code: INTERNAL_ERROR.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                }
+              }
+            }
+          }
+        },
+        "tags": [
+          "health"
+        ]
+      }
+    },
+    "/v1/health/ready": {
+      "get": {
+        "operationId": "HealthController_ready",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Every dependency answered.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ReadinessResponseDto"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Error. code: INTERNAL_ERROR.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "A dependency did not answer: status is unavailable and checks names it.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ReadinessResponseDto"
+                },
+                "example": {
+                  "status": "unavailable",
+                  "checks": {
+                    "database": "up",
+                    "redis": "down"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "tags": [
+          "health"
+        ]
+      }
+    }
+  },
+  "info": {
+    "title": "JAZLA API",
+    "description": "Every route is under the /v1 prefix; the paths below include it.\n\nAmounts are integer halalas; timestamps are UTC (ISO 8601).\n\nEvery error response has the ErrorResponseDto shape; clients branch on its code.",
+    "version": "1.0.0",
+    "contact": {}
+  },
+  "tags": [],
+  "servers": [],
+  "components": {
+    "securitySchemes": {
+      "bearer": {
+        "scheme": "bearer",
+        "bearerFormat": "JWT",
+        "type": "http",
+        "description": "Access token from the authentication endpoints."
+      }
+    },
+    "schemas": {
+      "LivenessResponseDto": {
+        "type": "object",
+        "properties": {
+          "status": {
+            "type": "string",
+            "description": "Always ok: the process answers.",
+            "enum": [
+              "ok"
+            ],
+            "example": "ok"
+          }
+        },
+        "required": [
+          "status"
+        ]
+      },
+      "FieldErrorDto": {
+        "type": "object",
+        "properties": {
+          "field": {
+            "type": "string",
+            "description": "Dotted path of the invalid field.",
+            "example": "address.city"
+          },
+          "constraints": {
+            "description": "Names of the failed checks (class-validator constraint names), stable and language-neutral.",
+            "example": [
+              "isString",
+              "isNotEmpty"
+            ],
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        },
+        "required": [
+          "field",
+          "constraints"
+        ]
+      },
+      "ErrorCode": {
+        "type": "string",
+        "enum": [
+          "VALIDATION_FAILED",
+          "BAD_REQUEST",
+          "NOT_FOUND",
+          "METHOD_NOT_ALLOWED",
+          "UNAUTHORIZED",
+          "FORBIDDEN",
+          "CONFLICT",
+          "PAYLOAD_TOO_LARGE",
+          "UNSUPPORTED_MEDIA_TYPE",
+          "RATE_LIMITED",
+          "TRANSACTION_CONFLICT",
+          "SERVICE_UNAVAILABLE",
+          "INTERNAL_ERROR",
+          "MEDIA_CONTENT_TYPE_NOT_ALLOWED",
+          "MEDIA_NOT_FOUND",
+          "MEDIA_UPLOAD_EXPIRED",
+          "MEDIA_UPLOAD_REJECTED",
+          "MEDIA_NOT_READY"
+        ],
+        "description": "Stable error code. Clients branch on it; it is never renamed or reused."
+      },
+      "ErrorResponseDto": {
+        "type": "object",
+        "properties": {
+          "code": {
+            "description": "Stable error code. Clients branch on it; it is never renamed or reused.",
+            "example": "NOT_FOUND",
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/ErrorCode"
+              }
+            ]
+          },
+          "message": {
+            "type": "string",
+            "description": "Message for a person, in Arabic unless Accept-Language prefers English. Never branch on it.",
+            "example": "The requested resource was not found."
+          },
+          "details": {
+            "description": "More about the error. For VALIDATION_FAILED, the list of invalid fields; otherwise an object whose fields depend on the code.",
+            "oneOf": [
+              {
+                "type": "array",
+                "items": {
+                  "$ref": "#/components/schemas/FieldErrorDto"
+                }
+              },
+              {
+                "type": "object",
+                "additionalProperties": true
+              }
+            ]
+          },
+          "requestId": {
+            "type": "string",
+            "description": "Id of the request, also in the x-request-id response header. Quote it when reporting a problem.",
+            "example": "3f2b8c1e-7d4a-4b6f-9a2e-5c8d1f0e6b7a"
+          }
+        },
+        "required": [
+          "code",
+          "message",
+          "requestId"
+        ]
+      },
+      "ReadinessChecksDto": {
+        "type": "object",
+        "properties": {
+          "database": {
+            "type": "string",
+            "enum": [
+              "up",
+              "down"
+            ],
+            "example": "up"
+          },
+          "redis": {
+            "type": "string",
+            "enum": [
+              "up",
+              "down"
+            ],
+            "example": "up"
+          }
+        },
+        "required": [
+          "database",
+          "redis"
+        ]
+      },
+      "ReadinessResponseDto": {
+        "type": "object",
+        "properties": {
+          "status": {
+            "type": "string",
+            "description": "ok (HTTP 200) when every dependency is up; unavailable (HTTP 503) when one is down or the instance is shutting down.",
+            "enum": [
+              "ok",
+              "unavailable"
+            ],
+            "example": "ok"
+          },
+          "checks": {
+            "$ref": "#/components/schemas/ReadinessChecksDto"
+          },
+          "draining": {
+            "type": "boolean",
+            "description": "Present, true, while the instance shuts down: status is then unavailable (HTTP 503) whatever the checks say.",
+            "enum": [
+              true
+            ],
+            "example": true
+          }
+        },
+        "required": [
+          "status",
+          "checks"
+        ]
+      }
+    }
+  }
+}
