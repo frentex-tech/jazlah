@@ -3,6 +3,8 @@ import { DiscoveryModule } from '@nestjs/core';
 import { Test } from '@nestjs/testing';
 import { RateLimit } from '@infra/rate-limit/rate-limit.decorator';
 import { SkipRateLimit } from '@infra/rate-limit/skip-rate-limit.decorator';
+import { rateLimitConfig } from '@config/rate-limit.config';
+import type { ConfiguredRateLimits } from '@config/configured-rate-limits.type';
 import { RateLimitPolicyCheck } from './rate-limit-policy.check';
 
 const OTP = { name: 'otp-request', limit: 5, windowMs: 600_000 };
@@ -28,6 +30,24 @@ class SameSettingsOtpController {
   request(): void {}
 }
 
+const CONFIGURED: ConfiguredRateLimits = {
+  otpRequestAddress: { limit: 5, windowMs: 600_000 },
+  otpVerifyAddress: { limit: 30, windowMs: 600_000 },
+  otpRequestPhone: { limit: 3, windowMs: 600_000 },
+  otpRequestPhoneDaily: { limit: 10, windowMs: 86_400_000 },
+};
+
+/** The same counter as OTP, its numbers picked from configuration. */
+@Controller('kitchen/otp')
+class ConfiguredOtpController {
+  @Get()
+  @RateLimit({
+    name: 'otp-request',
+    from: (limits) => limits.otpRequestAddress,
+  })
+  request(): void {}
+}
+
 @SkipRateLimit()
 @Controller('skipped')
 class SkippedController {
@@ -38,10 +58,20 @@ class SkippedController {
 
 /** Starts a Nest application with the check and the given controllers. */
 async function start(...controllers: (new () => object)[]) {
+  return startWith(CONFIGURED, ...controllers);
+}
+
+async function startWith(
+  configured: ConfiguredRateLimits,
+  ...controllers: (new () => object)[]
+) {
   const moduleRef = await Test.createTestingModule({
     imports: [DiscoveryModule],
     controllers,
-    providers: [RateLimitPolicyCheck],
+    providers: [
+      RateLimitPolicyCheck,
+      { provide: rateLimitConfig.KEY, useValue: { configured } },
+    ],
   }).compile();
   const app = moduleRef.createNestApplication({ logger: false });
   try {
@@ -64,6 +94,31 @@ describe('RateLimitPolicyCheck', () => {
     await expect(
       start(CustomerOtpController, SameSettingsOtpController),
     ).resolves.toBeUndefined();
+  });
+
+  it('resolves a configured limit before comparing: equal numbers share the counter', async () => {
+    await expect(
+      start(CustomerOtpController, ConfiguredOtpController),
+    ).resolves.toBeUndefined();
+  });
+
+  it('fails startup when the configured numbers differ from the written ones', async () => {
+    await expect(
+      startWith(
+        { ...CONFIGURED, otpRequestAddress: { limit: 6, windowMs: 600_000 } },
+        CustomerOtpController,
+        ConfiguredOtpController,
+      ),
+    ).rejects.toThrow(/declared with different settings/);
+  });
+
+  it('fails startup when a configured limit is not a valid number', async () => {
+    await expect(
+      startWith(
+        { ...CONFIGURED, otpRequestAddress: { limit: 0, windowMs: 600_000 } },
+        ConfiguredOtpController,
+      ),
+    ).rejects.toThrow('limit must be a positive whole number');
   });
 
   it('fails startup on @RateLimit under a class-level @SkipRateLimit', async () => {

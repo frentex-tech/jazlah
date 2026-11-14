@@ -12,6 +12,8 @@ export class AppError extends Error {
   /** An HTTP status code. */
   readonly status: number;
   readonly details?: unknown;
+  /** Seconds the client should wait before retrying; sent as `Retry-After`. */
+  readonly retryAfterSeconds?: number;
 
   constructor(code: ErrorCode, options: AppErrorOptions = {}) {
     super(code, { cause: options.cause });
@@ -19,5 +21,6 @@ export class AppError extends Error {
     this.code = code;
     this.status = options.status ?? ERROR_STATUSES[code];
     this.details = options.details;
+    this.retryAfterSeconds = options.retryAfterSeconds;
   }
 }

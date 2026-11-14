@@ -75,4 +75,24 @@ export const ERROR_MESSAGES: Readonly<Record<ErrorCode, LocalizedText>> = {
     ar: 'الملف غير جاهز بعد.',
     en: 'The file is not ready yet.',
   },
+  [ErrorCode.OTP_INVALID]: {
+    ar: 'رمز التحقق غير صحيح.',
+    en: 'The verification code is incorrect.',
+  },
+  [ErrorCode.OTP_EXPIRED]: {
+    ar: 'رمز التحقق لم يعد صالحًا، يرجى طلب رمز جديد.',
+    en: 'The verification code is no longer valid. Please request a new one.',
+  },
+  [ErrorCode.REFRESH_TOKEN_INVALID]: {
+    ar: 'انتهت الجلسة، يرجى تسجيل الدخول من جديد.',
+    en: 'Your session has ended. Please sign in again.',
+  },
+  [ErrorCode.ACCESS_TOKEN_EXPIRED]: {
+    ar: 'انتهت صلاحية رمز الدخول، يرجى تحديثه.',
+    en: 'The access token has expired. Please refresh it.',
+  },
+  [ErrorCode.ACCOUNT_DISABLED]: {
+    ar: 'هذا الحساب موقوف.',
+    en: 'This account has been disabled.',
+  },
 };

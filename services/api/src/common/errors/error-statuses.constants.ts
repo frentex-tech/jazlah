@@ -24,4 +24,10 @@ export const ERROR_STATUSES: Readonly<Record<ErrorCode, number>> = {
   [ErrorCode.MEDIA_UPLOAD_EXPIRED]: 410,
   [ErrorCode.MEDIA_UPLOAD_REJECTED]: 422,
   [ErrorCode.MEDIA_NOT_READY]: 409,
+  // Not 401: a client that refreshes its token on every 401 must not do so here.
+  [ErrorCode.OTP_INVALID]: 422,
+  [ErrorCode.OTP_EXPIRED]: 410,
+  [ErrorCode.REFRESH_TOKEN_INVALID]: 401,
+  [ErrorCode.ACCESS_TOKEN_EXPIRED]: 401,
+  [ErrorCode.ACCOUNT_DISABLED]: 403,
 };

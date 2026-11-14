@@ -40,4 +40,20 @@ export enum ErrorCode {
   MEDIA_UPLOAD_REJECTED = 'MEDIA_UPLOAD_REJECTED',
   /** The file exists but its upload has not been confirmed, or was rejected. */
   MEDIA_NOT_READY = 'MEDIA_NOT_READY',
+  /** The verification code is wrong; the attempt was counted. */
+  OTP_INVALID = 'OTP_INVALID',
+  /**
+   * No code can be verified for this phone and audience: none was requested, it
+   * expired, it was used, or its attempts ran out. Request a new code.
+   */
+  OTP_EXPIRED = 'OTP_EXPIRED',
+  /**
+   * The refresh token cannot be exchanged: unknown, expired, already used, or its
+   * session has ended. Sign in again.
+   */
+  REFRESH_TOKEN_INVALID = 'REFRESH_TOKEN_INVALID',
+  /** The access token was valid and has expired: refresh it, no new sign-in needed. */
+  ACCESS_TOKEN_EXPIRED = 'ACCESS_TOKEN_EXPIRED',
+  /** The account has been disabled; signing in or refreshing will not help. */
+  ACCOUNT_DISABLED = 'ACCOUNT_DISABLED',
 }

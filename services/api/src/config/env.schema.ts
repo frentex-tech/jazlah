@@ -1,3 +1,4 @@
+import { randomBytes } from 'node:crypto';
 import { z } from 'zod';
 import { integerEnvVar } from './integer-env-var';
 import { CORS_WILDCARD, isCorsOrigin } from './is-cors-origin';
@@ -12,6 +13,7 @@ import { STORAGE_PROVIDERS } from './storage-providers.constants';
 import { SMS_PROVIDERS } from './sms-providers.constants';
 import { SMS_PROVIDER_VARIABLES } from './sms-provider-variables.constants';
 import { findMissingProviderVariables } from './find-missing-provider-variables';
+import { parseReviewAccounts } from './parse-review-accounts';
 
 const DATABASE_URL_EXPECTED =
   'expected a PostgreSQL connection URL (postgresql://user:password@host:port/database)';
@@ -41,6 +43,37 @@ const SMS_LOG_IN_PRODUCTION =
   'the log provider writes message text (OTP codes) to the log: not allowed when NODE_ENV is production';
 const PENDING_TTL_AFTER_UPLOAD_EXPIRY =
   'must be greater than STORAGE_UPLOAD_URL_EXPIRY_SECONDS, so an upload is never removed while its upload URL is still valid';
+
+const AUTH_SECRET_EXPECTED =
+  'expected a secret of at least 32 characters (for example the output of: openssl rand -base64 48)';
+const AUTH_SECRET_IN_PRODUCTION = `required when NODE_ENV is production: ${AUTH_SECRET_EXPECTED}`;
+const AUTH_SECRETS_DIFFER =
+  'must differ from AUTH_ACCESS_TOKEN_SECRET: one secret signs tokens, the other hashes verification codes';
+const AUTH_KEY_ID_EXPECTED =
+  'expected a key id of 1 to 32 letters, digits, dashes or underscores';
+const AUTH_PREVIOUS_KEY_TOGETHER =
+  'AUTH_ACCESS_TOKEN_PREVIOUS_SECRET and AUTH_ACCESS_TOKEN_PREVIOUS_KEY_ID are set together or not at all';
+const AUTH_PREVIOUS_KEY_ID_DIFFERS =
+  'must differ from AUTH_ACCESS_TOKEN_KEY_ID: a rotation gives the new key a new id';
+const AUTH_REVIEW_ACCOUNTS_EXPECTED =
+  'expected a comma-separated list of phone:code pairs (a Saudi mobile number and a code of digits), each phone once';
+const AUTH_REVIEW_CODE_LENGTH =
+  'every review code must have AUTH_OTP_LENGTH digits';
+
+/** An optional secret: unset or empty is undefined; otherwise at least 32 characters. */
+function optionalSecret() {
+  return z.preprocess(
+    (value) => (value === '' ? undefined : value),
+    z.string().min(32, { error: AUTH_SECRET_EXPECTED }).optional(),
+  );
+}
+
+/** A signing key id, as it appears in a token header (`kid`). */
+function keyId() {
+  return z
+    .string()
+    .regex(/^[A-Za-z0-9_-]{1,32}$/, { error: AUTH_KEY_ID_EXPECTED });
+}
 
 /**
  * Every environment variable the API reads, validated at startup.
@@ -214,6 +247,109 @@ export const envSchema = z
     // How long one provider call may take before it counts as a retryable failure and
     // the next provider is tried. Each provider gets the whole time.
     SMS_PROVIDER_TIMEOUT_MS: integerEnvVar(500, 30_000, 5_000),
+    // Authentication (src/modules/auth/). The key that signs access tokens (HS256) and
+    // its id, which goes in each token's header. Required in production; elsewhere an
+    // unset secret is a random value made at startup, so tokens end with the process.
+    AUTH_ACCESS_TOKEN_SECRET: optionalSecret(),
+    AUTH_ACCESS_TOKEN_KEY_ID: keyId().default('1'),
+    // The previous signing key, still accepted while a rotation is under way: move the
+    // old secret and id here, give the new key a new id, and remove these once every
+    // token signed with the old key has expired (AUTH_ACCESS_TOKEN_TTL_SECONDS).
+    AUTH_ACCESS_TOKEN_PREVIOUS_SECRET: optionalSecret(),
+    AUTH_ACCESS_TOKEN_PREVIOUS_KEY_ID: z.preprocess(
+      (value) => (value === '' ? undefined : value),
+      keyId().optional(),
+    ),
+    // The secret that hashes verification codes and the phone numbers in rate limit
+    // keys (HMAC). Required in production, random elsewhere when unset.
+    AUTH_OTP_SECRET: optionalSecret(),
+    // How long an access token and a refresh token live, in seconds.
+    AUTH_ACCESS_TOKEN_TTL_SECONDS: integerEnvVar(60, 3_600, 900),
+    AUTH_REFRESH_TOKEN_TTL_SECONDS: integerEnvVar(86_400, 7_776_000, 2_592_000),
+    // A verification code: how long it lives, how many attempts it allows, its number
+    // of digits, and how long a client waits before asking for another.
+    AUTH_OTP_TTL_SECONDS: integerEnvVar(60, 900, 300),
+    AUTH_OTP_MAX_ATTEMPTS: integerEnvVar(1, 10, 5),
+    AUTH_OTP_LENGTH: integerEnvVar(4, 8, 6),
+    AUTH_OTP_RESEND_WAIT_SECONDS: integerEnvVar(1, 600, 60),
+    // The verification code limits. Per client address: requests and verifications in
+    // each window. Per phone number: requests in a short window, and per day.
+    AUTH_OTP_REQUEST_ADDRESS_LIMIT: integerEnvVar(1, 10_000, 30),
+    AUTH_OTP_VERIFY_ADDRESS_LIMIT: integerEnvVar(1, 10_000, 30),
+    AUTH_OTP_ADDRESS_WINDOW_SECONDS: integerEnvVar(60, 86_400, 600),
+    AUTH_OTP_PHONE_LIMIT: integerEnvVar(1, 100, 3),
+    AUTH_OTP_PHONE_WINDOW_SECONDS: integerEnvVar(60, 86_400, 600),
+    AUTH_OTP_PHONE_DAILY_LIMIT: integerEnvVar(1, 1_000, 10),
+    // Review accounts: phone:code pairs whose code is fixed and never sent by SMS, for
+    // the app stores' reviewers. Empty by default.
+    AUTH_REVIEW_ACCOUNTS: z
+      .string()
+      .default('')
+      .transform((value, context) => {
+        const accounts = parseReviewAccounts(value);
+        if (accounts === null) {
+          context.addIssue({
+            code: 'custom',
+            message: AUTH_REVIEW_ACCOUNTS_EXPECTED,
+          });
+          return z.NEVER;
+        }
+        return accounts;
+      }),
+  })
+  .superRefine((env, context) => {
+    for (const variable of [
+      'AUTH_ACCESS_TOKEN_SECRET',
+      'AUTH_OTP_SECRET',
+    ] as const) {
+      if (env.NODE_ENV === 'production' && env[variable] === undefined) {
+        context.addIssue({
+          code: 'custom',
+          path: [variable],
+          message: AUTH_SECRET_IN_PRODUCTION,
+        });
+      }
+    }
+    if (
+      env.AUTH_OTP_SECRET !== undefined &&
+      env.AUTH_OTP_SECRET === env.AUTH_ACCESS_TOKEN_SECRET
+    ) {
+      context.addIssue({
+        code: 'custom',
+        path: ['AUTH_OTP_SECRET'],
+        message: AUTH_SECRETS_DIFFER,
+      });
+    }
+    if (
+      (env.AUTH_ACCESS_TOKEN_PREVIOUS_SECRET === undefined) !==
+      (env.AUTH_ACCESS_TOKEN_PREVIOUS_KEY_ID === undefined)
+    ) {
+      context.addIssue({
+        code: 'custom',
+        path: ['AUTH_ACCESS_TOKEN_PREVIOUS_SECRET'],
+        message: AUTH_PREVIOUS_KEY_TOGETHER,
+      });
+    }
+    if (
+      env.AUTH_ACCESS_TOKEN_PREVIOUS_KEY_ID === env.AUTH_ACCESS_TOKEN_KEY_ID
+    ) {
+      context.addIssue({
+        code: 'custom',
+        path: ['AUTH_ACCESS_TOKEN_PREVIOUS_KEY_ID'],
+        message: AUTH_PREVIOUS_KEY_ID_DIFFERS,
+      });
+    }
+    if (
+      env.AUTH_REVIEW_ACCOUNTS.some(
+        (account) => account.code.length !== env.AUTH_OTP_LENGTH,
+      )
+    ) {
+      context.addIssue({
+        code: 'custom',
+        path: ['AUTH_REVIEW_ACCOUNTS'],
+        message: AUTH_REVIEW_CODE_LENGTH,
+      });
+    }
   })
   .superRefine((env, context) => {
     if (env.NODE_ENV === 'production' && env.TRUST_PROXY_HOPS === undefined) {
@@ -296,4 +432,9 @@ export const envSchema = z
       (env.NODE_ENV === 'production' ? [] : ['log' as const]),
     TRUST_PROXY_HOPS: env.TRUST_PROXY_HOPS ?? 0,
     QUEUE_WORKERS_ENABLED: env.QUEUE_WORKERS_ENABLED ?? true,
+    // Outside production an unset secret is random: nothing to copy into the repository.
+    AUTH_ACCESS_TOKEN_SECRET:
+      env.AUTH_ACCESS_TOKEN_SECRET ?? randomBytes(48).toString('base64url'),
+    AUTH_OTP_SECRET:
+      env.AUTH_OTP_SECRET ?? randomBytes(48).toString('base64url'),
   }));

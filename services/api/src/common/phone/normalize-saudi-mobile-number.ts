@@ -1,14 +1,7 @@
+import { toLatinDigits } from '../text/to-latin-digits';
+
 /** Spaces and dashes a person may type between the digits. */
 const SEPARATORS = /[\s-]/g;
-
-/** Arabic-Indic (U+0660 to U+0669) and Extended Arabic-Indic (U+06F0 to U+06F9) digits. */
-const ARABIC_DIGITS = /[٠-٩۰-۹]/g;
-
-/** The Latin digit of an Arabic-Indic or Extended Arabic-Indic digit. */
-function toLatinDigit(digit: string): string {
-  const code = digit.charCodeAt(0);
-  return String(code - (code >= 0x06f0 ? 0x06f0 : 0x0660));
-}
 
 /** The forms accepted once separators are removed; group 1 is the 8 digits after 5. */
 const SAUDI_MOBILE_FORMS: readonly RegExp[] = [
@@ -30,10 +23,7 @@ const SAUDI_MOBILE_FORMS: readonly RegExp[] = [
  * are not checked, so a newly assigned prefix is accepted.
  */
 export function normalizeSaudiMobileNumber(input: string): string | null {
-  const compact = input
-    .trim()
-    .replace(SEPARATORS, '')
-    .replace(ARABIC_DIGITS, toLatinDigit);
+  const compact = toLatinDigits(input.trim().replace(SEPARATORS, ''));
   for (const form of SAUDI_MOBILE_FORMS) {
     const match = form.exec(compact);
     if (match !== null) {
