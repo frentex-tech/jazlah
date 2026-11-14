@@ -10,6 +10,7 @@ import { LoggerModule } from '@infra/logger/logger.module';
 import { QueueModule } from '@infra/queue/queue.module';
 import { RateLimitModule } from '@infra/rate-limit/rate-limit.module';
 import { RedisModule } from '@infra/redis/redis.module';
+import { AuthModule } from '@modules/auth';
 import { MediaModule } from '@modules/media';
 
 @Module({
@@ -21,6 +22,9 @@ import { MediaModule } from '@modules/media';
     QueueModule,
     EventBusModule,
     RateLimitModule,
+    // After RateLimitModule, always: it registers the authentication guard, which must
+    // run after the rate limit guard (.claude/rules/http.md, "Guard order").
+    AuthModule,
     HealthModule,
     MediaModule,
   ],

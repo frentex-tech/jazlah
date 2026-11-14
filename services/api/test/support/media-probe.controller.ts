@@ -1,3 +1,4 @@
+import { Public } from '@common/decorators/public.decorator';
 import {
   Body,
   Controller,
@@ -20,6 +21,8 @@ import {
  * authentication (an unauthenticated upload endpoint would be abusable, so the API has
  * none). Mounted beside AppModule by the media e2e tests: `/v1/test/media/...`.
  */
+// Outside the audience prefixes: test controllers say so themselves.
+@Public()
 @Controller('test/media')
 export class MediaProbeController {
   constructor(private readonly media: MediaService) {}

@@ -1,3 +1,4 @@
+import { Public } from '@common/decorators/public.decorator';
 import { Controller, Get } from '@nestjs/common';
 import { RateLimit } from '@infra/rate-limit/rate-limit.decorator';
 import {
@@ -7,6 +8,8 @@ import {
 } from './rate-limit-probe.constants';
 
 /** Endpoints for the rate limit tests, mounted only in e2e tests. */
+// Outside the audience prefixes: test controllers say so themselves.
+@Public()
 @Controller('rate-limit-probe')
 export class RateLimitProbeController {
   /** Limited by the default limit only (fails open). */
