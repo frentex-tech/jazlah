@@ -1,0 +1,15 @@
+# Line endings of files that are generated, or compared or checksummed by a tool, are
+# fixed to LF, so a Windows checkout with core.autocrlf=true does not change them:
+# - openapi.json: written by `pnpm openapi:generate`, checked by `pnpm openapi:check`.
+# - pnpm-lock.yaml: written by pnpm.
+# - prisma/migrations: Prisma checksums each applied migration; a changed line ending
+#   reads as an edited migration.
+# - lint-fixtures: `pnpm lint:rules` runs ESLint (and Prettier) over them.
+# - docker: shell scripts run inside Linux containers.
+# - .husky: git hook scripts run by sh, which a carriage return breaks (Git Bash too).
+openapi.json text eol=lf
+pnpm-lock.yaml text eol=lf
+prisma/migrations/** text eol=lf
+lint-fixtures/** text eol=lf
+docker/** text eol=lf
+.husky/** text eol=lf
