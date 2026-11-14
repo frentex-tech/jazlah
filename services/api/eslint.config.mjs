@@ -37,6 +37,7 @@ const ENV_READER_FILES = [
  */
 const DOMAIN_SAFE_COMMON = [
   'async/**',
+  'auth/**',
   'errors/**',
   'events/**',
   'i18n/**',
@@ -44,7 +45,8 @@ const DOMAIN_SAFE_COMMON = [
 ];
 
 /** The modules that have four layers (DECISIONS.md, "Settled"); R14 gives them no CRUD exception. */
-const FOUR_LAYER_MODULES = '{orders,checkout,payments,refunds,wallet,finance}';
+const FOUR_LAYER_MODULES =
+  '{auth,orders,checkout,payments,refunds,wallet,finance}';
 
 /**
  * Packages a file under a module's `domain/` folder may import (R8). Empty: domain

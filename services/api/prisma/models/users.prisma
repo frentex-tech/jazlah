@@ -1,0 +1,54 @@
+// Domain: users. Owned by the users module (src/modules/users/): the people who sign in,
+// and the staff access granted to them.
+
+/// Who a sign-in, a session and a route are for. `customer` needs no grant; the other
+/// three are granted (UserAccess).
+enum Audience {
+  customer
+  vendor
+  kitchen
+  admin
+
+  @@map("audience")
+}
+
+/// One person, identified by a Saudi mobile number. Created on the first successful
+/// customer sign-in, or when staff access is granted to a phone not seen before.
+model User {
+  id         String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  /// E.164 (`+9665XXXXXXXX`).
+  phone      String
+  /// Nullable: null while the user is enabled. A disabled user cannot sign in or refresh.
+  disabledAt DateTime? @map("disabled_at") @db.Timestamptz(3)
+  createdAt  DateTime  @default(now()) @map("created_at") @db.Timestamptz(3)
+  updatedAt  DateTime  @updatedAt @map("updated_at") @db.Timestamptz(3)
+
+  access   UserAccess[]
+  sessions AuthSession[]
+
+  @@unique([phone], map: "users_phone_key")
+  @@map("users")
+}
+
+/// Staff access granted to a user for one audience: vendor, kitchen or admin, never
+/// customer (check constraint `user_access_audience_check`). One access per user per
+/// audience. The organisation is null exactly for admin (check constraint
+/// `user_access_organisation_check`).
+model UserAccess {
+  id             String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  userId         String    @map("user_id") @db.Uuid
+  audience       Audience
+  /// Nullable: null for admin access. Otherwise the vendor or the kitchen the user works
+  /// for; no foreign key until those tables exist (DECISIONS.md).
+  organisationId String?   @map("organisation_id") @db.Uuid
+  /// Nullable: null while the access is active.
+  deactivatedAt  DateTime? @map("deactivated_at") @db.Timestamptz(3)
+  createdAt      DateTime  @default(now()) @map("created_at") @db.Timestamptz(3)
+  updatedAt      DateTime  @updatedAt @map("updated_at") @db.Timestamptz(3)
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  // Also the index of the foreign key (user_id is its first column).
+  @@unique([userId, audience], map: "user_access_user_id_audience_key")
+  @@map("user_access")
+}

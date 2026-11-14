@@ -1,0 +1,93 @@
+// Domain: auth. Owned by the auth module (src/modules/auth/): verification codes,
+// sessions and their refresh tokens.
+
+/// The kind of client a session was started from.
+enum DevicePlatform {
+  ios
+  android
+  web
+
+  @@map("device_platform")
+}
+
+/// Why a session ended before its last refresh token expired.
+enum AuthSessionRevocationReason {
+  /// The client signed out of this session.
+  logout
+  /// The user signed out of every session of the audience.
+  logout_all
+  /// A refresh token that had already been exchanged was presented again.
+  reuse_detected
+  /// At refresh the user was disabled or gone, or the staff access was no longer active.
+  access_lost
+
+  @@map("auth_session_revocation_reason")
+}
+
+/// One verification code issued for a phone and an audience. Only the newest row of a
+/// phone and audience can be verified, so a new code invalidates the previous one. A
+/// request for a staff audience by a phone without access stores a row whose hash no
+/// code matches, so such a request behaves like any other.
+model OtpChallenge {
+  id         String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  /// E.164. No foreign key: the user may not exist yet.
+  phone      String
+  audience   Audience
+  /// HMAC-SHA256 of the phone, the audience and the code; never the code.
+  codeHash   String    @map("code_hash")
+  expiresAt  DateTime  @map("expires_at") @db.Timestamptz(3)
+  /// Verification attempts claimed, right or wrong.
+  attempts   Int       @default(0)
+  /// Nullable: null until a correct code consumed it.
+  consumedAt DateTime? @map("consumed_at") @db.Timestamptz(3)
+  createdAt  DateTime  @default(now()) @map("created_at") @db.Timestamptz(3)
+
+  @@index([phone, audience, createdAt])
+  @@map("otp_challenges")
+}
+
+/// One sign-in: a user, one audience, one device. Its refresh tokens form a rotation
+/// chain (RefreshToken).
+model AuthSession {
+  id               String                       @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  userId           String                       @map("user_id") @db.Uuid
+  audience         Audience
+  /// Nullable: null for customer and admin sessions; the vendor or kitchen otherwise.
+  organisationId   String?                      @map("organisation_id") @db.Uuid
+  /// Nullable: null when the client sent no device name at sign-in.
+  deviceName       String?                      @map("device_name")
+  devicePlatform   DevicePlatform               @map("device_platform")
+  /// The sign-in, then the last refresh.
+  lastUsedAt       DateTime                     @map("last_used_at") @db.Timestamptz(3)
+  /// Nullable: null while the session is active.
+  revokedAt        DateTime?                    @map("revoked_at") @db.Timestamptz(3)
+  /// Nullable: null unless the session was revoked.
+  revocationReason AuthSessionRevocationReason? @map("revocation_reason")
+  createdAt        DateTime                     @default(now()) @map("created_at") @db.Timestamptz(3)
+
+  user          User           @relation(fields: [userId], references: [id], onDelete: Cascade)
+  refreshTokens RefreshToken[]
+
+  // Also the index of the foreign key; used to revoke every session of a user and audience.
+  @@index([userId, audience])
+  @@map("auth_sessions")
+}
+
+/// One refresh token of a session, by its hash. Exchanging it marks it used and issues
+/// its successor; a used token presented again revokes the session.
+model RefreshToken {
+  id        String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  sessionId String    @map("session_id") @db.Uuid
+  /// SHA-256 of the token; the token itself is never stored.
+  tokenHash String    @map("token_hash")
+  expiresAt DateTime  @map("expires_at") @db.Timestamptz(3)
+  /// Nullable: null until the token was exchanged for its successor.
+  usedAt    DateTime? @map("used_at") @db.Timestamptz(3)
+  createdAt DateTime  @default(now()) @map("created_at") @db.Timestamptz(3)
+
+  session AuthSession @relation(fields: [sessionId], references: [id], onDelete: Cascade)
+
+  @@unique([tokenHash], map: "refresh_tokens_token_hash_key")
+  @@index([sessionId])
+  @@map("refresh_tokens")
+}
