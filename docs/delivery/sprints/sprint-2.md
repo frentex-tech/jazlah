@@ -140,7 +140,7 @@ This task also covers:
 *Pricing service (authoritative line price)*
 - `unitPrice = size.price + cut.extra + packaging.extra`, `lineTotal = unitPrice × quantity`. Prices include VAT. Keep it pure (load data first, then compute) for easy testing.
 
-**Where:** `services/api/prisma/schema.prisma`, `services/api/src/modules/catalog/`, `services/api/src/modules/pricing/`
+**Where:** `services/api/prisma/` (the catalog and pricing schema files), `services/api/src/modules/catalog/`, `services/api/src/modules/pricing/`
 
 **Acceptance:**
 - [ ] Migration applies cleanly; seed creates categories and meat types

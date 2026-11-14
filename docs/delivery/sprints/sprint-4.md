@@ -6,14 +6,14 @@
 
 **Exit criteria (demo on staging):**
 - Cancelling before "preparing" refunds to the card or the wallet and frees the capacity. A complaint with photos is resolved with a partial refund.
-- Vendor marks an order ready → shipment created (provider sandbox or manual adapter) → webhook updates → delivered, with a push to the customer at each stage. With the provider down, the admin assigns a courier manually and can reschedule.
+- Vendor marks an order ready → shipment created (provider sandbox or manual provider) → webhook updates → delivered, with a push to the customer at each stage. With the provider down, the admin assigns a courier manually and can reschedule.
 - The vendor board plays a sound for a new order. Vendor (and admin, for Jazlah's own orders) records the slaughter time and uploads a photo, and the customer sees it.
 - A delivered partner order creates commission and ledger entries. The weekly payout batch shows the right net amount, and the vendor sees it in Earnings.
 - An admin with limited permissions can't open finance. Every admin action is in the audit log.
 
 **Merge points:**
 - MP-1: CAN-API-1, NOT-API-1, DLV-API-1, ADM-API-1 (permissions) and FIN-API-1 (ledger) merge first.
-- DLV-API-2 and PAY-MOB-2 depend on client inputs (`needs-client`). If late, release with the manual adapter and the fake provider and carry them over. Nothing else in the sprint waits on them.
+- DLV-API-2 and PAY-MOB-2 depend on client inputs (`needs-client`). If late, release with the manual delivery provider and the fake payments provider and carry them over. Nothing else in the sprint waits on them.
 - MP-4: REL-INF-4.
 
 **Parallel tracks:** Backend: CAN/DLV/NOT/VOP/ADM/FIN-API · Dashboard: CAN-DSH-1, DLV-DSH-1, VOP-DSH-1, NOT-DSH-1, ADM-DSH-*, FIN-DSH-1 · Mobile: PAY-MOB-2, CAN-MOB-1, DLV-MOB-1, NOT-MOB-1 · Web: CAN-WEB-1, DLV-WEB-1
@@ -138,7 +138,7 @@ This task also covers:
 
 ## EPIC DLV — Delivery company integration
 - reqs: INT-DLV-01, INT-DLV-02, INT-DLV-03, INT-DLV-04, INT-DLV-05, FR-ORD-05
-No driver app. Shipments are created with the contracted delivery company through an adapter, with webhooks for status and a manual fallback.
+No driver app. Shipments are created with the contracted delivery company through a provider behind the delivery port, with webhooks for status and a manual fallback.
 
 ### DLV-DOC-1 — Spike: delivery company API review (ADR-0005)
 `type: Task · area: api · size: S · prio: P0 · reqs: INT-DLV-05 · labels: spike, needs-client`
@@ -152,7 +152,7 @@ No driver app. Shipments are created with the contracted delivery company throug
 **Acceptance:**
 - [ ] Mapping table reviewed by both developers; sandbox credentials stored as secrets
 
-### DLV-API-1 — Delivery port, shipments, manual adapter & COD reconciliation
+### DLV-API-1 — Delivery port, shipments, manual provider & COD reconciliation
 `type: Feature · area: api · size: L · prio: P0 · reqs: INT-DLV-01, INT-DLV-05, INT-DLV-04, FR-ADM-06 · depends: ORD-API-2`
 
 **What:** provider-independent shipments, plus a manual mode that always works.
@@ -162,10 +162,10 @@ This task also covers:
 
 **Output:**
 
-*Delivery port, shipment model & manual adapter*
+*Delivery port, shipment model & manual provider*
 - `Shipment` (orderId, provider, externalId?, status created|assigned|picked_up|in_transit|delivered|failed|cancelled, courierName?, courierPhone?, trackingUrl?, lastLocation?, pickupPoint vendor|kitchen + snapshot, codAmountHalalas, attempts, rawLast)
 - `integrations/delivery/delivery.port.ts`: `createShipment`, `cancelShipment`, `verifyWebhook`, `parseWebhook`, `getStatus?`
-- `providers/manual.ts`: no external calls; the admin enters the courier and status
+- `providers/manual.provider.ts`: no external calls; the admin enters the courier and status
 - A listener on `order.status.changed → ready` (delivery orders only) creates the shipment via the active provider (setting `delivery.provider`)
 - `POST /v1/admin/shipments/:id/assign {courierName, courierPhone}`, `POST /v1/admin/shipments/:id/status {status}` (mapped to order transitions)
 
@@ -179,7 +179,7 @@ This task also covers:
 - [ ] e2e (manual provider): ready → shipment created → admin assigns → delivered → order delivered
 - [ ] The outstanding total equals the sum of delivered COD shipments not yet settled
 
-### DLV-API-2 — Delivery company adapter + webhooks & courier info
+### DLV-API-2 — Delivery company provider + webhooks & courier info
 `type: Feature · area: api · size: XL · prio: P0 · reqs: INT-DLV-01, INT-DLV-05, INT-DLV-02, INT-DLV-03, FR-ORD-05 · depends: DLV-API-1, DLV-DOC-1 · labels: needs-client`
 
 **What:** create and cancel shipments with the real provider.
@@ -189,11 +189,11 @@ This task also covers:
 
 **Output:**
 
-*Delivery company provider adapter*
-- `providers/<company>.ts`; create on ready with pickup address (vendor or kitchen), drop-off, customer name and phone, COD amount, delivery window; cancel when an order is cancelled after shipment creation; BullMQ retries with backoff; after N failures → alert the admin and switch that shipment to manual
+*Delivery company provider*
+- `providers/<company>.provider.ts`; create on ready with pickup address (vendor or kitchen), drop-off, customer name and phone, COD amount, delivery window; cancel when an order is cancelled after shipment creation; BullMQ retries with backoff; after N failures → alert the admin and switch that shipment to manual
 
 *Delivery webhooks & courier info*
-- `POST /v1/webhooks/delivery/:provider` (signature check, idempotent by event id); status mapping → `OrdersService.transition` (assigned → stores courier; picked_up → `picked_up`; in_transit → `out_for_delivery`; delivered → `delivered`; failed → `delivery_failed`); tracking data (courier, tracking URL or last location) in the customer order detail
+- `POST /v1/webhooks/delivery/:provider` (signature check, idempotent by event id); status mapping → order transitions through the orders domain state machine (assigned → stores courier; picked_up → `picked_up`; in_transit → `out_for_delivery`; delivered → `delivered`; failed → `delivery_failed`); tracking data (courier, tracking URL or last location) in the customer order detail
 
 **Where:** `services/api/src/integrations/delivery/providers/`, `services/api/src/modules/delivery/`
 
@@ -282,7 +282,7 @@ This task also covers:
 
 *Notification service (push, SMS, inbox)*
 - `Notification` (userId, type, titleAr/En, bodyAr/En, data {route, id}, readAt) and the inbox endpoints `GET /v1/customer/notifications`, `POST …/read`, unread count
-- `integrations/push/fcm.ts` (firebase-admin, multicast to the user's devices, removes invalid tokens)
+- `integrations/push/providers/fcm.provider.ts` (firebase-admin, multicast to the user's devices, removes invalid tokens)
 - Templates in `notifications/templates/{ar,en}.ts` per event: order confirmed / preparing / ready / out for delivery / delivered / cancelled / refund issued / complaint resolved (visits, chat and occasions are added by their sprints)
 - SMS only for critical events: order confirmed, out for delivery, delivery failed
 - Subscribes to domain events and sends through a BullMQ queue (retries)
@@ -355,7 +355,7 @@ This task also covers:
 **Output:**
 
 *Vendor order actions*
-- `POST /v1/vendor/orders/:id/start-preparing {slaughteredAt?}` (required when the order contains carcass items), `…/mark-ready` (triggers shipment creation for delivery orders), `…/mark-collected` (pickup), `…/request-courier` (manual adapter → admin alert; real provider → create shipment now); permission: owner of the order's vendor
+- `POST /v1/vendor/orders/:id/start-preparing {slaughteredAt?}` (required when the order contains carcass items), `…/mark-ready` (triggers shipment creation for delivery orders), `…/mark-collected` (pickup), `…/request-courier` (manual provider → admin alert; real provider → create shipment now); permission: owner of the order's vendor
 
 *Freshness record*
 - `FreshnessRecord` (orderId, slaughteredAt, mediaIds[] (photo or video ≤ 30 s), vetName?, vetStampMediaId?); `PUT /v1/vendor/orders/:id/freshness`; included in the customer order detail

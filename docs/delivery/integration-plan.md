@@ -60,9 +60,9 @@ Inside S5, occasions depend on kitchens (cooking option). Adha is independent. I
 
 | Input | Blocks | Fallback while waiting |
 |---|---|---|
-| Payment gateway choice (Moyasar / Tap / HyperPay / PayTabs) and its sandbox keys | PAY-API-2 (S3), PAY-MOB-2 (S4) | Clients and orders work against the fake provider; the port is fixed |
+| Geidea sandbox keys (Geidea selected as the payment gateway on 2026-11-13) | PAY-API-2 (S3), PAY-MOB-2 (S4) | Clients and orders work against the fake provider; the port is fixed |
 | SMS provider plus sender ID | ACC-API-1 production SMS (S1) | Console/log SMS provider in dev and staging, with a fixed OTP on staging |
-| Delivery company API docs and sandbox | DLV-API-2 (S4) | Manual courier flow (DLV-API-1 manual adapter) works without it |
+| Delivery company API docs and sandbox | DLV-API-2 (S4) | Manual courier flow (DLV-API-1 manual provider) works without it |
 | Operating numbers (cutoffs, capacity, fees, minimum order, COD cap, deposit %) | None (all are settings) | Seed defaults, client edits them in the dashboard |
 | Hosting approval (ADR-0003) | FND-INF-5 staging (S1) | Run staging temporarily on a low-cost provider and migrate when approved. Everything is containerised |
 | Seller of record & VAT on deposits (accountant) | INV-DOC-1 (S1) → order/finance model | Assume Jazlah is the seller of record for all orders (simplest) and keep vendor VAT fields optional |

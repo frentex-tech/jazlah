@@ -113,7 +113,7 @@ Jazlah sells cooked dishes and a "cook it for me" option. Orders are assigned to
 
 **How:**
 - The DLV-API-1 `ready` listener **must skip** orders that have a cooking job. For those, the shipment to the customer is created when the kitchen marks `ready`, with the kitchen as pickup.
-- Meat transfer Jazlah → kitchen: an internal shipment through the same delivery port (pickup = Jazlah, drop-off = kitchen, no COD, not visible to the customer), created when Jazlah marks the meat `meat_sent`. With the manual adapter, Jazlah's own driver is recorded.
+- Meat transfer Jazlah → kitchen: an internal shipment through the same delivery port (pickup = Jazlah, drop-off = kitchen, no COD, not visible to the customer), created when Jazlah marks the meat `meat_sent`. With the manual provider, Jazlah's own driver is recorded.
 
 **Where:** `services/api/src/modules/kitchens/`, `services/api/src/modules/orders/`
 

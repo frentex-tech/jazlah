@@ -1,7 +1,7 @@
 # Jazlah — Architecture & Code Map
 
 Every task on the board names the exact path it touches. This file defines those paths and the conventions behind them.
-Accepted decisions: [ADR-0001 stack](adr/0001-tech-stack.md) · [ADR-0002 monorepo & tooling](adr/0002-monorepo-tooling.md).
+Accepted decisions: [ADR-0001 stack](adr/0001-tech-stack.md) · [ADR-0002 monorepo & tooling](adr/0002-monorepo-tooling.md) · [ADR-0007 backend architecture](adr/0007-backend-architecture.md).
 
 ## 1. System overview
 
@@ -17,9 +17,9 @@ Accepted decisions: [ADR-0001 stack](adr/0001-tech-stack.md) · [ADR-0002 monore
                               │  NestJS API          │  services/api
                               │  modules + jobs      │
                               └──┬──────┬──────┬────┘
-                    PostgreSQL+PostGIS  Redis   S3-compatible storage
+                 PostgreSQL 17+PostGIS  Redis   S3-compatible storage
                                      (cache, BullMQ queues, socket adapter)
-     Adapters ──► Payment gateway · SMS · Delivery company · ZATCA · FCM · BNPL (post-launch)
+     Integrations ──► Payment gateway (Geidea) · Mail · SMS · Push (FCM) · Storage · Delivery company · ZATCA · BNPL (post-launch)
 ```
 
 ## 2. Monorepo layout
@@ -48,23 +48,44 @@ JS/TS packages use **pnpm workspaces** with **Turborepo** (`pnpm-workspace.yaml`
 
 ```
 services/api/
-  prisma/schema.prisma        single Prisma schema; migrations in prisma/migrations
+  prisma/                     multi-file Prisma schema, one schema file per domain; migrations beside it
   src/
     main.ts  app.module.ts
     config/                   typed config (zod-validated env)
     common/                   guards (auth, roles), filters, interceptors, i18n errors, pagination, decorators
-    database/                 PrismaService, geo helpers (PostGIS raw SQL)
-    realtime/                 socket.io gateway + Redis adapter, room conventions
-    jobs/                     BullMQ queues and processors
-    integrations/
-      sms/  payments/  delivery/  zatca/  push/  storage/  bnpl/
-        <type>.port.ts        interface (port)
-        providers/<name>.ts   implementation (adapter)
+      errors/                 AppError and the error code list
+      money/                  the Money helper: all arithmetic on halala amounts
+    infra/                    internal infrastructure; never imports from modules/
+      database/               PrismaService, geo helpers (PostGIS raw SQL)
+      jobs/                   BullMQ queue registration and connection only (no business processors)
+      realtime/               socket.io gateway + Redis adapter, room conventions, the publishing port
+      event-bus/              in-process event bus (publishers and subscribers live in modules)
+      redis/  logger/  health/
+    integrations/             external services, one folder per capability
+      mail/  sms/  push/  payments/  storage/  delivery/  zatca/  bnpl/
+        <capability>.port.ts              interface + injection token (the port)
+        <capability>.types.ts             argument and result types of the port
+        <capability>.errors.ts            errors the capability raises
+        <capability>.service.ts           what the rest of the API calls
+        <capability>.module.ts            selects providers from configuration
+        index.ts                          public entry; nothing outside the folder imports past it
+        providers/<vendor>.provider.ts    one file per vendor (e.g. resend.provider.ts)
+        providers/fake.provider.ts        fake used by tests
     modules/
       auth/ users/ addresses/ coverage/ vendors/ catalog/ pricing/ search/ cart/ coupons/
       scheduling/ checkout/ orders/ payments/ wallet/ refunds/ complaints/ ratings/
       delivery/ notifications/ freshness/ occasions/ visits/ kitchens/ adha/
       feed/ chat/ moderation/ finance/ invoicing/ cms/ admin-users/ audit/ reports/ settings/
+
+      orders, checkout, payments, refunds, wallet, finance: four layers
+        <module>.module.ts
+        api/                  controllers/customer.controller.ts | vendor.controller.ts | kitchen.controller.ts | admin.controller.ts
+                              dto/
+        application/          one class per use case
+        domain/               entities, state machines, rules, ports, events (plain TypeScript)
+        infrastructure/       Prisma repositories and mappers
+
+      every other module (promoted to four layers when it gains a state machine or money logic)
         <module>.module.ts
         <module>.service.ts
         controllers/customer.controller.ts | vendor.controller.ts | kitchen.controller.ts | admin.controller.ts
@@ -72,14 +93,27 @@ services/api/
   test/                       e2e tests (supertest), one file per module: <module>.e2e-spec.ts
 ```
 
+The rules for working inside this layout (dependency rules between the folders, enforced by ESLint; one declaration per file; testing and evidence) and the index of shared code are in `services/api/CLAUDE.md` and `services/api/.claude/`.
+
 **Conventions**
+- **Database and storage:** PostgreSQL 17 with PostGIS. Object storage is S3-compatible and is reached only through the storage port.
+- **Integrations:** every external service sits behind its port, with one provider per vendor. Modules import an integration only through its `index.ts`.
+  - `mail`, `sms` and `push` take an ordered provider list and fall back to the next provider on a retryable failure. A vendor error the vendor does not document counts as retryable.
+  - `payments` never fails over. One active provider (Geidea) takes new payments, each payment record stores its provider, and capture, void and refund go to that provider. An unknown or ambiguous gateway response marks the payment pending and triggers a status query; it is never retried blindly, because a blind retry can charge the customer twice.
+  - `delivery` and `bnpl` work like payments: the provider is recorded on the shipment or transaction, every later call goes to that provider, and there is no automatic failover.
+  - `zatca` has no fallback. Submissions go through a queue and retry against the same provider, with an idempotency key so an invoice is never submitted twice.
+  - `storage` has one provider and no fallback.
+- **Order status** changes in one place only: the state machine in the orders module's domain layer. No other code sets an order's status.
+- **Finance ledger:** append-only. Every movement of money (customer payment, commission, merchant payable, refund, COD receivable from the delivery company, transfer) is a ledger entry. Entries are never updated or deleted; a correction is a new entry. Statements and settlements must be reproducible from the entries alone.
+- **No inventory module.** Product availability belongs to `catalog` and slot capacity to `scheduling`.
 - **Route prefixes by audience:** `/v1/public/*` (no auth), `/v1/customer/*`, `/v1/vendor/*`, `/v1/kitchen/*`, `/v1/admin/*`, `/v1/webhooks/*`.
 - **Auth:** JWT access token (15 min) plus a rotating refresh token. Roles are `customer`, `vendor_owner`, `vendor_staff` (post-launch), `kitchen`, `admin` (with permissions), `feed_seller` (a flag on the customer).
-- **Money:** stored as integer halalas (`amount_halalas`). VAT is 15%, and prices include VAT unless stated otherwise.
+- **Money:** stored as integer halalas (`amount_halalas`). VAT is 15%, and prices include VAT unless stated otherwise. All arithmetic on amounts goes through the Money helper in `src/common/money/`. Frontends receive integer halalas through the generated API client; there is no shared money package.
 - **Time:** stored in UTC. All business rules (cutoff, capacity, "today") are computed in `Asia/Riyadh` on the server only.
 - **Swagger** at `/docs`, spec at `/docs-json`. Every endpoint has DTOs with class-validator and Swagger decorators. The spec is the contract.
-- **Errors:** `{ code: "CART_VENDOR_MISMATCH", message: <localized by Accept-Language>, details? }`.
-- **Domain events** are emitted in-process (`@nestjs/event-emitter`). Notifications, realtime updates and jobs subscribe to them, never to controllers.
+- **Errors:** `{ code: "CART_VENDOR_MISMATCH", message: <localized by Accept-Language>, details? }`. `AppError` and the error code list live in `src/common/errors/`. Codes are UPPER_SNAKE_CASE.
+- **Domain events** are emitted in-process (`@nestjs/event-emitter`) on the event bus. The bus lives in `src/infra/`; publishers and subscribers both live in modules. Notifications, realtime updates and jobs subscribe to them, never to controllers, so nothing in `infra/` imports from `modules/`.
+- **Jobs and realtime:** `src/infra/jobs/` only registers queues and holds the connection; a processor that runs business logic lives inside the module that owns that logic. Modules publish realtime updates through the publishing port in `src/infra/realtime/` and never import the gateway.
 - **Audit:** every admin mutation writes to `audit_log` through the `@Audited()` decorator.
 
 ## 4. Mobile (`apps/mobile`)

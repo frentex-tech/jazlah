@@ -243,7 +243,7 @@ Payment gateway behind a port, COD rules, wallet tender and refunds. No card dat
 ### PAY-DOC-1 — Spike: payment gateway selection (ADR-0004)
 `type: Task · area: api · size: S · prio: P0 · reqs: FR-PAY-01 · labels: spike, needs-client`
 
-**What:** help the client pick one gateway among Moyasar, Tap, HyperPay and PayTabs.
+**What:** the gateway is selected: Geidea (decided 2026-11-13, ADR-0007). Document what the integration needs from it.
 
 **Output:** `docs/adr/0004-payment-gateway.md`: fees (mada / credit / Apple Pay), settlement period, Apple Pay on iOS and web, tokenization, refunds API (full/partial), webhooks and signatures, Flutter SDK quality, sandbox availability, onboarding documents needed; recommendation
 
@@ -264,8 +264,8 @@ This task also covers:
 
 *Payment port, model, webhooks & fake provider*
 - `Payment` (orderId?, purpose order|occasion_deposit|occasion_balance|visit_fee|animal_deposit, provider, method mada|card|applepay|cod|wallet, amountHalalas, status initiated|authorized|captured|failed|cancelled|refunded|partially_refunded, providerRef, idempotencyKey, rawLast) and `Refund` (paymentId, amount, status, providerRef, reason)
-- `integrations/payments/payment.port.ts`: `createIntent`, `getStatus`, `refund`, `verifyWebhook`, `parseWebhook`
-- `providers/fake.ts` (dev/staging: approve/decline by amount or test card) and `POST /v1/webhooks/payments/:provider`
+- `integrations/payments/payments.port.ts`: `createIntent`, `getStatus`, `refund`, `verifyWebhook`, `parseWebhook`
+- `providers/fake.provider.ts` (dev/staging: approve/decline by amount or test card) and `POST /v1/webhooks/payments/:provider`
 - `PaymentsService`: emits `payment.captured|failed|refunded`
 
 *COD eligibility & wallet / split tender*
@@ -289,9 +289,9 @@ This task also covers:
 ### PAY-API-2 — Gateway implementation (mada, cards, Apple Pay, 3DS, refunds)
 `type: Feature · area: api · size: L · prio: P0 · reqs: FR-PAY-01 · depends: PAY-API-1, PAY-DOC-1 · labels: needs-client, security`
 
-**What:** the chosen gateway behind the port.
+**What:** Geidea behind the payments port.
 
-**Output:** `providers/<gateway>.ts` implementing every port method; 3DS redirect/callback URLs for app (deep link) and web; Apple Pay merchant validation endpoint (web) and token decryption flow per gateway docs; full and partial refunds; sandbox contract tests (`*.contract-spec.ts`, run manually or nightly)
+**Output:** `providers/geidea.provider.ts` implementing every port method; 3DS redirect/callback URLs for app (deep link) and web; Apple Pay merchant validation endpoint (web) and token decryption flow per gateway docs; full and partial refunds; sandbox contract tests (`*.contract-spec.ts`, run manually or nightly)
 
 **How:** follow the gateway's recommended mobile flow (native SDK or hosted page). Map gateway statuses to ours in one table in code.
 
@@ -356,11 +356,11 @@ Then call the payment intent outside the transaction. If it fails, the payment-t
 **Output:**
 - Statuses: `pending_payment → new → confirmed → preparing → ready → picked_up → out_for_delivery → delivered`; pickup: `ready → collected`; exceptions: `cancelled`, `delivery_failed`, `returned`
 - `OrderStatusHistory` (from, to, actorType system|customer|admin|vendor|kitchen|delivery, actorId, note, at)
-- `OrdersService.transition(orderId, to, actor, meta)` with a transition table (allowed from→to and actor), emits `order.status.changed`
+- The orders domain state machine: `transition(orderId, to, actor, meta)` with a transition table (allowed from→to and actor), emits `order.status.changed`
 - Rules: payment captured → `confirmed`; COD → `confirmed` if `ops.cod.confirmation=auto`, else stays `new` for admin review; a job cancels `pending_payment` after 15 min (releases capacity, coupon and wallet)
 - **Late capture:** a payment captured after the order was cancelled or expired → automatic full refund + admin alert (`payment.captured` listener checks the order state)
 
-**How:** the transition table is data in code (`orders/state-machine.ts`) with exhaustive unit tests. No other module updates `order.status` directly.
+**How:** the transition table is data in code in the orders domain layer (`modules/orders/domain/`) with exhaustive unit tests. No other module updates `order.status` directly.
 
 **Where:** `services/api/src/modules/orders/`
 

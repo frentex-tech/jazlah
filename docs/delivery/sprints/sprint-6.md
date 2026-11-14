@@ -100,7 +100,7 @@ Realtime 1:1 chat used by the feed marketplace (buyer ↔ seller), built generic
 
 **How:** strip links and phone numbers? **No.** Sharing phone numbers is allowed because deals close off-platform at launch. Keep it as a setting `chat.allowPhoneNumbers=true` for later.
 
-**Where:** `services/api/src/modules/chat/`, `services/api/src/realtime/`
+**Where:** `services/api/src/modules/chat/`, `services/api/src/infra/realtime/`
 
 **Acceptance:**
 - [ ] Socket e2e: a message arrives to the other participant in < 1 s; offline → push

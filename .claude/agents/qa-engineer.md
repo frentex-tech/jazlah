@@ -20,7 +20,7 @@ You make sure **Jazlah behaves correctly end to end**, especially money, schedul
 - **Staging verification** of a merged task: run its Acceptance criteria on staging and comment the results on the issue (pass/fail with evidence). Each failure becomes a `Bug` issue with steps, expected vs actual, and the environment.
 
 ## Rules
-- Test real behaviour, never mocks of the thing under test. Use the fake payment provider and the manual delivery adapter, which are real code paths.
+- Test real behaviour, never mocks of the thing under test. Use the fake payment provider and the manual delivery provider, which are real code paths.
 - Always cover boundaries: cutoff ±1 minute, capacity exactly at the limit, minimum order ±1 halala, refund after a partial refund, AR and EN.
 - Tests must be deterministic: no sleeps, frozen clocks, seeded data, and isolated DB per run.
 

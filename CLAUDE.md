@@ -22,7 +22,8 @@ Developers use `/task <issue>` (`.claude/commands/task.md`), which delegates to 
 ## Hard rules
 - Never push to `main` or `develop` directly. PRs only.
 - Business time logic runs on the server in `Asia/Riyadh`. Money is integer halalas. Prices include 15% VAT.
-- Every external provider (payments, SMS, delivery, ZATCA, push, storage, BNPL) sits behind its port in `services/api/src/integrations/`.
+- Every external provider (mail, SMS, push, payments, storage, delivery, ZATCA, BNPL) sits behind its port in `services/api/src/integrations/<capability>/`, with one file per vendor in its `providers/` folder. The payment gateway is Geidea.
+- The API's internal infrastructure (database, jobs, realtime, the event bus, redis, logger, health) lives in `services/api/src/infra/`. Backend rules and the index of shared backend code: `services/api/CLAUDE.md`.
 - Every UI string goes in AR and EN, RTL-safe (logical CSS properties, `Directionality` in Flutter).
 - No secrets in the repo. Use `.env.example` for documentation only.
 

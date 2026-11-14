@@ -17,7 +17,7 @@
 
 | Input | Blocks | Status |
 |---|---|---|
-| Payment gateway choice + sandbox keys | PAY-API-2 (Sprint 3) | open |
+| Geidea sandbox keys (Geidea selected as the payment gateway on 2026-11-13) | PAY-API-2 (Sprint 3) | open |
 | SMS provider + sender ID | ACC-API-1 production SMS | open |
 | Delivery company API docs + sandbox | DLV-API-2 (Sprint 4) | open |
 | Operating numbers (cutoffs, capacity, fees, minimum order, COD cap, deposit %) | none (editable settings) | open |
@@ -37,6 +37,11 @@
 - **Feed buyers** are registered platform users. Feed sellers need admin approval.
 
 ## Log
+
+### 2026-11-13 — Backend architecture decisions
+- Backend structure, integrations, money and events decided and recorded in [ADR-0007](../adr/0007-backend-architecture.md); `docs/architecture.md` §3 and `services/api/CLAUDE.md` updated to match.
+- Payment gateway selected: Geidea. The gateway line under "Waiting on the client" now tracks only the sandbox keys.
+- Sprint files updated where they named a superseded path, file name, image or choice (`src/infra/`, multi-file Prisma schema, `providers/<vendor>.provider.ts`, `postgis/postgis:17-3.5`, the orders domain state machine).
 
 ### 2026-11-09 — Planning
 - Repo `frentex-tech/jazlah` created (private), `main` + `develop` (default), merge rules and PR policy check.
