@@ -2,7 +2,7 @@
 
 The backend of JAZLA: a NestJS modular monolith in which every external service sits behind a port, one provider per vendor. Paths are relative to `services/api/`. **For API work this file and `.claude/` take precedence over the documents at the repository root** (an earlier plan): look nowhere else for layout, workflow or commands. This is the company's first product and later ones build on it, so **consistency and maintainability outrank delivery speed**.
 
-> **State on 2026-11-14: the foundation is complete, with the storage integration, the media module (uploads; no endpoints until authentication) and the sms integration (ordered fallback; providers `log` and the test fake, Msegat pending its documentation).** Built: validated config, `AppError` with the error filter and validation pipe, the logger, the database (Prisma 7; tables `audit_logs`, `idempotency_keys`, `media`), Redis, BullMQ (queue `media-cleanup`; workers only where QUEUE_WORKERS_ENABLED), the event bus, readiness, the API docs, the security baseline, the shutdown deadline, lint rules R0 to R22, and CI (`.github/workflows/api-ci.yml`). Not built: authentication, caching, Bull Board, an outbox, other integrations, `Money` and the other reserved names (of the masking helper, only `maskPhoneNumber` exists). Each is a later step: do not start one unless your task asks. Update this note when a step lands.
+> **State on 2026-11-14: the foundation is complete, with the storage integration, the media module (uploads; no endpoints until authentication) the sms integration (ordered fallback; providers `log` and the test fake, Msegat pending its documentation), and authentication (modules `users` and `auth`: phone and OTP sign-in scoped to one audience, the global guard, `pnpm admin:create`). Production deployment waits on a real SMS provider.** Built: validated config, `AppError` with the error filter and validation pipe, the logger, the database (Prisma 7; tables `audit_logs`, `idempotency_keys`, `media`, `users`, `user_access`, `otp_challenges`, `auth_sessions`, `refresh_tokens`), Redis, BullMQ (queue `media-cleanup`; workers only where QUEUE_WORKERS_ENABLED), the event bus, readiness, the API docs, the security baseline, the shutdown deadline, lint rules R0 to R22, and CI (`.github/workflows/api-ci.yml`). Not built: endpoints that grant or disable access, cleanup of expired challenges and tokens, caching, Bull Board, an outbox, other integrations, `Money` and the other reserved names (of the masking helper, only `maskPhoneNumber` exists). Each is a later step: do not start one unless your task asks. Update this note when a step lands.
 
 ## Loaded with this file, and what to read when
 
@@ -49,6 +49,7 @@ ARCHITECTURE.md and DECISIONS.md are reference documents: nothing imports them, 
 | Registry | `node .claude/hooks/check-registry.mjs` |
 | Database | `pnpm db:migrate`, `pnpm db:deploy`, `pnpm db:generate`; `pnpm db:reset` drops data: only when the user asks |
 | Run | `pnpm infra:up`, `pnpm start:dev`, then `/v1/health`, `/v1/health/ready`, `/docs` |
+| First admin | `pnpm admin:create <phone>` (grants admin access; idempotent) |
 
 Jest prints `ExperimentalWarning: VM Modules`: expected. If a check you need has no command here, report it under "Not verified"; do not invent one.
 

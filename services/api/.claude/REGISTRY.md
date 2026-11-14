@@ -14,11 +14,13 @@ One line per building block: name, path, purpose; the detail is in that file's d
 - **Integration with ordered fallback** (sms): `src/integrations/sms/` — the storage shape, plus: the token is an ordered list of ports (`SMS_PORTS`), the service tries them in order with a timeout per call and moves on only on a retryable `SmsError`, one error (`SmsNotSentError`) carries every attempt, startup refuses unknown, repeated or unconfigured providers (`src/config/`), the log masks the recipient and never holds the text. Mail and push copy it.
 - **CRUD-shaped module without a controller** (media): `src/modules/media/` — service through `DbContext`, conditional updates on the status, a processor and its schedule. Its controllers come with authentication.
 
-None built yet: payments integration, four-layer module, CRUD module with controllers. Until then follow ARCHITECTURE.md and the area's rule file.
+- **Four-layer module** (auth): `src/modules/auth/` — `api/` (one controller per audience, DTOs, mapping), `application/` (one use case per class, tested against the fakes through `auth-use-cases.fake.ts`), `domain/` (entities holding the rules, one port per file with its token, in-memory fakes in `fakes/`), `infrastructure/` (Prisma repositories with mappers, and the other port implementations); `auth.module.ts` alone binds ports to classes. A use case that must commit something before refusing returns an outcome from its transaction and throws after it.
+
+None built yet: payments integration, CRUD module with controllers. Until then follow ARCHITECTURE.md and the area's rule file.
 
 ## config
 
-- **Typed configuration** — `src/config/` — `AppConfigModule`, `loadEnv` (the only reader of `process.env`), one namespace per area (`app`, `logger`, `database`, `redis`, `queue`, `http`, `rateLimit`, `storage`, `media`, `sms`); `findMissingProviderVariables` (`src/config/find-missing-provider-variables.ts`) names the variables a listed provider lacks; inject `@Inject(xConfig.KEY)`.
+- **Typed configuration** — `src/config/` — `AppConfigModule`, `loadEnv` (the only reader of `process.env`), one namespace per area (`app`, `logger`, `database`, `redis`, `queue`, `http`, `rateLimit`, `storage`, `media`, `sms`, `auth`); `findMissingProviderVariables` (`src/config/find-missing-provider-variables.ts`) names the variables a listed provider lacks; inject `@Inject(xConfig.KEY)`.
 
 ## common
 
@@ -39,6 +41,16 @@ None built yet: payments integration, four-layer module, CRUD module with contro
 - **sanitizeFileName** — `src/common/files/sanitize-file-name.ts` — a client's file name made safe to store and show; never a path.
 - **normalizeSaudiMobileNumber** — `src/common/phone/normalize-saudi-mobile-number.ts` — a Saudi mobile number in E.164 (`+9665XXXXXXXX`) from the forms people type, or null.
 - **maskPhoneNumber** — `src/common/phone/mask-phone-number.ts` — the masking helper for phone numbers: `+966*******78`; what logs hold instead of a number.
+- **Audiences and the signed-in user** — `src/common/auth/audiences.constants.ts` — `AUDIENCES` (customer, vendor, kitchen, admin), `Audience` (`src/common/auth/audience.type.ts`), `RouteAudience` (`src/common/auth/route-audience.type.ts`), `AuthenticatedUser` (`src/common/auth/authenticated-user.type.ts`); plain TypeScript, importable from `domain/`.
+- **resolveRouteAudience** — `src/common/auth/resolve-route-audience.ts` — a controller path's audience (`public`, an audience, or null).
+- **AccessTokenVerifier** — `src/common/auth/access-token-verifier.interface.ts` — what the guard verifies tokens with; token `src/common/auth/access-token-verifier.constants.ts`, result `src/common/auth/access-token-verification.type.ts`; implemented by the auth module.
+- **AuthenticationGuard** — `src/common/guards/authentication.guard.ts` — the global guard: audience from the route, one audience per token, deny by default.
+- **RouteAudienceCheck** — `src/common/guards/route-audience.check.ts` — startup fails on an endpoint with neither an audience prefix nor `@Public()` (`src/common/guards/route-without-audience.error.ts`).
+- **Public** — `src/common/decorators/public.decorator.ts` — marks a route outside the audience prefixes as needing no sign-in; key `src/common/decorators/public-route.constants.ts`.
+- **CurrentUser** — `src/common/decorators/current-user.decorator.ts` — the `AuthenticatedUser` of the request.
+- **Rate limit declarations** — `src/common/decorators/to-rate-limit-declaration.ts` — what `@RateLimit` stores (`src/common/decorators/rate-limit-declaration.type.ts`, numbers `src/common/decorators/rate-limit-settings.type.ts`); `resolveRateLimitPolicy` (`src/common/decorators/resolve-rate-limit-policy.ts`) turns one into a policy, reading configured limits.
+- **SaudiMobileNumber** — `src/common/phone/saudi-mobile-number.decorator.ts` — DTO property decorator: accepts every form, leaves E.164.
+- **toLatinDigits** — `src/common/text/to-latin-digits.ts` — Arabic-Indic and Extended Arabic-Indic digits to Latin.
 - **measureSmsText** — `src/common/sms/measure-sms-text.ts` — an SMS text's encoding (GSM-7 or UCS-2), units and segments; alphabet `src/common/sms/gsm-7-alphabet.constants.ts`, sizes `src/common/sms/sms-segment-sizes.constants.ts`, types `src/common/sms/sms-encoding.type.ts`, `src/common/sms/sms-text-measure.type.ts`.
 
 ## infra
@@ -47,7 +59,8 @@ None built yet: payments integration, four-layer module, CRUD module with contro
 - **HTTP setup** — `src/infra/http/` — `configureHttpApp`: the HTTP layer in order, for `main.ts` and the e2e tests. [whole folder: one unit, configureHttpApp with its constants and middleware]
 - **API docs** — `src/infra/api-docs/` — `buildOpenApiDocument`, `setupApiDocs` (`/docs`). [whole folder: one unit, building and serving the one OpenAPI document]
 - **Rate limiting** — `src/infra/rate-limit/` — `RateLimitModule`: the global guard, the pre-routing limiter, the Redis storage, the startup policy check. [whole folder: one unit, the throttler setup reached through RateLimitModule and the two decorators below]
-- **RateLimit, SkipRateLimit** — `src/infra/rate-limit/rate-limit.decorator.ts`, `src/infra/rate-limit/skip-rate-limit.decorator.ts` — what endpoints use instead of the throttler's decorators (R19).
+- **RateLimiter** — `src/infra/rate-limit/rate-limiter.ts` — `consume(options, key)`: a limit counted by a key the caller supplies (a phone number), same options, storage and fail-closed behaviour as `@RateLimit`; the key must already be a keyed hash.
+- **RateLimit, SkipRateLimit** — `src/infra/rate-limit/rate-limit.decorator.ts`, `src/infra/rate-limit/skip-rate-limit.decorator.ts` — what endpoints use instead of the throttler's decorators (R19); numbers written in the decorator, or picked from `rateLimit.configured` with `from`.
 - **Event bus** — `src/infra/event-bus/` — `EventBusModule`, `EventPublisher.publish(EventClass, event)`, `@OnDomainEvent`, `InvalidEventError`. [whole folder: one unit, the wrapper around @nestjs/event-emitter (R16)]
 - **Database** — `src/infra/database/` — `DatabaseModule`, `PrismaService` (infrastructure only). [whole folder: one unit; scope storage, errors, types and constants are internals of the entries below]
 - **DbContext** — `src/infra/database/db-context.ts` — the client repositories and CRUD services query through.
@@ -78,10 +91,15 @@ None built yet: payments integration, four-layer module, CRUD module with contro
 
 - **MediaService** — `src/modules/media/media.service.ts` — `requestUpload`, `confirmUpload`, `getDownloadLink` for uploaded files; with `RequestUploadDto` (`src/modules/media/dto/request-upload.dto.ts`) and the types in `src/modules/media/index.ts`.
 
+- **UsersService** — `src/modules/users/users.service.ts` — `findOrCreateByPhone`, `findById`, `findByPhone`, `findActiveAccess` (staff access), `grantAdminAccess`; types `User`, `StaffAccess`, `StaffAudience` in `src/modules/users/index.ts`.
+- **AuthModule** — `src/modules/auth/index.ts` — exports nothing to call: other modules get the signed-in user with `@CurrentUser()` and protect routes by their audience prefix.
+
 ## Lookup tables (extend, never duplicate)
 
 - **Error codes** — `src/common/errors/error-code.enum.ts` — every code; a new one also needs its messages (`src/common/errors/error-messages.constants.ts`) and status (`src/common/errors/error-statuses.constants.ts`). Never rename, remove or reuse a code.
 - **Queue names** — `src/infra/queue/queue-names.constants.ts` — `QUEUE_NAMES`.
 - **Upload purposes** — `src/modules/media/upload-purposes.constants.ts` — `UPLOAD_PURPOSES`: each purpose's visibility, types and size; a module that needs uploads adds its own.
+- **Configured rate limits** — `src/config/rate-limit.config.ts` — `configured`: the named limits whose numbers come from the environment (`ConfiguredRateLimits`, `src/config/configured-rate-limits.type.ts`).
+- **Audiences** — `src/common/auth/audiences.constants.ts` — `AUDIENCES`; the Prisma enum `audience` and the route prefixes follow it.
 - **Environment schema** — `src/config/env.schema.ts` — every variable with its default; a new one also goes in a namespace and `.env.example`.
 - **SMS providers** — `src/config/sms-providers.constants.ts` — `SMS_PROVIDERS`, the names SMS_PROVIDERS may list, with each one's variables in `src/config/sms-provider-variables.constants.ts`.

@@ -21,7 +21,7 @@ Three business questions are not answered (`.claude/DECISIONS.md`): who the sell
 
 ## 2. Choose the shape, or confirm it
 
-- **orders, checkout, payments, refunds, wallet, finance:** four layers.
+- **auth, orders, checkout, payments, refunds, wallet, finance:** four layers.
 - **Any other module, new or existing:** controllers + service + dto. If the task would add a state machine or money logic to it, stop and propose promoting it to four layers (`.claude/rules/modules.md`).
 - There is no inventory module: availability belongs to `catalog` and slot capacity to `scheduling`.
 

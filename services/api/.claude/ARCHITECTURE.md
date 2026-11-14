@@ -19,13 +19,18 @@ prisma/
   models/audit.prisma         AuditLog -> audit_logs
   models/idempotency.prisma   IdempotencyKey -> idempotency_keys
   models/media.prisma         Media -> media (enums media_visibility, media_status, media_rejection_reason)
+  models/users.prisma         User -> users, UserAccess -> user_access (enum audience)
+  models/auth.prisma          OtpChallenge -> otp_challenges, AuthSession -> auth_sessions, RefreshToken ->
+                              refresh_tokens (enums device_platform, auth_session_revocation_reason)
   migrations/                 20261113150318_init: PostGIS extension, audit_logs; 20261113224826_idempotency_keys;
-                              20261114151242_media
+                              20261114151242_media; 20261114192800_users_and_auth (with two check constraints)
 src/
   main.ts                     bootstrap: validates the environment, pino as Nest's logger, configureHttpApp,
                               shutdownOnSignals (the shutdown deadline), port from config; an invalid
                               environment prints its problems and exits with code 1
-  app.module.ts               imports config, logger, database, redis, queue, event bus, rate limit, health;
+  create-admin.ts             pnpm admin:create <phone>: grants admin access (create-admin.module.ts)
+  app.module.ts               imports config, logger, database, redis, queue, event bus, rate limit, auth (after
+                              rate limit: guard order), health, media;
                               registers the global filter and pipe
   generate-openapi.ts         pnpm openapi:generate / openapi:check (Nest preview mode: nothing connects)
   config/                     env.schema.ts (zod), validate-env.ts, load-env.ts (the one reader of process.env),
@@ -48,7 +53,11 @@ src/
                               helper for phone numbers)
     sms/                      measure-sms-text.ts (GSM-7 or UCS-2, segments), the GSM-7 alphabet, segment sizes
     i18n/  request-id/  async/
-    guards/ interceptors/     empty
+    auth/                     audiences, AuthenticatedUser, the AccessTokenVerifier interface, resolve-route-audience.ts
+    guards/                   authentication.guard.ts (global; audience from the route prefix), route-audience.check.ts
+                              (startup refuses an endpoint with neither an audience nor @Public())
+    text/                     to-latin-digits.ts
+    interceptors/             empty
   infra/
     http/                     configure-http-app.ts (the HTTP layer in order: request logger, helmet, CORS,
                               pre-routing rate limit, JSON-only bodies, /v1, /docs), require-json-body.ts, constants
@@ -95,6 +104,15 @@ src/
                               SMS_PROVIDER_TIMEOUT_MS each, log masked), .module.ts (SMS_PROVIDERS), index.ts,
                               testing.ts, providers/log.provider.ts (development only), providers/fake.provider.ts
   modules/
+    users/                    CRUD-shaped, no controller: users.service.ts (users, staff access in user_access)
+    auth/                     the reference four-layer module: phone and OTP sign-in scoped to one audience.
+                              api/ (public.controller.ts: otp/request, otp/verify, refresh, logout under
+                              /v1/public/auth; customer, vendor, kitchen, admin controllers: me, auth/logout-all),
+                              application/ (request-otp, verify-otp, refresh-session, logout, logout-all,
+                              get-current-user), domain/ (otp-challenge, refresh-token, auth-session entities;
+                              ports/; fakes/), infrastructure/ (Prisma repositories and mappers, hmac-otp-codes,
+                              jwt-access-tokens, random-refresh-token-secrets, sms-otp-sender,
+                              rate-limited-otp-requests, tracked-detached-work, system-clock)
     media/                    CRUD-shaped, no controller yet: media.service.ts (request, confirm, download link,
                               removeExpiredUploads), upload-purposes.constants.ts (UPLOAD_PURPOSES), dto/,
                               media-cleanup.processor.ts and .scheduler.ts (queue media-cleanup), types
@@ -153,7 +171,7 @@ src/
       providers/<vendor>.provider.ts    one file per vendor
       providers/fake.provider.ts        fake used by tests
   modules/                    business domains, one folder each
-    orders, checkout, payments, refunds, wallet, finance: four layers
+    auth, orders, checkout, payments, refunds, wallet, finance: four layers
       index.ts                public entry: re-exports what other modules may use (R7)
       <module>.module.ts
       api/                    controllers/<audience>.controller.ts, dto/
@@ -173,7 +191,7 @@ test/                         e2e tests, one file per module: <module>.e2e-spec.
 - PostgreSQL 17 with PostGIS, through Prisma. Redis 7 with BullMQ 6 (through `@nestjs/bullmq`) and ioredis 6. Local images: `postgis/postgis:17-3.5` and `redis:7-alpine`, started together by `pnpm infra:up`.
 - Object storage is S3-compatible, reached only through the storage port, with presigned direct uploads.
 - Payment gateway: Geidea, behind the payments port.
-- Auth: phone number + OTP, JWT access and refresh tokens.
+- Auth: phone number + OTP, a sign-in scoped to one audience, JWT access tokens (HS256, keys with ids) and rotating refresh tokens (`@nestjs/jwt` 12).
 - HTTP: `@nestjs/swagger` 12, helmet 8, `@nestjs/throttler` 6 with our own Redis storage.
 
 ## Routes
@@ -181,6 +199,7 @@ test/                         e2e tests, one file per module: <module>.e2e-spec.
 - Global prefix: `/v1`.
 - Health: `GET /v1/health`. It has no audience segment.
 - API documentation: `/docs` and `/docs-json`, outside the prefix.
+- Every route is under an audience prefix or marked `@Public()`; the authentication guard denies anything else, and the application refuses to start with it.
 - Business routes are grouped by audience, starting with the first business module: `/v1/public/...` (no authentication), `/v1/customer/...`, `/v1/vendor/...`, `/v1/kitchen/...`, `/v1/admin/...`. One controller per audience.
 - Incoming webhooks: `/v1/webhooks/<capability>/<provider>`, for example `/v1/webhooks/payments/geidea`. Where the webhook controller lives is still open (`.claude/DECISIONS.md`).
 
