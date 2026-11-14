@@ -1,4 +1,6 @@
 import { Inject, Injectable, Logger } from '@nestjs/common';
+import { redisConfig } from '@config/redis.config';
+import type { RedisConfig } from '@config/redis-config.type';
 import type { ThrottlerStorage } from '@nestjs/throttler';
 import type { Redis } from 'ioredis';
 import { withTimeout } from '@common/async/with-timeout';
@@ -32,7 +34,11 @@ export class RedisThrottlerStorage implements ThrottlerStorage {
   private readonly logger = new Logger(RedisThrottlerStorage.name);
   private failing = false;
 
-  constructor(@Inject(RATE_LIMIT_REDIS) private readonly redis: Redis) {}
+  constructor(
+    @Inject(RATE_LIMIT_REDIS) private readonly redis: Redis,
+    @Inject(redisConfig.KEY)
+    private readonly config: Pick<RedisConfig, 'keyPrefix'>,
+  ) {}
 
   async increment(
     key: string,
@@ -45,7 +51,7 @@ export class RedisThrottlerStorage implements ThrottlerStorage {
       if (this.redis.status !== 'ready') {
         throw new RedisNotReadyError(this.redis.status);
       }
-      const keys = rateLimitKeys(key);
+      const keys = rateLimitKeys(this.config.keyPrefix, key);
       const reply = await withTimeout(
         this.redis.eval(
           INCREMENT_HITS_SCRIPT,

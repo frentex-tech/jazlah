@@ -9,7 +9,9 @@ import { LOG_DESTINATION } from '@infra/logger/log-destination.constants';
 import { Logger } from 'nestjs-pino';
 import { RATE_LIMIT_REDIS } from '@infra/rate-limit/rate-limit.constants';
 import { AppModule } from '../../src/app.module';
+import type { NextFunction, Request, Response } from 'express';
 import { enableWorkers } from './enable-workers';
+import { testClientAddress } from './test-client-address';
 import type { HttpAppOptions } from './http-app-options.type';
 
 /**
@@ -54,6 +56,16 @@ export async function createHttpApp(
   });
   // As in main.ts: Nest's Logger writes through the application logger.
   app.useLogger(app.get(Logger));
+  // Every request comes from 127.0.0.1, so suites running in parallel would share rate
+  // limit counters. As a load balancer would, give each request the address of the test
+  // that sends it (testClientAddress), unless the test set X-Forwarded-For itself. It
+  // counts because e2e runs trust one proxy hop (scripts/e2e.mjs); a test that sets
+  // TRUST_PROXY_HOPS=0 gets the socket address again. Mounted before configureHttpApp,
+  // so it runs first; production's HTTP setup is unchanged.
+  app.use((req: Request, _res: Response, next: NextFunction) => {
+    req.headers['x-forwarded-for'] ??= testClientAddress();
+    next();
+  });
   configureHttpApp(app);
   await app.init();
   // As a load balancer waits for readiness: until the shared Redis client has

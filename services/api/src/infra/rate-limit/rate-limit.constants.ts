@@ -1,8 +1,8 @@
 /**
- * Prefix of every rate limit key in Redis. The rest of the key is a SHA-256 hash in
- * braces (a cluster hash tag) and `:hits` or `:blocked` (rateLimitKeys).
+ * The segment after REDIS_KEY_PREFIX in every rate limit key:
+ * `<prefix>:rate-limit:{<sha256>}:hits` or `:blocked` (rateLimitKeys).
  */
-export const RATE_LIMIT_KEY_PREFIX = 'jazla:rate-limit:';
+export const RATE_LIMIT_KEY_SEGMENT = 'rate-limit';
 
 /**
  * How long a request waits for a connected Redis to answer before the storage gives up

@@ -66,7 +66,7 @@ describe('Redis errors in logs (e2e)', () => {
         ],
       })
         .overrideProvider(redisConfig.KEY)
-        .useValue({ url })
+        .useValue({ url, keyPrefix: loadEnv().REDIS_KEY_PREFIX })
         .overrideProvider(LOG_DESTINATION)
         .useValue(capture.stream)
         .compile();

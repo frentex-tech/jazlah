@@ -1,10 +1,4 @@
 /**
- * The prefix of every BullMQ key in Redis (`jazla:<queue>:...`), so the API's queues
- * are recognisable when Redis is shared or inspected.
- */
-export const QUEUE_KEY_PREFIX = 'jazla';
-
-/**
  * How long a closing worker waits for its active jobs before it cancels them. Below the
  * usual 30 s an orchestrator allows between SIGTERM and SIGKILL, so the API still
  * closes its connections cleanly.

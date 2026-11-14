@@ -26,7 +26,7 @@ export class RedisService extends Redis implements OnApplicationShutdown {
   private readonly logger = new Logger(RedisService.name);
   private reportedDown = false;
 
-  constructor(@Inject(redisConfig.KEY) config: RedisConfig) {
+  constructor(@Inject(redisConfig.KEY) config: Pick<RedisConfig, 'url'>) {
     // ioredis reads host, port, credentials, logical database and TLS (`rediss://`) from the URL.
     super(config.url, {
       connectTimeout: REDIS_CONNECT_TIMEOUT_MS,

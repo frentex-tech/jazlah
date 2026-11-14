@@ -5,6 +5,7 @@ import { PrismaService } from '@infra/database/prisma.service';
 import { createHttpApp } from './support/create-http-app';
 import { LogCapture } from './support/log-capture';
 import { LogProbeController } from './support/log-probe.controller';
+import { testClientAddress } from './support/test-client-address';
 import { PRISMA_MESSAGE_OMITTED } from '@infra/logger/prisma-error-logging.constants';
 import { DbContext } from '@infra/database/db-context';
 import {
@@ -114,8 +115,9 @@ describe('Secrets and personal data in request logs (e2e)', () => {
         .expect(200);
       const line = await next;
       show('headers and address', line);
-      // Express's req.ip (the test client connects from the loopback address).
-      expect(Object(line.req)).toMatchObject({ ip: '127.0.0.1' });
+      // Express's req.ip: the test's own address, sent as X-Forwarded-For and trusted
+      // (createHttpApp; e2e runs trust one proxy hop).
+      expect(Object(line.req)).toMatchObject({ ip: testClientAddress() });
       expect(JSON.stringify(line)).not.toContain('e2e-token');
       expect(JSON.stringify(line)).not.toContain('e2e-key');
     });

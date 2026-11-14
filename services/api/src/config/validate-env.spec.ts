@@ -27,6 +27,7 @@ const HTTP_DEFAULTS = {
   CORS_ORIGINS: [],
   TRUST_PROXY_HOPS: 0,
   QUEUE_WORKERS_ENABLED: true,
+  REDIS_KEY_PREFIX: 'jazla',
   REQUEST_BODY_LIMIT_KB: 100,
   RATE_LIMIT_WINDOW_MS: 60_000,
   RATE_LIMIT_MAX_REQUESTS: 300,
@@ -350,6 +351,22 @@ describe('validateEnv', () => {
         validateEnv({ ...VALID, QUEUE_WORKERS_ENABLED: 'false' })
           .QUEUE_WORKERS_ENABLED,
       ).toBe(false);
+    });
+
+    it.each(['', 'Jazla', 'jazla:e2e', 'jazla-', '-jazla', 'a--b', 'a{b}'])(
+      'rejects REDIS_KEY_PREFIX %p',
+      (value) => {
+        expect(problemsOf({ ...VALID, REDIS_KEY_PREFIX: value })).toEqual([
+          'REDIS_KEY_PREFIX: expected lowercase letters and digits in words joined by single hyphens (jazla)',
+        ]);
+      },
+    );
+
+    it('accepts a REDIS_KEY_PREFIX of hyphen-joined words', () => {
+      expect(
+        validateEnv({ ...VALID, REDIS_KEY_PREFIX: 'jazla-e2e-m3x9k2' })
+          .REDIS_KEY_PREFIX,
+      ).toBe('jazla-e2e-m3x9k2');
     });
 
     it('rejects a QUEUE_WORKERS_ENABLED other than true or false', () => {

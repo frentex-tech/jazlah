@@ -14,6 +14,8 @@ const DATABASE_URL_EXPECTED =
   'expected a PostgreSQL connection URL (postgresql://user:password@host:port/database)';
 const REDIS_URL_EXPECTED =
   'expected a Redis connection URL (redis://[:password@]host:port[/database], or rediss:// for TLS; scheme in lowercase, database 0 to 15)';
+const REDIS_KEY_PREFIX_EXPECTED =
+  'expected lowercase letters and digits in words joined by single hyphens (jazla)';
 const CORS_ORIGINS_EXPECTED =
   'expected a comma-separated list of origins such as https://app.example.com (scheme, host and optional port; no path or trailing slash), or *';
 const TRUST_PROXY_HOPS_IN_PRODUCTION =
@@ -73,6 +75,13 @@ export const envSchema = z
     REDIS_URL: z
       .string({ error: `required: ${REDIS_URL_EXPECTED}` })
       .refine(isRedisUrl, { error: REDIS_URL_EXPECTED }),
+    // The first segment of every key the API writes to Redis: rate limit counters
+    // (`<prefix>:rate-limit:...`) and BullMQ queues (`<prefix>:<queue>:...`). Each e2e run
+    // sets its own, so runs never see each other's keys (scripts/e2e.mjs).
+    REDIS_KEY_PREFIX: z
+      .string()
+      .regex(/^[a-z0-9]+(-[a-z0-9]+)*$/, { error: REDIS_KEY_PREFIX_EXPECTED })
+      .default('jazla'),
     // Serve the API documentation at /docs. Unset: on in development and test, off in
     // production. Only "true" or "false" are accepted.
     API_DOCS_ENABLED: z

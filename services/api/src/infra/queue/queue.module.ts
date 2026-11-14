@@ -3,7 +3,6 @@ import { Module } from '@nestjs/common';
 import { redisConfig } from '@config/redis.config';
 import type { RedisConfig } from '@config/redis-config.type';
 import { DEFAULT_JOB_OPTIONS } from './default-job-options.constants';
-import { QUEUE_KEY_PREFIX } from './queue.constants';
 
 /**
  * Registers BullMQ once for the whole application: the Redis connection from the
@@ -24,7 +23,9 @@ import { QUEUE_KEY_PREFIX } from './queue.constants';
       useFactory: (config: RedisConfig) => ({
         // BullMQ hands the URL to ioredis for each connection it opens.
         connection: { url: config.url },
-        prefix: QUEUE_KEY_PREFIX,
+        // `<REDIS_KEY_PREFIX>:<queue>:...`: the API's queues are recognisable when Redis
+        // is shared or inspected, and each e2e run keeps its own.
+        prefix: config.keyPrefix,
         defaultJobOptions: DEFAULT_JOB_OPTIONS,
       }),
     }),

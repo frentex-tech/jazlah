@@ -5,7 +5,6 @@ import { Queue } from 'bullmq';
 import { loadEnv } from '@config/load-env';
 import { PrismaService } from '@infra/database/prisma.service';
 import { buildJobId } from '@infra/queue/build-job-id';
-import { QUEUE_KEY_PREFIX } from '@infra/queue/queue.constants';
 import { AppModule } from '../src/app.module';
 import { EventProbePublisherModule } from './support/events/event-probe-publisher.module';
 import { EventProbePublisherService } from './support/events/event-probe-publisher.service';
@@ -32,7 +31,7 @@ describe('Event bus (e2e)', () => {
   const auditIds: string[] = [];
   const inspector = new Queue(EVENT_PROBE_QUEUE, {
     connection: { url: loadEnv().REDIS_URL },
-    prefix: QUEUE_KEY_PREFIX,
+    prefix: loadEnv().REDIS_KEY_PREFIX,
   });
 
   beforeAll(async () => {

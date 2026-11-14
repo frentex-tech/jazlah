@@ -7,10 +7,12 @@ import { ERROR_MESSAGES } from '@common/errors/error-messages.constants';
 import type { ErrorResponseBody } from '@common/filters/error-response-body.interface';
 import { buildHttpConfig } from '@config/build-http-config';
 import { loadEnv } from '@config/load-env';
+import { redisConfig } from '@config/redis.config';
+import type { RedisConfig } from '@config/redis-config.type';
 import { rateLimitKeys } from '@infra/rate-limit/rate-limit-keys';
+import { RATE_LIMIT_STORAGE_TIMEOUT_MS } from '@infra/rate-limit/rate-limit.constants';
 import { RedisThrottlerStorage } from '@infra/rate-limit/redis-throttler-storage';
 import { RedisService } from '@infra/redis/redis.service';
-import { clearRateLimits } from './support/clear-rate-limits';
 import { createHttpApp } from './support/create-http-app';
 import type { HttpAppOptions } from './support/http-app-options.type';
 import { RateLimitProbeController } from './support/rate-limit-probe.controller';
@@ -65,9 +67,22 @@ async function statuses(
   return result;
 }
 
+/**
+ * "At once" with Redis down: well under the storage timeout a request would wait if Redis
+ * were still called. A tighter bound (it was 50 ms) measures the machine's load instead:
+ * with every suite running in parallel, requests took up to 103 ms.
+ */
+const AT_ONCE_MS = RATE_LIMIT_STORAGE_TIMEOUT_MS / 2;
+
 const times = (count: number, status: number): number[] =>
   Array.from({ length: count }, () => status);
 
+/**
+ * Every test has its own client address (createHttpApp sends the test's address as
+ * X-Forwarded-For; e2e runs trust one proxy hop) and every run its own key prefix, so
+ * each test starts with fresh counters and no other suite touches them: nothing is
+ * cleared, and no other suite's counters are.
+ */
 describe('Rate limiting (e2e)', () => {
   const apps: NestExpressApplication[] = [];
 
@@ -85,12 +100,10 @@ describe('Rate limiting (e2e)', () => {
   }
 
   beforeEach(async () => {
-    const app = await start();
-    await clearRateLimits(app.get(RedisService));
+    await start();
   });
 
   afterEach(async () => {
-    await clearRateLimits(apps[0].get(RedisService));
     await Promise.all(apps.splice(0).map((app) => app.close()));
   });
 
@@ -176,7 +189,8 @@ describe('Rate limiting (e2e)', () => {
     expect((await count()).isBlocked).toBe(false);
     expect((await count()).isBlocked).toBe(true);
     // The block ends (its key expires) while the 60 s window is still running.
-    await app.get(RedisService).del(rateLimitKeys(key).blocked);
+    const { keyPrefix } = app.get<RedisConfig>(redisConfig.KEY);
+    await app.get(RedisService).del(rateLimitKeys(keyPrefix, key).blocked);
     const after = await count();
     process.stdout.write(
       `after the block ended inside the window: totalHits=${after.totalHits} isBlocked=${after.isBlocked}\n`,
@@ -230,7 +244,7 @@ describe('Rate limiting (e2e)', () => {
         );
         expect(results.map((r) => r.status)).toEqual(times(10, 200));
         for (const result of results) {
-          expect(result.ms).toBeLessThan(50);
+          expect(result.ms).toBeLessThan(AT_ONCE_MS);
         }
 
         const closed = await timed(app, FAIL_CLOSED_URL);
@@ -258,7 +272,7 @@ describe('Rate limiting (e2e)', () => {
         }
         expect(results.map((r) => r.status)).toEqual(times(count, 200));
         for (const result of results) {
-          expect(result.ms).toBeLessThan(50);
+          expect(result.ms).toBeLessThan(AT_ONCE_MS);
         }
         expect((await timed(app, FAIL_CLOSED_URL)).body.code).toBe(
           'SERVICE_UNAVAILABLE',
@@ -328,7 +342,10 @@ describe('Rate limiting (e2e)', () => {
     });
 
     it('ignores a forged X-Forwarded-For with TRUST_PROXY_HOPS=0', async () => {
-      const [app] = apps;
+      // Counted by the socket address, 127.0.0.1: the only test of the run that uses it.
+      const app = await start({
+        http: buildHttpConfig({ ...loadEnv(), TRUST_PROXY_HOPS: 0 }),
+      });
       const results: number[] = [];
       for (let i = 0; i <= PROBE_DEFAULT_LIMIT.maxRequests; i += 1) {
         const res = await request(app.getHttpServer())

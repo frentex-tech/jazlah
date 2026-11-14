@@ -6,7 +6,6 @@ import { AppError } from '@common/errors/app-error';
 import { ErrorCode } from '@common/errors/error-code.enum';
 import { buildJobId } from '@infra/queue/build-job-id';
 import { DEFAULT_JOB_OPTIONS } from '@infra/queue/default-job-options.constants';
-import { QUEUE_KEY_PREFIX } from '@infra/queue/queue.constants';
 import { createQueueProbeApp } from './support/create-queue-probe-app';
 import { PROBE_QUEUES } from './support/queue-probe.constants';
 import { QueueProbeProcessor } from './support/queue-probe.processor';
@@ -27,7 +26,7 @@ describe('Queue (e2e)', () => {
     (name) =>
       new Queue(name, {
         connection: { url: loadEnv().REDIS_URL },
-        prefix: QUEUE_KEY_PREFIX,
+        prefix: loadEnv().REDIS_KEY_PREFIX,
       }),
   );
   const inspector = (name: string): Queue => {
@@ -82,9 +81,6 @@ describe('Queue (e2e)', () => {
   it('runs no worker unless one is turned on, and producers still add jobs', async () => {
     app = await createQueueProbeApp();
     const probe = app.get<Queue>(getQueueToken(PROBE_QUEUES.probe));
-    // Connected first: under a full parallel e2e run the first connection can take
-    // longer than the bounded add waits, which is not what this test is about.
-    await probe.waitUntilReady();
 
     const job = await probe.add('succeed', { key: 'no-worker' });
 
@@ -289,7 +285,7 @@ describe('Queue (e2e)', () => {
     // Another worker takes the job and never renews its lock, as a crashed instance would.
     const crashed = new Worker(PROBE_QUEUES.stalled, null, {
       connection: { url: loadEnv().REDIS_URL },
-      prefix: QUEUE_KEY_PREFIX,
+      prefix: loadEnv().REDIS_KEY_PREFIX,
       lockDuration: 300,
       autorun: false,
     });
