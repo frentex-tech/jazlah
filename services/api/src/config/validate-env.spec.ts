@@ -753,6 +753,33 @@ describe('validateEnv', () => {
       ]);
     });
 
+    it('refuses a listed provider missing one of its variables, naming it (review of #232)', () => {
+      // Today no provider needs a variable, so the check runs only with a provider that
+      // does: a fresh module registry where `log` needs one. The variable must be one
+      // the schema declares (it reads the parsed environment, as a real provider's
+      // would be): STORAGE_ENDPOINT, optional and unset in VALID. Loaded with require:
+      // a dynamic import loads outside Jest's registry, and requireActual skips the mock.
+      jest.isolateModules(() => {
+        jest.doMock('./sms-provider-variables.constants', () => ({
+          SMS_PROVIDER_VARIABLES: { log: ['STORAGE_ENDPOINT'] },
+        }));
+        type ValidateEnvModule = typeof import('./validate-env');
+        // eslint-disable-next-line @typescript-eslint/no-require-imports -- the only load that sees jest.doMock in an isolated registry
+        const isolated = require('./validate-env') as ValidateEnvModule;
+
+        expect(() =>
+          isolated.validateEnv({ ...VALID, SMS_PROVIDERS: 'log' }),
+        ).toThrow('STORAGE_ENDPOINT: required when SMS_PROVIDERS lists log');
+        expect(
+          isolated.validateEnv({
+            ...VALID,
+            SMS_PROVIDERS: 'log',
+            STORAGE_ENDPOINT: 'http://localhost:9002',
+          }).SMS_PROVIDERS,
+        ).toEqual(['log']);
+      });
+    });
+
     it('refuses the log provider in production', () => {
       expect(
         problemsOf({

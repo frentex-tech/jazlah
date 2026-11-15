@@ -1,7 +1,12 @@
 import { toLatinDigits } from '../text/to-latin-digits';
 
-/** Spaces and dashes a person may type between the digits. */
-const SEPARATORS = /[\s-]/g;
+/**
+ * What is removed before the number is read: spaces and dashes a person may type between
+ * the digits, and Unicode format characters (`\p{Cf}`), which are invisible: direction
+ * marks (U+200E, U+200F, U+202A to U+202E, U+2066 to U+2069) that phones insert when a
+ * number is copied in an Arabic interface, and zero-width characters (U+200B, U+FEFF).
+ */
+const SEPARATORS = /[\s\p{Cf}-]/gu;
 
 /** The forms accepted once separators are removed; group 1 is the 8 digits after 5. */
 const SAUDI_MOBILE_FORMS: readonly RegExp[] = [
@@ -14,8 +19,8 @@ const SAUDI_MOBILE_FORMS: readonly RegExp[] = [
 
 /**
  * A Saudi mobile number in E.164 (`+9665XXXXXXXX`), from the forms people type: `05…`,
- * `5…`, `9665…`, `009665…` or `+9665…`, with spaces or dashes anywhere between the
- * digits, in Latin, Arabic-Indic (٠ to ٩) or Extended Arabic-Indic (۰ to ۹) digits, mixed
+ * `5…`, `9665…`, `009665…` or `+9665…`, with spaces, dashes or invisible format
+ * characters (direction marks, zero-width characters) anywhere between the digits, in Latin, Arabic-Indic (٠ to ٩) or Extended Arabic-Indic (۰ to ۹) digits, mixed
  * or not: they are converted to Latin before the number is checked. Anything else returns null: a landline, another country, a trunk zero after
  * the country code (`+96605…`), letters, other punctuation, or the wrong length.
  *

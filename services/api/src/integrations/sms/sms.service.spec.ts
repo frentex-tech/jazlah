@@ -221,9 +221,6 @@ describe('SmsService', () => {
       Record<string, unknown>,
       string,
     ];
-    process.stdout.write(
-      `captured log lines:\n  ${JSON.stringify(failed)}\n  ${JSON.stringify(sent)} ${message}\n`,
-    );
     expect(failed).toMatchObject({
       provider: 'first',
       reason: 'unavailable',
