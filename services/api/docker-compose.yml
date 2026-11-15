@@ -1,0 +1,65 @@
+# Local infrastructure for the JAZLA API: PostgreSQL + PostGIS and Redis.
+# Start with `pnpm infra:up`, stop with `pnpm infra:down`.
+#
+# On first start postgres creates two databases: `jazla` (development) and `jazla_test`
+# (e2e tests). The credentials are for these local containers only.
+#
+# Host ports, both changeable because the usual ones are often taken on a developer
+# machine:
+# - JAZLA_DB_PORT, default 5434 (5432 is often a locally installed PostgreSQL).
+#   DATABASE_URL in `.env` must use the same port.
+# - JAZLA_REDIS_PORT, default 6380 (6379 is often another project's Redis).
+#   REDIS_URL in `.env` must use the same port.
+name: jazla-api
+
+services:
+  postgres:
+    image: postgis/postgis:17-3.5
+    environment:
+      POSTGRES_USER: jazla
+      POSTGRES_PASSWORD: jazla
+      POSTGRES_DB: jazla
+    ports:
+      - '${JAZLA_DB_PORT:-5434}:5432'
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+      - ./docker/postgres/00-create-test-database.sql:/docker-entrypoint-initdb.d/00-create-test-database.sql:ro
+    healthcheck:
+      test:
+        [
+          'CMD-SHELL',
+          'pg_isready -U jazla -d jazla && pg_isready -U jazla -d jazla_test',
+        ]
+      interval: 2s
+      timeout: 3s
+      retries: 30
+      start_period: 5s
+
+  redis:
+    image: redis:7-alpine
+    # Append-only file, fsync every second: jobs survive a restart of the container.
+    # noeviction: BullMQ requires that Redis never evicts its keys.
+    command:
+      [
+        'redis-server',
+        '--appendonly',
+        'yes',
+        '--appendfsync',
+        'everysec',
+        '--maxmemory-policy',
+        'noeviction',
+      ]
+    ports:
+      - '${JAZLA_REDIS_PORT:-6380}:6379'
+    volumes:
+      - redis-data:/data
+    healthcheck:
+      test: ['CMD', 'redis-cli', 'ping']
+      interval: 2s
+      timeout: 3s
+      retries: 30
+      start_period: 2s
+
+volumes:
+  postgres-data:
+  redis-data:

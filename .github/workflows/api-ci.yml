@@ -1,0 +1,120 @@
+# CI of the JAZLA API (services/api): every check of services/api/CLAUDE.md, "Commands",
+# against PostgreSQL + PostGIS and Redis service containers matching docker-compose.yml.
+name: API CI
+
+on:
+  pull_request:
+    paths:
+      - 'services/api/**'
+      - '.github/workflows/api-ci.yml'
+  push:
+    paths:
+      - 'services/api/**'
+      - '.github/workflows/api-ci.yml'
+
+permissions:
+  contents: read
+
+concurrency:
+  group: api-ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  api:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    defaults:
+      run:
+        working-directory: services/api
+
+    services:
+      # The images and host ports of docker-compose.yml, so the URLs of .env.example work.
+      postgres:
+        image: postgis/postgis:17-3.5
+        env:
+          POSTGRES_USER: jazla
+          POSTGRES_PASSWORD: jazla
+          POSTGRES_DB: jazla
+        ports:
+          - 5434:5432
+        options: >-
+          --health-cmd "pg_isready -U jazla -d jazla"
+          --health-interval 2s
+          --health-timeout 3s
+          --health-retries 30
+      # The compose file's command: BullMQ requires noeviction.
+      redis:
+        image: redis:7-alpine
+        command: redis-server --appendonly yes --appendfsync everysec --maxmemory-policy noeviction
+        ports:
+          - 6380:6379
+        options: >-
+          --health-cmd "redis-cli ping"
+          --health-interval 2s
+          --health-timeout 3s
+          --health-retries 30
+
+    env:
+      # Local-container credentials, the same placeholders as .env.example: not secrets.
+      NODE_ENV: test
+      DATABASE_URL: postgresql://jazla:jazla@localhost:5434/jazla
+      REDIS_URL: redis://localhost:6380/0
+      PGPASSWORD: jazla
+
+    steps:
+      - name: Check out
+        uses: actions/checkout@v7
+
+      - name: Set up pnpm
+        uses: pnpm/action-setup@v6
+        with:
+          version: 10.33.2
+
+      - name: Set up Node (version from .nvmrc)
+        uses: actions/setup-node@v7
+        with:
+          node-version-file: services/api/.nvmrc
+          cache: pnpm
+          cache-dependency-path: services/api/pnpm-lock.yaml
+
+      - name: Install (lockfile frozen)
+        run: pnpm install --frozen-lockfile
+
+      - name: Generate the Prisma client
+        run: pnpm db:generate
+
+      # pnpm lint runs ESLint with --fix: fail on any warning, and on any file it changed.
+      - name: Lint
+        run: |
+          pnpm lint --max-warnings 0
+          git diff --exit-code -- .
+
+      - name: Lint rules
+        run: pnpm lint:rules
+
+      - name: Type check and type tests
+        run: pnpm test:types
+
+      - name: Unit tests
+        run: pnpm test
+
+      # docker-compose.yml creates jazla_test from this file on first start; a service
+      # container cannot mount it, so it runs here.
+      - name: Create the test database
+        run: psql -h localhost -p 5434 -U jazla -d jazla -v ON_ERROR_STOP=1 -f docker/postgres/00-create-test-database.sql
+
+      - name: Migrations
+        run: pnpm db:deploy
+
+      # Applies the migrations to jazla_test itself, then runs the e2e suites.
+      - name: e2e tests
+        run: pnpm test:e2e --detectOpenHandles
+
+      - name: Build
+        run: pnpm build
+
+      - name: OpenAPI document is up to date
+        run: pnpm openapi:check
+
+      - name: Registry
+        run: node .claude/hooks/check-registry.mjs

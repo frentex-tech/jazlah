@@ -1,0 +1,7 @@
+# commit-msg (husky; POSIX sh): every commit message in the repository follows
+# Conventional Commits (commitlint.config.mjs).
+# Work from services/api, where husky's relative node_modules/.bin applies. Git passes
+# the message file relative to the repository root, and commitlint resolves --edit
+# against the repository root too, so the path is passed on unchanged.
+cd services/api
+commitlint --edit "$1"

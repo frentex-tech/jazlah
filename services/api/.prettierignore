@@ -1,0 +1,11 @@
+# Written by tools, compared or checksummed by tools: never reformatted.
+openapi.json
+pnpm-lock.yaml
+src/infra/database/generated/
+dist/
+coverage/
+
+# Instructions loaded into every agent session: their size matters more than table
+# alignment, and Prettier's padding adds about 10,000 characters (DECISIONS.md, "Git hooks").
+CLAUDE.md
+.claude/**
