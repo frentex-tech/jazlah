@@ -28,5 +28,11 @@ node .husky/staged-guard.mjs check
 # Every shared source file still has its registry line.
 node .claude/hooks/check-registry.mjs
 
+# The always-loaded instructions stay under their size limit, checked when one of them
+# (CLAUDE.md, the registry, a rule file) is staged. The list of files is the script's.
+if [ -n "$(git diff --cached --name-only -- CLAUDE.md .claude/REGISTRY.md .claude/rules)" ]; then
+  node scripts/check-instruction-size.mjs
+fi
+
 # Tests, build, lint:rules and openapi:check run in CI (.github/workflows/api-ci.yml):
 # a hook slow enough to be skipped protects nothing.

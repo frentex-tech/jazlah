@@ -2,6 +2,7 @@ import { InvalidRateLimitOptionsError } from './invalid-rate-limit-options.error
 import { RATE_LIMIT_NAME_PATTERN } from './rate-limit.constants';
 import type { RateLimitOptions } from './rate-limit-options.type';
 import type { RateLimitPolicy } from './rate-limit-policy.type';
+import type { RateLimitSettings } from './rate-limit-settings.type';
 
 /**
  * Validates `@RateLimit` settings and applies the defaults. Throws
@@ -14,7 +15,9 @@ import type { RateLimitPolicy } from './rate-limit-policy.type';
  * the window, is blocked again by its first request. A shorter block would only read as
  * more lenient than it is.
  */
-export function toRateLimitPolicy(options: RateLimitOptions): RateLimitPolicy {
+export function toRateLimitPolicy(
+  options: Pick<RateLimitOptions, 'name' | 'failClosed'> & RateLimitSettings,
+): RateLimitPolicy {
   const { name } = options;
   if (typeof name !== 'string' || !RATE_LIMIT_NAME_PATTERN.test(name)) {
     throw new InvalidRateLimitOptionsError(

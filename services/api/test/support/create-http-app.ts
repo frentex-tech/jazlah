@@ -1,3 +1,4 @@
+import { randomUUID } from 'node:crypto';
 import { once } from 'node:events';
 import { Test } from '@nestjs/testing';
 import { RedisService } from '@infra/redis/redis.service';
@@ -8,6 +9,7 @@ import { configureHttpApp } from '@infra/http/configure-http-app';
 import { LOG_DESTINATION } from '@infra/logger/log-destination.constants';
 import { Logger } from 'nestjs-pino';
 import { RATE_LIMIT_REDIS } from '@infra/rate-limit/rate-limit.constants';
+import { MEDIA_CLEANUP_SCOPE } from '@modules/media/media-cleanup-scope.constants';
 import { AppModule } from '../../src/app.module';
 import type { NextFunction, Request, Response } from 'express';
 import { enableWorkers } from './enable-workers';
@@ -17,6 +19,11 @@ import type { HttpAppOptions } from './http-app-options.type';
 /**
  * The real application, set up exactly as `main.ts` sets it up (configureHttpApp:
  * helmet, CORS, trusted proxies, body limit, the /v1 prefix, /docs), and initialised.
+ *
+ * One difference from production, because suites share one database: the media cleanup
+ * acts only on uploads owned by this app's own random id (MEDIA_CLEANUP_SCOPE), so a
+ * cleanup run here never removes another suite's expired upload. A suite that tests the
+ * cleanup gives its rows that owner (`app.get(MEDIA_CLEANUP_SCOPE)`).
  */
 export async function createHttpApp(
   options: HttpAppOptions = {},
@@ -43,6 +50,9 @@ export async function createHttpApp(
       .overrideProvider(LOG_DESTINATION)
       .useValue(options.logDestination);
   }
+  builder = builder
+    .overrideProvider(MEDIA_CLEANUP_SCOPE)
+    .useValue({ ownerId: randomUUID() });
   builder = enableWorkers(builder, options.workers ?? []);
   for (const override of options.overrides ?? []) {
     builder = builder

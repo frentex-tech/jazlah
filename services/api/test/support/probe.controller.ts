@@ -1,3 +1,4 @@
+import { Public } from '@common/decorators/public.decorator';
 import {
   BadRequestException,
   Body,
@@ -13,6 +14,8 @@ import { ErrorCode } from '@common/errors/error-code.enum';
 import { CreateProbeDto } from './create-probe.dto';
 
 /** Endpoints that validate or throw, mounted only in e2e tests. */
+// Outside the audience prefixes: test controllers say so themselves.
+@Public()
 @Controller('probe')
 export class ProbeController {
   @Post('validate')

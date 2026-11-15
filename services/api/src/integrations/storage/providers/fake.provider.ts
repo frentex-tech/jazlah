@@ -19,8 +19,9 @@ import type {
  * mistyped upload is refused without a storage server. Objects keep the Content-Type the upload
  * declared, as real storage does.
  *
- * Exported from the integration's `index.ts` for tests; production code injects the
- * StorageService, never this class.
+ * Exported from the integration's `testing.ts`, the test-only entry (R22); production
+ * code injects the StorageService, never this class. `pause` holds an operation until
+ * released, so a test can run one request while another waits at a storage call.
  */
 export class FakeStorageProvider implements StoragePort {
   /** Every port call, in order: the operation and the object it concerned. */
@@ -37,6 +38,8 @@ export class FakeStorageProvider implements StoragePort {
     PresignedUploadRequest & { expiresAt: number }
   >();
   private readonly failures = new Map<keyof StoragePort, Error>();
+  private readonly pauses = new Map<keyof StoragePort, Promise<void>>();
+  private readonly arrivals = new Map<keyof StoragePort, () => void>();
   private nextPolicy = 1;
 
   constructor(private readonly now: () => number = Date.now) {}
@@ -44,6 +47,40 @@ export class FakeStorageProvider implements StoragePort {
   /** The next call of `operation` rejects with `error` (once). */
   failNext(operation: keyof StoragePort, error: Error): void {
     this.failures.set(operation, error);
+  }
+
+  /**
+   * The next call of `operation` waits, after it is recorded and before it acts, until
+   * the returned `release` is called. `reached` resolves once that call is waiting.
+   */
+  pause(operation: keyof StoragePort): {
+    reached: Promise<void>;
+    release: () => void;
+  } {
+    let release: () => void = () => undefined;
+    let arrive: () => void = () => undefined;
+    const reached = new Promise<void>((resolve) => {
+      arrive = resolve;
+    });
+    const gate = new Promise<void>((resolve) => {
+      release = resolve;
+    });
+    this.pauses.set(
+      operation,
+      reached.then(() => gate),
+    );
+    this.arrivals.set(operation, arrive);
+    return { reached, release };
+  }
+
+  /** Every stored object, as `<bucket>/<key>`, sorted. */
+  objectLocations(): string[] {
+    return [...this.objects.keys()].sort();
+  }
+
+  /** The bytes of a stored object, or undefined. */
+  objectBytes(location: StorageLocation): Uint8Array | undefined {
+    return this.objects.get(this.id(location))?.bytes;
   }
 
   /** Stores an object directly, as if it had been uploaded. */
@@ -144,6 +181,23 @@ export class FakeStorageProvider implements StoragePort {
     });
   }
 
+  copyObject(
+    source: StorageLocation,
+    destination: StorageLocation,
+  ): Promise<boolean> {
+    return this.call('copyObject', destination, () => {
+      const object = this.objects.get(this.id(source));
+      if (object === undefined) {
+        return false;
+      }
+      this.objects.set(this.id(destination), {
+        bytes: object.bytes.slice(),
+        contentType: object.contentType,
+      });
+      return true;
+    });
+  }
+
   deleteObject(location: StorageLocation): Promise<void> {
     return this.call('deleteObject', location, () => {
       this.objects.delete(this.id(location));
@@ -160,6 +214,13 @@ export class FakeStorageProvider implements StoragePort {
     if (failure !== undefined) {
       this.failures.delete(operation);
       throw failure;
+    }
+    const pause = this.pauses.get(operation);
+    if (pause !== undefined) {
+      this.pauses.delete(operation);
+      this.arrivals.get(operation)?.();
+      this.arrivals.delete(operation);
+      await pause;
     }
     // Asynchronous like real storage, so callers cannot depend on synchronous effects.
     await Promise.resolve();

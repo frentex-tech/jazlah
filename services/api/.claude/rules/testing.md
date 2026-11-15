@@ -18,21 +18,21 @@ A task that adds one of these without its test is not done; if you cannot write 
 ## How tests are written
 
 1. Integrations are replaced by their fake provider; nothing reaches a vendor.
-2. Use case unit tests use the in-memory port fakes in the module's `domain/fakes/`: no database, no Nest app.
+2. Use case unit tests use the module's `domain/fakes/`: no database, no Nest app.
 3. Test the real thing: a test that mocks the class under test, or only asserts a mock was called, proves nothing.
 4. Deterministic: no current time, test order, network or sleeping; exact halalas.
 5. No real personal data or credentials.
 6. Never weaken, skip or delete a failing test to pass; fix the test (and say why it was wrong) or the code.
-7. e2e tests use `jazla_test` and the next Redis database (`scripts/e2e.mjs`, which also raises the default rate limit, sets a per-run REDIS_KEY_PREFIX and deletes the run's keys at the end); a test deletes its rows and obliterates its queues. Suites run in parallel: give any new shared state (rows, queue names, object keys, counters) a per-suite or per-run name.
-   - **Queues:** e2e apps start with no worker (QUEUE_WORKERS_ENABLED=false, `scripts/e2e.mjs`); a suite turns on only the workers it needs with `workers: [...]` (`createHttpApp`, `createQueueProbeApp`). Probe queues and processors in `test/support/`, registered beside `AppModule` (`create-queue-probe-app.ts`); wait through worker events (`wait-for-worker-event.ts`). A test that stops Redis (`startTcpProxy`) turns on no worker and resumes the proxy before closing: BullMQ 6.7.6 workers were seen to hang in `close()`.
-   - **Events:** probes in `test/support/events/`, one publisher and one subscriber module sharing an `EventTrace`; a subscriber writes to the trace before its first await.
-   - **HTTP:** `createHttpApp()` (`test/support/create-http-app.ts`) applies `configureHttpApp` like `main.ts`. Vary config with `buildHttpConfig({ ...loadEnv(), … })`; break a dependency with a replacement built from the production class (`new RedisService({ url })`) behind `startTcpProxy`. Each test has its own client address (`testClientAddress`, sent as X-Forwarded-For by `createHttpApp`; e2e runs trust one hop) and each run its own Redis key prefix (`scripts/e2e.mjs`), so rate limit tests start with fresh counters and use their own limits; never clear counters by pattern, which reaches other suites.
-   - **Logs:** capture the real logger with `LogCapture` through `LOG_DESTINATION`, and first assert the secret really is in the raw input. One app whose logs are read per test file (nestjs-pino keeps one root logger).
-   - **Process behaviour** (exit codes, signals): run a script from `test/support/` as a child process (`test/shutdown.e2e-spec.ts`).
-8. Compile-time tests: `test/types/*.type-test.ts`, run by `pnpm test:types`; a line that must not compile carries `// @ts-expect-error -- why`.
-9. Lint fixtures (`lint-fixtures/`) are not tests; change them only with `eslint.config.mjs` (`code-structure.md`, 2a).
+7. e2e: `scripts/e2e.mjs` gives the run `jazla_test`, the next Redis database, a raised default rate limit and its own REDIS_KEY_PREFIX. A test deletes its rows and obliterates its queues. Suites run in parallel: name new shared state (rows, queues, object keys, counters) per suite or run; never clear counters by pattern. Helpers in `test/support/`, each documented there:
+   - **HTTP:** `createHttpApp()` (as `main.ts`; vary config with `buildHttpConfig`; each test its own `testClientAddress`); break a dependency with the production class behind `startTcpProxy`.
+   - **Queues:** no worker by default; a suite turns on what it needs with `workers: [...]`; probes beside `AppModule`; wait through worker events. A test that stops Redis turns on no worker and resumes the proxy before closing (BullMQ workers hang in `close()`).
+   - **Events:** probes in `test/support/events/` sharing an `EventTrace`; a subscriber writes to it before its first await.
+   - **Logs:** `LogCapture` through `LOG_DESTINATION`; first assert the secret is in the raw input; one app whose logs are read per test file.
+   - **Process behaviour** (exit codes, signals): a child process from `test/support/`.
+8. Compile-time tests: `test/types/*.type-test.ts` (`pnpm test:types`); a line that must not compile carries `// @ts-expect-error -- why`.
+9. Lint fixtures (`lint-fixtures/`) are not tests; change them only with `eslint.config.mjs`.
 10. Placement: `<name>.spec.ts` beside the file; `test/<module>.e2e-spec.ts`. No second convention.
 
 ## Evidence
 
-After your last edit, run every command in `CLAUDE.md` and report each with its real outcome (counts, every failure's text). A failure you did not cause is still reported, not fixed unasked, with how you know it predates you. What you could not run goes under "Not verified" with what it would need. A reported failure is a correct result; a hidden one is not.
+As `CLAUDE.md`, "Done means", with counts and every failure's text. A failure you did not cause is still reported, not fixed unasked, with how you know it predates you. A reported failure is a correct result; a hidden one is not.

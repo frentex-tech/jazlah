@@ -1,3 +1,4 @@
+import { Public } from '@common/decorators/public.decorator';
 import { randomUUID } from 'node:crypto';
 import {
   Controller,
@@ -21,6 +22,8 @@ import {
  * rows holding a phone number, left unmapped so they end as 500 and are logged with the
  * request, and the error filter's edge cases. Mounted only in e2e tests.
  */
+// Outside the audience prefixes: test controllers say so themselves.
+@Public()
 @Controller('log-probe')
 export class LogProbeController {
   constructor(

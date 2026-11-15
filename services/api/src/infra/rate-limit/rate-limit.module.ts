@@ -9,6 +9,7 @@ import { PreRoutingRateLimiter } from './pre-routing-rate-limiter';
 import { RateLimitPolicyCheck } from './rate-limit-policy.check';
 import { RateLimitStorageModule } from './rate-limit-storage.module';
 import { RateLimitGuard } from './rate-limit.guard';
+import { RateLimiter } from './rate-limiter';
 import { RedisThrottlerStorage } from './redis-throttler-storage';
 
 /**
@@ -24,7 +25,8 @@ import { RedisThrottlerStorage } from './redis-throttler-storage';
  *
  * The address is `req.ip`, which honours TRUST_PROXY_HOPS. While Redis is unavailable
  * requests go through, except on `@RateLimit({ failClosed: true })` endpoints (503).
- * Over a limit: 429 RATE_LIMITED with Retry-After. RateLimitPolicyCheck refuses to start
+ * Over a limit: 429 RATE_LIMITED with Retry-After. A limit keyed by something other
+ * than the address (a phone number) is counted from code with RateLimiter. RateLimitPolicyCheck refuses to start
  * when the declared limits contradict each other.
  */
 @Module({
@@ -54,7 +56,8 @@ import { RedisThrottlerStorage } from './redis-throttler-storage';
     { provide: APP_GUARD, useClass: RateLimitGuard },
     RateLimitPolicyCheck,
     PreRoutingRateLimiter,
+    RateLimiter,
   ],
-  exports: [PreRoutingRateLimiter],
+  exports: [PreRoutingRateLimiter, RateLimiter],
 })
 export class RateLimitModule {}

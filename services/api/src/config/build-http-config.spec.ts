@@ -15,6 +15,8 @@ const REQUIRED = {
   // Required in production.
   TRUST_PROXY_HOPS: '1',
   QUEUE_WORKERS_ENABLED: 'false',
+  AUTH_ACCESS_TOKEN_SECRET: 'example-access-token-secret-0123456789',
+  AUTH_OTP_SECRET: 'example-otp-secret-0123456789-abcdefghij',
 };
 
 function envWith(raw: Record<string, string>): Env {

@@ -2,13 +2,18 @@ import { Controller, Get, HttpStatus, Res } from '@nestjs/common';
 import { ApiOkResponse, ApiResponse, ApiTags } from '@nestjs/swagger';
 import type { Response } from 'express';
 import { ApiErrorResponses } from '@common/decorators/api-error-responses.decorator';
+import { Public } from '@common/decorators/public.decorator';
 import { SkipRateLimit } from '@infra/rate-limit/skip-rate-limit.decorator';
 import { LivenessResponseDto } from './dto/liveness-response.dto';
 import { ReadinessResponseDto } from './dto/readiness-response.dto';
 import { ReadinessService } from './readiness.service';
 
-/** Liveness and readiness. Never rate limited: load balancers probe it constantly. */
+/**
+ * Liveness and readiness. Never rate limited: load balancers probe it constantly.
+ * Public: it sits outside the audience prefixes and needs no sign-in.
+ */
 @ApiTags('health')
+@Public()
 @SkipRateLimit()
 @Controller('health')
 export class HealthController {

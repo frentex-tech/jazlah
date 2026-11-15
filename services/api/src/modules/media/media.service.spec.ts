@@ -10,6 +10,7 @@ import {
 } from '@integrations/storage';
 import { FakeStorageProvider } from '@integrations/storage/testing';
 import { InMemoryMediaClient } from './in-memory-media-client.fake';
+import type { MediaCleanupScope } from './media-cleanup-scope.type';
 import { MediaService } from './media.service';
 
 const NOW = Date.UTC(2026, 10, 14, 9, 30, 0);
@@ -32,6 +33,7 @@ const MEDIA_CONFIG: MediaConfig = {
   pendingUploadTtlSeconds: TTL_SECONDS,
   cleanupIntervalSeconds: 900,
 };
+const AFTER_EXPIRY = NOW + TTL_SECONDS * 1_000 + 1;
 
 /** File starts, padded to `size` bytes. */
 const file = (start: number[], size = 64): Uint8Array => {
@@ -45,20 +47,24 @@ const PDF = [0x25, 0x50, 0x44, 0x46, 0x2d, 0x31, 0x2e, 0x37];
 /** A Windows executable ("MZ") renamed to .jpg. */
 const EXE = [0x4d, 0x5a, 0x90, 0x00, 0x03, 0x00];
 
-function setup() {
+/** The service as production builds it (no cleanup scope), or limited to `scope`. */
+function setup(scope: MediaCleanupScope | null = null) {
   const client = new InMemoryMediaClient();
   const storage = new FakeStorageProvider(() => Date.now());
   const service = new MediaService(
     { client } as unknown as DbContext,
     new StorageService(storage, STORAGE_CONFIG),
     MEDIA_CONFIG,
+    scope,
   );
   return { service, client, storage };
 }
 
+type Context = ReturnType<typeof setup>;
+
 /** Requests an upload and plays the client's POST with `bytes`. */
 async function uploaded(
-  context: ReturnType<typeof setup>,
+  context: Context,
   bytes: Uint8Array,
   options: {
     purpose?: 'catalog.product-image' | 'vendor.document';
@@ -67,7 +73,8 @@ async function uploaded(
 ): Promise<{
   mediaId: string;
   ticket: PresignedUpload;
-  location: { bucket: string; key: string };
+  /** Where the ticket writes: the staging object. */
+  staging: { bucket: string; key: string };
 }> {
   const contentType = options.contentType ?? 'image/jpeg';
   const ticket = await context.service.requestUpload({
@@ -77,12 +84,23 @@ async function uploaded(
   expect(context.storage.upload(ticket, { bytes, contentType })).toEqual({
     accepted: true,
   });
-  const row = context.client.rows.get(ticket.mediaId);
   return {
     mediaId: ticket.mediaId,
     ticket,
-    location: { bucket: String(row?.bucket), key: String(row?.objectKey) },
+    staging: {
+      bucket: String(ticket.fields.bucket),
+      key: String(ticket.fields.key),
+    },
   };
+}
+
+/** The location of a ready row's checked copy. */
+function finalLocation(
+  context: Context,
+  mediaId: string,
+): { bucket: string; key: string } {
+  const row = context.client.rows.get(mediaId);
+  return { bucket: String(row?.bucket), key: String(row?.objectKey) };
 }
 
 async function errorOf(work: Promise<unknown>): Promise<AppError> {
@@ -109,7 +127,7 @@ describe('MediaService', () => {
   });
 
   describe('requestUpload', () => {
-    it('creates a pending row and an upload ticket under a server-generated key', async () => {
+    it('creates a pending row and a ticket for a staging key in the private bucket', async () => {
       const context = setup();
 
       const ticket = await context.service.requestUpload({
@@ -122,8 +140,9 @@ describe('MediaService', () => {
       expect(row).toMatchObject({
         purpose: 'catalog.product-image',
         visibility: 'public',
-        bucket: 'example-public',
-        objectKey: `catalog/product-image/2026/11/14/${ticket.mediaId}`,
+        bucket: null,
+        objectKey: null,
+        stagingKey: `staging/catalog/product-image/2026/11/14/${ticket.mediaId}`,
         status: 'pending',
         originalFileName: 'my photo.webp',
         ownerId: null,
@@ -131,8 +150,10 @@ describe('MediaService', () => {
       });
       expect(ticket.confirmBy).toEqual(new Date(NOW + TTL_SECONDS * 1_000));
       expect(ticket.expiresAt).toEqual(new Date(NOW + 300_000));
+      // A public purpose still uploads to the private bucket: nothing unchecked is public.
       expect(ticket.fields).toMatchObject({
-        key: row?.objectKey,
+        bucket: 'example-private',
+        key: row?.stagingKey,
         'Content-Type': 'image/webp',
       });
     });
@@ -148,10 +169,7 @@ describe('MediaService', () => {
 
       expect(ticket.fields.key).not.toContain('contract');
       expect(ticket.fields.key).toMatch(
-        /^vendor\/document\/2026\/11\/14\/[0-9a-f-]{36}$/,
-      );
-      expect(context.client.rows.get(ticket.mediaId)?.bucket).toBe(
-        'example-private',
+        /^staging\/vendor\/document\/2026\/11\/14\/[0-9a-f-]{36}$/,
       );
     });
 
@@ -196,9 +214,9 @@ describe('MediaService', () => {
   });
 
   describe('confirmUpload', () => {
-    it('makes a checked upload ready', async () => {
+    it('copies a checked upload to a final key in the purpose bucket and makes it ready', async () => {
       const context = setup();
-      const { mediaId } = await uploaded(context, file(JPEG, 2_048));
+      const { mediaId, staging } = await uploaded(context, file(JPEG, 2_048));
 
       const media = await context.service.confirmUpload(mediaId);
 
@@ -210,6 +228,18 @@ describe('MediaService', () => {
         rejectionReason: null,
         confirmedAt: new Date(NOW),
       });
+      const final = finalLocation(context, mediaId);
+      expect(final.bucket).toBe('example-public');
+      expect(final.key).toMatch(
+        new RegExp(
+          `^catalog/product-image/2026/11/14/${mediaId}/[0-9a-f-]{36}$`,
+        ),
+      );
+      // Only the checked copy is left: the staging object is deleted.
+      expect(context.storage.objectLocations()).toEqual([
+        `${final.bucket}/${final.key}`,
+      ]);
+      expect(context.storage.hasObject(staging)).toBe(false);
     });
 
     it('is idempotent: a second confirmation returns the same file without reading storage', async () => {
@@ -254,10 +284,10 @@ describe('MediaService', () => {
         'TYPE_NOT_ALLOWED',
       ],
     ] as const)(
-      'rejects %s and deletes the object',
+      'rejects %s and deletes the staging object and the copy',
       async (_label, bytes, contentType, purpose, reason) => {
         const context = setup();
-        const { mediaId, location } = await uploaded(context, bytes, {
+        const { mediaId } = await uploaded(context, bytes, {
           purpose,
           contentType,
         });
@@ -266,10 +296,12 @@ describe('MediaService', () => {
 
         expect(error.code).toBe(ErrorCode.MEDIA_UPLOAD_REJECTED);
         expect(error.details).toEqual({ reason });
-        expect(context.storage.hasObject(location)).toBe(false);
+        expect(context.storage.objectLocations()).toEqual([]);
         expect(context.client.rows.get(mediaId)).toMatchObject({
           status: 'rejected',
           rejectionReason: reason,
+          bucket: null,
+          objectKey: null,
         });
       },
     );
@@ -286,6 +318,7 @@ describe('MediaService', () => {
       );
 
       expect(error.details).toEqual({ reason: 'OBJECT_MISSING' });
+      expect(context.storage.objectLocations()).toEqual([]);
     });
 
     it('rejects an empty object and an oversized one that bypassed the policy', async () => {
@@ -298,18 +331,18 @@ describe('MediaService', () => {
           purpose: 'catalog.product-image',
           contentType: 'image/jpeg',
         });
-        const location = {
-          bucket: 'example-public',
+        const staging = {
+          bucket: 'example-private',
           key: String(ticket.fields.key),
         };
-        context.storage.putObject(location, bytes, 'image/jpeg');
+        context.storage.putObject(staging, bytes, 'image/jpeg');
 
         const error = await errorOf(
           context.service.confirmUpload(ticket.mediaId),
         );
 
         expect(error.details).toEqual({ reason });
-        expect(context.storage.hasObject(location)).toBe(false);
+        expect(context.storage.objectLocations()).toEqual([]);
       }
     });
 
@@ -338,13 +371,13 @@ describe('MediaService', () => {
 
     it('fails with MEDIA_UPLOAD_EXPIRED once the confirm window has passed, deleting nothing', async () => {
       const context = setup();
-      const { mediaId, location } = await uploaded(context, file(JPEG));
+      const { mediaId, staging } = await uploaded(context, file(JPEG));
       jest.setSystemTime(NOW + TTL_SECONDS * 1_000);
 
       const error = await errorOf(context.service.confirmUpload(mediaId));
 
       expect(error.code).toBe(ErrorCode.MEDIA_UPLOAD_EXPIRED);
-      expect(context.storage.hasObject(location)).toBe(true);
+      expect(context.storage.hasObject(staging)).toBe(true);
       expect(context.client.rows.get(mediaId)?.status).toBe('pending');
     });
 
@@ -368,43 +401,178 @@ describe('MediaService', () => {
 
     it('leaves the row pending when deleting a rejected object fails', async () => {
       const context = setup();
-      const { mediaId, location } = await uploaded(context, file(EXE));
+      const { mediaId, staging } = await uploaded(context, file(EXE));
       context.storage.failNext('deleteObject', new StorageError('unavailable'));
 
       await errorOf(context.service.confirmUpload(mediaId));
 
       expect(context.client.rows.get(mediaId)?.status).toBe('pending');
-      expect(context.storage.hasObject(location)).toBe(true);
+      expect(context.storage.hasObject(staging)).toBe(true);
+    });
+  });
+
+  describe('a reused upload ticket cannot change a checked file (review of #230)', () => {
+    it('a re-upload after confirmation reaches only the staging key, never the checked copy', async () => {
+      const context = setup();
+      const { mediaId, ticket, staging } = await uploaded(context, file(JPEG));
+      await context.service.confirmUpload(mediaId);
+      const final = finalLocation(context, mediaId);
+
+      // The ticket is still valid: the storage accepts the second POST.
+      expect(
+        context.storage.upload(ticket, {
+          bytes: file(EXE, 4_096),
+          contentType: 'image/jpeg',
+        }),
+      ).toEqual({ accepted: true });
+
+      expect(context.storage.objectBytes(final)).toEqual(file(JPEG));
+      expect(context.storage.objectBytes(staging)).toEqual(file(EXE, 4_096));
+      expect(context.client.rows.get(mediaId)).toMatchObject({
+        status: 'ready',
+        sizeBytes: 64,
+        detectedContentType: 'image/jpeg',
+      });
+      await expect(context.service.getDownloadLink(mediaId)).resolves.toEqual({
+        url: `https://cdn.example.invalid/${final.key}`,
+        expiresAt: null,
+      });
+    });
+
+    it('a re-upload after rejection stays unread, and the cleanup removes it once the ticket expired', async () => {
+      const context = setup();
+      const { mediaId, ticket, staging } = await uploaded(context, file(EXE));
+      await errorOf(context.service.confirmUpload(mediaId));
+
+      expect(
+        context.storage.upload(ticket, {
+          bytes: file(JPEG),
+          contentType: 'image/jpeg',
+        }),
+      ).toEqual({ accepted: true });
+      expect(
+        (await errorOf(context.service.confirmUpload(mediaId))).details,
+      ).toEqual({ reason: 'TYPE_NOT_ALLOWED' });
+      await context.service.removeExpiredUploads();
+      expect(context.storage.hasObject(staging)).toBe(true);
+
+      jest.setSystemTime(AFTER_EXPIRY);
+      await context.service.removeExpiredUploads();
+
+      expect(context.storage.objectLocations()).toEqual([]);
+      expect(context.client.rows.get(mediaId)).toMatchObject({
+        status: 'rejected',
+        rejectionReason: 'TYPE_NOT_ALLOWED',
+        stagingKey: null,
+      });
+    });
+
+    it('two confirmations with a re-upload between them leave the winner ready with its copy', async () => {
+      const context = setup();
+      const { mediaId, ticket } = await uploaded(context, file(EXE));
+      // Confirmation A rejects the executable and waits at the delete of its copy.
+      const gate = context.storage.pause('deleteObject');
+      const confirmationA = context.service.confirmUpload(mediaId);
+      await gate.reached;
+
+      context.storage.upload(ticket, {
+        bytes: file(JPEG),
+        contentType: 'image/jpeg',
+      });
+      const confirmationB = await context.service.confirmUpload(mediaId);
+      gate.release();
+      const outcomeA = await confirmationA;
+
+      expect(confirmationB).toMatchObject({ status: 'ready' });
+      // A lost the conditional update and answers with the row as B left it: the ready
+      // file, not its own rejection.
+      expect(outcomeA).toEqual(confirmationB);
+      expect(context.client.rows.get(mediaId)?.status).toBe('ready');
+      const final = finalLocation(context, mediaId);
+      expect(context.storage.objectBytes(final)).toEqual(file(JPEG));
+      expect(context.storage.objectLocations()).toEqual([
+        `${final.bucket}/${final.key}`,
+      ]);
+    });
+  });
+
+  describe('concurrent state changes (conditional updates)', () => {
+    it('confirm against confirm: one copy wins, the loser deletes its own copy', async () => {
+      const context = setup();
+      const { mediaId } = await uploaded(context, file(JPEG));
+      const gate = context.storage.pause('getObjectMetadata');
+      const confirmationA = context.service.confirmUpload(mediaId);
+      await gate.reached;
+
+      const confirmationB = await context.service.confirmUpload(mediaId);
+      const winner = finalLocation(context, mediaId);
+      gate.release();
+      const outcomeA = await confirmationA;
+
+      expect(outcomeA).toEqual(confirmationB);
+      expect(finalLocation(context, mediaId)).toEqual(winner);
+      expect(context.storage.objectLocations()).toEqual([
+        `${winner.bucket}/${winner.key}`,
+      ]);
+    });
+
+    it('confirm against the cleanup claim: the claim wins and nothing is left', async () => {
+      const context = setup();
+      const { mediaId } = await uploaded(context, file(JPEG));
+      jest.setSystemTime(AFTER_EXPIRY - 2);
+      const confirmGate = context.storage.pause('getObjectMetadata');
+      const confirmation = errorOf(context.service.confirmUpload(mediaId));
+      await confirmGate.reached;
+
+      jest.setSystemTime(AFTER_EXPIRY);
+      const cleanupGate = context.storage.pause('deleteObject');
+      const cleanup = context.service.removeExpiredUploads();
+      await cleanupGate.reached;
+      expect(context.client.rows.get(mediaId)).toMatchObject({
+        status: 'rejected',
+        rejectionReason: 'EXPIRED',
+      });
+
+      confirmGate.release();
+      const error = await confirmation;
+      cleanupGate.release();
+      await expect(cleanup).resolves.toBe(1);
+
+      expect(error.code).toBe(ErrorCode.MEDIA_UPLOAD_EXPIRED);
+      expect(context.client.rows.has(mediaId)).toBe(false);
+      expect(context.storage.objectLocations()).toEqual([]);
     });
   });
 
   describe('getDownloadLink', () => {
-    it('gives a public file its stable URL, with no expiry', async () => {
+    it('gives a public file the stable URL of its checked copy, with no expiry', async () => {
       const context = setup();
-      const { mediaId, location } = await uploaded(context, file(JPEG));
+      const { mediaId } = await uploaded(context, file(JPEG));
       await context.service.confirmUpload(mediaId);
 
       await expect(context.service.getDownloadLink(mediaId)).resolves.toEqual({
-        url: `https://cdn.example.invalid/${location.key}`,
+        url: `https://cdn.example.invalid/${finalLocation(context, mediaId).key}`,
         expiresAt: null,
       });
     });
 
     it('gives a private file a presigned GET that expires', async () => {
       const context = setup();
-      const { mediaId, location } = await uploaded(context, file(PDF), {
+      const { mediaId } = await uploaded(context, file(PDF), {
         purpose: 'vendor.document',
         contentType: 'application/pdf',
       });
       await context.service.confirmUpload(mediaId);
+      const final = finalLocation(context, mediaId);
 
       const link = await context.service.getDownloadLink(mediaId);
 
+      expect(final.bucket).toBe('example-private');
       expect(link.expiresAt).toEqual(new Date(NOW + 600_000));
-      expect(link.url).toContain(location.key);
+      expect(link.url).toContain(final.key);
       expect(context.storage.calls.at(-1)).toEqual({
         operation: 'createPresignedDownload',
-        location,
+        location: final,
       });
     });
 
@@ -435,21 +603,86 @@ describe('MediaService', () => {
       const fresh = await uploaded(context, file(JPEG));
       const ready = await uploaded(context, file(JPEG));
       await context.service.confirmUpload(ready.mediaId);
-      jest.setSystemTime(NOW + TTL_SECONDS * 1_000 + 1);
+      jest.setSystemTime(AFTER_EXPIRY);
 
       await expect(context.service.removeExpiredUploads()).resolves.toBe(1);
 
       expect(context.client.rows.has(expired.mediaId)).toBe(false);
-      expect(context.storage.hasObject(expired.location)).toBe(false);
+      expect(context.storage.hasObject(expired.staging)).toBe(false);
       expect(context.client.rows.get(fresh.mediaId)?.status).toBe('pending');
-      expect(context.storage.hasObject(fresh.location)).toBe(true);
+      expect(context.storage.hasObject(fresh.staging)).toBe(true);
       expect(context.client.rows.get(ready.mediaId)?.status).toBe('ready');
+    });
+
+    it('with a scope, acts only on the uploads of its owner', async () => {
+      const owner = '00000000-0000-4000-8000-000000000001';
+      const context = setup({ ownerId: owner });
+      const own = await uploaded(context, file(JPEG));
+      const unowned = await uploaded(context, file(JPEG));
+      const other = await uploaded(context, file(JPEG));
+      const ownReady = await uploaded(context, file(JPEG));
+      const unownedReady = await uploaded(context, file(JPEG));
+      for (const ready of [ownReady, unownedReady]) {
+        await context.service.confirmUpload(ready.mediaId);
+        // A re-upload with the still valid ticket: a staging object the cleanup removes.
+        context.storage.upload(ready.ticket, {
+          bytes: file(JPEG),
+          contentType: 'image/jpeg',
+        });
+      }
+      const assign = (mediaId: string, ownerId: string): void => {
+        const row = context.client.rows.get(mediaId);
+        if (row !== undefined) {
+          row.ownerId = ownerId;
+        }
+      };
+      assign(own.mediaId, owner);
+      assign(ownReady.mediaId, owner);
+      assign(other.mediaId, '00000000-0000-4000-8000-000000000002');
+      jest.setSystemTime(AFTER_EXPIRY);
+
+      await expect(context.service.removeExpiredUploads()).resolves.toBe(1);
+
+      expect(context.client.rows.has(own.mediaId)).toBe(false);
+      expect(context.storage.hasObject(own.staging)).toBe(false);
+      for (const untouched of [unowned, other]) {
+        expect(context.client.rows.get(untouched.mediaId)?.status).toBe(
+          'pending',
+        );
+        expect(context.storage.hasObject(untouched.staging)).toBe(true);
+      }
+      expect(context.storage.hasObject(ownReady.staging)).toBe(false);
+      expect(context.storage.hasObject(unownedReady.staging)).toBe(true);
+    });
+
+    it('removes the staging object of a ready upload only once its ticket expired', async () => {
+      const context = setup();
+      const { mediaId, ticket, staging } = await uploaded(context, file(JPEG));
+      await context.service.confirmUpload(mediaId);
+      context.storage.upload(ticket, {
+        bytes: file(JPEG),
+        contentType: 'image/jpeg',
+      });
+
+      await context.service.removeExpiredUploads();
+      expect(context.storage.hasObject(staging)).toBe(true);
+      jest.setSystemTime(AFTER_EXPIRY);
+      await expect(context.service.removeExpiredUploads()).resolves.toBe(0);
+
+      expect(context.storage.hasObject(staging)).toBe(false);
+      expect(context.storage.hasObject(finalLocation(context, mediaId))).toBe(
+        true,
+      );
+      expect(context.client.rows.get(mediaId)).toMatchObject({
+        status: 'ready',
+        stagingKey: null,
+      });
     });
 
     it('is idempotent: running twice removes each upload once', async () => {
       const context = setup();
       await uploaded(context, file(JPEG));
-      jest.setSystemTime(NOW + TTL_SECONDS * 1_000 + 1);
+      jest.setSystemTime(AFTER_EXPIRY);
 
       await expect(context.service.removeExpiredUploads()).resolves.toBe(1);
       await expect(context.service.removeExpiredUploads()).resolves.toBe(0);
@@ -461,7 +694,7 @@ describe('MediaService', () => {
         purpose: 'vendor.document',
         contentType: 'application/pdf',
       });
-      jest.setSystemTime(NOW + TTL_SECONDS * 1_000 + 1);
+      jest.setSystemTime(AFTER_EXPIRY);
 
       await expect(context.service.removeExpiredUploads()).resolves.toBe(1);
       expect(context.client.rows.has(ticket.mediaId)).toBe(false);
@@ -469,8 +702,8 @@ describe('MediaService', () => {
 
     it('finishes after a failed run, and a confirmation meanwhile sees EXPIRED', async () => {
       const context = setup();
-      const { mediaId, location } = await uploaded(context, file(JPEG));
-      jest.setSystemTime(NOW + TTL_SECONDS * 1_000 + 1);
+      const { mediaId, staging } = await uploaded(context, file(JPEG));
+      jest.setSystemTime(AFTER_EXPIRY);
       context.storage.failNext('deleteObject', new StorageError('unavailable'));
 
       await expect(
@@ -485,7 +718,7 @@ describe('MediaService', () => {
       );
 
       await expect(context.service.removeExpiredUploads()).resolves.toBe(1);
-      expect(context.storage.hasObject(location)).toBe(false);
+      expect(context.storage.hasObject(staging)).toBe(false);
     });
 
     it('works through more expired uploads than one batch', async () => {
@@ -493,8 +726,9 @@ describe('MediaService', () => {
       for (let index = 0; index < 150; index += 1) {
         context.client.seed({
           id: `id-${index}`,
-          bucket: 'example-private',
-          objectKey: `k-${index}`,
+          stagingKey: `staging/k-${index}`,
+          bucket: null,
+          objectKey: null,
           status: 'pending',
           rejectionReason: null,
           expiresAt: new Date(NOW - 1),
@@ -508,7 +742,7 @@ describe('MediaService', () => {
     it('stops between uploads once aborted', async () => {
       const context = setup();
       await uploaded(context, file(JPEG));
-      jest.setSystemTime(NOW + TTL_SECONDS * 1_000 + 1);
+      jest.setSystemTime(AFTER_EXPIRY);
       const controller = new AbortController();
       controller.abort(new Error('shutting down'));
 

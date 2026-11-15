@@ -66,6 +66,10 @@ export class AllExceptionsFilter implements ExceptionFilter {
       response.setHeader(REQUEST_ID_HEADER, requestId);
     }
 
+    if (error.retryAfterSeconds !== undefined) {
+      response.setHeader('Retry-After', String(error.retryAfterSeconds));
+    }
+
     const language = resolveLanguage(request.headers['accept-language']);
     const body: ErrorResponseBody = {
       code: error.code,

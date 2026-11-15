@@ -43,7 +43,7 @@ export class SmsError extends AppError {
  * retryable one. `failures` holds every attempt in order, each provider's SmsError
  * carrying its original cause; the message names them all (`log timeout, other
  * invalid-number`), and `cause` is the last failure. `retryable` is the last failure's:
- * true only when every provider failed in a way a later attempt may not.
+ * true only when every provider failed retryably, so a later attempt may succeed.
  */
 export class SmsNotSentError extends AppError {
   readonly failures: readonly SmsProviderFailure[];

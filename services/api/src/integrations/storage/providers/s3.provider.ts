@@ -1,4 +1,5 @@
 import {
+  CopyObjectCommand,
   DeleteObjectCommand,
   GetObjectCommand,
   HeadObjectCommand,
@@ -38,7 +39,9 @@ import type {
  * `@aws-sdk/client-s3`) and its retry classification (`@smithy/core`, retry
  * submodule): HeadObject throws `NotFound` (its 404 has no body, so a missing bucket
  * also reads as `NotFound`); GetObject throws `NoSuchKey` and `InvalidObjectState`;
- * DeleteObject documents no error of its own and succeeds for a missing key.
+ * DeleteObject documents no error of its own and succeeds for a missing key; CopyObject
+ * documents `ObjectNotInActiveTierError` (the source is archived) and answers 404
+ * `NoSuchKey` when the source does not exist (the field's documentation of CopySource).
  */
 export class S3StorageProvider implements StoragePort, OnModuleDestroy {
   /** How long opening a connection to the storage may take. */
@@ -191,6 +194,33 @@ export class S3StorageProvider implements StoragePort, OnModuleDestroy {
     }
   }
 
+  async copyObject(
+    source: StorageLocation,
+    destination: StorageLocation,
+  ): Promise<boolean> {
+    try {
+      // `CopySource` is `<bucket>/<key>`, URL-encoded (the SDK's documentation of the
+      // field); each segment is encoded so the slashes between them stay slashes. The
+      // default MetadataDirective, COPY, keeps the source's Content-Type.
+      const copySource = [source.bucket, ...source.key.split('/')]
+        .map(encodeURIComponent)
+        .join('/');
+      await this.client.send(
+        new CopyObjectCommand({
+          Bucket: destination.bucket,
+          Key: destination.key,
+          CopySource: copySource,
+        }),
+      );
+      return true;
+    } catch (error) {
+      if (this.errorName(error) === 'NoSuchKey') {
+        return false;
+      }
+      throw this.toStorageError(error);
+    }
+  }
+
   async deleteObject(location: StorageLocation): Promise<void> {
     try {
       await this.client.send(
@@ -217,7 +247,10 @@ export class S3StorageProvider implements StoragePort, OnModuleDestroy {
     if (name === 'NoSuchBucket') {
       return 'bucket-missing';
     }
-    if (name === 'InvalidObjectState') {
+    if (
+      name === 'InvalidObjectState' ||
+      name === 'ObjectNotInActiveTierError'
+    ) {
       return 'object-archived';
     }
     if (status === 429 || S3StorageProvider.THROTTLING_ERRORS.includes(name)) {

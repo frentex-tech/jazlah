@@ -8,6 +8,8 @@ import type { ErrorResponseBody } from '@common/filters/error-response-body.inte
 import { PrismaService } from '@infra/database/prisma.service';
 import { QUEUE_NAMES } from '@infra/queue/queue-names.constants';
 import { StorageService } from '@integrations/storage';
+import { MEDIA_CLEANUP_SCOPE } from '../src/modules/media/media-cleanup-scope.constants';
+import type { MediaCleanupScope } from '../src/modules/media/media-cleanup-scope.type';
 import { MEDIA_CLEANUP } from '../src/modules/media/media-cleanup.constants';
 import { MediaCleanupProcessor } from '../src/modules/media/media-cleanup.processor';
 import { MediaCleanupScheduler } from '../src/modules/media/media-cleanup.scheduler';
@@ -34,9 +36,10 @@ function file(start: number[], size = 1_024): Uint8Array<ArrayBuffer> {
 
 /**
  * The storage side, against the local MinIO (`pnpm infra:up`) and its -test buckets
- * (scripts/e2e.mjs): what the presigned POST policy really enforces, public and private
- * reads, and the cleanup job. Uploads are real multipart form POSTs, as a browser or the
- * app sends them.
+ * (scripts/e2e.mjs): what the presigned POST policy really enforces, that uploads land in
+ * a private staging key and only a checked copy is served, public and private reads, and
+ * the cleanup job. Uploads are real multipart form POSTs, as a browser or the app sends
+ * them.
  */
 describe('Media uploads against MinIO (e2e)', () => {
   const env = loadEnv();
@@ -74,7 +77,15 @@ describe('Media uploads against MinIO (e2e)', () => {
       where: { id: { in: created } },
     });
     for (const row of rows) {
-      await storage.deleteObject({ bucket: row.bucket, key: row.objectKey });
+      if (row.bucket !== null && row.objectKey !== null) {
+        await storage.deleteObject({ bucket: row.bucket, key: row.objectKey });
+      }
+      if (row.stagingKey !== null) {
+        await storage.deleteObject({
+          bucket: env.STORAGE_PRIVATE_BUCKET,
+          key: row.stagingKey,
+        });
+      }
     }
     await prisma.media.deleteMany({ where: { id: { in: created } } });
     await app.close();
@@ -110,6 +121,41 @@ describe('Media uploads against MinIO (e2e)', () => {
 
   function confirm(id: string): request.Test {
     return request(app.getHttpServer()).post(`/v1/test/media/${id}/confirm`);
+  }
+
+  /** Where a ready file's checked copy is, from its row. */
+  async function finalLocation(
+    id: string,
+  ): Promise<{ bucket: string; key: string }> {
+    const row = await prisma.media.findUnique({ where: { id } });
+    return { bucket: row?.bucket ?? '', key: row?.objectKey ?? '' };
+  }
+
+  /** Runs the cleanup job once, as its worker would. */
+  async function runCleanup(): Promise<void> {
+    const job = {
+      id: 'e2e-cleanup',
+      name: MEDIA_CLEANUP.jobName,
+      data: {},
+      queueName: QUEUE_NAMES.mediaCleanup,
+    } as unknown as Job<unknown, number>;
+    await app.get(MediaCleanupProcessor).process(job);
+  }
+
+  /**
+   * Moves an upload's confirm window, and so its ticket, into the past, and gives it this
+   * app's cleanup owner: the cleanup here acts only on that owner's uploads, and other
+   * suites' cleanups never on them (createHttpApp, MEDIA_CLEANUP_SCOPE).
+   */
+  async function expire(id: string): Promise<void> {
+    const scope = app.get<MediaCleanupScope>(MEDIA_CLEANUP_SCOPE);
+    await prisma.media.update({
+      where: { id },
+      data: {
+        expiresAt: new Date(Date.now() - 1_000),
+        ownerId: scope.ownerId,
+      },
+    });
   }
 
   async function downloadLink(
@@ -172,6 +218,18 @@ describe('Media uploads against MinIO (e2e)', () => {
     expect(moved.status).toBe(403);
   });
 
+  it('an upload for a public purpose lands in the private bucket, unreadable until checked', async () => {
+    const ticket = await requestUpload('catalog.product-image', 'image/jpeg');
+    expect(ticket.fields.bucket).toBe(env.STORAGE_PRIVATE_BUCKET);
+    expect((await post(ticket, file(JPEG))).status).toBe(204);
+
+    const direct = await fetch(
+      `${endpoint}/${ticket.fields.bucket}/${ticket.fields.key}`,
+    );
+
+    expect(direct.status).toBe(403);
+  });
+
   it('a public object is reachable at its public URL after confirm', async () => {
     const ticket = await requestUpload('catalog.product-image', 'image/jpeg');
     const bytes = file(JPEG, 4_096);
@@ -180,11 +238,18 @@ describe('Media uploads against MinIO (e2e)', () => {
 
     const link = await downloadLink(ticket.mediaId);
     const res = await fetch(link.url);
+    const final = await finalLocation(ticket.mediaId);
 
     expect(link.expiresAt).toBeNull();
-    expect(link.url).toBe(
-      `${env.STORAGE_PUBLIC_BASE_URL}/${ticket.fields.key}`,
-    );
+    expect(final.bucket).toBe(env.STORAGE_PUBLIC_BUCKET);
+    expect(link.url).toBe(`${env.STORAGE_PUBLIC_BASE_URL}/${final.key}`);
+    // The staging object is deleted once the copy is checked.
+    await expect(
+      storage.getObjectMetadata({
+        bucket: ticket.fields.bucket ?? '',
+        key: ticket.fields.key ?? '',
+      }),
+    ).resolves.toBeNull();
     expect(res.status).toBe(200);
     expect(res.headers.get('content-type')).toBe('image/jpeg');
     expect(new Uint8Array(await res.arrayBuffer())).toEqual(bytes);
@@ -200,9 +265,9 @@ describe('Media uploads against MinIO (e2e)', () => {
       visibility: 'private',
     });
 
-    const direct = await fetch(
-      `${endpoint}/${ticket.fields.bucket}/${ticket.fields.key}`,
-    );
+    const final = await finalLocation(ticket.mediaId);
+    const direct = await fetch(`${endpoint}/${final.bucket}/${final.key}`);
+    expect(final.bucket).toBe(env.STORAGE_PRIVATE_BUCKET);
     expect(direct.status).toBe(403);
 
     const link = await downloadLink(ticket.mediaId);
@@ -227,6 +292,95 @@ describe('Media uploads against MinIO (e2e)', () => {
       reason: 'TYPE_NOT_ALLOWED',
     });
     await expect(storage.getObjectMetadata(location)).resolves.toBeNull();
+    await expect(
+      prisma.media.findUnique({ where: { id: ticket.mediaId } }),
+    ).resolves.toMatchObject({ bucket: null, objectKey: null });
+  });
+
+  describe('a reused upload ticket cannot change a checked file (review of #230)', () => {
+    it('a second POST after confirmation does not change what is served', async () => {
+      const ticket = await requestUpload('catalog.product-image', 'image/jpeg');
+      const bytes = file(JPEG, 2_048);
+      expect((await post(ticket, bytes)).status).toBe(204);
+      await confirm(ticket.mediaId).expect(200);
+
+      // The ticket is still valid, so the storage accepts an executable at the staging key.
+      expect((await post(ticket, file(EXE, 4_096))).status).toBe(204);
+
+      const served = await fetch((await downloadLink(ticket.mediaId)).url);
+      expect(new Uint8Array(await served.arrayBuffer())).toEqual(bytes);
+      await expect(
+        storage.getObjectMetadata(await finalLocation(ticket.mediaId)),
+      ).resolves.toEqual({ sizeBytes: 2_048, contentType: 'image/jpeg' });
+
+      // Once the ticket has expired, the cleanup removes the staging object.
+      await expire(ticket.mediaId);
+      await runCleanup();
+      await expect(
+        storage.getObjectMetadata({
+          bucket: ticket.fields.bucket ?? '',
+          key: ticket.fields.key ?? '',
+        }),
+      ).resolves.toBeNull();
+      await expect(
+        prisma.media.findUnique({ where: { id: ticket.mediaId } }),
+      ).resolves.toMatchObject({ status: 'ready', stagingKey: null });
+    });
+
+    it('a re-upload after rejection is never read, and the cleanup removes it', async () => {
+      const ticket = await requestUpload('catalog.product-image', 'image/jpeg');
+      const staging = {
+        bucket: ticket.fields.bucket ?? '',
+        key: ticket.fields.key ?? '',
+      };
+      expect((await post(ticket, file(EXE))).status).toBe(204);
+      await confirm(ticket.mediaId).expect(422);
+
+      expect((await post(ticket, file(JPEG))).status).toBe(204);
+      const again = await confirm(ticket.mediaId).expect(422);
+      expect((again.body as ErrorResponseBody).details).toEqual({
+        reason: 'TYPE_NOT_ALLOWED',
+      });
+
+      await expire(ticket.mediaId);
+      await runCleanup();
+      await expect(storage.getObjectMetadata(staging)).resolves.toBeNull();
+      await expect(
+        prisma.media.findUnique({ where: { id: ticket.mediaId } }),
+      ).resolves.toMatchObject({
+        status: 'rejected',
+        stagingKey: null,
+        bucket: null,
+      });
+    });
+
+    it('two confirmations racing a re-upload leave a consistent file', async () => {
+      // The exact interleaving is up to the event loop and MinIO, so this asserts the
+      // invariant whatever the order: a ready row serves a checked JPEG at its own
+      // location, a rejected one has no copy. The fixed interleavings are unit-tested.
+      const ticket = await requestUpload('catalog.product-image', 'image/jpeg');
+      const good = file(JPEG, 2_048);
+      expect((await post(ticket, file(EXE))).status).toBe(204);
+
+      const [first, , second] = await Promise.all([
+        confirm(ticket.mediaId),
+        post(ticket, good),
+        confirm(ticket.mediaId),
+      ]);
+
+      const row = await prisma.media.findUnique({
+        where: { id: ticket.mediaId },
+      });
+      if (row?.status === 'ready') {
+        const served = await fetch((await downloadLink(ticket.mediaId)).url);
+        expect(new Uint8Array(await served.arrayBuffer())).toEqual(good);
+      } else {
+        expect(row).toMatchObject({ status: 'rejected', bucket: null });
+      }
+      expect([first.status, second.status].sort()).toEqual(
+        row?.status === 'ready' ? expect.arrayContaining([200]) : [422, 422],
+      );
+    });
   });
 
   it('keeps the cleanup job scheduled at the configured interval', async () => {
@@ -252,21 +406,11 @@ describe('Media uploads against MinIO (e2e)', () => {
       bucket: ticket.fields.bucket ?? '',
       key: ticket.fields.key ?? '',
     };
-    await prisma.media.update({
-      where: { id: ticket.mediaId },
-      data: { expiresAt: new Date(Date.now() - 1_000) },
-    });
-    const processor = app.get(MediaCleanupProcessor);
-    const job = {
-      id: 'e2e-cleanup',
-      name: MEDIA_CLEANUP.jobName,
-      data: {},
-      queueName: QUEUE_NAMES.mediaCleanup,
-    } as unknown as Job<unknown, number>;
+    await expire(ticket.mediaId);
 
-    await processor.process(job);
+    await runCleanup();
     // Run again: nothing left to remove, nothing fails.
-    await processor.process(job);
+    await runCleanup();
 
     await expect(storage.getObjectMetadata(location)).resolves.toBeNull();
     await expect(

@@ -102,6 +102,11 @@ jobs:
       - name: Lint rules
         run: pnpm lint:rules
 
+      # The instruction files loaded into every Claude Code session stay under 50,000
+      # characters; the script lists each file's size.
+      - name: Instruction size
+        run: pnpm instructions:check
+
       - name: Type check and type tests
         run: pnpm test:types
 
@@ -115,6 +120,15 @@ jobs:
 
       - name: Migrations
         run: pnpm db:deploy
+
+      # The migrations, replayed on an empty shadow database, must produce exactly the
+      # Prisma schema: exit code 2 names each difference.
+      - name: Migration drift
+        env:
+          SHADOW_DATABASE_URL: postgresql://jazla:jazla@localhost:5434/jazla_shadow
+        run: |
+          psql -h localhost -p 5434 -U jazla -d jazla -v ON_ERROR_STOP=1 -c 'CREATE DATABASE jazla_shadow'
+          pnpm db:drift
 
       # A service container starts before checkout and cannot run the bucket setup in
       # docker/minio/, so MinIO comes from docker-compose.yml; --wait returns once its

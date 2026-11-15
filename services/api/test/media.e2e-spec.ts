@@ -100,7 +100,7 @@ describe('Media uploads with the fake storage (e2e)', () => {
     ).body as Ticket;
     expect(ticket.fields.key).toMatch(
       new RegExp(
-        `^catalog/product-image/\\d{4}/\\d{2}/\\d{2}/${ticket.mediaId}$`,
+        `^staging/catalog/product-image/\\d{4}/\\d{2}/\\d{2}/${ticket.mediaId}$`,
       ),
     );
 
@@ -122,12 +122,47 @@ describe('Media uploads with the fake storage (e2e)', () => {
     const link = await request(app.getHttpServer())
       .get(`/v1/test/media/${ticket.mediaId}/download-link`)
       .expect(200);
+    const row = await prisma.media.findUnique({
+      where: { id: ticket.mediaId },
+    });
+    expect(row?.objectKey).toMatch(
+      new RegExp(`^catalog/product-image/.+/${ticket.mediaId}/[0-9a-f-]{36}$`),
+    );
     expect(link.body).toEqual({
-      url: expect.stringMatching(
-        new RegExp(`/${ticket.fields.key}$`),
-      ) as unknown,
+      url: expect.stringMatching(new RegExp(`/${row?.objectKey}$`)) as unknown,
       expiresAt: null,
     });
+  });
+
+  it('concurrent confirmations on PostgreSQL agree, and only the winning copy is kept', async () => {
+    const ticket = (
+      await requestUpload({
+        purpose: 'catalog.product-image',
+        contentType: 'image/jpeg',
+      })
+    ).body as Ticket;
+    upload(ticket, file(JPEG, 2_048), 'image/jpeg');
+
+    const responses = await Promise.all(
+      Array.from({ length: 5 }, () => confirm(ticket.mediaId)),
+    );
+
+    // Every confirmation, winner or loser, answers with the ready file the winner made.
+    for (const res of responses) {
+      expect(res.status).toBe(200);
+      expect(res.body).toEqual(responses[0]?.body);
+    }
+    const row = await prisma.media.findUnique({
+      where: { id: ticket.mediaId },
+    });
+    const finalPrefix = `${row?.bucket}/catalog/product-image/`;
+    const copies = storage
+      .objectLocations()
+      .filter(
+        (location) =>
+          location.startsWith(finalPrefix) && location.includes(ticket.mediaId),
+      );
+    expect(copies).toEqual([`${row?.bucket}/${row?.objectKey}`]);
   });
 
   it('an oversized upload is refused by the storage, and confirming it finds nothing', async () => {

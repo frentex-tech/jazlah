@@ -48,7 +48,11 @@ export class MediaCleanupScheduler
     this.schedule?.stop();
   }
 
-  /** Resolves once the schedule is registered in Redis (tests wait on it). */
+  /**
+   * Test hook: resolves once the schedule is registered in Redis, so an e2e test can
+   * wait for it. Production code never needs it: registration is retried in the
+   * background (`keepJobScheduled`).
+   */
   whenRegistered(): Promise<void> {
     return (
       this.schedule?.registered ??

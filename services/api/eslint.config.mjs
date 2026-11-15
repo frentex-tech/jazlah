@@ -14,9 +14,16 @@ import tseslint from 'typescript-eslint';
  * message (except R0's loose-file check, whose message the plugin fixes) and in
  * `.claude/rules/code-structure.md`, which explains why the rule exists and what to do
  * instead. Each rule is proven by fixtures in
- * `lint-fixtures/`, checked by `pnpm lint:rules`. Changing a rule, an element or a
- * folder means changing the fixtures in the same change (see code-structure.md,
- * "Changing the layout").
+ * `lint-fixtures/`, checked by `pnpm lint:rules`.
+ *
+ * Changing the layout (a top-level folder, a layer, what may import what) is one change:
+ *   - the policy here, with a new id (the next free one is in code-structure.md);
+ *   - its row in code-structure.md, section 2;
+ *   - violating and conforming fixtures in `lint-fixtures/src/` (first line
+ *     `// lint-rule: Rn violates|conforms`, or `support`; a closed bypass becomes a fixture);
+ *   - the id in `scripts/check-lint-rules.mjs`;
+ *   - for a top-level folder also the path aliases, `LOOSE_FILES` and ARCHITECTURE.md.
+ * Then `pnpm lint` and `pnpm lint:rules`.
  */
 
 /** Where the architecture rules apply: the real source and the fixtures that prove them. */
@@ -37,6 +44,7 @@ const ENV_READER_FILES = [
  */
 const DOMAIN_SAFE_COMMON = [
   'async/**',
+  'auth/**',
   'errors/**',
   'events/**',
   'i18n/**',
@@ -44,7 +52,8 @@ const DOMAIN_SAFE_COMMON = [
 ];
 
 /** The modules that have four layers (DECISIONS.md, "Settled"); R14 gives them no CRUD exception. */
-const FOUR_LAYER_MODULES = '{orders,checkout,payments,refunds,wallet,finance}';
+const FOUR_LAYER_MODULES =
+  '{auth,orders,checkout,payments,refunds,wallet,finance}';
 
 /**
  * Packages a file under a module's `domain/` folder may import (R8). Empty: domain

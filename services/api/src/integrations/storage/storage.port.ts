@@ -44,6 +44,16 @@ export interface StoragePort {
     byteCount: number,
   ): Promise<Uint8Array | null>;
 
+  /**
+   * Copies an object inside the storage, keeping its stored Content-Type; the bytes do
+   * not pass through the API. Replaces whatever is at `destination`. Returns false,
+   * copying nothing, when there is no object at `source`.
+   */
+  copyObject(
+    source: StorageLocation,
+    destination: StorageLocation,
+  ): Promise<boolean>;
+
   /** Deletes the object. Deleting an object that does not exist succeeds. */
   deleteObject(location: StorageLocation): Promise<void>;
 }

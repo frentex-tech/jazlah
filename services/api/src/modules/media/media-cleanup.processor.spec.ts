@@ -25,6 +25,8 @@ function setup() {
       publicBucket: 'example-public',
     } as StorageConfig),
     { pendingUploadTtlSeconds: 3_600 } as MediaConfig,
+    // As production: no cleanup scope.
+    null,
   );
   return {
     processor: new MediaCleanupProcessor(media),

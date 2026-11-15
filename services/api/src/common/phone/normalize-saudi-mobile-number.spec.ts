@@ -26,6 +26,18 @@ describe('normalizeSaudiMobileNumber', () => {
     ['Arabic-Indic mixed with Latin digits', '05١٢٣٤٥678'],
     ['Extended Arabic-Indic mixed with Latin digits', '+966 ۵۱ 234 ۵۶۷۸'],
     ['all three digit forms mixed', '٠5۱٢3۴٥6۷٨'],
+    // Copied numbers (review of #232): invisible format characters around or inside.
+    [
+      'wrapped in LRE and PDF, as iOS copies a contact',
+      '\u202A+966 51 234 5678\u202C',
+    ],
+    ['led by a left-to-right mark', '\u200E0512345678'],
+    ['ended by a right-to-left mark', '0512345678\u200F'],
+    ['wrapped in a left-to-right isolate', '\u2066+966512345678\u2069'],
+    ['wrapped in a first-strong isolate', '\u2068+966512345678\u2069'],
+    ['split by a zero-width space', '0512\u200B345678'],
+    ['led by a byte order mark', '\uFEFF0512345678'],
+    ['a no-break space between groups', '0512\u00A0345678'],
   ])('normalises %s (%p)', (_label, input) => {
     expect(normalizeSaudiMobileNumber(input)).toBe(E164);
   });

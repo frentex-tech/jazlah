@@ -1,6 +1,7 @@
 import { Module } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
 import { appConfig } from './app.config';
+import { authConfig } from './auth.config';
 import { databaseConfig } from './database.config';
 import { httpConfig } from './http.config';
 import { loggerConfig } from './logger.config';
@@ -32,6 +33,7 @@ import { storageConfig } from './storage.config';
         storageConfig,
         mediaConfig,
         smsConfig,
+        authConfig,
       ],
     }),
   ],

@@ -1,6 +1,833 @@
 {
   "openapi": "3.0.0",
   "paths": {
+    "/v1/public/auth/otp/request": {
+      "post": {
+        "description": "The answer is the same whether or not the phone may sign in to the audience. A new code replaces the previous one. Asking again before `resendAfterSeconds` has passed is RATE_LIMITED with Retry-After.",
+        "operationId": "PublicAuthController_request",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RequestOtpDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/OtpRequestedResponseDto"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Error. code: VALIDATION_FAILED.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Error. code: RATE_LIMITED.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Error. code: INTERNAL_ERROR.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "Error. code: SERVICE_UNAVAILABLE.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                }
+              }
+            }
+          }
+        },
+        "summary": "Send a verification code to a phone number",
+        "tags": [
+          "auth"
+        ]
+      }
+    },
+    "/v1/public/auth/otp/verify": {
+      "post": {
+        "description": "OTP_INVALID: the code is wrong (the attempt is counted). OTP_EXPIRED: no code can be verified any more; request a new one.",
+        "operationId": "PublicAuthController_verify",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/VerifyOtpDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SignedInResponseDto"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Error. code: VALIDATION_FAILED.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Error. code: ACCOUNT_DISABLED.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                }
+              }
+            }
+          },
+          "410": {
+            "description": "Error. code: OTP_EXPIRED.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Error. code: OTP_INVALID.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Error. code: RATE_LIMITED.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Error. code: INTERNAL_ERROR.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "Error. code: SERVICE_UNAVAILABLE.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                }
+              }
+            }
+          }
+        },
+        "summary": "Sign in with the verification code",
+        "tags": [
+          "auth"
+        ]
+      }
+    },
+    "/v1/public/auth/refresh": {
+      "post": {
+        "description": "Each refresh token works once. Presenting one again ends the session.",
+        "operationId": "PublicAuthController_refresh",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RefreshTokenDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AuthTokensResponseDto"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Error. code: VALIDATION_FAILED.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Error. code: REFRESH_TOKEN_INVALID.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Error. code: ACCOUNT_DISABLED.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Error. code: RATE_LIMITED.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Error. code: INTERNAL_ERROR.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                }
+              }
+            }
+          }
+        },
+        "summary": "Exchange the refresh token for a new pair",
+        "tags": [
+          "auth"
+        ]
+      }
+    },
+    "/v1/public/auth/logout": {
+      "post": {
+        "description": "Always 204, also for an unknown token or a session already ended.",
+        "operationId": "PublicAuthController_logout",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RefreshTokenDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "204": {
+            "description": "Signed out."
+          },
+          "400": {
+            "description": "Error. code: VALIDATION_FAILED.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Error. code: RATE_LIMITED.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Error. code: INTERNAL_ERROR.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                }
+              }
+            }
+          }
+        },
+        "summary": "Sign out of the session the refresh token belongs to",
+        "tags": [
+          "auth"
+        ]
+      }
+    },
+    "/v1/customer/me": {
+      "get": {
+        "operationId": "CustomerAuthController_me",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PrincipalResponseDto"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Error. code: UNAUTHORIZED, ACCESS_TOKEN_EXPIRED.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Error. code: FORBIDDEN, ACCOUNT_DISABLED.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Error. code: RATE_LIMITED.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Error. code: INTERNAL_ERROR.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Who is signed in",
+        "tags": [
+          "auth"
+        ]
+      }
+    },
+    "/v1/customer/auth/logout-all": {
+      "post": {
+        "description": "Ends this session too. Access tokens already issued keep working until they expire.",
+        "operationId": "CustomerAuthController_logoutAll",
+        "parameters": [],
+        "responses": {
+          "204": {
+            "description": "Signed out everywhere."
+          },
+          "401": {
+            "description": "Error. code: UNAUTHORIZED, ACCESS_TOKEN_EXPIRED.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Error. code: FORBIDDEN.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Error. code: RATE_LIMITED.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Error. code: INTERNAL_ERROR.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Sign out of every customer session of this user",
+        "tags": [
+          "auth"
+        ]
+      }
+    },
+    "/v1/vendor/me": {
+      "get": {
+        "operationId": "VendorAuthController_me",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PrincipalResponseDto"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Error. code: UNAUTHORIZED, ACCESS_TOKEN_EXPIRED.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Error. code: FORBIDDEN, ACCOUNT_DISABLED.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Error. code: RATE_LIMITED.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Error. code: INTERNAL_ERROR.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Who is signed in",
+        "tags": [
+          "auth"
+        ]
+      }
+    },
+    "/v1/vendor/auth/logout-all": {
+      "post": {
+        "description": "Ends this session too. Access tokens already issued keep working until they expire.",
+        "operationId": "VendorAuthController_logoutAll",
+        "parameters": [],
+        "responses": {
+          "204": {
+            "description": "Signed out everywhere."
+          },
+          "401": {
+            "description": "Error. code: UNAUTHORIZED, ACCESS_TOKEN_EXPIRED.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Error. code: FORBIDDEN.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Error. code: RATE_LIMITED.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Error. code: INTERNAL_ERROR.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Sign out of every vendor session of this user",
+        "tags": [
+          "auth"
+        ]
+      }
+    },
+    "/v1/kitchen/me": {
+      "get": {
+        "operationId": "KitchenAuthController_me",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PrincipalResponseDto"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Error. code: UNAUTHORIZED, ACCESS_TOKEN_EXPIRED.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Error. code: FORBIDDEN, ACCOUNT_DISABLED.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Error. code: RATE_LIMITED.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Error. code: INTERNAL_ERROR.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Who is signed in",
+        "tags": [
+          "auth"
+        ]
+      }
+    },
+    "/v1/kitchen/auth/logout-all": {
+      "post": {
+        "description": "Ends this session too. Access tokens already issued keep working until they expire.",
+        "operationId": "KitchenAuthController_logoutAll",
+        "parameters": [],
+        "responses": {
+          "204": {
+            "description": "Signed out everywhere."
+          },
+          "401": {
+            "description": "Error. code: UNAUTHORIZED, ACCESS_TOKEN_EXPIRED.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Error. code: FORBIDDEN.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Error. code: RATE_LIMITED.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Error. code: INTERNAL_ERROR.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Sign out of every kitchen session of this user",
+        "tags": [
+          "auth"
+        ]
+      }
+    },
+    "/v1/admin/me": {
+      "get": {
+        "operationId": "AdminAuthController_me",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PrincipalResponseDto"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Error. code: UNAUTHORIZED, ACCESS_TOKEN_EXPIRED.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Error. code: FORBIDDEN, ACCOUNT_DISABLED.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Error. code: RATE_LIMITED.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Error. code: INTERNAL_ERROR.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Who is signed in",
+        "tags": [
+          "auth"
+        ]
+      }
+    },
+    "/v1/admin/auth/logout-all": {
+      "post": {
+        "description": "Ends this session too. Access tokens already issued keep working until they expire.",
+        "operationId": "AdminAuthController_logoutAll",
+        "parameters": [],
+        "responses": {
+          "204": {
+            "description": "Signed out everywhere."
+          },
+          "401": {
+            "description": "Error. code: UNAUTHORIZED, ACCESS_TOKEN_EXPIRED.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Error. code: FORBIDDEN.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Error. code: RATE_LIMITED.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Error. code: INTERNAL_ERROR.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Sign out of every admin session of this user",
+        "tags": [
+          "auth"
+        ]
+      }
+    },
     "/v1/health": {
       "get": {
         "operationId": "HealthController_check",
@@ -99,20 +926,48 @@
       }
     },
     "schemas": {
-      "LivenessResponseDto": {
+      "RequestOtpDto": {
         "type": "object",
         "properties": {
-          "status": {
+          "phone": {
             "type": "string",
-            "description": "Always ok: the process answers.",
+            "description": "A Saudi mobile number, in any usual form (05…, 5…, 9665…, +9665…), with Latin or Arabic digits.",
+            "example": "0512345678"
+          },
+          "audience": {
+            "type": "string",
             "enum": [
-              "ok"
+              "customer",
+              "vendor",
+              "kitchen",
+              "admin"
             ],
-            "example": "ok"
+            "description": "The application the user is signing in to.",
+            "example": "customer"
           }
         },
         "required": [
-          "status"
+          "phone",
+          "audience"
+        ]
+      },
+      "OtpRequestedResponseDto": {
+        "type": "object",
+        "properties": {
+          "expiresInSeconds": {
+            "type": "number",
+            "description": "How long the code can be used, in seconds.",
+            "example": 300
+          },
+          "resendAfterSeconds": {
+            "type": "number",
+            "description": "How long to wait before asking for another code, in seconds.",
+            "example": 60
+          }
+        },
+        "required": [
+          "expiresInSeconds",
+          "resendAfterSeconds"
         ]
       },
       "FieldErrorDto": {
@@ -160,7 +1015,12 @@
           "MEDIA_NOT_FOUND",
           "MEDIA_UPLOAD_EXPIRED",
           "MEDIA_UPLOAD_REJECTED",
-          "MEDIA_NOT_READY"
+          "MEDIA_NOT_READY",
+          "OTP_INVALID",
+          "OTP_EXPIRED",
+          "REFRESH_TOKEN_INVALID",
+          "ACCESS_TOKEN_EXPIRED",
+          "ACCOUNT_DISABLED"
         ],
         "description": "Stable error code. Clients branch on it; it is never renamed or reused."
       },
@@ -206,6 +1066,197 @@
           "code",
           "message",
           "requestId"
+        ]
+      },
+      "VerifyOtpDto": {
+        "type": "object",
+        "properties": {
+          "phone": {
+            "type": "string",
+            "description": "The phone number the code was requested for.",
+            "example": "0512345678"
+          },
+          "audience": {
+            "type": "string",
+            "enum": [
+              "customer",
+              "vendor",
+              "kitchen",
+              "admin"
+            ],
+            "description": "The audience the code was requested for.",
+            "example": "customer"
+          },
+          "code": {
+            "type": "string",
+            "description": "The code from the message: 4 to 8 digits, Latin or Arabic (٠ to ٩, ۰ to ۹). Surrounding spaces and invisible format characters (direction marks, zero-width characters) are ignored.",
+            "example": "482913"
+          },
+          "devicePlatform": {
+            "type": "string",
+            "enum": [
+              "ios",
+              "android",
+              "web"
+            ],
+            "description": "The kind of client signing in.",
+            "example": "ios"
+          },
+          "deviceName": {
+            "type": "string",
+            "description": "A name for the device, shown in the list of sessions.",
+            "example": "iPhone 16",
+            "minLength": 1,
+            "maxLength": 100
+          }
+        },
+        "required": [
+          "phone",
+          "audience",
+          "code",
+          "devicePlatform"
+        ]
+      },
+      "PrincipalResponseDto": {
+        "type": "object",
+        "properties": {
+          "userId": {
+            "type": "string",
+            "format": "uuid",
+            "example": "6f1c0c53-3f0b-4d0a-9a6f-2f0f0f8f7a11"
+          },
+          "phone": {
+            "type": "string",
+            "description": "The phone number, masked.",
+            "example": "+966*******78"
+          },
+          "audience": {
+            "type": "string",
+            "enum": [
+              "customer",
+              "vendor",
+              "kitchen",
+              "admin"
+            ],
+            "description": "The one audience this sign-in is for.",
+            "example": "customer"
+          },
+          "organisationId": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true,
+            "description": "The vendor or kitchen the user acts for; null for customers and admins.",
+            "example": null
+          },
+          "sessionId": {
+            "type": "string",
+            "format": "uuid",
+            "example": "0b9f6a0e-58e5-4f6b-8e0a-5a1d3d0c2b10"
+          }
+        },
+        "required": [
+          "userId",
+          "phone",
+          "audience",
+          "organisationId",
+          "sessionId"
+        ]
+      },
+      "SignedInResponseDto": {
+        "type": "object",
+        "properties": {
+          "accessToken": {
+            "type": "string",
+            "description": "Sent as `Authorization: Bearer <token>` on every request.",
+            "example": "eyJhbGciOi…"
+          },
+          "accessTokenExpiresInSeconds": {
+            "type": "number",
+            "description": "How long the access token lives, in seconds.",
+            "example": 900
+          },
+          "refreshToken": {
+            "type": "string",
+            "description": "Exchanged once for a new pair when the access token expires. Keep it in secure storage.",
+            "example": "q3vX…"
+          },
+          "refreshTokenExpiresInSeconds": {
+            "type": "number",
+            "description": "How long the refresh token lives, in seconds.",
+            "example": 2592000
+          },
+          "principal": {
+            "$ref": "#/components/schemas/PrincipalResponseDto"
+          }
+        },
+        "required": [
+          "accessToken",
+          "accessTokenExpiresInSeconds",
+          "refreshToken",
+          "refreshTokenExpiresInSeconds",
+          "principal"
+        ]
+      },
+      "RefreshTokenDto": {
+        "type": "object",
+        "properties": {
+          "refreshToken": {
+            "type": "string",
+            "description": "The refresh token of the session.",
+            "example": "q3vX…",
+            "minLength": 20,
+            "maxLength": 200
+          }
+        },
+        "required": [
+          "refreshToken"
+        ]
+      },
+      "AuthTokensResponseDto": {
+        "type": "object",
+        "properties": {
+          "accessToken": {
+            "type": "string",
+            "description": "Sent as `Authorization: Bearer <token>` on every request.",
+            "example": "eyJhbGciOi…"
+          },
+          "accessTokenExpiresInSeconds": {
+            "type": "number",
+            "description": "How long the access token lives, in seconds.",
+            "example": 900
+          },
+          "refreshToken": {
+            "type": "string",
+            "description": "Exchanged once for a new pair when the access token expires. Keep it in secure storage.",
+            "example": "q3vX…"
+          },
+          "refreshTokenExpiresInSeconds": {
+            "type": "number",
+            "description": "How long the refresh token lives, in seconds.",
+            "example": 2592000
+          }
+        },
+        "required": [
+          "accessToken",
+          "accessTokenExpiresInSeconds",
+          "refreshToken",
+          "refreshTokenExpiresInSeconds"
+        ]
+      },
+      "LivenessResponseDto": {
+        "type": "object",
+        "properties": {
+          "status": {
+            "type": "string",
+            "description": "Always ok: the process answers.",
+            "enum": [
+              "ok"
+            ],
+            "example": "ok"
+          }
+        },
+        "required": [
+          "status"
         ]
       },
       "ReadinessChecksDto": {

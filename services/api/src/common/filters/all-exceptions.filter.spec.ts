@@ -92,6 +92,20 @@ describe('AllExceptionsFilter', () => {
       expect(result.body).toMatchObject({ code: 'NOT_FOUND' });
     });
 
+    it('sends retryAfterSeconds as the Retry-After header', () => {
+      const result = run(
+        new AppError(ErrorCode.RATE_LIMITED, { retryAfterSeconds: 42 }),
+      );
+      expect(result.status).toBe(HttpStatus.TOO_MANY_REQUESTS);
+      expect(result.headers['Retry-After']).toBe('42');
+    });
+
+    it('sends no Retry-After without it', () => {
+      expect(
+        run(new AppError(ErrorCode.RATE_LIMITED)).headers,
+      ).not.toHaveProperty('Retry-After');
+    });
+
     it('omits details when there are none', () => {
       expect(run(new AppError(ErrorCode.FORBIDDEN)).body).not.toHaveProperty(
         'details',

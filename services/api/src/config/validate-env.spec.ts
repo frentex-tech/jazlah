@@ -14,7 +14,19 @@ const STORAGE = {
   STORAGE_PRIVATE_BUCKET: 'example-private',
   STORAGE_PUBLIC_BASE_URL: 'https://cdn.example.com/media',
 };
-const VALID = { DATABASE_URL, REDIS_URL, ...STORAGE };
+/** The two authentication secrets; obviously not real. Unset outside production they are random. */
+const AUTH_SECRETS = {
+  AUTH_ACCESS_TOKEN_SECRET: 'example-access-token-secret-0123456789',
+  AUTH_OTP_SECRET: 'example-otp-secret-0123456789-abcdefghij',
+};
+const VALID = { DATABASE_URL, REDIS_URL, ...STORAGE, ...AUTH_SECRETS };
+const WITHOUT_AUTH_SECRETS = { DATABASE_URL, REDIS_URL, ...STORAGE };
+const PRODUCTION = {
+  ...VALID,
+  NODE_ENV: 'production',
+  TRUST_PROXY_HOPS: '1',
+  QUEUE_WORKERS_ENABLED: 'false',
+};
 /** The defaults of the HTTP and rate limit variables. */
 const HTTP_DEFAULTS = {
   SHUTDOWN_DEADLINE_MS: 28_000,
@@ -42,6 +54,23 @@ const HTTP_DEFAULTS = {
   MEDIA_CLEANUP_INTERVAL_SECONDS: 900,
   SMS_PROVIDERS: ['log'],
   SMS_PROVIDER_TIMEOUT_MS: 5_000,
+  ...AUTH_SECRETS,
+  AUTH_ACCESS_TOKEN_KEY_ID: '1',
+  AUTH_ACCESS_TOKEN_PREVIOUS_SECRET: undefined,
+  AUTH_ACCESS_TOKEN_PREVIOUS_KEY_ID: undefined,
+  AUTH_ACCESS_TOKEN_TTL_SECONDS: 900,
+  AUTH_REFRESH_TOKEN_TTL_SECONDS: 2_592_000,
+  AUTH_OTP_TTL_SECONDS: 300,
+  AUTH_OTP_MAX_ATTEMPTS: 5,
+  AUTH_OTP_LENGTH: 6,
+  AUTH_OTP_RESEND_WAIT_SECONDS: 60,
+  AUTH_OTP_REQUEST_ADDRESS_LIMIT: 30,
+  AUTH_OTP_VERIFY_ADDRESS_LIMIT: 30,
+  AUTH_OTP_ADDRESS_WINDOW_SECONDS: 600,
+  AUTH_OTP_PHONE_LIMIT: 3,
+  AUTH_OTP_PHONE_WINDOW_SECONDS: 600,
+  AUTH_OTP_PHONE_DAILY_LIMIT: 10,
+  AUTH_REVIEW_ACCOUNTS: [],
 };
 
 function problemsOf(raw: Record<string, unknown>): readonly string[] {
@@ -551,6 +580,145 @@ describe('validateEnv', () => {
     });
   });
 
+  describe('auth variables', () => {
+    it('requires both secrets in production, without printing anything', () => {
+      expect(
+        problemsOf({
+          ...WITHOUT_AUTH_SECRETS,
+          NODE_ENV: 'production',
+          TRUST_PROXY_HOPS: '1',
+          QUEUE_WORKERS_ENABLED: 'false',
+        }),
+      ).toEqual([
+        'AUTH_ACCESS_TOKEN_SECRET: required when NODE_ENV is production: expected a secret of at least 32 characters (for example the output of: openssl rand -base64 48)',
+        'AUTH_OTP_SECRET: required when NODE_ENV is production: expected a secret of at least 32 characters (for example the output of: openssl rand -base64 48)',
+      ]);
+    });
+
+    it('makes a random secret of its own for each when unset outside production', () => {
+      const first = validateEnv(WITHOUT_AUTH_SECRETS);
+      const second = validateEnv({
+        ...WITHOUT_AUTH_SECRETS,
+        AUTH_ACCESS_TOKEN_SECRET: '',
+      });
+
+      expect(first.AUTH_ACCESS_TOKEN_SECRET.length).toBeGreaterThanOrEqual(32);
+      expect(first.AUTH_OTP_SECRET.length).toBeGreaterThanOrEqual(32);
+      expect(first.AUTH_OTP_SECRET).not.toBe(first.AUTH_ACCESS_TOKEN_SECRET);
+      expect(second.AUTH_ACCESS_TOKEN_SECRET).not.toBe(
+        first.AUTH_ACCESS_TOKEN_SECRET,
+      );
+    });
+
+    it('refuses a short secret, never repeating it', () => {
+      const message = messageOf({ ...VALID, AUTH_OTP_SECRET: 'too-short' });
+
+      expect(message).toContain(
+        'AUTH_OTP_SECRET: expected a secret of at least 32 characters',
+      );
+      expect(message).not.toContain('too-short');
+    });
+
+    it('refuses one secret used for both purposes', () => {
+      expect(
+        problemsOf({
+          ...VALID,
+          AUTH_OTP_SECRET: AUTH_SECRETS.AUTH_ACCESS_TOKEN_SECRET,
+        }),
+      ).toEqual([
+        'AUTH_OTP_SECRET: must differ from AUTH_ACCESS_TOKEN_SECRET: one secret signs tokens, the other hashes verification codes',
+      ]);
+    });
+
+    it('accepts a previous signing key with an id of its own', () => {
+      const env = validateEnv({
+        ...VALID,
+        AUTH_ACCESS_TOKEN_KEY_ID: '2',
+        AUTH_ACCESS_TOKEN_PREVIOUS_SECRET:
+          'example-previous-secret-0123456789abcdef',
+        AUTH_ACCESS_TOKEN_PREVIOUS_KEY_ID: '1',
+      });
+
+      expect(env.AUTH_ACCESS_TOKEN_KEY_ID).toBe('2');
+      expect(env.AUTH_ACCESS_TOKEN_PREVIOUS_KEY_ID).toBe('1');
+    });
+
+    it('refuses a previous secret without its id, and an id without its secret', () => {
+      const expected = [
+        'AUTH_ACCESS_TOKEN_PREVIOUS_SECRET: AUTH_ACCESS_TOKEN_PREVIOUS_SECRET and AUTH_ACCESS_TOKEN_PREVIOUS_KEY_ID are set together or not at all',
+      ];
+      expect(
+        problemsOf({
+          ...VALID,
+          AUTH_ACCESS_TOKEN_PREVIOUS_SECRET:
+            'example-previous-secret-0123456789abcdef',
+        }),
+      ).toEqual(expected);
+      expect(
+        problemsOf({ ...VALID, AUTH_ACCESS_TOKEN_PREVIOUS_KEY_ID: '0' }),
+      ).toEqual(expected);
+    });
+
+    it('refuses a previous key with the id of the current one', () => {
+      expect(
+        problemsOf({
+          ...VALID,
+          AUTH_ACCESS_TOKEN_PREVIOUS_SECRET:
+            'example-previous-secret-0123456789abcdef',
+          AUTH_ACCESS_TOKEN_PREVIOUS_KEY_ID: '1',
+        }),
+      ).toEqual([
+        'AUTH_ACCESS_TOKEN_PREVIOUS_KEY_ID: must differ from AUTH_ACCESS_TOKEN_KEY_ID: a rotation gives the new key a new id',
+      ]);
+    });
+
+    it('reads review accounts, normalising their phones', () => {
+      expect(
+        validateEnv({ ...VALID, AUTH_REVIEW_ACCOUNTS: '0512345678:123456' })
+          .AUTH_REVIEW_ACCOUNTS,
+      ).toEqual([{ phone: '+966512345678', code: '123456' }]);
+    });
+
+    it('refuses a malformed review account without repeating it', () => {
+      const message = messageOf({
+        ...VALID,
+        AUTH_REVIEW_ACCOUNTS: '0512345678-123456',
+      });
+
+      expect(message).toContain(
+        'AUTH_REVIEW_ACCOUNTS: expected a comma-separated list of phone:code pairs',
+      );
+      expect(message).not.toContain('123456');
+    });
+
+    it('refuses a review code of another length than AUTH_OTP_LENGTH', () => {
+      expect(
+        problemsOf({ ...VALID, AUTH_REVIEW_ACCOUNTS: '0512345678:1234' }),
+      ).toEqual([
+        'AUTH_REVIEW_ACCOUNTS: every review code must have AUTH_OTP_LENGTH digits',
+      ]);
+    });
+
+    it.each([
+      ['AUTH_OTP_MAX_ATTEMPTS', '0', 'expected an integer from 1 to 10'],
+      ['AUTH_OTP_LENGTH', '3', 'expected an integer from 4 to 8'],
+      ['AUTH_OTP_PHONE_LIMIT', 'many', 'expected an integer from 1 to 100'],
+      [
+        'AUTH_ACCESS_TOKEN_TTL_SECONDS',
+        '7200',
+        'expected an integer from 60 to 3600',
+      ],
+    ])('refuses %s=%s', (variable, value, expected) => {
+      expect(problemsOf({ ...VALID, [variable]: value })).toEqual([
+        `${variable}: ${expected}`,
+      ]);
+    });
+
+    it('starts in production with both secrets set', () => {
+      expect(validateEnv(PRODUCTION).AUTH_OTP_TTL_SECONDS).toBe(300);
+    });
+  });
+
   describe('sms variables', () => {
     it('reads an ordered, comma-separated provider list', () => {
       expect(
@@ -583,6 +751,33 @@ describe('validateEnv', () => {
       expect(problemsOf({ ...VALID, SMS_PROVIDERS: 'log,log' })).toEqual([
         'SMS_PROVIDERS: a provider is listed more than once',
       ]);
+    });
+
+    it('refuses a listed provider missing one of its variables, naming it (review of #232)', () => {
+      // Today no provider needs a variable, so the check runs only with a provider that
+      // does: a fresh module registry where `log` needs one. The variable must be one
+      // the schema declares (it reads the parsed environment, as a real provider's
+      // would be): STORAGE_ENDPOINT, optional and unset in VALID. Loaded with require:
+      // a dynamic import loads outside Jest's registry, and requireActual skips the mock.
+      jest.isolateModules(() => {
+        jest.doMock('./sms-provider-variables.constants', () => ({
+          SMS_PROVIDER_VARIABLES: { log: ['STORAGE_ENDPOINT'] },
+        }));
+        type ValidateEnvModule = typeof import('./validate-env');
+        // eslint-disable-next-line @typescript-eslint/no-require-imports -- the only load that sees jest.doMock in an isolated registry
+        const isolated = require('./validate-env') as ValidateEnvModule;
+
+        expect(() =>
+          isolated.validateEnv({ ...VALID, SMS_PROVIDERS: 'log' }),
+        ).toThrow('STORAGE_ENDPOINT: required when SMS_PROVIDERS lists log');
+        expect(
+          isolated.validateEnv({
+            ...VALID,
+            SMS_PROVIDERS: 'log',
+            STORAGE_ENDPOINT: 'http://localhost:9002',
+          }).SMS_PROVIDERS,
+        ).toEqual(['log']);
+      });
     });
 
     it('refuses the log provider in production', () => {
