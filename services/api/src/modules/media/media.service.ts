@@ -178,6 +178,59 @@ export class MediaService {
   }
 
   /**
+   * confirmUpload for an upload endpoint: the file must belong to `ownerId` (the user
+   * who requested the upload). Another user's file is answered exactly like a missing
+   * one, MEDIA_NOT_FOUND, so its existence is not revealed.
+   */
+  async confirmOwnUpload(id: string, ownerId: string): Promise<MediaFile> {
+    const row = await this.loadRow(id);
+    if (row.ownerId !== ownerId) {
+      throw new AppError(ErrorCode.MEDIA_NOT_FOUND);
+    }
+    return this.confirmUpload(id);
+  }
+
+  /**
+   * The files with these ids, in any status; ids with no file are left out. For a module
+   * checking files it is given (their owner, purpose and status) before it refers to
+   * them.
+   */
+  async findFiles(ids: readonly string[]): Promise<MediaFile[]> {
+    if (ids.length === 0) {
+      return [];
+    }
+    const rows = await this.query(() =>
+      this.db.client.media.findMany({ where: { id: { in: [...ids] } } }),
+    );
+    return rows.map((row) => this.toMediaFile(row));
+  }
+
+  /**
+   * The stable public URL of each ready public file among `ids`, by id, without calling
+   * the storage (one database read; the URL is built from configuration). For lists
+   * that show images (vendor logos). Private, unconfirmed and unknown ids are left out.
+   */
+  async getPublicUrls(
+    ids: readonly string[],
+  ): Promise<ReadonlyMap<string, string>> {
+    const unique = [...new Set(ids)];
+    if (unique.length === 0) {
+      return new Map();
+    }
+    const rows = await this.query(() =>
+      this.db.client.media.findMany({
+        where: { id: { in: unique }, status: 'ready', visibility: 'public' },
+      }),
+    );
+    return new Map(
+      rows.map((row) => [
+        row.id,
+        this.storage.publicUrl(this.readyLocation(row).key),
+      ]),
+    );
+  }
+
+  /**
    * Where a ready file is read: the stable public URL for a public file, a presigned
    * GET (STORAGE_DOWNLOAD_URL_EXPIRY_SECONDS) for a private one. Throws MEDIA_NOT_FOUND,
    * or MEDIA_NOT_READY for a pending or rejected file.

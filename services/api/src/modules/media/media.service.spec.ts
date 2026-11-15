@@ -34,6 +34,8 @@ const MEDIA_CONFIG: MediaConfig = {
   cleanupIntervalSeconds: 900,
 };
 const AFTER_EXPIRY = NOW + TTL_SECONDS * 1_000 + 1;
+/** An id no file has. */
+const UNKNOWN_ID = '00000000-0000-4000-8000-0000000000ff';
 
 /** File starts, padded to `size` bytes. */
 const file = (start: number[], size = 64): Uint8Array => {
@@ -67,8 +69,9 @@ async function uploaded(
   context: Context,
   bytes: Uint8Array,
   options: {
-    purpose?: 'catalog.product-image' | 'vendor.document';
+    purpose?: 'catalog.product-image' | 'vendor.document' | 'vendor.logo';
     contentType?: string;
+    ownerId?: string;
   } = {},
 ): Promise<{
   mediaId: string;
@@ -80,6 +83,7 @@ async function uploaded(
   const ticket = await context.service.requestUpload({
     purpose: options.purpose ?? 'catalog.product-image',
     contentType,
+    ownerId: options.ownerId,
   });
   expect(context.storage.upload(ticket, { bytes, contentType })).toEqual({
     accepted: true,
@@ -541,6 +545,101 @@ describe('MediaService', () => {
       expect(error.code).toBe(ErrorCode.MEDIA_UPLOAD_EXPIRED);
       expect(context.client.rows.has(mediaId)).toBe(false);
       expect(context.storage.objectLocations()).toEqual([]);
+    });
+  });
+
+  describe('confirmOwnUpload', () => {
+    const OWNER = '00000000-0000-4000-8000-000000000001';
+    const STRANGER = '00000000-0000-4000-8000-000000000002';
+
+    it("confirms the owner's file", async () => {
+      const context = setup();
+      const { mediaId } = await uploaded(context, file(JPEG), {
+        ownerId: OWNER,
+      });
+
+      await expect(
+        context.service.confirmOwnUpload(mediaId, OWNER),
+      ).resolves.toMatchObject({
+        id: mediaId,
+        status: 'ready',
+        ownerId: OWNER,
+      });
+    });
+
+    it("answers another user's file and a file with no owner exactly like a missing one", async () => {
+      const context = setup();
+      const owned = await uploaded(context, file(JPEG), { ownerId: OWNER });
+      const unowned = await uploaded(context, file(JPEG));
+
+      for (const mediaId of [owned.mediaId, unowned.mediaId, UNKNOWN_ID]) {
+        expect(
+          (await errorOf(context.service.confirmOwnUpload(mediaId, STRANGER)))
+            .code,
+        ).toBe(ErrorCode.MEDIA_NOT_FOUND);
+      }
+      expect(context.client.rows.get(owned.mediaId)?.status).toBe('pending');
+    });
+  });
+
+  describe('findFiles', () => {
+    it('returns the files that exist, in any status, and none for no ids', async () => {
+      const context = setup();
+      const ready = await uploaded(context, file(JPEG));
+      await context.service.confirmUpload(ready.mediaId);
+      const pending = await uploaded(context, file(JPEG));
+
+      const found = await context.service.findFiles([
+        ready.mediaId,
+        pending.mediaId,
+        UNKNOWN_ID,
+      ]);
+
+      expect(found.map((each) => [each.id, each.status]).sort()).toEqual(
+        [
+          [ready.mediaId, 'ready'],
+          [pending.mediaId, 'pending'],
+        ].sort(),
+      );
+      await expect(context.service.findFiles([])).resolves.toEqual([]);
+    });
+  });
+
+  describe('getPublicUrls', () => {
+    it('maps each ready public file to its stable URL without calling the storage', async () => {
+      const context = setup();
+      const logo = await uploaded(context, file(PNG), {
+        purpose: 'vendor.logo',
+        contentType: 'image/png',
+      });
+      await context.service.confirmUpload(logo.mediaId);
+      const document = await uploaded(context, file(PDF), {
+        purpose: 'vendor.document',
+        contentType: 'application/pdf',
+      });
+      await context.service.confirmUpload(document.mediaId);
+      const pending = await uploaded(context, file(PNG), {
+        purpose: 'vendor.logo',
+        contentType: 'image/png',
+      });
+      const callsBefore = context.storage.calls.length;
+
+      const urls = await context.service.getPublicUrls([
+        logo.mediaId,
+        logo.mediaId,
+        document.mediaId,
+        pending.mediaId,
+        UNKNOWN_ID,
+      ]);
+
+      const final = finalLocation(context, logo.mediaId);
+      expect([...urls]).toEqual([
+        [logo.mediaId, `https://cdn.example.invalid/${final.key}`],
+      ]);
+      expect(context.storage.calls).toHaveLength(callsBefore);
+      await expect(context.service.getPublicUrls([])).resolves.toEqual(
+        new Map(),
+      );
     });
   });
 
