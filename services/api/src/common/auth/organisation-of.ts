@@ -1,4 +1,4 @@
-import type { AuthenticatedUser } from '@common/auth/authenticated-user.type';
+import type { AuthenticatedUser } from './authenticated-user.type';
 
 /**
  * The vendor a signed-in vendor user acts for: the token's organisation. A vendor token

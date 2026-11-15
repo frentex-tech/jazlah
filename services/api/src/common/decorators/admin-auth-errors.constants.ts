@@ -1,4 +1,4 @@
-import { ErrorCode } from '@common/errors/error-code.enum';
+import { ErrorCode } from '../errors/error-code.enum';
 
 /** The authentication errors of every admin endpoint. */
 export const ADMIN_AUTH_ERRORS = [

@@ -1,7 +1,7 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { Transform } from 'class-transformer';
 import { IsString, MaxLength, MinLength } from 'class-validator';
-import { trimText } from '@common/dto/trim-text';
+import { trimText } from './trim-text';
 
 /** An admin's reason: rejecting an application (shown to the applicant) or suspending a vendor. */
 export class ReasonDto {
