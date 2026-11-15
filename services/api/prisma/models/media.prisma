@@ -77,6 +77,7 @@ model Media {
 
   vendorLogos                Vendor[]
   vendorApplicationDocuments VendorApplicationDocument[]
+  productImages              ProductImage[]
 
   @@unique([bucket, objectKey], map: "media_bucket_object_key_key")
   @@index([status, expiresAt])

@@ -79,6 +79,7 @@ model Vendor {
   application       VendorApplication?       @relation(fields: [applicationId], references: [id], onDelete: Restrict)
   commissionChanges VendorCommissionChange[]
   access            UserAccess[]
+  products          Product[]
 
   @@unique([applicationId], map: "vendors_application_id_key")
   @@index([logoMediaId])

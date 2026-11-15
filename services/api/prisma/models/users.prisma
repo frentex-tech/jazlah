@@ -29,6 +29,9 @@ model User {
   vendorApplications         VendorApplication[]      @relation("VendorApplicant")
   reviewedVendorApplications VendorApplication[]      @relation("VendorApplicationReviewer")
   vendorCommissionChanges    VendorCommissionChange[]
+  reviewedProducts           Product[]                @relation("ProductReviewer")
+  requestedProductChanges    ProductChangeRequest[]   @relation("ProductChangeRequester")
+  reviewedProductChanges     ProductChangeRequest[]   @relation("ProductChangeReviewer")
 
   @@unique([phone], map: "users_phone_key")
   @@map("users")
