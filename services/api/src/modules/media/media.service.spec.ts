@@ -469,7 +469,7 @@ describe('MediaService', () => {
       const { mediaId, ticket } = await uploaded(context, file(EXE));
       // Confirmation A rejects the executable and waits at the delete of its copy.
       const gate = context.storage.pause('deleteObject');
-      const confirmationA = errorOf(context.service.confirmUpload(mediaId));
+      const confirmationA = context.service.confirmUpload(mediaId);
       await gate.reached;
 
       context.storage.upload(ticket, {
@@ -478,11 +478,12 @@ describe('MediaService', () => {
       });
       const confirmationB = await context.service.confirmUpload(mediaId);
       gate.release();
-      const outcomeA = await confirmationA.catch((error: unknown) => error);
+      const outcomeA = await confirmationA;
 
       expect(confirmationB).toMatchObject({ status: 'ready' });
-      // A lost the conditional update and answers with the row as B left it.
-      expect(outcomeA).toBeInstanceOf(Error);
+      // A lost the conditional update and answers with the row as B left it: the ready
+      // file, not its own rejection.
+      expect(outcomeA).toEqual(confirmationB);
       expect(context.client.rows.get(mediaId)?.status).toBe('ready');
       const final = finalLocation(context, mediaId);
       expect(context.storage.objectBytes(final)).toEqual(file(JPEG));
