@@ -4,7 +4,7 @@ import type { FieldError } from '@common/errors/field-error.type';
 import type { LocalizedText } from '@common/i18n/localized-text.type';
 import { COMMISSION_BASIS_POINTS } from './commission-basis-points.constants';
 import type { GeoPoint } from './geo-point.type';
-import type { OptionalLocalizedText } from './optional-localized-text.type';
+import type { OptionalLocalizedText } from '@common/i18n/optional-localized-text.type';
 import type { VendorStatus } from './vendor-status.type';
 
 /**

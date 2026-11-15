@@ -2,8 +2,8 @@ import { ApiProperty } from '@nestjs/swagger';
 import type { VendorApplicationStatus } from '../../domain/vendor-application-status.type';
 import { VENDOR_APPLICATION_STATUSES } from '../../domain/vendor-application-statuses.constants';
 import { GeoPointDto } from './geo-point.dto';
-import { LocalizedTextResponseDto } from './localized-text-response.dto';
-import { OptionalLocalizedTextResponseDto } from './optional-localized-text-response.dto';
+import { LocalizedTextResponseDto } from '@common/dto/localized-text-response.dto';
+import { OptionalLocalizedTextResponseDto } from '@common/dto/optional-localized-text-response.dto';
 import { VendorApplicationDocumentResponseDto } from './vendor-application-document-response.dto';
 
 /** A vendor application and its review. The IBAN is only ever shown masked. */

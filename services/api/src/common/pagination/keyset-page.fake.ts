@@ -1,6 +1,6 @@
-import type { Page } from '@common/pagination/page.type';
-import type { PageRequest } from '@common/pagination/page-request.type';
-import { toPage } from '@common/pagination/to-page';
+import type { Page } from './page.type';
+import type { PageRequest } from './page-request.type';
+import { toPage } from './to-page';
 
 /** The in-memory fakes' keyset pagination: newest first, then id, strictly after the cursor. */
 export function keysetPage<T extends Readonly<{ createdAt: Date; id: string }>>(

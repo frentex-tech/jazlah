@@ -8,7 +8,7 @@ import type { VendorApplication } from '../vendor-application.entity';
 import type { VendorProfileChanges } from '../vendor-profile-changes.type';
 import type { VendorStatus } from '../vendor-status.type';
 import type { InMemoryVendorApplicationRepository } from './in-memory-vendor-application.repository.fake';
-import { keysetPage } from './keyset-page.fake';
+import { keysetPage } from '@common/pagination/keyset-page.fake';
 
 /** One stored vendor: the entity and its sealed IBAN (null for the platform vendor). */
 export type StoredVendor = Readonly<{
@@ -96,6 +96,20 @@ export class InMemoryVendorRepository implements VendorRepository {
   findActiveById(id: string): Promise<Vendor | null> {
     const vendor = this.get(id);
     return Promise.resolve(vendor?.status === 'active' ? vendor : null);
+  }
+
+  findPlatform(): Promise<Vendor | null> {
+    return Promise.resolve(
+      this.rows.find(({ vendor }) => vendor.isPlatform)?.vendor ?? null,
+    );
+  }
+
+  findByIds(ids: readonly string[]): Promise<Vendor[]> {
+    return Promise.resolve(
+      this.rows
+        .map(({ vendor }) => vendor)
+        .filter((vendor) => ids.includes(vendor.id)),
+    );
   }
 
   isSuspended(id: string): Promise<boolean> {

@@ -15,11 +15,11 @@ import { VENDOR_APPLICATION_DOCUMENT_KINDS } from '../../domain/vendor-applicati
 import { VENDOR_APPLICATION_DOCUMENT_LIMITS } from '../../domain/vendor-application-document-limits.constants';
 import { GeoPointDto } from './geo-point.dto';
 import { IsSaudiIban } from './is-saudi-iban.decorator';
-import { LocalizedDescriptionDto } from './localized-description.dto';
-import { LocalizedNameDto } from './localized-name.dto';
+import { LocalizedDescriptionDto } from '@common/dto/localized-description.dto';
+import { LocalizedNameDto } from '@common/dto/localized-name.dto';
 import { toDigits } from './to-digits';
 import { toIbanElectronicForm } from './to-iban-electronic-form';
-import { trimText } from './trim-text';
+import { trimText } from '@common/dto/trim-text';
 import { VendorApplicationDocumentDto } from './vendor-application-document.dto';
 
 /** The body of a vendor application (FR-VND-01). */

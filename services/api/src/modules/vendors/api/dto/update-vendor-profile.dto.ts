@@ -7,7 +7,7 @@ import {
   ValidateIf,
   ValidateNested,
 } from 'class-validator';
-import { LocalizedDescriptionDto } from './localized-description.dto';
+import { LocalizedDescriptionDto } from '@common/dto/localized-description.dto';
 
 /**
  * A vendor's changes to its own profile (FR-VND-02). A field left out stays as it is.

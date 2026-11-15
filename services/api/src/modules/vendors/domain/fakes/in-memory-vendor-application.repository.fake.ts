@@ -7,7 +7,7 @@ import type { VendorApplicationRepository } from '../ports/vendor-application.re
 import type { SealedIban } from '../sealed-iban.type';
 import { VendorApplication } from '../vendor-application.entity';
 import type { VendorApplicationStatus } from '../vendor-application-status.type';
-import { keysetPage } from './keyset-page.fake';
+import { keysetPage } from '@common/pagination/keyset-page.fake';
 
 /** One stored application: the entity and its sealed IBAN, as the table keeps both. */
 export type StoredVendorApplication = Readonly<{
