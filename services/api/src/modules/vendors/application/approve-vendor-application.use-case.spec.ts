@@ -54,7 +54,7 @@ describe('ApproveVendorApplicationUseCase', () => {
   it('leaves the application pending, and nothing written, when granting access fails', async () => {
     const kit = buildVendorsUseCases();
     const application = await submitted(kit);
-    kit.access.failNextWith(new AppError(ErrorCode.CONFLICT));
+    kit.access.failNextWith(new AppError(ErrorCode.VENDOR_ACCESS_ALREADY_HELD));
 
     await expect(
       kit.approveApplication.execute({
@@ -62,7 +62,7 @@ describe('ApproveVendorApplicationUseCase', () => {
         reviewerId: ADMIN,
         commissionBasisPoints: 1250,
       }),
-    ).rejects.toMatchObject({ code: ErrorCode.CONFLICT });
+    ).rejects.toMatchObject({ code: ErrorCode.VENDOR_ACCESS_ALREADY_HELD });
 
     expect((await kit.applications.findById(application.id))?.status).toBe(
       'pending',

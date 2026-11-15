@@ -113,7 +113,7 @@ export class UsersService {
    * Grants vendor access for `vendorId` to an existing user: creates the access, or
    * reactivates a deactivated one and points it at this vendor. Granting it again
    * changes nothing. A user works for one vendor: an active access for another vendor is
-   * refused with CONFLICT, and nothing changes.
+   * refused with VENDOR_ACCESS_ALREADY_HELD, and nothing changes.
    *
    * Database only, so it runs inside the caller's transaction (the approval of a vendor
    * application); the decision is one conditional update, safe beside a concurrent call.
@@ -133,9 +133,7 @@ export class UsersService {
         data: { organisationId: vendorId, deactivatedAt: null },
       });
       if (count === 0) {
-        throw new AppError(ErrorCode.CONFLICT, {
-          details: { reason: 'USER_WORKS_FOR_ANOTHER_VENDOR' },
-        });
+        throw new AppError(ErrorCode.VENDOR_ACCESS_ALREADY_HELD);
       }
     } catch (error) {
       if (error instanceof AppError) {

@@ -65,4 +65,9 @@ export enum ErrorCode {
    * as that vendor are refused until an admin reinstates it.
    */
   VENDOR_SUSPENDED = 'VENDOR_SUSPENDED',
+  /**
+   * The user already works for a vendor (active vendor access): refused when applying to
+   * become a vendor, and at approval when the access came after the application.
+   */
+  VENDOR_ACCESS_ALREADY_HELD = 'VENDOR_ACCESS_ALREADY_HELD',
 }

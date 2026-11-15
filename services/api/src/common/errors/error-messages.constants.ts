@@ -116,4 +116,8 @@ export const ERROR_MESSAGES: Readonly<Record<ErrorCode, LocalizedText>> = {
     ar: 'متجرك موقوف حاليًا، تواصل معنا عشان نساعدك',
     en: 'This vendor account is suspended.',
   },
+  [ErrorCode.VENDOR_ACCESS_ALREADY_HELD]: {
+    ar: 'حسابك مرتبط بمتجر من قبل، ما تقدر تقدّم طلب متجر جديد',
+    en: 'This account already works for a vendor.',
+  },
 };

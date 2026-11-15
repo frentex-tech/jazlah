@@ -172,7 +172,7 @@ describe('UsersService', () => {
       ]);
     });
 
-    it('refuses with CONFLICT while the user works for another vendor, changing nothing', async () => {
+    it('refuses with VENDOR_ACCESS_ALREADY_HELD while the user works for another vendor, changing nothing', async () => {
       const { service, client } = build();
       const user = await service.findOrCreateByPhone(PHONE);
       await service.grantVendorAccess(user.id, VENDOR_A);
@@ -180,8 +180,7 @@ describe('UsersService', () => {
       await expect(
         service.grantVendorAccess(user.id, VENDOR_B),
       ).rejects.toMatchObject({
-        code: ErrorCode.CONFLICT,
-        details: { reason: 'USER_WORKS_FOR_ANOTHER_VENDOR' },
+        code: ErrorCode.VENDOR_ACCESS_ALREADY_HELD,
       });
       expect(client.accesses).toEqual([
         expect.objectContaining({

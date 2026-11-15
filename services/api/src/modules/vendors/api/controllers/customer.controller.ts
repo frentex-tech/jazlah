@@ -31,7 +31,7 @@ export class CustomerVendorsController {
   @ApiOperation({
     summary: 'Apply to become a vendor',
     description:
-      'Upload each document first (POST /v1/customer/media/uploads, purpose vendor.document) and confirm it. One pending application at a time; after a rejection, apply again.',
+      'Upload each document first (POST /v1/customer/media/uploads, purpose vendor.document) and confirm it. One pending application at a time; after a rejection, apply again. VENDOR_ACCESS_ALREADY_HELD when the user already works for a vendor.',
   })
   @ApiCreatedResponse({ type: VendorApplicationResponseDto })
   @ApiErrorResponses(
@@ -39,6 +39,7 @@ export class CustomerVendorsController {
     ErrorCode.MEDIA_NOT_FOUND,
     ErrorCode.MEDIA_NOT_READY,
     ErrorCode.VENDOR_APPLICATION_ALREADY_PENDING,
+    ErrorCode.VENDOR_ACCESS_ALREADY_HELD,
     ErrorCode.UNAUTHORIZED,
     ErrorCode.ACCESS_TOKEN_EXPIRED,
     ErrorCode.FORBIDDEN,

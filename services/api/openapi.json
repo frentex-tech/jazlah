@@ -830,7 +830,7 @@
     },
     "/v1/customer/vendor-applications": {
       "post": {
-        "description": "Upload each document first (POST /v1/customer/media/uploads, purpose vendor.document) and confirm it. One pending application at a time; after a rejection, apply again.",
+        "description": "Upload each document first (POST /v1/customer/media/uploads, purpose vendor.document) and confirm it. One pending application at a time; after a rejection, apply again. VENDOR_ACCESS_ALREADY_HELD when the user already works for a vendor.",
         "operationId": "CustomerVendorsController_submit",
         "parameters": [],
         "requestBody": {
@@ -895,7 +895,7 @@
             }
           },
           "409": {
-            "description": "Error. code: MEDIA_NOT_READY, VENDOR_APPLICATION_ALREADY_PENDING.",
+            "description": "Error. code: MEDIA_NOT_READY, VENDOR_APPLICATION_ALREADY_PENDING, VENDOR_ACCESS_ALREADY_HELD.",
             "content": {
               "application/json": {
                 "schema": {
@@ -1412,7 +1412,7 @@
     },
     "/v1/admin/vendor-applications/{id}/approve": {
       "post": {
-        "description": "Creates the vendor and gives the applicant vendor access. CONFLICT when the applicant already works for another vendor.",
+        "description": "Creates the vendor and gives the applicant vendor access. VENDOR_ACCESS_ALREADY_HELD when the applicant came to work for another vendor after applying; the application stays pending.",
         "operationId": "AdminVendorsController_approve",
         "parameters": [
           {
@@ -1488,7 +1488,7 @@
             }
           },
           "409": {
-            "description": "Error. code: VENDOR_APPLICATION_NOT_PENDING, CONFLICT, TRANSACTION_CONFLICT.",
+            "description": "Error. code: VENDOR_APPLICATION_NOT_PENDING, VENDOR_ACCESS_ALREADY_HELD, CONFLICT, TRANSACTION_CONFLICT.",
             "content": {
               "application/json": {
                 "schema": {
@@ -3384,7 +3384,8 @@
           "ACCOUNT_DISABLED",
           "VENDOR_APPLICATION_ALREADY_PENDING",
           "VENDOR_APPLICATION_NOT_PENDING",
-          "VENDOR_SUSPENDED"
+          "VENDOR_SUSPENDED",
+          "VENDOR_ACCESS_ALREADY_HELD"
         ],
         "description": "Stable error code. Clients branch on it; it is never renamed or reused."
       },

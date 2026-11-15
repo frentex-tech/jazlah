@@ -112,13 +112,14 @@ export class AdminVendorsController {
   @ApiOperation({
     summary: 'Approve a pending application with a commission',
     description:
-      'Creates the vendor and gives the applicant vendor access. CONFLICT when the applicant already works for another vendor.',
+      'Creates the vendor and gives the applicant vendor access. VENDOR_ACCESS_ALREADY_HELD when the applicant came to work for another vendor after applying; the application stays pending.',
   })
   @ApiOkResponse({ type: AdminVendorResponseDto })
   @ApiErrorResponses(
     ErrorCode.VALIDATION_FAILED,
     ErrorCode.NOT_FOUND,
     ErrorCode.VENDOR_APPLICATION_NOT_PENDING,
+    ErrorCode.VENDOR_ACCESS_ALREADY_HELD,
     ErrorCode.CONFLICT,
     ErrorCode.TRANSACTION_CONFLICT,
     ...ADMIN_AUTH_ERRORS,

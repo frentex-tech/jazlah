@@ -10,4 +10,8 @@ export class UsersServiceVendorAccess implements VendorAccess {
   grant(userId: string, vendorId: string): Promise<void> {
     return this.users.grantVendorAccess(userId, vendorId);
   }
+
+  async isHeldBy(userId: string): Promise<boolean> {
+    return (await this.users.findActiveAccess(userId, 'vendor')) !== null;
+  }
 }

@@ -45,6 +45,17 @@ describe('SubmitVendorApplicationUseCase', () => {
     expect(kit.applications.rows).toHaveLength(1);
   });
 
+  it('refuses an applicant who already works for a vendor with VENDOR_ACCESS_ALREADY_HELD, storing nothing', async () => {
+    const kit = buildVendorsUseCases();
+    await kit.access.grant(APPLICANT, '00000000-0000-4000-8000-0000000000a1');
+
+    expect(
+      await codeOf(kit.submitApplication.execute(applicationInput(kit))),
+    ).toBe(ErrorCode.VENDOR_ACCESS_ALREADY_HELD);
+    expect(kit.applications.rows).toEqual([]);
+    expect(kit.cipher.sealed).toEqual([]);
+  });
+
   it('refuses an IBAN that fails the checksum, without sealing it', async () => {
     const kit = buildVendorsUseCases();
 

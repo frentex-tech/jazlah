@@ -72,6 +72,7 @@ export function buildVendorsUseCases() {
       applications,
       media,
       cipher,
+      access,
     ),
     getLatestApplication: new GetLatestVendorApplicationUseCase(applications),
     listApplications: new ListVendorApplicationsUseCase(applications),

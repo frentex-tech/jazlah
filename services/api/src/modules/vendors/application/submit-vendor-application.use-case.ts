@@ -5,6 +5,10 @@ import type { FieldError } from '@common/errors/field-error.type';
 import { Iban } from '../domain/iban';
 import { IBAN_CIPHER, type IbanCipher } from '../domain/ports/iban-cipher.port';
 import {
+  VENDOR_ACCESS,
+  type VendorAccess,
+} from '../domain/ports/vendor-access.port';
+import {
   VENDOR_APPLICATION_REPOSITORY,
   type VendorApplicationRepository,
 } from '../domain/ports/vendor-application.repository.port';
@@ -22,6 +26,8 @@ const DOCUMENT_PURPOSE = 'vendor.document';
 /**
  * A signed-in customer applies to become a vendor (FR-VND-01).
  *
+ * 0. The applicant does not work for a vendor already, or VENDOR_ACCESS_ALREADY_HELD.
+ *    A read, not a lock: an access granted after it is refused again at approval.
  * 1. The documents follow the rules (VendorApplication.assertDocuments).
  * 2. The IBAN is a valid Saudi IBAN (the DTO checked it already; this is the domain's
  *    own guard), or VALIDATION_FAILED on `iban`.
@@ -39,11 +45,15 @@ export class SubmitVendorApplicationUseCase {
     private readonly applications: VendorApplicationRepository,
     @Inject(VENDOR_MEDIA) private readonly media: VendorMedia,
     @Inject(IBAN_CIPHER) private readonly cipher: IbanCipher,
+    @Inject(VENDOR_ACCESS) private readonly access: VendorAccess,
   ) {}
 
   async execute(
     input: SubmitVendorApplicationInput,
   ): Promise<VendorApplication> {
+    if (await this.access.isHeldBy(input.applicantId)) {
+      throw new AppError(ErrorCode.VENDOR_ACCESS_ALREADY_HELD);
+    }
     VendorApplication.assertDocuments(input.documents);
     const iban = Iban.parse(input.iban);
     if (iban === null) {

@@ -1,11 +1,14 @@
 /** Injection token of the VendorAccess port. */
 export const VENDOR_ACCESS = Symbol('VENDOR_ACCESS');
 
-/** Grants a user the vendor audience for one vendor (the users module keeps access). */
+/** A user's vendor audience access (the users module keeps access). */
 export interface VendorAccess {
   /**
-   * Database only, inside the caller's transaction. Throws CONFLICT when the user
-   * already works for another vendor.
+   * Grants the vendor audience for one vendor. Database only, inside the caller's
+   * transaction. Throws VENDOR_ACCESS_ALREADY_HELD when the user already works for
+   * another vendor.
    */
   grant(userId: string, vendorId: string): Promise<void>;
+  /** Whether the user already works for a vendor (an active vendor access). */
+  isHeldBy(userId: string): Promise<boolean>;
 }

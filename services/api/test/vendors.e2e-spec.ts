@@ -172,6 +172,33 @@ describe('Vendors (e2e)', () => {
       expect(errorCode(res.body)).toBe('VENDOR_APPLICATION_ALREADY_PENDING');
     });
 
+    it('refuses an applicant who already works for a vendor with VENDOR_ACCESS_ALREADY_HELD', async () => {
+      const { customer, applicationId } = await journey.pendingApplication();
+      const admin = await journey.admin();
+      await journey.http
+        .post(`/v1/admin/vendor-applications/${applicationId}/approve`)
+        .set(...bearer(admin))
+        .send({ commissionBasisPoints: 1000 })
+        .expect(200);
+      const documents = await journey.documents(customer);
+      const before = await prisma.vendorApplication.count({
+        where: { applicantId: customer.userId },
+      });
+
+      const res = await journey.http
+        .post('/v1/customer/vendor-applications')
+        .set(...bearer(customer))
+        .send(journey.applicationBody(documents))
+        .expect(409);
+
+      expect(errorCode(res.body)).toBe('VENDOR_ACCESS_ALREADY_HELD');
+      expect(
+        await prisma.vendorApplication.count({
+          where: { applicantId: customer.userId },
+        }),
+      ).toBe(before);
+    });
+
     it("refuses another customer's documents exactly like missing ones", async () => {
       const other = await journey.customer('other');
       const theirs = await journey.documents(other);

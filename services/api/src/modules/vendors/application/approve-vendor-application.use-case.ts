@@ -33,8 +33,8 @@ import type { ReviewVendorApplicationInput } from './review-vendor-application-i
  *    other gets VENDOR_APPLICATION_NOT_PENDING: one vendor is ever created.
  * 2. The vendor is created from the application, with the commission and its first
  *    history entry.
- * 3. The applicant is granted vendor access for it (CONFLICT if they already work for
- *    another vendor).
+ * 3. The applicant is granted vendor access for it (VENDOR_ACCESS_ALREADY_HELD if
+ *    they came to work for another vendor after applying).
  * 4. The audit entry is written.
  *
  * Any failure rolls all of it back: the application stays pending.
