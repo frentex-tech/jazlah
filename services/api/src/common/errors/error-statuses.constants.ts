@@ -34,4 +34,6 @@ export const ERROR_STATUSES: Readonly<Record<ErrorCode, number>> = {
   [ErrorCode.VENDOR_APPLICATION_NOT_PENDING]: 409,
   [ErrorCode.VENDOR_SUSPENDED]: 403,
   [ErrorCode.VENDOR_ACCESS_ALREADY_HELD]: 409,
+  [ErrorCode.PRODUCT_NOT_EDITABLE]: 409,
+  [ErrorCode.PRODUCT_NOT_SUBMITTABLE]: 422,
 };

@@ -1,0 +1,230 @@
+import { ErrorCode } from '@common/errors/error-code.enum';
+import { Money } from '@common/money/money';
+import { Product } from './product.entity';
+import type { ProductContent } from './product-content.type';
+import type { ProductDetails } from './product-details.type';
+
+const CUT = '00000000-0000-4000-8000-0000000000c1';
+const OTHER_CUT = '00000000-0000-4000-8000-0000000000c2';
+const SIZE = '00000000-0000-4000-8000-0000000000a1';
+
+const CONTENT: ProductContent = {
+  name: { ar: 'نعيمي', en: 'Naimi lamb' },
+  description: { ar: null, en: null },
+  categoryId: '00000000-0000-4000-8000-0000000000b1',
+  meatTypeId: null,
+  imageMediaIds: ['00000000-0000-4000-8000-0000000000d1'],
+  sizes: [
+    { id: null, approxWeightGrams: 8_000, price: Money.of(95_000), tag: null },
+  ],
+  cuttings: [{ cuttingStyleId: CUT, extraPrice: Money.zero() }],
+  packagings: ['trays', 'vacuum'],
+  exclusionItemIds: [],
+};
+
+const LIVE: ProductDetails = {
+  id: '00000000-0000-4000-8000-0000000000e1',
+  vendorId: '00000000-0000-4000-8000-0000000000f1',
+  status: 'published',
+  isAvailable: true,
+  fulfilment: 'both',
+  name: CONTENT.name,
+  description: CONTENT.description,
+  category: { id: CONTENT.categoryId, name: { ar: 'ذبائح', en: 'Whole' } },
+  meatType: null,
+  imageMediaIds: CONTENT.imageMediaIds,
+  sizes: [
+    {
+      id: SIZE,
+      approxWeightGrams: 8_000,
+      price: Money.of(95_000),
+      tag: { ar: 'يجزئ العقيقة', en: 'Enough for an aqiqah' },
+    },
+  ],
+  cuttings: [
+    {
+      cuttingStyleId: CUT,
+      name: { ar: 'ثلاجة', en: 'Fridge cut' },
+      extraPrice: Money.of(1_500),
+    },
+  ],
+  packagings: ['trays'],
+  exclusions: [],
+  minPrice: Money.of(95_000),
+  rejectionReason: null,
+  submittedAt: null,
+  reviewedAt: null,
+  publishedAt: null,
+  createdAt: new Date('2026-11-16T09:00:00.000Z'),
+  updatedAt: new Date('2026-11-16T09:00:00.000Z'),
+};
+
+const errorOf = (work: () => void): unknown => {
+  try {
+    work();
+    return null;
+  } catch (error) {
+    return error;
+  }
+};
+
+describe('Product', () => {
+  describe('assertSubmittable', () => {
+    it('accepts a size, an image and compatible options', () => {
+      expect(
+        errorOf(() =>
+          Product.assertSubmittable(CONTENT, [
+            { cuttingStyleId: OTHER_CUT, packaging: 'vacuum' },
+            { cuttingStyleId: CUT, packaging: 'bags' },
+          ]),
+        ),
+      ).toBeNull();
+    });
+
+    it('refuses no size and no image, both reasons at once', () => {
+      expect(
+        errorOf(() =>
+          Product.assertSubmittable(
+            { ...CONTENT, sizes: [], imageMediaIds: [] },
+            [],
+          ),
+        ),
+      ).toMatchObject({
+        code: ErrorCode.PRODUCT_NOT_SUBMITTABLE,
+        details: { reasons: ['NO_SIZE', 'NO_IMAGE'] },
+      });
+    });
+
+    it('refuses an offered cutting with an offered packaging it is incompatible with, naming the pair', () => {
+      expect(
+        errorOf(() =>
+          Product.assertSubmittable(CONTENT, [
+            { cuttingStyleId: CUT, packaging: 'vacuum' },
+          ]),
+        ),
+      ).toMatchObject({
+        code: ErrorCode.PRODUCT_NOT_SUBMITTABLE,
+        details: {
+          reasons: ['INCOMPATIBLE_CUTTING_PACKAGING'],
+          pairs: [{ cuttingStyleId: CUT, packaging: 'vacuum' }],
+        },
+      });
+    });
+  });
+
+  describe('minPriceOf', () => {
+    it('is the lowest size price, null without sizes', () => {
+      expect(
+        Product.minPriceOf([
+          { price: Money.of(120_000) },
+          { price: Money.of(95_001) },
+          { price: Money.of(95_000) },
+        ])?.halalas,
+      ).toBe(95_000);
+      expect(Product.minPriceOf([{ price: Money.of(1) }])?.halalas).toBe(1);
+      expect(Product.minPriceOf([])).toBeNull();
+    });
+  });
+
+  describe('assertOwnSizes', () => {
+    it("accepts new sizes and the product's own, refuses another size id", () => {
+      const own = { ...CONTENT.sizes[0], id: SIZE };
+      const foreign = { ...CONTENT.sizes[0], id: CUT };
+
+      expect(
+        errorOf(() =>
+          Product.assertOwnSizes(
+            { ...CONTENT, sizes: [...CONTENT.sizes, own] },
+            LIVE,
+          ),
+        ),
+      ).toBeNull();
+      expect(
+        errorOf(() =>
+          Product.assertOwnSizes({ ...CONTENT, sizes: [own, foreign] }, LIVE),
+        ),
+      ).toMatchObject({
+        code: ErrorCode.VALIDATION_FAILED,
+        details: [{ field: 'sizes.1.id', constraints: ['isSizeOfProduct'] }],
+      });
+      expect(
+        errorOf(() =>
+          Product.assertOwnSizes({ ...CONTENT, sizes: [own] }, null),
+        ),
+      ).toMatchObject({ details: [{ field: 'sizes.0.id' }] });
+    });
+  });
+
+  describe('editing a published product', () => {
+    it('accepts a content edit that keeps the live prices and adds a priced size', () => {
+      const content: ProductContent = {
+        ...Product.contentOf(LIVE),
+        name: { ar: 'نعيمي بلدي', en: 'Local Naimi' },
+        sizes: [
+          ...Product.contentOf(LIVE).sizes,
+          {
+            id: null,
+            approxWeightGrams: 12_000,
+            price: Money.of(130_000),
+            tag: null,
+          },
+        ],
+      };
+
+      expect(
+        errorOf(() => Product.assertKeepsLivePrices(content, LIVE)),
+      ).toBeNull();
+    });
+
+    it('refuses a changed price of an existing size or cutting style', () => {
+      const live = Product.contentOf(LIVE);
+      const content: ProductContent = {
+        ...live,
+        sizes: [{ ...live.sizes[0], price: Money.of(90_000) }],
+        cuttings: [{ cuttingStyleId: CUT, extraPrice: Money.zero() }],
+      };
+
+      expect(
+        errorOf(() => Product.assertKeepsLivePrices(content, LIVE)),
+      ).toMatchObject({
+        code: ErrorCode.VALIDATION_FAILED,
+        details: [
+          { field: 'sizes.0.priceHalalas', constraints: ['isLivePrice'] },
+          {
+            field: 'cuttings.0.extraPriceHalalas',
+            constraints: ['isLivePrice'],
+          },
+        ],
+      });
+    });
+
+    it('applies a request with the live prices, keeping the new ones', () => {
+      const requested: ProductContent = {
+        ...Product.contentOf(LIVE),
+        sizes: [
+          { id: SIZE, approxWeightGrams: 9_000, price: Money.of(1), tag: null },
+          {
+            id: null,
+            approxWeightGrams: 12_000,
+            price: Money.of(130_000),
+            tag: null,
+          },
+        ],
+        cuttings: [
+          { cuttingStyleId: CUT, extraPrice: Money.of(1) },
+          { cuttingStyleId: OTHER_CUT, extraPrice: Money.of(500) },
+        ],
+      };
+
+      const applied = Product.withLivePrices(requested, LIVE);
+
+      expect(applied.sizes.map((size) => size.price.halalas)).toEqual([
+        95_000, 130_000,
+      ]);
+      expect(applied.sizes[0]?.approxWeightGrams).toBe(9_000);
+      expect(
+        applied.cuttings.map((cutting) => cutting.extraPrice.halalas),
+      ).toEqual([1_500, 500]);
+    });
+  });
+});

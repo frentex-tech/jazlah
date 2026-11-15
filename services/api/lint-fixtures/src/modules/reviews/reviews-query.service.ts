@@ -1,7 +1,7 @@
 // lint-rule: R14 conforms
 import { PrismaClient } from '@infra/database/generated/prisma/client';
 
-export class CatalogQueryService {
+export class ReviewsQueryService {
   constructor(private readonly db: PrismaClient) {}
 
   kind(): string {

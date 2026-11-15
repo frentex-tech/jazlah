@@ -70,4 +70,14 @@ export enum ErrorCode {
    * become a vendor, and at approval when the access came after the application.
    */
   VENDOR_ACCESS_ALREADY_HELD = 'VENDOR_ACCESS_ALREADY_HELD',
+  /**
+   * The product's status does not allow this: editing a product under review, or a
+   * review step on a product that is not waiting for it. Details: `{ status }`.
+   */
+  PRODUCT_NOT_EDITABLE = 'PRODUCT_NOT_EDITABLE',
+  /**
+   * The product cannot go to review or be published as it is. Details: `{ reasons }`,
+   * each NO_SIZE, NO_IMAGE or INCOMPATIBLE_CUTTING_PACKAGING (with `pairs`).
+   */
+  PRODUCT_NOT_SUBMITTABLE = 'PRODUCT_NOT_SUBMITTABLE',
 }
