@@ -14,6 +14,10 @@ import { PrismaService } from '@infra/database/prisma.service';
 import { SMS_PORTS, SmsError } from '@integrations/sms';
 import { FakeSmsProvider } from '@integrations/sms/testing';
 import { CLOCK } from '@modules/auth/domain/ports/clock.port';
+import {
+  OTP_CODES,
+  type OtpCodes,
+} from '@modules/auth/domain/ports/otp-codes.port';
 import { AuthClient, type SignedInBody } from './support/auth-client';
 import { createHttpApp } from './support/create-http-app';
 import type { HttpAppOptions } from './support/http-app-options.type';
@@ -483,17 +487,24 @@ describe('Authentication (e2e)', () => {
       const { organisationId } = await grant(staff, 'vendor');
 
       // A customer code for the same phone, then a vendor challenge: the customer code
-      // is refused for the vendor audience as a wrong code, and opens nothing.
-      await client.requestCode(staff, 'customer').expect(200);
-      const customerCode = await client.codeFor(staff);
-      await client.requestCode(staff, 'vendor').expect(200);
-      const vendorCode = await client.codeFor(staff);
-      if (customerCode !== vendorCode) {
-        const refused = await client
-          .verify(staff, customerCode, 'vendor')
-          .expect(422);
-        expect((refused.body as ErrorResponseBody).code).toBe('OTP_INVALID');
+      // is refused for the vendor audience as a wrong code, and opens nothing. The two
+      // codes are fixed and different, so the refusal is always checked.
+      const generate = jest
+        .spyOn(app.get<OtpCodes>(OTP_CODES), 'generate')
+        .mockReturnValueOnce('111111')
+        .mockReturnValueOnce('222222');
+      try {
+        await client.requestCode(staff, 'customer').expect(200);
+        expect(await client.codeFor(staff)).toBe('111111');
+        await client.requestCode(staff, 'vendor').expect(200);
+        expect(await client.codeFor(staff)).toBe('222222');
+      } finally {
+        generate.mockRestore();
       }
+      const refused = await client
+        .verify(staff, '111111', 'vendor')
+        .expect(422);
+      expect((refused.body as ErrorResponseBody).code).toBe('OTP_INVALID');
       clock.advanceSeconds(61);
 
       const vendor = await client.signIn(staff, 'vendor');
