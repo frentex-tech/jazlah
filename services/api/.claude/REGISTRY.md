@@ -32,6 +32,6 @@ What exists, by area. Before writing anything, read this index, then open the ar
 - **queue** — `.claude/registry/queue.md` — queue registration, processors, job ids and options, schedules, queue names.
 - **events** — `.claude/registry/events.md` — domain event base class, the event bus.
 - **runtime** — `.claude/registry/runtime.md` — Redis, logger, shutdown deadline, `withTimeout`.
-- **phone** — `.claude/registry/phone.md` — Saudi mobile normalising and masking, the DTO decorator, Arabic digits.
+- **phone** — `.claude/registry/phone.md` — Saudi mobile normalising and masking, the DTO decorator, Arabic digits, invisible format characters.
 - **storage** — `.claude/registry/storage.md` — the storage integration and its fake.
 - **sms** — `.claude/registry/sms.md` — the SMS integration and its fake, SMS text measuring.

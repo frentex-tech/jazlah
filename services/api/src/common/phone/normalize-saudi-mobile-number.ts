@@ -1,12 +1,11 @@
+import { removeFormatCharacters } from '../text/remove-format-characters';
 import { toLatinDigits } from '../text/to-latin-digits';
 
 /**
- * What is removed before the number is read: spaces and dashes a person may type between
- * the digits, and Unicode format characters (`\p{Cf}`), which are invisible: direction
- * marks (U+200E, U+200F, U+202A to U+202E, U+2066 to U+2069) that phones insert when a
- * number is copied in an Arabic interface, and zero-width characters (U+200B, U+FEFF).
+ * Spaces and dashes a person may type between the digits, removed before the number is
+ * read (invisible format characters are removed by removeFormatCharacters).
  */
-const SEPARATORS = /[\s\p{Cf}-]/gu;
+const SEPARATORS = /[\s-]/gu;
 
 /** The forms accepted once separators are removed; group 1 is the 8 digits after 5. */
 const SAUDI_MOBILE_FORMS: readonly RegExp[] = [
@@ -28,7 +27,9 @@ const SAUDI_MOBILE_FORMS: readonly RegExp[] = [
  * are not checked, so a newly assigned prefix is accepted.
  */
 export function normalizeSaudiMobileNumber(input: string): string | null {
-  const compact = toLatinDigits(input.trim().replace(SEPARATORS, ''));
+  const compact = toLatinDigits(
+    removeFormatCharacters(input).replace(SEPARATORS, ''),
+  );
   for (const form of SAUDI_MOBILE_FORMS) {
     const match = form.exec(compact);
     if (match !== null) {

@@ -1089,7 +1089,7 @@
           },
           "code": {
             "type": "string",
-            "description": "The code from the message: 4 to 8 digits, Latin or Arabic (٠ to ٩, ۰ to ۹).",
+            "description": "The code from the message: 4 to 8 digits, Latin or Arabic (٠ to ٩, ۰ to ۹). Surrounding spaces and invisible format characters (direction marks, zero-width characters) are ignored.",
             "example": "482913"
           },
           "devicePlatform": {

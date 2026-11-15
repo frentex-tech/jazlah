@@ -11,6 +11,7 @@ import {
 import type { Audience } from '@common/auth/audience.type';
 import { AUDIENCES } from '@common/auth/audiences.constants';
 import { SaudiMobileNumber } from '@common/phone/saudi-mobile-number.decorator';
+import { removeFormatCharacters } from '@common/text/remove-format-characters';
 import { toLatinDigits } from '@common/text/to-latin-digits';
 import type { DevicePlatform } from '../../domain/device-platform.type';
 import { DEVICE_PLATFORMS } from '../../domain/device-platforms.constants';
@@ -33,11 +34,13 @@ export class VerifyOtpDto {
 
   @ApiProperty({
     description:
-      'The code from the message: 4 to 8 digits, Latin or Arabic (٠ to ٩, ۰ to ۹).',
+      'The code from the message: 4 to 8 digits, Latin or Arabic (٠ to ٩, ۰ to ۹). Surrounding spaces and invisible format characters (direction marks, zero-width characters) are ignored.',
     example: '482913',
   })
   @Transform(({ value }: { value: unknown }) =>
-    typeof value === 'string' ? toLatinDigits(value.trim()) : value,
+    typeof value === 'string'
+      ? toLatinDigits(removeFormatCharacters(value).trim())
+      : value,
   )
   @Matches(/^\d{4,8}$/)
   code!: string;
