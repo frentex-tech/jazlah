@@ -136,6 +136,11 @@ describe('Vendors (e2e)', () => {
           location: { latitude: 91, longitude: 46 },
         }),
       );
+      const textLocation = await send(
+        journey.applicationBody(documents, {
+          location: { latitude: '24.7', longitude: '46.6' },
+        }),
+      );
 
       expect(badIban.body).toMatchObject({
         code: 'VALIDATION_FAILED',
@@ -145,6 +150,13 @@ describe('Vendors (e2e)', () => {
       expect(errorCode(missingKind.body)).toBe('VALIDATION_FAILED');
       expect(badLocation.body).toMatchObject({
         details: [{ field: 'location.latitude' }],
+      });
+      expect(textLocation.body).toMatchObject({
+        code: 'VALIDATION_FAILED',
+        details: [
+          { field: 'location.latitude' },
+          { field: 'location.longitude' },
+        ],
       });
     });
 
@@ -583,6 +595,15 @@ describe('Vendors (e2e)', () => {
         description: { ar: 'لحوم بلدية', en: 'Fresh daily' },
       });
       expect((updated.body as VendorBody).logoUrl).toEqual(expect.any(String));
+      const nullDescription = await journey.http
+        .patch('/v1/vendor/profile')
+        .set(...bearer(owner))
+        .send({ description: null })
+        .expect(400);
+      expect(nullDescription.body).toMatchObject({
+        code: 'VALIDATION_FAILED',
+        details: [{ field: 'description' }],
+      });
       expect(publicPage.body).toEqual({
         id: vendorId,
         name: { ar: 'ملحمة النخبة', en: 'Al Nokhba Butchery' },

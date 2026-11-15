@@ -9,6 +9,7 @@ import { mapPrismaError } from '@infra/database/map-prisma-error';
 import type { NewVendorCommissionChange } from '../domain/new-vendor-commission-change.type';
 import type { VendorCommissionHistory } from '../domain/ports/vendor-commission-history.port';
 import type { VendorCommissionChange } from '../domain/vendor-commission-change.type';
+import { toVendorCommissionChange } from './vendor-commission-change.mapper';
 
 /**
  * The commission history in `vendor_commission_changes`: insert-only. This class has no
@@ -22,9 +23,9 @@ export class PrismaVendorCommissionHistory implements VendorCommissionHistory {
     change: NewVendorCommissionChange,
   ): Promise<VendorCommissionChange> {
     try {
-      return await this.db.client.vendorCommissionChange.create({
-        data: change,
-      });
+      return toVendorCommissionChange(
+        await this.db.client.vendorCommissionChange.create({ data: change }),
+      );
     } catch (error) {
       mapPrismaError(error);
     }
@@ -40,7 +41,7 @@ export class PrismaVendorCommissionHistory implements VendorCommissionHistory {
         orderBy: [...KEYSET_ORDER],
         take: page.limit + 1,
       });
-      return toPage(rows, page.limit);
+      return toPage(rows.map(toVendorCommissionChange), page.limit);
     } catch (error) {
       mapPrismaError(error);
     }
