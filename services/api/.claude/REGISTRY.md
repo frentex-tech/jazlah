@@ -6,7 +6,7 @@ What exists, by area. Before writing anything, read this index, then open the ar
 
 **Lookup tables** (error codes, queue names, upload purposes and each audience's, configured rate limits, audiences, the environment schema, SMS providers): extend, never duplicate. Their lines are in the area files.
 
-**Reserved names** (decided, not built; create them only under these names and record the path): **Money** in `src/common/money/` (all halala arithmetic); **the realtime publishing port** in `src/infra/realtime/` (beside the gateway modules never import); **the time helper** (Asia/Riyadh business calendar); **the masking helper** (phones and addresses in logs; the phone part is `maskPhoneNumber`, area phone).
+**Reserved names** (decided, not built; create them only under these names and record the path): **the realtime publishing port** in `src/infra/realtime/` (beside the gateway modules never import); **the time helper** (Asia/Riyadh business calendar); **the masking helper** (phones and addresses in logs; the phone part is `maskPhoneNumber`, area phone).
 
 **Reference implementations** (the first of each kind, which later ones copy): ARCHITECTURE.md, "Reference implementations".
 
@@ -38,4 +38,5 @@ What exists, by area. Before writing anything, read this index, then open the ar
 - **pagination** — `.claude/registry/pagination.md` — keyset lists: page query, cursor, `Page`, `keysetAfter`.
 - **audit** — `.claude/registry/audit.md` — `AuditLogWriter`.
 - **crypto** — `.claude/registry/crypto.md` — AES-256-GCM for data at rest.
+- **money** — `.claude/registry/money.md` — `Money`: all halala arithmetic.
 - **vendors** — `.claude/registry/vendors.md` — `VendorsModule` (the vendor status checker), the platform vendor.
