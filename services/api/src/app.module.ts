@@ -12,6 +12,7 @@ import { RateLimitModule } from '@infra/rate-limit/rate-limit.module';
 import { RedisModule } from '@infra/redis/redis.module';
 import { AuthModule } from '@modules/auth';
 import { MediaModule } from '@modules/media';
+import { VendorsModule } from '@modules/vendors';
 
 @Module({
   imports: [
@@ -23,10 +24,12 @@ import { MediaModule } from '@modules/media';
     EventBusModule,
     RateLimitModule,
     // After RateLimitModule, always: it registers the authentication guard, which must
-    // run after the rate limit guard (.claude/rules/http.md, "Guard order").
+    // run after the rate limit guard, and the organisation status guard after it
+    // (.claude/rules/http.md, "Guard order").
     AuthModule,
     HealthModule,
     MediaModule,
+    VendorsModule,
   ],
   providers: [
     { provide: APP_FILTER, useClass: AllExceptionsFilter },
