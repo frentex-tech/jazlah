@@ -7,3 +7,4 @@ One line per building block: name, path, purpose; the detail is in that file's d
 - **Health** — `src/infra/health/` — `GET /v1/health`, `/v1/health/ready`, `ShutdownState`. [whole folder: the health endpoints and their checks]
 - **HTTP setup** — `src/infra/http/` — `configureHttpApp`, for `main.ts` and the e2e tests. [whole folder: configureHttpApp and its parts]
 - **API docs** — `src/infra/api-docs/` — `buildOpenApiDocument`, `setupApiDocs`. [whole folder: the one OpenAPI document]
+- **IdParamDto** — `src/common/dto/id-param.dto.ts` — the `:id` path parameter: a UUID, or VALIDATION_FAILED on `id`.
