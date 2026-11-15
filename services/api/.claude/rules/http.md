@@ -23,12 +23,22 @@ The OpenAPI document is a contract: the mobile client is generated from `openapi
 2. **Every endpoint documents its error responses with `@ApiErrorResponses(...codes)`** (`src/common/decorators/api-error-responses.decorator.ts`), listing each code it can return, for example `@ApiErrorResponses(ErrorCode.VALIDATION_FAILED, ErrorCode.RATE_LIMITED)`. The helper documents each code under its default status, adds INTERNAL_ERROR, and references the one shared `ErrorResponseDto`. Never declare an error schema on an endpoint. A rate-limited endpoint (all except those with `@SkipRateLimit`) lists RATE_LIMITED.
 3. **Every request body and query is a DTO class**, with class-validator decorators for the validation pipe and `@ApiProperty` / `@ApiPropertyOptional` for the document, with an `example`.
 4. **`@ApiProperty` on every DTO property, with an explicit `type` for arrays, nested DTOs and enums** (`type: [String]`, `type: NestedDto`, `enum: [...]`). There is no Swagger CLI plugin, so a property without the decorator is missing from the document.
-4a. **Every controller is under an audience prefix or marked public.** Its path starts with `public/`, `customer/`, `vendor/`, `kitchen/` or `admin/`; the global authentication guard (`src/common/guards/authentication.guard.ts`) takes the audience from that prefix and demands an access token of exactly that audience (401 UNAUTHORIZED, 401 ACCESS_TOKEN_EXPIRED, 403 FORBIDDEN: list them in `@ApiErrorResponses`). A route outside the prefixes (health, a webhook) is marked `@Public()` (`src/common/decorators/public.decorator.ts`); with neither, the application refuses to start. The signed-in user is `@CurrentUser() user: AuthenticatedUser`. The guard reads only the token: check the database yourself where a disabled user or revoked access must be refused at once.
+4a. **Every controller is under an audience prefix or marked public.** Its path starts with `public/`, `customer/`, `vendor/`, `kitchen/` or `admin/`; the global authentication guard (`src/common/guards/authentication.guard.ts`) takes the audience from that prefix and demands an access token of exactly that audience (401 UNAUTHORIZED, 401 ACCESS_TOKEN_EXPIRED, 403 FORBIDDEN: list them in `@ApiErrorResponses`). A route outside the prefixes (health, a webhook) is marked `@Public()` (`src/common/decorators/public.decorator.ts`); with neither, the application refuses to start. The signed-in user is `@CurrentUser() user: AuthenticatedUser`. The guard reads only the token: check the database yourself where a disabled user or revoked access must be refused at once. On `vendor/` routes the organisation status guard then refuses a suspended vendor (403 VENDOR_SUSPENDED: list it); nothing skips it, and a vendor route is never `@Public()` (the application refuses to start).
 5. **A controller has `@ApiTags('<module>')`.** An endpoint that needs authentication has `@ApiBearerAuth(BEARER_AUTH_SCHEME)` (`src/common/decorators/bearer-auth.constants.ts`).
 6. **After changing an endpoint or a DTO, run `pnpm openapi:generate` and include `openapi.json` in the change.** `pnpm openapi:check` fails while the file is out of date, and it is part of "done" (`CLAUDE.md`). Read the diff of `openapi.json`: it is what the mobile app will see.
 7. **The document is generated without a running app** (Nest preview mode). Nothing in a controller's or DTO's decorators may depend on configuration or on a provider instance.
 
 Served at `/docs` (Swagger page) and `/docs-json`, outside `/v1`; on in development and test, off in production unless `API_DOCS_ENABLED=true`.
+
+## Lists
+
+Every list endpoint follows one convention, so clients page every list the same way:
+
+1. **Keyset pagination with an opaque cursor, newest first** (`created_at` then `id`), **no total count**. The query is `PageQueryDto` (`src/common/dto/page-query.dto.ts`), extended with the list's filters: `cursor` (the previous page's `nextCursor`; a value the API did not write is VALIDATION_FAILED) and `limit`, **default 20, maximum 50**.
+2. The response is `{ items: [...], nextCursor: string | null }`, `nextCursor` null on the last page, through a page DTO of its own (`<noun>-page-response.dto.ts`).
+3. The repository reads `limit + 1` rows with `keysetAfter(cursor)` and `KEYSET_ORDER` and returns `toPage(rows, limit)`; the table has an index on the filter columns followed by `(created_at, id)`. Helpers: registry area pagination.
+
+*Why: offsets skip or repeat rows while items are added, and a count costs a scan of the table; neither scales to Eid volumes.*
 
 ## Security baseline
 
@@ -58,7 +68,7 @@ Set up in one place, `configureHttpApp` (`src/infra/http/configure-http-app.ts`)
 The global authentication guard (registered by `AuthModule`) must run **after** the rate limits, so that failed token attempts are counted. How that holds:
 
 - **The pre-routing limit is Express middleware**, mounted by `configureHttpApp` before Nest's router. Every guard runs inside Nest, after all Express middleware, so no guard can run before it. Every request with a bad token is counted there, per address, whatever the guards do.
-- **The per-route limit is `RateLimitGuard`, registered as `APP_GUARD` in `RateLimitModule`.** Nest runs global guards in the order their providers are registered, which follows module import order. `AuthModule` registers the authentication guard's `APP_GUARD` and is imported **after** `RateLimitModule` in `AppModule.imports`; never move it before, and never register global guards anywhere else.
+- **The per-route limit is `RateLimitGuard`, registered as `APP_GUARD` in `RateLimitModule`.** Nest runs global guards in the order their providers are registered, which follows module import order. `AuthModule` registers the authentication guard's `APP_GUARD`, then the organisation status guard's (a suspended vendor gets VENDOR_SUSPENDED on every vendor route; list it in their `@ApiErrorResponses`), and is imported **after** `RateLimitModule` in `AppModule.imports`; never move it before, and never register global guards anywhere else.
 - **Proven by test:** `test/auth-guard.e2e-spec.ts` sends requests with an invalid token to a `@RateLimit` endpoint and expects 429 once the limit is reached, not 401 forever. Without that test the order is not enforced.
 
 ### Behind a proxy

@@ -2,7 +2,7 @@
 
 The backend of JAZLA: a NestJS modular monolith in which every external service sits behind a port, one provider per vendor. Paths are relative to `services/api/`. **For API work this file and `.claude/` take precedence over the documents at the repository root** (an earlier plan): look nowhere else for layout, workflow or commands. This is the company's first product and later ones build on it, so **consistency and maintainability outrank delivery speed**.
 
-> **State on 2026-11-14:** foundation complete, plus the storage and sms integrations (sms: providers `log` and the fake, Msegat pending its documentation), the media module (no endpoints yet) and authentication (`users`, `auth`: phone and OTP sign-in scoped to one audience, the global guard, `pnpm admin:create`). **Production waits on a real SMS provider.** What exists: the registry and ARCHITECTURE.md. Not built: endpoints that grant or disable access, cleanup of expired challenges and tokens, caching, Bull Board, an outbox, other integrations, the reserved names: later steps, not to start unless your task asks. Update this note when a step lands.
+> **State on 2026-11-15:** foundation complete, plus the storage and sms integrations (sms: providers `log` and the fake, Msegat pending its documentation), the media module (upload endpoints per audience), authentication (`users`, `auth`: phone and OTP sign-in scoped to one audience, the global guards, `pnpm admin:create`) and vendors (applications, approval, suspension, commission, `pnpm vendor:create-platform`). Next: catalog (`.claude/plans/catalog.md`). **Production waits on a real SMS provider.** What exists: the registry and ARCHITECTURE.md. Not built: endpoints that grant or disable access, cleanup of expired challenges and tokens, caching, Bull Board, an outbox, other integrations, the reserved names: later steps, not to start unless your task asks. Update this note when a step lands.
 
 ## Loaded with this file, and what to read when
 
@@ -15,6 +15,7 @@ Always loaded: the registry index (imported at the end; its area files are not) 
 | add a module, use case, endpoint, processor or subscriber | the add-module skill |
 | need the folder layout, the routes or what exists | `.claude/ARCHITECTURE.md` |
 | doubt a settled choice, meet something undecided, make an architectural decision, or design finance or zatca | `.claude/DECISIONS.md` (reasons for every rule; the open business questions) |
+| work on the catalog (products, categories, options, prices) | `.claude/plans/catalog.md` (the approved plan; build nothing it does not list) |
 
 **Settled** (stack, storage, Geidea, phone + OTP auth, the five top-level folders, which modules have four layers, the event bus, the routes): DECISIONS.md, "Decisions in force". If you think one is wrong, say so in your report and change nothing.
 
