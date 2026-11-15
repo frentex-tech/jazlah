@@ -1,5 +1,5 @@
 import type { UserAccounts } from '../ports/user-accounts.port';
-import type { StaffAudience } from '../staff-audience.type';
+import type { StaffAudience } from '@common/auth/staff-audience.type';
 import type { UserAccount } from '../user-account.type';
 
 /** Users and their staff access in memory, with helpers to arrange a test. */

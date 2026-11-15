@@ -204,7 +204,9 @@ describe('RequestOtpUseCase', () => {
         }),
       );
 
-      expect(kit.limit.counted).toEqual([PHONE]);
+      expect(kit.limit.counted).toEqual([
+        { phone: PHONE, audience: 'customer' },
+      ]);
     });
 
     it('allows a new code once the wait has passed, and the newest is the one that counts', async () => {
@@ -372,9 +374,10 @@ describe('RequestOtpUseCase', () => {
       });
     });
 
-    it('logs a failed send at error and deletes its row, the request having already answered', async () => {
+    it('logs a failed send at error and makes its row unverifiable, the request having already answered', async () => {
       const kit = buildAuthUseCases();
       kit.users.grant(STAFF_PHONE, 'admin', null);
+      kit.codes.nextCodes = ['482913'];
       kit.sender.failNext(new AppError(ErrorCode.SERVICE_UNAVAILABLE));
 
       await expect(
@@ -384,16 +387,62 @@ describe('RequestOtpUseCase', () => {
           language: 'ar',
         }),
       ).resolves.toBeDefined();
-      expect(kit.challenges.rows).toHaveLength(1);
+      expect(kit.challenges.rows[0]?.codeHash).toBe(
+        `hash(${STAFF_PHONE}|admin|482913)`,
+      );
 
       await kit.detached.settle();
 
-      expect(kit.challenges.rows).toEqual([]);
+      // Kept, so it stays the newest and the resend wait applies; no code matches it.
+      expect(kit.challenges.rows).toHaveLength(1);
+      expect(kit.challenges.rows[0]?.codeHash).toBe('unmatchable-1');
       expect(logError).toHaveBeenCalledWith(
         expect.objectContaining({ challengeId: 'challenge-1' }),
         'Verification code not sent',
       );
       expect(JSON.stringify(logError.mock.calls)).not.toContain(STAFF_PHONE);
+    });
+  });
+
+  describe('a staff SMS outage reveals nothing (review of #234)', () => {
+    async function twoRequestsWhileSmsFails(
+      kit: ReturnType<typeof buildAuthUseCases>,
+    ): Promise<unknown[]> {
+      kit.sender.failNext(new AppError(ErrorCode.SERVICE_UNAVAILABLE));
+      const request = () =>
+        kit.requestOtp
+          .execute({ phone: STAFF_PHONE, audience: 'vendor', language: 'ar' })
+          .then(
+            (result) => ({ result }),
+            (error: unknown) => ({ error }),
+          );
+      const first = await request();
+      await kit.detached.settle();
+      kit.sender.failNext(new AppError(ErrorCode.SERVICE_UNAVAILABLE));
+      const second = await request();
+      await kit.detached.settle();
+      return [first, second];
+    }
+
+    it('answers two consecutive requests alike with and without access while the provider fails', async () => {
+      const withAccess = buildAuthUseCases();
+      withAccess.users.grant(STAFF_PHONE, 'vendor', ORGANISATION);
+      const withoutAccess = buildAuthUseCases();
+
+      const answersWith = await twoRequestsWhileSmsFails(withAccess);
+      const answersWithout = await twoRequestsWhileSmsFails(withoutAccess);
+
+      expect(answersWith).toEqual(answersWithout);
+      expect(answersWith[1]).toEqual({
+        error: expect.objectContaining({
+          code: ErrorCode.RATE_LIMITED,
+          retryAfterSeconds: 60,
+        }) as unknown,
+      });
+      expect(withAccess.limit.counted).toEqual(withoutAccess.limit.counted);
+      expect(withAccess.challenges.rows.map((row) => row.codeHash)).toEqual(
+        withoutAccess.challenges.rows.map((row) => row.codeHash),
+      );
     });
   });
 
@@ -438,7 +487,9 @@ describe('RequestOtpUseCase', () => {
         language: 'ar',
       });
 
-      expect(kit.limit.counted).toEqual([PHONE]);
+      expect(kit.limit.counted).toEqual([
+        { phone: PHONE, audience: 'customer' },
+      ]);
     });
   });
 });

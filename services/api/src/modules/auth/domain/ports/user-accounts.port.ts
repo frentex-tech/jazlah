@@ -1,4 +1,4 @@
-import type { StaffAudience } from '../staff-audience.type';
+import type { StaffAudience } from '@common/auth/staff-audience.type';
 import type { UserAccount } from '../user-account.type';
 
 /** Injection token of UserAccounts. */

@@ -59,6 +59,24 @@ export class InMemoryOtpChallengeRepository implements OtpChallengeRepository {
     return Promise.resolve();
   }
 
+  makeUnverifiable(id: string, codeHash: string): Promise<void> {
+    this.rows = this.rows.map((row) =>
+      row.id === id
+        ? new OtpChallenge(
+            row.id,
+            row.phone,
+            row.audience,
+            codeHash,
+            row.expiresAt,
+            row.attempts,
+            row.consumedAt,
+            row.createdAt,
+          )
+        : row,
+    );
+    return Promise.resolve();
+  }
+
   /** The stored challenge, as it is now. */
   byId(id: string): OtpChallenge | undefined {
     return this.rows.find((row) => row.id === id);

@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { UsersService } from '@modules/users';
 import type { UserAccounts } from '../domain/ports/user-accounts.port';
-import type { StaffAudience } from '../domain/staff-audience.type';
+import type { StaffAudience } from '@common/auth/staff-audience.type';
 import type { UserAccount } from '../domain/user-account.type';
 
 /** Users as signing in needs them, read through the users module's service. */

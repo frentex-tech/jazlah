@@ -4,7 +4,7 @@ import type { User as UserRow } from '@infra/database/generated/prisma/client';
 import { mapPrismaError } from '@infra/database/map-prisma-error';
 import { TransactionRunner } from '@infra/database/transaction-runner';
 import type { StaffAccess } from './staff-access.type';
-import type { StaffAudience } from './staff-audience.type';
+import type { StaffAudience } from '@common/auth/staff-audience.type';
 import type { User } from './user.type';
 
 /**

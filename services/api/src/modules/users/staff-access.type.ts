@@ -1,4 +1,4 @@
-import type { StaffAudience } from './staff-audience.type';
+import type { StaffAudience } from '@common/auth/staff-audience.type';
 
 /** An active staff access of a user. */
 export type StaffAccess = Readonly<{

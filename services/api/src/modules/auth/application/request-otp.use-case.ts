@@ -24,7 +24,7 @@ import {
   USER_ACCOUNTS,
   type UserAccounts,
 } from '../domain/ports/user-accounts.port';
-import type { StaffAudience } from '../domain/staff-audience.type';
+import type { StaffAudience } from '@common/auth/staff-audience.type';
 import type { OtpRequested } from './otp-requested.type';
 import type { RequestOtpInput } from './request-otp-input.type';
 
@@ -35,7 +35,8 @@ import type { RequestOtpInput } from './request-otp-input.type';
  * 1. The resend wait: a code issued less than AUTH_OTP_RESEND_WAIT_SECONDS ago for the
  *    same phone and audience refuses the request (RATE_LIMITED with the time left). A
  *    refused resend does not count against the phone's limits.
- * 2. The phone's limits (OtpRequestLimit), which fail closed.
+ * 2. The phone's limits for this audience (OtpRequestLimit), which fail closed; counted
+ *    before access is looked up, so the same with and without staff access.
  * 3. What is stored, one row in every case, so every request behaves alike afterwards:
  *    - a staff audience and a phone without active access: a hash no code matches, and
  *      no SMS. The answer, the resend wait and the attempts are those of a real
@@ -47,7 +48,9 @@ import type { RequestOtpInput } from './request-otp-input.type';
  *      previous code works again and the client may retry at once, and the failure
  *      reaches the client (503 when retryable).
  *    - Staff: the request does not wait (DetachedWork), so the time it takes is the
- *      same with and without access. A failure is logged at error and the row deleted.
+ *      same with and without access. A failure is logged at error and the row made
+ *      unverifiable, not deleted: it stays the newest, so the resend wait applies
+ *      exactly as for a phone without access, and an SMS outage reveals nothing.
  *
  * The code and the phone never reach the log: only the challenge id.
  */
@@ -81,7 +84,7 @@ export class RequestOtpUseCase {
     if (wait > 0) {
       throw new AppError(ErrorCode.RATE_LIMITED, { retryAfterSeconds: wait });
     }
-    await this.limit.consume(phone);
+    await this.limit.consume(phone, audience);
 
     const verifiable =
       audience === 'customer' || (await this.hasStaffAccess(phone, audience));
@@ -105,12 +108,7 @@ export class RequestOtpUseCase {
         await this.sendOrDelete(challenge, text);
       } else {
         this.detached.start('otp-sms', () =>
-          this.sendOrDelete(challenge, text).catch((error: unknown) => {
-            this.logger.error(
-              { err: error, challengeId: challenge.id, audience },
-              'Verification code not sent',
-            );
-          }),
+          this.sendOrDisable(challenge, text),
         );
       }
     }
@@ -137,6 +135,37 @@ export class RequestOtpUseCase {
       audience,
     );
     return organisation !== undefined;
+  }
+
+  /**
+   * A staff code's SMS, sent detached: when it fails, the failure is logged at error and
+   * the challenge made unverifiable. Never rejects: nobody is waiting for it.
+   */
+  private async sendOrDisable(
+    challenge: OtpChallenge,
+    text: string,
+  ): Promise<void> {
+    try {
+      await this.sender.send(challenge.phone, text);
+      return;
+    } catch (error) {
+      this.logger.error(
+        { err: error, challengeId: challenge.id, audience: challenge.audience },
+        'Verification code not sent',
+      );
+    }
+    try {
+      await this.challenges.makeUnverifiable(
+        challenge.id,
+        this.codes.unmatchableHash(),
+      );
+    } catch (error) {
+      // The challenge then still expires, unverified, in AUTH_OTP_TTL_SECONDS.
+      this.logger.error(
+        { err: error, challengeId: challenge.id },
+        'Could not disable the challenge of a verification code that was not sent',
+      );
+    }
   }
 
   /** Sends the message; when that fails, removes the challenge and rethrows. */

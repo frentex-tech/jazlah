@@ -40,7 +40,18 @@ function decode(part: string): Record<string, unknown> {
   >;
 }
 
-/** A token with the given header and payload, signed with HS256 and `secret`. */
+/** The HMAC hash each declared algorithm signs with. */
+const HMAC_HASHES: Readonly<Record<string, string>> = {
+  HS256: 'sha256',
+  HS384: 'sha384',
+  HS512: 'sha512',
+};
+
+/**
+ * A token with the given header and payload, signed with `secret` and the HMAC hash its
+ * header declares (HS256 for anything else, `none` included), so a token declaring
+ * another algorithm carries a valid signature for it.
+ */
 function forge(
   header: Record<string, unknown>,
   payload: Record<string, unknown>,
@@ -49,9 +60,8 @@ function forge(
   const encode = (value: unknown) =>
     Buffer.from(JSON.stringify(value)).toString('base64url');
   const body = `${encode(header)}.${encode(payload)}`;
-  const signature = createHmac('sha256', secret)
-    .update(body)
-    .digest('base64url');
+  const hash = HMAC_HASHES[String(header.alg)] ?? 'sha256';
+  const signature = createHmac(hash, secret).update(body).digest('base64url');
   return `${body}.${signature}`;
 }
 
@@ -213,7 +223,7 @@ describe('JwtAccessTokens', () => {
           .join('.')}.`,
       ],
       [
-        'declaring another algorithm',
+        'declaring another algorithm, validly signed with it and our key',
         forge({ ...HEADER, alg: 'HS512' }, CLAIMS, KEY_1.secret),
       ],
       ['that is not a token', 'not-a-token'],

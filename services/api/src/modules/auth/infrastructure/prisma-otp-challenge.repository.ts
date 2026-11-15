@@ -81,4 +81,15 @@ export class PrismaOtpChallengeRepository implements OtpChallengeRepository {
       mapPrismaError(error);
     }
   }
+
+  async makeUnverifiable(id: string, codeHash: string): Promise<void> {
+    try {
+      await this.db.client.otpChallenge.updateMany({
+        where: { id },
+        data: { codeHash },
+      });
+    } catch (error) {
+      mapPrismaError(error);
+    }
+  }
 }

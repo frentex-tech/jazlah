@@ -300,19 +300,27 @@ describe('Authentication (e2e)', () => {
   });
 
   describe('rate limits', () => {
-    it('the fourth request for one phone is RATE_LIMITED, whatever the address and audience', async () => {
+    it('the fourth request for one phone and audience is RATE_LIMITED, whatever the address; another audience still passes', async () => {
       const number = phone();
       const from = (audience: string, address: string) =>
         client.requestCode(number, audience).set('X-Forwarded-For', address);
 
-      await from('customer', '2001:db8:aa::1').expect(200);
-      await from('vendor', '2001:db8:aa::2').expect(200);
-      await from('kitchen', '2001:db8:aa::3').expect(200);
-      const res = await from('admin', '2001:db8:aa::4').expect(429);
+      for (const address of [
+        '2001:db8:aa::1',
+        '2001:db8:aa::2',
+        '2001:db8:aa::3',
+      ]) {
+        await from('customer', address).expect(200);
+        // Past the resend wait, so the phone's own limit is what refuses next.
+        clock.advanceSeconds(61);
+      }
+      const res = await from('customer', '2001:db8:aa::4').expect(429);
 
       expect((res.body as ErrorResponseBody).code).toBe('RATE_LIMITED');
       expect(Number(res.headers['retry-after'])).toBeGreaterThan(0);
-      expect(client.messagesTo(number)).toHaveLength(1);
+      expect(client.messagesTo(number)).toHaveLength(3);
+      // Each audience counts on its own: abuse of one cannot lock the phone out of another.
+      await from('vendor', '2001:db8:aa::5').expect(200);
     });
 
     it('stores no phone number in a rate limit key', async () => {
@@ -473,6 +481,20 @@ describe('Authentication (e2e)', () => {
     it('signs staff in with their organisation, and a customer code does not open a staff session', async () => {
       const staff = phone();
       const { organisationId } = await grant(staff, 'vendor');
+
+      // A customer code for the same phone, then a vendor challenge: the customer code
+      // is refused for the vendor audience as a wrong code, and opens nothing.
+      await client.requestCode(staff, 'customer').expect(200);
+      const customerCode = await client.codeFor(staff);
+      await client.requestCode(staff, 'vendor').expect(200);
+      const vendorCode = await client.codeFor(staff);
+      if (customerCode !== vendorCode) {
+        const refused = await client
+          .verify(staff, customerCode, 'vendor')
+          .expect(422);
+        expect((refused.body as ErrorResponseBody).code).toBe('OTP_INVALID');
+      }
+      clock.advanceSeconds(61);
 
       const vendor = await client.signIn(staff, 'vendor');
 

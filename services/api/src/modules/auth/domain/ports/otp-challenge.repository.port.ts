@@ -27,4 +27,10 @@ export interface OtpChallengeRepository {
 
   /** Removes a challenge whose code never reached the user. */
   delete(id: string): Promise<void>;
+
+  /**
+   * Replaces the stored hash with `codeHash`, one no code matches: the challenge can
+   * never be verified, yet it stays the newest, so the resend wait still applies.
+   */
+  makeUnverifiable(id: string, codeHash: string): Promise<void>;
 }
