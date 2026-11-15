@@ -3,8 +3,9 @@ type Where = Readonly<Record<string, unknown>>;
 
 /**
  * The part of the database client MediaService uses (`client.media`), in memory, for
- * its unit tests: rows are plain objects, and the `where` filters understand equality
- * and `{ lt: Date }`, which is all the service sends. Excluded from the build
+ * its unit tests: rows are plain objects, and the `where` filters understand equality,
+ * `{ lt: Date }`, `{ in: [...] }` and `{ not: null }`, which is all the service sends.
+ * Each call is asynchronous, like the database, so concurrent calls interleave. Excluded from the build
  * (`*.fake.ts`). Unit tests never need a database (.claude/rules/database.md, 19).
  *
  * Use it as `{ client: fake } as unknown as DbContext`.
@@ -20,6 +21,9 @@ export class InMemoryMediaClient {
         detectedContentType: null,
         originalFileName: null,
         ownerId: null,
+        bucket: null,
+        objectKey: null,
+        stagingKey: null,
         rejectionReason: null,
         confirmedAt: null,
         createdAt: now,
@@ -67,6 +71,22 @@ export class InMemoryMediaClient {
     return [...this.rows.values()].filter((row) =>
       Object.entries(where).every(([field, condition]) => {
         const value = row[field];
+        if (
+          typeof condition === 'object' &&
+          condition !== null &&
+          'in' in condition &&
+          Array.isArray(condition.in)
+        ) {
+          return condition.in.includes(value);
+        }
+        if (
+          typeof condition === 'object' &&
+          condition !== null &&
+          'not' in condition &&
+          condition.not === null
+        ) {
+          return value !== null && value !== undefined;
+        }
         if (
           typeof condition === 'object' &&
           condition !== null &&

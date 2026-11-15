@@ -1,4 +1,5 @@
 import {
+  CopyObjectCommand,
   DeleteObjectCommand,
   GetObjectCommand,
   HeadObjectCommand,
@@ -6,6 +7,7 @@ import {
   NoSuchBucket,
   NoSuchKey,
   NotFound,
+  ObjectNotInActiveTierError,
   S3Client,
   S3ServiceException,
 } from '@aws-sdk/client-s3';
@@ -110,6 +112,24 @@ describe('S3StorageProvider', () => {
       expect(command.input.Range).toBe('bytes=0-2');
     });
 
+    it('copies with CopyObject, the source URL-encoded per segment', async () => {
+      const { provider, commands } = providerAnswering(() => ({}));
+
+      await expect(
+        provider.copyObject(
+          { bucket: 'example-private', key: 'staging/a b/ق.jpg' },
+          { bucket: 'example-public', key: 'catalog/x' },
+        ),
+      ).resolves.toBe(true);
+      const command = commands[0] as CopyObjectCommand;
+      expect(command).toBeInstanceOf(CopyObjectCommand);
+      expect(command.input).toEqual({
+        Bucket: 'example-public',
+        Key: 'catalog/x',
+        CopySource: 'example-private/staging/a%20b/%D9%82.jpg',
+      });
+    });
+
     it('deletes with DeleteObject', async () => {
       const { provider, commands } = providerAnswering(() => ({}));
 
@@ -190,6 +210,18 @@ describe('S3StorageProvider', () => {
       await expect(provider.readObjectStart(LOCATION, 12)).resolves.toBeNull();
     });
 
+    it('CopyObject NoSuchKey (no source): nothing copied', async () => {
+      const { provider } = providerAnswering(() => {
+        throw new NoSuchKey({
+          $metadata: { ...METADATA, httpStatusCode: 404 },
+          message: 'NoSuchKey',
+        });
+      });
+      await expect(provider.copyObject(LOCATION, LOCATION)).resolves.toBe(
+        false,
+      );
+    });
+
     it('GetObject InvalidRange (an empty object): empty bytes', async () => {
       const { provider } = providerAnswering(() => {
         throw serviceError('InvalidRange', 416);
@@ -219,6 +251,16 @@ describe('S3StorageProvider', () => {
           new InvalidObjectState({
             $metadata: { ...METADATA, httpStatusCode: 403 },
             message: 'InvalidObjectState',
+          }),
+        'object-archived',
+        false,
+      ],
+      [
+        'ObjectNotInActiveTierError (CopyObject)',
+        () =>
+          new ObjectNotInActiveTierError({
+            $metadata: { ...METADATA, httpStatusCode: 403 },
+            message: 'ObjectNotInActiveTierError',
           }),
         'object-archived',
         false,
@@ -331,6 +373,7 @@ describe('S3StorageProvider', () => {
       for (const work of [
         provider.getObjectMetadata(LOCATION),
         provider.readObjectStart(LOCATION, 12),
+        provider.copyObject(LOCATION, LOCATION),
         provider.deleteObject(LOCATION),
       ]) {
         expect((await failureOf(work)).reason).toBe('access-denied');

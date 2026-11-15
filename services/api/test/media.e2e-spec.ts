@@ -100,7 +100,7 @@ describe('Media uploads with the fake storage (e2e)', () => {
     ).body as Ticket;
     expect(ticket.fields.key).toMatch(
       new RegExp(
-        `^catalog/product-image/\\d{4}/\\d{2}/\\d{2}/${ticket.mediaId}$`,
+        `^staging/catalog/product-image/\\d{4}/\\d{2}/\\d{2}/${ticket.mediaId}$`,
       ),
     );
 
@@ -122,10 +122,14 @@ describe('Media uploads with the fake storage (e2e)', () => {
     const link = await request(app.getHttpServer())
       .get(`/v1/test/media/${ticket.mediaId}/download-link`)
       .expect(200);
+    const row = await prisma.media.findUnique({
+      where: { id: ticket.mediaId },
+    });
+    expect(row?.objectKey).toMatch(
+      new RegExp(`^catalog/product-image/.+/${ticket.mediaId}/[0-9a-f-]{36}$`),
+    );
     expect(link.body).toEqual({
-      url: expect.stringMatching(
-        new RegExp(`/${ticket.fields.key}$`),
-      ) as unknown,
+      url: expect.stringMatching(new RegExp(`/${row?.objectKey}$`)) as unknown,
       expiresAt: null,
     });
   });

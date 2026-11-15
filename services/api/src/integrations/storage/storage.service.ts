@@ -91,6 +91,17 @@ export class StorageService {
     return this.provider.readObjectStart(location, byteCount);
   }
 
+  /**
+   * Copies an object inside the storage, keeping its Content-Type; false when the source
+   * does not exist.
+   */
+  copyObject(
+    source: StorageLocation,
+    destination: StorageLocation,
+  ): Promise<boolean> {
+    return this.provider.copyObject(source, destination);
+  }
+
   /** Deletes the object; succeeds when it does not exist. */
   deleteObject(location: StorageLocation): Promise<void> {
     return this.provider.deleteObject(location);

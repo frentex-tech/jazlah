@@ -56,6 +56,34 @@ describe('FakeStorageProvider', () => {
     await expect(fake.getObjectMetadata(LOCATION)).resolves.toBeNull();
   });
 
+  it('copies an object with its type, and reports a missing source', async () => {
+    const fake = new FakeStorageProvider();
+    const target = { bucket: 'example-public', key: 'copy' };
+    fake.putObject(LOCATION, Uint8Array.from([7, 8]), 'image/png');
+
+    await expect(fake.copyObject(LOCATION, target)).resolves.toBe(true);
+    await expect(fake.getObjectMetadata(target)).resolves.toEqual({
+      sizeBytes: 2,
+      contentType: 'image/png',
+    });
+    await fake.deleteObject(LOCATION);
+    await expect(fake.copyObject(LOCATION, target)).resolves.toBe(false);
+    expect(fake.objectBytes(target)).toEqual(Uint8Array.from([7, 8]));
+  });
+
+  it('holds a paused call until it is released', async () => {
+    const fake = new FakeStorageProvider();
+    const gate = fake.pause('deleteObject');
+    fake.putObject(LOCATION, Uint8Array.from([1]), null);
+
+    const deleting = fake.deleteObject(LOCATION);
+    await gate.reached;
+    expect(fake.hasObject(LOCATION)).toBe(true);
+    gate.release();
+    await deleting;
+    expect(fake.hasObject(LOCATION)).toBe(false);
+  });
+
   it('records calls and fails once on request', async () => {
     const fake = new FakeStorageProvider();
     const failure = new Error('told to fail');
