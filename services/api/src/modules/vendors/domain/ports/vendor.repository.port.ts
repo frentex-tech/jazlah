@@ -39,6 +39,12 @@ export interface VendorRepository {
   /** The vendor if it is active; null otherwise (public reads). */
   findActiveById(id: string): Promise<Vendor | null>;
 
+  /** The platform vendor, or null before `pnpm vendor:create-platform` has run. */
+  findPlatform(): Promise<Vendor | null>;
+
+  /** The vendors with these ids, whatever their status; unknown ids are left out. */
+  findByIds(ids: readonly string[]): Promise<Vendor[]>;
+
   /** Whether the vendor is suspended; true when no vendor has this id. */
   isSuspended(id: string): Promise<boolean>;
 
