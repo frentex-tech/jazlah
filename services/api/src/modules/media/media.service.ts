@@ -13,6 +13,8 @@ import { mapPrismaError } from '@infra/database/map-prisma-error';
 import { StorageService, type StorageLocation } from '@integrations/storage';
 import type { DownloadLink } from './download-link.type';
 import { isUploadPurpose } from './is-upload-purpose';
+import { MEDIA_CLEANUP_SCOPE } from './media-cleanup-scope.constants';
+import type { MediaCleanupScope } from './media-cleanup-scope.type';
 import { MEDIA_CLEANUP } from './media-cleanup.constants';
 import type { MediaFile } from './media-file.type';
 import type { MediaRejectionReason } from './media-rejection-reason.type';
@@ -64,6 +66,8 @@ export class MediaService {
     private readonly db: DbContext,
     private readonly storage: StorageService,
     @Inject(mediaConfig.KEY) private readonly config: MediaConfig,
+    @Inject(MEDIA_CLEANUP_SCOPE)
+    private readonly cleanupScope: MediaCleanupScope | null,
   ) {}
 
   /**
@@ -203,11 +207,18 @@ export class MediaService {
    * Idempotent and safe beside a concurrent run: each object delete succeeds when the
    * object is already gone. A run that stops halfway leaves work the next run finishes.
    * Stops between rows once `signal` is aborted.
+   *
+   * Both passes act only on the uploads of MEDIA_CLEANUP_SCOPE: all of them in
+   * production; one owner's in an e2e app, so suites sharing a database stay apart.
    */
   async removeExpiredUploads(signal?: AbortSignal): Promise<number> {
     await this.query(() =>
       this.db.client.media.updateMany({
-        where: { status: 'pending', expiresAt: { lt: new Date() } },
+        where: {
+          ...this.inCleanupScope(),
+          status: 'pending',
+          expiresAt: { lt: new Date() },
+        },
         data: { status: 'rejected', rejectionReason: 'EXPIRED' },
       }),
     );
@@ -221,7 +232,11 @@ export class MediaService {
     for (;;) {
       const claimed = await this.query(() =>
         this.db.client.media.findMany({
-          where: { status: 'rejected', rejectionReason: 'EXPIRED' },
+          where: {
+            ...this.inCleanupScope(),
+            status: 'rejected',
+            rejectionReason: 'EXPIRED',
+          },
           select: { id: true, bucket: true, objectKey: true, stagingKey: true },
           orderBy: { expiresAt: 'asc' },
           take: MEDIA_CLEANUP.batchSize,
@@ -263,6 +278,7 @@ export class MediaService {
       const settled = await this.query(() =>
         this.db.client.media.findMany({
           where: {
+            ...this.inCleanupScope(),
             status: { in: ['ready', 'rejected'] },
             stagingKey: { not: null },
             expiresAt: { lt: new Date() },
@@ -325,6 +341,13 @@ export class MediaService {
       return { reason: 'CONTENT_TYPE_MISMATCH' };
     }
     return { sizeBytes: metadata.sizeBytes, contentType: detected };
+  }
+
+  /** The filter that keeps the cleanup to its scope: nothing in production. */
+  private inCleanupScope(): { ownerId?: string } {
+    return this.cleanupScope === null
+      ? {}
+      : { ownerId: this.cleanupScope.ownerId };
   }
 
   /** The outcome of a row that is no longer pending: the file, or the error it ended with. */

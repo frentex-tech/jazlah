@@ -1,3 +1,4 @@
+import { randomUUID } from 'node:crypto';
 import type { INestApplication, Type } from '@nestjs/common';
 import { getQueueToken } from '@nestjs/bullmq';
 import { Test } from '@nestjs/testing';
@@ -7,6 +8,7 @@ import { queueConfig } from '@config/queue.config';
 import { redisConfig } from '@config/redis.config';
 import { provideWorkers } from '@infra/queue/provide-workers';
 import { QueueRegistrationModule } from '@infra/queue/queue-registration.module';
+import { MEDIA_CLEANUP_SCOPE } from '@modules/media/media-cleanup-scope.constants';
 import { AppModule } from '../../src/app.module';
 import { enableWorkers } from './enable-workers';
 import { PROBE_JOB_OPTIONS, PROBE_QUEUES } from './queue-probe.constants';
@@ -22,6 +24,9 @@ import { StuckProbeProcessor } from './stuck-probe.processor';
  * `workersEnabledByConfig` instead turns every worker on the way production does:
  * QUEUE_WORKERS_ENABLED true in the queue config and no test override, so each worker
  * comes from `provideWorkers`' factory (the application's own workers start too).
+ * As in createHttpApp, the media cleanup acts only on uploads owned by this app's own
+ * random id (MEDIA_CLEANUP_SCOPE): the application's cleanup worker, started by
+ * `workersEnabledByConfig`, never removes another suite's expired upload.
  * Returns once the probe queues are connected.
  */
 export async function createQueueProbeApp(
@@ -47,6 +52,9 @@ export async function createQueueProbeApp(
       StalledProbeProcessor,
     ),
   });
+  builder = builder
+    .overrideProvider(MEDIA_CLEANUP_SCOPE)
+    .useValue({ ownerId: randomUUID() });
   builder = enableWorkers(builder, options.workers ?? []);
   if (options.workersEnabledByConfig === true) {
     builder = builder

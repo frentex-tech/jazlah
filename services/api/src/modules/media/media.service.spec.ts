@@ -10,6 +10,7 @@ import {
 } from '@integrations/storage';
 import { FakeStorageProvider } from '@integrations/storage/testing';
 import { InMemoryMediaClient } from './in-memory-media-client.fake';
+import type { MediaCleanupScope } from './media-cleanup-scope.type';
 import { MediaService } from './media.service';
 
 const NOW = Date.UTC(2026, 10, 14, 9, 30, 0);
@@ -46,13 +47,15 @@ const PDF = [0x25, 0x50, 0x44, 0x46, 0x2d, 0x31, 0x2e, 0x37];
 /** A Windows executable ("MZ") renamed to .jpg. */
 const EXE = [0x4d, 0x5a, 0x90, 0x00, 0x03, 0x00];
 
-function setup() {
+/** The service as production builds it (no cleanup scope), or limited to `scope`. */
+function setup(scope: MediaCleanupScope | null = null) {
   const client = new InMemoryMediaClient();
   const storage = new FakeStorageProvider(() => Date.now());
   const service = new MediaService(
     { client } as unknown as DbContext,
     new StorageService(storage, STORAGE_CONFIG),
     MEDIA_CONFIG,
+    scope,
   );
   return { service, client, storage };
 }
@@ -609,6 +612,47 @@ describe('MediaService', () => {
       expect(context.client.rows.get(fresh.mediaId)?.status).toBe('pending');
       expect(context.storage.hasObject(fresh.staging)).toBe(true);
       expect(context.client.rows.get(ready.mediaId)?.status).toBe('ready');
+    });
+
+    it('with a scope, acts only on the uploads of its owner', async () => {
+      const owner = '00000000-0000-4000-8000-000000000001';
+      const context = setup({ ownerId: owner });
+      const own = await uploaded(context, file(JPEG));
+      const unowned = await uploaded(context, file(JPEG));
+      const other = await uploaded(context, file(JPEG));
+      const ownReady = await uploaded(context, file(JPEG));
+      const unownedReady = await uploaded(context, file(JPEG));
+      for (const ready of [ownReady, unownedReady]) {
+        await context.service.confirmUpload(ready.mediaId);
+        // A re-upload with the still valid ticket: a staging object the cleanup removes.
+        context.storage.upload(ready.ticket, {
+          bytes: file(JPEG),
+          contentType: 'image/jpeg',
+        });
+      }
+      const assign = (mediaId: string, ownerId: string): void => {
+        const row = context.client.rows.get(mediaId);
+        if (row !== undefined) {
+          row.ownerId = ownerId;
+        }
+      };
+      assign(own.mediaId, owner);
+      assign(ownReady.mediaId, owner);
+      assign(other.mediaId, '00000000-0000-4000-8000-000000000002');
+      jest.setSystemTime(AFTER_EXPIRY);
+
+      await expect(context.service.removeExpiredUploads()).resolves.toBe(1);
+
+      expect(context.client.rows.has(own.mediaId)).toBe(false);
+      expect(context.storage.hasObject(own.staging)).toBe(false);
+      for (const untouched of [unowned, other]) {
+        expect(context.client.rows.get(untouched.mediaId)?.status).toBe(
+          'pending',
+        );
+        expect(context.storage.hasObject(untouched.staging)).toBe(true);
+      }
+      expect(context.storage.hasObject(ownReady.staging)).toBe(false);
+      expect(context.storage.hasObject(unownedReady.staging)).toBe(true);
     });
 
     it('removes the staging object of a ready upload only once its ticket expired', async () => {

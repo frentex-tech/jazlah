@@ -8,6 +8,8 @@ import type { ErrorResponseBody } from '@common/filters/error-response-body.inte
 import { PrismaService } from '@infra/database/prisma.service';
 import { QUEUE_NAMES } from '@infra/queue/queue-names.constants';
 import { StorageService } from '@integrations/storage';
+import { MEDIA_CLEANUP_SCOPE } from '../src/modules/media/media-cleanup-scope.constants';
+import type { MediaCleanupScope } from '../src/modules/media/media-cleanup-scope.type';
 import { MEDIA_CLEANUP } from '../src/modules/media/media-cleanup.constants';
 import { MediaCleanupProcessor } from '../src/modules/media/media-cleanup.processor';
 import { MediaCleanupScheduler } from '../src/modules/media/media-cleanup.scheduler';
@@ -140,11 +142,19 @@ describe('Media uploads against MinIO (e2e)', () => {
     await app.get(MediaCleanupProcessor).process(job);
   }
 
-  /** Moves an upload's confirm window, and so its ticket, into the past. */
+  /**
+   * Moves an upload's confirm window, and so its ticket, into the past, and gives it this
+   * app's cleanup owner: the cleanup here acts only on that owner's uploads, and other
+   * suites' cleanups never on them (createHttpApp, MEDIA_CLEANUP_SCOPE).
+   */
   async function expire(id: string): Promise<void> {
+    const scope = app.get<MediaCleanupScope>(MEDIA_CLEANUP_SCOPE);
     await prisma.media.update({
       where: { id },
-      data: { expiresAt: new Date(Date.now() - 1_000) },
+      data: {
+        expiresAt: new Date(Date.now() - 1_000),
+        ownerId: scope.ownerId,
+      },
     });
   }
 
