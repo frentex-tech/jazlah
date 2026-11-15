@@ -17,6 +17,8 @@ const REQUIRED = {
   QUEUE_WORKERS_ENABLED: 'false',
   AUTH_ACCESS_TOKEN_SECRET: 'example-access-token-secret-0123456789',
   AUTH_OTP_SECRET: 'example-otp-secret-0123456789-abcdefghij',
+  // base64 of `example-iban-key-not-a-real-key!`.
+  VENDORS_IBAN_KEY: 'ZXhhbXBsZS1pYmFuLWtleS1ub3QtYS1yZWFsLWtleSE=',
 };
 
 function envWith(raw: Record<string, string>): Env {

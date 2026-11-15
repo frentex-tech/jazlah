@@ -19,8 +19,21 @@ const AUTH_SECRETS = {
   AUTH_ACCESS_TOKEN_SECRET: 'example-access-token-secret-0123456789',
   AUTH_OTP_SECRET: 'example-otp-secret-0123456789-abcdefghij',
 };
-const VALID = { DATABASE_URL, REDIS_URL, ...STORAGE, ...AUTH_SECRETS };
-const WITHOUT_AUTH_SECRETS = { DATABASE_URL, REDIS_URL, ...STORAGE };
+/** The IBAN key: base64 of `example-iban-key-not-a-real-key!`. Unset outside production it is random. */
+const VENDORS_IBAN_KEY = 'ZXhhbXBsZS1pYmFuLWtleS1ub3QtYS1yZWFsLWtleSE=';
+const VALID = {
+  DATABASE_URL,
+  REDIS_URL,
+  ...STORAGE,
+  ...AUTH_SECRETS,
+  VENDORS_IBAN_KEY,
+};
+const WITHOUT_AUTH_SECRETS = {
+  DATABASE_URL,
+  REDIS_URL,
+  ...STORAGE,
+  VENDORS_IBAN_KEY,
+};
 const PRODUCTION = {
   ...VALID,
   NODE_ENV: 'production',
@@ -29,6 +42,8 @@ const PRODUCTION = {
 };
 /** The defaults of the HTTP and rate limit variables. */
 const HTTP_DEFAULTS = {
+  VENDORS_IBAN_KEY,
+  VENDORS_IBAN_KEY_ID: '1',
   SHUTDOWN_DEADLINE_MS: 28_000,
   DATABASE_POOL_SIZE: 10,
   DATABASE_CONNECTION_TIMEOUT_MS: 5_000,
@@ -593,6 +608,33 @@ describe('validateEnv', () => {
         'AUTH_ACCESS_TOKEN_SECRET: required when NODE_ENV is production: expected a secret of at least 32 characters (for example the output of: openssl rand -base64 48)',
         'AUTH_OTP_SECRET: required when NODE_ENV is production: expected a secret of at least 32 characters (for example the output of: openssl rand -base64 48)',
       ]);
+    });
+
+    it('requires the IBAN key in production, without printing anything', () => {
+      expect(
+        problemsOf({ ...PRODUCTION, VENDORS_IBAN_KEY: undefined }),
+      ).toEqual([
+        'VENDORS_IBAN_KEY: required when NODE_ENV is production: expected 32 random bytes in base64 (for example the output of: openssl rand -base64 32)',
+      ]);
+    });
+
+    it.each([
+      ['not base64', 'not base64 at all, not even close!!!!!!!!!!=='],
+      ['16 bytes', 'ZXhhbXBsZS0xNi1ieXRlcw=='],
+      ['33 bytes', 'ZXhhbXBsZS1pYmFuLWtleS1ub3QtYS1yZWFsLWtleSEh'],
+    ])('refuses an IBAN key that is %s', (_label, key) => {
+      expect(problemsOf({ ...VALID, VENDORS_IBAN_KEY: key })).toEqual([
+        'VENDORS_IBAN_KEY: expected 32 random bytes in base64 (for example the output of: openssl rand -base64 32)',
+      ]);
+    });
+
+    it('makes a random IBAN key of 32 bytes when unset outside production', () => {
+      const withoutKey = { ...VALID, VENDORS_IBAN_KEY: undefined };
+      const first = validateEnv(withoutKey);
+      const second = validateEnv(withoutKey);
+
+      expect(Buffer.from(first.VENDORS_IBAN_KEY, 'base64')).toHaveLength(32);
+      expect(second.VENDORS_IBAN_KEY).not.toBe(first.VENDORS_IBAN_KEY);
     });
 
     it('makes a random secret of its own for each when unset outside production', () => {
