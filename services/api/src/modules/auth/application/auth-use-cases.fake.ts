@@ -11,6 +11,7 @@ import { InMemoryOtpSender } from '../domain/fakes/in-memory-otp-sender.fake';
 import { InMemoryRefreshTokenRepository } from '../domain/fakes/in-memory-refresh-token.repository.fake';
 import { InMemoryRefreshTokenSecrets } from '../domain/fakes/in-memory-refresh-token-secrets.fake';
 import { InMemoryUserAccounts } from '../domain/fakes/in-memory-user-accounts.fake';
+import { InMemoryVendorStatusChecker } from '../domain/fakes/in-memory-vendor-status-checker.fake';
 import { GetCurrentUserUseCase } from './get-current-user.use-case';
 import { LogoutAllUseCase } from './logout-all.use-case';
 import { LogoutUseCase } from './logout.use-case';
@@ -57,6 +58,7 @@ export function buildAuthUseCases(
   const limit = new InMemoryOtpRequestLimit();
   const users = new InMemoryUserAccounts();
   const detached = new InMemoryDetachedWork();
+  const vendors = new InMemoryVendorStatusChecker();
 
   const transactions: Pick<TransactionRunner, 'run'> = {
     async run<T>(work: () => Promise<T>): Promise<T> {
@@ -90,6 +92,7 @@ export function buildAuthUseCases(
     limit,
     users,
     detached,
+    vendors,
     requestOtp: new RequestOtpUseCase(
       challenges,
       codes,
@@ -111,6 +114,7 @@ export function buildAuthUseCases(
       clock,
       transactions,
       settings,
+      vendors,
     ),
     refreshSession: new RefreshSessionUseCase(
       refreshTokens,
@@ -121,6 +125,7 @@ export function buildAuthUseCases(
       clock,
       transactions,
       settings,
+      vendors,
     ),
     logout: new LogoutUseCase(refreshTokens, sessions, secrets, clock),
     logoutAll: new LogoutAllUseCase(sessions, clock),

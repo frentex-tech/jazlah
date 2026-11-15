@@ -1,4 +1,6 @@
-import { Inject, Injectable, Logger } from '@nestjs/common';
+import { Inject, Injectable, Logger, Optional } from '@nestjs/common';
+import { VENDOR_STATUS_CHECKER } from '@common/auth/vendor-status-checker.constants';
+import type { VendorStatusChecker } from '@common/auth/vendor-status-checker.interface';
 import { AppError } from '@common/errors/app-error';
 import { ErrorCode } from '@common/errors/error-code.enum';
 import { authConfig } from '@config/auth.config';
@@ -41,12 +43,13 @@ import type { RefreshOutcome } from './refresh-outcome.type';
  *   and both lose it. Strict on purpose: a client that lost the answer to a refresh
  *   signs in again;
  * - the user is gone or disabled, or, for a staff session, the access is no longer
- *   active for the session's organisation: the session is revoked;
+ *   active for the session's organisation, or, for a vendor session, the vendor is
+ *   suspended (or no VendorStatusChecker is bound): the session is revoked;
  * - otherwise the token is marked used, its successor stored, and the session's
  *   last-used time updated.
  *
- * After the commit: ACCOUNT_DISABLED for a disabled user, REFRESH_TOKEN_INVALID for
- * every other refusal, or a new access token carrying the session's single audience
+ * After the commit: ACCOUNT_DISABLED for a disabled user, VENDOR_SUSPENDED for a
+ * suspended vendor, REFRESH_TOKEN_INVALID for every other refusal, or a new access token carrying the session's single audience
  * and organisation.
  */
 @Injectable()
@@ -71,6 +74,10 @@ export class RefreshSessionUseCase {
       AuthConfig,
       'accessTokenTtlSeconds' | 'refreshTokenTtlSeconds'
     >,
+    // Bound by the vendors module; without it no vendor session can be refreshed.
+    @Optional()
+    @Inject(VENDOR_STATUS_CHECKER)
+    private readonly vendors?: VendorStatusChecker,
   ) {}
 
   async execute(refreshToken: string): Promise<AuthTokens> {
@@ -90,6 +97,9 @@ export class RefreshSessionUseCase {
 
     if (outcome.kind === 'disabled') {
       throw new AppError(ErrorCode.ACCOUNT_DISABLED);
+    }
+    if (outcome.kind === 'suspended') {
+      throw new AppError(ErrorCode.VENDOR_SUSPENDED);
     }
     if (outcome.kind !== 'rotated') {
       if (outcome.kind === 'reused') {
@@ -141,6 +151,15 @@ export class RefreshSessionUseCase {
     ) {
       await this.sessions.revoke(session.id, 'access_lost', now);
       return { kind: 'invalid' };
+    }
+    if (
+      session.audience === 'vendor' &&
+      (session.organisationId === null ||
+        this.vendors === undefined ||
+        (await this.vendors.isSuspended(session.organisationId)))
+    ) {
+      await this.sessions.revoke(session.id, 'access_lost', now);
+      return { kind: 'suspended' };
     }
 
     await this.refreshTokens.create({

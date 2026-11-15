@@ -3,10 +3,13 @@ import { APP_GUARD, DiscoveryModule } from '@nestjs/core';
 import { JwtModule } from '@nestjs/jwt';
 import { ACCESS_TOKEN_VERIFIER } from '@common/auth/access-token-verifier.constants';
 import { AuthenticationGuard } from '@common/guards/authentication.guard';
+import { OrganisationStatusGuard } from '@common/guards/organisation-status.guard';
 import { RouteAudienceCheck } from '@common/guards/route-audience.check';
+import { VendorRouteCheck } from '@common/guards/vendor-route.check';
 import { RateLimitModule } from '@infra/rate-limit/rate-limit.module';
 import { SmsModule } from '@integrations/sms';
 import { UsersModule } from '@modules/users';
+import { VendorsModule } from '@modules/vendors';
 import { AdminAuthController } from './api/controllers/admin.controller';
 import { CustomerAuthController } from './api/controllers/customer.controller';
 import { KitchenAuthController } from './api/controllers/kitchen.controller';
@@ -53,10 +56,13 @@ import { UsersServiceUserAccounts } from './infrastructure/users-service-user-ac
  * This file is the only place that knows which class implements which port: every port
  * is bound here to its token, and use cases inject tokens.
  *
- * It also registers the authentication guard as a global guard. AppModule imports this
- * module after RateLimitModule, so the guard runs after the rate limits (`http.md`,
- * "Guard order"); no other module registers a global guard after it. RouteAudienceCheck
- * refuses to start with an endpoint that has neither an audience nor `@Public()`.
+ * It also registers the global guards: the authentication guard, then the organisation
+ * status guard (a suspended vendor is refused on every vendor route), in that order.
+ * AppModule imports this module after RateLimitModule, so both run after the rate limits
+ * (`http.md`, "Guard order"); no other module registers a global guard. RouteAudienceCheck
+ * refuses to start with an endpoint that has neither an audience nor `@Public()`, and
+ * VendorRouteCheck with a vendor route that could escape the status guard. The
+ * VendorStatusChecker comes from VendorsModule, which is why it is imported here.
  */
 @Module({
   imports: [
@@ -66,6 +72,7 @@ import { UsersServiceUserAccounts } from './infrastructure/users-service-user-ac
     RateLimitModule,
     SmsModule,
     UsersModule,
+    VendorsModule,
   ],
   controllers: [
     PublicAuthController,
@@ -101,7 +108,10 @@ import { UsersServiceUserAccounts } from './infrastructure/users-service-user-ac
     { provide: CLOCK, useClass: SystemClock },
     { provide: DETACHED_WORK, useClass: TrackedDetachedWork },
     RouteAudienceCheck,
+    VendorRouteCheck,
+    // In this order: Nest runs global guards in registration order.
     { provide: APP_GUARD, useClass: AuthenticationGuard },
+    { provide: APP_GUARD, useClass: OrganisationStatusGuard },
   ],
 })
 export class AuthModule {}
