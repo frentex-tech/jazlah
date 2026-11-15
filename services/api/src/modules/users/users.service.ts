@@ -1,4 +1,6 @@
 import { Injectable } from '@nestjs/common';
+import { AppError } from '@common/errors/app-error';
+import { ErrorCode } from '@common/errors/error-code.enum';
 import { DbContext } from '@infra/database/db-context';
 import type { User as UserRow } from '@infra/database/generated/prisma/client';
 import { mapPrismaError } from '@infra/database/map-prisma-error';
@@ -105,6 +107,40 @@ export class UsersService {
       }
       return user;
     });
+  }
+
+  /**
+   * Grants vendor access for `vendorId` to an existing user: creates the access, or
+   * reactivates a deactivated one and points it at this vendor. Granting it again
+   * changes nothing. A user works for one vendor: an active access for another vendor is
+   * refused with VENDOR_ACCESS_ALREADY_HELD, and nothing changes.
+   *
+   * Database only, so it runs inside the caller's transaction (the approval of a vendor
+   * application); the decision is one conditional update, safe beside a concurrent call.
+   */
+  async grantVendorAccess(userId: string, vendorId: string): Promise<void> {
+    try {
+      await this.db.client.userAccess.createMany({
+        data: [{ userId, audience: 'vendor', organisationId: vendorId }],
+        skipDuplicates: true,
+      });
+      const { count } = await this.db.client.userAccess.updateMany({
+        where: {
+          userId,
+          audience: 'vendor',
+          OR: [{ organisationId: vendorId }, { deactivatedAt: { not: null } }],
+        },
+        data: { organisationId: vendorId, deactivatedAt: null },
+      });
+      if (count === 0) {
+        throw new AppError(ErrorCode.VENDOR_ACCESS_ALREADY_HELD);
+      }
+    } catch (error) {
+      if (error instanceof AppError) {
+        throw error;
+      }
+      mapPrismaError(error);
+    }
   }
 
   private toUser(row: UserRow): User {

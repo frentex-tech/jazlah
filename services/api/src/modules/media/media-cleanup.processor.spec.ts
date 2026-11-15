@@ -2,6 +2,7 @@ import type { Job } from 'bullmq';
 import type { MediaConfig } from '@config/media-config.type';
 import type { StorageConfig } from '@config/storage-config.type';
 import type { DbContext } from '@infra/database/db-context';
+import type { RateLimiter } from '@infra/rate-limit/rate-limiter';
 import { StorageService } from '@integrations/storage';
 import { FakeStorageProvider } from '@integrations/storage/testing';
 import { InMemoryMediaClient } from './in-memory-media-client.fake';
@@ -27,6 +28,10 @@ function setup() {
     { pendingUploadTtlSeconds: 3_600 } as MediaConfig,
     // As production: no cleanup scope.
     null,
+    // The cleanup requests no upload, so it never counts one.
+    {
+      consume: () => Promise.reject(new Error('not expected')),
+    } as unknown as RateLimiter,
   );
   return {
     processor: new MediaCleanupProcessor(media),

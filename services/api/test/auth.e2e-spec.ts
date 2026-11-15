@@ -1,4 +1,3 @@
-import { randomUUID } from 'node:crypto';
 import type { INestApplication } from '@nestjs/common';
 import request from 'supertest';
 import type { App } from 'supertest/types';
@@ -66,6 +65,47 @@ describe('Authentication (e2e)', () => {
     return number;
   }
 
+  /** The vendor rows this file created, deleted after the users' access. */
+  const organisations: { vendorId: string; applicationId: string }[] = [];
+
+  /**
+   * A vendor for a staff access to point at (user_access.organisation_id references
+   * vendors; a kitchen access too, until kitchens are decided), with the approved
+   * application a vendor row requires. Straight in the database: this file tests
+   * signing in, not the review.
+   */
+  async function organisation(applicantId: string): Promise<string> {
+    const business = {
+      nameAr: 'منظمة اختبار',
+      nameEn: 'Test organisation',
+      commercialRegistrationNumber: '1010123456',
+      ibanEncrypted: 'not-a-real-ciphertext',
+      ibanKeyId: 'test',
+      ibanLast4: '0000',
+      accountHolderName: 'Test',
+      latitude: 24.7,
+      longitude: 46.7,
+    };
+    const application = await prisma.vendorApplication.create({
+      data: {
+        ...business,
+        applicantId,
+        status: 'approved',
+        reviewedById: applicantId,
+        reviewedAt: new Date(),
+      },
+    });
+    const vendor = await prisma.vendor.create({
+      data: {
+        ...business,
+        commissionBasisPoints: 0,
+        applicationId: application.id,
+      },
+    });
+    organisations.push({ vendorId: vendor.id, applicationId: application.id });
+    return vendor.id;
+  }
+
   /** Grants staff access straight in the database: no endpoint does it yet. */
   async function grant(
     number: string,
@@ -76,7 +116,8 @@ describe('Authentication (e2e)', () => {
       create: { phone: number },
       update: {},
     });
-    const organisationId = audience === 'admin' ? null : randomUUID();
+    const organisationId =
+      audience === 'admin' ? null : await organisation(user.id);
     await prisma.userAccess.create({
       data: { userId: user.id, audience, organisationId },
     });
@@ -93,7 +134,18 @@ describe('Authentication (e2e)', () => {
       await prisma.otpChallenge.deleteMany({
         where: { phone: { in: phones } },
       });
-      // Sessions, refresh tokens and access rows go with their user (cascade).
+      // Access rows first: they hold the vendors (Restrict), which hold the
+      // applications, which hold their applicants. Sessions and refresh tokens go with
+      // their user (cascade).
+      await prisma.userAccess.deleteMany({
+        where: { user: { phone: { in: phones } } },
+      });
+      await prisma.vendor.deleteMany({
+        where: { id: { in: organisations.map((each) => each.vendorId) } },
+      });
+      await prisma.vendorApplication.deleteMany({
+        where: { id: { in: organisations.map((each) => each.applicationId) } },
+      });
       await prisma.user.deleteMany({ where: { phone: { in: phones } } });
     }
     await Promise.all(apps.map((each) => each.close()));

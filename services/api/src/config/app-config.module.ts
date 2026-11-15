@@ -11,6 +11,7 @@ import { rateLimitConfig } from './rate-limit.config';
 import { redisConfig } from './redis.config';
 import { smsConfig } from './sms.config';
 import { storageConfig } from './storage.config';
+import { vendorsConfig } from './vendors.config';
 
 /**
  * Loads `.env` files into the environment and provides the typed namespaces
@@ -34,6 +35,7 @@ import { storageConfig } from './storage.config';
         mediaConfig,
         smsConfig,
         authConfig,
+        vendorsConfig,
       ],
     }),
   ],

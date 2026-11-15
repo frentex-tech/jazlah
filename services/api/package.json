@@ -26,6 +26,7 @@
     "test:types": "tsc --noEmit -p tsconfig.json",
     "openapi:generate": "node -r ts-node/register/transpile-only -r tsconfig-paths/register src/generate-openapi.ts write",
     "admin:create": "node -r ts-node/register/transpile-only -r tsconfig-paths/register src/create-admin.ts",
+    "vendor:create-platform": "node -r ts-node/register/transpile-only -r tsconfig-paths/register src/create-platform-vendor.ts",
     "openapi:check": "node -r ts-node/register/transpile-only -r tsconfig-paths/register src/generate-openapi.ts check",
     "infra:up": "docker compose up -d --wait",
     "infra:down": "docker compose down",

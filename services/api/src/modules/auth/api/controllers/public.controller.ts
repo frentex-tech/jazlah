@@ -86,6 +86,7 @@ export class PublicAuthController {
     ErrorCode.OTP_INVALID,
     ErrorCode.OTP_EXPIRED,
     ErrorCode.ACCOUNT_DISABLED,
+    ErrorCode.VENDOR_SUSPENDED,
     ErrorCode.RATE_LIMITED,
     ErrorCode.SERVICE_UNAVAILABLE,
   )
@@ -112,6 +113,7 @@ export class PublicAuthController {
     ErrorCode.VALIDATION_FAILED,
     ErrorCode.REFRESH_TOKEN_INVALID,
     ErrorCode.ACCOUNT_DISABLED,
+    ErrorCode.VENDOR_SUSPENDED,
     ErrorCode.RATE_LIMITED,
   )
   async refresh(@Body() body: RefreshTokenDto): Promise<AuthTokensResponseDto> {

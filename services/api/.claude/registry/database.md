@@ -8,3 +8,4 @@ One line per building block: name, path, purpose; the detail is in that file's d
 - **runAfterCommit** — `src/infra/database/run-after-commit.ts` — a callback after the outermost commit.
 - **IdempotencyRunner** — `src/infra/database/idempotency-runner.ts` — `runOnce(operation, key, work)`.
 - **mapPrismaError** — `src/infra/database/map-prisma-error.ts` — known database errors to `AppError`.
+- **mapConstraintViolation** — `src/infra/database/map-constraint-violation.ts` — a known constraint to its own code (rule 17a), the rest as `mapPrismaError`.

@@ -8,4 +8,5 @@ export type RefreshOutcome =
   | Readonly<{ kind: 'rotated'; user: AuthenticatedUser }>
   | Readonly<{ kind: 'invalid' }>
   | Readonly<{ kind: 'reused' }>
-  | Readonly<{ kind: 'disabled' }>;
+  | Readonly<{ kind: 'disabled' }>
+  | Readonly<{ kind: 'suspended' }>;

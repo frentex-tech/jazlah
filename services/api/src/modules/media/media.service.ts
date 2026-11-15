@@ -10,12 +10,14 @@ import { sanitizeFileName } from '@common/files/sanitize-file-name';
 import { DbContext } from '@infra/database/db-context';
 import type { Media } from '@infra/database/generated/prisma/client';
 import { mapPrismaError } from '@infra/database/map-prisma-error';
+import { RateLimiter } from '@infra/rate-limit/rate-limiter';
 import { StorageService, type StorageLocation } from '@integrations/storage';
 import type { DownloadLink } from './download-link.type';
 import { isUploadPurpose } from './is-upload-purpose';
 import { MEDIA_CLEANUP_SCOPE } from './media-cleanup-scope.constants';
 import type { MediaCleanupScope } from './media-cleanup-scope.type';
 import { MEDIA_CLEANUP } from './media-cleanup.constants';
+import { MEDIA_RATE_LIMITS } from './media-rate-limits.constants';
 import type { MediaFile } from './media-file.type';
 import type { MediaRejectionReason } from './media-rejection-reason.type';
 import type { RequestUploadInput } from './request-upload-input.type';
@@ -68,11 +70,15 @@ export class MediaService {
     @Inject(mediaConfig.KEY) private readonly config: MediaConfig,
     @Inject(MEDIA_CLEANUP_SCOPE)
     private readonly cleanupScope: MediaCleanupScope | null,
+    private readonly rateLimiter: RateLimiter,
   ) {}
 
   /**
    * Creates a pending upload and its presigned POST. Throws
-   * MEDIA_CONTENT_TYPE_NOT_ALLOWED when the purpose does not accept `contentType`.
+   * MEDIA_CONTENT_TYPE_NOT_ALLOWED when the purpose does not accept `contentType`, and
+   * RATE_LIMITED (or SERVICE_UNAVAILABLE while the limit cannot be counted) when the
+   * owner has requested too many uploads (`MEDIA_RATE_LIMITS.owner`), before anything
+   * is created.
    * The object key is generated here; the client's file name is stored, sanitised, as
    * metadata only.
    */
@@ -82,6 +88,9 @@ export class MediaService {
       throw new AppError(ErrorCode.MEDIA_CONTENT_TYPE_NOT_ALLOWED, {
         details: { allowed: policy.contentTypes },
       });
+    }
+    if (input.ownerId != null) {
+      await this.rateLimiter.consume(MEDIA_RATE_LIMITS.owner, input.ownerId);
     }
     const id = randomUUID();
     const now = new Date();
@@ -175,6 +184,59 @@ export class MediaService {
     }
     // Whoever won (this call, a concurrent confirmation or the cleanup) decided the row.
     return this.settled(await this.loadRow(id));
+  }
+
+  /**
+   * confirmUpload for an upload endpoint: the file must belong to `ownerId` (the user
+   * who requested the upload). Another user's file is answered exactly like a missing
+   * one, MEDIA_NOT_FOUND, so its existence is not revealed.
+   */
+  async confirmOwnUpload(id: string, ownerId: string): Promise<MediaFile> {
+    const row = await this.loadRow(id);
+    if (row.ownerId !== ownerId) {
+      throw new AppError(ErrorCode.MEDIA_NOT_FOUND);
+    }
+    return this.confirmUpload(id);
+  }
+
+  /**
+   * The files with these ids, in any status; ids with no file are left out. For a module
+   * checking files it is given (their owner, purpose and status) before it refers to
+   * them.
+   */
+  async findFiles(ids: readonly string[]): Promise<MediaFile[]> {
+    if (ids.length === 0) {
+      return [];
+    }
+    const rows = await this.query(() =>
+      this.db.client.media.findMany({ where: { id: { in: [...ids] } } }),
+    );
+    return rows.map((row) => this.toMediaFile(row));
+  }
+
+  /**
+   * The stable public URL of each ready public file among `ids`, by id, without calling
+   * the storage (one database read; the URL is built from configuration). For lists
+   * that show images (vendor logos). Private, unconfirmed and unknown ids are left out.
+   */
+  async getPublicUrls(
+    ids: readonly string[],
+  ): Promise<ReadonlyMap<string, string>> {
+    const unique = [...new Set(ids)];
+    if (unique.length === 0) {
+      return new Map();
+    }
+    const rows = await this.query(() =>
+      this.db.client.media.findMany({
+        where: { id: { in: unique }, status: 'ready', visibility: 'public' },
+      }),
+    );
+    return new Map(
+      rows.map((row) => [
+        row.id,
+        this.storage.publicUrl(this.readyLocation(row).key),
+      ]),
+    );
   }
 
   /**

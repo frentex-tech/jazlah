@@ -1,3 +1,4 @@
+import { ErrorCode } from '@common/errors/error-code.enum';
 import type { DbContext } from '@infra/database/db-context';
 import type { TransactionRunner } from '@infra/database/transaction-runner';
 import { InMemoryUsersClient } from './in-memory-users-client.fake';
@@ -121,6 +122,72 @@ describe('UsersService', () => {
 
       expect(await service.findActiveAccess(user.id, 'admin')).not.toBeNull();
       expect(client.accesses).toHaveLength(1);
+    });
+  });
+
+  describe('grantVendorAccess', () => {
+    const VENDOR_A = '00000000-0000-4000-8000-00000000000a';
+    const VENDOR_B = '00000000-0000-4000-8000-00000000000b';
+
+    it('grants active vendor access for the vendor, and again changes nothing', async () => {
+      const { service, client } = build();
+      const user = await service.findOrCreateByPhone(PHONE);
+
+      await service.grantVendorAccess(user.id, VENDOR_A);
+      await service.grantVendorAccess(user.id, VENDOR_A);
+
+      expect(client.accesses).toEqual([
+        expect.objectContaining({
+          userId: user.id,
+          audience: 'vendor',
+          organisationId: VENDOR_A,
+          deactivatedAt: null,
+        }),
+      ]);
+      await expect(
+        service.findActiveAccess(user.id, 'vendor'),
+      ).resolves.toEqual({
+        userId: user.id,
+        audience: 'vendor',
+        organisationId: VENDOR_A,
+      });
+    });
+
+    it('reactivates a deactivated access and points it at the new vendor', async () => {
+      const { service, client } = build();
+      const user = await service.findOrCreateByPhone(PHONE);
+      await service.grantVendorAccess(user.id, VENDOR_A);
+      const access = client.accesses[0];
+      if (access !== undefined) {
+        access.deactivatedAt = new Date('2026-11-15T09:00:00.000Z');
+      }
+
+      await service.grantVendorAccess(user.id, VENDOR_B);
+
+      expect(client.accesses).toEqual([
+        expect.objectContaining({
+          organisationId: VENDOR_B,
+          deactivatedAt: null,
+        }),
+      ]);
+    });
+
+    it('refuses with VENDOR_ACCESS_ALREADY_HELD while the user works for another vendor, changing nothing', async () => {
+      const { service, client } = build();
+      const user = await service.findOrCreateByPhone(PHONE);
+      await service.grantVendorAccess(user.id, VENDOR_A);
+
+      await expect(
+        service.grantVendorAccess(user.id, VENDOR_B),
+      ).rejects.toMatchObject({
+        code: ErrorCode.VENDOR_ACCESS_ALREADY_HELD,
+      });
+      expect(client.accesses).toEqual([
+        expect.objectContaining({
+          organisationId: VENDOR_A,
+          deactivatedAt: null,
+        }),
+      ]);
     });
   });
 });

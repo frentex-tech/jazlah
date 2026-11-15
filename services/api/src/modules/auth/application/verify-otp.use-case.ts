@@ -1,5 +1,7 @@
-import { Inject, Injectable, Logger } from '@nestjs/common';
+import { Inject, Injectable, Logger, Optional } from '@nestjs/common';
 import type { AuthenticatedUser } from '@common/auth/authenticated-user.type';
+import { VENDOR_STATUS_CHECKER } from '@common/auth/vendor-status-checker.constants';
+import type { VendorStatusChecker } from '@common/auth/vendor-status-checker.interface';
 import { AppError } from '@common/errors/app-error';
 import { ErrorCode } from '@common/errors/error-code.enum';
 import { authConfig } from '@config/auth.config';
@@ -50,8 +52,9 @@ import type { VerifyOtpInput } from './verify-otp-input.type';
  *    once); the user is found (created, for a customer's first sign-in); a staff
  *    audience needs active access, without which the answer is OTP_INVALID, the same
  *    as a wrong code; a disabled user gets ACCOUNT_DISABLED, which only the owner of
- *    the phone can ever see, since it takes the code; the session and its first
- *    refresh token are stored. Any refusal rolls all of it back: the code is not
+ *    the phone can ever see, since it takes the code; a vendor whose vendor is
+ *    suspended (or with no VendorStatusChecker bound) gets VENDOR_SUSPENDED, likewise
+ *    only after a correct code; the session and its first refresh token are stored. Any refusal rolls all of it back: the code is not
  *    consumed, the attempt stays counted.
  * 5. After the commit the access token is signed. Nothing outside the database happens
  *    inside the transaction.
@@ -84,6 +87,10 @@ export class VerifyOtpUseCase {
       | 'refreshTokenTtlSeconds'
       | 'reviewAccounts'
     >,
+    // Bound by the vendors module; without it no vendor can sign in.
+    @Optional()
+    @Inject(VENDOR_STATUS_CHECKER)
+    private readonly vendors?: VendorStatusChecker,
   ) {}
 
   async execute(input: VerifyOtpInput): Promise<SignedIn> {
@@ -116,6 +123,12 @@ export class VerifyOtpUseCase {
       const { user, organisationId } = await this.resolveUser(input);
       if (user.disabledAt !== null) {
         throw new AppError(ErrorCode.ACCOUNT_DISABLED);
+      }
+      if (
+        audience === 'vendor' &&
+        (organisationId === null || (await this.isSuspended(organisationId)))
+      ) {
+        throw new AppError(ErrorCode.VENDOR_SUSPENDED);
       }
       const session = await this.sessions.create({
         userId: user.id,
@@ -164,6 +177,11 @@ export class VerifyOtpUseCase {
       },
       principal: { ...signedIn, phone },
     };
+  }
+
+  /** Whether the vendor is suspended; true while no VendorStatusChecker is bound. */
+  private async isSuspended(vendorId: string): Promise<boolean> {
+    return this.vendors === undefined || this.vendors.isSuspended(vendorId);
   }
 
   /**

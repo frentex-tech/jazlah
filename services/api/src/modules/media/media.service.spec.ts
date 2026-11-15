@@ -3,6 +3,7 @@ import type { StorageConfig } from '@config/storage-config.type';
 import { AppError } from '@common/errors/app-error';
 import { ErrorCode } from '@common/errors/error-code.enum';
 import type { DbContext } from '@infra/database/db-context';
+import type { RateLimiter } from '@infra/rate-limit/rate-limiter';
 import {
   StorageError,
   StorageService,
@@ -11,6 +12,7 @@ import {
 import { FakeStorageProvider } from '@integrations/storage/testing';
 import { InMemoryMediaClient } from './in-memory-media-client.fake';
 import type { MediaCleanupScope } from './media-cleanup-scope.type';
+import { MEDIA_RATE_LIMITS } from './media-rate-limits.constants';
 import { MediaService } from './media.service';
 
 const NOW = Date.UTC(2026, 10, 14, 9, 30, 0);
@@ -34,6 +36,8 @@ const MEDIA_CONFIG: MediaConfig = {
   cleanupIntervalSeconds: 900,
 };
 const AFTER_EXPIRY = NOW + TTL_SECONDS * 1_000 + 1;
+/** An id no file has. */
+const UNKNOWN_ID = '00000000-0000-4000-8000-0000000000ff';
 
 /** File starts, padded to `size` bytes. */
 const file = (start: number[], size = 64): Uint8Array => {
@@ -47,17 +51,33 @@ const PDF = [0x25, 0x50, 0x44, 0x46, 0x2d, 0x31, 0x2e, 0x37];
 /** A Windows executable ("MZ") renamed to .jpg. */
 const EXE = [0x4d, 0x5a, 0x90, 0x00, 0x03, 0x00];
 
-/** The service as production builds it (no cleanup scope), or limited to `scope`. */
+/**
+ * The service as production builds it (no cleanup scope), or limited to `scope`. The
+ * rate limiter records each count and refuses with `refuseWith` once that is set.
+ */
 function setup(scope: MediaCleanupScope | null = null) {
   const client = new InMemoryMediaClient();
   const storage = new FakeStorageProvider(() => Date.now());
+  const limits = {
+    counted: [] as Array<{ name: string; key: string }>,
+    refuseWith: null as AppError | null,
+  };
+  const rateLimiter = {
+    consume: (options: { name: string }, key: string) => {
+      limits.counted.push({ name: options.name, key });
+      return limits.refuseWith === null
+        ? Promise.resolve()
+        : Promise.reject(limits.refuseWith);
+    },
+  };
   const service = new MediaService(
     { client } as unknown as DbContext,
     new StorageService(storage, STORAGE_CONFIG),
     MEDIA_CONFIG,
     scope,
+    rateLimiter as unknown as RateLimiter,
   );
-  return { service, client, storage };
+  return { service, client, storage, limits };
 }
 
 type Context = ReturnType<typeof setup>;
@@ -67,8 +87,9 @@ async function uploaded(
   context: Context,
   bytes: Uint8Array,
   options: {
-    purpose?: 'catalog.product-image' | 'vendor.document';
+    purpose?: 'catalog.product-image' | 'vendor.document' | 'vendor.logo';
     contentType?: string;
+    ownerId?: string;
   } = {},
 ): Promise<{
   mediaId: string;
@@ -80,6 +101,7 @@ async function uploaded(
   const ticket = await context.service.requestUpload({
     purpose: options.purpose ?? 'catalog.product-image',
     contentType,
+    ownerId: options.ownerId,
   });
   expect(context.storage.upload(ticket, { bytes, contentType })).toEqual({
     accepted: true,
@@ -208,6 +230,39 @@ describe('MediaService', () => {
       expect(error.details).toEqual({
         allowed: ['image/jpeg', 'image/png', 'image/webp'],
       });
+      expect(context.client.rows.size).toBe(0);
+      expect(context.storage.calls).toEqual([]);
+    });
+
+    it("counts each request against its owner's upload limit", async () => {
+      const context = setup();
+
+      await context.service.requestUpload({
+        purpose: 'vendor.document',
+        contentType: 'application/pdf',
+        ownerId: 'user-1',
+      });
+
+      expect(context.limits.counted).toEqual([
+        { name: MEDIA_RATE_LIMITS.owner.name, key: 'user-1' },
+      ]);
+    });
+
+    it('refuses an owner over the limit, creating nothing', async () => {
+      const context = setup();
+      context.limits.refuseWith = new AppError(ErrorCode.RATE_LIMITED, {
+        retryAfterSeconds: 60,
+      });
+
+      const error = await errorOf(
+        context.service.requestUpload({
+          purpose: 'vendor.document',
+          contentType: 'application/pdf',
+          ownerId: 'user-1',
+        }),
+      );
+
+      expect(error.code).toBe(ErrorCode.RATE_LIMITED);
       expect(context.client.rows.size).toBe(0);
       expect(context.storage.calls).toEqual([]);
     });
@@ -541,6 +596,101 @@ describe('MediaService', () => {
       expect(error.code).toBe(ErrorCode.MEDIA_UPLOAD_EXPIRED);
       expect(context.client.rows.has(mediaId)).toBe(false);
       expect(context.storage.objectLocations()).toEqual([]);
+    });
+  });
+
+  describe('confirmOwnUpload', () => {
+    const OWNER = '00000000-0000-4000-8000-000000000001';
+    const STRANGER = '00000000-0000-4000-8000-000000000002';
+
+    it("confirms the owner's file", async () => {
+      const context = setup();
+      const { mediaId } = await uploaded(context, file(JPEG), {
+        ownerId: OWNER,
+      });
+
+      await expect(
+        context.service.confirmOwnUpload(mediaId, OWNER),
+      ).resolves.toMatchObject({
+        id: mediaId,
+        status: 'ready',
+        ownerId: OWNER,
+      });
+    });
+
+    it("answers another user's file and a file with no owner exactly like a missing one", async () => {
+      const context = setup();
+      const owned = await uploaded(context, file(JPEG), { ownerId: OWNER });
+      const unowned = await uploaded(context, file(JPEG));
+
+      for (const mediaId of [owned.mediaId, unowned.mediaId, UNKNOWN_ID]) {
+        expect(
+          (await errorOf(context.service.confirmOwnUpload(mediaId, STRANGER)))
+            .code,
+        ).toBe(ErrorCode.MEDIA_NOT_FOUND);
+      }
+      expect(context.client.rows.get(owned.mediaId)?.status).toBe('pending');
+    });
+  });
+
+  describe('findFiles', () => {
+    it('returns the files that exist, in any status, and none for no ids', async () => {
+      const context = setup();
+      const ready = await uploaded(context, file(JPEG));
+      await context.service.confirmUpload(ready.mediaId);
+      const pending = await uploaded(context, file(JPEG));
+
+      const found = await context.service.findFiles([
+        ready.mediaId,
+        pending.mediaId,
+        UNKNOWN_ID,
+      ]);
+
+      expect(found.map((each) => [each.id, each.status]).sort()).toEqual(
+        [
+          [ready.mediaId, 'ready'],
+          [pending.mediaId, 'pending'],
+        ].sort(),
+      );
+      await expect(context.service.findFiles([])).resolves.toEqual([]);
+    });
+  });
+
+  describe('getPublicUrls', () => {
+    it('maps each ready public file to its stable URL without calling the storage', async () => {
+      const context = setup();
+      const logo = await uploaded(context, file(PNG), {
+        purpose: 'vendor.logo',
+        contentType: 'image/png',
+      });
+      await context.service.confirmUpload(logo.mediaId);
+      const document = await uploaded(context, file(PDF), {
+        purpose: 'vendor.document',
+        contentType: 'application/pdf',
+      });
+      await context.service.confirmUpload(document.mediaId);
+      const pending = await uploaded(context, file(PNG), {
+        purpose: 'vendor.logo',
+        contentType: 'image/png',
+      });
+      const callsBefore = context.storage.calls.length;
+
+      const urls = await context.service.getPublicUrls([
+        logo.mediaId,
+        logo.mediaId,
+        document.mediaId,
+        pending.mediaId,
+        UNKNOWN_ID,
+      ]);
+
+      const final = finalLocation(context, logo.mediaId);
+      expect([...urls]).toEqual([
+        [logo.mediaId, `https://cdn.example.invalid/${final.key}`],
+      ]);
+      expect(context.storage.calls).toHaveLength(callsBefore);
+      await expect(context.service.getPublicUrls([])).resolves.toEqual(
+        new Map(),
+      );
     });
   });
 

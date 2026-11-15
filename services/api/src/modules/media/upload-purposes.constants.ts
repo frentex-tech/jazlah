@@ -9,13 +9,18 @@ const MEGABYTE = 1024 * 1024;
  * slashes), and calls MediaService with it. A type that content-type detection does
  * not recognise yet needs its signature in `src/common/files/` first.
  *
- * The two entries below are the first examples; their modules do not exist yet.
+ * Which audience may upload for which purpose: AUDIENCE_UPLOAD_PURPOSES.
  */
 export const UPLOAD_PURPOSES = {
   'catalog.product-image': {
     visibility: 'public',
     contentTypes: ['image/jpeg', 'image/png', 'image/webp'],
     maxSizeBytes: 5 * MEGABYTE,
+  },
+  'vendor.logo': {
+    visibility: 'public',
+    contentTypes: ['image/jpeg', 'image/png', 'image/webp'],
+    maxSizeBytes: 2 * MEGABYTE,
   },
   'vendor.document': {
     visibility: 'private',

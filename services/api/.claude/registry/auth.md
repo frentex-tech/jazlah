@@ -10,3 +10,6 @@ One line per building block: name, path, purpose; the detail is in that file's d
 - **Public** — `src/common/decorators/public.decorator.ts` — a route outside the audience prefixes needing no sign-in; key `src/common/decorators/public-route.constants.ts`.
 - **CurrentUser** — `src/common/decorators/current-user.decorator.ts` — the request's `AuthenticatedUser`.
 - **AuthModule** — `src/modules/auth/index.ts` — nothing to call: use `@CurrentUser()` and the audience prefixes.
+- **VendorStatusChecker** — `src/common/auth/vendor-status-checker.interface.ts` — whether a vendor is suspended; token `src/common/auth/vendor-status-checker.constants.ts`; bound by vendors.
+- **OrganisationStatusGuard** — `src/common/guards/organisation-status.guard.ts` — the second global guard: VENDOR_SUSPENDED on every vendor route, no skip.
+- **VendorRouteCheck** — `src/common/guards/vendor-route.check.ts` — startup fails on a public vendor route or no checker (`src/common/guards/vendor-route-misconfigured.error.ts`).

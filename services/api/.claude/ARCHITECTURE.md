@@ -19,23 +19,30 @@ prisma/
   models/audit.prisma         AuditLog -> audit_logs
   models/idempotency.prisma   IdempotencyKey -> idempotency_keys
   models/media.prisma         Media -> media (enums media_visibility, media_status, media_rejection_reason)
-  models/users.prisma         User -> users, UserAccess -> user_access (enum audience)
+  models/users.prisma         User -> users, UserAccess -> user_access (enum audience; organisation -> vendors)
+  models/vendors.prisma       Vendor -> vendors, VendorApplication -> vendor_applications,
+                              VendorApplicationDocument -> vendor_application_documents, VendorCommissionChange ->
+                              vendor_commission_changes (enums vendor_status, vendor_application_status,
+                              vendor_application_document_kind)
   models/auth.prisma          OtpChallenge -> otp_challenges, AuthSession -> auth_sessions, RefreshToken ->
                               refresh_tokens (enums device_platform, auth_session_revocation_reason)
   migrations/                 20261113150318_init: PostGIS extension, audit_logs; 20261113224826_idempotency_keys;
-                              20261114151242_media; 20261114192800_users_and_auth (with two check constraints)
+                              20261114151242_media; 20261114192800_users_and_auth (with two check constraints);
+                              20261115120000_media_staged_uploads; 20261115205251_vendors (partial unique indexes and
+                              check constraints written by hand)
 src/
   main.ts                     bootstrap: validates the environment, pino as Nest's logger, configureHttpApp,
                               shutdownOnSignals (the shutdown deadline), port from config; an invalid
                               environment prints its problems and exits with code 1
   create-admin.ts             pnpm admin:create <phone>: grants admin access (create-admin.module.ts)
+  create-platform-vendor.ts   pnpm vendor:create-platform: creates the platform vendor (create-platform-vendor.module.ts)
   app.module.ts               imports config, logger, database, redis, queue, event bus, rate limit, auth (after
-                              rate limit: guard order), health, media;
+                              rate limit: guard order), health, media, vendors;
                               registers the global filter and pipe
   generate-openapi.ts         pnpm openapi:generate / openapi:check (Nest preview mode: nothing connects)
   config/                     env.schema.ts (zod), validate-env.ts, load-env.ts (the one reader of process.env),
                               namespaces app, logger, database, redis, queue, http (build-http-config.ts), rateLimit,
-                              storage, media, sms,
+                              storage, media, sms, vendors (the IBAN key),
                               each with its -config.type.ts; is-postgres-url.ts, is-redis-url.ts,
                               is-cors-origin.ts, integer-env-var.ts, *.constants.ts
   common/
@@ -53,10 +60,16 @@ src/
                               helper for phone numbers)
     sms/                      measure-sms-text.ts (GSM-7 or UCS-2, segments), the GSM-7 alphabet, segment sizes
     i18n/  request-id/  async/
-    auth/                     audiences, AuthenticatedUser, the AccessTokenVerifier interface, resolve-route-audience.ts
+    auth/                     audiences, AuthenticatedUser, the AccessTokenVerifier and VendorStatusChecker
+                              interfaces, resolve-route-audience.ts
     guards/                   authentication.guard.ts (global; audience from the route prefix), route-audience.check.ts
-                              (startup refuses an endpoint with neither an audience nor @Public())
-    text/                     to-latin-digits.ts
+                              (startup refuses an endpoint with neither an audience nor @Public()),
+                              organisation-status.guard.ts (global, after it: VENDOR_SUSPENDED on vendor routes),
+                              vendor-route.check.ts (startup refuses a public vendor route or no status checker)
+    crypto/                   AES-256-GCM encrypt and decrypt with key ids (data at rest: IBANs)
+    pagination/               keyset lists: Page, PageRequest, cursor codec, toPage (plain TypeScript, domain-safe)
+    dto/                      id-param.dto.ts (the :id parameter), page-query.dto.ts (every list's query)
+    text/                     to-latin-digits.ts, remove-format-characters.ts
     interceptors/             empty
   infra/
     http/                     configure-http-app.ts (the HTTP layer in order: request logger, helmet, CORS,
@@ -72,7 +85,10 @@ src/
                               transaction-runner.ts + run-in-transaction.ts (ambient transactions, retries),
                               track-query-failures.ts, run-after-commit.ts + run-isolated-callback.ts,
                               transaction scope (with its state), idempotency-runner.ts (runOnce, table
-                              idempotency_keys), map-prisma-error.ts; generated/prisma/ (not committed)
+                              idempotency_keys), map-prisma-error.ts, map-constraint-violation.ts (a named constraint
+                              to its code), keyset-after.ts + keyset-order.constants.ts (keyset pages);
+                              generated/prisma/ (not committed)
+    audit/                    audit-log-writer.ts (an audit_logs entry inside the caller's transaction), audit.module.ts
     redis/                    redis.module.ts (global), redis.service.ts (shared client), redis-readiness.check.ts
                               (answers, on the configured database)
     queue/                    queue.module.ts (BullMQ root), queue-registration.module.ts, bounded-queue.ts
@@ -113,16 +129,26 @@ src/
                               ports/; fakes/), infrastructure/ (Prisma repositories and mappers, hmac-otp-codes,
                               jwt-access-tokens, random-refresh-token-secrets, sms-otp-sender,
                               rate-limited-otp-requests, tracked-detached-work, system-clock)
-    media/                    CRUD-shaped, no controller yet: media.service.ts (request, confirm, download link,
-                              removeExpiredUploads), upload-purposes.constants.ts (UPLOAD_PURPOSES), dto/,
-                              media-cleanup.processor.ts and .scheduler.ts (queue media-cleanup), types
+    media/                    CRUD-shaped: media.service.ts (request, confirm, confirm own, download link, files,
+                              public URLs in bulk, removeExpiredUploads), controllers/ (customer, vendor, admin:
+                              uploads and confirm), upload-purposes.constants.ts (UPLOAD_PURPOSES),
+                              audience-upload-purposes.constants.ts, dto/, media-cleanup.processor.ts and
+                              .scheduler.ts (queue media-cleanup), types
+    vendors/                  four layers: applications and their review, vendors (status, commission and its
+                              history, profile), the platform vendor. api/ (customer, vendor, admin, public
+                              controllers), application/ (a use case per class), domain/ (Iban, the review and
+                              status state machines, entities, ports, fakes), infrastructure/ (Prisma repositories,
+                              AES-GCM IBAN cipher, MediaService and UsersService adapters, the status checker);
+                              platform-vendor.module.ts (what the command needs)
 test/
   *.e2e-spec.ts               health, errors, request-id, database, queue, event-bus, api-docs, http-security,
                               rate-limit, startup, logging, redis-logging, shutdown, media (fake storage),
-                              media-storage (MinIO); jest-e2e.json
+                              media-storage (MinIO), auth, auth-guard, media-endpoints, vendors,
+                              vendors-logging, vendor-routes-suspension (walks every vendor route); jest-e2e.json
   support/                    test-only code: createHttpApp() (the real app set up as main.ts does; no workers
                               unless `workers` turns one on, enableWorkers), probe
-                              controllers, queue and event probes, start-api.cjs (starts main.ts with variables)
+                              controllers, queue and event probes, start-api.cjs (starts main.ts with variables),
+                              auth-client.ts and vendor-journey.ts (sign-ins, uploads, applications, approvals)
   types/                      compile-time tests (pnpm test:types)
 lint-fixtures/                fixtures that prove each lint rule: src/ mirrors the layout (fake integrations
                               sms and mail, modules catalog and orders, orders with domain/), own tsconfig.json;
@@ -141,10 +167,13 @@ The first of each kind becomes the reference, which later ones copy file for fil
 
 - **Integration, one provider, no fallback** (storage): `src/integrations/storage/` — port and token, types, errors with `retryable`, service, module selecting the provider from config, `index.ts`, `testing.ts` (the fake), `providers/` with the vendor provider and the fake.
 - **Integration with ordered fallback** (sms): `src/integrations/sms/` — the storage shape, plus an ordered list of ports (`SMS_PORTS`), a timeout per call, fallback only on a retryable error, one `SmsNotSentError` carrying every attempt, startup refusing unknown or unconfigured providers. Mail and push copy it.
-- **CRUD-shaped module without a controller** (media): `src/modules/media/` — service through `DbContext`, conditional updates on the status, a processor and its schedule.
+- **CRUD-shaped module** (media): `src/modules/media/` — service through `DbContext`, conditional updates on the status, a processor and its schedule, and a controller per audience (`controllers/`) that maps through `to-*-response.ts` functions.
 - **Four-layer module** (auth): `src/modules/auth/` — `api/` (a controller per audience, DTOs, mapping), `application/` (one use case per class, tested against the fakes through `auth-use-cases.fake.ts`), `domain/` (entities with the rules, one port per file with its token, fakes in `fakes/`), `infrastructure/` (Prisma repositories with mappers, other port implementations); only `auth.module.ts` binds ports. A use case that must commit before refusing returns an outcome from its transaction and throws after it.
 
-None built yet: payments integration, CRUD module with controllers. Until then follow ARCHITECTURE.md and the area's rule file.
+- **List endpoint** (vendors): keyset pagination as `http.md`, "Lists" — `PageQueryDto`, a port returning `Page<T>`, `keysetAfter` + `KEYSET_ORDER` + `toPage` in the repository, a `<noun>-page-response.dto.ts`.
+- **Second global guard behind a common interface** (`OrganisationStatusGuard` + `VendorStatusChecker`): the interface in `src/common/auth/`, bound by the module that knows the data, a startup check refusing routes that could escape it.
+
+None built yet: payments integration. Until then follow ARCHITECTURE.md and the area's rule file.
 
 ## Target layout (folders appear when their step comes)
 
@@ -182,7 +211,7 @@ src/
       providers/<vendor>.provider.ts    one file per vendor
       providers/fake.provider.ts        fake used by tests
   modules/                    business domains, one folder each
-    auth, orders, checkout, payments, refunds, wallet, finance: four layers
+    auth, vendors, orders, checkout, payments, refunds, wallet, finance: four layers
       index.ts                public entry: re-exports what other modules may use (R7)
       <module>.module.ts
       api/                    controllers/<audience>.controller.ts, dto/

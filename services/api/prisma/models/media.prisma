@@ -75,6 +75,9 @@ model Media {
   createdAt           DateTime              @default(now()) @map("created_at") @db.Timestamptz(3)
   updatedAt           DateTime              @updatedAt @map("updated_at") @db.Timestamptz(3)
 
+  vendorLogos                Vendor[]
+  vendorApplicationDocuments VendorApplicationDocument[]
+
   @@unique([bucket, objectKey], map: "media_bucket_object_key_key")
   @@index([status, expiresAt])
   @@index([ownerId])

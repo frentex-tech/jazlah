@@ -16,6 +16,9 @@ const AUTH_SECRETS = [
   'AUTH_ACCESS_TOKEN_SECRET=example-access-token-secret-0123456789',
   'AUTH_OTP_SECRET=example-otp-secret-0123456789-abcdefghij',
 ];
+/** Obviously not real (base64 of `example-iban-key-not-a-real-key!`): production requires it. */
+const VENDORS_IBAN_KEY =
+  'VENDORS_IBAN_KEY=ZXhhbXBsZS1pYmFuLWtleS1ub3QtYS1yZWFsLWtleSE=';
 
 describe('Startup (e2e)', () => {
   it('refuses a wildcard CORS origin in production with the clean message', () => {
@@ -24,6 +27,7 @@ describe('Startup (e2e)', () => {
       'TRUST_PROXY_HOPS=1',
       'QUEUE_WORKERS_ENABLED=false',
       ...AUTH_SECRETS,
+      VENDORS_IBAN_KEY,
       'CORS_ORIGINS=*',
     );
     expect(result.stderr).toBe(
@@ -41,6 +45,7 @@ describe('Startup (e2e)', () => {
       'QUEUE_WORKERS_ENABLED=false',
       'AUTH_ACCESS_TOKEN_SECRET=',
       'AUTH_OTP_SECRET=',
+      VENDORS_IBAN_KEY,
     );
     expect(result.stderr).toBe(
       'Invalid environment configuration:\n' +

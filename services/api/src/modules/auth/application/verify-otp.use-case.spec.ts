@@ -384,6 +384,57 @@ describe('VerifyOtpUseCase', () => {
     });
   });
 
+  describe('a suspended vendor', () => {
+    it('gets a real code, then VENDOR_SUSPENDED after a correct one, with no session and the code unconsumed', async () => {
+      const kit = buildAuthUseCases();
+      kit.users.grant(STAFF_PHONE, 'vendor', ORGANISATION);
+      kit.vendors.suspend(ORGANISATION);
+      await request(kit, STAFF_PHONE, 'vendor');
+
+      expect(kit.sender.sent).toHaveLength(1);
+      expect(
+        await codeOf(
+          kit.verifyOtp.execute(
+            input({ phone: STAFF_PHONE, audience: 'vendor' }),
+          ),
+        ),
+      ).toBe(ErrorCode.VENDOR_SUSPENDED);
+      expect(kit.challenges.rows[0]).toMatchObject({ consumedAt: null });
+      expect(kit.sessions.rows).toEqual([]);
+      expect(kit.accessTokens.signed).toEqual([]);
+    });
+
+    it('signs in once the vendor is reinstated', async () => {
+      const kit = buildAuthUseCases();
+      kit.users.grant(STAFF_PHONE, 'vendor', ORGANISATION);
+      kit.vendors.suspend(ORGANISATION);
+      kit.vendors.reinstate(ORGANISATION);
+      await request(kit, STAFF_PHONE, 'vendor');
+
+      const signedIn = await kit.verifyOtp.execute(
+        input({ phone: STAFF_PHONE, audience: 'vendor' }),
+      );
+
+      expect(signedIn.principal).toMatchObject({
+        audience: 'vendor',
+        organisationId: ORGANISATION,
+      });
+    });
+
+    it("does not concern other audiences of the vendor's user", async () => {
+      const kit = buildAuthUseCases();
+      kit.users.grant(STAFF_PHONE, 'vendor', ORGANISATION);
+      kit.vendors.suspend(ORGANISATION);
+      await request(kit, STAFF_PHONE, 'customer');
+
+      await expect(
+        kit.verifyOtp.execute(
+          input({ phone: STAFF_PHONE, audience: 'customer' }),
+        ),
+      ).resolves.toMatchObject({ principal: { audience: 'customer' } });
+    });
+  });
+
   describe('a disabled user', () => {
     it('is refused with ACCOUNT_DISABLED after a correct code, and gets no session', async () => {
       const kit = buildAuthUseCases();

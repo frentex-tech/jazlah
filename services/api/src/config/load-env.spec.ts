@@ -46,6 +46,9 @@ const validated: Env = {
   AUTH_ACCESS_TOKEN_PREVIOUS_SECRET: undefined,
   AUTH_ACCESS_TOKEN_PREVIOUS_KEY_ID: undefined,
   AUTH_OTP_SECRET: 'example-otp-secret-of-enough-length-too',
+  // base64 of `example-iban-key-not-a-real-key!`.
+  VENDORS_IBAN_KEY: 'ZXhhbXBsZS1pYmFuLWtleS1ub3QtYS1yZWFsLWtleSE=',
+  VENDORS_IBAN_KEY_ID: '1',
   AUTH_ACCESS_TOKEN_TTL_SECONDS: 900,
   AUTH_REFRESH_TOKEN_TTL_SECONDS: 2_592_000,
   AUTH_OTP_TTL_SECONDS: 300,

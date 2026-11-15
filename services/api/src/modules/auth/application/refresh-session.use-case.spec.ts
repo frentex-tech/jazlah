@@ -249,6 +249,19 @@ describe('RefreshSessionUseCase', () => {
       expect(kit.sessions.rows[0]?.revocationReason).toBe('access_lost');
     });
 
+    it('refuses a vendor session with VENDOR_SUSPENDED once the vendor is suspended, and revokes it', async () => {
+      const kit = buildAuthUseCases();
+      kit.users.grant(PHONE, 'vendor', ORGANISATION);
+      const first = await signIn(kit, 'vendor');
+      kit.vendors.suspend(ORGANISATION);
+
+      expect(await codeOf(kit.refreshSession.execute(first))).toBe(
+        ErrorCode.VENDOR_SUSPENDED,
+      );
+      expect(kit.sessions.rows[0]?.revocationReason).toBe('access_lost');
+      expect(kit.accessTokens.signed).toHaveLength(1);
+    });
+
     it('keeps an admin session alive while admin access is active', async () => {
       const kit = buildAuthUseCases();
       kit.users.grant(PHONE, 'admin', null);

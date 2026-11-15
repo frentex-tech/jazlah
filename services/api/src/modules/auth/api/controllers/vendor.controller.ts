@@ -33,6 +33,7 @@ export class VendorAuthController {
     ErrorCode.UNAUTHORIZED,
     ErrorCode.ACCESS_TOKEN_EXPIRED,
     ErrorCode.FORBIDDEN,
+    ErrorCode.VENDOR_SUSPENDED,
     ErrorCode.ACCOUNT_DISABLED,
     ErrorCode.RATE_LIMITED,
   )
@@ -54,6 +55,7 @@ export class VendorAuthController {
     ErrorCode.UNAUTHORIZED,
     ErrorCode.ACCESS_TOKEN_EXPIRED,
     ErrorCode.FORBIDDEN,
+    ErrorCode.VENDOR_SUSPENDED,
     ErrorCode.RATE_LIMITED,
   )
   async logoutAll(@CurrentUser() user: AuthenticatedUser): Promise<void> {

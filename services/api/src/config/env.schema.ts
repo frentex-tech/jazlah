@@ -55,6 +55,9 @@ const AUTH_PREVIOUS_KEY_TOGETHER =
   'AUTH_ACCESS_TOKEN_PREVIOUS_SECRET and AUTH_ACCESS_TOKEN_PREVIOUS_KEY_ID are set together or not at all';
 const AUTH_PREVIOUS_KEY_ID_DIFFERS =
   'must differ from AUTH_ACCESS_TOKEN_KEY_ID: a rotation gives the new key a new id';
+const VENDORS_IBAN_KEY_EXPECTED =
+  'expected 32 random bytes in base64 (for example the output of: openssl rand -base64 32)';
+const VENDORS_IBAN_KEY_IN_PRODUCTION = `required when NODE_ENV is production: ${VENDORS_IBAN_KEY_EXPECTED}`;
 const AUTH_REVIEW_ACCOUNTS_EXPECTED =
   'expected a comma-separated list of phone:code pairs (a Saudi mobile number and a code of digits), each phone once';
 const AUTH_REVIEW_CODE_LENGTH =
@@ -65,6 +68,14 @@ function optionalSecret() {
   return z.preprocess(
     (value) => (value === '' ? undefined : value),
     z.string().min(32, { error: AUTH_SECRET_EXPECTED }).optional(),
+  );
+}
+
+/** Whether a value is exactly 32 bytes written in standard base64: an AES-256 key. */
+function isAes256KeyBase64(value: string): boolean {
+  return (
+    /^[A-Za-z0-9+/]{43}=$/.test(value) &&
+    Buffer.from(value, 'base64').length === 32
   );
 }
 
@@ -280,6 +291,18 @@ export const envSchema = z
     AUTH_OTP_PHONE_LIMIT: integerEnvVar(1, 100, 3),
     AUTH_OTP_PHONE_WINDOW_SECONDS: integerEnvVar(60, 86_400, 600),
     AUTH_OTP_PHONE_DAILY_LIMIT: integerEnvVar(1, 1_000, 10),
+    // Vendors (src/modules/vendors/). The key that encrypts IBANs (AES-256-GCM), and its
+    // id, stored with each ciphertext. Required in production; elsewhere an unset key is
+    // random at startup, so IBANs stored by an earlier process cannot be decrypted (only
+    // their last four characters are ever shown).
+    VENDORS_IBAN_KEY: z.preprocess(
+      (value) => (value === '' ? undefined : value),
+      z
+        .string()
+        .refine(isAes256KeyBase64, { error: VENDORS_IBAN_KEY_EXPECTED })
+        .optional(),
+    ),
+    VENDORS_IBAN_KEY_ID: keyId().default('1'),
     // Review accounts: phone:code pairs whose code is fixed and never sent by SMS, for
     // the app stores' reviewers. Empty by default.
     AUTH_REVIEW_ACCOUNTS: z
@@ -309,6 +332,13 @@ export const envSchema = z
           message: AUTH_SECRET_IN_PRODUCTION,
         });
       }
+    }
+    if (env.NODE_ENV === 'production' && env.VENDORS_IBAN_KEY === undefined) {
+      context.addIssue({
+        code: 'custom',
+        path: ['VENDORS_IBAN_KEY'],
+        message: VENDORS_IBAN_KEY_IN_PRODUCTION,
+      });
     }
     if (
       env.AUTH_OTP_SECRET !== undefined &&
@@ -437,4 +467,6 @@ export const envSchema = z
       env.AUTH_ACCESS_TOKEN_SECRET ?? randomBytes(48).toString('base64url'),
     AUTH_OTP_SECRET:
       env.AUTH_OTP_SECRET ?? randomBytes(48).toString('base64url'),
+    VENDORS_IBAN_KEY:
+      env.VENDORS_IBAN_KEY ?? randomBytes(32).toString('base64'),
   }));

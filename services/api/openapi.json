@@ -111,7 +111,7 @@
             }
           },
           "403": {
-            "description": "Error. code: ACCOUNT_DISABLED.",
+            "description": "Error. code: ACCOUNT_DISABLED, VENDOR_SUSPENDED.",
             "content": {
               "application/json": {
                 "schema": {
@@ -224,7 +224,7 @@
             }
           },
           "403": {
-            "description": "Error. code: ACCOUNT_DISABLED.",
+            "description": "Error. code: ACCOUNT_DISABLED, VENDOR_SUSPENDED.",
             "content": {
               "application/json": {
                 "schema": {
@@ -470,7 +470,7 @@
             }
           },
           "403": {
-            "description": "Error. code: FORBIDDEN, ACCOUNT_DISABLED.",
+            "description": "Error. code: FORBIDDEN, VENDOR_SUSPENDED, ACCOUNT_DISABLED.",
             "content": {
               "application/json": {
                 "schema": {
@@ -531,7 +531,7 @@
             }
           },
           "403": {
-            "description": "Error. code: FORBIDDEN.",
+            "description": "Error. code: FORBIDDEN, VENDOR_SUSPENDED.",
             "content": {
               "application/json": {
                 "schema": {
@@ -828,6 +828,2486 @@
         ]
       }
     },
+    "/v1/customer/vendor-applications": {
+      "post": {
+        "description": "Upload each document first (POST /v1/customer/media/uploads, purpose vendor.document) and confirm it. One pending application at a time; after a rejection, apply again. VENDOR_ACCESS_ALREADY_HELD when the user already works for a vendor.",
+        "operationId": "CustomerVendorsController_submit",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SubmitVendorApplicationDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/VendorApplicationResponseDto"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Error. code: VALIDATION_FAILED.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Error. code: UNAUTHORIZED, ACCESS_TOKEN_EXPIRED.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Error. code: FORBIDDEN.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Error. code: MEDIA_NOT_FOUND.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Error. code: MEDIA_NOT_READY, VENDOR_APPLICATION_ALREADY_PENDING, VENDOR_ACCESS_ALREADY_HELD.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Error. code: RATE_LIMITED.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Error. code: INTERNAL_ERROR.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Apply to become a vendor",
+        "tags": [
+          "vendors"
+        ]
+      }
+    },
+    "/v1/customer/vendor-applications/latest": {
+      "get": {
+        "description": "NOT_FOUND when I never applied.",
+        "operationId": "CustomerVendorsController_latest",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/VendorApplicationResponseDto"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Error. code: UNAUTHORIZED, ACCESS_TOKEN_EXPIRED.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Error. code: FORBIDDEN.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Error. code: NOT_FOUND.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Error. code: RATE_LIMITED.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Error. code: INTERNAL_ERROR.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "My newest vendor application",
+        "tags": [
+          "vendors"
+        ]
+      }
+    },
+    "/v1/vendor/profile": {
+      "get": {
+        "operationId": "VendorVendorsController_read",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/VendorProfileResponseDto"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Error. code: UNAUTHORIZED, ACCESS_TOKEN_EXPIRED.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Error. code: FORBIDDEN, VENDOR_SUSPENDED.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Error. code: NOT_FOUND.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Error. code: RATE_LIMITED.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Error. code: INTERNAL_ERROR.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "My store profile",
+        "tags": [
+          "vendors"
+        ]
+      },
+      "patch": {
+        "description": "Upload a logo first (POST /v1/vendor/media/uploads, purpose vendor.logo) and confirm it. A field left out stays as it is; null clears it.",
+        "operationId": "VendorVendorsController_update",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateVendorProfileDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/VendorProfileResponseDto"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Error. code: VALIDATION_FAILED.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Error. code: UNAUTHORIZED, ACCESS_TOKEN_EXPIRED.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Error. code: FORBIDDEN, VENDOR_SUSPENDED.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Error. code: MEDIA_NOT_FOUND, NOT_FOUND.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Error. code: MEDIA_NOT_READY.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Error. code: RATE_LIMITED.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Error. code: INTERNAL_ERROR.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Change my logo or descriptions",
+        "tags": [
+          "vendors"
+        ]
+      }
+    },
+    "/v1/admin/vendor-applications": {
+      "get": {
+        "operationId": "AdminVendorsController_applications",
+        "parameters": [
+          {
+            "name": "cursor",
+            "required": false,
+            "in": "query",
+            "description": "The `nextCursor` of the previous page; omit it for the first page. Opaque: never build or change it.",
+            "schema": {
+              "example": "WyIyMDI2LTExLTE1VDEwOjAwOjAwLjAwMFoiLCI3ZjNhIl0",
+              "type": "string"
+            }
+          },
+          {
+            "name": "limit",
+            "required": false,
+            "in": "query",
+            "description": "How many items to return, 1 to 50.",
+            "schema": {
+              "minimum": 1,
+              "maximum": 50,
+              "default": 20,
+              "example": 20,
+              "type": "number"
+            }
+          },
+          {
+            "name": "status",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "example": "pending",
+              "type": "string",
+              "enum": [
+                "pending",
+                "approved",
+                "rejected"
+              ]
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/VendorApplicationPageResponseDto"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Error. code: VALIDATION_FAILED.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Error. code: UNAUTHORIZED, ACCESS_TOKEN_EXPIRED.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Error. code: FORBIDDEN.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Error. code: RATE_LIMITED.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Error. code: INTERNAL_ERROR.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Vendor applications, newest first",
+        "tags": [
+          "vendors"
+        ]
+      }
+    },
+    "/v1/admin/vendor-applications/{id}": {
+      "get": {
+        "operationId": "AdminVendorsController_application",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "format": "uuid",
+              "example": "7f3a2c1e-0b9d-4e5f-8a6b-1c2d3e4f5a6b",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/VendorApplicationDetailResponseDto"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Error. code: VALIDATION_FAILED.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Error. code: UNAUTHORIZED, ACCESS_TOKEN_EXPIRED.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Error. code: FORBIDDEN.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Error. code: NOT_FOUND.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Error. code: RATE_LIMITED.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Error. code: INTERNAL_ERROR.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "One vendor application, with a link to each document",
+        "tags": [
+          "vendors"
+        ]
+      }
+    },
+    "/v1/admin/vendor-applications/{id}/approve": {
+      "post": {
+        "description": "Creates the vendor and gives the applicant vendor access. VENDOR_ACCESS_ALREADY_HELD when the applicant came to work for another vendor after applying; the application stays pending.",
+        "operationId": "AdminVendorsController_approve",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "format": "uuid",
+              "example": "7f3a2c1e-0b9d-4e5f-8a6b-1c2d3e4f5a6b",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CommissionDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AdminVendorResponseDto"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Error. code: VALIDATION_FAILED.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Error. code: UNAUTHORIZED, ACCESS_TOKEN_EXPIRED.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Error. code: FORBIDDEN.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Error. code: NOT_FOUND.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Error. code: VENDOR_APPLICATION_NOT_PENDING, VENDOR_ACCESS_ALREADY_HELD, CONFLICT, TRANSACTION_CONFLICT.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Error. code: RATE_LIMITED.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Error. code: INTERNAL_ERROR.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Approve a pending application with a commission",
+        "tags": [
+          "vendors"
+        ]
+      }
+    },
+    "/v1/admin/vendor-applications/{id}/reject": {
+      "post": {
+        "description": "The applicant sees the reason and may apply again.",
+        "operationId": "AdminVendorsController_reject",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "format": "uuid",
+              "example": "7f3a2c1e-0b9d-4e5f-8a6b-1c2d3e4f5a6b",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ReasonDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/VendorApplicationResponseDto"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Error. code: VALIDATION_FAILED.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Error. code: UNAUTHORIZED, ACCESS_TOKEN_EXPIRED.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Error. code: FORBIDDEN.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Error. code: NOT_FOUND.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Error. code: VENDOR_APPLICATION_NOT_PENDING, TRANSACTION_CONFLICT.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Error. code: RATE_LIMITED.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Error. code: INTERNAL_ERROR.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Reject a pending application with a reason",
+        "tags": [
+          "vendors"
+        ]
+      }
+    },
+    "/v1/admin/vendors": {
+      "get": {
+        "operationId": "AdminVendorsController_vendors",
+        "parameters": [
+          {
+            "name": "cursor",
+            "required": false,
+            "in": "query",
+            "description": "The `nextCursor` of the previous page; omit it for the first page. Opaque: never build or change it.",
+            "schema": {
+              "example": "WyIyMDI2LTExLTE1VDEwOjAwOjAwLjAwMFoiLCI3ZjNhIl0",
+              "type": "string"
+            }
+          },
+          {
+            "name": "limit",
+            "required": false,
+            "in": "query",
+            "description": "How many items to return, 1 to 50.",
+            "schema": {
+              "minimum": 1,
+              "maximum": 50,
+              "default": 20,
+              "example": 20,
+              "type": "number"
+            }
+          },
+          {
+            "name": "status",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "example": "active",
+              "type": "string",
+              "enum": [
+                "active",
+                "suspended"
+              ]
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AdminVendorPageResponseDto"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Error. code: VALIDATION_FAILED.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Error. code: UNAUTHORIZED, ACCESS_TOKEN_EXPIRED.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Error. code: FORBIDDEN.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Error. code: RATE_LIMITED.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Error. code: INTERNAL_ERROR.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Vendors, newest first",
+        "tags": [
+          "vendors"
+        ]
+      }
+    },
+    "/v1/admin/vendors/{id}": {
+      "get": {
+        "operationId": "AdminVendorsController_vendor",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "format": "uuid",
+              "example": "7f3a2c1e-0b9d-4e5f-8a6b-1c2d3e4f5a6b",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AdminVendorResponseDto"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Error. code: VALIDATION_FAILED.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Error. code: UNAUTHORIZED, ACCESS_TOKEN_EXPIRED.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Error. code: FORBIDDEN.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Error. code: NOT_FOUND.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Error. code: RATE_LIMITED.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Error. code: INTERNAL_ERROR.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "One vendor",
+        "tags": [
+          "vendors"
+        ]
+      }
+    },
+    "/v1/admin/vendors/{id}/suspend": {
+      "post": {
+        "description": "From now on its users are refused on vendor routes, at sign-in and on refresh (VENDOR_SUSPENDED), and it leaves the public list. CONFLICT when it is suspended already.",
+        "operationId": "AdminVendorsController_suspend",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "format": "uuid",
+              "example": "7f3a2c1e-0b9d-4e5f-8a6b-1c2d3e4f5a6b",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ReasonDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AdminVendorResponseDto"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Error. code: VALIDATION_FAILED.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Error. code: UNAUTHORIZED, ACCESS_TOKEN_EXPIRED.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Error. code: FORBIDDEN.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Error. code: NOT_FOUND.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Error. code: CONFLICT, TRANSACTION_CONFLICT.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Error. code: RATE_LIMITED.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Error. code: INTERNAL_ERROR.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Suspend an active vendor",
+        "tags": [
+          "vendors"
+        ]
+      }
+    },
+    "/v1/admin/vendors/{id}/reinstate": {
+      "post": {
+        "description": "CONFLICT when it is active already.",
+        "operationId": "AdminVendorsController_reinstate",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "format": "uuid",
+              "example": "7f3a2c1e-0b9d-4e5f-8a6b-1c2d3e4f5a6b",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AdminVendorResponseDto"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Error. code: VALIDATION_FAILED.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Error. code: UNAUTHORIZED, ACCESS_TOKEN_EXPIRED.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Error. code: FORBIDDEN.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Error. code: NOT_FOUND.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Error. code: CONFLICT, TRANSACTION_CONFLICT.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Error. code: RATE_LIMITED.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Error. code: INTERNAL_ERROR.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Reinstate a suspended vendor",
+        "tags": [
+          "vendors"
+        ]
+      }
+    },
+    "/v1/admin/vendors/{id}/profile": {
+      "patch": {
+        "description": "Any vendor, the platform vendor included. Upload a logo first (POST /v1/admin/media/uploads, purpose vendor.logo) and confirm it. A field left out stays as it is; logoMediaId null removes the logo.",
+        "operationId": "AdminVendorsController_updateVendorProfile",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "format": "uuid",
+              "example": "7f3a2c1e-0b9d-4e5f-8a6b-1c2d3e4f5a6b",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateVendorProfileDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AdminVendorResponseDto"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Error. code: VALIDATION_FAILED.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Error. code: UNAUTHORIZED, ACCESS_TOKEN_EXPIRED.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Error. code: FORBIDDEN.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Error. code: MEDIA_NOT_FOUND, NOT_FOUND.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Error. code: MEDIA_NOT_READY, TRANSACTION_CONFLICT.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Error. code: RATE_LIMITED.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Error. code: INTERNAL_ERROR.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Change a vendor’s logo or descriptions",
+        "tags": [
+          "vendors"
+        ]
+      }
+    },
+    "/v1/admin/vendors/{id}/commission": {
+      "put": {
+        "description": "Orders already placed keep theirs. Recorded in the commission history. CONFLICT when another change was made at the same moment.",
+        "operationId": "AdminVendorsController_commission",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "format": "uuid",
+              "example": "7f3a2c1e-0b9d-4e5f-8a6b-1c2d3e4f5a6b",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CommissionDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AdminVendorResponseDto"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Error. code: VALIDATION_FAILED.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Error. code: UNAUTHORIZED, ACCESS_TOKEN_EXPIRED.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Error. code: FORBIDDEN.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Error. code: NOT_FOUND.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Error. code: CONFLICT, TRANSACTION_CONFLICT.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Error. code: RATE_LIMITED.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Error. code: INTERNAL_ERROR.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Set a vendor’s commission for future orders",
+        "tags": [
+          "vendors"
+        ]
+      }
+    },
+    "/v1/admin/vendors/{id}/commission-history": {
+      "get": {
+        "operationId": "AdminVendorsController_commissionHistory",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "format": "uuid",
+              "example": "7f3a2c1e-0b9d-4e5f-8a6b-1c2d3e4f5a6b",
+              "type": "string"
+            }
+          },
+          {
+            "name": "cursor",
+            "required": false,
+            "in": "query",
+            "description": "The `nextCursor` of the previous page; omit it for the first page. Opaque: never build or change it.",
+            "schema": {
+              "example": "WyIyMDI2LTExLTE1VDEwOjAwOjAwLjAwMFoiLCI3ZjNhIl0",
+              "type": "string"
+            }
+          },
+          {
+            "name": "limit",
+            "required": false,
+            "in": "query",
+            "description": "How many items to return, 1 to 50.",
+            "schema": {
+              "minimum": 1,
+              "maximum": 50,
+              "default": 20,
+              "example": 20,
+              "type": "number"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/VendorCommissionChangePageResponseDto"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Error. code: VALIDATION_FAILED.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Error. code: UNAUTHORIZED, ACCESS_TOKEN_EXPIRED.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Error. code: FORBIDDEN.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Error. code: NOT_FOUND.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Error. code: RATE_LIMITED.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Error. code: INTERNAL_ERROR.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "A vendor’s commission history, newest first",
+        "tags": [
+          "vendors"
+        ]
+      }
+    },
+    "/v1/public/vendors": {
+      "get": {
+        "operationId": "PublicVendorsController_list",
+        "parameters": [
+          {
+            "name": "cursor",
+            "required": false,
+            "in": "query",
+            "description": "The `nextCursor` of the previous page; omit it for the first page. Opaque: never build or change it.",
+            "schema": {
+              "example": "WyIyMDI2LTExLTE1VDEwOjAwOjAwLjAwMFoiLCI3ZjNhIl0",
+              "type": "string"
+            }
+          },
+          {
+            "name": "limit",
+            "required": false,
+            "in": "query",
+            "description": "How many items to return, 1 to 50.",
+            "schema": {
+              "minimum": 1,
+              "maximum": 50,
+              "default": 20,
+              "example": 20,
+              "type": "number"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PublicVendorPageResponseDto"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Error. code: VALIDATION_FAILED.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Error. code: RATE_LIMITED.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Error. code: INTERNAL_ERROR.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                }
+              }
+            }
+          }
+        },
+        "summary": "The active vendors, newest first",
+        "tags": [
+          "vendors"
+        ]
+      }
+    },
+    "/v1/public/vendors/{id}": {
+      "get": {
+        "description": "NOT_FOUND for an unknown or suspended vendor.",
+        "operationId": "PublicVendorsController_read",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "format": "uuid",
+              "example": "7f3a2c1e-0b9d-4e5f-8a6b-1c2d3e4f5a6b",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PublicVendorResponseDto"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Error. code: VALIDATION_FAILED.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Error. code: NOT_FOUND.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Error. code: RATE_LIMITED.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Error. code: INTERNAL_ERROR.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                }
+              }
+            }
+          }
+        },
+        "summary": "One active vendor",
+        "tags": [
+          "vendors"
+        ]
+      }
+    },
+    "/v1/customer/media/uploads": {
+      "post": {
+        "description": "Upload the file straight to storage with the ticket, then confirm it before confirmBy.",
+        "operationId": "CustomerMediaController_requestUpload",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RequestCustomerUploadDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UploadTicketResponseDto"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Error. code: VALIDATION_FAILED.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Error. code: UNAUTHORIZED, ACCESS_TOKEN_EXPIRED.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Error. code: FORBIDDEN.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                }
+              }
+            }
+          },
+          "415": {
+            "description": "Error. code: MEDIA_CONTENT_TYPE_NOT_ALLOWED.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Error. code: RATE_LIMITED.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Error. code: INTERNAL_ERROR.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "Error. code: SERVICE_UNAVAILABLE.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Get a ticket to upload one file",
+        "tags": [
+          "media"
+        ]
+      }
+    },
+    "/v1/customer/media/{id}/confirm": {
+      "post": {
+        "description": "Checks the uploaded file (its real type and size). Confirming again returns the same file.",
+        "operationId": "CustomerMediaController_confirm",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "format": "uuid",
+              "example": "7f3a2c1e-0b9d-4e5f-8a6b-1c2d3e4f5a6b",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MediaFileResponseDto"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Error. code: VALIDATION_FAILED.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Error. code: UNAUTHORIZED, ACCESS_TOKEN_EXPIRED.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Error. code: FORBIDDEN.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Error. code: MEDIA_NOT_FOUND.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                }
+              }
+            }
+          },
+          "410": {
+            "description": "Error. code: MEDIA_UPLOAD_EXPIRED.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Error. code: MEDIA_UPLOAD_REJECTED.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Error. code: RATE_LIMITED.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Error. code: INTERNAL_ERROR.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "Error. code: SERVICE_UNAVAILABLE.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Confirm an uploaded file",
+        "tags": [
+          "media"
+        ]
+      }
+    },
+    "/v1/vendor/media/uploads": {
+      "post": {
+        "description": "Upload the file straight to storage with the ticket, then confirm it before confirmBy.",
+        "operationId": "VendorMediaController_requestUpload",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RequestVendorUploadDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UploadTicketResponseDto"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Error. code: VALIDATION_FAILED.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Error. code: UNAUTHORIZED, ACCESS_TOKEN_EXPIRED.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Error. code: FORBIDDEN, VENDOR_SUSPENDED.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                }
+              }
+            }
+          },
+          "415": {
+            "description": "Error. code: MEDIA_CONTENT_TYPE_NOT_ALLOWED.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Error. code: RATE_LIMITED.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Error. code: INTERNAL_ERROR.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "Error. code: SERVICE_UNAVAILABLE.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Get a ticket to upload one file",
+        "tags": [
+          "media"
+        ]
+      }
+    },
+    "/v1/vendor/media/{id}/confirm": {
+      "post": {
+        "description": "Checks the uploaded file (its real type and size). Confirming again returns the same file.",
+        "operationId": "VendorMediaController_confirm",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "format": "uuid",
+              "example": "7f3a2c1e-0b9d-4e5f-8a6b-1c2d3e4f5a6b",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MediaFileResponseDto"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Error. code: VALIDATION_FAILED.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Error. code: UNAUTHORIZED, ACCESS_TOKEN_EXPIRED.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Error. code: FORBIDDEN, VENDOR_SUSPENDED.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Error. code: MEDIA_NOT_FOUND.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                }
+              }
+            }
+          },
+          "410": {
+            "description": "Error. code: MEDIA_UPLOAD_EXPIRED.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Error. code: MEDIA_UPLOAD_REJECTED.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Error. code: RATE_LIMITED.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Error. code: INTERNAL_ERROR.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "Error. code: SERVICE_UNAVAILABLE.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Confirm an uploaded file",
+        "tags": [
+          "media"
+        ]
+      }
+    },
+    "/v1/admin/media/uploads": {
+      "post": {
+        "description": "Upload the file straight to storage with the ticket, then confirm it before confirmBy.",
+        "operationId": "AdminMediaController_requestUpload",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RequestAdminUploadDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UploadTicketResponseDto"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Error. code: VALIDATION_FAILED.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Error. code: UNAUTHORIZED, ACCESS_TOKEN_EXPIRED.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Error. code: FORBIDDEN.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                }
+              }
+            }
+          },
+          "415": {
+            "description": "Error. code: MEDIA_CONTENT_TYPE_NOT_ALLOWED.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Error. code: RATE_LIMITED.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Error. code: INTERNAL_ERROR.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "Error. code: SERVICE_UNAVAILABLE.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Get a ticket to upload one file",
+        "tags": [
+          "media"
+        ]
+      }
+    },
+    "/v1/admin/media/{id}/confirm": {
+      "post": {
+        "description": "Checks the uploaded file (its real type and size). Confirming again returns the same file.",
+        "operationId": "AdminMediaController_confirm",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "format": "uuid",
+              "example": "7f3a2c1e-0b9d-4e5f-8a6b-1c2d3e4f5a6b",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MediaFileResponseDto"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Error. code: VALIDATION_FAILED.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Error. code: UNAUTHORIZED, ACCESS_TOKEN_EXPIRED.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Error. code: FORBIDDEN.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Error. code: MEDIA_NOT_FOUND.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                }
+              }
+            }
+          },
+          "410": {
+            "description": "Error. code: MEDIA_UPLOAD_EXPIRED.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Error. code: MEDIA_UPLOAD_REJECTED.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Error. code: RATE_LIMITED.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Error. code: INTERNAL_ERROR.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "Error. code: SERVICE_UNAVAILABLE.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Confirm an uploaded file",
+        "tags": [
+          "media"
+        ]
+      }
+    },
     "/v1/health": {
       "get": {
         "operationId": "HealthController_check",
@@ -1020,7 +3500,11 @@
           "OTP_EXPIRED",
           "REFRESH_TOKEN_INVALID",
           "ACCESS_TOKEN_EXPIRED",
-          "ACCOUNT_DISABLED"
+          "ACCOUNT_DISABLED",
+          "VENDOR_APPLICATION_ALREADY_PENDING",
+          "VENDOR_APPLICATION_NOT_PENDING",
+          "VENDOR_SUSPENDED",
+          "VENDOR_ACCESS_ALREADY_HELD"
         ],
         "description": "Stable error code. Clients branch on it; it is never renamed or reused."
       },
@@ -1241,6 +3725,966 @@
           "accessTokenExpiresInSeconds",
           "refreshToken",
           "refreshTokenExpiresInSeconds"
+        ]
+      },
+      "LocalizedNameDto": {
+        "type": "object",
+        "properties": {
+          "ar": {
+            "type": "string",
+            "minLength": 2,
+            "maxLength": 100,
+            "example": "ملحمة النخبة"
+          },
+          "en": {
+            "type": "string",
+            "minLength": 2,
+            "maxLength": 100,
+            "example": "Al Nokhba Butchery"
+          }
+        },
+        "required": [
+          "ar",
+          "en"
+        ]
+      },
+      "LocalizedDescriptionDto": {
+        "type": "object",
+        "properties": {
+          "ar": {
+            "type": "string",
+            "nullable": true,
+            "maxLength": 1000,
+            "example": "لحوم بلدية طازجة يوميًا"
+          },
+          "en": {
+            "type": "string",
+            "nullable": true,
+            "maxLength": 1000,
+            "example": "Fresh local meat every day"
+          }
+        }
+      },
+      "GeoPointDto": {
+        "type": "object",
+        "properties": {
+          "latitude": {
+            "type": "number",
+            "minimum": -90,
+            "maximum": 90,
+            "example": 24.7136
+          },
+          "longitude": {
+            "type": "number",
+            "minimum": -180,
+            "maximum": 180,
+            "example": 46.6753
+          }
+        },
+        "required": [
+          "latitude",
+          "longitude"
+        ]
+      },
+      "VendorApplicationDocumentDto": {
+        "type": "object",
+        "properties": {
+          "kind": {
+            "type": "string",
+            "enum": [
+              "commercial_registration",
+              "health_certificate",
+              "facility_photo"
+            ],
+            "example": "commercial_registration"
+          },
+          "mediaId": {
+            "type": "string",
+            "format": "uuid",
+            "description": "The id of the confirmed upload (purpose vendor.document).",
+            "example": "7f3a2c1e-0b9d-4e5f-8a6b-1c2d3e4f5a6b"
+          }
+        },
+        "required": [
+          "kind",
+          "mediaId"
+        ]
+      },
+      "SubmitVendorApplicationDto": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "$ref": "#/components/schemas/LocalizedNameDto"
+          },
+          "description": {
+            "$ref": "#/components/schemas/LocalizedDescriptionDto"
+          },
+          "commercialRegistrationNumber": {
+            "type": "string",
+            "description": "The commercial registration number: 10 digits, Latin or Arabic.",
+            "example": "1010123456"
+          },
+          "iban": {
+            "type": "string",
+            "description": "The Saudi IBAN of the account payouts go to (SA and 22 more characters; spaces allowed). Never returned: responses show it masked.",
+            "example": "SA03 8000 0000 6080 1016 7519"
+          },
+          "accountHolderName": {
+            "type": "string",
+            "minLength": 2,
+            "maxLength": 100,
+            "description": "The name on the bank account.",
+            "example": "مؤسسة النخبة للحوم"
+          },
+          "location": {
+            "description": "Where the facility is.",
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/GeoPointDto"
+              }
+            ]
+          },
+          "documents": {
+            "description": "At least one document of each kind (commercial_registration, health_certificate, facility_photo), each file once, at most 10 in all.",
+            "minItems": 3,
+            "maxItems": 10,
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/VendorApplicationDocumentDto"
+            }
+          }
+        },
+        "required": [
+          "name",
+          "commercialRegistrationNumber",
+          "iban",
+          "accountHolderName",
+          "location",
+          "documents"
+        ]
+      },
+      "LocalizedTextResponseDto": {
+        "type": "object",
+        "properties": {
+          "ar": {
+            "type": "string",
+            "example": "ملحمة النخبة"
+          },
+          "en": {
+            "type": "string",
+            "example": "Al Nokhba Butchery"
+          }
+        },
+        "required": [
+          "ar",
+          "en"
+        ]
+      },
+      "OptionalLocalizedTextResponseDto": {
+        "type": "object",
+        "properties": {
+          "ar": {
+            "type": "string",
+            "nullable": true,
+            "example": "لحوم بلدية طازجة يوميًا"
+          },
+          "en": {
+            "type": "string",
+            "nullable": true,
+            "example": "Fresh local meat every day"
+          }
+        },
+        "required": [
+          "ar",
+          "en"
+        ]
+      },
+      "VendorApplicationDocumentResponseDto": {
+        "type": "object",
+        "properties": {
+          "kind": {
+            "type": "string",
+            "enum": [
+              "commercial_registration",
+              "health_certificate",
+              "facility_photo"
+            ],
+            "example": "health_certificate"
+          },
+          "mediaId": {
+            "type": "string",
+            "format": "uuid",
+            "example": "7f3a2c1e-0b9d-4e5f-8a6b-1c2d3e4f5a6b"
+          }
+        },
+        "required": [
+          "kind",
+          "mediaId"
+        ]
+      },
+      "VendorApplicationResponseDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "example": "7f3a2c1e-0b9d-4e5f-8a6b-1c2d3e4f5a6b"
+          },
+          "applicantId": {
+            "type": "string",
+            "format": "uuid",
+            "example": "5b1d9e2a-3c4f-4a6b-8d7e-9f0a1b2c3d4e"
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "pending",
+              "approved",
+              "rejected"
+            ],
+            "example": "pending"
+          },
+          "name": {
+            "$ref": "#/components/schemas/LocalizedTextResponseDto"
+          },
+          "description": {
+            "$ref": "#/components/schemas/OptionalLocalizedTextResponseDto"
+          },
+          "commercialRegistrationNumber": {
+            "type": "string",
+            "example": "1010123456"
+          },
+          "ibanMasked": {
+            "type": "string",
+            "description": "The IBAN with every character hidden but the country and the last four.",
+            "example": "SA** **** **** **** **** 7519"
+          },
+          "accountHolderName": {
+            "type": "string",
+            "example": "مؤسسة النخبة للحوم"
+          },
+          "location": {
+            "$ref": "#/components/schemas/GeoPointDto"
+          },
+          "documents": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/VendorApplicationDocumentResponseDto"
+            }
+          },
+          "rejectionReason": {
+            "type": "string",
+            "nullable": true,
+            "description": "Why it was rejected; null unless rejected.",
+            "example": null
+          },
+          "reviewedAt": {
+            "format": "date-time",
+            "type": "string",
+            "nullable": true,
+            "example": null
+          },
+          "createdAt": {
+            "format": "date-time",
+            "type": "string",
+            "example": "2026-11-15T10:00:00.000Z"
+          }
+        },
+        "required": [
+          "id",
+          "applicantId",
+          "status",
+          "name",
+          "description",
+          "commercialRegistrationNumber",
+          "ibanMasked",
+          "accountHolderName",
+          "location",
+          "documents",
+          "rejectionReason",
+          "reviewedAt",
+          "createdAt"
+        ]
+      },
+      "VendorProfileResponseDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "example": "7f3a2c1e-0b9d-4e5f-8a6b-1c2d3e4f5a6b"
+          },
+          "name": {
+            "$ref": "#/components/schemas/LocalizedTextResponseDto"
+          },
+          "description": {
+            "$ref": "#/components/schemas/OptionalLocalizedTextResponseDto"
+          },
+          "logoUrl": {
+            "type": "string",
+            "nullable": true,
+            "description": "The logo’s stable public URL; null without a logo.",
+            "example": "https://cdn.example.com/media/vendor/logo/2026/11/15/…"
+          },
+          "commissionBasisPoints": {
+            "type": "number",
+            "description": "Basis points on future orders: 1250 is 12.5%.",
+            "example": 1250
+          },
+          "commercialRegistrationNumber": {
+            "type": "string",
+            "nullable": true,
+            "example": "1010123456"
+          },
+          "ibanMasked": {
+            "type": "string",
+            "nullable": true,
+            "description": "The IBAN with every character hidden but the country and the last four.",
+            "example": "SA** **** **** **** **** 7519"
+          },
+          "accountHolderName": {
+            "type": "string",
+            "nullable": true,
+            "example": "مؤسسة النخبة للحوم"
+          },
+          "location": {
+            "nullable": true,
+            "type": "object",
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/GeoPointDto"
+              }
+            ]
+          },
+          "createdAt": {
+            "format": "date-time",
+            "type": "string",
+            "example": "2026-11-15T10:00:00.000Z"
+          }
+        },
+        "required": [
+          "id",
+          "name",
+          "description",
+          "logoUrl",
+          "commissionBasisPoints",
+          "commercialRegistrationNumber",
+          "ibanMasked",
+          "accountHolderName",
+          "location",
+          "createdAt"
+        ]
+      },
+      "UpdateVendorProfileDto": {
+        "type": "object",
+        "properties": {
+          "logoMediaId": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true,
+            "description": "A confirmed upload (purpose vendor.logo) by the signed-in user; null removes the logo.",
+            "example": "7f3a2c1e-0b9d-4e5f-8a6b-1c2d3e4f5a6b"
+          },
+          "description": {
+            "$ref": "#/components/schemas/LocalizedDescriptionDto"
+          }
+        }
+      },
+      "VendorApplicationPageResponseDto": {
+        "type": "object",
+        "properties": {
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/VendorApplicationResponseDto"
+            }
+          },
+          "nextCursor": {
+            "type": "string",
+            "nullable": true,
+            "description": "Send as `cursor` for the next page; null on the last page.",
+            "example": null
+          }
+        },
+        "required": [
+          "items",
+          "nextCursor"
+        ]
+      },
+      "VendorApplicationDocumentLinkResponseDto": {
+        "type": "object",
+        "properties": {
+          "kind": {
+            "type": "string",
+            "enum": [
+              "commercial_registration",
+              "health_certificate",
+              "facility_photo"
+            ],
+            "example": "health_certificate"
+          },
+          "mediaId": {
+            "type": "string",
+            "format": "uuid",
+            "example": "7f3a2c1e-0b9d-4e5f-8a6b-1c2d3e4f5a6b"
+          },
+          "url": {
+            "type": "string",
+            "description": "A presigned URL: the documents are private.",
+            "example": "https://storage.example.com/jazla-private/vendor/document/…"
+          },
+          "expiresAt": {
+            "format": "date-time",
+            "type": "string",
+            "nullable": true,
+            "description": "When the URL stops working.",
+            "example": "2026-11-15T10:05:00.000Z"
+          }
+        },
+        "required": [
+          "kind",
+          "mediaId",
+          "url",
+          "expiresAt"
+        ]
+      },
+      "VendorApplicationDetailResponseDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "example": "7f3a2c1e-0b9d-4e5f-8a6b-1c2d3e4f5a6b"
+          },
+          "applicantId": {
+            "type": "string",
+            "format": "uuid",
+            "example": "5b1d9e2a-3c4f-4a6b-8d7e-9f0a1b2c3d4e"
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "pending",
+              "approved",
+              "rejected"
+            ],
+            "example": "pending"
+          },
+          "name": {
+            "$ref": "#/components/schemas/LocalizedTextResponseDto"
+          },
+          "description": {
+            "$ref": "#/components/schemas/OptionalLocalizedTextResponseDto"
+          },
+          "commercialRegistrationNumber": {
+            "type": "string",
+            "example": "1010123456"
+          },
+          "ibanMasked": {
+            "type": "string",
+            "description": "The IBAN with every character hidden but the country and the last four.",
+            "example": "SA** **** **** **** **** 7519"
+          },
+          "accountHolderName": {
+            "type": "string",
+            "example": "مؤسسة النخبة للحوم"
+          },
+          "location": {
+            "$ref": "#/components/schemas/GeoPointDto"
+          },
+          "rejectionReason": {
+            "type": "string",
+            "nullable": true,
+            "description": "Why it was rejected; null unless rejected.",
+            "example": null
+          },
+          "reviewedAt": {
+            "format": "date-time",
+            "type": "string",
+            "nullable": true,
+            "example": null
+          },
+          "createdAt": {
+            "format": "date-time",
+            "type": "string",
+            "example": "2026-11-15T10:00:00.000Z"
+          },
+          "documents": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/VendorApplicationDocumentLinkResponseDto"
+            }
+          },
+          "reviewedById": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true,
+            "description": "The admin who approved or rejected it; null while pending.",
+            "example": null
+          }
+        },
+        "required": [
+          "id",
+          "applicantId",
+          "status",
+          "name",
+          "description",
+          "commercialRegistrationNumber",
+          "ibanMasked",
+          "accountHolderName",
+          "location",
+          "rejectionReason",
+          "reviewedAt",
+          "createdAt",
+          "documents",
+          "reviewedById"
+        ]
+      },
+      "CommissionDto": {
+        "type": "object",
+        "properties": {
+          "commissionBasisPoints": {
+            "type": "number",
+            "minimum": 0,
+            "maximum": 10000,
+            "description": "Basis points: 1250 is 12.5%.",
+            "example": 1250
+          }
+        },
+        "required": [
+          "commissionBasisPoints"
+        ]
+      },
+      "AdminVendorResponseDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "example": "7f3a2c1e-0b9d-4e5f-8a6b-1c2d3e4f5a6b"
+          },
+          "name": {
+            "$ref": "#/components/schemas/LocalizedTextResponseDto"
+          },
+          "description": {
+            "$ref": "#/components/schemas/OptionalLocalizedTextResponseDto"
+          },
+          "logoUrl": {
+            "type": "string",
+            "nullable": true,
+            "description": "The logo’s stable public URL; null without a logo.",
+            "example": "https://cdn.example.com/media/vendor/logo/2026/11/15/…"
+          },
+          "commissionBasisPoints": {
+            "type": "number",
+            "description": "Basis points on future orders: 1250 is 12.5%.",
+            "example": 1250
+          },
+          "commercialRegistrationNumber": {
+            "type": "string",
+            "nullable": true,
+            "example": "1010123456"
+          },
+          "ibanMasked": {
+            "type": "string",
+            "nullable": true,
+            "description": "The IBAN with every character hidden but the country and the last four.",
+            "example": "SA** **** **** **** **** 7519"
+          },
+          "accountHolderName": {
+            "type": "string",
+            "nullable": true,
+            "example": "مؤسسة النخبة للحوم"
+          },
+          "location": {
+            "nullable": true,
+            "type": "object",
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/GeoPointDto"
+              }
+            ]
+          },
+          "createdAt": {
+            "format": "date-time",
+            "type": "string",
+            "example": "2026-11-15T10:00:00.000Z"
+          },
+          "isPlatform": {
+            "type": "boolean",
+            "description": "Whether this is the platform’s own vendor (JAZLA’s products).",
+            "example": false
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "active",
+              "suspended"
+            ],
+            "example": "active"
+          },
+          "suspendedAt": {
+            "format": "date-time",
+            "type": "string",
+            "nullable": true,
+            "example": null
+          },
+          "suspensionReason": {
+            "type": "string",
+            "nullable": true,
+            "example": null
+          },
+          "applicationId": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true,
+            "description": "The approved application; null only for the platform vendor.",
+            "example": "5b1d9e2a-3c4f-4a6b-8d7e-9f0a1b2c3d4e"
+          }
+        },
+        "required": [
+          "id",
+          "name",
+          "description",
+          "logoUrl",
+          "commissionBasisPoints",
+          "commercialRegistrationNumber",
+          "ibanMasked",
+          "accountHolderName",
+          "location",
+          "createdAt",
+          "isPlatform",
+          "status",
+          "suspendedAt",
+          "suspensionReason",
+          "applicationId"
+        ]
+      },
+      "ReasonDto": {
+        "type": "object",
+        "properties": {
+          "reason": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 500,
+            "example": "السجل التجاري منتهي، جدّده وقدّم من جديد"
+          }
+        },
+        "required": [
+          "reason"
+        ]
+      },
+      "AdminVendorPageResponseDto": {
+        "type": "object",
+        "properties": {
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/AdminVendorResponseDto"
+            }
+          },
+          "nextCursor": {
+            "type": "string",
+            "nullable": true,
+            "description": "Send as `cursor` for the next page; null on the last page.",
+            "example": null
+          }
+        },
+        "required": [
+          "items",
+          "nextCursor"
+        ]
+      },
+      "VendorCommissionChangeResponseDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "example": "7f3a2c1e-0b9d-4e5f-8a6b-1c2d3e4f5a6b"
+          },
+          "commissionBasisPoints": {
+            "type": "number",
+            "description": "The new commission, basis points.",
+            "example": 1250
+          },
+          "previousCommissionBasisPoints": {
+            "type": "number",
+            "nullable": true,
+            "description": "The commission before; null for the first one.",
+            "example": 1000
+          },
+          "changedById": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true,
+            "description": "The admin who set it; null when the system did.",
+            "example": "5b1d9e2a-3c4f-4a6b-8d7e-9f0a1b2c3d4e"
+          },
+          "createdAt": {
+            "format": "date-time",
+            "type": "string",
+            "example": "2026-11-15T10:00:00.000Z"
+          }
+        },
+        "required": [
+          "id",
+          "commissionBasisPoints",
+          "previousCommissionBasisPoints",
+          "changedById",
+          "createdAt"
+        ]
+      },
+      "VendorCommissionChangePageResponseDto": {
+        "type": "object",
+        "properties": {
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/VendorCommissionChangeResponseDto"
+            }
+          },
+          "nextCursor": {
+            "type": "string",
+            "nullable": true,
+            "description": "Send as `cursor` for the next page; null on the last page.",
+            "example": null
+          }
+        },
+        "required": [
+          "items",
+          "nextCursor"
+        ]
+      },
+      "PublicVendorResponseDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "example": "7f3a2c1e-0b9d-4e5f-8a6b-1c2d3e4f5a6b"
+          },
+          "name": {
+            "$ref": "#/components/schemas/LocalizedTextResponseDto"
+          },
+          "description": {
+            "$ref": "#/components/schemas/OptionalLocalizedTextResponseDto"
+          },
+          "logoUrl": {
+            "type": "string",
+            "nullable": true,
+            "description": "The logo’s stable public URL; null without a logo.",
+            "example": "https://cdn.example.com/media/vendor/logo/2026/11/15/…"
+          }
+        },
+        "required": [
+          "id",
+          "name",
+          "description",
+          "logoUrl"
+        ]
+      },
+      "PublicVendorPageResponseDto": {
+        "type": "object",
+        "properties": {
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/PublicVendorResponseDto"
+            }
+          },
+          "nextCursor": {
+            "type": "string",
+            "nullable": true,
+            "description": "Send as `cursor` for the next page; null on the last page.",
+            "example": null
+          }
+        },
+        "required": [
+          "items",
+          "nextCursor"
+        ]
+      },
+      "RequestCustomerUploadDto": {
+        "type": "object",
+        "properties": {
+          "contentType": {
+            "type": "string",
+            "example": "image/jpeg",
+            "description": "The Content-Type the file will be uploaded with."
+          },
+          "fileName": {
+            "type": "string",
+            "example": "product.jpg",
+            "description": "The file name on the device; shown back, never used as a path."
+          },
+          "purpose": {
+            "type": "string",
+            "enum": [
+              "vendor.document"
+            ],
+            "example": "vendor.document",
+            "description": "Why the file is uploaded; decides the accepted types, size and visibility."
+          }
+        },
+        "required": [
+          "contentType",
+          "purpose"
+        ]
+      },
+      "UploadTicketResponseDto": {
+        "type": "object",
+        "properties": {
+          "mediaId": {
+            "type": "string",
+            "format": "uuid",
+            "example": "7f3a2c1e-0b9d-4e5f-8a6b-1c2d3e4f5a6b"
+          },
+          "url": {
+            "type": "string",
+            "example": "https://storage.example.com/jazla-private"
+          },
+          "fields": {
+            "type": "object",
+            "additionalProperties": {
+              "type": "string"
+            },
+            "description": "Form fields to send, unchanged, before the file.",
+            "example": {
+              "key": "staging/vendor/document/2026/11/15/7f3a…",
+              "Policy": "…"
+            }
+          },
+          "expiresAt": {
+            "format": "date-time",
+            "type": "string",
+            "example": "2026-11-15T10:05:00.000Z"
+          },
+          "confirmBy": {
+            "format": "date-time",
+            "type": "string",
+            "description": "The last moment the upload may be confirmed.",
+            "example": "2026-11-15T11:00:00.000Z"
+          }
+        },
+        "required": [
+          "mediaId",
+          "url",
+          "fields",
+          "expiresAt",
+          "confirmBy"
+        ]
+      },
+      "MediaFileResponseDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "example": "7f3a2c1e-0b9d-4e5f-8a6b-1c2d3e4f5a6b"
+          },
+          "purpose": {
+            "type": "string",
+            "example": "vendor.logo"
+          },
+          "visibility": {
+            "type": "string",
+            "enum": [
+              "public",
+              "private"
+            ],
+            "example": "public"
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "ready"
+            ],
+            "example": "ready"
+          },
+          "sizeBytes": {
+            "type": "number",
+            "example": 48213
+          },
+          "contentType": {
+            "type": "string",
+            "description": "The type read from the file itself.",
+            "example": "image/png"
+          },
+          "originalFileName": {
+            "type": "string",
+            "nullable": true,
+            "example": "logo.png"
+          },
+          "confirmedAt": {
+            "format": "date-time",
+            "type": "string",
+            "example": "2026-11-15T10:01:00.000Z"
+          }
+        },
+        "required": [
+          "id",
+          "purpose",
+          "visibility",
+          "status",
+          "sizeBytes",
+          "contentType",
+          "originalFileName",
+          "confirmedAt"
+        ]
+      },
+      "RequestVendorUploadDto": {
+        "type": "object",
+        "properties": {
+          "contentType": {
+            "type": "string",
+            "example": "image/jpeg",
+            "description": "The Content-Type the file will be uploaded with."
+          },
+          "fileName": {
+            "type": "string",
+            "example": "product.jpg",
+            "description": "The file name on the device; shown back, never used as a path."
+          },
+          "purpose": {
+            "type": "string",
+            "enum": [
+              "vendor.logo"
+            ],
+            "example": "vendor.logo",
+            "description": "Why the file is uploaded; decides the accepted types, size and visibility."
+          }
+        },
+        "required": [
+          "contentType",
+          "purpose"
+        ]
+      },
+      "RequestAdminUploadDto": {
+        "type": "object",
+        "properties": {
+          "contentType": {
+            "type": "string",
+            "example": "image/jpeg",
+            "description": "The Content-Type the file will be uploaded with."
+          },
+          "fileName": {
+            "type": "string",
+            "example": "product.jpg",
+            "description": "The file name on the device; shown back, never used as a path."
+          },
+          "purpose": {
+            "type": "string",
+            "enum": [
+              "vendor.logo"
+            ],
+            "example": "vendor.logo",
+            "description": "Why the file is uploaded; decides the accepted types, size and visibility."
+          }
+        },
+        "required": [
+          "contentType",
+          "purpose"
         ]
       },
       "LivenessResponseDto": {

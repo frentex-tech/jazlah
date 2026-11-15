@@ -26,6 +26,10 @@ model User {
   access   UserAccess[]
   sessions AuthSession[]
 
+  vendorApplications         VendorApplication[]      @relation("VendorApplicant")
+  reviewedVendorApplications VendorApplication[]      @relation("VendorApplicationReviewer")
+  vendorCommissionChanges    VendorCommissionChange[]
+
   @@unique([phone], map: "users_phone_key")
   @@map("users")
 }
@@ -38,17 +42,19 @@ model UserAccess {
   id             String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
   userId         String    @map("user_id") @db.Uuid
   audience       Audience
-  /// Nullable: null for admin access. Otherwise the vendor or the kitchen the user works
-  /// for; no foreign key until those tables exist (DECISIONS.md).
+  /// Nullable: null for admin access. Otherwise the organisation the user works for: a
+  /// vendor (foreign key to vendors; kitchens are decided later, DECISIONS.md).
   organisationId String?   @map("organisation_id") @db.Uuid
   /// Nullable: null while the access is active.
   deactivatedAt  DateTime? @map("deactivated_at") @db.Timestamptz(3)
   createdAt      DateTime  @default(now()) @map("created_at") @db.Timestamptz(3)
   updatedAt      DateTime  @updatedAt @map("updated_at") @db.Timestamptz(3)
 
-  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  user         User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  organisation Vendor? @relation(fields: [organisationId], references: [id], onDelete: Restrict)
 
   // Also the index of the foreign key (user_id is its first column).
   @@unique([userId, audience], map: "user_access_user_id_audience_key")
+  @@index([organisationId])
   @@map("user_access")
 }
