@@ -8,6 +8,7 @@ import { mediaConfig } from './media.config';
 import { queueConfig } from './queue.config';
 import { rateLimitConfig } from './rate-limit.config';
 import { redisConfig } from './redis.config';
+import { smsConfig } from './sms.config';
 import { storageConfig } from './storage.config';
 
 /**
@@ -30,6 +31,7 @@ import { storageConfig } from './storage.config';
         rateLimitConfig,
         storageConfig,
         mediaConfig,
+        smsConfig,
       ],
     }),
   ],

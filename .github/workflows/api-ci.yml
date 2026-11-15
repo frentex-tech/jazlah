@@ -129,6 +129,18 @@ jobs:
       - name: Build
         run: pnpm build
 
+      # tsconfig.build.json leaves test-only code out, but still compiles any file that
+      # production code imports: fail if a test-only file reached the build output.
+      - name: No test-only code in dist/
+        run: |
+          found=$(find dist \( -name 'testing.*' -o -name 'fake.provider.*' -o -name '*.fake.*' -o -name '*.spec.*' -o -name '*.e2e-spec.*' \) -print)
+          if [ -n "$found" ]; then
+            echo "Test-only files in dist/:"
+            echo "$found"
+            exit 1
+          fi
+          echo "dist/ holds no testing.*, fake provider, in-memory fake or spec file."
+
       - name: OpenAPI document is up to date
         run: pnpm openapi:check
 
