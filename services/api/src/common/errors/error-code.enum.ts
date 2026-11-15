@@ -56,4 +56,13 @@ export enum ErrorCode {
   ACCESS_TOKEN_EXPIRED = 'ACCESS_TOKEN_EXPIRED',
   /** The account has been disabled; signing in or refreshing will not help. */
   ACCOUNT_DISABLED = 'ACCOUNT_DISABLED',
+  /** The user already has a vendor application waiting for review; nothing was created. */
+  VENDOR_APPLICATION_ALREADY_PENDING = 'VENDOR_APPLICATION_ALREADY_PENDING',
+  /** The vendor application was already approved or rejected; it cannot be reviewed again. */
+  VENDOR_APPLICATION_NOT_PENDING = 'VENDOR_APPLICATION_NOT_PENDING',
+  /**
+   * The vendor the user works for is suspended: vendor routes, signing in and refreshing
+   * as that vendor are refused until an admin reinstates it.
+   */
+  VENDOR_SUSPENDED = 'VENDOR_SUSPENDED',
 }

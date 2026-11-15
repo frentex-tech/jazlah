@@ -30,4 +30,7 @@ export const ERROR_STATUSES: Readonly<Record<ErrorCode, number>> = {
   [ErrorCode.REFRESH_TOKEN_INVALID]: 401,
   [ErrorCode.ACCESS_TOKEN_EXPIRED]: 401,
   [ErrorCode.ACCOUNT_DISABLED]: 403,
+  [ErrorCode.VENDOR_APPLICATION_ALREADY_PENDING]: 409,
+  [ErrorCode.VENDOR_APPLICATION_NOT_PENDING]: 409,
+  [ErrorCode.VENDOR_SUSPENDED]: 403,
 };

@@ -104,4 +104,16 @@ export const ERROR_MESSAGES: Readonly<Record<ErrorCode, LocalizedText>> = {
     ar: 'حسابك موقوف، تواصل معنا عشان نساعدك',
     en: 'This account has been disabled.',
   },
+  [ErrorCode.VENDOR_APPLICATION_ALREADY_PENDING]: {
+    ar: 'عندك طلب انضمام تحت المراجعة، انتظر ردّنا عليه',
+    en: 'You already have a vendor application under review.',
+  },
+  [ErrorCode.VENDOR_APPLICATION_NOT_PENDING]: {
+    ar: 'هذا الطلب انراجع من قبل، حدّث الصفحة',
+    en: 'This vendor application has already been reviewed.',
+  },
+  [ErrorCode.VENDOR_SUSPENDED]: {
+    ar: 'متجرك موقوف حاليًا، تواصل معنا عشان نساعدك',
+    en: 'This vendor account is suspended.',
+  },
 };
