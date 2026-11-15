@@ -492,6 +492,54 @@ describe('MediaService', () => {
     });
   });
 
+  describe('concurrent state changes (conditional updates)', () => {
+    it('confirm against confirm: one copy wins, the loser deletes its own copy', async () => {
+      const context = setup();
+      const { mediaId } = await uploaded(context, file(JPEG));
+      const gate = context.storage.pause('getObjectMetadata');
+      const confirmationA = context.service.confirmUpload(mediaId);
+      await gate.reached;
+
+      const confirmationB = await context.service.confirmUpload(mediaId);
+      const winner = finalLocation(context, mediaId);
+      gate.release();
+      const outcomeA = await confirmationA;
+
+      expect(outcomeA).toEqual(confirmationB);
+      expect(finalLocation(context, mediaId)).toEqual(winner);
+      expect(context.storage.objectLocations()).toEqual([
+        `${winner.bucket}/${winner.key}`,
+      ]);
+    });
+
+    it('confirm against the cleanup claim: the claim wins and nothing is left', async () => {
+      const context = setup();
+      const { mediaId } = await uploaded(context, file(JPEG));
+      jest.setSystemTime(AFTER_EXPIRY - 2);
+      const confirmGate = context.storage.pause('getObjectMetadata');
+      const confirmation = errorOf(context.service.confirmUpload(mediaId));
+      await confirmGate.reached;
+
+      jest.setSystemTime(AFTER_EXPIRY);
+      const cleanupGate = context.storage.pause('deleteObject');
+      const cleanup = context.service.removeExpiredUploads();
+      await cleanupGate.reached;
+      expect(context.client.rows.get(mediaId)).toMatchObject({
+        status: 'rejected',
+        rejectionReason: 'EXPIRED',
+      });
+
+      confirmGate.release();
+      const error = await confirmation;
+      cleanupGate.release();
+      await expect(cleanup).resolves.toBe(1);
+
+      expect(error.code).toBe(ErrorCode.MEDIA_UPLOAD_EXPIRED);
+      expect(context.client.rows.has(mediaId)).toBe(false);
+      expect(context.storage.objectLocations()).toEqual([]);
+    });
+  });
+
   describe('getDownloadLink', () => {
     it('gives a public file the stable URL of its checked copy, with no expiry', async () => {
       const context = setup();

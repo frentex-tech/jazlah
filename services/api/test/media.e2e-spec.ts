@@ -134,6 +134,42 @@ describe('Media uploads with the fake storage (e2e)', () => {
     });
   });
 
+  it('concurrent confirmations on PostgreSQL agree, and only the winning copy is kept', async () => {
+    const ticket = (
+      await requestUpload({
+        purpose: 'catalog.product-image',
+        contentType: 'image/jpeg',
+      })
+    ).body as Ticket;
+    upload(ticket, file(JPEG, 2_048), 'image/jpeg');
+
+    const responses = await Promise.all(
+      Array.from({ length: 5 }, () => confirm(ticket.mediaId)),
+    );
+
+    const ready = responses.filter((res) => res.status === 200);
+    // A loser that reads the row while the winner is mid-flight may answer 409
+    // MEDIA_NOT_READY (confirm again); none may report another outcome.
+    for (const res of responses) {
+      expect([200, 409]).toContain(res.status);
+    }
+    expect(ready.length).toBeGreaterThan(0);
+    for (const res of ready) {
+      expect(res.body).toEqual(ready[0]?.body);
+    }
+    const row = await prisma.media.findUnique({
+      where: { id: ticket.mediaId },
+    });
+    const finalPrefix = `${row?.bucket}/catalog/product-image/`;
+    const copies = storage
+      .objectLocations()
+      .filter(
+        (location) =>
+          location.startsWith(finalPrefix) && location.includes(ticket.mediaId),
+      );
+    expect(copies).toEqual([`${row?.bucket}/${row?.objectKey}`]);
+  });
+
   it('an oversized upload is refused by the storage, and confirming it finds nothing', async () => {
     const ticket = (
       await requestUpload({

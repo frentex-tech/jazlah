@@ -105,6 +105,26 @@ describe('Queue (e2e)', () => {
     expect(await stuck.getWorkersCount()).toBe(0);
   });
 
+  it('starts workers the way production does: enabled by configuration, no test override', async () => {
+    app = await createQueueProbeApp({ workersEnabledByConfig: true });
+    const processor = app.get(QueueProbeProcessor);
+    const probe = app.get<Queue>(getQueueToken(PROBE_QUEUES.probe));
+
+    // Created by provideWorkers' factory branch, with its dependencies.
+    expect(processor).toBeInstanceOf(QueueProbeProcessor);
+    await processor.worker.waitUntilReady();
+    expect(await probe.getWorkersCount()).toBe(1);
+    const completed = waitForWorkerEvent(
+      processor.worker,
+      'completed',
+      (job) => job.name === 'succeed',
+    );
+    const job = await probe.add('succeed', { key: 'by-config' });
+
+    expect((await completed).id).toBe(job.id);
+    expect(await probe.getJobState(job.id ?? '')).toBe('completed');
+  });
+
   it('applies the default job options to a queue that does not override them', async () => {
     const started = await start();
     const defaults = started.app.get<Queue>(
