@@ -2088,6 +2088,125 @@
         ]
       }
     },
+    "/v1/admin/vendors/{id}/profile": {
+      "patch": {
+        "description": "Any vendor, the platform vendor included. Upload a logo first (POST /v1/admin/media/uploads, purpose vendor.logo) and confirm it. A field left out stays as it is; logoMediaId null removes the logo.",
+        "operationId": "AdminVendorsController_updateVendorProfile",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "format": "uuid",
+              "example": "7f3a2c1e-0b9d-4e5f-8a6b-1c2d3e4f5a6b",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateVendorProfileDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AdminVendorResponseDto"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Error. code: VALIDATION_FAILED.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Error. code: UNAUTHORIZED, ACCESS_TOKEN_EXPIRED.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Error. code: FORBIDDEN.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Error. code: MEDIA_NOT_FOUND, NOT_FOUND.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Error. code: MEDIA_NOT_READY, TRANSACTION_CONFLICT.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Error. code: RATE_LIMITED.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Error. code: INTERNAL_ERROR.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Change a vendor’s logo or descriptions",
+        "tags": [
+          "vendors"
+        ]
+      }
+    },
     "/v1/admin/vendors/{id}/commission": {
       "put": {
         "description": "Orders already placed keep theirs. Recorded in the commission history. CONFLICT when another change was made at the same moment.",

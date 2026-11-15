@@ -9,18 +9,15 @@ import {
   VENDOR_REPOSITORY,
   type VendorRepository,
 } from '../domain/ports/vendor.repository.port';
+import { assertUsableLogo } from './assert-usable-logo';
 import type { UpdateOwnVendorProfileInput } from './update-own-vendor-profile-input.type';
 import type { VendorWithLogo } from './vendor-with-logo.type';
 import { withLogoUrls } from './with-logo-urls';
 
-/** The upload purpose of a vendor logo. */
-const LOGO_PURPOSE = 'vendor.logo';
-
 /**
  * A vendor changes its own profile: the logo and the descriptions (FR-VND-02). The
  * vendor is the token's organisation, never one named in the request. A new logo must be
- * a ready `vendor.logo` file the signed-in user uploaded: another user's file, or one
- * that does not exist, is MEDIA_NOT_FOUND, and one not confirmed MEDIA_NOT_READY.
+ * a ready `vendor.logo` file the signed-in user uploaded (assertUsableLogo).
  */
 @Injectable()
 export class UpdateOwnVendorProfileUseCase {
@@ -32,21 +29,7 @@ export class UpdateOwnVendorProfileUseCase {
   async execute(input: UpdateOwnVendorProfileInput): Promise<VendorWithLogo> {
     const logoId = input.changes.logoMediaId;
     if (logoId !== undefined && logoId !== null) {
-      const [file] = await this.media.findFiles([logoId]);
-      if (
-        file === undefined ||
-        file.ownerId !== input.userId ||
-        file.purpose !== LOGO_PURPOSE
-      ) {
-        throw new AppError(ErrorCode.MEDIA_NOT_FOUND, {
-          details: { mediaId: logoId },
-        });
-      }
-      if (!file.isReady) {
-        throw new AppError(ErrorCode.MEDIA_NOT_READY, {
-          details: { mediaId: logoId },
-        });
-      }
+      await assertUsableLogo(this.media, logoId, input.userId);
     }
     const vendor = await this.vendors.updateProfile(
       input.vendorId,

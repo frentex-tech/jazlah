@@ -8,6 +8,7 @@ import { FakeSmsProvider } from '@integrations/sms/testing';
 import { STORAGE_PORT } from '@integrations/storage';
 import { FakeStorageProvider } from '@integrations/storage/testing';
 import { CLOCK } from '@modules/auth/domain/ports/clock.port';
+import { CreatePlatformVendorUseCase } from '@modules/vendors/application/create-platform-vendor.use-case';
 import { createHttpApp } from './support/create-http-app';
 import { TestClock } from './support/test-clock';
 import {
@@ -578,6 +579,7 @@ describe('Vendors (e2e)', () => {
       ['post', `/v1/admin/vendors/${randomUUID()}/reinstate`],
       ['put', `/v1/admin/vendors/${randomUUID()}/commission`],
       ['get', `/v1/admin/vendors/${randomUUID()}/commission-history`],
+      ['patch', `/v1/admin/vendors/${randomUUID()}/profile`],
     ] as const)(
       '%s %s: 401 without a token, 403 with a customer token',
       async (method, path) => {
@@ -592,6 +594,123 @@ describe('Vendors (e2e)', () => {
         expect(errorCode(wrong.body)).toBe('FORBIDDEN');
       },
     );
+  });
+
+  describe('an admin setting a vendor profile', () => {
+    it("puts the admin's uploaded logo and a description on the platform vendor, audited", async () => {
+      const admin = await journey.admin();
+      const { vendor } = await app
+        .get(CreatePlatformVendorUseCase, { strict: false })
+        .execute();
+      try {
+        const logo = await journey.uploadedFile(
+          admin,
+          'admin',
+          'vendor.logo',
+          'png',
+        );
+
+        const updated = await journey.http
+          .patch(`/v1/admin/vendors/${vendor.id}/profile`)
+          .set(...bearer(admin))
+          .send({
+            logoMediaId: logo,
+            description: { ar: 'ذبائح جزلة', en: 'Jazla cuts' },
+          })
+          .expect(200);
+        const publicPage = await journey.http
+          .get(`/v1/public/vendors/${vendor.id}`)
+          .expect(200);
+
+        expect(updated.body).toMatchObject({
+          id: vendor.id,
+          description: { ar: 'ذبائح جزلة', en: 'Jazla cuts' },
+        });
+        expect((updated.body as VendorBody).logoUrl).toEqual(
+          expect.any(String),
+        );
+        expect(publicPage.body).toMatchObject({
+          id: vendor.id,
+          description: { ar: 'ذبائح جزلة', en: 'Jazla cuts' },
+          logoUrl: (updated.body as VendorBody).logoUrl,
+        });
+        expect(
+          await prisma.auditLog.findMany({
+            where: {
+              entityId: vendor.id,
+              action: 'vendors.vendor.profile_updated',
+            },
+            select: { actorId: true, metadata: true },
+          }),
+        ).toEqual([
+          {
+            actorId: admin.userId,
+            metadata: { fields: 'descriptionAr,descriptionEn,logoMediaId' },
+          },
+        ]);
+      } finally {
+        // The platform vendor is unique: remove it so the next run creates it again.
+        await prisma.auditLog.deleteMany({ where: { entityId: vendor.id } });
+        await prisma.vendorCommissionChange.deleteMany({
+          where: { vendorId: vendor.id },
+        });
+        await prisma.vendor.deleteMany({ where: { id: vendor.id } });
+      }
+    });
+
+    it('refuses invalid input, unknown vendors and a logo the admin did not upload', async () => {
+      const { vendorId, owner, admin } = await journey.approvedVendor();
+      const ownersLogo = await journey.uploadedFile(
+        owner,
+        'vendor',
+        'vendor.logo',
+        'png',
+      );
+      const patch = (path: string, body: Record<string, unknown>) =>
+        journey.http
+          .patch(path)
+          .set(...bearer(admin))
+          .send(body);
+
+      const malformedId = await patch('/v1/admin/vendors/nope/profile', {
+        description: { en: 'x' },
+      }).expect(400);
+      const nullDescription = await patch(
+        `/v1/admin/vendors/${vendorId}/profile`,
+        { description: null },
+      ).expect(400);
+      const badLogo = await patch(`/v1/admin/vendors/${vendorId}/profile`, {
+        logoMediaId: 'nope',
+      }).expect(400);
+      const unknown = await patch(`/v1/admin/vendors/${randomUUID()}/profile`, {
+        description: { en: 'x' },
+      }).expect(404);
+      const notTheirs = await patch(`/v1/admin/vendors/${vendorId}/profile`, {
+        logoMediaId: ownersLogo,
+      }).expect(404);
+
+      expect(malformedId.body).toMatchObject({ details: [{ field: 'id' }] });
+      expect(nullDescription.body).toMatchObject({
+        details: [{ field: 'description' }],
+      });
+      expect(badLogo.body).toMatchObject({
+        details: [{ field: 'logoMediaId' }],
+      });
+      expect(errorCode(unknown.body)).toBe('NOT_FOUND');
+      expect(errorCode(notTheirs.body)).toBe('MEDIA_NOT_FOUND');
+    });
+
+    it('refuses a vendor token with 403', async () => {
+      const { vendorId, owner } = await journey.approvedVendor();
+
+      const res = await journey.http
+        .patch(`/v1/admin/vendors/${vendorId}/profile`)
+        .set(...bearer(owner))
+        .send({ description: { en: 'mine' } })
+        .expect(403);
+
+      expect(errorCode(res.body)).toBe('FORBIDDEN');
+    });
   });
 
   describe('a vendor and its profile', () => {

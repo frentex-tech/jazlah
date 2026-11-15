@@ -19,4 +19,8 @@ export const VENDOR_AUDIT = {
     entity: 'vendor',
   },
   platformVendorCreated: { action: 'vendors.vendor.created', entity: 'vendor' },
+  profileUpdated: {
+    action: 'vendors.vendor.profile_updated',
+    entity: 'vendor',
+  },
 } as const;

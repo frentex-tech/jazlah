@@ -22,6 +22,7 @@ import { RejectVendorApplicationUseCase } from './application/reject-vendor-appl
 import { SubmitVendorApplicationUseCase } from './application/submit-vendor-application.use-case';
 import { SuspendVendorUseCase } from './application/suspend-vendor.use-case';
 import { UpdateOwnVendorProfileUseCase } from './application/update-own-vendor-profile.use-case';
+import { UpdateVendorProfileAsAdminUseCase } from './application/update-vendor-profile-as-admin.use-case';
 import { IBAN_CIPHER } from './domain/ports/iban-cipher.port';
 import { VENDOR_ACCESS } from './domain/ports/vendor-access.port';
 import { VENDOR_APPLICATION_REPOSITORY } from './domain/ports/vendor-application.repository.port';
@@ -65,6 +66,7 @@ import { PlatformVendorModule } from './platform-vendor.module';
     ChangeVendorCommissionUseCase,
     ListVendorCommissionChangesUseCase,
     UpdateOwnVendorProfileUseCase,
+    UpdateVendorProfileAsAdminUseCase,
     ListPublicVendorsUseCase,
     GetPublicVendorUseCase,
     {

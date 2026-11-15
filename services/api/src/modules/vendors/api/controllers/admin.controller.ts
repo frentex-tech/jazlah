@@ -5,6 +5,7 @@ import {
   HttpCode,
   HttpStatus,
   Param,
+  Patch,
   Post,
   Put,
   Query,
@@ -34,12 +35,14 @@ import { ListVendorsUseCase } from '../../application/list-vendors.use-case';
 import { ReinstateVendorUseCase } from '../../application/reinstate-vendor.use-case';
 import { RejectVendorApplicationUseCase } from '../../application/reject-vendor-application.use-case';
 import { SuspendVendorUseCase } from '../../application/suspend-vendor.use-case';
+import { UpdateVendorProfileAsAdminUseCase } from '../../application/update-vendor-profile-as-admin.use-case';
 import { AdminVendorPageResponseDto } from '../dto/admin-vendor-page-response.dto';
 import { AdminVendorResponseDto } from '../dto/admin-vendor-response.dto';
 import { CommissionDto } from '../dto/commission.dto';
 import { ListVendorApplicationsQueryDto } from '../dto/list-vendor-applications-query.dto';
 import { ListVendorsQueryDto } from '../dto/list-vendors-query.dto';
 import { ReasonDto } from '../dto/reason.dto';
+import { UpdateVendorProfileDto } from '../dto/update-vendor-profile.dto';
 import { VendorApplicationDetailResponseDto } from '../dto/vendor-application-detail-response.dto';
 import { VendorApplicationPageResponseDto } from '../dto/vendor-application-page-response.dto';
 import { VendorApplicationResponseDto } from '../dto/vendor-application-response.dto';
@@ -49,11 +52,13 @@ import { toAdminVendorResponse } from '../to-admin-vendor-response';
 import { toVendorApplicationDetailResponse } from '../to-vendor-application-detail-response';
 import { toVendorApplicationResponse } from '../to-vendor-application-response';
 import { toVendorCommissionChangeResponse } from '../to-vendor-commission-change-response';
+import { toVendorProfileChanges } from '../to-vendor-profile-changes';
 
 /**
  * Vendor management for admins (FR-ADM-04): reviewing applications and their
  * documents, approving with a commission or rejecting, suspending and reinstating
- * vendors, and their commission with its history. Every change is audited.
+ * vendors, their commission with its history, and any vendor's logo and descriptions
+ * (the platform vendor's included). Every change is audited.
  */
 @ApiTags('vendors')
 @ApiBearerAuth(BEARER_AUTH_SCHEME)
@@ -70,6 +75,7 @@ export class AdminVendorsController {
     private readonly reinstateVendor: ReinstateVendorUseCase,
     private readonly changeCommission: ChangeVendorCommissionUseCase,
     private readonly listCommissionChanges: ListVendorCommissionChangesUseCase,
+    private readonly updateProfile: UpdateVendorProfileAsAdminUseCase,
   ) {}
 
   @Get('vendor-applications')
@@ -246,6 +252,35 @@ export class AdminVendorsController {
       await this.reinstateVendor.execute({
         vendorId: params.id,
         actorId: user.userId,
+      }),
+    );
+  }
+
+  @Patch('vendors/:id/profile')
+  @ApiOperation({
+    summary: 'Change a vendor’s logo or descriptions',
+    description:
+      'Any vendor, the platform vendor included. Upload a logo first (POST /v1/admin/media/uploads, purpose vendor.logo) and confirm it. A field left out stays as it is; logoMediaId null removes the logo.',
+  })
+  @ApiOkResponse({ type: AdminVendorResponseDto })
+  @ApiErrorResponses(
+    ErrorCode.VALIDATION_FAILED,
+    ErrorCode.MEDIA_NOT_FOUND,
+    ErrorCode.MEDIA_NOT_READY,
+    ErrorCode.NOT_FOUND,
+    ErrorCode.TRANSACTION_CONFLICT,
+    ...ADMIN_AUTH_ERRORS,
+  )
+  async updateVendorProfile(
+    @CurrentUser() user: AuthenticatedUser,
+    @Param() params: IdParamDto,
+    @Body() body: UpdateVendorProfileDto,
+  ): Promise<AdminVendorResponseDto> {
+    return toAdminVendorResponse(
+      await this.updateProfile.execute({
+        vendorId: params.id,
+        actorId: user.userId,
+        changes: toVendorProfileChanges(body),
       }),
     );
   }

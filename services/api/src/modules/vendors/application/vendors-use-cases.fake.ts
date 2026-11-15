@@ -22,6 +22,7 @@ import { RejectVendorApplicationUseCase } from './reject-vendor-application.use-
 import { SubmitVendorApplicationUseCase } from './submit-vendor-application.use-case';
 import { SuspendVendorUseCase } from './suspend-vendor.use-case';
 import { UpdateOwnVendorProfileUseCase } from './update-own-vendor-profile.use-case';
+import { UpdateVendorProfileAsAdminUseCase } from './update-vendor-profile-as-admin.use-case';
 
 /**
  * Every use case of the vendors module wired to the in-memory fakes of its ports, for
@@ -116,6 +117,12 @@ export function buildVendorsUseCases() {
       history,
     ),
     updateProfile: new UpdateOwnVendorProfileUseCase(vendors, media),
+    updateProfileAsAdmin: new UpdateVendorProfileAsAdminUseCase(
+      vendors,
+      media,
+      audit,
+      transactions,
+    ),
     listPublicVendors: new ListPublicVendorsUseCase(vendors, media),
     getPublicVendor: new GetPublicVendorUseCase(vendors, media),
     createPlatformVendor: new CreatePlatformVendorUseCase(
