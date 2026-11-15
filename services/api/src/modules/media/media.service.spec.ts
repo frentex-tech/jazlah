@@ -3,6 +3,7 @@ import type { StorageConfig } from '@config/storage-config.type';
 import { AppError } from '@common/errors/app-error';
 import { ErrorCode } from '@common/errors/error-code.enum';
 import type { DbContext } from '@infra/database/db-context';
+import type { RateLimiter } from '@infra/rate-limit/rate-limiter';
 import {
   StorageError,
   StorageService,
@@ -11,6 +12,7 @@ import {
 import { FakeStorageProvider } from '@integrations/storage/testing';
 import { InMemoryMediaClient } from './in-memory-media-client.fake';
 import type { MediaCleanupScope } from './media-cleanup-scope.type';
+import { MEDIA_RATE_LIMITS } from './media-rate-limits.constants';
 import { MediaService } from './media.service';
 
 const NOW = Date.UTC(2026, 10, 14, 9, 30, 0);
@@ -49,17 +51,33 @@ const PDF = [0x25, 0x50, 0x44, 0x46, 0x2d, 0x31, 0x2e, 0x37];
 /** A Windows executable ("MZ") renamed to .jpg. */
 const EXE = [0x4d, 0x5a, 0x90, 0x00, 0x03, 0x00];
 
-/** The service as production builds it (no cleanup scope), or limited to `scope`. */
+/**
+ * The service as production builds it (no cleanup scope), or limited to `scope`. The
+ * rate limiter records each count and refuses with `refuseWith` once that is set.
+ */
 function setup(scope: MediaCleanupScope | null = null) {
   const client = new InMemoryMediaClient();
   const storage = new FakeStorageProvider(() => Date.now());
+  const limits = {
+    counted: [] as Array<{ name: string; key: string }>,
+    refuseWith: null as AppError | null,
+  };
+  const rateLimiter = {
+    consume: (options: { name: string }, key: string) => {
+      limits.counted.push({ name: options.name, key });
+      return limits.refuseWith === null
+        ? Promise.resolve()
+        : Promise.reject(limits.refuseWith);
+    },
+  };
   const service = new MediaService(
     { client } as unknown as DbContext,
     new StorageService(storage, STORAGE_CONFIG),
     MEDIA_CONFIG,
     scope,
+    rateLimiter as unknown as RateLimiter,
   );
-  return { service, client, storage };
+  return { service, client, storage, limits };
 }
 
 type Context = ReturnType<typeof setup>;
@@ -212,6 +230,39 @@ describe('MediaService', () => {
       expect(error.details).toEqual({
         allowed: ['image/jpeg', 'image/png', 'image/webp'],
       });
+      expect(context.client.rows.size).toBe(0);
+      expect(context.storage.calls).toEqual([]);
+    });
+
+    it("counts each request against its owner's upload limit", async () => {
+      const context = setup();
+
+      await context.service.requestUpload({
+        purpose: 'vendor.document',
+        contentType: 'application/pdf',
+        ownerId: 'user-1',
+      });
+
+      expect(context.limits.counted).toEqual([
+        { name: MEDIA_RATE_LIMITS.owner.name, key: 'user-1' },
+      ]);
+    });
+
+    it('refuses an owner over the limit, creating nothing', async () => {
+      const context = setup();
+      context.limits.refuseWith = new AppError(ErrorCode.RATE_LIMITED, {
+        retryAfterSeconds: 60,
+      });
+
+      const error = await errorOf(
+        context.service.requestUpload({
+          purpose: 'vendor.document',
+          contentType: 'application/pdf',
+          ownerId: 'user-1',
+        }),
+      );
+
+      expect(error.code).toBe(ErrorCode.RATE_LIMITED);
       expect(context.client.rows.size).toBe(0);
       expect(context.storage.calls).toEqual([]);
     });

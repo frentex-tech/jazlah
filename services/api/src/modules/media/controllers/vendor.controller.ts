@@ -19,9 +19,11 @@ import { BEARER_AUTH_SCHEME } from '@common/decorators/bearer-auth.constants';
 import { CurrentUser } from '@common/decorators/current-user.decorator';
 import { IdParamDto } from '@common/dto/id-param.dto';
 import { ErrorCode } from '@common/errors/error-code.enum';
+import { RateLimit } from '@infra/rate-limit/rate-limit.decorator';
 import { MediaFileResponseDto } from '../dto/media-file-response.dto';
 import { RequestVendorUploadDto } from '../dto/request-vendor-upload.dto';
 import { UploadTicketResponseDto } from '../dto/upload-ticket-response.dto';
+import { MEDIA_RATE_LIMITS } from '../media-rate-limits.constants';
 import { MediaService } from '../media.service';
 import { toMediaFileResponse } from '../to-media-file-response';
 import { toUploadTicketResponse } from '../to-upload-ticket-response';
@@ -37,6 +39,7 @@ export class VendorMediaController {
   constructor(private readonly media: MediaService) {}
 
   @Post('uploads')
+  @RateLimit(MEDIA_RATE_LIMITS.address)
   @ApiOperation({
     summary: 'Get a ticket to upload one file',
     description:
@@ -50,6 +53,7 @@ export class VendorMediaController {
     ErrorCode.ACCESS_TOKEN_EXPIRED,
     ErrorCode.FORBIDDEN,
     ErrorCode.VENDOR_SUSPENDED,
+    ErrorCode.SERVICE_UNAVAILABLE,
     ErrorCode.RATE_LIMITED,
   )
   async requestUpload(
@@ -68,6 +72,7 @@ export class VendorMediaController {
 
   @Post(':id/confirm')
   @HttpCode(HttpStatus.OK)
+  @RateLimit(MEDIA_RATE_LIMITS.confirm)
   @ApiOperation({
     summary: 'Confirm an uploaded file',
     description:

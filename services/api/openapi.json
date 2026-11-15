@@ -2563,6 +2563,16 @@
                 }
               }
             }
+          },
+          "503": {
+            "description": "Error. code: SERVICE_UNAVAILABLE.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                }
+              }
+            }
           }
         },
         "security": [
@@ -2790,6 +2800,16 @@
                 }
               }
             }
+          },
+          "503": {
+            "description": "Error. code: SERVICE_UNAVAILABLE.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                }
+              }
+            }
           }
         },
         "security": [
@@ -3010,6 +3030,16 @@
           },
           "500": {
             "description": "Error. code: INTERNAL_ERROR.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "Error. code: SERVICE_UNAVAILABLE.",
             "content": {
               "application/json": {
                 "schema": {

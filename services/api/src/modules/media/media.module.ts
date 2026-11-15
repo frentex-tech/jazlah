@@ -2,6 +2,7 @@ import { Module } from '@nestjs/common';
 import { provideWorkers } from '@infra/queue/provide-workers';
 import { QueueRegistrationModule } from '@infra/queue/queue-registration.module';
 import { QUEUE_NAMES } from '@infra/queue/queue-names.constants';
+import { RateLimitModule } from '@infra/rate-limit/rate-limit.module';
 import { StorageModule } from '@integrations/storage';
 import { AdminMediaController } from './controllers/admin.controller';
 import { CustomerMediaController } from './controllers/customer.controller';
@@ -19,6 +20,8 @@ import { MediaService } from './media.service';
 @Module({
   imports: [
     StorageModule,
+    // RateLimiter, for the per-user upload limit (MEDIA_RATE_LIMITS.owner).
+    RateLimitModule,
     QueueRegistrationModule.register({ name: QUEUE_NAMES.mediaCleanup }),
   ],
   controllers: [

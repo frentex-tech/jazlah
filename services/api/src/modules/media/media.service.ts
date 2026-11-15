@@ -10,12 +10,14 @@ import { sanitizeFileName } from '@common/files/sanitize-file-name';
 import { DbContext } from '@infra/database/db-context';
 import type { Media } from '@infra/database/generated/prisma/client';
 import { mapPrismaError } from '@infra/database/map-prisma-error';
+import { RateLimiter } from '@infra/rate-limit/rate-limiter';
 import { StorageService, type StorageLocation } from '@integrations/storage';
 import type { DownloadLink } from './download-link.type';
 import { isUploadPurpose } from './is-upload-purpose';
 import { MEDIA_CLEANUP_SCOPE } from './media-cleanup-scope.constants';
 import type { MediaCleanupScope } from './media-cleanup-scope.type';
 import { MEDIA_CLEANUP } from './media-cleanup.constants';
+import { MEDIA_RATE_LIMITS } from './media-rate-limits.constants';
 import type { MediaFile } from './media-file.type';
 import type { MediaRejectionReason } from './media-rejection-reason.type';
 import type { RequestUploadInput } from './request-upload-input.type';
@@ -68,11 +70,15 @@ export class MediaService {
     @Inject(mediaConfig.KEY) private readonly config: MediaConfig,
     @Inject(MEDIA_CLEANUP_SCOPE)
     private readonly cleanupScope: MediaCleanupScope | null,
+    private readonly rateLimiter: RateLimiter,
   ) {}
 
   /**
    * Creates a pending upload and its presigned POST. Throws
-   * MEDIA_CONTENT_TYPE_NOT_ALLOWED when the purpose does not accept `contentType`.
+   * MEDIA_CONTENT_TYPE_NOT_ALLOWED when the purpose does not accept `contentType`, and
+   * RATE_LIMITED (or SERVICE_UNAVAILABLE while the limit cannot be counted) when the
+   * owner has requested too many uploads (`MEDIA_RATE_LIMITS.owner`), before anything
+   * is created.
    * The object key is generated here; the client's file name is stored, sanitised, as
    * metadata only.
    */
@@ -82,6 +88,9 @@ export class MediaService {
       throw new AppError(ErrorCode.MEDIA_CONTENT_TYPE_NOT_ALLOWED, {
         details: { allowed: policy.contentTypes },
       });
+    }
+    if (input.ownerId != null) {
+      await this.rateLimiter.consume(MEDIA_RATE_LIMITS.owner, input.ownerId);
     }
     const id = randomUUID();
     const now = new Date();
