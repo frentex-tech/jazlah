@@ -18,7 +18,10 @@ function storageAnswering(
       return evalReply();
     },
   } as unknown as Redis;
-  return { storage: new RedisThrottlerStorage(redis), evalCalls };
+  return {
+    storage: new RedisThrottlerStorage(redis, { keyPrefix: 'jazla' }),
+    evalCalls,
+  };
 }
 
 describe('RedisThrottlerStorage', () => {

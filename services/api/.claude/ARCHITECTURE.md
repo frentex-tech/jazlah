@@ -8,13 +8,19 @@ The layout and the conventions of the API, in one place. The rule files hold the
 .nvmrc  .env.example  .gitignore  package.json  pnpm-lock.yaml  tsconfig.json  tsconfig.build.json  nest-cli.json
 jest.config.ts  eslint.config.mjs  .prettierrc  prisma.config.ts (Prisma CLI: schema, migrations, DATABASE_URL)
 openapi.json                  the OpenAPI document, generated (pnpm openapi:generate), committed, checked (openapi:check)
-docker-compose.yml            postgis/postgis:17-3.5 (host port JAZLA_DB_PORT, 5434; databases jazla, jazla_test)
-                              and redis:7-alpine (host port JAZLA_REDIS_PORT, 6380); pnpm infra:up / infra:down
+docker-compose.yml            postgis/postgis:17-3.5 (host port JAZLA_DB_PORT, 5434; databases jazla, jazla_test),
+                              redis:7-alpine (host port JAZLA_REDIS_PORT, 6380) and MinIO (Chainguard build, S3 API
+                              on JAZLA_MINIO_PORT, 9002; console 9003); pnpm infra:up / infra:down
 docker/postgres/              00-create-test-database.sql (first start only)
+docker/minio/                 entrypoint.sh (server, then bucket setup, then healthy), init-buckets.sh (jazla-public,
+                              jazla-private and their -test twins; public: anonymous GetObject only)
 prisma/
   schema.prisma               generator (prisma-client, CommonJS) and datasource only
   models/audit.prisma         AuditLog -> audit_logs
-  migrations/                 20261113150318_init: PostGIS extension, audit_logs
+  models/idempotency.prisma   IdempotencyKey -> idempotency_keys
+  models/media.prisma         Media -> media (enums media_visibility, media_status, media_rejection_reason)
+  migrations/                 20261113150318_init: PostGIS extension, audit_logs; 20261113224826_idempotency_keys;
+                              20261114151242_media
 src/
   main.ts                     bootstrap: validates the environment, pino as Nest's logger, configureHttpApp,
                               shutdownOnSignals (the shutdown deadline), port from config; an invalid
@@ -36,6 +42,7 @@ src/
     pipes/                    app-validation.pipe.ts, to-field-errors.ts
     events/                   domain-event.ts (DomainEvent, plain TypeScript: domain/ may extend it),
                               event-name.type.ts, event-name-of.type.ts, domain-event-class.type.ts
+    files/                    detect-content-type.ts (magic numbers), content signatures, sanitize-file-name.ts
     i18n/  request-id/  async/
     guards/ interceptors/     empty
   infra/
@@ -57,7 +64,9 @@ src/
                               (answers, on the configured database)
     queue/                    queue.module.ts (BullMQ root), queue-registration.module.ts, bounded-queue.ts
                               (adds fail fast), job-processor.ts + job-lifecycle-logger.ts (worker events),
-                              build-job-id.ts, default job options, queue names (empty)
+                              build-job-id.ts, keep-job-scheduled.ts (repeating jobs), provide-workers.ts
+                              (processors and schedulers start only with QUEUE_WORKERS_ENABLED), default job
+                              options, queue names (media-cleanup)
     event-bus/                event-bus.module.ts, event-publisher.ts (publish(EventClass, event)),
                               on-domain-event.decorator.ts; the event types are in src/common/events/
     health/                   health.controller.ts: GET /v1/health (liveness), GET /v1/health/ready
@@ -69,12 +78,23 @@ src/
     shutdown/                 shutdown-on-signals.ts + close-with-deadline.ts (SIGTERM/SIGINT close under
                               SHUTDOWN_DEADLINE_MS, then exit 1 naming what was still closing), closing-resources
                               (what workers, queues, the database and Redis report while they close)
-  integrations/               empty
-  modules/                    empty
+  integrations/
+    storage/                  the reference integration: storage.port.ts (StoragePort, STORAGE_PORT), .types.ts,
+                              .errors.ts (StorageError: reason, retryable), .service.ts (bucket per visibility, public
+                              URLs, expiries), .module.ts (STORAGE_PROVIDER), index.ts, testing.ts (the fake, for
+                              tests only), providers/s3.provider.ts
+                              (AWS SDK v3; MinIO with path style), providers/fake.provider.ts (in memory, enforces
+                              the upload policy)
+  modules/
+    media/                    CRUD-shaped, no controller yet: media.service.ts (request, confirm, download link,
+                              removeExpiredUploads), upload-purposes.constants.ts (UPLOAD_PURPOSES), dto/,
+                              media-cleanup.processor.ts and .scheduler.ts (queue media-cleanup), types
 test/
   *.e2e-spec.ts               health, errors, request-id, database, queue, event-bus, api-docs, http-security,
-                              rate-limit, startup, logging, redis-logging, shutdown; jest-e2e.json
-  support/                    test-only code: createHttpApp() (the real app set up as main.ts does), probe
+                              rate-limit, startup, logging, redis-logging, shutdown, media (fake storage),
+                              media-storage (MinIO); jest-e2e.json
+  support/                    test-only code: createHttpApp() (the real app set up as main.ts does; no workers
+                              unless `workers` turns one on, enableWorkers), probe
                               controllers, queue and event probes, start-api.cjs (starts main.ts with variables)
   types/                      compile-time tests (pnpm test:types)
 lint-fixtures/                fixtures that prove each lint rule: src/ mirrors the layout (fake integrations
@@ -83,8 +103,8 @@ lint-fixtures/                fixtures that prove each lint rule: src/ mirrors t
 .husky/                       git hooks (husky): pre-commit (lint-staged, the staged-files guard staged-guard.mjs,
                               registry check), commit-msg (commitlint); install.mjs, run by `prepare`; lint-staged.config.mjs, commitlint.config.mjs, .prettierignore
 scripts/check-lint-rules.mjs  pnpm lint:rules: lints the fixtures and checks each against its first line
-scripts/e2e.mjs               pnpm test:e2e: checks the database and Redis, migrates jazla_test, runs Jest against
-                              the test database and Redis database
+scripts/e2e.mjs               pnpm test:e2e: checks the database and Redis, migrates jazla_test, points storage at
+                              the -test buckets, runs Jest against the test database and Redis database
 ../../.github/workflows/api-ci.yml   CI: every command of CLAUDE.md on pull requests and pushes touching services/api
 ```
 
@@ -106,7 +126,8 @@ src/
     rate-limit/               rate limiting: the throttler and its Redis storage
     database/                 the Prisma service, geo helpers (PostGIS raw SQL)
     redis/                    the shared Redis client and its readiness check
-    queue/                    BullMQ connection, default job options, queue names, JobProcessor, buildJobId; no processor
+    queue/                    BullMQ connection, default job options, queue names, JobProcessor, buildJobId,
+                              provideWorkers; no processor
     shutdown/                 the shutdown deadline
     realtime/                 socket gateway, room conventions, the publishing port
     event-bus/                in-process event bus: EventPublisher, @OnDomainEvent (wraps @nestjs/event-emitter)
@@ -119,6 +140,7 @@ src/
       <capability>.service.ts           what the rest of the API calls
       <capability>.module.ts            selects providers from configuration
       index.ts                          public entry; nothing outside imports past it
+      testing.ts                        test-only entry: the fake and test helpers (R22)
       providers/<vendor>.provider.ts    one file per vendor
       providers/fake.provider.ts        fake used by tests
   modules/                    business domains, one folder each

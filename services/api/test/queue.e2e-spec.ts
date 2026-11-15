@@ -6,7 +6,6 @@ import { AppError } from '@common/errors/app-error';
 import { ErrorCode } from '@common/errors/error-code.enum';
 import { buildJobId } from '@infra/queue/build-job-id';
 import { DEFAULT_JOB_OPTIONS } from '@infra/queue/default-job-options.constants';
-import { QUEUE_KEY_PREFIX } from '@infra/queue/queue.constants';
 import { createQueueProbeApp } from './support/create-queue-probe-app';
 import { PROBE_QUEUES } from './support/queue-probe.constants';
 import { QueueProbeProcessor } from './support/queue-probe.processor';
@@ -27,7 +26,7 @@ describe('Queue (e2e)', () => {
     (name) =>
       new Queue(name, {
         connection: { url: loadEnv().REDIS_URL },
-        prefix: QUEUE_KEY_PREFIX,
+        prefix: loadEnv().REDIS_KEY_PREFIX,
       }),
   );
   const inspector = (name: string): Queue => {
@@ -65,13 +64,46 @@ describe('Queue (e2e)', () => {
     probe: Queue;
     processor: QueueProbeProcessor;
   }> {
-    app = await createQueueProbeApp();
+    app = await createQueueProbeApp({
+      workers: [
+        QueueProbeProcessor,
+        StuckProbeProcessor,
+        StalledProbeProcessor,
+      ],
+    });
     return {
       app,
       probe: app.get<Queue>(getQueueToken(PROBE_QUEUES.probe)),
       processor: app.get(QueueProbeProcessor),
     };
   }
+
+  it('runs no worker unless one is turned on, and producers still add jobs', async () => {
+    app = await createQueueProbeApp();
+    const probe = app.get<Queue>(getQueueToken(PROBE_QUEUES.probe));
+
+    const job = await probe.add('succeed', { key: 'no-worker' });
+
+    expect(app.get(QueueProbeProcessor)).not.toBeInstanceOf(
+      QueueProbeProcessor,
+    );
+    expect(await probe.getWorkersCount()).toBe(0);
+    expect(await job.getState()).toBe('waiting');
+  });
+
+  it('starts only the worker a test turns on', async () => {
+    app = await createQueueProbeApp({ workers: [QueueProbeProcessor] });
+
+    expect(app.get(QueueProbeProcessor)).toBeInstanceOf(QueueProbeProcessor);
+    expect(app.get(StuckProbeProcessor)).not.toBeInstanceOf(
+      StuckProbeProcessor,
+    );
+    const probe = app.get<Queue>(getQueueToken(PROBE_QUEUES.probe));
+    const stuck = app.get<Queue>(getQueueToken(PROBE_QUEUES.stuck));
+    await app.get(QueueProbeProcessor).worker.waitUntilReady();
+    expect(await probe.getWorkersCount()).toBe(1);
+    expect(await stuck.getWorkersCount()).toBe(0);
+  });
 
   it('applies the default job options to a queue that does not override them', async () => {
     const started = await start();
@@ -89,13 +121,10 @@ describe('Queue (e2e)', () => {
     const proxied = new URL(redisUrl);
     proxied.hostname = '127.0.0.1';
     proxied.port = String(proxy.port);
-    // A producer only: no worker shares the stopped connection. (BullMQ 6.7.6 workers whose
-    // connection dropped and came back were seen never to finish close(), which is not
-    // what this test is about.)
-    app = await createQueueProbeApp({
-      redisUrl: proxied.toString(),
-      processors: false,
-    });
+    // A producer only (no workers turned on): no worker shares the stopped connection.
+    // (BullMQ 6.7.6 workers whose connection dropped and came back were seen never to
+    // finish close(), which is not what this test is about.)
+    app = await createQueueProbeApp({ redisUrl: proxied.toString() });
     const probe = app.get<Queue>(getQueueToken(PROBE_QUEUES.probe));
     await probe.add('succeed', { key: 'before-outage' });
 
@@ -256,7 +285,7 @@ describe('Queue (e2e)', () => {
     // Another worker takes the job and never renews its lock, as a crashed instance would.
     const crashed = new Worker(PROBE_QUEUES.stalled, null, {
       connection: { url: loadEnv().REDIS_URL },
-      prefix: QUEUE_KEY_PREFIX,
+      prefix: loadEnv().REDIS_KEY_PREFIX,
       lockDuration: 300,
       autorun: false,
     });

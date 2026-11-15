@@ -48,7 +48,8 @@ For each vendor you need its documentation: authentication, endpoints, request a
 | `src/integrations/<capability>/<capability>.errors.ts` | the errors the capability raises, built on `AppError` |
 | `src/integrations/<capability>/<capability>.service.ts` | what the rest of the API calls; provider selection and, where it applies, fallback |
 | `src/integrations/<capability>/<capability>.module.ts` | selects providers from configuration |
-| `src/integrations/<capability>/index.ts` | the public entry: re-exports only |
+| `src/integrations/<capability>/index.ts` | the public entry: re-exports only, nothing test-only |
+| `src/integrations/<capability>/testing.ts` | the test-only entry: re-exports the fake and any test helpers (R22) |
 | `src/integrations/<capability>/providers/<vendor>.provider.ts` | one file per vendor |
 | `src/integrations/<capability>/providers/fake.provider.ts` | the fake for tests |
 | a `.spec.ts` beside the service and beside each provider | see step 7 |
@@ -71,10 +72,11 @@ For each vendor you need its documentation: authentication, endpoints, request a
   - **zatca:** no fallback. A submission is queued, retried against the same provider, and carries an idempotency key: processing the same submission twice creates one invoice.
   - **storage:** one provider, no fallback. Test the provider and the fake.
 - **The fake itself** needs no vendor behaviour. It records calls and fails on request.
+- **Tests import the fake from `testing.ts`** (`@integrations/<capability>/testing`), never from `index.ts` or `providers/`.
 
 ## 8. Check the boundaries
 
-Run `pnpm lint`: R4 (an integration imports no module and no other integration) and R6 (outside code imports an integration only through its `index.ts`, never `providers/`) are enforced there (`.claude/rules/code-structure.md`, section 2). Then run this search, which lint does not cover, and fix any hit:
+Run `pnpm lint`: R4 (an integration imports no module and no other integration), R6 (outside code imports an integration only through its `index.ts`, never `providers/`) and R22 (`testing.ts` only from `*.spec.ts` and `test/`) are enforced there (`.claude/rules/code-structure.md`, section 2). Then run this search, which lint does not cover, and fix any hit:
 
 - `Grep` for the vendor's name outside `src/integrations/<capability>/providers/`, the capability's module file and `src/config/`: the vendor must not be known anywhere else.
 
@@ -84,7 +86,7 @@ Run lint, typecheck or build, unit tests and e2e tests with the commands in `CLA
 
 ## 10. Record it
 
-1. Add or update the line in `.claude/REGISTRY.md` under "integrations": the folder, what it does, the providers that exist, the config key that selects them, and whether it falls back.
+1. Add or update the line in `.claude/REGISTRY.md` under "integrations": the folder, what it does, the providers that exist, the config key that selects them, whether it falls back, and the fake its `testing.ts` exports.
 2. If this is the first integration of its kind, fill in the "Reference implementations" table.
 3. If you decided anything a later integration should repeat, add a line to the log in `.claude/DECISIONS.md`.
 4. Run `node .claude/hooks/check-registry.mjs`.

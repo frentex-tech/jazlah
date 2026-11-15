@@ -19,4 +19,9 @@ export const ERROR_STATUSES: Readonly<Record<ErrorCode, number>> = {
   [ErrorCode.TRANSACTION_CONFLICT]: 409,
   [ErrorCode.SERVICE_UNAVAILABLE]: 503,
   [ErrorCode.INTERNAL_ERROR]: 500,
+  [ErrorCode.MEDIA_CONTENT_TYPE_NOT_ALLOWED]: 415,
+  [ErrorCode.MEDIA_NOT_FOUND]: 404,
+  [ErrorCode.MEDIA_UPLOAD_EXPIRED]: 410,
+  [ErrorCode.MEDIA_UPLOAD_REJECTED]: 422,
+  [ErrorCode.MEDIA_NOT_READY]: 409,
 };

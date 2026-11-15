@@ -50,6 +50,7 @@ const RULES = {
   R19: { title: '@Throttle and @SkipThrottle are used only inside src/infra/rate-limit', eslintRule: ['no-restricted-imports', 'no-restricted-syntax'], tag: '[R19]' },
   R20: { title: 'no Prisma *OrThrow method in a module', eslintRule: 'no-restricted-syntax', tag: '[R20]' },
   R21: { title: 'no type assertion from any or unknown to a concrete type', eslintRule: 'jazla/no-assertion-from-unknown', tag: '[R21]' },
+  R22: { title: "an integration's testing.ts is imported only by tests (*.spec.ts, test/)", eslintRule: 'boundaries/dependencies', tag: '[R22]' },
 };
 
 function listFixtures(dir) {

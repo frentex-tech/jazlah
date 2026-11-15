@@ -10,6 +10,7 @@ import { LoggerModule } from '@infra/logger/logger.module';
 import { QueueModule } from '@infra/queue/queue.module';
 import { RateLimitModule } from '@infra/rate-limit/rate-limit.module';
 import { RedisModule } from '@infra/redis/redis.module';
+import { MediaModule } from '@modules/media';
 
 @Module({
   imports: [
@@ -21,6 +22,7 @@ import { RedisModule } from '@infra/redis/redis.module';
     EventBusModule,
     RateLimitModule,
     HealthModule,
+    MediaModule,
   ],
   providers: [
     { provide: APP_FILTER, useClass: AllExceptionsFilter },

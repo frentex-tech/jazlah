@@ -155,7 +155,12 @@
           "RATE_LIMITED",
           "TRANSACTION_CONFLICT",
           "SERVICE_UNAVAILABLE",
-          "INTERNAL_ERROR"
+          "INTERNAL_ERROR",
+          "MEDIA_CONTENT_TYPE_NOT_ALLOWED",
+          "MEDIA_NOT_FOUND",
+          "MEDIA_UPLOAD_EXPIRED",
+          "MEDIA_UPLOAD_REJECTED",
+          "MEDIA_NOT_READY"
         ],
         "description": "Stable error code. Clients branch on it; it is never renamed or reused."
       },

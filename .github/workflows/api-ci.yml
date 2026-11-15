@@ -1,5 +1,6 @@
 # CI of the JAZLA API (services/api): every check of services/api/CLAUDE.md, "Commands",
-# against PostgreSQL + PostGIS and Redis service containers matching docker-compose.yml.
+# against PostgreSQL + PostGIS and Redis service containers matching docker-compose.yml,
+# and MinIO started from docker-compose.yml itself (it needs the repository's scripts).
 name: API CI
 
 on:
@@ -60,6 +61,15 @@ jobs:
       DATABASE_URL: postgresql://jazla:jazla@localhost:5434/jazla
       REDIS_URL: redis://localhost:6380/0
       PGPASSWORD: jazla
+      # The local MinIO of docker-compose.yml, as in .env.example.
+      STORAGE_ENDPOINT: http://localhost:9002
+      STORAGE_REGION: us-east-1
+      STORAGE_FORCE_PATH_STYLE: 'true'
+      STORAGE_ACCESS_KEY_ID: jazla
+      STORAGE_SECRET_ACCESS_KEY: jazla-local-storage
+      STORAGE_PUBLIC_BUCKET: jazla-public
+      STORAGE_PRIVATE_BUCKET: jazla-private
+      STORAGE_PUBLIC_BASE_URL: http://localhost:9002/jazla-public
 
     steps:
       - name: Check out
@@ -105,6 +115,12 @@ jobs:
 
       - name: Migrations
         run: pnpm db:deploy
+
+      # A service container starts before checkout and cannot run the bucket setup in
+      # docker/minio/, so MinIO comes from docker-compose.yml; --wait returns once its
+      # buckets exist (its healthcheck).
+      - name: Start MinIO
+        run: docker compose up -d --wait minio
 
       # Applies the migrations to jazla_test itself, then runs the e2e suites.
       - name: e2e tests
