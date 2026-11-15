@@ -340,9 +340,12 @@ export class MediaService {
         details: { reason: row.rejectionReason },
       });
     }
-    // Still pending after a conditional update: only a concurrent request that is
-    // itself confirming can be in this state; let the client confirm again.
-    throw new AppError(ErrorCode.MEDIA_NOT_READY);
+    // Unreachable: settled() runs only on a row that was not pending when read, or after
+    // this request's conditional update, which this request or another one won; nothing
+    // ever moves a row back to pending. Reaching it is a programming error.
+    throw new AppError(ErrorCode.INTERNAL_ERROR, {
+      cause: new Error(`media ${row.id} still pending after confirmation`),
+    });
   }
 
   private async loadRow(id: string): Promise<Media> {

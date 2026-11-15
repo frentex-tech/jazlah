@@ -147,15 +147,10 @@ describe('Media uploads with the fake storage (e2e)', () => {
       Array.from({ length: 5 }, () => confirm(ticket.mediaId)),
     );
 
-    const ready = responses.filter((res) => res.status === 200);
-    // A loser that reads the row while the winner is mid-flight may answer 409
-    // MEDIA_NOT_READY (confirm again); none may report another outcome.
+    // Every confirmation, winner or loser, answers with the ready file the winner made.
     for (const res of responses) {
-      expect([200, 409]).toContain(res.status);
-    }
-    expect(ready.length).toBeGreaterThan(0);
-    for (const res of ready) {
-      expect(res.body).toEqual(ready[0]?.body);
+      expect(res.status).toBe(200);
+      expect(res.body).toEqual(responses[0]?.body);
     }
     const row = await prisma.media.findUnique({
       where: { id: ticket.mediaId },
