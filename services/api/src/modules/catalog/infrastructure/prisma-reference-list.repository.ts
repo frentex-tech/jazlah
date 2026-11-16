@@ -3,10 +3,13 @@ import type { Page } from '@common/pagination/page.type';
 import type { PageRequest } from '@common/pagination/page-request.type';
 import { toPage } from '@common/pagination/to-page';
 import { DbContext } from '@infra/database/db-context';
+import type { Prisma } from '@infra/database/generated/prisma/client';
 import { keysetAfter } from '@infra/database/keyset-after';
 import { KEYSET_ORDER } from '@infra/database/keyset-order.constants';
 import { mapPrismaError } from '@infra/database/map-prisma-error';
+import { isOrderedReferenceList } from '../domain/is-ordered-reference-list';
 import type { NewReferenceItem } from '../domain/new-reference-item.type';
+import type { OrderedReferenceList } from '../domain/ordered-reference-list.type';
 import type { ReferenceListRepository } from '../domain/ports/reference-list.repository.port';
 import type { ReferenceItem } from '../domain/reference-item.type';
 import type { ReferenceItemChanges } from '../domain/reference-item-changes.type';
@@ -15,9 +18,9 @@ import { toReferenceItem } from './reference-item.mapper';
 import type { ReferenceTable } from './reference-table.type';
 
 /**
- * The admin lists, one table each, through the same columns; categories also have a
- * display order, written through their own delegate (the use cases refuse an order for
- * another list).
+ * The admin lists, one table each, through the same columns; the ordered lists
+ * (ORDERED_REFERENCE_LISTS: categories) also have a display order, written through
+ * their own delegate (the use cases refuse an order for another list).
  */
 @Injectable()
 export class PrismaReferenceListRepository implements ReferenceListRepository {
@@ -30,8 +33,8 @@ export class PrismaReferenceListRepository implements ReferenceListRepository {
     const data = { nameAr: item.name.ar, nameEn: item.name.en };
     try {
       return toReferenceItem(
-        list === 'categories'
-          ? await this.db.client.category.create({
+        isOrderedReferenceList(list)
+          ? await this.orderedTable(list).create({
               data: { ...data, sortOrder: item.sortOrder ?? 0 },
             })
           : await this.table(list).create({ data }),
@@ -56,18 +59,17 @@ export class PrismaReferenceListRepository implements ReferenceListRepository {
           ? {}
           : { isActive: changes.isActive }),
       };
-      const { count } =
-        list === 'categories'
-          ? await this.db.client.category.updateMany({
-              where: { id },
-              data: {
-                ...data,
-                ...(changes.sortOrder === undefined
-                  ? {}
-                  : { sortOrder: changes.sortOrder }),
-              },
-            })
-          : await table.updateMany({ where: { id }, data });
+      const { count } = isOrderedReferenceList(list)
+        ? await this.orderedTable(list).updateMany({
+            where: { id },
+            data: {
+              ...data,
+              ...(changes.sortOrder === undefined
+                ? {}
+                : { sortOrder: changes.sortOrder }),
+            },
+          })
+        : await table.updateMany({ where: { id }, data });
       if (count === 0) {
         return null;
       }
@@ -133,6 +135,19 @@ export class PrismaReferenceListRepository implements ReferenceListRepository {
       cutting_styles: client.cuttingStyle,
       exclusion_items: client.exclusionItem,
     };
+    return tables[list];
+  }
+
+  /**
+   * The table of a list with a display order. Typed by OrderedReferenceList: a list added
+   * to ORDERED_REFERENCE_LISTS does not compile until it is mapped here.
+   */
+  private orderedTable(
+    list: OrderedReferenceList,
+  ): Prisma.TransactionClient['category'] {
+    const tables: Readonly<
+      Record<OrderedReferenceList, Prisma.TransactionClient['category']>
+    > = { categories: this.db.client.category };
     return tables[list];
   }
 }

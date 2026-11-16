@@ -112,20 +112,6 @@ describe('Product', () => {
     });
   });
 
-  describe('minPriceOf', () => {
-    it('is the lowest size price, null without sizes', () => {
-      expect(
-        Product.minPriceOf([
-          { price: Money.of(120_000) },
-          { price: Money.of(95_001) },
-          { price: Money.of(95_000) },
-        ])?.halalas,
-      ).toBe(95_000);
-      expect(Product.minPriceOf([{ price: Money.of(1) }])?.halalas).toBe(1);
-      expect(Product.minPriceOf([])).toBeNull();
-    });
-  });
-
   describe('assertOwnSizes', () => {
     it("accepts new sizes and the product's own, refuses another size id", () => {
       const own = { ...CONTENT.sizes[0], id: SIZE };

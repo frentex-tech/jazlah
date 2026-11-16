@@ -70,9 +70,9 @@ export interface ProductRepository {
 
   /**
    * Sets the given prices, then the lowest price worked out again from the stored
-   * sizes, in the caller's transaction.
+   * sizes, in the caller's transaction; returns the product as saved.
    */
-  setPrices(id: string, changes: ProductPriceChanges): Promise<void>;
+  setPrices(id: string, changes: ProductPriceChanges): Promise<ProductDetails>;
 
   /**
    * The public list (FR-CAT-03): published, available products of active vendors in

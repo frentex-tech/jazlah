@@ -1,10 +1,9 @@
-import type { Money } from '@common/money/money';
+import { Money } from '@common/money/money';
 import { keysetPage } from '@common/pagination/keyset-page.fake';
 import type { Page } from '@common/pagination/page.type';
 import type { PageRequest } from '@common/pagination/page-request.type';
 import type { NewProduct } from '../new-product.type';
 import type { ProductRepository } from '../ports/product.repository.port';
-import { Product } from '../product.entity';
 import type { ProductContent } from '../product-content.type';
 import type { ProductDetails } from '../product-details.type';
 import type { ProductFulfilment } from '../product-fulfilment.type';
@@ -77,7 +76,7 @@ export class InMemoryProductRepository implements ProductRepository {
       fulfilment: product.fulfilment,
       content: product.content,
       sizes,
-      minPrice: Product.minPriceOf(sizes),
+      minPrice: this.minPriceOf(sizes),
       rejectionReason: null,
       submittedAt: null,
       reviewedAt: null,
@@ -93,6 +92,7 @@ export class InMemoryProductRepository implements ProductRepository {
     id: string,
     vendorId: string | null,
   ): Promise<ProductDetails | null> {
+    this.locks.noteRead(id);
     const stored = this.rows.find(
       (row) =>
         row.id === id && (vendorId === null || row.vendorId === vendorId),
@@ -142,7 +142,7 @@ export class InMemoryProductRepository implements ProductRepository {
         })),
       },
       sizes,
-      minPrice: Product.minPriceOf(sizes),
+      minPrice: this.minPriceOf(sizes),
       updatedAt: this.nextDate(),
     };
     this.replace(saved);
@@ -185,7 +185,7 @@ export class InMemoryProductRepository implements ProductRepository {
     return Promise.resolve();
   }
 
-  setPrices(id: string, changes: ProductPriceChanges): Promise<void> {
+  setPrices(id: string, changes: ProductPriceChanges): Promise<ProductDetails> {
     this.locks.assertLocked(id);
     const stored = this.get(id);
     const sizes = stored.sizes.map((size) => ({
@@ -208,14 +208,15 @@ export class InMemoryProductRepository implements ProductRepository {
           )?.extraPrice ?? cutting.extraPrice,
       })),
     };
-    this.replace({
+    const saved: StoredProduct = {
       ...stored,
       sizes,
       content,
-      minPrice: Product.minPriceOf(sizes),
+      minPrice: this.minPriceOf(sizes),
       updatedAt: this.nextDate(),
-    });
-    return Promise.resolve();
+    };
+    this.replace(saved);
+    return Promise.resolve(this.detailsOf(saved));
   }
 
   listPublic(
@@ -337,6 +338,11 @@ export class InMemoryProductRepository implements ProductRepository {
       coverMediaId: row.content.imageMediaIds[0] ?? null,
       createdAt: row.createdAt,
     };
+  }
+
+  /** The lowest stored size price, null for none (the repository's aggregate). */
+  private minPriceOf(sizes: readonly ProductSize[]): Money | null {
+    return Money.min(sizes.map((size) => size.price));
   }
 
   private get(id: string): StoredProduct {

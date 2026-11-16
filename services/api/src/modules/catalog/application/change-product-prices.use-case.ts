@@ -64,9 +64,6 @@ export class ChangeProductPricesUseCase {
       );
       return this.applyPrices(input, live);
     });
-    if (updated === null) {
-      throw new AppError(ErrorCode.NOT_FOUND);
-    }
     return toProductView(updated, null, this.media);
   }
 
@@ -74,7 +71,7 @@ export class ChangeProductPricesUseCase {
   private async applyPrices(
     input: Readonly<{ actorId: string; changes: ProductPriceChanges }>,
     live: ProductDetails,
-  ): Promise<ProductDetails | null> {
+  ): Promise<ProductDetails> {
     ProductStatusMachine.assertEditable(live.status);
     const sizes = new Map(live.sizes.map((size) => [size.id, size]));
     const cuttings = new Map(
@@ -132,7 +129,7 @@ export class ChangeProductPricesUseCase {
             ];
       }),
     ];
-    await this.products.setPrices(live.id, input.changes);
+    const saved = await this.products.setPrices(live.id, input.changes);
     for (const metadata of audited) {
       await this.audit.write({
         actorId: input.actorId,
@@ -141,6 +138,6 @@ export class ChangeProductPricesUseCase {
         metadata,
       });
     }
-    return this.products.findDetails(live.id, live.vendorId);
+    return saved;
   }
 }

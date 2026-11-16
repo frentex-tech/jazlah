@@ -1,3 +1,4 @@
+import { isOrderedReferenceList } from '../is-ordered-reference-list';
 import type { NewReferenceItem } from '../new-reference-item.type';
 import { keysetPage } from '@common/pagination/keyset-page.fake';
 import type { Page } from '@common/pagination/page.type';
@@ -20,7 +21,7 @@ export class InMemoryReferenceLists implements ReferenceListRepository {
       id,
       name: { ar: `${list} ${id.slice(-4)}`, en: `${list} ${id.slice(-4)}` },
       isActive,
-      sortOrder: list === 'categories' ? 0 : null,
+      sortOrder: isOrderedReferenceList(list) ? 0 : null,
       createdAt: this.nextDate(),
     };
     this.rows = [...this.rows, { list, item }];
@@ -38,7 +39,7 @@ export class InMemoryReferenceLists implements ReferenceListRepository {
       id: this.newId(),
       name: entry.name,
       isActive: true,
-      sortOrder: list === 'categories' ? (entry.sortOrder ?? 0) : null,
+      sortOrder: isOrderedReferenceList(list) ? (entry.sortOrder ?? 0) : null,
       createdAt: this.nextDate(),
     };
     this.rows = [...this.rows, { list, item }];

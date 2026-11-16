@@ -242,7 +242,10 @@ export class PrismaProductRepository implements ProductRepository {
     }
   }
 
-  async setPrices(id: string, changes: ProductPriceChanges): Promise<void> {
+  async setPrices(
+    id: string,
+    changes: ProductPriceChanges,
+  ): Promise<ProductDetails> {
     const client = this.db.client;
     try {
       for (const change of changes.sizes) {
@@ -257,7 +260,7 @@ export class PrismaProductRepository implements ProductRepository {
           data: { extraPriceHalalas: change.extraPrice.halalas },
         });
       }
-      await this.refreshMinPrice(id);
+      return await this.refreshMinPrice(id);
     } catch (error) {
       mapPrismaError(error);
     }

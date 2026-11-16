@@ -8417,7 +8417,12 @@
             "example": "pending"
           },
           "content": {
-            "$ref": "#/components/schemas/ProductContentResponseDto"
+            "description": "The content as the vendor proposed it. Prices of sizes and cuttings the product already has are as they were then: approval keeps their live prices (see the product), and only new sizes and cuttings take the prices shown.",
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/ProductContentResponseDto"
+              }
+            ]
           },
           "rejectionReason": {
             "type": "string",

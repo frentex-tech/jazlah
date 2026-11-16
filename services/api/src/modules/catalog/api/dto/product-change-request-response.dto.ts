@@ -20,7 +20,11 @@ export class ProductChangeRequestResponseDto {
   @ApiProperty({ enum: PRODUCT_CHANGE_REQUEST_STATUSES, example: 'pending' })
   status!: ProductChangeRequestStatus;
 
-  @ApiProperty({ type: ProductContentResponseDto })
+  @ApiProperty({
+    type: ProductContentResponseDto,
+    description:
+      'The content as the vendor proposed it. Prices of sizes and cuttings the product already has are as they were then: approval keeps their live prices (see the product), and only new sizes and cuttings take the prices shown.',
+  })
   content!: ProductContentResponseDto;
 
   @ApiProperty({ type: String, nullable: true, example: null })

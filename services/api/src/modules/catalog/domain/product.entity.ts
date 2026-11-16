@@ -1,12 +1,10 @@
 import { AppError } from '@common/errors/app-error';
 import { ErrorCode } from '@common/errors/error-code.enum';
 import type { FieldError } from '@common/errors/field-error.type';
-import { Money } from '@common/money/money';
 import type { CuttingPackagingIncompatibility } from './cutting-packaging-incompatibility.type';
 import type { ProductContent } from './product-content.type';
 import type { ProductDetails } from './product-details.type';
 import type { ProductPriceChanges } from './product-price-changes.type';
-import type { ProductSizeInput } from './product-size-input.type';
 import type { ProductSubmissionProblem } from './product-submission-problem.type';
 
 /**
@@ -93,16 +91,6 @@ export class Product {
         (index) => `cuttings.${index}.cuttingStyleId`,
       ),
     ]);
-  }
-
-  /**
-   * The lowest size price, or null for no size: `products.min_price_halalas`, which the
-   * repository works out from the stored sizes in the transaction that changed them.
-   */
-  static minPriceOf(
-    sizes: readonly Pick<ProductSizeInput, 'price'>[],
-  ): Money | null {
-    return Money.min(sizes.map((size) => size.price));
   }
 
   /**
