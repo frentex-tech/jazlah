@@ -75,6 +75,7 @@ export class UpdateProductContentUseCase {
       content: ProductContent;
     }>,
   ): Promise<ProductView> {
+    Product.assertNoRepeats(input.content);
     const live = await findWritableProduct(
       input.scope,
       input.productId,

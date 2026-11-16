@@ -51,6 +51,7 @@ export class CreateProductUseCase {
       content: ProductContent;
     }>,
   ): Promise<ProductView> {
+    Product.assertNoRepeats(input.content);
     const vendorId = await resolveVendorId(input.scope, this.vendors);
     Product.assertOwnSizes(input.content, null);
     await assertProductContent(

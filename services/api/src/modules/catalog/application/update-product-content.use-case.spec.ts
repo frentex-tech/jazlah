@@ -49,6 +49,54 @@ describe('UpdateProductContentUseCase', () => {
     expect(kit.changeRequests.rows).toEqual([]);
   });
 
+  it('refuses a size id named twice, so the lowest price cannot fall below every real one (review finding)', async () => {
+    const kit = buildCatalogUseCases();
+    seedCatalog(kit);
+    const draft = await vendorDraft(kit);
+    const kept = draft.product.sizes[0];
+    const before = kit.products.rows;
+
+    await expect(
+      kit.updateContent.execute({
+        scope: vendorScope,
+        actorId: VENDOR_USER,
+        productId: draft.product.id,
+        content: content({
+          sizes: [kept, { ...kept, price: Money.of(100) }],
+        }),
+      }),
+    ).rejects.toMatchObject({
+      code: ErrorCode.VALIDATION_FAILED,
+      details: [{ field: 'sizes.1.id', constraints: ['isNotRepeated'] }],
+    });
+    expect(kit.products.rows).toBe(before);
+  });
+
+  it('refuses a cutting style named twice', async () => {
+    const kit = buildCatalogUseCases();
+    seedCatalog(kit);
+    const draft = await vendorDraft(kit);
+
+    await expect(
+      kit.updateContent.execute({
+        scope: vendorScope,
+        actorId: VENDOR_USER,
+        productId: draft.product.id,
+        content: content({
+          cuttings: [
+            { cuttingStyleId: CUT, extraPrice: Money.zero() },
+            { cuttingStyleId: CUT, extraPrice: Money.of(1) },
+          ],
+        }),
+      }),
+    ).rejects.toMatchObject({
+      code: ErrorCode.VALIDATION_FAILED,
+      details: [
+        { field: 'cuttings.1.cuttingStyleId', constraints: ['isNotRepeated'] },
+      ],
+    });
+  });
+
   it('refuses any edit of a product under review with PRODUCT_NOT_EDITABLE', async () => {
     const kit = buildCatalogUseCases();
     seedCatalog(kit);

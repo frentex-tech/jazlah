@@ -8186,6 +8186,7 @@
           },
           "sizes": {
             "maxItems": 20,
+            "description": "Each existing size id at most once (VALIDATION_FAILED `isNotRepeated` on `sizes.<i>.id`).",
             "type": "array",
             "items": {
               "$ref": "#/components/schemas/ProductSizeDto"
@@ -8193,6 +8194,7 @@
           },
           "cuttings": {
             "maxItems": 30,
+            "description": "Each cutting style at most once (VALIDATION_FAILED `isNotRepeated` on `cuttings.<i>.cuttingStyleId`).",
             "type": "array",
             "items": {
               "$ref": "#/components/schemas/ProductCuttingDto"
@@ -8799,6 +8801,7 @@
           },
           "sizes": {
             "maxItems": 20,
+            "description": "Each existing size id at most once (VALIDATION_FAILED `isNotRepeated` on `sizes.<i>.id`).",
             "type": "array",
             "items": {
               "$ref": "#/components/schemas/ProductSizeDto"
@@ -8806,6 +8809,7 @@
           },
           "cuttings": {
             "maxItems": 30,
+            "description": "Each cutting style at most once (VALIDATION_FAILED `isNotRepeated` on `cuttings.<i>.cuttingStyleId`).",
             "type": "array",
             "items": {
               "$ref": "#/components/schemas/ProductCuttingDto"
@@ -8925,6 +8929,7 @@
         "properties": {
           "sizes": {
             "maxItems": 20,
+            "description": "Each size at most once (VALIDATION_FAILED `isNotRepeated` on `sizes.<i>.sizeId`).",
             "type": "array",
             "items": {
               "$ref": "#/components/schemas/SizePriceDto"
@@ -8932,6 +8937,7 @@
           },
           "cuttings": {
             "maxItems": 30,
+            "description": "Each cutting style at most once (VALIDATION_FAILED `isNotRepeated` on `cuttings.<i>.cuttingStyleId`).",
             "type": "array",
             "items": {
               "$ref": "#/components/schemas/CuttingPriceDto"

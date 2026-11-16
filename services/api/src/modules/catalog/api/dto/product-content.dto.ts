@@ -70,17 +70,26 @@ export class ProductContentDto {
   @IsUUID('all', { each: true })
   imageMediaIds!: string[];
 
-  @ApiProperty({ type: [ProductSizeDto], maxItems: PRODUCT_LIMITS.sizes })
+  @ApiProperty({
+    type: [ProductSizeDto],
+    maxItems: PRODUCT_LIMITS.sizes,
+    description:
+      'Each existing size id at most once (VALIDATION_FAILED `isNotRepeated` on `sizes.<i>.id`).',
+  })
   @IsArray()
   @ArrayMaxSize(PRODUCT_LIMITS.sizes)
   @ValidateNested({ each: true })
   @Type(() => ProductSizeDto)
   sizes!: ProductSizeDto[];
 
-  @ApiProperty({ type: [ProductCuttingDto], maxItems: PRODUCT_LIMITS.cuttings })
+  @ApiProperty({
+    type: [ProductCuttingDto],
+    maxItems: PRODUCT_LIMITS.cuttings,
+    description:
+      'Each cutting style at most once (VALIDATION_FAILED `isNotRepeated` on `cuttings.<i>.cuttingStyleId`).',
+  })
   @IsArray()
   @ArrayMaxSize(PRODUCT_LIMITS.cuttings)
-  @ArrayUnique((cutting: ProductCuttingDto) => cutting.cuttingStyleId)
   @ValidateNested({ each: true })
   @Type(() => ProductCuttingDto)
   cuttings!: ProductCuttingDto[];

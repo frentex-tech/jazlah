@@ -52,6 +52,7 @@ export class ChangeProductPricesUseCase {
       changes: ProductPriceChanges;
     }>,
   ): Promise<ProductView> {
+    Product.assertNoRepeatedPriceChanges(input.changes);
     const live = await findWritableProduct(
       input.scope,
       input.productId,

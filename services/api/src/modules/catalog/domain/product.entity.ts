@@ -5,6 +5,7 @@ import { Money } from '@common/money/money';
 import type { CuttingPackagingIncompatibility } from './cutting-packaging-incompatibility.type';
 import type { ProductContent } from './product-content.type';
 import type { ProductDetails } from './product-details.type';
+import type { ProductPriceChanges } from './product-price-changes.type';
 import type { ProductSizeInput } from './product-size-input.type';
 import type { ProductSubmissionProblem } from './product-submission-problem.type';
 
@@ -54,6 +55,44 @@ export class Product {
         details: pairs.length > 0 ? { reasons, pairs } : { reasons },
       });
     }
+  }
+
+  /**
+   * One request names each existing size and each cutting style once. A repeat would
+   * write one row twice (the last value winning) while the lowest price counted both.
+   * Otherwise VALIDATION_FAILED on each repeat: `sizes.<i>.id`,
+   * `cuttings.<i>.cuttingStyleId` (constraint `isNotRepeated`). New sizes (id null)
+   * may repeat.
+   */
+  static assertNoRepeats(content: ProductContent): void {
+    Product.throwRepeats([
+      ...Product.repeatsOf(
+        content.sizes.map((size) => size.id),
+        (index) => `sizes.${index}.id`,
+      ),
+      ...Product.repeatsOf(
+        content.cuttings.map((cutting) => cutting.cuttingStyleId),
+        (index) => `cuttings.${index}.cuttingStyleId`,
+      ),
+    ]);
+  }
+
+  /**
+   * A prices edit names each size and each cutting style once. Otherwise
+   * VALIDATION_FAILED on each repeat: `sizes.<i>.sizeId`, `cuttings.<i>.cuttingStyleId`
+   * (constraint `isNotRepeated`).
+   */
+  static assertNoRepeatedPriceChanges(changes: ProductPriceChanges): void {
+    Product.throwRepeats([
+      ...Product.repeatsOf(
+        changes.sizes.map((change) => change.sizeId),
+        (index) => `sizes.${index}.sizeId`,
+      ),
+      ...Product.repeatsOf(
+        changes.cuttings.map((change) => change.cuttingStyleId),
+        (index) => `cuttings.${index}.cuttingStyleId`,
+      ),
+    ]);
   }
 
   /** The lowest size price, or null for no size: `products.min_price_halalas`. */
@@ -182,5 +221,29 @@ export class Product {
       packagings: live.packagings,
       exclusionItemIds: live.exclusions.map((exclusion) => exclusion.id),
     };
+  }
+
+  /** A field error for every value (null aside) already seen earlier in `values`. */
+  private static repeatsOf(
+    values: readonly (string | null)[],
+    field: (index: number) => string,
+  ): FieldError[] {
+    const seen = new Set<string>();
+    return values.flatMap((value, index) => {
+      if (value === null) {
+        return [];
+      }
+      if (seen.has(value)) {
+        return [{ field: field(index), constraints: ['isNotRepeated'] }];
+      }
+      seen.add(value);
+      return [];
+    });
+  }
+
+  private static throwRepeats(details: readonly FieldError[]): void {
+    if (details.length > 0) {
+      throw new AppError(ErrorCode.VALIDATION_FAILED, { details });
+    }
   }
 }

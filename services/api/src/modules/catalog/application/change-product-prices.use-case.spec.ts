@@ -104,6 +104,39 @@ describe('ChangeProductPricesUseCase', () => {
     expect(kit.audit.rows).toEqual([]);
   });
 
+  it('refuses a size or a cutting style named twice, changing nothing', async () => {
+    const kit = buildCatalogUseCases();
+    seedCatalog(kit);
+    const live = await publishedVendorProduct(kit);
+    const sizeId = live.product.sizes[0].id;
+    const before = kit.products.rows;
+
+    await expect(
+      kit.changePrices.execute({
+        scope,
+        actorId: VENDOR_USER,
+        productId: live.product.id,
+        changes: {
+          sizes: [
+            { sizeId, price: Money.of(100) },
+            { sizeId, price: Money.of(200) },
+          ],
+          cuttings: [
+            { cuttingStyleId: CUT, extraPrice: Money.zero() },
+            { cuttingStyleId: CUT, extraPrice: Money.of(1) },
+          ],
+        },
+      }),
+    ).rejects.toMatchObject({
+      code: ErrorCode.VALIDATION_FAILED,
+      details: [
+        { field: 'sizes.1.sizeId', constraints: ['isNotRepeated'] },
+        { field: 'cuttings.1.cuttingStyleId', constraints: ['isNotRepeated'] },
+      ],
+    });
+    expect(kit.products.rows).toBe(before);
+  });
+
   it('refuses a product under review', async () => {
     const kit = buildCatalogUseCases();
     seedCatalog(kit);

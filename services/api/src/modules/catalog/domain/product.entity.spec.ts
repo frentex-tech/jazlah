@@ -155,6 +155,92 @@ describe('Product', () => {
     });
   });
 
+  describe('assertNoRepeats', () => {
+    it('accepts distinct ids and several new sizes', () => {
+      const newSize = CONTENT.sizes[0];
+      expect(
+        errorOf(() =>
+          Product.assertNoRepeats({
+            ...CONTENT,
+            sizes: [{ ...newSize, id: SIZE }, newSize, newSize],
+            cuttings: [
+              { cuttingStyleId: CUT, extraPrice: Money.zero() },
+              { cuttingStyleId: OTHER_CUT, extraPrice: Money.zero() },
+            ],
+          }),
+        ),
+      ).toBeNull();
+    });
+
+    it('refuses a size id or a cutting style named twice, on each repeat', () => {
+      const own = { ...CONTENT.sizes[0], id: SIZE };
+      expect(
+        errorOf(() =>
+          Product.assertNoRepeats({
+            ...CONTENT,
+            sizes: [own, { ...own, price: Money.of(1) }],
+            cuttings: [
+              { cuttingStyleId: CUT, extraPrice: Money.zero() },
+              { cuttingStyleId: OTHER_CUT, extraPrice: Money.zero() },
+              { cuttingStyleId: CUT, extraPrice: Money.of(1) },
+            ],
+          }),
+        ),
+      ).toMatchObject({
+        code: ErrorCode.VALIDATION_FAILED,
+        details: [
+          { field: 'sizes.1.id', constraints: ['isNotRepeated'] },
+          {
+            field: 'cuttings.2.cuttingStyleId',
+            constraints: ['isNotRepeated'],
+          },
+        ],
+      });
+    });
+  });
+
+  describe('assertNoRepeatedPriceChanges', () => {
+    it('accepts each size and cutting style once', () => {
+      expect(
+        errorOf(() =>
+          Product.assertNoRepeatedPriceChanges({
+            sizes: [{ sizeId: SIZE, price: Money.of(1) }],
+            cuttings: [
+              { cuttingStyleId: CUT, extraPrice: Money.zero() },
+              { cuttingStyleId: OTHER_CUT, extraPrice: Money.zero() },
+            ],
+          }),
+        ),
+      ).toBeNull();
+    });
+
+    it('refuses a size or a cutting style named twice, on each repeat', () => {
+      expect(
+        errorOf(() =>
+          Product.assertNoRepeatedPriceChanges({
+            sizes: [
+              { sizeId: SIZE, price: Money.of(1) },
+              { sizeId: SIZE, price: Money.of(2) },
+            ],
+            cuttings: [
+              { cuttingStyleId: CUT, extraPrice: Money.zero() },
+              { cuttingStyleId: CUT, extraPrice: Money.of(1) },
+            ],
+          }),
+        ),
+      ).toMatchObject({
+        code: ErrorCode.VALIDATION_FAILED,
+        details: [
+          { field: 'sizes.1.sizeId', constraints: ['isNotRepeated'] },
+          {
+            field: 'cuttings.1.cuttingStyleId',
+            constraints: ['isNotRepeated'],
+          },
+        ],
+      });
+    });
+  });
+
   describe('editing a published product', () => {
     it('accepts a content edit that keeps the live prices and adds a priced size', () => {
       const content: ProductContent = {

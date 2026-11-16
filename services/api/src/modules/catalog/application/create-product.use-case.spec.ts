@@ -152,6 +152,26 @@ describe('CreateProductUseCase', () => {
     expect(kit.products.rows).toEqual([]);
   });
 
+  it('refuses a cutting style named twice, creating nothing', async () => {
+    const kit = buildCatalogUseCases();
+    seedCatalog(kit);
+
+    await expect(
+      vendorDraft(kit, {
+        cuttings: [
+          { cuttingStyleId: CUT, extraPrice: Money.zero() },
+          { cuttingStyleId: CUT, extraPrice: Money.of(1) },
+        ],
+      }),
+    ).rejects.toMatchObject({
+      code: ErrorCode.VALIDATION_FAILED,
+      details: [
+        { field: 'cuttings.1.cuttingStyleId', constraints: ['isNotRepeated'] },
+      ],
+    });
+    expect(kit.products.rows).toEqual([]);
+  });
+
   it('refuses a size id on a new product', async () => {
     const kit = buildCatalogUseCases();
     seedCatalog(kit);
