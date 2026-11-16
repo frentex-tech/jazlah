@@ -649,12 +649,18 @@ describe('Vendors (e2e)', () => {
           },
         ]);
       } finally {
-        // The platform vendor is unique: remove it so the next run creates it again.
-        await prisma.auditLog.deleteMany({ where: { entityId: vendor.id } });
-        await prisma.vendorCommissionChange.deleteMany({
-          where: { vendorId: vendor.id },
+        // The platform vendor is unique and other suites (the catalog's JAZLA products)
+        // use it at the same time: keep it, and undo only what this test changed.
+        await prisma.auditLog.deleteMany({
+          where: {
+            entityId: vendor.id,
+            action: 'vendors.vendor.profile_updated',
+          },
         });
-        await prisma.vendor.deleteMany({ where: { id: vendor.id } });
+        await prisma.vendor.update({
+          where: { id: vendor.id },
+          data: { logoMediaId: null, descriptionAr: null, descriptionEn: null },
+        });
       }
     });
 
