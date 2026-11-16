@@ -5642,7 +5642,7 @@
     },
     "/v1/admin/product-change-requests": {
       "get": {
-        "description": "Image URLs are given on the product (GET admin/products/:id), not here.",
+        "description": "Each with the proposed content, its images with their URLs. The live product beside it: GET admin/products/:id.",
         "operationId": "AdminCatalogController_listPendingChanges",
         "parameters": [
           {

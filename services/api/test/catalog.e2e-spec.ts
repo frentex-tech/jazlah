@@ -33,6 +33,11 @@ type ProductBody = {
   } | null;
 };
 type Page<T> = { items: T[]; nextCursor: string | null };
+type QueuedRequest = {
+  id: string;
+  productId: string;
+  content: { images: { mediaId: string; url: string | null }[] };
+};
 type CategoryList = { items: { id: string; sortOrder: number | null }[] };
 type Card = { id: string; vendor: { id: string; name: { en: string } | null } };
 
@@ -573,6 +578,10 @@ describe('Catalog (e2e)', () => {
         .get('/v1/admin/product-change-requests?limit=50')
         .set(...bearer(admin))
         .expect(200);
+      const detail = await catalog.http
+        .get(`/v1/admin/products/${id}`)
+        .set(...bearer(admin))
+        .expect(200);
       const requestId = (second.body as ProductBody).changeRequest!.id;
       const approved = await catalog.http
         .post(`/v1/admin/product-change-requests/${requestId}/approve`)
@@ -596,11 +605,17 @@ describe('Catalog (e2e)', () => {
       expect((publicPage.body as { name: { en: string } }).name.en).toBe(
         'Naimi lamb',
       );
+      const queued = (queue.body as Page<QueuedRequest>).items.filter(
+        (request) => request.productId === id,
+      );
+      expect(queued).toHaveLength(1);
+      // The reviewer sees the proposed images, in the queue and on the product.
+      const proposed = [{ mediaId: image, url: expect.any(String) as string }];
+      expect(queued[0]?.content.images).toEqual(proposed);
       expect(
-        (queue.body as Page<{ id: string; productId: string }>).items.filter(
-          (request) => request.productId === id,
-        ),
-      ).toHaveLength(1);
+        (detail.body as { changeRequest: QueuedRequest }).changeRequest.content
+          .images,
+      ).toEqual(proposed);
       expect(approved.body).toMatchObject({
         status: 'published',
         name: { en: 'Second' },

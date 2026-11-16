@@ -326,17 +326,19 @@ export class AdminCatalogController {
   @ApiOperation({
     summary: 'Pending change requests on published products, newest first',
     description:
-      'Image URLs are given on the product (GET admin/products/:id), not here.',
+      'Each with the proposed content, its images with their URLs. The live product beside it: GET admin/products/:id.',
   })
   @ApiOkResponse({ type: ProductChangeRequestPageResponseDto })
   @ApiErrorResponses(ErrorCode.VALIDATION_FAILED, ...ADMIN_AUTH_ERRORS)
   async listPendingChanges(
     @Query() query: PageQueryDto,
   ): Promise<ProductChangeRequestPageResponseDto> {
-    const page = await this.listChangeRequests.execute(toPageRequest(query));
+    const { page, imageUrls } = await this.listChangeRequests.execute(
+      toPageRequest(query),
+    );
     return {
       items: page.items.map((request) =>
-        toChangeRequestResponse(request, new Map()),
+        toChangeRequestResponse(request, imageUrls),
       ),
       nextCursor: toNextCursor(page),
     };

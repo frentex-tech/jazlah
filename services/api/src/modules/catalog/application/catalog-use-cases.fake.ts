@@ -154,7 +154,10 @@ export function buildCatalogUseCases() {
       audit,
       transactions,
     ),
-    listChangeRequests: new ListProductChangeRequestsUseCase(changeRequests),
+    listChangeRequests: new ListProductChangeRequestsUseCase(
+      changeRequests,
+      media,
+    ),
     approveChangeRequest: new ApproveProductChangeRequestUseCase(
       products,
       changeRequests,

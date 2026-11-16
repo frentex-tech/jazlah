@@ -2,6 +2,7 @@ import { Product } from '../domain/product.entity';
 import { buildCatalogUseCases } from './catalog-use-cases.fake';
 import {
   ADMIN,
+  IMAGE,
   VENDOR,
   VENDOR_USER,
   publishedVendorProduct,
@@ -9,7 +10,7 @@ import {
 } from './catalog-test-data.fake';
 
 describe('ListProductChangeRequestsUseCase', () => {
-  it('lists the pending requests only, newest first', async () => {
+  it('lists the pending requests only, newest first, with the URLs of their images', async () => {
     const kit = buildCatalogUseCases();
     seedCatalog(kit);
     const first = await publishedVendorProduct(kit);
@@ -32,7 +33,7 @@ describe('ListProductChangeRequestsUseCase', () => {
       reason: 'r',
     });
 
-    const page = await kit.listChangeRequests.execute({
+    const { page, imageUrls } = await kit.listChangeRequests.execute({
       cursor: null,
       limit: 20,
     });
@@ -40,5 +41,7 @@ describe('ListProductChangeRequestsUseCase', () => {
     expect(page.items.map((request) => request.id)).toEqual([
       waiting.changeRequest!.id,
     ]);
+    expect([...imageUrls.keys()]).toEqual(page.items[0]?.content.imageMediaIds);
+    expect(imageUrls.get(IMAGE)).toBe(`https://cdn.example.invalid/${IMAGE}`);
   });
 });
