@@ -3708,7 +3708,7 @@
         ]
       },
       "put": {
-        "description": "A draft or rejected product changes at once. On a published product the edit becomes its one pending change request (replacing any pending one) while the live version stays; existing sizes and cuttings must keep their live prices (change them with PATCH …/prices), and the submission rules apply. PRODUCT_NOT_EDITABLE while under review.",
+        "description": "Existing sizes and cuttings must keep their live prices (change them with PATCH …/prices). A draft or rejected product changes at once. On a published product the edit becomes its one pending change request (replacing any pending one) while the live version stays, and the submission rules apply. PRODUCT_NOT_EDITABLE while under review.",
         "operationId": "VendorCatalogController_update",
         "parameters": [
           {
@@ -5284,7 +5284,7 @@
         ]
       },
       "put": {
-        "description": "Applies at once, also when published (audited); a published product keeps its live prices here and must meet the submission rules. Another vendor’s product is NOT_FOUND.",
+        "description": "Applies at once, also when published (audited). Existing sizes and cuttings keep their live prices here (change them with PATCH …/prices); a published product must meet the submission rules. Another vendor’s product is NOT_FOUND.",
         "operationId": "AdminCatalogController_updatePlatformProduct",
         "parameters": [
           {
@@ -8111,7 +8111,7 @@
             "type": "number",
             "minimum": 1,
             "maximum": 100000000,
-            "description": "The price in halalas, VAT included. On a published product an existing size keeps its live price here: change it with the prices endpoint.",
+            "description": "The price in halalas, VAT included. An existing size keeps its live price here (VALIDATION_FAILED `isLivePrice` otherwise): change it with the prices endpoint.",
             "example": 95000
           },
           "tag": {
@@ -8142,7 +8142,7 @@
             "type": "number",
             "minimum": 0,
             "maximum": 100000000,
-            "description": "The extra price in halalas, VAT included; 0 for none.",
+            "description": "The extra price in halalas, VAT included; 0 for none. A cutting style the product already offers keeps its live extra price here (VALIDATION_FAILED `isLivePrice` otherwise): change it with the prices endpoint.",
             "example": 1500
           }
         },
@@ -8186,7 +8186,7 @@
           },
           "sizes": {
             "maxItems": 20,
-            "description": "Each existing size id at most once (VALIDATION_FAILED `isNotRepeated` on `sizes.<i>.id`).",
+            "description": "Each existing size id at most once (VALIDATION_FAILED `isNotRepeated` on `sizes.<i>.id`); an existing size keeps its live price.",
             "type": "array",
             "items": {
               "$ref": "#/components/schemas/ProductSizeDto"
@@ -8801,7 +8801,7 @@
           },
           "sizes": {
             "maxItems": 20,
-            "description": "Each existing size id at most once (VALIDATION_FAILED `isNotRepeated` on `sizes.<i>.id`).",
+            "description": "Each existing size id at most once (VALIDATION_FAILED `isNotRepeated` on `sizes.<i>.id`); an existing size keeps its live price.",
             "type": "array",
             "items": {
               "$ref": "#/components/schemas/ProductSizeDto"

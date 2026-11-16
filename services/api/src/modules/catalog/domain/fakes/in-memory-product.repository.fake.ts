@@ -4,6 +4,7 @@ import type { Page } from '@common/pagination/page.type';
 import type { PageRequest } from '@common/pagination/page-request.type';
 import type { NewProduct } from '../new-product.type';
 import type { ProductRepository } from '../ports/product.repository.port';
+import { Product } from '../product.entity';
 import type { ProductContent } from '../product-content.type';
 import type { ProductDetails } from '../product-details.type';
 import type { ProductFulfilment } from '../product-fulfilment.type';
@@ -38,7 +39,8 @@ type StoredProduct = Readonly<{
 /**
  * Products in memory, with names joined from the reference lists fake. `rows` is
  * replaced on every write (fake rollback). `suspendedVendors` stands for the vendors
- * whose status the public queries exclude.
+ * whose status the public queries exclude. As the Prisma repository: a kept size or
+ * cutting keeps its stored price, and the lowest price comes from the stored sizes.
  */
 export class InMemoryProductRepository implements ProductRepository {
   private readonly newId = fakeIds('8004');
@@ -50,6 +52,7 @@ export class InMemoryProductRepository implements ProductRepository {
 
   create(product: NewProduct): Promise<ProductDetails> {
     const now = this.nextDate();
+    const sizes = this.sizesOf(product.content, []);
     const stored: StoredProduct = {
       id: this.newId(),
       vendorId: product.vendorId,
@@ -57,8 +60,8 @@ export class InMemoryProductRepository implements ProductRepository {
       isAvailable: true,
       fulfilment: product.fulfilment,
       content: product.content,
-      sizes: this.sizesOf(product.content, []),
-      minPrice: product.minPrice,
+      sizes,
+      minPrice: Product.minPriceOf(sizes),
       rejectionReason: null,
       submittedAt: null,
       reviewedAt: null,
@@ -102,17 +105,27 @@ export class InMemoryProductRepository implements ProductRepository {
     );
   }
 
-  saveContent(
-    id: string,
-    content: ProductContent,
-    minPrice: Money | null,
-  ): Promise<ProductDetails> {
+  saveContent(id: string, content: ProductContent): Promise<ProductDetails> {
     const stored = this.get(id);
+    const sizes = this.sizesOf(content, stored.sizes);
     const saved: StoredProduct = {
       ...stored,
-      content,
-      sizes: this.sizesOf(content, stored.sizes),
-      minPrice,
+      content: {
+        ...content,
+        sizes: content.sizes.map((size, index) => ({
+          ...size,
+          price: sizes[index]?.price ?? size.price,
+        })),
+        cuttings: content.cuttings.map((cutting) => ({
+          ...cutting,
+          extraPrice:
+            stored.content.cuttings.find(
+              (old) => old.cuttingStyleId === cutting.cuttingStyleId,
+            )?.extraPrice ?? cutting.extraPrice,
+        })),
+      },
+      sizes,
+      minPrice: Product.minPriceOf(sizes),
       updatedAt: this.nextDate(),
     };
     this.replace(saved);
@@ -152,11 +165,7 @@ export class InMemoryProductRepository implements ProductRepository {
     return Promise.resolve();
   }
 
-  setPrices(
-    id: string,
-    changes: ProductPriceChanges,
-    minPrice: Money | null,
-  ): Promise<void> {
+  setPrices(id: string, changes: ProductPriceChanges): Promise<void> {
     const stored = this.get(id);
     const sizes = stored.sizes.map((size) => ({
       ...size,
@@ -182,7 +191,7 @@ export class InMemoryProductRepository implements ProductRepository {
       ...stored,
       sizes,
       content,
-      minPrice,
+      minPrice: Product.minPriceOf(sizes),
       updatedAt: this.nextDate(),
     });
     return Promise.resolve();
@@ -233,20 +242,23 @@ export class InMemoryProductRepository implements ProductRepository {
     );
   }
 
-  /** The content's sizes with ids: kept for an existing id, new otherwise. */
+  /**
+   * The content's sizes with ids: an existing id kept with its stored price, a new one
+   * otherwise.
+   */
   private sizesOf(
     content: ProductContent,
     previous: readonly ProductSize[],
   ): ProductSize[] {
-    return content.sizes.map((size) => ({
-      id:
-        size.id !== null && previous.some((old) => old.id === size.id)
-          ? size.id
-          : this.newId(),
-      approxWeightGrams: size.approxWeightGrams,
-      price: size.price,
-      tag: size.tag,
-    }));
+    return content.sizes.map((size) => {
+      const old = previous.find((kept) => kept.id === size.id);
+      return {
+        id: old?.id ?? this.newId(),
+        approxWeightGrams: size.approxWeightGrams,
+        price: old?.price ?? size.price,
+        tag: size.tag,
+      };
+    });
   }
 
   private detailsOf(row: StoredProduct): ProductDetails {

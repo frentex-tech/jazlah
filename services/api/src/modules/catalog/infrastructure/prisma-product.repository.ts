@@ -1,5 +1,4 @@
 import { Injectable } from '@nestjs/common';
-import type { Money } from '@common/money/money';
 import type { Page } from '@common/pagination/page.type';
 import type { PageRequest } from '@common/pagination/page-request.type';
 import { toPage } from '@common/pagination/to-page';
@@ -38,15 +37,16 @@ export class PrismaProductRepository implements ProductRepository {
   async create(product: NewProduct): Promise<ProductDetails> {
     const { content } = product;
     try {
-      const row = await this.db.client.product.create({
+      const { id } = await this.db.client.product.create({
         data: {
           vendorId: product.vendorId,
           fulfilment: product.fulfilment,
-          ...this.productFields(content, product.minPrice),
+          ...this.productFields(content),
           images: { create: this.imageRows(content) },
           sizes: {
             create: content.sizes.map((size, position) => ({
               ...this.sizeFields(size),
+              priceHalalas: size.price.halalas,
               position,
             })),
           },
@@ -60,9 +60,9 @@ export class PrismaProductRepository implements ProductRepository {
             })),
           },
         },
-        include: PRODUCT_DETAILS_INCLUDE,
+        select: { id: true },
       });
-      return toProductDetails(row);
+      return await this.refreshMinPrice(id);
     } catch (error) {
       mapPrismaError(error);
     }
@@ -93,7 +93,6 @@ export class PrismaProductRepository implements ProductRepository {
   async saveContent(
     id: string,
     content: ProductContent,
-    minPrice: Money | null,
   ): Promise<ProductDetails> {
     const client = this.db.client;
     const keptIds = content.sizes.flatMap((size) =>
@@ -102,7 +101,7 @@ export class PrismaProductRepository implements ProductRepository {
     try {
       await client.product.update({
         where: { id },
-        data: this.productFields(content, minPrice),
+        data: this.productFields(content),
       });
       await client.productImage.deleteMany({ where: { productId: id } });
       await client.productImage.createMany({
@@ -122,9 +121,15 @@ export class PrismaProductRepository implements ProductRepository {
       for (const [position, size] of content.sizes.entries()) {
         if (size.id === null) {
           await client.productSize.create({
-            data: { ...this.sizeFields(size), position, productId: id },
+            data: {
+              ...this.sizeFields(size),
+              priceHalalas: size.price.halalas,
+              position,
+              productId: id,
+            },
           });
         } else {
+          // A kept size keeps its stored price: prices change only through setPrices.
           await client.productSize.updateMany({
             where: { id: size.id, productId: id },
             data: { ...this.sizeFields(size), position },
@@ -138,22 +143,14 @@ export class PrismaProductRepository implements ProductRepository {
       await client.productCutting.deleteMany({
         where: { productId: id, cuttingStyleId: { notIn: cuttingStyleIds } },
       });
-      for (const cutting of content.cuttings) {
-        await client.productCutting.upsert({
-          where: {
-            productId_cuttingStyleId: {
-              productId: id,
-              cuttingStyleId: cutting.cuttingStyleId,
-            },
-          },
-          create: {
-            productId: id,
-            cuttingStyleId: cutting.cuttingStyleId,
-            extraPriceHalalas: cutting.extraPrice.halalas,
-          },
-          update: { extraPriceHalalas: cutting.extraPrice.halalas },
-        });
-      }
+      // A kept cutting keeps its stored extra price (ON CONFLICT DO NOTHING on the pair).
+      await client.productCutting.createMany({
+        data: this.cuttingRows(content).map((row) => ({
+          ...row,
+          productId: id,
+        })),
+        skipDuplicates: true,
+      });
 
       await client.productPackagingOption.deleteMany({
         where: { productId: id },
@@ -172,14 +169,7 @@ export class PrismaProductRepository implements ProductRepository {
         })),
       });
 
-      const row = await client.product.findUnique({
-        where: { id },
-        include: PRODUCT_DETAILS_INCLUDE,
-      });
-      if (row === null) {
-        throw new Error(`Product ${id} vanished while saving it`);
-      }
-      return toProductDetails(row);
+      return await this.refreshMinPrice(id);
     } catch (error) {
       mapPrismaError(error);
     }
@@ -235,11 +225,7 @@ export class PrismaProductRepository implements ProductRepository {
     }
   }
 
-  async setPrices(
-    id: string,
-    changes: ProductPriceChanges,
-    minPrice: Money | null,
-  ): Promise<void> {
+  async setPrices(id: string, changes: ProductPriceChanges): Promise<void> {
     const client = this.db.client;
     try {
       for (const change of changes.sizes) {
@@ -254,10 +240,7 @@ export class PrismaProductRepository implements ProductRepository {
           data: { extraPriceHalalas: change.extraPrice.halalas },
         });
       }
-      await client.product.updateMany({
-        where: { id },
-        data: { minPriceHalalas: minPrice?.halalas ?? null },
-      });
+      await this.refreshMinPrice(id);
     } catch (error) {
       mapPrismaError(error);
     }
@@ -339,7 +322,33 @@ export class PrismaProductRepository implements ProductRepository {
     }
   }
 
-  private productFields(content: ProductContent, minPrice: Money | null) {
+  /**
+   * Sets `min_price_halalas` to the lowest price among the product's stored sizes (null
+   * for none), read in the caller's transaction after its own size writes, and returns
+   * the product as saved. Never worked out from a request, which can disagree with what
+   * is stored.
+   */
+  private async refreshMinPrice(id: string): Promise<ProductDetails> {
+    const client = this.db.client;
+    const { _min } = await client.productSize.aggregate({
+      where: { productId: id },
+      _min: { priceHalalas: true },
+    });
+    await client.product.updateMany({
+      where: { id },
+      data: { minPriceHalalas: _min.priceHalalas },
+    });
+    const row = await client.product.findUnique({
+      where: { id },
+      include: PRODUCT_DETAILS_INCLUDE,
+    });
+    if (row === null) {
+      throw new Error(`Product ${id} vanished while saving it`);
+    }
+    return toProductDetails(row);
+  }
+
+  private productFields(content: ProductContent) {
     return {
       categoryId: content.categoryId,
       meatTypeId: content.meatTypeId,
@@ -347,7 +356,6 @@ export class PrismaProductRepository implements ProductRepository {
       nameEn: content.name.en,
       descriptionAr: content.description.ar,
       descriptionEn: content.description.en,
-      minPriceHalalas: minPrice?.halalas ?? null,
     };
   }
 
@@ -358,10 +366,10 @@ export class PrismaProductRepository implements ProductRepository {
     }));
   }
 
+  /** A size's fields but its price, written only for a new size or by setPrices. */
   private sizeFields(size: ProductContent['sizes'][number]) {
     return {
       approxWeightGrams: size.approxWeightGrams,
-      priceHalalas: size.price.halalas,
       tagAr: size.tag?.ar ?? null,
       tagEn: size.tag?.en ?? null,
     };

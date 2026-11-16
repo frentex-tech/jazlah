@@ -95,7 +95,10 @@ export class Product {
     ]);
   }
 
-  /** The lowest size price, or null for no size: `products.min_price_halalas`. */
+  /**
+   * The lowest size price, or null for no size: `products.min_price_halalas`, which the
+   * repository works out from the stored sizes in the transaction that changed them.
+   */
   static minPriceOf(
     sizes: readonly Pick<ProductSizeInput, 'price'>[],
   ): Money | null {
@@ -122,10 +125,11 @@ export class Product {
   }
 
   /**
-   * On a published product, prices change only through the prices edit (at once,
-   * audited): an existing size or cutting style in a content edit must keep its live
-   * price. Otherwise VALIDATION_FAILED on `sizes.<i>.priceHalalas` or
-   * `cuttings.<i>.extraPriceHalalas` (constraint `isLivePrice`).
+   * Prices change only at creation and through the prices edit (at once, audited): an
+   * existing size or cutting style in a content edit, whatever the status, must keep its
+   * live price (the repository keeps the stored one anyway). Otherwise
+   * VALIDATION_FAILED on `sizes.<i>.priceHalalas` or `cuttings.<i>.extraPriceHalalas`
+   * (constraint `isLivePrice`).
    */
   static assertKeepsLivePrices(
     content: ProductContent,
@@ -166,38 +170,6 @@ export class Product {
     if (details.length > 0) {
       throw new AppError(ErrorCode.VALIDATION_FAILED, { details });
     }
-  }
-
-  /**
-   * The content with the live price of every size and cutting style the product still
-   * has: what approving a change request applies, so a price changed after the request
-   * was made is kept.
-   */
-  static withLivePrices(
-    content: ProductContent,
-    live: ProductDetails,
-  ): ProductContent {
-    const sizePrices = new Map(live.sizes.map((size) => [size.id, size.price]));
-    const cuttingPrices = new Map(
-      live.cuttings.map((cutting) => [
-        cutting.cuttingStyleId,
-        cutting.extraPrice,
-      ]),
-    );
-    return {
-      ...content,
-      sizes: content.sizes.map((size) => ({
-        ...size,
-        price:
-          (size.id === null ? undefined : sizePrices.get(size.id)) ??
-          size.price,
-      })),
-      cuttings: content.cuttings.map((cutting) => ({
-        ...cutting,
-        extraPrice:
-          cuttingPrices.get(cutting.cuttingStyleId) ?? cutting.extraPrice,
-      })),
-    };
   }
 
   /** The live product's content, as an edit would write it unchanged. */

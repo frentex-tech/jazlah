@@ -283,34 +283,5 @@ describe('Product', () => {
         ],
       });
     });
-
-    it('applies a request with the live prices, keeping the new ones', () => {
-      const requested: ProductContent = {
-        ...Product.contentOf(LIVE),
-        sizes: [
-          { id: SIZE, approxWeightGrams: 9_000, price: Money.of(1), tag: null },
-          {
-            id: null,
-            approxWeightGrams: 12_000,
-            price: Money.of(130_000),
-            tag: null,
-          },
-        ],
-        cuttings: [
-          { cuttingStyleId: CUT, extraPrice: Money.of(1) },
-          { cuttingStyleId: OTHER_CUT, extraPrice: Money.of(500) },
-        ],
-      };
-
-      const applied = Product.withLivePrices(requested, LIVE);
-
-      expect(applied.sizes.map((size) => size.price.halalas)).toEqual([
-        95_000, 130_000,
-      ]);
-      expect(applied.sizes[0]?.approxWeightGrams).toBe(9_000);
-      expect(
-        applied.cuttings.map((cutting) => cutting.extraPrice.halalas),
-      ).toEqual([1_500, 500]);
-    });
   });
 });

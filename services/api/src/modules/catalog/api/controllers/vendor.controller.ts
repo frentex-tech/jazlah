@@ -137,7 +137,7 @@ export class VendorCatalogController {
   @ApiOperation({
     summary: 'Replace a product’s content',
     description:
-      'A draft or rejected product changes at once. On a published product the edit becomes its one pending change request (replacing any pending one) while the live version stays; existing sizes and cuttings must keep their live prices (change them with PATCH …/prices), and the submission rules apply. PRODUCT_NOT_EDITABLE while under review.',
+      'Existing sizes and cuttings must keep their live prices (change them with PATCH …/prices). A draft or rejected product changes at once. On a published product the edit becomes its one pending change request (replacing any pending one) while the live version stays, and the submission rules apply. PRODUCT_NOT_EDITABLE while under review.',
   })
   @ApiOkResponse({ type: ProductResponseDto })
   @ApiErrorResponses(

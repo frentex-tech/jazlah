@@ -40,12 +40,12 @@ import { toProductView } from './to-product-view';
  * packagings, exclusions). By status:
  *
  * - under review: PRODUCT_NOT_EDITABLE;
+ * - in every other status, existing sizes and cuttings must keep their live prices
+ *   (Product.assertKeepsLivePrices): prices change through ChangeProductPrices;
  * - draft or rejected: saved at once (a rejected product stays rejected until submitted);
- * - published: existing sizes and cuttings must keep their live prices
- *   (Product.assertKeepsLivePrices; prices change through ChangeProductPrices) and the
- *   submission rules hold. A vendor's edit becomes the product's one pending change
- *   request (replacing any pending one) while the live version stays; an admin's edit
- *   of a JAZLA product applies at once, audited.
+ * - published: the submission rules hold. A vendor's edit becomes the product's one
+ *   pending change request (replacing any pending one) while the live version stays; an
+ *   admin's edit of a JAZLA product applies at once, audited.
  *
  * One transaction for every save of the product's tables.
  */
@@ -91,11 +91,11 @@ export class UpdateProductContentUseCase {
       input.actorId,
       live.imageMediaIds,
     );
-    const minPrice = Product.minPriceOf(input.content.sizes);
+    Product.assertKeepsLivePrices(input.content, live);
 
     if (!ProductStatusMachine.needsChangeRequest(live.status)) {
       const saved = await this.transactions.run(() =>
-        this.products.saveContent(live.id, input.content, minPrice),
+        this.products.saveContent(live.id, input.content),
       );
       return toProductView(
         saved,
@@ -104,7 +104,6 @@ export class UpdateProductContentUseCase {
       );
     }
 
-    Product.assertKeepsLivePrices(input.content, live);
     Product.assertSubmittable(
       input.content,
       await this.rules.findForCuttingStyles(
@@ -120,11 +119,7 @@ export class UpdateProductContentUseCase {
       return toProductView(live, request, this.media);
     }
     const saved = await this.transactions.run(async () => {
-      const product = await this.products.saveContent(
-        live.id,
-        input.content,
-        minPrice,
-      );
+      const product = await this.products.saveContent(live.id, input.content);
       await this.audit.write({
         actorId: input.actorId,
         ...CATALOG_AUDIT.productUpdated,

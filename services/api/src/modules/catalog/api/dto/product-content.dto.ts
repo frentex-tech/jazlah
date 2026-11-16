@@ -74,7 +74,7 @@ export class ProductContentDto {
     type: [ProductSizeDto],
     maxItems: PRODUCT_LIMITS.sizes,
     description:
-      'Each existing size id at most once (VALIDATION_FAILED `isNotRepeated` on `sizes.<i>.id`).',
+      'Each existing size id at most once (VALIDATION_FAILED `isNotRepeated` on `sizes.<i>.id`); an existing size keeps its live price.',
   })
   @IsArray()
   @ArrayMaxSize(PRODUCT_LIMITS.sizes)

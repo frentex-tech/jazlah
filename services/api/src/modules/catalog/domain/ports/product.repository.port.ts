@@ -1,4 +1,3 @@
-import type { Money } from '@common/money/money';
 import type { Page } from '@common/pagination/page.type';
 import type { PageRequest } from '@common/pagination/page-request.type';
 import type { NewProduct } from '../new-product.type';
@@ -21,7 +20,10 @@ export const PRODUCT_REPOSITORY = Symbol('PRODUCT_REPOSITORY');
  * not found. Writes touching several tables run inside the caller's transaction.
  */
 export interface ProductRepository {
-  /** Creates a draft with its content. */
+  /**
+   * Creates a draft with its content, and its lowest price from the stored sizes, in the
+   * caller's transaction.
+   */
   create(product: NewProduct): Promise<ProductDetails>;
 
   /** The product, of this vendor only, or of any vendor when `vendorId` is null. */
@@ -37,15 +39,13 @@ export interface ProductRepository {
   ): Promise<Page<ProductSummary>>;
 
   /**
-   * Replaces the content: names, category, images, packagings and exclusions as given;
-   * sizes matched by id (updated, added, the others deleted); cuttings matched by
-   * cutting style; and the lowest price, in the caller's transaction.
+   * Replaces the content, in the caller's transaction: names, category, images,
+   * packagings and exclusions as given; sizes matched by id (kept, added, the others
+   * deleted) and cuttings by cutting style. **A kept size or cutting keeps its stored
+   * price** (the content's is ignored): prices change only at creation and through
+   * setPrices. Then the lowest price is worked out again from the stored sizes.
    */
-  saveContent(
-    id: string,
-    content: ProductContent,
-    minPrice: Money | null,
-  ): Promise<ProductDetails>;
+  saveContent(id: string, content: ProductContent): Promise<ProductDetails>;
 
   /** Moves the product if it is still `from` (conditional update); false otherwise. */
   transition(
@@ -58,12 +58,11 @@ export interface ProductRepository {
 
   setFulfilment(id: string, fulfilment: ProductFulfilment): Promise<void>;
 
-  /** Sets the given prices and the lowest price, in the caller's transaction. */
-  setPrices(
-    id: string,
-    changes: ProductPriceChanges,
-    minPrice: Money | null,
-  ): Promise<void>;
+  /**
+   * Sets the given prices, then the lowest price worked out again from the stored
+   * sizes, in the caller's transaction.
+   */
+  setPrices(id: string, changes: ProductPriceChanges): Promise<void>;
 
   /**
    * The public list (FR-CAT-03): published, available products of active vendors in

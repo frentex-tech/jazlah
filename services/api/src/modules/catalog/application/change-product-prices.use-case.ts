@@ -90,14 +90,6 @@ export class ChangeProductPricesUseCase {
       throw new AppError(ErrorCode.VALIDATION_FAILED, { details });
     }
 
-    const newSizePrices = new Map(
-      input.changes.sizes.map((change) => [change.sizeId, change.price]),
-    );
-    const minPrice = Product.minPriceOf(
-      live.sizes.map((size) => ({
-        price: newSizePrices.get(size.id) ?? size.price,
-      })),
-    );
     const audited = [
       ...input.changes.sizes.flatMap((change) => {
         const previous = sizes.get(change.sizeId)?.price;
@@ -125,7 +117,7 @@ export class ChangeProductPricesUseCase {
       }),
     ];
     const updated = await this.transactions.run(async () => {
-      await this.products.setPrices(live.id, input.changes, minPrice);
+      await this.products.setPrices(live.id, input.changes);
       for (const metadata of audited) {
         await this.audit.write({
           actorId: input.actorId,

@@ -42,7 +42,7 @@ export class ProductSizeDto {
     minimum: 1,
     maximum: PRODUCT_LIMITS.maxPriceHalalas,
     description:
-      'The price in halalas, VAT included. On a published product an existing size keeps its live price here: change it with the prices endpoint.',
+      'The price in halalas, VAT included. An existing size keeps its live price here (VALIDATION_FAILED `isLivePrice` otherwise): change it with the prices endpoint.',
     example: 95000,
   })
   @IsInt()

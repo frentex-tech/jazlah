@@ -418,7 +418,7 @@ export class AdminCatalogController {
   @ApiOperation({
     summary: 'Replace a JAZLA product’s content',
     description:
-      'Applies at once, also when published (audited); a published product keeps its live prices here and must meet the submission rules. Another vendor’s product is NOT_FOUND.',
+      'Applies at once, also when published (audited). Existing sizes and cuttings keep their live prices here (change them with PATCH …/prices); a published product must meet the submission rules. Another vendor’s product is NOT_FOUND.',
   })
   @ApiOkResponse({ type: ProductResponseDto })
   @ApiErrorResponses(

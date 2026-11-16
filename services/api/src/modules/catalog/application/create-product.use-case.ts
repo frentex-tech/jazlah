@@ -66,7 +66,6 @@ export class CreateProductUseCase {
         vendorId,
         fulfilment: input.fulfilment,
         content: input.content,
-        minPrice: Product.minPriceOf(input.content.sizes),
       }),
     );
     return toProductView(product, null, this.media);

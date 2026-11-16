@@ -32,7 +32,7 @@ describe('UpdateProductContentUseCase', () => {
       content: content({
         name: { ar: 'نعيمي بلدي', en: 'Local Naimi' },
         sizes: [
-          { ...kept, price: Money.of(90_000) },
+          { ...kept, approxWeightGrams: 9_000 },
           {
             id: null,
             approxWeightGrams: 4_000,
@@ -44,9 +44,33 @@ describe('UpdateProductContentUseCase', () => {
     });
 
     expect(view.product.name.en).toBe('Local Naimi');
-    expect(view.product.sizes[0]?.id).toBe(kept.id);
+    expect(view.product.sizes[0]).toMatchObject({
+      id: kept.id,
+      approxWeightGrams: 9_000,
+    });
     expect(view.product.minPrice?.halalas).toBe(50_000);
     expect(kit.changeRequests.rows).toEqual([]);
+  });
+
+  it('refuses a changed price of an existing size on a draft too: prices change on their own', async () => {
+    const kit = buildCatalogUseCases();
+    seedCatalog(kit);
+    const draft = await vendorDraft(kit);
+    const kept = draft.product.sizes[0];
+
+    await expect(
+      kit.updateContent.execute({
+        scope: vendorScope,
+        actorId: VENDOR_USER,
+        productId: draft.product.id,
+        content: content({ sizes: [{ ...kept, price: Money.of(90_000) }] }),
+      }),
+    ).rejects.toMatchObject({
+      code: ErrorCode.VALIDATION_FAILED,
+      details: [
+        { field: 'sizes.0.priceHalalas', constraints: ['isLivePrice'] },
+      ],
+    });
   });
 
   it('refuses a size id named twice, so the lowest price cannot fall below every real one (review finding)', async () => {
