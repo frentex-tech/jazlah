@@ -9,7 +9,7 @@ import { FakeSmsProvider } from '@integrations/sms/testing';
 import { STORAGE_PORT } from '@integrations/storage';
 import { FakeStorageProvider } from '@integrations/storage/testing';
 import { CreatePlatformVendorUseCase } from '@modules/vendors';
-import { CatalogJourney } from './support/catalog-journey';
+import { CatalogJourney, type CatalogOptions } from './support/catalog-journey';
 import { createHttpApp } from './support/create-http-app';
 import { holdRowLock } from './support/row-lock';
 import { VendorJourney, type TestUser } from './support/vendor-journey';
@@ -1110,28 +1110,73 @@ describe('Catalog (e2e)', () => {
       });
     });
 
-    it('keeps a price edit made between a change request and its approval', async () => {
-      const { owner, admin, options } = await setUp();
-      const id = await catalog.published(owner, admin, options);
-      const live = await vendorProduct(owner, id);
+    /** A vendor's pending change request on `id`, renaming it; returns its id. */
+    const requestChange = async (
+      owner: TestUser,
+      options: CatalogOptions,
+      live: ProductBody,
+      sizes: Record<string, unknown>[],
+    ): Promise<string> => {
       const requested = await catalog.http
-        .put(`/v1/vendor/products/${id}`)
+        .put(`/v1/vendor/products/${live.id}`)
         .set(...bearer(owner))
         .send(
           catalog.body(options, [live.images[0].mediaId], {
             fulfilment: undefined,
             name: { ar: 'نعيمي بلدي', en: 'Local Naimi' },
-            sizes: [
-              {
-                id: live.sizes[0].id,
-                approxWeightGrams: 8000,
-                priceHalalas: 95000,
-              },
-            ],
+            sizes,
           }),
         )
         .expect(200);
-      const requestId = (requested.body as ProductBody).changeRequest!.id;
+      return (requested.body as ProductBody).changeRequest!.id;
+    };
+
+    it('keeps the prices of a price edit made after a change request when it is approved', async () => {
+      const { owner, admin, options } = await setUp();
+      const id = await catalog.published(owner, admin, options);
+      const live = await vendorProduct(owner, id);
+      const sizeId = live.sizes[0].id;
+      // The request carries the prices of its time: the size at 95000, the cutting at 1500.
+      const requestId = await requestChange(owner, options, live, [
+        { id: sizeId, approxWeightGrams: 8000, priceHalalas: 95000 },
+      ]);
+
+      await catalog.http
+        .patch(`/v1/vendor/products/${id}/prices`)
+        .set(...bearer(owner))
+        .send({
+          sizes: [{ sizeId, priceHalalas: 90000 }],
+          cuttings: [
+            { cuttingStyleId: options.cuttingStyleId, extraPriceHalalas: 0 },
+          ],
+        })
+        .expect(200);
+      await catalog.http
+        .post(`/v1/admin/product-change-requests/${requestId}/approve`)
+        .set(...bearer(admin))
+        .expect(200);
+
+      // One request after the other, no lock involved: only the repository rule that a
+      // kept size or cutting keeps its stored price protects the new prices here.
+      expect(await stored(id)).toEqual({ prices: [90000], minPrice: 90000 });
+      expect(
+        (
+          await prisma.productCutting.findMany({ where: { productId: id } })
+        ).map((cutting) => cutting.extraPriceHalalas),
+      ).toEqual([0]);
+      expect((await vendorProduct(owner, id)).name.en).toBe('Local Naimi');
+    });
+
+    it('makes a price edit sent while an approval runs wait for it', async () => {
+      const { owner, admin, options } = await setUp();
+      const id = await catalog.published(owner, admin, options);
+      const live = await vendorProduct(owner, id);
+      const sizeId = live.sizes[0].id;
+      // The approval adds a new, cheaper size: 80000.
+      const requestId = await requestChange(owner, options, live, [
+        { id: sizeId, approxWeightGrams: 8000, priceHalalas: 95000 },
+        { approxWeightGrams: 4000, priceHalalas: 80000 },
+      ]);
 
       // The approval stops at its decision (the request row is locked); the price edit
       // starts while it waits.
@@ -1153,9 +1198,7 @@ describe('Catalog (e2e)', () => {
           catalog.http
             .patch(`/v1/vendor/products/${id}/prices`)
             .set(...bearer(owner))
-            .send({
-              sizes: [{ sizeId: live.sizes[0].id, priceHalalas: 90000 }],
-            }),
+            .send({ sizes: [{ sizeId, priceHalalas: 90000 }] }),
         ).then((res) => {
           priced = true;
           return res;
@@ -1169,10 +1212,25 @@ describe('Catalog (e2e)', () => {
       const approved = await approval;
       const priceResponse = await priceEdit;
 
+      // What this proves: the product lock makes the price edit run after the approval,
+      // on the approved product, so its answer already has the new size and the lowest
+      // price 80000. Without the lock the price edit answers first (one size, 90000).
+      // The stored result is right either way, thanks to the kept-price rule and the
+      // lowest price worked out from stored rows; no order of these two requests that
+      // stores a wrong price without the lock alone can be forced from a test, since
+      // both write the same size rows and PostgreSQL would end one of them as a
+      // deadlock (retried). The stored lowest price under concurrent writers is proven
+      // by the two price edits above.
       expect(approved.status).toBe(200);
       expect(priceResponse.status).toBe(200);
-      expect(await stored(id)).toEqual({ prices: [90000], minPrice: 90000 });
-      expect((await vendorProduct(owner, id)).name.en).toBe('Local Naimi');
+      expect(priceResponse.body).toMatchObject({
+        minPriceHalalas: 80000,
+        sizes: [{ id: sizeId, priceHalalas: 90000 }, { priceHalalas: 80000 }],
+      });
+      expect(await stored(id)).toEqual({
+        prices: [90000, 80000],
+        minPrice: 80000,
+      });
     });
   });
 
