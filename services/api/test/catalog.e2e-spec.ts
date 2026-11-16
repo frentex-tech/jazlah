@@ -282,7 +282,12 @@ describe('Catalog (e2e)', () => {
         details: [{ field: 'packagings' }],
       });
       expect(duplicateCut.body).toMatchObject({
-        details: [{ field: 'cuttings' }],
+        details: [
+          {
+            field: 'cuttings.1.cuttingStyleId',
+            constraints: ['isNotRepeated'],
+          },
+        ],
       });
       expect(unknownCategory.body).toMatchObject({
         details: [{ field: 'categoryId', constraints: ['isActiveCategory'] }],
@@ -290,6 +295,46 @@ describe('Catalog (e2e)', () => {
       expect(badFulfilment.body).toMatchObject({
         details: [{ field: 'fulfilment' }],
       });
+    });
+
+    it('refuses a size id named twice in an edit, leaving the product as it was (review finding)', async () => {
+      const { owner, options } = await setUp();
+      const id = await catalog.draft(owner, options);
+      const live = (
+        await catalog.http
+          .get(`/v1/vendor/products/${id}`)
+          .set(...bearer(owner))
+          .expect(200)
+      ).body as ProductBody;
+      const size = {
+        id: live.sizes[0].id,
+        approxWeightGrams: 8000,
+        priceHalalas: 95000,
+      };
+
+      const repeated = await catalog.http
+        .put(`/v1/vendor/products/${id}`)
+        .set(...bearer(owner))
+        .send(
+          catalog.body(options, [live.images[0].mediaId], {
+            fulfilment: undefined,
+            sizes: [size, { ...size, priceHalalas: 100 }],
+          }),
+        )
+        .expect(400);
+      const after = (
+        await catalog.http
+          .get(`/v1/vendor/products/${id}`)
+          .set(...bearer(owner))
+          .expect(200)
+      ).body as ProductBody;
+
+      expect(repeated.body).toMatchObject({
+        code: 'VALIDATION_FAILED',
+        details: [{ field: 'sizes.1.id', constraints: ['isNotRepeated'] }],
+      });
+      expect(after.minPriceHalalas).toBe(95000);
+      expect(after.sizes.map((s) => s.priceHalalas)).toEqual([95000]);
     });
 
     it('refuses to submit without a size and an image, or with an incompatible pair (422)', async () => {
