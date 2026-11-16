@@ -128,8 +128,10 @@ model CuttingPackagingIncompatibility {
 
 /// A product a vendor sells (the platform vendor's are JAZLA's own). Shown publicly only
 /// when published, available, its vendor active and its category active; the public
-/// lists use the partial indexes `products_public_*_idx` (migration). The review fields
-/// follow the status (check constraint `products_review_check`).
+/// lists use the `products_listing_*` indexes (not partial indexes: Prisma sends the
+/// status as a cast parameter, from which PostgreSQL cannot prove a partial index's
+/// condition). The review fields follow the status (check constraint
+/// `products_review_check`).
 model Product {
   id              String            @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
   vendorId        String            @map("vendor_id") @db.Uuid
@@ -174,11 +176,16 @@ model Product {
   changeRequests ProductChangeRequest[]
 
   @@index([vendorId, createdAt, id])
+  /// Also the public list filtered by vendor (is_available checked on the rows read).
   @@index([vendorId, status, createdAt, id])
   @@index([status, createdAt, id])
   @@index([createdAt, id])
-  @@index([categoryId])
-  @@index([meatTypeId])
+  /// The public list, newest first: status and availability as index conditions.
+  @@index([status, isAvailable, createdAt(sort: Desc), id(sort: Desc)], map: "products_listing_idx")
+  /// The public list filtered by category; also the category_id foreign key's index.
+  @@index([categoryId, status, isAvailable, createdAt(sort: Desc), id(sort: Desc)], map: "products_listing_category_idx")
+  /// The public list filtered by meat type; also the meat_type_id foreign key's index.
+  @@index([meatTypeId, status, isAvailable, createdAt(sort: Desc), id(sort: Desc)], map: "products_listing_meat_type_idx")
   @@index([reviewedById])
   @@map("products")
 }

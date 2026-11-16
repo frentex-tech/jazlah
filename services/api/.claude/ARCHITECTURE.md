@@ -35,8 +35,9 @@ prisma/
   migrations/                 20261113150318_init: PostGIS extension, audit_logs; 20261113224826_idempotency_keys;
                               20261114151242_media; 20261114192800_users_and_auth (with two check constraints);
                               20261115120000_media_staged_uploads; 20261115205251_vendors (partial unique indexes and
-                              check constraints written by hand); 20261115230905_catalog (check constraints, the
-                              pending change request index and the public list's partial indexes by hand)
+                              check constraints written by hand); 20261115230905_catalog (check constraints and the
+                              pending change request index by hand); 20261116000616_catalog_listing_indexes (the
+                              public list's composite indexes, replacing unusable partial ones)
 src/
   main.ts                     bootstrap: validates the environment, pino as Nest's logger, configureHttpApp,
                               shutdownOnSignals (the shutdown deadline), port from config; an invalid
