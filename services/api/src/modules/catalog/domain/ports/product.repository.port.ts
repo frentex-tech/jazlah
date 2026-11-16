@@ -17,9 +17,19 @@ export const PRODUCT_REPOSITORY = Symbol('PRODUCT_REPOSITORY');
 /**
  * Where products and their options are kept. A vendor-side caller passes the vendor id
  * from the access token, never one from the request: another vendor's product is simply
- * not found. Writes touching several tables run inside the caller's transaction.
+ * not found. Writes touching several tables run inside the caller's transaction, after
+ * lockForWrite on the product.
  */
 export interface ProductRepository {
+  /**
+   * Locks the product row until the caller's transaction ends (`SELECT … FOR UPDATE`):
+   * a second writer to the same product waits here for the first to commit. The first
+   * call of every write to a product or its children, inside its transaction (outside
+   * one the lock would end at once); read the product after it. False when the product
+   * does not exist, or is not this vendor's (`vendorId` null: any vendor's).
+   */
+  lockForWrite(id: string, vendorId: string | null): Promise<boolean>;
+
   /**
    * Creates a draft with its content, and its lowest price from the stored sizes, in the
    * caller's transaction.

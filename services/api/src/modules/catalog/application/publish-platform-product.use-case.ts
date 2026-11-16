@@ -22,7 +22,7 @@ import {
 } from '../domain/ports/product.repository.port';
 import { Product } from '../domain/product.entity';
 import { ProductStatusMachine } from '../domain/product-status.state-machine';
-import { findWritableProduct } from './find-writable-product';
+import { lockWritableProduct } from './lock-writable-product';
 import type { ProductView } from './product-view.type';
 import { toProductView } from './to-product-view';
 
@@ -49,26 +49,26 @@ export class PublishPlatformProductUseCase {
   async execute(
     input: Readonly<{ actorId: string; productId: string }>,
   ): Promise<ProductView> {
-    const live = await findWritableProduct(
-      { kind: 'platform' },
-      input.productId,
-      this.products,
-      this.vendors,
-    );
-    if (live.status !== 'draft') {
-      throw new AppError(ErrorCode.PRODUCT_NOT_EDITABLE, {
-        details: { status: live.status },
-      });
-    }
-    ProductStatusMachine.assertCanMove(live.status, 'published');
-    const content = Product.contentOf(live);
-    Product.assertSubmittable(
-      content,
-      await this.rules.findForCuttingStyles(
-        content.cuttings.map((cutting) => cutting.cuttingStyleId),
-      ),
-    );
     const published = await this.transactions.run(async () => {
+      const live = await lockWritableProduct(
+        { kind: 'platform' },
+        input.productId,
+        this.products,
+        this.vendors,
+      );
+      if (live.status !== 'draft') {
+        throw new AppError(ErrorCode.PRODUCT_NOT_EDITABLE, {
+          details: { status: live.status },
+        });
+      }
+      ProductStatusMachine.assertCanMove(live.status, 'published');
+      const content = Product.contentOf(live);
+      Product.assertSubmittable(
+        content,
+        await this.rules.findForCuttingStyles(
+          content.cuttings.map((cutting) => cutting.cuttingStyleId),
+        ),
+      );
       const moved = await this.products.transition(live.id, 'draft', {
         to: 'published',
         reviewerId: input.actorId,

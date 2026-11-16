@@ -18,9 +18,10 @@ import {
   type ProductRepository,
 } from '../domain/ports/product.repository.port';
 import { Product } from '../domain/product.entity';
+import type { ProductDetails } from '../domain/product-details.type';
 import type { ProductPriceChanges } from '../domain/product-price-changes.type';
 import { ProductStatusMachine } from '../domain/product-status.state-machine';
-import { findWritableProduct } from './find-writable-product';
+import { lockWritableProduct } from './lock-writable-product';
 import type { ProductView } from './product-view.type';
 import type { ProductWriteScope } from './product-write-scope.type';
 import { toProductView } from './to-product-view';
@@ -29,8 +30,9 @@ import { toProductView } from './to-product-view';
  * Changes the prices of existing sizes and cutting styles, at once even when published
  * (no review). Each id must be one of the product's (VALIDATION_FAILED on
  * `sizes.<i>.sizeId` or `cuttings.<i>.cuttingStyleId`); under review:
- * PRODUCT_NOT_EDITABLE. One transaction: the prices, the lowest price, and one audit
- * entry per price that actually changed (previous and new halalas).
+ * PRODUCT_NOT_EDITABLE. One transaction, which first locks the product row
+ * (lockProduct): the checks, the prices, the lowest price, and one audit entry per price
+ * that actually changed (previous and new halalas, as read under the lock).
  */
 @Injectable()
 export class ChangeProductPricesUseCase {
@@ -53,12 +55,26 @@ export class ChangeProductPricesUseCase {
     }>,
   ): Promise<ProductView> {
     Product.assertNoRepeatedPriceChanges(input.changes);
-    const live = await findWritableProduct(
-      input.scope,
-      input.productId,
-      this.products,
-      this.vendors,
-    );
+    const updated = await this.transactions.run(async () => {
+      const live = await lockWritableProduct(
+        input.scope,
+        input.productId,
+        this.products,
+        this.vendors,
+      );
+      return this.applyPrices(input, live);
+    });
+    if (updated === null) {
+      throw new AppError(ErrorCode.NOT_FOUND);
+    }
+    return toProductView(updated, null, this.media);
+  }
+
+  /** The checks and writes under the lock, on the product as locked. */
+  private async applyPrices(
+    input: Readonly<{ actorId: string; changes: ProductPriceChanges }>,
+    live: ProductDetails,
+  ): Promise<ProductDetails | null> {
     ProductStatusMachine.assertEditable(live.status);
     const sizes = new Map(live.sizes.map((size) => [size.id, size]));
     const cuttings = new Map(
@@ -116,21 +132,15 @@ export class ChangeProductPricesUseCase {
             ];
       }),
     ];
-    const updated = await this.transactions.run(async () => {
-      await this.products.setPrices(live.id, input.changes);
-      for (const metadata of audited) {
-        await this.audit.write({
-          actorId: input.actorId,
-          ...CATALOG_AUDIT.priceChanged,
-          entityId: live.id,
-          metadata,
-        });
-      }
-      return this.products.findDetails(live.id, live.vendorId);
-    });
-    if (updated === null) {
-      throw new AppError(ErrorCode.NOT_FOUND);
+    await this.products.setPrices(live.id, input.changes);
+    for (const metadata of audited) {
+      await this.audit.write({
+        actorId: input.actorId,
+        ...CATALOG_AUDIT.priceChanged,
+        entityId: live.id,
+        metadata,
+      });
     }
-    return toProductView(updated, null, this.media);
+    return this.products.findDetails(live.id, live.vendorId);
   }
 }

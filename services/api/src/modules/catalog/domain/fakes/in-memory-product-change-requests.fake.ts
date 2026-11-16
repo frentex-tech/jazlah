@@ -6,18 +6,25 @@ import type { ProductChangeRequestRepository } from '../ports/product-change-req
 import type { ProductChangeRequest } from '../product-change-request.type';
 import type { ProductContent } from '../product-content.type';
 import { fakeIds } from './fake-ids.fake';
+import type { InMemoryProductLocks } from './in-memory-product-locks.fake';
 
-/** Change requests in memory; `rows` is replaced on every write (fake rollback). */
+/**
+ * Change requests in memory; `rows` is replaced on every write (fake rollback). A write
+ * needs its product's lock (InMemoryProductLocks).
+ */
 export class InMemoryProductChangeRequests implements ProductChangeRequestRepository {
   private readonly newId = fakeIds('8003');
   rows: readonly ProductChangeRequest[] = [];
   private clock = Date.UTC(2026, 10, 16, 10, 0, 0);
+
+  constructor(private readonly locks: InMemoryProductLocks) {}
 
   savePending(
     productId: string,
     requestedById: string,
     content: ProductContent,
   ): Promise<ProductChangeRequest> {
+    this.locks.assertLocked(productId);
     const now = this.nextDate();
     const pending = this.rows.find(
       (row) => row.productId === productId && row.status === 'pending',
@@ -71,6 +78,7 @@ export class InMemoryProductChangeRequests implements ProductChangeRequestReposi
     if (pending === undefined) {
       return Promise.resolve(false);
     }
+    this.locks.assertLocked(pending.productId);
     const now = this.nextDate();
     this.rows = this.rows.map((row) =>
       row.id === id

@@ -17,6 +17,7 @@ categories, products, product_images, product_sizes, cutting_styles, exclusion_i
 - Status: `draft`, `pending_review`, `published`, `rejected`; plus an availability switch.
 - Fulfilment: delivery, pickup or both.
 - `min_price_halalas` kept in step with its sizes.
+- Every write to a product or its children locks the product row first (`SELECT … FOR UPDATE`, `ProductRepository.lockForWrite`), so writers to one product run one after another (added after the review of #238; DECISIONS.md, "Catalog").
 
 ## Options
 

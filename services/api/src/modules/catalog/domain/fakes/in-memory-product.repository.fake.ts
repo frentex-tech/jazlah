@@ -15,6 +15,7 @@ import type { ProductStatus } from '../product-status.type';
 import type { ProductSummary } from '../product-summary.type';
 import type { ProductTransition } from '../product-transition.type';
 import type { PublicProductFilter } from '../public-product-filter.type';
+import type { InMemoryProductLocks } from './in-memory-product-locks.fake';
 import type { InMemoryReferenceLists } from './in-memory-reference-lists.fake';
 import { fakeIds } from './fake-ids.fake';
 
@@ -41,6 +42,7 @@ type StoredProduct = Readonly<{
  * replaced on every write (fake rollback). `suspendedVendors` stands for the vendors
  * whose status the public queries exclude. As the Prisma repository: a kept size or
  * cutting keeps its stored price, and the lowest price comes from the stored sizes.
+ * Every write but `create` needs the product's lock (InMemoryProductLocks).
  */
 export class InMemoryProductRepository implements ProductRepository {
   private readonly newId = fakeIds('8004');
@@ -48,7 +50,21 @@ export class InMemoryProductRepository implements ProductRepository {
   readonly suspendedVendors = new Set<string>();
   private clock = Date.UTC(2026, 10, 16, 9, 0, 0);
 
-  constructor(private readonly lists: InMemoryReferenceLists) {}
+  constructor(
+    private readonly lists: InMemoryReferenceLists,
+    private readonly locks: InMemoryProductLocks,
+  ) {}
+
+  lockForWrite(id: string, vendorId: string | null): Promise<boolean> {
+    const found = this.rows.some(
+      (row) =>
+        row.id === id && (vendorId === null || row.vendorId === vendorId),
+    );
+    if (found) {
+      this.locks.lock(id);
+    }
+    return Promise.resolve(found);
+  }
 
   create(product: NewProduct): Promise<ProductDetails> {
     const now = this.nextDate();
@@ -106,6 +122,7 @@ export class InMemoryProductRepository implements ProductRepository {
   }
 
   saveContent(id: string, content: ProductContent): Promise<ProductDetails> {
+    this.locks.assertLocked(id);
     const stored = this.get(id);
     const sizes = this.sizesOf(content, stored.sizes);
     const saved: StoredProduct = {
@@ -137,6 +154,7 @@ export class InMemoryProductRepository implements ProductRepository {
     from: ProductStatus,
     transition: ProductTransition,
   ): Promise<boolean> {
+    this.locks.assertLocked(id);
     const stored = this.rows.find((row) => row.id === id);
     if (stored === undefined || stored.status !== from) {
       return Promise.resolve(false);
@@ -156,16 +174,19 @@ export class InMemoryProductRepository implements ProductRepository {
   }
 
   setAvailability(id: string, isAvailable: boolean): Promise<void> {
+    this.locks.assertLocked(id);
     this.replace({ ...this.get(id), isAvailable, updatedAt: this.nextDate() });
     return Promise.resolve();
   }
 
   setFulfilment(id: string, fulfilment: ProductFulfilment): Promise<void> {
+    this.locks.assertLocked(id);
     this.replace({ ...this.get(id), fulfilment, updatedAt: this.nextDate() });
     return Promise.resolve();
   }
 
   setPrices(id: string, changes: ProductPriceChanges): Promise<void> {
+    this.locks.assertLocked(id);
     const stored = this.get(id);
     const sizes = stored.sizes.map((size) => ({
       ...size,

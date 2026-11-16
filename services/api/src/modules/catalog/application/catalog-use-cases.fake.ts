@@ -4,6 +4,7 @@ import { InMemoryCatalogMedia } from '../domain/fakes/in-memory-catalog-media.fa
 import { InMemoryCatalogVendors } from '../domain/fakes/in-memory-catalog-vendors.fake';
 import { InMemoryCuttingPackagingIncompatibilities } from '../domain/fakes/in-memory-cutting-packaging-incompatibilities.fake';
 import { InMemoryProductChangeRequests } from '../domain/fakes/in-memory-product-change-requests.fake';
+import { InMemoryProductLocks } from '../domain/fakes/in-memory-product-locks.fake';
 import { InMemoryProductRepository } from '../domain/fakes/in-memory-product.repository.fake';
 import { InMemoryReferenceLists } from '../domain/fakes/in-memory-reference-lists.fake';
 import { ApproveProductChangeRequestUseCase } from './approve-product-change-request.use-case';
@@ -32,13 +33,15 @@ import { UpdateReferenceItemUseCase } from './update-reference-item.use-case';
 /**
  * Every use case of the catalog wired to the in-memory fakes, for the unit tests: no
  * database, no Nest application. A fake transaction puts back what its work wrote to
- * the fakes when the work throws, as a rollback would.
+ * the fakes when the work throws, as a rollback would, and holds the product locks taken
+ * in it until it ends (a write without its product's lock throws).
  */
 export function buildCatalogUseCases() {
   const lists = new InMemoryReferenceLists();
   const rules = new InMemoryCuttingPackagingIncompatibilities();
-  const products = new InMemoryProductRepository(lists);
-  const changeRequests = new InMemoryProductChangeRequests();
+  const locks = new InMemoryProductLocks();
+  const products = new InMemoryProductRepository(lists, locks);
+  const changeRequests = new InMemoryProductChangeRequests(locks);
   const media = new InMemoryCatalogMedia();
   const vendors = new InMemoryCatalogVendors();
   const audit = new InMemoryAuditLog();
@@ -50,6 +53,7 @@ export function buildCatalogUseCases() {
         changeRequests: changeRequests.rows,
         audit: audit.rows,
       };
+      locks.begin();
       try {
         return await work();
       } catch (error) {
@@ -57,6 +61,8 @@ export function buildCatalogUseCases() {
         changeRequests.rows = before.changeRequests;
         audit.rows = before.audit;
         throw error;
+      } finally {
+        locks.end();
       }
     },
   };
@@ -99,7 +105,12 @@ export function buildCatalogUseCases() {
       audit,
       transactions,
     ),
-    submitProduct: new SubmitProductUseCase(products, rules, media),
+    submitProduct: new SubmitProductUseCase(
+      products,
+      rules,
+      media,
+      transactions,
+    ),
     publishPlatformProduct: new PublishPlatformProductUseCase(
       products,
       rules,
@@ -112,8 +123,14 @@ export function buildCatalogUseCases() {
       products,
       media,
       vendors,
+      transactions,
     ),
-    setFulfilment: new SetProductFulfilmentUseCase(products, media, vendors),
+    setFulfilment: new SetProductFulfilmentUseCase(
+      products,
+      media,
+      vendors,
+      transactions,
+    ),
     changePrices: new ChangeProductPricesUseCase(
       products,
       media,
@@ -144,6 +161,7 @@ export function buildCatalogUseCases() {
       transactions,
     ),
     rejectChangeRequest: new RejectProductChangeRequestUseCase(
+      products,
       changeRequests,
       audit,
       transactions,

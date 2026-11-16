@@ -8,6 +8,10 @@ import {
   PRODUCT_CHANGE_REQUEST_REPOSITORY,
   type ProductChangeRequestRepository,
 } from '../domain/ports/product-change-request.repository.port';
+import {
+  PRODUCT_REPOSITORY,
+  type ProductRepository,
+} from '../domain/ports/product.repository.port';
 
 /**
  * An admin rejects a pending change request with a reason the vendor sees; the live
@@ -17,6 +21,7 @@ import {
 @Injectable()
 export class RejectProductChangeRequestUseCase {
   constructor(
+    @Inject(PRODUCT_REPOSITORY) private readonly products: ProductRepository,
     @Inject(PRODUCT_CHANGE_REQUEST_REPOSITORY)
     private readonly changeRequests: ProductChangeRequestRepository,
     @Inject(AuditLogWriter)
@@ -30,7 +35,10 @@ export class RejectProductChangeRequestUseCase {
   ): Promise<void> {
     await this.transactions.run(async () => {
       const request = await this.changeRequests.findPending(input.requestId);
-      if (request === null) {
+      if (
+        request === null ||
+        !(await this.products.lockForWrite(request.productId, null))
+      ) {
         throw new AppError(ErrorCode.NOT_FOUND);
       }
       const decided = await this.changeRequests.decide(request.id, {

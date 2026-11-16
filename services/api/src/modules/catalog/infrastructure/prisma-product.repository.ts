@@ -68,6 +68,23 @@ export class PrismaProductRepository implements ProductRepository {
     }
   }
 
+  async lockForWrite(id: string, vendorId: string | null): Promise<boolean> {
+    const client = this.db.client;
+    try {
+      const rows =
+        vendorId === null
+          ? await client.$queryRaw<unknown[]>`
+              SELECT 1 FROM "products" WHERE "id" = ${id}::uuid FOR UPDATE`
+          : await client.$queryRaw<unknown[]>`
+              SELECT 1 FROM "products"
+              WHERE "id" = ${id}::uuid AND "vendor_id" = ${vendorId}::uuid
+              FOR UPDATE`;
+      return rows.length === 1;
+    } catch (error) {
+      mapPrismaError(error);
+    }
+  }
+
   async findDetails(
     id: string,
     vendorId: string | null,

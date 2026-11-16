@@ -30,7 +30,7 @@ import { Product } from '../domain/product.entity';
 import type { ProductContent } from '../domain/product-content.type';
 import { ProductStatusMachine } from '../domain/product-status.state-machine';
 import { assertProductContent } from './assert-product-content';
-import { findWritableProduct } from './find-writable-product';
+import { lockWritableProduct } from './lock-writable-product';
 import type { ProductView } from './product-view.type';
 import type { ProductWriteScope } from './product-write-scope.type';
 import { toProductView } from './to-product-view';
@@ -47,7 +47,8 @@ import { toProductView } from './to-product-view';
  *   pending change request (replacing any pending one) while the live version stays; an
  *   admin's edit of a JAZLA product applies at once, audited.
  *
- * One transaction for every save of the product's tables.
+ * One transaction, which first locks the product row (lockProduct), for the checks and
+ * the save.
  */
 @Injectable()
 export class UpdateProductContentUseCase {
@@ -76,57 +77,54 @@ export class UpdateProductContentUseCase {
     }>,
   ): Promise<ProductView> {
     Product.assertNoRepeats(input.content);
-    const live = await findWritableProduct(
-      input.scope,
-      input.productId,
-      this.products,
-      this.vendors,
-    );
-    ProductStatusMachine.assertEditable(live.status);
-    Product.assertOwnSizes(input.content, live);
-    await assertProductContent(
-      input.content,
-      this.lists,
-      this.media,
-      input.actorId,
-      live.imageMediaIds,
-    );
-    Product.assertKeepsLivePrices(input.content, live);
-
-    if (!ProductStatusMachine.needsChangeRequest(live.status)) {
-      const saved = await this.transactions.run(() =>
-        this.products.saveContent(live.id, input.content),
-      );
-      return toProductView(
-        saved,
-        await this.changeRequests.findLatestOf(live.id),
-        this.media,
-      );
-    }
-
-    Product.assertSubmittable(
-      input.content,
-      await this.rules.findForCuttingStyles(
-        input.content.cuttings.map((cutting) => cutting.cuttingStyleId),
-      ),
-    );
-    if (input.scope.kind === 'vendor') {
-      const request = await this.changeRequests.savePending(
-        live.id,
-        input.actorId,
-        input.content,
-      );
-      return toProductView(live, request, this.media);
-    }
     const saved = await this.transactions.run(async () => {
+      const live = await lockWritableProduct(
+        input.scope,
+        input.productId,
+        this.products,
+        this.vendors,
+      );
+      ProductStatusMachine.assertEditable(live.status);
+      Product.assertOwnSizes(input.content, live);
+      await assertProductContent(
+        input.content,
+        this.lists,
+        this.media,
+        input.actorId,
+        live.imageMediaIds,
+      );
+      Product.assertKeepsLivePrices(input.content, live);
+
+      if (!ProductStatusMachine.needsChangeRequest(live.status)) {
+        return {
+          product: await this.products.saveContent(live.id, input.content),
+          changeRequest: await this.changeRequests.findLatestOf(live.id),
+        };
+      }
+      Product.assertSubmittable(
+        input.content,
+        await this.rules.findForCuttingStyles(
+          input.content.cuttings.map((cutting) => cutting.cuttingStyleId),
+        ),
+      );
+      if (input.scope.kind === 'vendor') {
+        return {
+          product: live,
+          changeRequest: await this.changeRequests.savePending(
+            live.id,
+            input.actorId,
+            input.content,
+          ),
+        };
+      }
       const product = await this.products.saveContent(live.id, input.content);
       await this.audit.write({
         actorId: input.actorId,
         ...CATALOG_AUDIT.productUpdated,
         entityId: live.id,
       });
-      return product;
+      return { product, changeRequest: null };
     });
-    return toProductView(saved, null, this.media);
+    return toProductView(saved.product, saved.changeRequest, this.media);
   }
 }

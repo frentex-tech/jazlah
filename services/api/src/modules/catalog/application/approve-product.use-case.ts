@@ -13,6 +13,7 @@ import {
   type ProductRepository,
 } from '../domain/ports/product.repository.port';
 import { ProductStatusMachine } from '../domain/product-status.state-machine';
+import { lockProduct } from './lock-product';
 import type { ProductView } from './product-view.type';
 import { toProductView } from './to-product-view';
 
@@ -36,10 +37,7 @@ export class ApproveProductUseCase {
     input: Readonly<{ reviewerId: string; productId: string }>,
   ): Promise<ProductView> {
     const product = await this.transactions.run(async () => {
-      const live = await this.products.findDetails(input.productId, null);
-      if (live === null) {
-        throw new AppError(ErrorCode.NOT_FOUND);
-      }
+      const live = await lockProduct(input.productId, null, this.products);
       if (live.status !== 'pending_review') {
         throw new AppError(ErrorCode.PRODUCT_NOT_EDITABLE, {
           details: { status: live.status },

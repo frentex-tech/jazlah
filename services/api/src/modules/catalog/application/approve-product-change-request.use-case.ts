@@ -16,13 +16,16 @@ import {
   PRODUCT_REPOSITORY,
   type ProductRepository,
 } from '../domain/ports/product.repository.port';
+import { lockProduct } from './lock-product';
 import type { ProductView } from './product-view.type';
 import { toProductView } from './to-product-view';
 
 /**
  * An admin approves a pending change request: its content becomes the live product in
  * one transaction (the product's tables, the lowest price, the request's decision and
- * the audit entry). Existing sizes and cutting styles keep their stored prices
+ * the audit entry), after locking the product row (lockProduct): a writer to the product
+ * waits, and the request is read again under the lock. Existing sizes and cutting
+ * styles keep their stored prices
  * (ProductRepository.saveContent: a price changed after the request stays). NOT_FOUND unless
  * the request is pending; PRODUCT_NOT_EDITABLE if the product is no longer published or
  * another decision won meanwhile.
@@ -44,12 +47,14 @@ export class ApproveProductChangeRequestUseCase {
     input: Readonly<{ reviewerId: string; requestId: string }>,
   ): Promise<ProductView> {
     const product = await this.transactions.run(async () => {
-      const request = await this.changeRequests.findPending(input.requestId);
-      if (request === null) {
+      const found = await this.changeRequests.findPending(input.requestId);
+      if (found === null) {
         throw new AppError(ErrorCode.NOT_FOUND);
       }
-      const live = await this.products.findDetails(request.productId, null);
-      if (live === null) {
+      const live = await lockProduct(found.productId, null, this.products);
+      // Read again under the lock: the content as the last edit before it left it.
+      const request = await this.changeRequests.findPending(found.id);
+      if (request === null) {
         throw new AppError(ErrorCode.NOT_FOUND);
       }
       if (live.status !== 'published') {
