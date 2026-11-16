@@ -289,7 +289,7 @@ describe('Catalog (e2e)', () => {
       const empty = await catalog.http
         .post('/v1/vendor/products')
         .set(...bearer(owner))
-        .send(catalog.body(options, [], { sizes: [] }))
+        .send(catalog.body(options, [], { sizes: [], cuttings: [] }))
         .expect(201);
       const emptyId = (empty.body as { id: string }).id;
       catalog.rememberProduct(emptyId);
