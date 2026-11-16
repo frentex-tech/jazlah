@@ -11,6 +11,7 @@ import { QueueModule } from '@infra/queue/queue.module';
 import { RateLimitModule } from '@infra/rate-limit/rate-limit.module';
 import { RedisModule } from '@infra/redis/redis.module';
 import { AuthModule } from '@modules/auth';
+import { CatalogModule } from '@modules/catalog';
 import { MediaModule } from '@modules/media';
 import { VendorsModule } from '@modules/vendors';
 
@@ -30,6 +31,7 @@ import { VendorsModule } from '@modules/vendors';
     HealthModule,
     MediaModule,
     VendorsModule,
+    CatalogModule,
   ],
   providers: [
     { provide: APP_FILTER, useClass: AllExceptionsFilter },

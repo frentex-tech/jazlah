@@ -39,4 +39,5 @@ What exists, by area. Before writing anything, read this index, then open the ar
 - **audit** — `.claude/registry/audit.md` — `AuditLogWriter`.
 - **crypto** — `.claude/registry/crypto.md` — AES-256-GCM for data at rest.
 - **money** — `.claude/registry/money.md` — `Money`: all halala arithmetic.
-- **vendors** — `.claude/registry/vendors.md` — `VendorsModule` (the vendor status checker), the platform vendor.
+- **vendors** — `.claude/registry/vendors.md` — `VendorsModule` (the vendor status checker), the platform vendor, `VendorDirectory`.
+- **catalog** — `.claude/registry/catalog.md` — `CatalogModule`.
