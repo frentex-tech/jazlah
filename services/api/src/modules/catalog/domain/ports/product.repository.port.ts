@@ -67,7 +67,8 @@ export interface ProductRepository {
 
   /**
    * The public list (FR-CAT-03): published, available products of active vendors in
-   * active categories, newest first, in one query served by a partial index.
+   * active categories, newest first, in one query served by an index (status and
+   * availability as index conditions).
    */
   listPublic(
     filter: PublicProductFilter,

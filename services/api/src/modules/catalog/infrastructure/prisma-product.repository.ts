@@ -309,9 +309,9 @@ export class PrismaProductRepository implements ProductRepository {
   }
 
   /**
-   * What the public may see: published and available (the partial indexes'
-   * condition), of an active vendor (a read-only join to `vendors.status`), in an
-   * active category.
+   * What the public may see: published and available (index conditions of the
+   * `products_listing_*` indexes), of an active vendor (a read-only join to
+   * `vendors.status`), in an active category.
    */
   private publicWhere(): Prisma.ProductWhereInput {
     return {
