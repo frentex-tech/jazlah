@@ -1,6 +1,6 @@
-# Plan: the catalog module (not built)
+# Plan: the catalog module (built in issue #237)
 
-The approved plan for the catalog, the task after vendors (issue #235). Not loaded by default; CLAUDE.md points here. Read with `.claude/rules/` and the add-module skill. Paths are relative to `services/api/`. Build nothing this plan does not list; anything it leaves open is asked, not guessed.
+The approved plan for the catalog, the task after vendors (issue #235); what was built and the choices made beyond this plan are in DECISIONS.md, "Catalog". Not loaded by default; CLAUDE.md points here. Read with `.claude/rules/` and the add-module skill. Paths are relative to `services/api/`. Build nothing this plan does not list; anything it leaves open is asked, not guessed.
 
 ## Shape
 

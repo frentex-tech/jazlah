@@ -6,7 +6,7 @@ Applies to `src/modules/`. Procedure: the add-module skill. Paths are relative t
 
 ## Shape
 
-- **auth, vendors, orders, checkout, payments, refunds, wallet, finance** have four layers (auth is the reference, ARCHITECTURE.md). Every other module starts as controllers + service + dto and is promoted when it gains a state machine or money logic: propose the promotion and wait; never half-convert, never hide a state machine in a plain service, never add empty layers.
+- **auth, vendors, catalog, orders, checkout, payments, refunds, wallet, finance** have four layers (auth is the reference, ARCHITECTURE.md). Every other module starts as controllers + service + dto and is promoted when it gains a state machine or money logic: propose the promotion and wait; never half-convert, never hide a state machine in a plain service, never add empty layers.
 - **No inventory module**: availability is `catalog`'s, slot capacity `scheduling`'s.
 - CRUD modules: `<module>.module.ts`, `<module>.service.ts` (through `DbContext`), `controllers/`, `dto/`.
 
