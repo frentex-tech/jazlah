@@ -1,5 +1,6 @@
 import { randomUUID } from 'node:crypto';
 import type { INestApplication } from '@nestjs/common';
+import type { Response, Test } from 'supertest';
 import type { App } from 'supertest/types';
 import type { ErrorResponseBody } from '@common/filters/error-response-body.interface';
 import { PrismaService } from '@infra/database/prisma.service';
@@ -10,6 +11,7 @@ import { FakeStorageProvider } from '@integrations/storage/testing';
 import { CreatePlatformVendorUseCase } from '@modules/vendors';
 import { CatalogJourney } from './support/catalog-journey';
 import { createHttpApp } from './support/create-http-app';
+import { holdRowLock } from './support/row-lock';
 import { VendorJourney, type TestUser } from './support/vendor-journey';
 
 type ProductBody = {
@@ -947,6 +949,131 @@ describe('Catalog (e2e)', () => {
       expect(badCursor.body).toMatchObject({ details: [{ field: 'cursor' }] });
       expect(badId.body).toMatchObject({ details: [{ field: 'id' }] });
       expect(errorCode(random.body)).toBe('NOT_FOUND');
+    });
+  });
+
+  describe('writers to one product at the same moment', () => {
+    /** Starts the request now (supertest sends on `then`). */
+    const start = (test: Test): Promise<Response> => test.then((res) => res);
+
+    const stored = async (id: string) => ({
+      prices: (
+        await prisma.productSize.findMany({
+          where: { productId: id },
+          orderBy: { position: 'asc' },
+        })
+      ).map((size) => size.priceHalalas),
+      minPrice: (await prisma.product.findUnique({ where: { id } }))
+        ?.minPriceHalalas,
+    });
+
+    const vendorProduct = async (owner: TestUser, id: string) =>
+      (
+        await catalog.http
+          .get(`/v1/vendor/products/${id}`)
+          .set(...bearer(owner))
+          .expect(200)
+      ).body as ProductBody;
+
+    it('keeps the real lowest price after two price edits on different sizes', async () => {
+      const { owner, admin, options } = await setUp();
+      const id = await catalog.published(owner, admin, options, {
+        sizes: [
+          { approxWeightGrams: 4000, priceHalalas: 50000 },
+          { approxWeightGrams: 8000, priceHalalas: 60000 },
+        ],
+      });
+      const [small, large] = (await vendorProduct(owner, id)).sizes;
+      const price = (sizeId: string, priceHalalas: number) =>
+        start(
+          catalog.http
+            .patch(`/v1/vendor/products/${id}/prices`)
+            .set(...bearer(owner))
+            .send({ sizes: [{ sizeId, priceHalalas }] }),
+        );
+
+      // Both edits queue behind a lock on the product row, then go on together.
+      const lock = await holdRowLock(prisma, 'products', id);
+      const edits = [price(small.id, 70000), price(large.id, 65000)];
+      try {
+        await lock.waitForWaiters(2);
+      } finally {
+        await lock.release();
+      }
+      const responses = await Promise.all(edits);
+
+      expect(responses.map((res) => res.status)).toEqual([200, 200]);
+      // Each edit read the other's size before it committed: without the product lock
+      // the stored lowest price is 60000 or 50000, from one edit's stale view.
+      expect(await stored(id)).toEqual({
+        prices: [70000, 65000],
+        minPrice: 65000,
+      });
+    });
+
+    it('keeps a price edit made between a change request and its approval', async () => {
+      const { owner, admin, options } = await setUp();
+      const id = await catalog.published(owner, admin, options);
+      const live = await vendorProduct(owner, id);
+      const requested = await catalog.http
+        .put(`/v1/vendor/products/${id}`)
+        .set(...bearer(owner))
+        .send(
+          catalog.body(options, [live.images[0].mediaId], {
+            fulfilment: undefined,
+            name: { ar: 'نعيمي بلدي', en: 'Local Naimi' },
+            sizes: [
+              {
+                id: live.sizes[0].id,
+                approxWeightGrams: 8000,
+                priceHalalas: 95000,
+              },
+            ],
+          }),
+        )
+        .expect(200);
+      const requestId = (requested.body as ProductBody).changeRequest!.id;
+
+      // The approval stops at its decision (the request row is locked); the price edit
+      // starts while it waits.
+      const lock = await holdRowLock(
+        prisma,
+        'product_change_requests',
+        requestId,
+      );
+      const approval = start(
+        catalog.http
+          .post(`/v1/admin/product-change-requests/${requestId}/approve`)
+          .set(...bearer(admin)),
+      );
+      let priceEdit: Promise<Response>;
+      let priced = false;
+      try {
+        await lock.waitForWaiters(1);
+        priceEdit = start(
+          catalog.http
+            .patch(`/v1/vendor/products/${id}/prices`)
+            .set(...bearer(owner))
+            .send({
+              sizes: [{ sizeId: live.sizes[0].id, priceHalalas: 90000 }],
+            }),
+        ).then((res) => {
+          priced = true;
+          return res;
+        });
+        // With the product lock the price edit waits behind the approval; without it,
+        // it commits now, before the approval writes.
+        await lock.waitForWaiters(2, () => priced);
+      } finally {
+        await lock.release();
+      }
+      const approved = await approval;
+      const priceResponse = await priceEdit;
+
+      expect(approved.status).toBe(200);
+      expect(priceResponse.status).toBe(200);
+      expect(await stored(id)).toEqual({ prices: [90000], minPrice: 90000 });
+      expect((await vendorProduct(owner, id)).name.en).toBe('Local Naimi');
     });
   });
 
