@@ -12,7 +12,7 @@ import {
   PRODUCT_REPOSITORY,
   type ProductRepository,
 } from '../domain/ports/product.repository.port';
-import { ProductChangeRequestReview } from '../domain/product-change-request-review.entity';
+import { ProductChangeRequestReviewMachine } from '../domain/product-change-request-review.state-machine';
 
 /**
  * An admin rejects a pending change request with a reason the vendor sees; the live
@@ -49,7 +49,10 @@ export class RejectProductChangeRequestUseCase {
       if (request === null) {
         throw new AppError(ErrorCode.NOT_FOUND);
       }
-      ProductChangeRequestReview.assertDecidable(request.status);
+      ProductChangeRequestReviewMachine.assertCanMove(
+        request.status,
+        'rejected',
+      );
       const decided = await this.changeRequests.decide(request.id, {
         status: 'rejected',
         reviewerId: input.reviewerId,

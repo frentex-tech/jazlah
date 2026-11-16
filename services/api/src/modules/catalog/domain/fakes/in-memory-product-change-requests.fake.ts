@@ -49,11 +49,25 @@ export class InMemoryProductChangeRequests implements ProductChangeRequestReposi
   }
 
   findLatestOf(productId: string): Promise<ProductChangeRequest | null> {
+    const pending = this.rows.find(
+      (row) => row.productId === productId && row.status === 'pending',
+    );
+    if (pending !== undefined) {
+      return Promise.resolve(pending);
+    }
     const latest = keysetPage(
       this.rows.filter((row) => row.productId === productId),
       { cursor: null, limit: 1 },
     ).items[0];
     return Promise.resolve(latest ?? null);
+  }
+
+  findPendingOf(productId: string): Promise<ProductChangeRequest | null> {
+    return Promise.resolve(
+      this.rows.find(
+        (row) => row.productId === productId && row.status === 'pending',
+      ) ?? null,
+    );
   }
 
   findById(id: string): Promise<ProductChangeRequest | null> {

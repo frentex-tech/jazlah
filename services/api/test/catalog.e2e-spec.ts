@@ -43,6 +43,9 @@ type Card = { id: string; vendor: { id: string; name: { en: string } | null } };
 
 const errorCode = (body: unknown): string => (body as ErrorResponseBody).code;
 
+/** Starts the request now (supertest sends on `then`). */
+const start = (test: Test): Promise<Response> => test.then((res) => res);
+
 /**
  * The catalog end to end: the admin lists and rules, vendors' products and their
  * review, change requests, JAZLA's own products and public browsing, against the real
@@ -829,18 +832,64 @@ describe('Catalog (e2e)', () => {
       });
 
       it('leaves one pending request after two vendor edits at the same moment', async () => {
-        const { id, edit } = await publishedWithEdit();
+        const { id, owner, edit } = await publishedWithEdit();
 
         const responses = await Promise.all([edit('Left'), edit('Right')]);
         const rows = await prisma.productChangeRequest.findMany({
           where: { productId: id },
         });
+        const view = (
+          await catalog.http
+            .get(`/v1/vendor/products/${id}`)
+            .set(...bearer(owner))
+            .expect(200)
+        ).body as ProductBody;
 
         expect(responses.map((res) => res.status)).toEqual([200, 200]);
         expect(rows.map((row) => row.status).sort()).toEqual([
           'pending',
           'superseded',
         ]);
+        // The product view shows the pending request, whatever the creation times.
+        expect(view.changeRequest).toMatchObject({
+          id: rows.find((row) => row.status === 'pending')?.id,
+          status: 'pending',
+        });
+      });
+
+      it('refuses an approval that waited while a vendor edit superseded its request', async () => {
+        const { id, admin, edit, requestOf } = await publishedWithEdit();
+        const requestId = requestOf(await edit('First').expect(200));
+
+        // The edit, then the approval, queue behind a lock on the product row; the
+        // approval read its request as pending before it waited.
+        const lock = await holdRowLock(prisma, 'products', id);
+        const second = start(edit('Second'));
+        let approval: Promise<Response>;
+        try {
+          await lock.waitForWaiters(1);
+          approval = start(
+            catalog.http
+              .post(`/v1/admin/product-change-requests/${requestId}/approve`)
+              .set(...bearer(admin)),
+          );
+          await lock.waitForWaiters(2);
+        } finally {
+          await lock.release();
+        }
+        const edited = await second;
+        const approved = await approval;
+
+        // Read again under the lock, the request is superseded: the dedicated code, not
+        // a generic refusal.
+        expect(edited.status).toBe(200);
+        expect(approved.status).toBe(409);
+        expect(errorCode(approved.body)).toBe(
+          'PRODUCT_CHANGE_REQUEST_SUPERSEDED',
+        );
+        expect(
+          (await prisma.product.findUnique({ where: { id } }))?.nameEn,
+        ).toBe('Naimi lamb');
       });
     });
 
@@ -1227,9 +1276,6 @@ describe('Catalog (e2e)', () => {
   });
 
   describe('writers to one product at the same moment', () => {
-    /** Starts the request now (supertest sends on `then`). */
-    const start = (test: Test): Promise<Response> => test.then((res) => res);
-
     const stored = async (id: string) => ({
       prices: (
         await prisma.productSize.findMany({

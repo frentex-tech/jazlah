@@ -38,7 +38,9 @@ prisma/
                               check constraints written by hand); 20261115230905_catalog (check constraints and the
                               pending change request index by hand); 20261116000616_catalog_listing_indexes (the
                               public list's composite indexes, replacing unusable partial ones);
-                              20261116140000_catalog_category_sort_order (categories' display order, check by hand)
+                              20261116140000_catalog_category_sort_order (categories' display order, check by hand);
+                              20261116160000_catalog_change_request_superseded (superseded status; review check
+                              rewritten by hand)
 src/
   main.ts                     bootstrap: validates the environment, pino as Nest's logger, configureHttpApp,
                               shutdownOnSignals (the shutdown deadline), port from config; an invalid

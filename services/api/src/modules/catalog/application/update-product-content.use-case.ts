@@ -28,6 +28,7 @@ import {
 } from '../domain/ports/reference-list.repository.port';
 import { Product } from '../domain/product.entity';
 import type { ProductContent } from '../domain/product-content.type';
+import { ProductChangeRequestReviewMachine } from '../domain/product-change-request-review.state-machine';
 import { ProductStatusMachine } from '../domain/product-status.state-machine';
 import { assertProductContent } from './assert-product-content';
 import { lockWritableProduct } from './lock-writable-product';
@@ -108,6 +109,13 @@ export class UpdateProductContentUseCase {
         ),
       );
       if (input.scope.kind === 'vendor') {
+        const pending = await this.changeRequests.findPendingOf(live.id);
+        if (pending !== null) {
+          ProductChangeRequestReviewMachine.assertCanMove(
+            pending.status,
+            'superseded',
+          );
+        }
         return {
           product: live,
           changeRequest: await this.changeRequests.openPending(

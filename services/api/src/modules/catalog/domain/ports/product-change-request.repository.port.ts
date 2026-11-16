@@ -26,8 +26,16 @@ export interface ProductChangeRequestRepository {
     content: ProductContent,
   ): Promise<ProductChangeRequest>;
 
-  /** The product's most recent request, whatever its status; null for none. */
+  /**
+   * The request a product view shows: its pending request if it has one, otherwise its
+   * most recent (approved, rejected or superseded); null for none. Pending first, not
+   * newest first: two requests created within a millisecond, or by two API processes
+   * with skewed clocks, cannot hide the pending one.
+   */
   findLatestOf(productId: string): Promise<ProductChangeRequest | null>;
+
+  /** The product's pending request; null for none. */
+  findPendingOf(productId: string): Promise<ProductChangeRequest | null>;
 
   /** The request, whatever its status; null for an unknown id. */
   findById(id: string): Promise<ProductChangeRequest | null>;

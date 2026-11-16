@@ -50,10 +50,25 @@ export class PrismaProductChangeRequestRepository implements ProductChangeReques
   }
 
   async findLatestOf(productId: string): Promise<ProductChangeRequest | null> {
+    const pending = await this.findPendingOf(productId);
+    if (pending !== null) {
+      return pending;
+    }
     try {
       const row = await this.db.client.productChangeRequest.findFirst({
         where: { productId },
         orderBy: [...KEYSET_ORDER],
+      });
+      return row === null ? null : toProductChangeRequest(row);
+    } catch (error) {
+      mapPrismaError(error);
+    }
+  }
+
+  async findPendingOf(productId: string): Promise<ProductChangeRequest | null> {
+    try {
+      const row = await this.db.client.productChangeRequest.findFirst({
+        where: { productId, status: 'pending' },
       });
       return row === null ? null : toProductChangeRequest(row);
     } catch (error) {

@@ -16,7 +16,7 @@ import {
   PRODUCT_REPOSITORY,
   type ProductRepository,
 } from '../domain/ports/product.repository.port';
-import { ProductChangeRequestReview } from '../domain/product-change-request-review.entity';
+import { ProductChangeRequestReviewMachine } from '../domain/product-change-request-review.state-machine';
 import { lockProduct } from './lock-product';
 import type { ProductView } from './product-view.type';
 import { toProductView } from './to-product-view';
@@ -29,7 +29,7 @@ import { toProductView } from './to-product-view';
  * content applied is the one the admin saw. Existing sizes and cutting styles keep their
  * stored prices (ProductRepository.saveContent: a price changed after the request
  * stays). NOT_FOUND for an unknown or decided request; PRODUCT_CHANGE_REQUEST_SUPERSEDED
- * when the vendor has edited again since (ProductChangeRequestReview);
+ * when the vendor has edited again since (ProductChangeRequestReviewMachine);
  * PRODUCT_NOT_EDITABLE if the product is no longer published.
  */
 @Injectable()
@@ -59,7 +59,10 @@ export class ApproveProductChangeRequestUseCase {
       if (request === null) {
         throw new AppError(ErrorCode.NOT_FOUND);
       }
-      ProductChangeRequestReview.assertDecidable(request.status);
+      ProductChangeRequestReviewMachine.assertCanMove(
+        request.status,
+        'approved',
+      );
       if (live.status !== 'published') {
         throw new AppError(ErrorCode.PRODUCT_NOT_EDITABLE, {
           details: { status: live.status },
