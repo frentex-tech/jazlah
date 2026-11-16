@@ -120,4 +120,16 @@ export const ERROR_MESSAGES: Readonly<Record<ErrorCode, LocalizedText>> = {
     ar: 'حسابك مرتبط بمتجر من قبل، ما تقدر تقدّم طلب متجر جديد',
     en: 'This account already works for a vendor.',
   },
+  [ErrorCode.PRODUCT_NOT_EDITABLE]: {
+    ar: 'ما تقدر تعدّل المنتج وهو بهالحالة، حدّث الصفحة وشوف حالته',
+    en: 'This product cannot be changed in its current state.',
+  },
+  [ErrorCode.PRODUCT_NOT_SUBMITTABLE]: {
+    ar: 'المنتج ناقص: أضف صورة وحجم واحد على الأقل، وتأكد إن التغليف يناسب التقطيع',
+    en: 'Add at least one image and one size, and packaging that suits each cutting style.',
+  },
+  [ErrorCode.PRODUCT_CHANGE_REQUEST_SUPERSEDED]: {
+    ar: 'التاجر عدّل المنتج بعد هالطلب، حدّث الصفحة وراجع التعديل الجديد',
+    en: 'The vendor has edited this product again since this request. Reload and review the newer request.',
+  },
 };

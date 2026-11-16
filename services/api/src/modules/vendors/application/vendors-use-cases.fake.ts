@@ -1,5 +1,5 @@
 import type { TransactionRunner } from '@infra/database/transaction-runner';
-import { InMemoryAuditLog } from '../domain/fakes/in-memory-audit-log.fake';
+import { InMemoryAuditLog } from '@infra/audit/in-memory-audit-log.fake';
 import { InMemoryIbanCipher } from '../domain/fakes/in-memory-iban-cipher.fake';
 import { InMemoryVendorAccess } from '../domain/fakes/in-memory-vendor-access.fake';
 import { InMemoryVendorApplicationRepository } from '../domain/fakes/in-memory-vendor-application.repository.fake';

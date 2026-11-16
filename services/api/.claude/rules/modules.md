@@ -6,7 +6,7 @@ Applies to `src/modules/`. Procedure: the add-module skill. Paths are relative t
 
 ## Shape
 
-- **auth, vendors, orders, checkout, payments, refunds, wallet, finance** have four layers (auth is the reference, ARCHITECTURE.md). Every other module starts as controllers + service + dto and is promoted when it gains a state machine or money logic: propose the promotion and wait; never half-convert, never hide a state machine in a plain service, never add empty layers.
+- **auth, vendors, catalog, orders, checkout, payments, refunds, wallet, finance** have four layers (auth is the reference, ARCHITECTURE.md). Every other module starts as controllers + service + dto and is promoted when it gains a state machine or money logic: propose the promotion and wait; never half-convert, never hide a state machine in a plain service, never add empty layers.
 - **No inventory module**: availability is `catalog`'s, slot capacity `scheduling`'s.
 - CRUD modules: `<module>.module.ts`, `<module>.service.ts` (through `DbContext`), `controllers/`, `dto/`.
 
@@ -20,6 +20,7 @@ Applies to `src/modules/`. Procedure: the add-module skill. Paths are relative t
 | `infrastructure/` | Prisma repositories implementing the ports, mappers | business rules; Prisma types never leave it |
 
 - **A state changes only through the state machine that owns it**; others ask through the module's exports. *Why: a stray assignment skips the rules guarding a money-moving transition.*
+- **A write to an aggregate locks its root row first**: inside its transaction, through one repository method (`SELECT … FOR UPDATE`; `lockForWrite` in catalog), then reads and decides. *Why: two writers reading the same rows each work out a total or a lowest price without the other's change, and the last write wins.*
 - One use case, one class, one file, one unit test; a new operation is a new class, never a method or flag on an existing one. Use cases take ports; their tests use the fakes.
 - Only mappers know both shapes. A controller serves one audience. *Why: prefix, guard and permissions differ.*
 

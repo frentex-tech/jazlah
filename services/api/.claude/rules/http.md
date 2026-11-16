@@ -40,6 +40,8 @@ Every list endpoint follows one convention, so clients page every list the same 
 
 *Why: offsets skip or repeat rows while items are added, and a count costs a scan of the table; neither scales to Eid volumes.*
 
+Exception: `GET public/categories` returns every active category in the order admins set, not paged (DECISIONS.md, "Catalog").
+
 ## Security baseline
 
 Set up in one place, `configureHttpApp` (`src/infra/http/configure-http-app.ts`), called by `main.ts` and by the e2e tests (`test/support/create-http-app.ts`). Change it there, never in `main.ts` alone, or the tests stop testing what runs.

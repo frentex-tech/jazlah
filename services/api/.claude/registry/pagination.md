@@ -10,3 +10,4 @@ One line per building block: name, path, purpose; the detail is in that file's d
 - **toPage** — `src/common/pagination/to-page.ts` — a page from `limit + 1` rows, newest first.
 - **toNextCursor** — `src/common/pagination/to-next-cursor.ts` — a page's `nextCursor` for the response.
 - **keysetAfter** — `src/infra/database/keyset-after.ts` — the Prisma `where` of a keyset page; order `src/infra/database/keyset-order.constants.ts` (`KEYSET_ORDER`).
+- **keysetPage** — `src/common/pagination/keyset-page.fake.ts` — the in-memory fakes' keyset pagination, for unit tests only (excluded from the build).

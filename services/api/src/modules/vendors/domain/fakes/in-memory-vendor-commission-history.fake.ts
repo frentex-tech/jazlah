@@ -3,7 +3,7 @@ import type { PageRequest } from '@common/pagination/page-request.type';
 import type { NewVendorCommissionChange } from '../new-vendor-commission-change.type';
 import type { VendorCommissionHistory } from '../ports/vendor-commission-history.port';
 import type { VendorCommissionChange } from '../vendor-commission-change.type';
-import { keysetPage } from './keyset-page.fake';
+import { keysetPage } from '@common/pagination/keyset-page.fake';
 
 /** VendorCommissionHistory in memory: entries are only ever appended. */
 export class InMemoryVendorCommissionHistory implements VendorCommissionHistory {

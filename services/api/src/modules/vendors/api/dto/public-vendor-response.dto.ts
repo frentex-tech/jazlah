@@ -1,6 +1,6 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { LocalizedTextResponseDto } from './localized-text-response.dto';
-import { OptionalLocalizedTextResponseDto } from './optional-localized-text-response.dto';
+import { LocalizedTextResponseDto } from '@common/dto/localized-text-response.dto';
+import { OptionalLocalizedTextResponseDto } from '@common/dto/optional-localized-text-response.dto';
 
 /** A vendor as anyone sees it (FR-CAT-02): who it is, in both languages, and its logo. */
 export class PublicVendorResponseDto {

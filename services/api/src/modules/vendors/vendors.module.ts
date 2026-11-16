@@ -23,6 +23,7 @@ import { SubmitVendorApplicationUseCase } from './application/submit-vendor-appl
 import { SuspendVendorUseCase } from './application/suspend-vendor.use-case';
 import { UpdateOwnVendorProfileUseCase } from './application/update-own-vendor-profile.use-case';
 import { UpdateVendorProfileAsAdminUseCase } from './application/update-vendor-profile-as-admin.use-case';
+import { VendorDirectory } from './application/vendor-directory.service';
 import { IBAN_CIPHER } from './domain/ports/iban-cipher.port';
 import { VENDOR_ACCESS } from './domain/ports/vendor-access.port';
 import { VENDOR_APPLICATION_REPOSITORY } from './domain/ports/vendor-application.repository.port';
@@ -42,7 +43,8 @@ import { PlatformVendorModule } from './platform-vendor.module';
  * This file binds the ports, except the two PlatformVendorModule binds for the platform
  * vendor command (the vendor repository and the commission history). It also provides
  * VENDOR_STATUS_CHECKER (exported), which the organisation status guard and
- * the auth module use to refuse suspended vendors.
+ * the auth module use to refuse suspended vendors, and VendorDirectory (exported), the
+ * reads other modules need (the catalog: the platform vendor, vendor names).
  */
 @Module({
   imports: [AuditModule, MediaModule, UsersModule, PlatformVendorModule],
@@ -69,6 +71,7 @@ import { PlatformVendorModule } from './platform-vendor.module';
     UpdateVendorProfileAsAdminUseCase,
     ListPublicVendorsUseCase,
     GetPublicVendorUseCase,
+    VendorDirectory,
     {
       provide: VENDOR_APPLICATION_REPOSITORY,
       useClass: PrismaVendorApplicationRepository,
@@ -78,6 +81,6 @@ import { PlatformVendorModule } from './platform-vendor.module';
     { provide: VENDOR_ACCESS, useClass: UsersServiceVendorAccess },
     { provide: VENDOR_STATUS_CHECKER, useClass: RepositoryVendorStatusChecker },
   ],
-  exports: [VENDOR_STATUS_CHECKER],
+  exports: [VENDOR_STATUS_CHECKER, VendorDirectory],
 })
 export class VendorsModule {}

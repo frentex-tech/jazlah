@@ -3386,6 +3386,3303 @@
           "health"
         ]
       }
+    },
+    "/v1/vendor/products": {
+      "post": {
+        "description": "Upload each image first (POST /v1/vendor/media/uploads, purpose catalog.product-image) and confirm it. A draft may be incomplete; submit it for review when ready.",
+        "operationId": "VendorCatalogController_create",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateProductDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProductResponseDto"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Error. code: VALIDATION_FAILED.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Error. code: UNAUTHORIZED, ACCESS_TOKEN_EXPIRED.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Error. code: FORBIDDEN, VENDOR_SUSPENDED.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Error. code: MEDIA_NOT_FOUND.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Error. code: MEDIA_NOT_READY.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Error. code: RATE_LIMITED.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Error. code: INTERNAL_ERROR.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Create a draft product",
+        "tags": [
+          "catalog"
+        ]
+      },
+      "get": {
+        "operationId": "VendorCatalogController_list",
+        "parameters": [
+          {
+            "name": "cursor",
+            "required": false,
+            "in": "query",
+            "description": "The `nextCursor` of the previous page; omit it for the first page. Opaque: never build or change it.",
+            "schema": {
+              "example": "WyIyMDI2LTExLTE1VDEwOjAwOjAwLjAwMFoiLCI3ZjNhIl0",
+              "type": "string"
+            }
+          },
+          {
+            "name": "limit",
+            "required": false,
+            "in": "query",
+            "description": "How many items to return, 1 to 50.",
+            "schema": {
+              "minimum": 1,
+              "maximum": 50,
+              "default": 20,
+              "example": 20,
+              "type": "number"
+            }
+          },
+          {
+            "name": "status",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "example": "pending_review",
+              "type": "string",
+              "enum": [
+                "draft",
+                "pending_review",
+                "published",
+                "rejected"
+              ]
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProductCardPageResponseDto"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Error. code: VALIDATION_FAILED.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Error. code: UNAUTHORIZED, ACCESS_TOKEN_EXPIRED.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Error. code: FORBIDDEN, VENDOR_SUSPENDED.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Error. code: RATE_LIMITED.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Error. code: INTERNAL_ERROR.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "My products, newest first",
+        "tags": [
+          "catalog"
+        ]
+      }
+    },
+    "/v1/vendor/products/{id}": {
+      "get": {
+        "description": "With its latest change request (pending, or the last decided one).",
+        "operationId": "VendorCatalogController_read",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "format": "uuid",
+              "example": "7f3a2c1e-0b9d-4e5f-8a6b-1c2d3e4f5a6b",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProductResponseDto"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Error. code: VALIDATION_FAILED.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Error. code: UNAUTHORIZED, ACCESS_TOKEN_EXPIRED.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Error. code: FORBIDDEN, VENDOR_SUSPENDED.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Error. code: NOT_FOUND.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Error. code: RATE_LIMITED.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Error. code: INTERNAL_ERROR.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "One of my products",
+        "tags": [
+          "catalog"
+        ]
+      },
+      "put": {
+        "description": "Existing sizes and cuttings must keep their live prices (change them with PATCH …/prices). A draft or rejected product changes at once. On a published product the edit becomes a new pending change request (a pending one is closed as superseded) while the live version stays, and the submission rules apply. PRODUCT_NOT_EDITABLE while under review.",
+        "operationId": "VendorCatalogController_update",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "format": "uuid",
+              "example": "7f3a2c1e-0b9d-4e5f-8a6b-1c2d3e4f5a6b",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ProductContentDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProductResponseDto"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Error. code: VALIDATION_FAILED.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Error. code: UNAUTHORIZED, ACCESS_TOKEN_EXPIRED.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Error. code: FORBIDDEN, VENDOR_SUSPENDED.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Error. code: MEDIA_NOT_FOUND, NOT_FOUND.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Error. code: MEDIA_NOT_READY, PRODUCT_NOT_EDITABLE, TRANSACTION_CONFLICT.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Error. code: PRODUCT_NOT_SUBMITTABLE.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Error. code: RATE_LIMITED.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Error. code: INTERNAL_ERROR.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Replace a product’s content",
+        "tags": [
+          "catalog"
+        ]
+      }
+    },
+    "/v1/vendor/products/{id}/submit": {
+      "post": {
+        "description": "PRODUCT_NOT_SUBMITTABLE without a size or an image, or with a cutting style and a packaging that do not go together.",
+        "operationId": "VendorCatalogController_submit",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "format": "uuid",
+              "example": "7f3a2c1e-0b9d-4e5f-8a6b-1c2d3e4f5a6b",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProductResponseDto"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Error. code: VALIDATION_FAILED.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Error. code: UNAUTHORIZED, ACCESS_TOKEN_EXPIRED.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Error. code: FORBIDDEN, VENDOR_SUSPENDED.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Error. code: NOT_FOUND.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Error. code: PRODUCT_NOT_EDITABLE.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Error. code: PRODUCT_NOT_SUBMITTABLE.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Error. code: RATE_LIMITED.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Error. code: INTERNAL_ERROR.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Send a draft or rejected product to review",
+        "tags": [
+          "catalog"
+        ]
+      }
+    },
+    "/v1/vendor/products/{id}/availability": {
+      "patch": {
+        "description": "Applies at once, also on a published product.",
+        "operationId": "VendorCatalogController_availability",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "format": "uuid",
+              "example": "7f3a2c1e-0b9d-4e5f-8a6b-1c2d3e4f5a6b",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SetProductAvailabilityDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProductResponseDto"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Error. code: VALIDATION_FAILED.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Error. code: UNAUTHORIZED, ACCESS_TOKEN_EXPIRED.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Error. code: FORBIDDEN, VENDOR_SUSPENDED.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Error. code: NOT_FOUND.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Error. code: PRODUCT_NOT_EDITABLE.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Error. code: RATE_LIMITED.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Error. code: INTERNAL_ERROR.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Switch a product on or off",
+        "tags": [
+          "catalog"
+        ]
+      }
+    },
+    "/v1/vendor/products/{id}/fulfilment": {
+      "patch": {
+        "description": "Applies at once, also on a published product.",
+        "operationId": "VendorCatalogController_fulfilment",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "format": "uuid",
+              "example": "7f3a2c1e-0b9d-4e5f-8a6b-1c2d3e4f5a6b",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SetProductFulfilmentDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProductResponseDto"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Error. code: VALIDATION_FAILED.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Error. code: UNAUTHORIZED, ACCESS_TOKEN_EXPIRED.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Error. code: FORBIDDEN, VENDOR_SUSPENDED.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Error. code: NOT_FOUND.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Error. code: PRODUCT_NOT_EDITABLE.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Error. code: RATE_LIMITED.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Error. code: INTERNAL_ERROR.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Set delivery, pickup or both",
+        "tags": [
+          "catalog"
+        ]
+      }
+    },
+    "/v1/vendor/products/{id}/prices": {
+      "patch": {
+        "description": "Applies at once, also on a published product; each change is recorded in the audit log.",
+        "operationId": "VendorCatalogController_prices",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "format": "uuid",
+              "example": "7f3a2c1e-0b9d-4e5f-8a6b-1c2d3e4f5a6b",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ChangeProductPricesDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProductResponseDto"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Error. code: VALIDATION_FAILED.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Error. code: UNAUTHORIZED, ACCESS_TOKEN_EXPIRED.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Error. code: FORBIDDEN, VENDOR_SUSPENDED.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Error. code: NOT_FOUND.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Error. code: PRODUCT_NOT_EDITABLE, TRANSACTION_CONFLICT.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Error. code: RATE_LIMITED.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Error. code: INTERNAL_ERROR.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Change size and cutting prices",
+        "tags": [
+          "catalog"
+        ]
+      }
+    },
+    "/v1/admin/lists/{list}": {
+      "post": {
+        "description": "A category may take its display order (`sortOrder`, 0 by default); another list refuses one.",
+        "operationId": "AdminCatalogController_createListItem",
+        "parameters": [
+          {
+            "name": "list",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "example": "categories",
+              "type": "string",
+              "enum": [
+                "categories",
+                "meat-types",
+                "cutting-styles",
+                "exclusion-items"
+              ]
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateReferenceItemDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ReferenceItemResponseDto"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Error. code: VALIDATION_FAILED.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Error. code: UNAUTHORIZED, ACCESS_TOKEN_EXPIRED.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Error. code: FORBIDDEN.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Error. code: RATE_LIMITED.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Error. code: INTERNAL_ERROR.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Add an entry to a list (it starts active)",
+        "tags": [
+          "catalog"
+        ]
+      },
+      "get": {
+        "operationId": "AdminCatalogController_listListItems",
+        "parameters": [
+          {
+            "name": "list",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "example": "categories",
+              "type": "string",
+              "enum": [
+                "categories",
+                "meat-types",
+                "cutting-styles",
+                "exclusion-items"
+              ]
+            }
+          },
+          {
+            "name": "cursor",
+            "required": false,
+            "in": "query",
+            "description": "The `nextCursor` of the previous page; omit it for the first page. Opaque: never build or change it.",
+            "schema": {
+              "example": "WyIyMDI2LTExLTE1VDEwOjAwOjAwLjAwMFoiLCI3ZjNhIl0",
+              "type": "string"
+            }
+          },
+          {
+            "name": "limit",
+            "required": false,
+            "in": "query",
+            "description": "How many items to return, 1 to 50.",
+            "schema": {
+              "minimum": 1,
+              "maximum": 50,
+              "default": 20,
+              "example": 20,
+              "type": "number"
+            }
+          },
+          {
+            "name": "isActive",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "example": "true",
+              "type": "string",
+              "enum": [
+                "true",
+                "false"
+              ]
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ReferenceItemPageResponseDto"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Error. code: VALIDATION_FAILED.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Error. code: UNAUTHORIZED, ACCESS_TOKEN_EXPIRED.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Error. code: FORBIDDEN.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Error. code: RATE_LIMITED.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Error. code: INTERNAL_ERROR.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "The entries of a list, newest first",
+        "tags": [
+          "catalog"
+        ]
+      }
+    },
+    "/v1/admin/lists/{list}/{id}": {
+      "patch": {
+        "description": "An inactive entry can no longer be chosen; an inactive category hides its products from the public at once. `sortOrder` (categories only) sets the public order.",
+        "operationId": "AdminCatalogController_updateListItem",
+        "parameters": [
+          {
+            "name": "list",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "example": "categories",
+              "type": "string",
+              "enum": [
+                "categories",
+                "meat-types",
+                "cutting-styles",
+                "exclusion-items"
+              ]
+            }
+          },
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "format": "uuid",
+              "example": "7f3a2c1e-0b9d-4e5f-8a6b-1c2d3e4f5a6b",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateReferenceItemDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ReferenceItemResponseDto"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Error. code: VALIDATION_FAILED.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Error. code: UNAUTHORIZED, ACCESS_TOKEN_EXPIRED.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Error. code: FORBIDDEN.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Error. code: NOT_FOUND.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Error. code: RATE_LIMITED.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Error. code: INTERNAL_ERROR.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Rename an entry, switch it on or off, or reorder a category",
+        "tags": [
+          "catalog"
+        ]
+      }
+    },
+    "/v1/admin/cutting-packaging-incompatibilities": {
+      "post": {
+        "description": "CONFLICT when the rule exists already.",
+        "operationId": "AdminCatalogController_createIncompatibility",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateCuttingPackagingIncompatibilityDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CuttingPackagingIncompatibilityResponseDto"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Error. code: VALIDATION_FAILED.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Error. code: UNAUTHORIZED, ACCESS_TOKEN_EXPIRED.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Error. code: FORBIDDEN.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Error. code: CONFLICT.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Error. code: RATE_LIMITED.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Error. code: INTERNAL_ERROR.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Forbid a cutting style with a packaging",
+        "tags": [
+          "catalog"
+        ]
+      },
+      "get": {
+        "operationId": "AdminCatalogController_listIncompatibilities",
+        "parameters": [
+          {
+            "name": "cursor",
+            "required": false,
+            "in": "query",
+            "description": "The `nextCursor` of the previous page; omit it for the first page. Opaque: never build or change it.",
+            "schema": {
+              "example": "WyIyMDI2LTExLTE1VDEwOjAwOjAwLjAwMFoiLCI3ZjNhIl0",
+              "type": "string"
+            }
+          },
+          {
+            "name": "limit",
+            "required": false,
+            "in": "query",
+            "description": "How many items to return, 1 to 50.",
+            "schema": {
+              "minimum": 1,
+              "maximum": 50,
+              "default": 20,
+              "example": 20,
+              "type": "number"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CuttingPackagingIncompatibilityPageResponseDto"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Error. code: VALIDATION_FAILED.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Error. code: UNAUTHORIZED, ACCESS_TOKEN_EXPIRED.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Error. code: FORBIDDEN.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Error. code: RATE_LIMITED.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Error. code: INTERNAL_ERROR.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "The cutting and packaging rules, newest first",
+        "tags": [
+          "catalog"
+        ]
+      }
+    },
+    "/v1/admin/cutting-packaging-incompatibilities/{id}": {
+      "delete": {
+        "operationId": "AdminCatalogController_deleteIncompatibility",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "format": "uuid",
+              "example": "7f3a2c1e-0b9d-4e5f-8a6b-1c2d3e4f5a6b",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Removed."
+          },
+          "400": {
+            "description": "Error. code: VALIDATION_FAILED.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Error. code: UNAUTHORIZED, ACCESS_TOKEN_EXPIRED.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Error. code: FORBIDDEN.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Error. code: NOT_FOUND.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Error. code: RATE_LIMITED.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Error. code: INTERNAL_ERROR.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Remove a cutting and packaging rule",
+        "tags": [
+          "catalog"
+        ]
+      }
+    },
+    "/v1/admin/products": {
+      "get": {
+        "description": "status=pending_review is the review queue.",
+        "operationId": "AdminCatalogController_listAllProducts",
+        "parameters": [
+          {
+            "name": "cursor",
+            "required": false,
+            "in": "query",
+            "description": "The `nextCursor` of the previous page; omit it for the first page. Opaque: never build or change it.",
+            "schema": {
+              "example": "WyIyMDI2LTExLTE1VDEwOjAwOjAwLjAwMFoiLCI3ZjNhIl0",
+              "type": "string"
+            }
+          },
+          {
+            "name": "limit",
+            "required": false,
+            "in": "query",
+            "description": "How many items to return, 1 to 50.",
+            "schema": {
+              "minimum": 1,
+              "maximum": 50,
+              "default": 20,
+              "example": 20,
+              "type": "number"
+            }
+          },
+          {
+            "name": "status",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "example": "pending_review",
+              "type": "string",
+              "enum": [
+                "draft",
+                "pending_review",
+                "published",
+                "rejected"
+              ]
+            }
+          },
+          {
+            "name": "vendorId",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "format": "uuid",
+              "example": "7f3a2c1e-0b9d-4e5f-8a6b-1c2d3e4f5a6b",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProductCardPageResponseDto"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Error. code: VALIDATION_FAILED.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Error. code: UNAUTHORIZED, ACCESS_TOKEN_EXPIRED.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Error. code: FORBIDDEN.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Error. code: RATE_LIMITED.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Error. code: INTERNAL_ERROR.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Products of every vendor, newest first",
+        "tags": [
+          "catalog"
+        ]
+      },
+      "post": {
+        "description": "Upload each image first (POST /v1/admin/media/uploads, purpose catalog.product-image) and confirm it. NOT_FOUND (PLATFORM_VENDOR_MISSING) before `pnpm vendor:create-platform`.",
+        "operationId": "AdminCatalogController_createPlatformProduct",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateProductDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProductResponseDto"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Error. code: VALIDATION_FAILED.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Error. code: UNAUTHORIZED, ACCESS_TOKEN_EXPIRED.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Error. code: FORBIDDEN.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Error. code: MEDIA_NOT_FOUND, NOT_FOUND.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Error. code: MEDIA_NOT_READY.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Error. code: RATE_LIMITED.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Error. code: INTERNAL_ERROR.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Create a JAZLA product (a draft of the platform vendor)",
+        "tags": [
+          "catalog"
+        ]
+      }
+    },
+    "/v1/admin/products/{id}": {
+      "get": {
+        "operationId": "AdminCatalogController_readProduct",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "format": "uuid",
+              "example": "7f3a2c1e-0b9d-4e5f-8a6b-1c2d3e4f5a6b",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProductResponseDto"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Error. code: VALIDATION_FAILED.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Error. code: UNAUTHORIZED, ACCESS_TOKEN_EXPIRED.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Error. code: FORBIDDEN.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Error. code: NOT_FOUND.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Error. code: RATE_LIMITED.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Error. code: INTERNAL_ERROR.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "One product of any vendor, with its latest change request",
+        "tags": [
+          "catalog"
+        ]
+      },
+      "put": {
+        "description": "Applies at once, also when published (audited). Existing sizes and cuttings keep their live prices here (change them with PATCH …/prices); a published product must meet the submission rules. Another vendor’s product is NOT_FOUND.",
+        "operationId": "AdminCatalogController_updatePlatformProduct",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "format": "uuid",
+              "example": "7f3a2c1e-0b9d-4e5f-8a6b-1c2d3e4f5a6b",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ProductContentDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProductResponseDto"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Error. code: VALIDATION_FAILED.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Error. code: UNAUTHORIZED, ACCESS_TOKEN_EXPIRED.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Error. code: FORBIDDEN.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Error. code: MEDIA_NOT_FOUND, NOT_FOUND.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Error. code: MEDIA_NOT_READY, PRODUCT_NOT_EDITABLE, TRANSACTION_CONFLICT.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Error. code: PRODUCT_NOT_SUBMITTABLE.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Error. code: RATE_LIMITED.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Error. code: INTERNAL_ERROR.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Replace a JAZLA product’s content",
+        "tags": [
+          "catalog"
+        ]
+      }
+    },
+    "/v1/admin/products/{id}/approve": {
+      "post": {
+        "description": "PRODUCT_NOT_EDITABLE unless it is under review.",
+        "operationId": "AdminCatalogController_approve",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "format": "uuid",
+              "example": "7f3a2c1e-0b9d-4e5f-8a6b-1c2d3e4f5a6b",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProductResponseDto"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Error. code: VALIDATION_FAILED.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Error. code: UNAUTHORIZED, ACCESS_TOKEN_EXPIRED.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Error. code: FORBIDDEN.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Error. code: NOT_FOUND.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Error. code: PRODUCT_NOT_EDITABLE, TRANSACTION_CONFLICT.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Error. code: RATE_LIMITED.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Error. code: INTERNAL_ERROR.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Approve a product under review: it is published",
+        "tags": [
+          "catalog"
+        ]
+      }
+    },
+    "/v1/admin/products/{id}/reject": {
+      "post": {
+        "description": "The vendor sees the reason, edits the product and submits it again.",
+        "operationId": "AdminCatalogController_reject",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "format": "uuid",
+              "example": "7f3a2c1e-0b9d-4e5f-8a6b-1c2d3e4f5a6b",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ReasonDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProductResponseDto"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Error. code: VALIDATION_FAILED.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Error. code: UNAUTHORIZED, ACCESS_TOKEN_EXPIRED.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Error. code: FORBIDDEN.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Error. code: NOT_FOUND.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Error. code: PRODUCT_NOT_EDITABLE, TRANSACTION_CONFLICT.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Error. code: RATE_LIMITED.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Error. code: INTERNAL_ERROR.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Reject a product under review with a reason",
+        "tags": [
+          "catalog"
+        ]
+      }
+    },
+    "/v1/admin/product-change-requests": {
+      "get": {
+        "description": "Each with the proposed content, its images with their URLs. The live product beside it: GET admin/products/:id.",
+        "operationId": "AdminCatalogController_listPendingChanges",
+        "parameters": [
+          {
+            "name": "cursor",
+            "required": false,
+            "in": "query",
+            "description": "The `nextCursor` of the previous page; omit it for the first page. Opaque: never build or change it.",
+            "schema": {
+              "example": "WyIyMDI2LTExLTE1VDEwOjAwOjAwLjAwMFoiLCI3ZjNhIl0",
+              "type": "string"
+            }
+          },
+          {
+            "name": "limit",
+            "required": false,
+            "in": "query",
+            "description": "How many items to return, 1 to 50.",
+            "schema": {
+              "minimum": 1,
+              "maximum": 50,
+              "default": 20,
+              "example": 20,
+              "type": "number"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProductChangeRequestPageResponseDto"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Error. code: VALIDATION_FAILED.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Error. code: UNAUTHORIZED, ACCESS_TOKEN_EXPIRED.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Error. code: FORBIDDEN.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Error. code: RATE_LIMITED.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Error. code: INTERNAL_ERROR.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Pending change requests on published products, newest first",
+        "tags": [
+          "catalog"
+        ]
+      }
+    },
+    "/v1/admin/product-change-requests/{id}/approve": {
+      "post": {
+        "description": "Applies exactly the content shown in the queue (a request never changes). Existing sizes and cuttings keep their live prices. PRODUCT_CHANGE_REQUEST_SUPERSEDED when the vendor has edited again since (reload: the newer request is in the queue); NOT_FOUND for an unknown or decided request.",
+        "operationId": "AdminCatalogController_approveChange",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "format": "uuid",
+              "example": "7f3a2c1e-0b9d-4e5f-8a6b-1c2d3e4f5a6b",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProductResponseDto"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Error. code: VALIDATION_FAILED.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Error. code: UNAUTHORIZED, ACCESS_TOKEN_EXPIRED.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Error. code: FORBIDDEN.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Error. code: NOT_FOUND.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Error. code: PRODUCT_CHANGE_REQUEST_SUPERSEDED, PRODUCT_NOT_EDITABLE, TRANSACTION_CONFLICT.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Error. code: RATE_LIMITED.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Error. code: INTERNAL_ERROR.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Approve a change request: it becomes the live product",
+        "tags": [
+          "catalog"
+        ]
+      }
+    },
+    "/v1/admin/product-change-requests/{id}/reject": {
+      "post": {
+        "description": "The live product is unchanged; the vendor sees the reason. PRODUCT_CHANGE_REQUEST_SUPERSEDED when the vendor has edited again since; NOT_FOUND for an unknown or decided request.",
+        "operationId": "AdminCatalogController_rejectChange",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "format": "uuid",
+              "example": "7f3a2c1e-0b9d-4e5f-8a6b-1c2d3e4f5a6b",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ReasonDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "204": {
+            "description": "Rejected."
+          },
+          "400": {
+            "description": "Error. code: VALIDATION_FAILED.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Error. code: UNAUTHORIZED, ACCESS_TOKEN_EXPIRED.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Error. code: FORBIDDEN.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Error. code: NOT_FOUND.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Error. code: PRODUCT_CHANGE_REQUEST_SUPERSEDED, TRANSACTION_CONFLICT.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Error. code: RATE_LIMITED.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Error. code: INTERNAL_ERROR.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Reject a change request with a reason",
+        "tags": [
+          "catalog"
+        ]
+      }
+    },
+    "/v1/admin/products/{id}/publish": {
+      "post": {
+        "description": "PRODUCT_NOT_SUBMITTABLE without a size or an image, or with incompatible options. Another vendor’s product is NOT_FOUND.",
+        "operationId": "AdminCatalogController_publish",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "format": "uuid",
+              "example": "7f3a2c1e-0b9d-4e5f-8a6b-1c2d3e4f5a6b",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProductResponseDto"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Error. code: VALIDATION_FAILED.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Error. code: UNAUTHORIZED, ACCESS_TOKEN_EXPIRED.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Error. code: FORBIDDEN.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Error. code: NOT_FOUND.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Error. code: PRODUCT_NOT_EDITABLE, TRANSACTION_CONFLICT.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Error. code: PRODUCT_NOT_SUBMITTABLE.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Error. code: RATE_LIMITED.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Error. code: INTERNAL_ERROR.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Publish a JAZLA draft directly",
+        "tags": [
+          "catalog"
+        ]
+      }
+    },
+    "/v1/admin/products/{id}/availability": {
+      "patch": {
+        "operationId": "AdminCatalogController_platformAvailability",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "format": "uuid",
+              "example": "7f3a2c1e-0b9d-4e5f-8a6b-1c2d3e4f5a6b",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SetProductAvailabilityDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProductResponseDto"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Error. code: VALIDATION_FAILED.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Error. code: UNAUTHORIZED, ACCESS_TOKEN_EXPIRED.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Error. code: FORBIDDEN.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Error. code: NOT_FOUND.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Error. code: PRODUCT_NOT_EDITABLE.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Error. code: RATE_LIMITED.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Error. code: INTERNAL_ERROR.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Switch a JAZLA product on or off, at once",
+        "tags": [
+          "catalog"
+        ]
+      }
+    },
+    "/v1/admin/products/{id}/fulfilment": {
+      "patch": {
+        "operationId": "AdminCatalogController_platformFulfilment",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "format": "uuid",
+              "example": "7f3a2c1e-0b9d-4e5f-8a6b-1c2d3e4f5a6b",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SetProductFulfilmentDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProductResponseDto"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Error. code: VALIDATION_FAILED.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Error. code: UNAUTHORIZED, ACCESS_TOKEN_EXPIRED.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Error. code: FORBIDDEN.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Error. code: NOT_FOUND.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Error. code: PRODUCT_NOT_EDITABLE.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Error. code: RATE_LIMITED.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Error. code: INTERNAL_ERROR.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Set delivery, pickup or both on a JAZLA product, at once",
+        "tags": [
+          "catalog"
+        ]
+      }
+    },
+    "/v1/admin/products/{id}/prices": {
+      "patch": {
+        "description": "Each change is recorded in the audit log.",
+        "operationId": "AdminCatalogController_platformPrices",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "format": "uuid",
+              "example": "7f3a2c1e-0b9d-4e5f-8a6b-1c2d3e4f5a6b",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ChangeProductPricesDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProductResponseDto"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Error. code: VALIDATION_FAILED.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Error. code: UNAUTHORIZED, ACCESS_TOKEN_EXPIRED.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Error. code: FORBIDDEN.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Error. code: NOT_FOUND.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Error. code: PRODUCT_NOT_EDITABLE, TRANSACTION_CONFLICT.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Error. code: RATE_LIMITED.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Error. code: INTERNAL_ERROR.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Change a JAZLA product’s prices, at once",
+        "tags": [
+          "catalog"
+        ]
+      }
+    },
+    "/v1/public/categories": {
+      "get": {
+        "description": "Every active category, by `sortOrder` (lower first) then oldest first; the whole list, not paged.",
+        "operationId": "PublicCatalogController_categories",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PublicCategoryListResponseDto"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Error. code: RATE_LIMITED.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Error. code: INTERNAL_ERROR.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                }
+              }
+            }
+          }
+        },
+        "summary": "The active categories, in the order admins set",
+        "tags": [
+          "catalog"
+        ]
+      }
+    },
+    "/v1/public/products": {
+      "get": {
+        "description": "Filter by category, vendor, meat type and the lowest size price (halalas, both ends included).",
+        "operationId": "PublicCatalogController_products",
+        "parameters": [
+          {
+            "name": "cursor",
+            "required": false,
+            "in": "query",
+            "description": "The `nextCursor` of the previous page; omit it for the first page. Opaque: never build or change it.",
+            "schema": {
+              "example": "WyIyMDI2LTExLTE1VDEwOjAwOjAwLjAwMFoiLCI3ZjNhIl0",
+              "type": "string"
+            }
+          },
+          {
+            "name": "limit",
+            "required": false,
+            "in": "query",
+            "description": "How many items to return, 1 to 50.",
+            "schema": {
+              "minimum": 1,
+              "maximum": 50,
+              "default": 20,
+              "example": 20,
+              "type": "number"
+            }
+          },
+          {
+            "name": "categoryId",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "format": "uuid",
+              "example": "7f3a2c1e-0b9d-4e5f-8a6b-1c2d3e4f5a6b",
+              "type": "string"
+            }
+          },
+          {
+            "name": "vendorId",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "format": "uuid",
+              "example": "7f3a2c1e-0b9d-4e5f-8a6b-1c2d3e4f5a6b",
+              "type": "string"
+            }
+          },
+          {
+            "name": "meatTypeId",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "format": "uuid",
+              "example": "7f3a2c1e-0b9d-4e5f-8a6b-1c2d3e4f5a6b",
+              "type": "string"
+            }
+          },
+          {
+            "name": "minPriceHalalas",
+            "required": false,
+            "in": "query",
+            "description": "Halalas.",
+            "schema": {
+              "minimum": 0,
+              "maximum": 100000000,
+              "example": 50000,
+              "type": "number"
+            }
+          },
+          {
+            "name": "maxPriceHalalas",
+            "required": false,
+            "in": "query",
+            "description": "Halalas.",
+            "schema": {
+              "minimum": 0,
+              "maximum": 100000000,
+              "example": 150000,
+              "type": "number"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProductCardPageResponseDto"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Error. code: VALIDATION_FAILED.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Error. code: RATE_LIMITED.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Error. code: INTERNAL_ERROR.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                }
+              }
+            }
+          }
+        },
+        "summary": "Products, newest first, with filters",
+        "tags": [
+          "catalog"
+        ]
+      }
+    },
+    "/v1/public/products/{id}": {
+      "get": {
+        "operationId": "PublicCatalogController_product",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "format": "uuid",
+              "example": "7f3a2c1e-0b9d-4e5f-8a6b-1c2d3e4f5a6b",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PublicProductResponseDto"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Error. code: VALIDATION_FAILED.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Error. code: NOT_FOUND.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Error. code: RATE_LIMITED.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Error. code: INTERNAL_ERROR.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                }
+              }
+            }
+          }
+        },
+        "summary": "One product with every option",
+        "tags": [
+          "catalog"
+        ]
+      }
     }
   },
   "info": {
@@ -3504,7 +6801,10 @@
           "VENDOR_APPLICATION_ALREADY_PENDING",
           "VENDOR_APPLICATION_NOT_PENDING",
           "VENDOR_SUSPENDED",
-          "VENDOR_ACCESS_ALREADY_HELD"
+          "VENDOR_ACCESS_ALREADY_HELD",
+          "PRODUCT_NOT_EDITABLE",
+          "PRODUCT_NOT_SUBMITTABLE",
+          "PRODUCT_CHANGE_REQUEST_SUPERSEDED"
         ],
         "description": "Stable error code. Clients branch on it; it is never renamed or reused."
       },
@@ -4649,7 +7949,8 @@
           "purpose": {
             "type": "string",
             "enum": [
-              "vendor.logo"
+              "vendor.logo",
+              "catalog.product-image"
             ],
             "example": "vendor.logo",
             "description": "Why the file is uploaded; decides the accepted types, size and visibility."
@@ -4676,7 +7977,8 @@
           "purpose": {
             "type": "string",
             "enum": [
-              "vendor.logo"
+              "vendor.logo",
+              "catalog.product-image"
             ],
             "example": "vendor.logo",
             "description": "Why the file is uploaded; decides the accepted types, size and visibility."
@@ -4755,6 +8057,1176 @@
         "required": [
           "status",
           "checks"
+        ]
+      },
+      "ProductSizeDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true,
+            "description": "An existing size of the product to keep (its id); left out or null for a new size.",
+            "example": null
+          },
+          "approxWeightGrams": {
+            "type": "number",
+            "minimum": 1,
+            "maximum": 10000000,
+            "description": "The approximate weight in grams.",
+            "example": 8000
+          },
+          "priceHalalas": {
+            "type": "number",
+            "minimum": 1,
+            "maximum": 100000000,
+            "description": "The price in halalas, VAT included. An existing size keeps its live price here (VALIDATION_FAILED `isLivePrice` otherwise): change it with the prices endpoint.",
+            "example": 95000
+          },
+          "tag": {
+            "nullable": true,
+            "description": "An optional tag, such as “enough for an aqiqah”.",
+            "type": "object",
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/LocalizedNameDto"
+              }
+            ]
+          }
+        },
+        "required": [
+          "approxWeightGrams",
+          "priceHalalas"
+        ]
+      },
+      "ProductCuttingDto": {
+        "type": "object",
+        "properties": {
+          "cuttingStyleId": {
+            "type": "string",
+            "format": "uuid",
+            "example": "7f3a2c1e-0b9d-4e5f-8a6b-1c2d3e4f5a6b"
+          },
+          "extraPriceHalalas": {
+            "type": "number",
+            "minimum": 0,
+            "maximum": 100000000,
+            "description": "The extra price in halalas, VAT included; 0 for none. A cutting style the product already offers keeps its live extra price here (VALIDATION_FAILED `isLivePrice` otherwise): change it with the prices endpoint.",
+            "example": 1500
+          }
+        },
+        "required": [
+          "cuttingStyleId",
+          "extraPriceHalalas"
+        ]
+      },
+      "CreateProductDto": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "$ref": "#/components/schemas/LocalizedNameDto"
+          },
+          "description": {
+            "$ref": "#/components/schemas/LocalizedDescriptionDto"
+          },
+          "categoryId": {
+            "type": "string",
+            "format": "uuid",
+            "description": "An active category.",
+            "example": "7f3a2c1e-0b9d-4e5f-8a6b-1c2d3e4f5a6b"
+          },
+          "meatTypeId": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true,
+            "description": "An active meat type, or null for none.",
+            "example": "7f3a2c1e-0b9d-4e5f-8a6b-1c2d3e4f5a6b"
+          },
+          "imageMediaIds": {
+            "maxItems": 10,
+            "description": "Confirmed uploads (purpose catalog.product-image) by the signed-in user, first is the cover.",
+            "example": [
+              "7f3a2c1e-0b9d-4e5f-8a6b-1c2d3e4f5a6b"
+            ],
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "sizes": {
+            "maxItems": 20,
+            "description": "Each existing size id at most once (VALIDATION_FAILED `isNotRepeated` on `sizes.<i>.id`); an existing size keeps its live price.",
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ProductSizeDto"
+            }
+          },
+          "cuttings": {
+            "maxItems": 30,
+            "description": "Each cutting style at most once (VALIDATION_FAILED `isNotRepeated` on `cuttings.<i>.cuttingStyleId`).",
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ProductCuttingDto"
+            }
+          },
+          "packagings": {
+            "type": "array",
+            "example": [
+              "trays",
+              "vacuum"
+            ],
+            "items": {
+              "type": "string",
+              "enum": [
+                "trays",
+                "bags",
+                "vacuum",
+                "none"
+              ]
+            }
+          },
+          "exclusionItemIds": {
+            "maxItems": 30,
+            "description": "Active \"without\" items.",
+            "example": [
+              "7f3a2c1e-0b9d-4e5f-8a6b-1c2d3e4f5a6b"
+            ],
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "fulfilment": {
+            "type": "string",
+            "enum": [
+              "delivery",
+              "pickup",
+              "both"
+            ],
+            "example": "both"
+          }
+        },
+        "required": [
+          "name",
+          "categoryId",
+          "imageMediaIds",
+          "sizes",
+          "cuttings",
+          "packagings",
+          "exclusionItemIds",
+          "fulfilment"
+        ]
+      },
+      "NamedReferenceResponseDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "example": "7f3a2c1e-0b9d-4e5f-8a6b-1c2d3e4f5a6b"
+          },
+          "name": {
+            "$ref": "#/components/schemas/LocalizedTextResponseDto"
+          }
+        },
+        "required": [
+          "id",
+          "name"
+        ]
+      },
+      "ProductImageResponseDto": {
+        "type": "object",
+        "properties": {
+          "mediaId": {
+            "type": "string",
+            "format": "uuid",
+            "example": "7f3a2c1e-0b9d-4e5f-8a6b-1c2d3e4f5a6b"
+          },
+          "url": {
+            "type": "string",
+            "nullable": true,
+            "example": "https://cdn.example.com/catalog/product-image/2026/11/16/7f3a.webp"
+          }
+        },
+        "required": [
+          "mediaId",
+          "url"
+        ]
+      },
+      "ProductSizeResponseDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true,
+            "description": "Null only for a new size in a change request.",
+            "example": "7f3a2c1e-0b9d-4e5f-8a6b-1c2d3e4f5a6b"
+          },
+          "approxWeightGrams": {
+            "type": "number",
+            "description": "Grams.",
+            "example": 8000
+          },
+          "priceHalalas": {
+            "type": "number",
+            "description": "Halalas, VAT included.",
+            "example": 95000
+          },
+          "tag": {
+            "nullable": true,
+            "type": "object",
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/LocalizedTextResponseDto"
+              }
+            ]
+          }
+        },
+        "required": [
+          "id",
+          "approxWeightGrams",
+          "priceHalalas",
+          "tag"
+        ]
+      },
+      "ProductCuttingResponseDto": {
+        "type": "object",
+        "properties": {
+          "cuttingStyleId": {
+            "type": "string",
+            "format": "uuid",
+            "example": "7f3a2c1e-0b9d-4e5f-8a6b-1c2d3e4f5a6b"
+          },
+          "name": {
+            "nullable": true,
+            "description": "Null only in a change request (names are shown for the live product).",
+            "type": "object",
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/LocalizedTextResponseDto"
+              }
+            ]
+          },
+          "extraPriceHalalas": {
+            "type": "number",
+            "description": "Halalas, VAT included; 0 for none.",
+            "example": 1500
+          }
+        },
+        "required": [
+          "cuttingStyleId",
+          "name",
+          "extraPriceHalalas"
+        ]
+      },
+      "ProductContentResponseDto": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "$ref": "#/components/schemas/LocalizedTextResponseDto"
+          },
+          "description": {
+            "$ref": "#/components/schemas/OptionalLocalizedTextResponseDto"
+          },
+          "categoryId": {
+            "type": "string",
+            "format": "uuid",
+            "example": "7f3a2c1e-0b9d-4e5f-8a6b-1c2d3e4f5a6b"
+          },
+          "meatTypeId": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true,
+            "example": null
+          },
+          "images": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ProductImageResponseDto"
+            }
+          },
+          "sizes": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ProductSizeResponseDto"
+            }
+          },
+          "cuttings": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ProductCuttingResponseDto"
+            }
+          },
+          "packagings": {
+            "type": "array",
+            "example": [
+              "trays"
+            ],
+            "items": {
+              "type": "string",
+              "enum": [
+                "trays",
+                "bags",
+                "vacuum",
+                "none"
+              ]
+            }
+          },
+          "exclusionItemIds": {
+            "example": [
+              "7f3a2c1e-0b9d-4e5f-8a6b-1c2d3e4f5a6b"
+            ],
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        },
+        "required": [
+          "name",
+          "description",
+          "categoryId",
+          "meatTypeId",
+          "images",
+          "sizes",
+          "cuttings",
+          "packagings",
+          "exclusionItemIds"
+        ]
+      },
+      "ProductChangeRequestResponseDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "example": "7f3a2c1e-0b9d-4e5f-8a6b-1c2d3e4f5a6b"
+          },
+          "productId": {
+            "type": "string",
+            "format": "uuid",
+            "example": "7f3a2c1e-0b9d-4e5f-8a6b-1c2d3e4f5a6b"
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "pending",
+              "approved",
+              "rejected",
+              "superseded"
+            ],
+            "example": "pending"
+          },
+          "content": {
+            "description": "The content as the vendor proposed it. Prices of sizes and cuttings the product already has are as they were then: approval keeps their live prices (see the product), and only new sizes and cuttings take the prices shown.",
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/ProductContentResponseDto"
+              }
+            ]
+          },
+          "rejectionReason": {
+            "type": "string",
+            "nullable": true,
+            "example": null
+          },
+          "createdAt": {
+            "format": "date-time",
+            "type": "string",
+            "example": "2026-11-16T09:00:00.000Z"
+          },
+          "updatedAt": {
+            "format": "date-time",
+            "type": "string",
+            "example": "2026-11-16T09:05:00.000Z"
+          },
+          "reviewedAt": {
+            "format": "date-time",
+            "type": "string",
+            "nullable": true,
+            "example": null
+          }
+        },
+        "required": [
+          "id",
+          "productId",
+          "status",
+          "content",
+          "rejectionReason",
+          "createdAt",
+          "updatedAt",
+          "reviewedAt"
+        ]
+      },
+      "ProductResponseDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "example": "7f3a2c1e-0b9d-4e5f-8a6b-1c2d3e4f5a6b"
+          },
+          "vendorId": {
+            "type": "string",
+            "format": "uuid",
+            "example": "7f3a2c1e-0b9d-4e5f-8a6b-1c2d3e4f5a6b"
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "draft",
+              "pending_review",
+              "published",
+              "rejected"
+            ],
+            "example": "published"
+          },
+          "isAvailable": {
+            "type": "boolean",
+            "example": true
+          },
+          "fulfilment": {
+            "type": "string",
+            "enum": [
+              "delivery",
+              "pickup",
+              "both"
+            ],
+            "example": "both"
+          },
+          "name": {
+            "$ref": "#/components/schemas/LocalizedTextResponseDto"
+          },
+          "description": {
+            "$ref": "#/components/schemas/OptionalLocalizedTextResponseDto"
+          },
+          "category": {
+            "$ref": "#/components/schemas/NamedReferenceResponseDto"
+          },
+          "meatType": {
+            "nullable": true,
+            "type": "object",
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/NamedReferenceResponseDto"
+              }
+            ]
+          },
+          "images": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ProductImageResponseDto"
+            }
+          },
+          "sizes": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ProductSizeResponseDto"
+            }
+          },
+          "cuttings": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ProductCuttingResponseDto"
+            }
+          },
+          "packagings": {
+            "type": "array",
+            "example": [
+              "trays"
+            ],
+            "items": {
+              "type": "string",
+              "enum": [
+                "trays",
+                "bags",
+                "vacuum",
+                "none"
+              ]
+            }
+          },
+          "exclusions": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/NamedReferenceResponseDto"
+            }
+          },
+          "minPriceHalalas": {
+            "type": "number",
+            "nullable": true,
+            "description": "The lowest size price in halalas; null while there is no size.",
+            "example": 95000
+          },
+          "rejectionReason": {
+            "type": "string",
+            "nullable": true,
+            "example": null
+          },
+          "submittedAt": {
+            "format": "date-time",
+            "type": "string",
+            "nullable": true,
+            "example": null
+          },
+          "reviewedAt": {
+            "format": "date-time",
+            "type": "string",
+            "nullable": true,
+            "example": null
+          },
+          "publishedAt": {
+            "format": "date-time",
+            "type": "string",
+            "nullable": true,
+            "example": null
+          },
+          "createdAt": {
+            "format": "date-time",
+            "type": "string",
+            "example": "2026-11-16T09:00:00.000Z"
+          },
+          "updatedAt": {
+            "format": "date-time",
+            "type": "string",
+            "example": "2026-11-16T09:00:00.000Z"
+          },
+          "changeRequest": {
+            "nullable": true,
+            "description": "The latest change request: pending, or the last decided one with its reason; null for none.",
+            "type": "object",
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/ProductChangeRequestResponseDto"
+              }
+            ]
+          }
+        },
+        "required": [
+          "id",
+          "vendorId",
+          "status",
+          "isAvailable",
+          "fulfilment",
+          "name",
+          "description",
+          "category",
+          "meatType",
+          "images",
+          "sizes",
+          "cuttings",
+          "packagings",
+          "exclusions",
+          "minPriceHalalas",
+          "rejectionReason",
+          "submittedAt",
+          "reviewedAt",
+          "publishedAt",
+          "createdAt",
+          "updatedAt",
+          "changeRequest"
+        ]
+      },
+      "ProductVendorResponseDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "example": "7f3a2c1e-0b9d-4e5f-8a6b-1c2d3e4f5a6b"
+          },
+          "name": {
+            "nullable": true,
+            "type": "object",
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/LocalizedTextResponseDto"
+              }
+            ]
+          }
+        },
+        "required": [
+          "id",
+          "name"
+        ]
+      },
+      "ProductCardResponseDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "example": "7f3a2c1e-0b9d-4e5f-8a6b-1c2d3e4f5a6b"
+          },
+          "vendor": {
+            "$ref": "#/components/schemas/ProductVendorResponseDto"
+          },
+          "name": {
+            "$ref": "#/components/schemas/LocalizedTextResponseDto"
+          },
+          "categoryId": {
+            "type": "string",
+            "format": "uuid",
+            "example": "7f3a2c1e-0b9d-4e5f-8a6b-1c2d3e4f5a6b"
+          },
+          "meatTypeId": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true,
+            "example": null
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "draft",
+              "pending_review",
+              "published",
+              "rejected"
+            ],
+            "example": "published"
+          },
+          "isAvailable": {
+            "type": "boolean",
+            "example": true
+          },
+          "minPriceHalalas": {
+            "type": "number",
+            "nullable": true,
+            "description": "The lowest size price in halalas; null while there is no size.",
+            "example": 95000
+          },
+          "coverUrl": {
+            "type": "string",
+            "nullable": true,
+            "description": "The first image; null while there is none.",
+            "example": "https://cdn.example.com/catalog/product-image/2026/11/16/7f3a.webp"
+          },
+          "createdAt": {
+            "format": "date-time",
+            "type": "string",
+            "example": "2026-11-16T09:00:00.000Z"
+          }
+        },
+        "required": [
+          "id",
+          "vendor",
+          "name",
+          "categoryId",
+          "meatTypeId",
+          "status",
+          "isAvailable",
+          "minPriceHalalas",
+          "coverUrl",
+          "createdAt"
+        ]
+      },
+      "ProductCardPageResponseDto": {
+        "type": "object",
+        "properties": {
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ProductCardResponseDto"
+            }
+          },
+          "nextCursor": {
+            "type": "string",
+            "nullable": true,
+            "description": "Send as `cursor` for the next page; null on the last page.",
+            "example": null
+          }
+        },
+        "required": [
+          "items",
+          "nextCursor"
+        ]
+      },
+      "ProductContentDto": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "$ref": "#/components/schemas/LocalizedNameDto"
+          },
+          "description": {
+            "$ref": "#/components/schemas/LocalizedDescriptionDto"
+          },
+          "categoryId": {
+            "type": "string",
+            "format": "uuid",
+            "description": "An active category.",
+            "example": "7f3a2c1e-0b9d-4e5f-8a6b-1c2d3e4f5a6b"
+          },
+          "meatTypeId": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true,
+            "description": "An active meat type, or null for none.",
+            "example": "7f3a2c1e-0b9d-4e5f-8a6b-1c2d3e4f5a6b"
+          },
+          "imageMediaIds": {
+            "maxItems": 10,
+            "description": "Confirmed uploads (purpose catalog.product-image) by the signed-in user, first is the cover.",
+            "example": [
+              "7f3a2c1e-0b9d-4e5f-8a6b-1c2d3e4f5a6b"
+            ],
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "sizes": {
+            "maxItems": 20,
+            "description": "Each existing size id at most once (VALIDATION_FAILED `isNotRepeated` on `sizes.<i>.id`); an existing size keeps its live price.",
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ProductSizeDto"
+            }
+          },
+          "cuttings": {
+            "maxItems": 30,
+            "description": "Each cutting style at most once (VALIDATION_FAILED `isNotRepeated` on `cuttings.<i>.cuttingStyleId`).",
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ProductCuttingDto"
+            }
+          },
+          "packagings": {
+            "type": "array",
+            "example": [
+              "trays",
+              "vacuum"
+            ],
+            "items": {
+              "type": "string",
+              "enum": [
+                "trays",
+                "bags",
+                "vacuum",
+                "none"
+              ]
+            }
+          },
+          "exclusionItemIds": {
+            "maxItems": 30,
+            "description": "Active \"without\" items.",
+            "example": [
+              "7f3a2c1e-0b9d-4e5f-8a6b-1c2d3e4f5a6b"
+            ],
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        },
+        "required": [
+          "name",
+          "categoryId",
+          "imageMediaIds",
+          "sizes",
+          "cuttings",
+          "packagings",
+          "exclusionItemIds"
+        ]
+      },
+      "SetProductAvailabilityDto": {
+        "type": "object",
+        "properties": {
+          "isAvailable": {
+            "type": "boolean",
+            "example": false
+          }
+        },
+        "required": [
+          "isAvailable"
+        ]
+      },
+      "SetProductFulfilmentDto": {
+        "type": "object",
+        "properties": {
+          "fulfilment": {
+            "type": "string",
+            "enum": [
+              "delivery",
+              "pickup",
+              "both"
+            ],
+            "example": "pickup"
+          }
+        },
+        "required": [
+          "fulfilment"
+        ]
+      },
+      "SizePriceDto": {
+        "type": "object",
+        "properties": {
+          "sizeId": {
+            "type": "string",
+            "format": "uuid",
+            "example": "7f3a2c1e-0b9d-4e5f-8a6b-1c2d3e4f5a6b"
+          },
+          "priceHalalas": {
+            "type": "number",
+            "minimum": 1,
+            "maximum": 100000000,
+            "description": "Halalas, VAT included.",
+            "example": 89000
+          }
+        },
+        "required": [
+          "sizeId",
+          "priceHalalas"
+        ]
+      },
+      "CuttingPriceDto": {
+        "type": "object",
+        "properties": {
+          "cuttingStyleId": {
+            "type": "string",
+            "format": "uuid",
+            "example": "7f3a2c1e-0b9d-4e5f-8a6b-1c2d3e4f5a6b"
+          },
+          "extraPriceHalalas": {
+            "type": "number",
+            "minimum": 0,
+            "maximum": 100000000,
+            "description": "Halalas, VAT included; 0 for none.",
+            "example": 1000
+          }
+        },
+        "required": [
+          "cuttingStyleId",
+          "extraPriceHalalas"
+        ]
+      },
+      "ChangeProductPricesDto": {
+        "type": "object",
+        "properties": {
+          "sizes": {
+            "maxItems": 20,
+            "description": "Each size at most once (VALIDATION_FAILED `isNotRepeated` on `sizes.<i>.sizeId`).",
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/SizePriceDto"
+            }
+          },
+          "cuttings": {
+            "maxItems": 30,
+            "description": "Each cutting style at most once (VALIDATION_FAILED `isNotRepeated` on `cuttings.<i>.cuttingStyleId`).",
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/CuttingPriceDto"
+            }
+          }
+        }
+      },
+      "CreateReferenceItemDto": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "$ref": "#/components/schemas/LocalizedNameDto"
+          },
+          "sortOrder": {
+            "type": "number",
+            "minimum": 0,
+            "maximum": 100000,
+            "description": "Categories only: the display order, lower first (0 by default). Another list refuses it (VALIDATION_FAILED `isOrderedList`).",
+            "example": 1
+          }
+        },
+        "required": [
+          "name"
+        ]
+      },
+      "ReferenceItemResponseDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "example": "7f3a2c1e-0b9d-4e5f-8a6b-1c2d3e4f5a6b"
+          },
+          "name": {
+            "$ref": "#/components/schemas/LocalizedTextResponseDto"
+          },
+          "isActive": {
+            "type": "boolean",
+            "example": true
+          },
+          "sortOrder": {
+            "type": "number",
+            "nullable": true,
+            "description": "A category’s display order, lower first; null for the other lists.",
+            "example": 0
+          },
+          "createdAt": {
+            "format": "date-time",
+            "type": "string",
+            "example": "2026-11-16T09:00:00.000Z"
+          }
+        },
+        "required": [
+          "id",
+          "name",
+          "isActive",
+          "sortOrder",
+          "createdAt"
+        ]
+      },
+      "ReferenceItemPageResponseDto": {
+        "type": "object",
+        "properties": {
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ReferenceItemResponseDto"
+            }
+          },
+          "nextCursor": {
+            "type": "string",
+            "nullable": true,
+            "description": "Send as `cursor` for the next page; null on the last page.",
+            "example": null
+          }
+        },
+        "required": [
+          "items",
+          "nextCursor"
+        ]
+      },
+      "UpdateReferenceItemDto": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "$ref": "#/components/schemas/LocalizedNameDto"
+          },
+          "isActive": {
+            "type": "boolean",
+            "description": "False: no longer offered for new products; an inactive category hides its products.",
+            "example": false
+          },
+          "sortOrder": {
+            "type": "number",
+            "minimum": 0,
+            "maximum": 100000,
+            "description": "Categories only: the display order, lower first (0 by default). Another list refuses it (VALIDATION_FAILED `isOrderedList`).",
+            "example": 1
+          }
+        }
+      },
+      "CreateCuttingPackagingIncompatibilityDto": {
+        "type": "object",
+        "properties": {
+          "cuttingStyleId": {
+            "type": "string",
+            "format": "uuid",
+            "example": "7f3a2c1e-0b9d-4e5f-8a6b-1c2d3e4f5a6b"
+          },
+          "packaging": {
+            "type": "string",
+            "enum": [
+              "trays",
+              "bags",
+              "vacuum",
+              "none"
+            ],
+            "example": "vacuum"
+          }
+        },
+        "required": [
+          "cuttingStyleId",
+          "packaging"
+        ]
+      },
+      "CuttingPackagingIncompatibilityResponseDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "example": "7f3a2c1e-0b9d-4e5f-8a6b-1c2d3e4f5a6b"
+          },
+          "cuttingStyleId": {
+            "type": "string",
+            "format": "uuid",
+            "example": "7f3a2c1e-0b9d-4e5f-8a6b-1c2d3e4f5a6b"
+          },
+          "packaging": {
+            "type": "string",
+            "enum": [
+              "trays",
+              "bags",
+              "vacuum",
+              "none"
+            ],
+            "example": "vacuum"
+          },
+          "createdAt": {
+            "format": "date-time",
+            "type": "string",
+            "example": "2026-11-16T09:00:00.000Z"
+          }
+        },
+        "required": [
+          "id",
+          "cuttingStyleId",
+          "packaging",
+          "createdAt"
+        ]
+      },
+      "CuttingPackagingIncompatibilityPageResponseDto": {
+        "type": "object",
+        "properties": {
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/CuttingPackagingIncompatibilityResponseDto"
+            }
+          },
+          "nextCursor": {
+            "type": "string",
+            "nullable": true,
+            "description": "Send as `cursor` for the next page; null on the last page.",
+            "example": null
+          }
+        },
+        "required": [
+          "items",
+          "nextCursor"
+        ]
+      },
+      "ProductChangeRequestPageResponseDto": {
+        "type": "object",
+        "properties": {
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ProductChangeRequestResponseDto"
+            }
+          },
+          "nextCursor": {
+            "type": "string",
+            "nullable": true,
+            "description": "Send as `cursor` for the next page; null on the last page.",
+            "example": null
+          }
+        },
+        "required": [
+          "items",
+          "nextCursor"
+        ]
+      },
+      "PublicCategoryListResponseDto": {
+        "type": "object",
+        "properties": {
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ReferenceItemResponseDto"
+            }
+          }
+        },
+        "required": [
+          "items"
+        ]
+      },
+      "PublicProductResponseDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "example": "7f3a2c1e-0b9d-4e5f-8a6b-1c2d3e4f5a6b"
+          },
+          "vendor": {
+            "$ref": "#/components/schemas/ProductVendorResponseDto"
+          },
+          "name": {
+            "$ref": "#/components/schemas/LocalizedTextResponseDto"
+          },
+          "description": {
+            "$ref": "#/components/schemas/OptionalLocalizedTextResponseDto"
+          },
+          "category": {
+            "$ref": "#/components/schemas/NamedReferenceResponseDto"
+          },
+          "meatType": {
+            "nullable": true,
+            "type": "object",
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/NamedReferenceResponseDto"
+              }
+            ]
+          },
+          "fulfilment": {
+            "type": "string",
+            "enum": [
+              "delivery",
+              "pickup",
+              "both"
+            ],
+            "example": "both"
+          },
+          "images": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ProductImageResponseDto"
+            }
+          },
+          "sizes": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ProductSizeResponseDto"
+            }
+          },
+          "cuttings": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ProductCuttingResponseDto"
+            }
+          },
+          "packagings": {
+            "type": "array",
+            "example": [
+              "trays"
+            ],
+            "items": {
+              "type": "string",
+              "enum": [
+                "trays",
+                "bags",
+                "vacuum",
+                "none"
+              ]
+            }
+          },
+          "exclusions": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/NamedReferenceResponseDto"
+            }
+          },
+          "minPriceHalalas": {
+            "type": "number",
+            "description": "The lowest size price in halalas.",
+            "example": 95000
+          }
+        },
+        "required": [
+          "id",
+          "vendor",
+          "name",
+          "description",
+          "category",
+          "meatType",
+          "fulfilment",
+          "images",
+          "sizes",
+          "cuttings",
+          "packagings",
+          "exclusions",
+          "minPriceHalalas"
         ]
       }
     }

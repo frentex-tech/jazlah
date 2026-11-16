@@ -13,3 +13,4 @@ One line per building block: name, path, purpose; the detail is in that file's d
 - **VendorStatusChecker** — `src/common/auth/vendor-status-checker.interface.ts` — whether a vendor is suspended; token `src/common/auth/vendor-status-checker.constants.ts`; bound by vendors.
 - **OrganisationStatusGuard** — `src/common/guards/organisation-status.guard.ts` — the second global guard: VENDOR_SUSPENDED on every vendor route, no skip.
 - **VendorRouteCheck** — `src/common/guards/vendor-route.check.ts` — startup fails on a public vendor route or no checker (`src/common/guards/vendor-route-misconfigured.error.ts`).
+- **organisationOf** — `src/common/auth/organisation-of.ts` — the vendor id of a vendor-audience user (from the token), for vendor-side calls.

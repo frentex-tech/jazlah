@@ -1,6 +1,6 @@
-# Plan: the catalog module (not built)
+# Plan: the catalog module (built in issue #237)
 
-The approved plan for the catalog, the task after vendors (issue #235). Not loaded by default; CLAUDE.md points here. Read with `.claude/rules/` and the add-module skill. Paths are relative to `services/api/`. Build nothing this plan does not list; anything it leaves open is asked, not guessed.
+The approved plan for the catalog, the task after vendors (issue #235); what was built and the choices made beyond this plan are in DECISIONS.md, "Catalog". Not loaded by default; CLAUDE.md points here. Read with `.claude/rules/` and the add-module skill. Paths are relative to `services/api/`. Build nothing this plan does not list; anything it leaves open is asked, not guessed.
 
 ## Shape
 
@@ -17,6 +17,7 @@ categories, products, product_images, product_sizes, cutting_styles, exclusion_i
 - Status: `draft`, `pending_review`, `published`, `rejected`; plus an availability switch.
 - Fulfilment: delivery, pickup or both.
 - `min_price_halalas` kept in step with its sizes.
+- Every write to a product or its children locks the product row first (`SELECT … FOR UPDATE`, `ProductRepository.lockForWrite`), so writers to one product run one after another (added after the review of #238; DECISIONS.md, "Catalog").
 
 ## Options
 
@@ -30,7 +31,7 @@ categories, products, product_images, product_sizes, cutting_styles, exclusion_i
 
 - A vendor's products need admin approval; admins publish JAZLA's products (the platform vendor's) directly.
 - On a published product, availability, prices and fulfilment apply at once, each price change with an audit entry (`AuditLogWriter`).
-- Any other edit becomes one pending change request while the live version stays; a second edit replaces the pending request.
+- Any other edit becomes one pending change request while the live version stays. A request never changes after it is created: a second edit closes the pending one as superseded and opens a new one, and deciding a superseded request is refused (PRODUCT_CHANGE_REQUEST_SUPERSEDED). This replaced "a second edit replaces the pending request" after the review of #238 (DECISIONS.md, "Catalog").
 
 ## Public queries
 

@@ -14,7 +14,7 @@ import { GetVendorUseCase } from '../../application/get-vendor.use-case';
 import { UpdateOwnVendorProfileUseCase } from '../../application/update-own-vendor-profile.use-case';
 import { UpdateVendorProfileDto } from '../dto/update-vendor-profile.dto';
 import { VendorProfileResponseDto } from '../dto/vendor-profile-response.dto';
-import { organisationOf } from '../organisation-of';
+import { organisationOf } from '@common/auth/organisation-of';
 import { toVendorProfileChanges } from '../to-vendor-profile-changes';
 import { toVendorProfileResponse } from '../to-vendor-profile-response';
 

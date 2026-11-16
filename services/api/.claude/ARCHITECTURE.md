@@ -24,12 +24,23 @@ prisma/
                               VendorApplicationDocument -> vendor_application_documents, VendorCommissionChange ->
                               vendor_commission_changes (enums vendor_status, vendor_application_status,
                               vendor_application_document_kind)
+  models/catalog.prisma       Category -> categories, MeatType -> meat_types, CuttingStyle -> cutting_styles,
+                              ExclusionItem -> exclusion_items, CuttingPackagingIncompatibility ->
+                              cutting_packaging_incompatibilities, Product -> products, ProductImage, ProductSize,
+                              ProductCutting, ProductPackagingOption (product_packagings), ProductExclusion,
+                              ProductChangeRequest (enums product_status, product_fulfilment, product_packaging,
+                              product_change_request_status)
   models/auth.prisma          OtpChallenge -> otp_challenges, AuthSession -> auth_sessions, RefreshToken ->
                               refresh_tokens (enums device_platform, auth_session_revocation_reason)
   migrations/                 20261113150318_init: PostGIS extension, audit_logs; 20261113224826_idempotency_keys;
                               20261114151242_media; 20261114192800_users_and_auth (with two check constraints);
                               20261115120000_media_staged_uploads; 20261115205251_vendors (partial unique indexes and
-                              check constraints written by hand)
+                              check constraints written by hand); 20261115230905_catalog (check constraints and the
+                              pending change request index by hand); 20261116000616_catalog_listing_indexes (the
+                              public list's composite indexes, replacing unusable partial ones);
+                              20261116140000_catalog_category_sort_order (categories' display order, check by hand);
+                              20261116160000_catalog_change_request_superseded (superseded status; review check
+                              rewritten by hand)
 src/
   main.ts                     bootstrap: validates the environment, pino as Nest's logger, configureHttpApp,
                               shutdownOnSignals (the shutdown deadline), port from config; an invalid
@@ -37,7 +48,7 @@ src/
   create-admin.ts             pnpm admin:create <phone>: grants admin access (create-admin.module.ts)
   create-platform-vendor.ts   pnpm vendor:create-platform: creates the platform vendor (create-platform-vendor.module.ts)
   app.module.ts               imports config, logger, database, redis, queue, event bus, rate limit, auth (after
-                              rate limit: guard order), health, media, vendors;
+                              rate limit: guard order), health, media, vendors, catalog;
                               registers the global filter and pipe
   generate-openapi.ts         pnpm openapi:generate / openapi:check (Nest preview mode: nothing connects)
   config/                     env.schema.ts (zod), validate-env.ts, load-env.ts (the one reader of process.env),
@@ -139,12 +150,19 @@ src/
                               controllers), application/ (a use case per class), domain/ (Iban, the review and
                               status state machines, entities, ports, fakes), infrastructure/ (Prisma repositories,
                               AES-GCM IBAN cipher, MediaService and UsersService adapters, the status checker);
-                              platform-vendor.module.ts (what the command needs)
+                              platform-vendor.module.ts (what the command needs); exports VendorDirectory
+    catalog/                  four layers: admin lists (categories, meat types, cutting styles, "without" items),
+                              cutting and packaging rules, products (sizes, cuttings, packagings, exclusions,
+                              images), their review (state machine), change requests on published products,
+                              public browsing. api/ (vendor, admin, public controllers), application/,
+                              domain/ (Product rules, ProductStatusMachine, ports, fakes), infrastructure/
+                              (Prisma repositories, MediaService and VendorDirectory adapters)
 test/
   *.e2e-spec.ts               health, errors, request-id, database, queue, event-bus, api-docs, http-security,
                               rate-limit, startup, logging, redis-logging, shutdown, media (fake storage),
                               media-storage (MinIO), auth, auth-guard, media-endpoints, vendors,
-                              vendors-logging, vendor-routes-suspension (walks every vendor route); jest-e2e.json
+                              vendors-logging, vendor-routes-suspension (walks every vendor route), catalog;
+                              jest-e2e.json
   support/                    test-only code: createHttpApp() (the real app set up as main.ts does; no workers
                               unless `workers` turns one on, enableWorkers), probe
                               controllers, queue and event probes, start-api.cjs (starts main.ts with variables),
@@ -211,7 +229,7 @@ src/
       providers/<vendor>.provider.ts    one file per vendor
       providers/fake.provider.ts        fake used by tests
   modules/                    business domains, one folder each
-    auth, vendors, orders, checkout, payments, refunds, wallet, finance: four layers
+    auth, vendors, catalog, orders, checkout, payments, refunds, wallet, finance: four layers
       index.ts                public entry: re-exports what other modules may use (R7)
       <module>.module.ts
       api/                    controllers/<audience>.controller.ts, dto/
