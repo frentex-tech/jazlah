@@ -9,8 +9,8 @@ import type { ReferenceItem } from '../domain/reference-item.type';
 import type { ReferenceList } from '../domain/reference-list.type';
 
 /**
- * The entries of one list, newest first: all of them or only active ones (admins), or
- * the active ones only (the public categories).
+ * The entries of one list for admins, newest first: all of them, or only active or
+ * only inactive ones.
  */
 @Injectable()
 export class ListReferenceItemsUseCase {

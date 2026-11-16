@@ -4,4 +4,6 @@ import type { LocalizedText } from '@common/i18n/localized-text.type';
 export type ReferenceItemChanges = Readonly<{
   name?: LocalizedText;
   isActive?: boolean;
+  /** A category's display order (ORDERED_REFERENCE_LISTS only). */
+  sortOrder?: number;
 }>;

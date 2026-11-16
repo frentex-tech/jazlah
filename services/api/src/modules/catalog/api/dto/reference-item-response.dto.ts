@@ -15,6 +15,15 @@ export class ReferenceItemResponseDto {
   @ApiProperty({ example: true })
   isActive!: boolean;
 
+  @ApiProperty({
+    type: Number,
+    nullable: true,
+    description:
+      'A category’s display order, lower first; null for the other lists.',
+    example: 0,
+  })
+  sortOrder!: number | null;
+
   @ApiProperty({ example: '2026-11-16T09:00:00.000Z' })
   createdAt!: Date;
 }

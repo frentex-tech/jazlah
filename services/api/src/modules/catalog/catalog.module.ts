@@ -18,6 +18,7 @@ import { ListCuttingPackagingIncompatibilitiesUseCase } from './application/list
 import { ListProductChangeRequestsUseCase } from './application/list-product-change-requests.use-case';
 import { ListProductsUseCase } from './application/list-products.use-case';
 import { ListPublicProductsUseCase } from './application/list-public-products.use-case';
+import { ListPublicCategoriesUseCase } from './application/list-public-categories.use-case';
 import { ListReferenceItemsUseCase } from './application/list-reference-items.use-case';
 import { PublishPlatformProductUseCase } from './application/publish-platform-product.use-case';
 import { RejectProductChangeRequestUseCase } from './application/reject-product-change-request.use-case';
@@ -57,6 +58,7 @@ import { VendorDirectoryCatalogVendors } from './infrastructure/vendor-directory
     CreateReferenceItemUseCase,
     UpdateReferenceItemUseCase,
     ListReferenceItemsUseCase,
+    ListPublicCategoriesUseCase,
     CreateCuttingPackagingIncompatibilityUseCase,
     ListCuttingPackagingIncompatibilitiesUseCase,
     DeleteCuttingPackagingIncompatibilityUseCase,

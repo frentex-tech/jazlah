@@ -2,17 +2,16 @@ import { Controller, Get, Param, Query } from '@nestjs/common';
 import { ApiOkResponse, ApiOperation, ApiTags } from '@nestjs/swagger';
 import { ApiErrorResponses } from '@common/decorators/api-error-responses.decorator';
 import { IdParamDto } from '@common/dto/id-param.dto';
-import { PageQueryDto } from '@common/dto/page-query.dto';
 import { ErrorCode } from '@common/errors/error-code.enum';
 import { toNextCursor } from '@common/pagination/to-next-cursor';
 import { toPageRequest } from '@common/pagination/to-page-request';
 import { GetPublicProductUseCase } from '../../application/get-public-product.use-case';
 import { ListPublicProductsUseCase } from '../../application/list-public-products.use-case';
-import { ListReferenceItemsUseCase } from '../../application/list-reference-items.use-case';
+import { ListPublicCategoriesUseCase } from '../../application/list-public-categories.use-case';
 import { ListPublicProductsQueryDto } from '../dto/list-public-products-query.dto';
 import { ProductCardPageResponseDto } from '../dto/product-card-page-response.dto';
 import { PublicProductResponseDto } from '../dto/public-product-response.dto';
-import { ReferenceItemPageResponseDto } from '../dto/reference-item-page-response.dto';
+import { PublicCategoryListResponseDto } from '../dto/public-category-list-response.dto';
 import { toProductCardResponse } from '../to-product-card-response';
 import { toPublicProductResponse } from '../to-public-product-response';
 import { toPublicProductFilter } from '../to-public-product-filter';
@@ -27,26 +26,22 @@ import { toReferenceItemResponse } from '../to-reference-item-response';
 @Controller('public')
 export class PublicCatalogController {
   constructor(
-    private readonly listItems: ListReferenceItemsUseCase,
+    private readonly listCategories: ListPublicCategoriesUseCase,
     private readonly listProducts: ListPublicProductsUseCase,
     private readonly getProduct: GetPublicProductUseCase,
   ) {}
 
   @Get('categories')
-  @ApiOperation({ summary: 'The active categories, newest first' })
-  @ApiOkResponse({ type: ReferenceItemPageResponseDto })
-  @ApiErrorResponses(ErrorCode.VALIDATION_FAILED, ErrorCode.RATE_LIMITED)
-  async categories(
-    @Query() query: PageQueryDto,
-  ): Promise<ReferenceItemPageResponseDto> {
-    const page = await this.listItems.execute(
-      'categories',
-      { isActive: true },
-      toPageRequest(query),
-    );
+  @ApiOperation({
+    summary: 'The active categories, in the order admins set',
+    description:
+      'Every active category, by `sortOrder` (lower first) then oldest first; the whole list, not paged.',
+  })
+  @ApiOkResponse({ type: PublicCategoryListResponseDto })
+  @ApiErrorResponses(ErrorCode.RATE_LIMITED)
+  async categories(): Promise<PublicCategoryListResponseDto> {
     return {
-      items: page.items.map(toReferenceItemResponse),
-      nextCursor: toNextCursor(page),
+      items: (await this.listCategories.execute()).map(toReferenceItemResponse),
     };
   }
 

@@ -51,12 +51,15 @@ model Category {
   nameAr    String   @map("name_ar")
   nameEn    String   @map("name_en")
   isActive  Boolean  @default(true) @map("is_active")
+  /// The display order admins set, lower first (the public categories); never negative.
+  sortOrder Int      @default(0) @map("sort_order")
   createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz(3)
   updatedAt DateTime @updatedAt @map("updated_at") @db.Timestamptz(3)
 
   products Product[]
 
   @@index([isActive, createdAt, id])
+  @@index([isActive, sortOrder, createdAt, id])
   @@index([createdAt, id])
   @@map("categories")
 }

@@ -9,5 +9,7 @@ export type ReferenceItem = Readonly<{
   id: string;
   name: LocalizedText;
   isActive: boolean;
+  /** A category's display order, lower first; null for the lists without one. */
+  sortOrder: number | null;
   createdAt: Date;
 }>;

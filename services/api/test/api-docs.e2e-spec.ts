@@ -115,6 +115,7 @@ describe('API documentation (e2e)', () => {
         'ProductSizeDto',
         'ProductSizeResponseDto',
         'ProductVendorResponseDto',
+        'PublicCategoryListResponseDto',
         'PublicProductResponseDto',
         'PublicVendorPageResponseDto',
         'PublicVendorResponseDto',

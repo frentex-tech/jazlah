@@ -114,7 +114,11 @@ export class AdminCatalogController {
   // The lists.
 
   @Post('lists/:list')
-  @ApiOperation({ summary: 'Add an entry to a list (it starts active)' })
+  @ApiOperation({
+    summary: 'Add an entry to a list (it starts active)',
+    description:
+      'A category may take its display order (`sortOrder`, 0 by default); another list refuses one.',
+  })
   @ApiCreatedResponse({ type: ReferenceItemResponseDto })
   @ApiErrorResponses(ErrorCode.VALIDATION_FAILED, ...ADMIN_AUTH_ERRORS)
   async createListItem(
@@ -122,7 +126,10 @@ export class AdminCatalogController {
     @Body() body: CreateReferenceItemDto,
   ): Promise<ReferenceItemResponseDto> {
     return toReferenceItemResponse(
-      await this.createItem.execute(toReferenceList(params.list), body.name),
+      await this.createItem.execute(toReferenceList(params.list), {
+        name: body.name,
+        ...(body.sortOrder === undefined ? {} : { sortOrder: body.sortOrder }),
+      }),
     );
   }
 
@@ -147,9 +154,9 @@ export class AdminCatalogController {
 
   @Patch('lists/:list/:id')
   @ApiOperation({
-    summary: 'Rename an entry or switch it on or off',
+    summary: 'Rename an entry, switch it on or off, or reorder a category',
     description:
-      'An inactive entry can no longer be chosen; an inactive category hides its products from the public at once.',
+      'An inactive entry can no longer be chosen; an inactive category hides its products from the public at once. `sortOrder` (categories only) sets the public order.',
   })
   @ApiOkResponse({ type: ReferenceItemResponseDto })
   @ApiErrorResponses(
@@ -165,6 +172,7 @@ export class AdminCatalogController {
       await this.updateItem.execute(toReferenceList(params.list), params.id, {
         ...(body.name === undefined ? {} : { name: body.name }),
         ...(body.isActive === undefined ? {} : { isActive: body.isActive }),
+        ...(body.sortOrder === undefined ? {} : { sortOrder: body.sortOrder }),
       }),
     );
   }

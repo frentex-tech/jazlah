@@ -33,6 +33,7 @@ type ProductBody = {
   } | null;
 };
 type Page<T> = { items: T[]; nextCursor: string | null };
+type CategoryList = { items: { id: string; sortOrder: number | null }[] };
 type Card = { id: string; vendor: { id: string; name: { en: string } | null } };
 
 const errorCode = (body: unknown): string => (body as ErrorResponseBody).code;
@@ -755,18 +756,10 @@ describe('Catalog (e2e)', () => {
       const page = await catalog.http
         .get(`/v1/public/products/${id}`)
         .expect(200);
-      const categories: string[] = [];
-      let cursor: string | null = null;
-      do {
-        const res = await catalog.http
-          .get(
-            `/v1/public/categories?limit=50${cursor === null ? '' : `&cursor=${cursor}`}`,
-          )
-          .expect(200);
-        const body = res.body as Page<{ id: string }>;
-        categories.push(...body.items.map((item) => item.id));
-        cursor = body.nextCursor;
-      } while (cursor !== null);
+      const categories = (
+        (await catalog.http.get('/v1/public/categories').expect(200))
+          .body as CategoryList
+      ).items.map((item) => item.id);
 
       expect(page.body).toMatchObject({
         id,
@@ -790,6 +783,52 @@ describe('Catalog (e2e)', () => {
       });
       expect(categories).toContain(options.categoryId);
       expect(categories).not.toContain(inactive);
+    });
+
+    it('returns the public categories in the order admins set; other lists take no order', async () => {
+      const admin = await vendors.admin();
+      const [first, second, third] = [
+        await catalog.listItem(admin, 'categories'),
+        await catalog.listItem(admin, 'categories'),
+        await catalog.listItem(admin, 'categories'),
+      ];
+      const order = (id: string, sortOrder: unknown) =>
+        catalog.http
+          .patch(`/v1/admin/lists/categories/${id}`)
+          .set(...bearer(admin))
+          .send({ sortOrder });
+      // High numbers: the categories of tests running beside this one stay at 0.
+      const moved = await order(first, 90003).expect(200);
+      await order(second, 90001).expect(200);
+      await order(third, 90002).expect(200);
+      const created = await catalog.http
+        .post('/v1/admin/lists/meat-types')
+        .set(...bearer(admin))
+        .send({ name: { ar: 'حاشي', en: 'Camel' }, sortOrder: 1 })
+        .expect(400);
+      const negative = await order(first, -1).expect(400);
+
+      const listed = (
+        (await catalog.http.get('/v1/public/categories').expect(200))
+          .body as CategoryList
+      ).items;
+      const mine = listed.filter((item) =>
+        [first, second, third].includes(item.id),
+      );
+
+      expect(moved.body).toMatchObject({ id: first, sortOrder: 90003 });
+      expect(mine.map((item) => item.id)).toEqual([second, third, first]);
+      expect(listed.indexOf(mine[0])).toBeGreaterThan(
+        listed.findIndex((item) => item.sortOrder === 0),
+      );
+      expect(created.body).toMatchObject({
+        code: 'VALIDATION_FAILED',
+        details: [{ field: 'sortOrder', constraints: ['isOrderedList'] }],
+      });
+      expect(negative.body).toMatchObject({
+        code: 'VALIDATION_FAILED',
+        details: [{ field: 'sortOrder' }],
+      });
     });
 
     it('hides an unpublished product', async () => {

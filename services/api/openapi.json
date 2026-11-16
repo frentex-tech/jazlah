@@ -4313,6 +4313,7 @@
     },
     "/v1/admin/lists/{list}": {
       "post": {
+        "description": "A category may take its display order (`sortOrder`, 0 by default); another list refuses one.",
         "operationId": "AdminCatalogController_createListItem",
         "parameters": [
           {
@@ -4543,7 +4544,7 @@
     },
     "/v1/admin/lists/{list}/{id}": {
       "patch": {
-        "description": "An inactive entry can no longer be chosen; an inactive category hides its products from the public at once.",
+        "description": "An inactive entry can no longer be chosen; an inactive category hides its products from the public at once. `sortOrder` (categories only) sets the public order.",
         "operationId": "AdminCatalogController_updateListItem",
         "parameters": [
           {
@@ -4659,7 +4660,7 @@
             "bearer": []
           }
         ],
-        "summary": "Rename an entry or switch it on or off",
+        "summary": "Rename an entry, switch it on or off, or reorder a category",
         "tags": [
           "catalog"
         ]
@@ -6438,49 +6439,16 @@
     },
     "/v1/public/categories": {
       "get": {
+        "description": "Every active category, by `sortOrder` (lower first) then oldest first; the whole list, not paged.",
         "operationId": "PublicCatalogController_categories",
-        "parameters": [
-          {
-            "name": "cursor",
-            "required": false,
-            "in": "query",
-            "description": "The `nextCursor` of the previous page; omit it for the first page. Opaque: never build or change it.",
-            "schema": {
-              "example": "WyIyMDI2LTExLTE1VDEwOjAwOjAwLjAwMFoiLCI3ZjNhIl0",
-              "type": "string"
-            }
-          },
-          {
-            "name": "limit",
-            "required": false,
-            "in": "query",
-            "description": "How many items to return, 1 to 50.",
-            "schema": {
-              "minimum": 1,
-              "maximum": 50,
-              "default": 20,
-              "example": 20,
-              "type": "number"
-            }
-          }
-        ],
+        "parameters": [],
         "responses": {
           "200": {
             "description": "",
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/ReferenceItemPageResponseDto"
-                }
-              }
-            }
-          },
-          "400": {
-            "description": "Error. code: VALIDATION_FAILED.",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ErrorResponseDto"
+                  "$ref": "#/components/schemas/PublicCategoryListResponseDto"
                 }
               }
             }
@@ -6506,7 +6474,7 @@
             }
           }
         },
-        "summary": "The active categories, newest first",
+        "summary": "The active categories, in the order admins set",
         "tags": [
           "catalog"
         ]
@@ -8950,6 +8918,13 @@
         "properties": {
           "name": {
             "$ref": "#/components/schemas/LocalizedNameDto"
+          },
+          "sortOrder": {
+            "type": "number",
+            "minimum": 0,
+            "maximum": 100000,
+            "description": "Categories only: the display order, lower first (0 by default). Another list refuses it (VALIDATION_FAILED `isOrderedList`).",
+            "example": 1
           }
         },
         "required": [
@@ -8971,6 +8946,12 @@
             "type": "boolean",
             "example": true
           },
+          "sortOrder": {
+            "type": "number",
+            "nullable": true,
+            "description": "A category’s display order, lower first; null for the other lists.",
+            "example": 0
+          },
           "createdAt": {
             "format": "date-time",
             "type": "string",
@@ -8981,6 +8962,7 @@
           "id",
           "name",
           "isActive",
+          "sortOrder",
           "createdAt"
         ]
       },
@@ -9015,6 +8997,13 @@
             "type": "boolean",
             "description": "False: no longer offered for new products; an inactive category hides its products.",
             "example": false
+          },
+          "sortOrder": {
+            "type": "number",
+            "minimum": 0,
+            "maximum": 100000,
+            "description": "Categories only: the display order, lower first (0 by default). Another list refuses it (VALIDATION_FAILED `isOrderedList`).",
+            "example": 1
           }
         }
       },
@@ -9118,6 +9107,20 @@
         "required": [
           "items",
           "nextCursor"
+        ]
+      },
+      "PublicCategoryListResponseDto": {
+        "type": "object",
+        "properties": {
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ReferenceItemResponseDto"
+            }
+          }
+        },
+        "required": [
+          "items"
         ]
       },
       "PublicProductResponseDto": {

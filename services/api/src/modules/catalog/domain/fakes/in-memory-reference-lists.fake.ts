@@ -1,4 +1,4 @@
-import type { LocalizedText } from '@common/i18n/localized-text.type';
+import type { NewReferenceItem } from '../new-reference-item.type';
 import { keysetPage } from '@common/pagination/keyset-page.fake';
 import type { Page } from '@common/pagination/page.type';
 import type { PageRequest } from '@common/pagination/page-request.type';
@@ -20,6 +20,7 @@ export class InMemoryReferenceLists implements ReferenceListRepository {
       id,
       name: { ar: `${list} ${id.slice(-4)}`, en: `${list} ${id.slice(-4)}` },
       isActive,
+      sortOrder: list === 'categories' ? 0 : null,
       createdAt: this.nextDate(),
     };
     this.rows = [...this.rows, { list, item }];
@@ -32,11 +33,12 @@ export class InMemoryReferenceLists implements ReferenceListRepository {
       ?.item;
   }
 
-  create(list: ReferenceList, name: LocalizedText): Promise<ReferenceItem> {
+  create(list: ReferenceList, entry: NewReferenceItem): Promise<ReferenceItem> {
     const item: ReferenceItem = {
       id: this.newId(),
-      name,
+      name: entry.name,
       isActive: true,
+      sortOrder: list === 'categories' ? (entry.sortOrder ?? 0) : null,
       createdAt: this.nextDate(),
     };
     this.rows = [...this.rows, { list, item }];
@@ -76,6 +78,20 @@ export class InMemoryReferenceLists implements ReferenceListRepository {
           .map((row) => row.item),
         page,
       ),
+    );
+  }
+
+  listActiveCategories(): Promise<ReferenceItem[]> {
+    return Promise.resolve(
+      this.rows
+        .filter((row) => row.list === 'categories' && row.item.isActive)
+        .map((row) => row.item)
+        .sort(
+          (a, b) =>
+            (a.sortOrder ?? 0) - (b.sortOrder ?? 0) ||
+            a.createdAt.getTime() - b.createdAt.getTime() ||
+            a.id.localeCompare(b.id),
+        ),
     );
   }
 

@@ -37,7 +37,8 @@ prisma/
                               20261115120000_media_staged_uploads; 20261115205251_vendors (partial unique indexes and
                               check constraints written by hand); 20261115230905_catalog (check constraints and the
                               pending change request index by hand); 20261116000616_catalog_listing_indexes (the
-                              public list's composite indexes, replacing unusable partial ones)
+                              public list's composite indexes, replacing unusable partial ones);
+                              20261116140000_catalog_category_sort_order (categories' display order, check by hand)
 src/
   main.ts                     bootstrap: validates the environment, pino as Nest's logger, configureHttpApp,
                               shutdownOnSignals (the shutdown deadline), port from config; an invalid

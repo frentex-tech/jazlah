@@ -19,6 +19,7 @@ import { GetPublicProductUseCase } from './get-public-product.use-case';
 import { ListCuttingPackagingIncompatibilitiesUseCase } from './list-cutting-packaging-incompatibilities.use-case';
 import { ListProductChangeRequestsUseCase } from './list-product-change-requests.use-case';
 import { ListProductsUseCase } from './list-products.use-case';
+import { ListPublicCategoriesUseCase } from './list-public-categories.use-case';
 import { ListPublicProductsUseCase } from './list-public-products.use-case';
 import { ListReferenceItemsUseCase } from './list-reference-items.use-case';
 import { PublishPlatformProductUseCase } from './publish-platform-product.use-case';
@@ -78,6 +79,7 @@ export function buildCatalogUseCases() {
     createReferenceItem: new CreateReferenceItemUseCase(lists),
     updateReferenceItem: new UpdateReferenceItemUseCase(lists),
     listReferenceItems: new ListReferenceItemsUseCase(lists),
+    listPublicCategories: new ListPublicCategoriesUseCase(lists),
     createIncompatibility: new CreateCuttingPackagingIncompatibilityUseCase(
       rules,
       lists,

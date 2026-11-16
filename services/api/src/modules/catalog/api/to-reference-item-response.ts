@@ -8,6 +8,7 @@ export function toReferenceItemResponse(
     id: item.id,
     name: item.name,
     isActive: item.isActive,
+    sortOrder: item.sortOrder,
     createdAt: item.createdAt,
   };
 }

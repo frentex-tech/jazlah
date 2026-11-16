@@ -6,13 +6,15 @@ import {
   type ReferenceListRepository,
 } from '../domain/ports/reference-list.repository.port';
 import type { ReferenceItem } from '../domain/reference-item.type';
+import { ReferenceItemRules } from '../domain/reference-item.entity';
 import type { ReferenceItemChanges } from '../domain/reference-item-changes.type';
 import type { ReferenceList } from '../domain/reference-list.type';
 
 /**
- * An admin renames an entry or switches it on or off. An inactive entry can no longer be
- * chosen for a product; an inactive category hides its products from the public at once.
- * NOT_FOUND for an unknown id.
+ * An admin renames an entry, switches it on or off, or reorders a category. An inactive
+ * entry can no longer be chosen for a product; an inactive category hides its products
+ * from the public at once. A display order on another list is refused
+ * (ReferenceItemRules.assertOrderable); NOT_FOUND for an unknown id.
  */
 @Injectable()
 export class UpdateReferenceItemUseCase {
@@ -26,6 +28,7 @@ export class UpdateReferenceItemUseCase {
     id: string,
     changes: ReferenceItemChanges,
   ): Promise<ReferenceItem> {
+    ReferenceItemRules.assertOrderable(list, changes.sortOrder);
     const item = await this.lists.update(list, id, changes);
     if (item === null) {
       throw new AppError(ErrorCode.NOT_FOUND);

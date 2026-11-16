@@ -7,6 +7,7 @@ export function toReferenceItem(row: ReferenceRow): ReferenceItem {
     id: row.id,
     name: { ar: row.nameAr, en: row.nameEn },
     isActive: row.isActive,
+    sortOrder: row.sortOrder ?? null,
     createdAt: row.createdAt,
   };
 }
