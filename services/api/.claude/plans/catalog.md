@@ -31,7 +31,7 @@ categories, products, product_images, product_sizes, cutting_styles, exclusion_i
 
 - A vendor's products need admin approval; admins publish JAZLA's products (the platform vendor's) directly.
 - On a published product, availability, prices and fulfilment apply at once, each price change with an audit entry (`AuditLogWriter`).
-- Any other edit becomes one pending change request while the live version stays; a second edit replaces the pending request.
+- Any other edit becomes one pending change request while the live version stays. A request never changes after it is created: a second edit closes the pending one as superseded and opens a new one, and deciding a superseded request is refused (PRODUCT_CHANGE_REQUEST_SUPERSEDED). This replaced "a second edit replaces the pending request" after the review of #238 (DECISIONS.md, "Catalog").
 
 ## Public queries
 

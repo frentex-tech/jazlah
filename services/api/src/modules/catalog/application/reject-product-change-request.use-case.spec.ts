@@ -46,6 +46,37 @@ describe('RejectProductChangeRequestUseCase', () => {
     ]);
   });
 
+  it('refuses a request the vendor has superseded since, rejecting nothing', async () => {
+    const kit = buildCatalogUseCases();
+    seedCatalog(kit);
+    const live = await publishedVendorProduct(kit);
+    const edit = (en: string) =>
+      kit.updateContent.execute({
+        scope: { kind: 'vendor', vendorId: VENDOR },
+        actorId: VENDOR_USER,
+        productId: live.product.id,
+        content: { ...Product.contentOf(live.product), name: { ar: en, en } },
+      });
+    const first = await edit('First');
+    await edit('Second');
+    kit.audit.rows = [];
+
+    await expect(
+      kit.rejectChangeRequest.execute({
+        reviewerId: ADMIN,
+        requestId: first.changeRequest!.id,
+        reason: 'r',
+      }),
+    ).rejects.toMatchObject({
+      code: ErrorCode.PRODUCT_CHANGE_REQUEST_SUPERSEDED,
+    });
+    expect(kit.changeRequests.rows.map((row) => row.status)).toEqual([
+      'superseded',
+      'pending',
+    ]);
+    expect(kit.audit.rows).toEqual([]);
+  });
+
   it('answers NOT_FOUND for an unknown request', async () => {
     const kit = buildCatalogUseCases();
 

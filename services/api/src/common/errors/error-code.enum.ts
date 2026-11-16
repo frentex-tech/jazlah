@@ -80,4 +80,9 @@ export enum ErrorCode {
    * each NO_SIZE, NO_IMAGE or INCOMPATIBLE_CUTTING_PACKAGING (with `pairs`).
    */
   PRODUCT_NOT_SUBMITTABLE = 'PRODUCT_NOT_SUBMITTABLE',
+  /**
+   * An admin approved or rejected a change request the vendor has since replaced with a
+   * newer edit: the dashboard reloads and shows the newer request.
+   */
+  PRODUCT_CHANGE_REQUEST_SUPERSEDED = 'PRODUCT_CHANGE_REQUEST_SUPERSEDED',
 }

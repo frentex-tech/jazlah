@@ -16,6 +16,7 @@ import {
   PRODUCT_REPOSITORY,
   type ProductRepository,
 } from '../domain/ports/product.repository.port';
+import { ProductChangeRequestReview } from '../domain/product-change-request-review.entity';
 import { lockProduct } from './lock-product';
 import type { ProductView } from './product-view.type';
 import { toProductView } from './to-product-view';
@@ -24,11 +25,12 @@ import { toProductView } from './to-product-view';
  * An admin approves a pending change request: its content becomes the live product in
  * one transaction (the product's tables, the lowest price, the request's decision and
  * the audit entry), after locking the product row (lockProduct): a writer to the product
- * waits, and the request is read again under the lock. Existing sizes and cutting
- * styles keep their stored prices
- * (ProductRepository.saveContent: a price changed after the request stays). NOT_FOUND unless
- * the request is pending; PRODUCT_NOT_EDITABLE if the product is no longer published or
- * another decision won meanwhile.
+ * waits, and the request is read again under the lock. A request never changes, so the
+ * content applied is the one the admin saw. Existing sizes and cutting styles keep their
+ * stored prices (ProductRepository.saveContent: a price changed after the request
+ * stays). NOT_FOUND for an unknown or decided request; PRODUCT_CHANGE_REQUEST_SUPERSEDED
+ * when the vendor has edited again since (ProductChangeRequestReview);
+ * PRODUCT_NOT_EDITABLE if the product is no longer published.
  */
 @Injectable()
 export class ApproveProductChangeRequestUseCase {
@@ -47,16 +49,17 @@ export class ApproveProductChangeRequestUseCase {
     input: Readonly<{ reviewerId: string; requestId: string }>,
   ): Promise<ProductView> {
     const product = await this.transactions.run(async () => {
-      const found = await this.changeRequests.findPending(input.requestId);
+      const found = await this.changeRequests.findById(input.requestId);
       if (found === null) {
         throw new AppError(ErrorCode.NOT_FOUND);
       }
       const live = await lockProduct(found.productId, null, this.products);
-      // Read again under the lock: the content as the last edit before it left it.
-      const request = await this.changeRequests.findPending(found.id);
+      // Its status again under the lock: an edit just before it may have superseded it.
+      const request = await this.changeRequests.findById(found.id);
       if (request === null) {
         throw new AppError(ErrorCode.NOT_FOUND);
       }
+      ProductChangeRequestReview.assertDecidable(request.status);
       if (live.status !== 'published') {
         throw new AppError(ErrorCode.PRODUCT_NOT_EDITABLE, {
           details: { status: live.status },

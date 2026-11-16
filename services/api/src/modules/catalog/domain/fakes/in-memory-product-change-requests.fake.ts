@@ -19,32 +19,33 @@ export class InMemoryProductChangeRequests implements ProductChangeRequestReposi
 
   constructor(private readonly locks: InMemoryProductLocks) {}
 
-  savePending(
+  openPending(
     productId: string,
     requestedById: string,
     content: ProductContent,
   ): Promise<ProductChangeRequest> {
     this.locks.assertLocked(productId);
     const now = this.nextDate();
-    const pending = this.rows.find(
-      (row) => row.productId === productId && row.status === 'pending',
-    );
-    const saved: ProductChangeRequest =
-      pending === undefined
-        ? {
-            id: this.newId(),
-            productId,
-            requestedById,
-            status: 'pending',
-            content,
-            rejectionReason: null,
-            reviewedAt: null,
-            createdAt: now,
-            updatedAt: now,
-          }
-        : { ...pending, requestedById, content, updatedAt: now };
-    this.rows = [...this.rows.filter((row) => row.id !== saved.id), saved];
-    return Promise.resolve(saved);
+    const opened: ProductChangeRequest = {
+      id: this.newId(),
+      productId,
+      requestedById,
+      status: 'pending',
+      content,
+      rejectionReason: null,
+      reviewedAt: null,
+      createdAt: now,
+      updatedAt: now,
+    };
+    this.rows = [
+      ...this.rows.map((row) =>
+        row.productId === productId && row.status === 'pending'
+          ? { ...row, status: 'superseded' as const, updatedAt: now }
+          : row,
+      ),
+      opened,
+    ];
+    return Promise.resolve(opened);
   }
 
   findLatestOf(productId: string): Promise<ProductChangeRequest | null> {
@@ -55,11 +56,8 @@ export class InMemoryProductChangeRequests implements ProductChangeRequestReposi
     return Promise.resolve(latest ?? null);
   }
 
-  findPending(id: string): Promise<ProductChangeRequest | null> {
-    return Promise.resolve(
-      this.rows.find((row) => row.id === id && row.status === 'pending') ??
-        null,
-    );
+  findById(id: string): Promise<ProductChangeRequest | null> {
+    return Promise.resolve(this.rows.find((row) => row.id === id) ?? null);
   }
 
   listPending(page: PageRequest): Promise<Page<ProductChangeRequest>> {

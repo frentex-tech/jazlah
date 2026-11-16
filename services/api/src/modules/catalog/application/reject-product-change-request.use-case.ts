@@ -12,11 +12,14 @@ import {
   PRODUCT_REPOSITORY,
   type ProductRepository,
 } from '../domain/ports/product.repository.port';
+import { ProductChangeRequestReview } from '../domain/product-change-request-review.entity';
 
 /**
  * An admin rejects a pending change request with a reason the vendor sees; the live
- * product is unchanged and the proposed content is discarded. NOT_FOUND unless the
- * request is pending. One transaction: the decision and its audit entry.
+ * product is unchanged and the proposed content is discarded. NOT_FOUND for an unknown
+ * or decided request; PRODUCT_CHANGE_REQUEST_SUPERSEDED when the vendor has edited again
+ * since. One transaction, after the product's row lock: the decision and its audit
+ * entry.
  */
 @Injectable()
 export class RejectProductChangeRequestUseCase {
@@ -34,13 +37,19 @@ export class RejectProductChangeRequestUseCase {
     input: Readonly<{ reviewerId: string; requestId: string; reason: string }>,
   ): Promise<void> {
     await this.transactions.run(async () => {
-      const request = await this.changeRequests.findPending(input.requestId);
+      const found = await this.changeRequests.findById(input.requestId);
       if (
-        request === null ||
-        !(await this.products.lockForWrite(request.productId, null))
+        found === null ||
+        !(await this.products.lockForWrite(found.productId, null))
       ) {
         throw new AppError(ErrorCode.NOT_FOUND);
       }
+      // Its status again under the lock: an edit just before it may have superseded it.
+      const request = await this.changeRequests.findById(found.id);
+      if (request === null) {
+        throw new AppError(ErrorCode.NOT_FOUND);
+      }
+      ProductChangeRequestReview.assertDecidable(request.status);
       const decided = await this.changeRequests.decide(request.id, {
         status: 'rejected',
         reviewerId: input.reviewerId,

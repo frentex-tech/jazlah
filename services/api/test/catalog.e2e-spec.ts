@@ -580,7 +580,7 @@ describe('Catalog (e2e)', () => {
       ).toEqual(['catalog.product.approved', 'catalog.product.rejected']);
     });
 
-    it('keeps the live product while a change request waits; a second edit replaces it; approval applies it', async () => {
+    it('keeps the live product while a change request waits; a second edit supersedes it; approval applies the newer one', async () => {
       const { owner, admin, options, vendorId } = await setUp();
       const id = await catalog.published(owner, admin, options);
       const live = (
@@ -638,7 +638,7 @@ describe('Catalog (e2e)', () => {
         .expect(404);
 
       expect((first.body as ProductBody).name.en).toBe('Naimi lamb');
-      expect((first.body as ProductBody).changeRequest?.id).toBe(requestId);
+      expect((first.body as ProductBody).changeRequest?.id).not.toBe(requestId);
       expect((second.body as ProductBody).changeRequest?.content.name.en).toBe(
         'Second',
       );
@@ -653,7 +653,7 @@ describe('Catalog (e2e)', () => {
       const queued = (queue.body as Page<QueuedRequest>).items.filter(
         (request) => request.productId === id,
       );
-      expect(queued).toHaveLength(1);
+      expect(queued.map((request) => request.id)).toEqual([requestId]);
       // The reviewer sees the proposed images, in the queue and on the product.
       const proposed = [{ mediaId: image, url: expect.any(String) as string }];
       expect(queued[0]?.content.images).toEqual(proposed);
@@ -667,6 +667,181 @@ describe('Catalog (e2e)', () => {
       });
       expect(errorCode(again.body)).toBe('NOT_FOUND');
       expect(await publicIds(`vendorId=${vendorId}`)).toEqual([id]);
+    });
+
+    describe('a change request never changes after it is created', () => {
+      /** A published product of a fresh vendor, and an edit sending `en` as its name. */
+      async function publishedWithEdit() {
+        const { owner, admin, options } = await setUp();
+        const id = await catalog.published(owner, admin, options);
+        const live = (
+          await catalog.http
+            .get(`/v1/vendor/products/${id}`)
+            .set(...bearer(owner))
+            .expect(200)
+        ).body as ProductBody;
+        const body = (en: string) =>
+          catalog.body(options, [live.images[0].mediaId], {
+            fulfilment: undefined,
+            name: { ar: en, en },
+            sizes: [
+              {
+                id: live.sizes[0].id,
+                approxWeightGrams: 8000,
+                priceHalalas: 95000,
+              },
+            ],
+          });
+        const edit = (en: string) =>
+          catalog.http
+            .put(`/v1/vendor/products/${id}`)
+            .set(...bearer(owner))
+            .send(body(en));
+        const requestOf = (res: { body: unknown }) =>
+          (res.body as ProductBody).changeRequest!.id;
+        return { id, owner, admin, options, live, body, edit, requestOf };
+      }
+
+      const decide = (
+        admin: TestUser,
+        requestId: string,
+        verb: 'approve' | 'reject',
+      ) =>
+        catalog.http
+          .post(`/v1/admin/product-change-requests/${requestId}/${verb}`)
+          .set(...bearer(admin))
+          .send(verb === 'reject' ? { reason: 'Not this one' } : {});
+
+      it('refuses to approve or reject a request the vendor edited after the admin listed it; the live product is unchanged', async () => {
+        const { id, admin, edit, requestOf } = await publishedWithEdit();
+        const listedId = requestOf(await edit('Seen').expect(200));
+        const queue = await catalog.http
+          .get('/v1/admin/product-change-requests?limit=50')
+          .set(...bearer(admin))
+          .expect(200);
+        const newerId = requestOf(await edit('Unseen').expect(200));
+
+        const approved = await decide(admin, listedId, 'approve').expect(409);
+        const rejected = await decide(admin, listedId, 'reject').expect(409);
+        const product = (
+          await catalog.http
+            .get(`/v1/admin/products/${id}`)
+            .set(...bearer(admin))
+            .expect(200)
+        ).body as ProductBody;
+        const requeued = await catalog.http
+          .get('/v1/admin/product-change-requests?limit=50')
+          .set(...bearer(admin))
+          .expect(200);
+
+        expect(
+          (queue.body as Page<QueuedRequest>).items
+            .filter((request) => request.productId === id)
+            .map((request) => request.id),
+        ).toEqual([listedId]);
+        expect(approved.body).toMatchObject({
+          code: 'PRODUCT_CHANGE_REQUEST_SUPERSEDED',
+        });
+        expect(errorCode(rejected.body)).toBe(
+          'PRODUCT_CHANGE_REQUEST_SUPERSEDED',
+        );
+        expect(product.name.en).toBe('Naimi lamb');
+        expect(product.changeRequest).toMatchObject({
+          id: newerId,
+          status: 'pending',
+          content: { name: { en: 'Unseen' } },
+        });
+        // The queue lists pending requests only; the superseded one stays, for history.
+        expect(
+          (requeued.body as Page<QueuedRequest>).items
+            .filter((request) => request.productId === id)
+            .map((request) => request.id),
+        ).toEqual([newerId]);
+        expect(
+          (
+            await prisma.productChangeRequest.findMany({
+              where: { productId: id },
+              orderBy: { createdAt: 'asc' },
+            })
+          ).map((row) => [row.id, row.status]),
+        ).toEqual([
+          [listedId, 'superseded'],
+          [newerId, 'pending'],
+        ]);
+      });
+
+      it('applies exactly the content the approved request holds', async () => {
+        const { id, admin, owner, options, live, requestOf } =
+          await publishedWithEdit();
+        const newImage = await catalog.image(owner, 'vendor');
+        const exclusion = await catalog.listItem(admin, 'exclusion-items');
+        const sent = catalog.body(options, [newImage, live.images[0].mediaId], {
+          fulfilment: undefined,
+          name: { ar: 'نعيمي بلدي', en: 'Local Naimi' },
+          description: { ar: 'مذبوح اليوم', en: 'Slaughtered today' },
+          sizes: [
+            { approxWeightGrams: 4000, priceHalalas: 50000 },
+            {
+              id: live.sizes[0].id,
+              approxWeightGrams: 9000,
+              priceHalalas: 95000,
+            },
+          ],
+          packagings: ['bags'],
+          exclusionItemIds: [exclusion],
+        });
+        const requestId = requestOf(
+          await catalog.http
+            .put(`/v1/vendor/products/${id}`)
+            .set(...bearer(owner))
+            .send(sent)
+            .expect(200),
+        );
+        const request = (
+          await catalog.http
+            .get(`/v1/admin/products/${id}`)
+            .set(...bearer(admin))
+            .expect(200)
+        ).body as { changeRequest: { content: Record<string, unknown> } };
+
+        const approved = await decide(admin, requestId, 'approve').expect(200);
+
+        expect(request.changeRequest.content).toMatchObject({
+          name: { en: 'Local Naimi' },
+          images: [{ mediaId: newImage }, { mediaId: live.images[0].mediaId }],
+        });
+        expect(approved.body).toMatchObject({
+          name: { ar: 'نعيمي بلدي', en: 'Local Naimi' },
+          description: { ar: 'مذبوح اليوم', en: 'Slaughtered today' },
+          images: [{ mediaId: newImage }, { mediaId: live.images[0].mediaId }],
+          sizes: [
+            { approxWeightGrams: 4000, priceHalalas: 50000 },
+            {
+              id: live.sizes[0].id,
+              approxWeightGrams: 9000,
+              priceHalalas: 95000,
+            },
+          ],
+          packagings: ['bags'],
+          exclusions: [{ id: exclusion }],
+          minPriceHalalas: 50000,
+        });
+      });
+
+      it('leaves one pending request after two vendor edits at the same moment', async () => {
+        const { id, edit } = await publishedWithEdit();
+
+        const responses = await Promise.all([edit('Left'), edit('Right')]);
+        const rows = await prisma.productChangeRequest.findMany({
+          where: { productId: id },
+        });
+
+        expect(responses.map((res) => res.status)).toEqual([200, 200]);
+        expect(rows.map((row) => row.status).sort()).toEqual([
+          'pending',
+          'superseded',
+        ]);
+      });
     });
 
     it('rejects a change request with a reason; the live product is unchanged', async () => {

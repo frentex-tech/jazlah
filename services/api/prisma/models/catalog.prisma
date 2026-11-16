@@ -40,6 +40,7 @@ enum ProductChangeRequestStatus {
   pending
   approved
   rejected
+  superseded
 
   @@map("product_change_request_status")
 }
@@ -294,9 +295,9 @@ model ProductChangeRequest {
   content         Json                       @db.JsonB
   /// Nullable: null unless rejected. The admin's reason, shown to the vendor.
   rejectionReason String?                    @map("rejection_reason")
-  /// Nullable: null while pending.
+  /// Nullable: null unless an admin decided it (approved or rejected).
   reviewedAt      DateTime?                  @map("reviewed_at") @db.Timestamptz(3)
-  /// Nullable: null while pending.
+  /// Nullable: null unless an admin decided it (approved or rejected).
   reviewedById    String?                    @map("reviewed_by_id") @db.Uuid
   createdAt       DateTime                   @default(now()) @map("created_at") @db.Timestamptz(3)
   updatedAt       DateTime                   @updatedAt @map("updated_at") @db.Timestamptz(3)

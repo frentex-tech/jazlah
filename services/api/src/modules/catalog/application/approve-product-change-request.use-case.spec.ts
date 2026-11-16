@@ -107,6 +107,39 @@ describe('ApproveProductChangeRequestUseCase', () => {
     }
   });
 
+  it('refuses a request the vendor has superseded since, applying nothing', async () => {
+    const kit = buildCatalogUseCases();
+    seedCatalog(kit);
+    const { live, request } = await withPendingEdit(kit);
+    const newer = await kit.updateContent.execute({
+      scope: { kind: 'vendor', vendorId: VENDOR },
+      actorId: VENDOR_USER,
+      productId: live.product.id,
+      content: {
+        ...Product.contentOf(live.product),
+        name: { ar: 'أحدث', en: 'Newer' },
+      },
+    });
+    kit.audit.rows = [];
+
+    await expect(
+      kit.approveChangeRequest.execute({
+        reviewerId: ADMIN,
+        requestId: request.id,
+      }),
+    ).rejects.toMatchObject({
+      code: ErrorCode.PRODUCT_CHANGE_REQUEST_SUPERSEDED,
+    });
+    expect(kit.products.rows[0]?.content.name.en).toBe(live.product.name.en);
+    expect(kit.audit.rows).toEqual([]);
+
+    const applied = await kit.approveChangeRequest.execute({
+      reviewerId: ADMIN,
+      requestId: newer.changeRequest!.id,
+    });
+    expect(applied.product.name.en).toBe('Newer');
+  });
+
   it('rolls everything back when the decision loses to another one', async () => {
     const kit = buildCatalogUseCases();
     seedCatalog(kit);

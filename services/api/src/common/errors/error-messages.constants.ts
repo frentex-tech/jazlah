@@ -128,4 +128,8 @@ export const ERROR_MESSAGES: Readonly<Record<ErrorCode, LocalizedText>> = {
     ar: 'المنتج ناقص: أضف صورة وحجم واحد على الأقل، وتأكد إن التغليف يناسب التقطيع',
     en: 'Add at least one image and one size, and packaging that suits each cutting style.',
   },
+  [ErrorCode.PRODUCT_CHANGE_REQUEST_SUPERSEDED]: {
+    ar: 'التاجر عدّل المنتج بعد هالطلب، حدّث الصفحة وراجع التعديل الجديد',
+    en: 'The vendor has edited this product again since this request. Reload and review the newer request.',
+  },
 };

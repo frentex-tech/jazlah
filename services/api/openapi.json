@@ -3708,7 +3708,7 @@
         ]
       },
       "put": {
-        "description": "Existing sizes and cuttings must keep their live prices (change them with PATCH …/prices). A draft or rejected product changes at once. On a published product the edit becomes its one pending change request (replacing any pending one) while the live version stays, and the submission rules apply. PRODUCT_NOT_EDITABLE while under review.",
+        "description": "Existing sizes and cuttings must keep their live prices (change them with PATCH …/prices). A draft or rejected product changes at once. On a published product the edit becomes a new pending change request (a pending one is closed as superseded) while the live version stays, and the submission rules apply. PRODUCT_NOT_EDITABLE while under review.",
         "operationId": "VendorCatalogController_update",
         "parameters": [
           {
@@ -5744,7 +5744,7 @@
     },
     "/v1/admin/product-change-requests/{id}/approve": {
       "post": {
-        "description": "Existing sizes and cuttings keep their live prices. NOT_FOUND unless the request is pending.",
+        "description": "Applies exactly the content shown in the queue (a request never changes). Existing sizes and cuttings keep their live prices. PRODUCT_CHANGE_REQUEST_SUPERSEDED when the vendor has edited again since (reload: the newer request is in the queue); NOT_FOUND for an unknown or decided request.",
         "operationId": "AdminCatalogController_approveChange",
         "parameters": [
           {
@@ -5810,7 +5810,7 @@
             }
           },
           "409": {
-            "description": "Error. code: PRODUCT_NOT_EDITABLE, TRANSACTION_CONFLICT.",
+            "description": "Error. code: PRODUCT_CHANGE_REQUEST_SUPERSEDED, PRODUCT_NOT_EDITABLE, TRANSACTION_CONFLICT.",
             "content": {
               "application/json": {
                 "schema": {
@@ -5853,7 +5853,7 @@
     },
     "/v1/admin/product-change-requests/{id}/reject": {
       "post": {
-        "description": "The live product is unchanged; the vendor sees the reason.",
+        "description": "The live product is unchanged; the vendor sees the reason. PRODUCT_CHANGE_REQUEST_SUPERSEDED when the vendor has edited again since; NOT_FOUND for an unknown or decided request.",
         "operationId": "AdminCatalogController_rejectChange",
         "parameters": [
           {
@@ -5922,7 +5922,7 @@
             }
           },
           "409": {
-            "description": "Error. code: TRANSACTION_CONFLICT.",
+            "description": "Error. code: PRODUCT_CHANGE_REQUEST_SUPERSEDED, TRANSACTION_CONFLICT.",
             "content": {
               "application/json": {
                 "schema": {
@@ -6803,7 +6803,8 @@
           "VENDOR_SUSPENDED",
           "VENDOR_ACCESS_ALREADY_HELD",
           "PRODUCT_NOT_EDITABLE",
-          "PRODUCT_NOT_SUBMITTABLE"
+          "PRODUCT_NOT_SUBMITTABLE",
+          "PRODUCT_CHANGE_REQUEST_SUPERSEDED"
         ],
         "description": "Stable error code. Clients branch on it; it is never renamed or reused."
       },
@@ -8412,7 +8413,8 @@
             "enum": [
               "pending",
               "approved",
-              "rejected"
+              "rejected",
+              "superseded"
             ],
             "example": "pending"
           },

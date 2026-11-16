@@ -186,7 +186,7 @@ describe('UpdateProductContentUseCase', () => {
       expect(kit.products.rows[0]?.content.name.en).toBe('Naimi lamb');
     });
 
-    it('replaces the pending request with a second edit', async () => {
+    it('closes the pending request as superseded on a second edit and opens a new one', async () => {
       const kit = buildCatalogUseCases();
       seedCatalog(kit);
       const live = await publishedVendorProduct(kit);
@@ -201,9 +201,13 @@ describe('UpdateProductContentUseCase', () => {
       const first = await edit('First');
       const second = await edit('Second');
 
-      expect(second.changeRequest?.id).toBe(first.changeRequest?.id);
-      expect(kit.changeRequests.rows).toHaveLength(1);
-      expect(kit.changeRequests.rows[0]?.content.name.en).toBe('Second');
+      expect(second.changeRequest?.id).not.toBe(first.changeRequest?.id);
+      expect(
+        kit.changeRequests.rows.map((row) => [row.status, row.content.name.en]),
+      ).toEqual([
+        ['superseded', 'First'],
+        ['pending', 'Second'],
+      ]);
     });
 
     it('refuses a changed price of an existing size: prices change on their own', async () => {

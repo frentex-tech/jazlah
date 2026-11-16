@@ -43,9 +43,9 @@ import { toProductView } from './to-product-view';
  * - in every other status, existing sizes and cuttings must keep their live prices
  *   (Product.assertKeepsLivePrices): prices change through ChangeProductPrices;
  * - draft or rejected: saved at once (a rejected product stays rejected until submitted);
- * - published: the submission rules hold. A vendor's edit becomes the product's one
- *   pending change request (replacing any pending one) while the live version stays; an
- *   admin's edit of a JAZLA product applies at once, audited.
+ * - published: the submission rules hold. A vendor's edit becomes a new pending change
+ *   request (a pending one is closed as superseded: requests never change) while the
+ *   live version stays; an admin's edit of a JAZLA product applies at once, audited.
  *
  * One transaction, which first locks the product row (lockProduct), for the checks and
  * the save.
@@ -110,7 +110,7 @@ export class UpdateProductContentUseCase {
       if (input.scope.kind === 'vendor') {
         return {
           product: live,
-          changeRequest: await this.changeRequests.savePending(
+          changeRequest: await this.changeRequests.openPending(
             live.id,
             input.actorId,
             input.content,

@@ -19,36 +19,31 @@ export class PrismaProductChangeRequestRepository implements ProductChangeReques
   constructor(private readonly db: DbContext) {}
 
   /**
-   * One statement: an insert, or, when the product already has a pending request
-   * (the partial unique index `product_change_requests_product_id_pending_key`), an
-   * update of its content. Two concurrent edits cannot create two pending requests.
+   * Two statements in the caller's transaction, under the product's row lock: the
+   * pending request (at most one: the partial unique index
+   * `product_change_requests_product_id_pending_key`) becomes `superseded`, then the new
+   * one is inserted. Content is never updated in place.
    */
-  async savePending(
+  async openPending(
     productId: string,
     requestedById: string,
     content: ProductContent,
   ): Promise<ProductChangeRequest> {
-    const json = JSON.stringify(toStoredProductContent(content));
+    const client = this.db.client;
     try {
-      await this.db.client.$executeRaw`
-        INSERT INTO "product_change_requests"
-          ("product_id", "requested_by_id", "status", "content", "updated_at")
-        VALUES
-          (${productId}::uuid, ${requestedById}::uuid, 'pending', ${json}::jsonb, now())
-        ON CONFLICT ("product_id") WHERE "status" = 'pending'
-        DO UPDATE SET
-          "requested_by_id" = EXCLUDED."requested_by_id",
-          "content" = EXCLUDED."content",
-          "updated_at" = now()`;
-      const row = await this.db.client.productChangeRequest.findFirst({
+      await client.productChangeRequest.updateMany({
         where: { productId, status: 'pending' },
+        data: { status: 'superseded' },
       });
-      if (row === null) {
-        throw new Error(
-          'The pending change request was not found after saving it',
-        );
-      }
-      return toProductChangeRequest(row);
+      return toProductChangeRequest(
+        await client.productChangeRequest.create({
+          data: {
+            productId,
+            requestedById,
+            content: toStoredProductContent(content),
+          },
+        }),
+      );
     } catch (error) {
       mapPrismaError(error);
     }
@@ -66,10 +61,10 @@ export class PrismaProductChangeRequestRepository implements ProductChangeReques
     }
   }
 
-  async findPending(id: string): Promise<ProductChangeRequest | null> {
+  async findById(id: string): Promise<ProductChangeRequest | null> {
     try {
-      const row = await this.db.client.productChangeRequest.findFirst({
-        where: { id, status: 'pending' },
+      const row = await this.db.client.productChangeRequest.findUnique({
+        where: { id },
       });
       return row === null ? null : toProductChangeRequest(row);
     } catch (error) {

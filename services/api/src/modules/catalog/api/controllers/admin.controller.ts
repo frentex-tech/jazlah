@@ -349,12 +349,13 @@ export class AdminCatalogController {
   @ApiOperation({
     summary: 'Approve a change request: it becomes the live product',
     description:
-      'Existing sizes and cuttings keep their live prices. NOT_FOUND unless the request is pending.',
+      'Applies exactly the content shown in the queue (a request never changes). Existing sizes and cuttings keep their live prices. PRODUCT_CHANGE_REQUEST_SUPERSEDED when the vendor has edited again since (reload: the newer request is in the queue); NOT_FOUND for an unknown or decided request.',
   })
   @ApiOkResponse({ type: ProductResponseDto })
   @ApiErrorResponses(
     ErrorCode.VALIDATION_FAILED,
     ErrorCode.NOT_FOUND,
+    ErrorCode.PRODUCT_CHANGE_REQUEST_SUPERSEDED,
     ErrorCode.PRODUCT_NOT_EDITABLE,
     ErrorCode.TRANSACTION_CONFLICT,
     ...ADMIN_AUTH_ERRORS,
@@ -375,12 +376,14 @@ export class AdminCatalogController {
   @HttpCode(HttpStatus.NO_CONTENT)
   @ApiOperation({
     summary: 'Reject a change request with a reason',
-    description: 'The live product is unchanged; the vendor sees the reason.',
+    description:
+      'The live product is unchanged; the vendor sees the reason. PRODUCT_CHANGE_REQUEST_SUPERSEDED when the vendor has edited again since; NOT_FOUND for an unknown or decided request.',
   })
   @ApiNoContentResponse({ description: 'Rejected.' })
   @ApiErrorResponses(
     ErrorCode.VALIDATION_FAILED,
     ErrorCode.NOT_FOUND,
+    ErrorCode.PRODUCT_CHANGE_REQUEST_SUPERSEDED,
     ErrorCode.TRANSACTION_CONFLICT,
     ...ADMIN_AUTH_ERRORS,
   )
