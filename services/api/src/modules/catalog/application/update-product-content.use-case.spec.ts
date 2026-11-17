@@ -73,6 +73,77 @@ describe('UpdateProductContentUseCase', () => {
     });
   });
 
+  it('refuses a changed price of a kept packaging, and lets a new packaging take any price', async () => {
+    const kit = buildCatalogUseCases();
+    seedCatalog(kit);
+    const draft = await vendorDraft(kit);
+
+    await expect(
+      kit.updateContent.execute({
+        scope: vendorScope,
+        actorId: VENDOR_USER,
+        productId: draft.product.id,
+        content: content({
+          packagings: [{ packaging: 'trays', extraPrice: Money.of(1) }],
+        }),
+      }),
+    ).rejects.toMatchObject({
+      code: ErrorCode.VALIDATION_FAILED,
+      details: [
+        {
+          field: 'packagings.0.extraPriceHalalas',
+          constraints: ['isLivePrice'],
+        },
+      ],
+    });
+
+    const view = await kit.updateContent.execute({
+      scope: vendorScope,
+      actorId: VENDOR_USER,
+      productId: draft.product.id,
+      content: content({
+        packagings: [
+          { packaging: 'trays', extraPrice: Money.of(300) },
+          { packaging: 'vacuum', extraPrice: Money.of(500) },
+        ],
+      }),
+    });
+    expect(
+      view.product.packagings.map((option) => [
+        option.packaging,
+        option.extraPrice.halalas,
+      ]),
+    ).toEqual([
+      ['trays', 300],
+      ['vacuum', 500],
+    ]);
+  });
+
+  it('refuses a packaging named twice', async () => {
+    const kit = buildCatalogUseCases();
+    seedCatalog(kit);
+    const draft = await vendorDraft(kit);
+
+    await expect(
+      kit.updateContent.execute({
+        scope: vendorScope,
+        actorId: VENDOR_USER,
+        productId: draft.product.id,
+        content: content({
+          packagings: [
+            { packaging: 'trays', extraPrice: Money.of(300) },
+            { packaging: 'trays', extraPrice: Money.of(300) },
+          ],
+        }),
+      }),
+    ).rejects.toMatchObject({
+      code: ErrorCode.VALIDATION_FAILED,
+      details: [
+        { field: 'packagings.1.packaging', constraints: ['isNotRepeated'] },
+      ],
+    });
+  });
+
   it('refuses a size id named twice, so the lowest price cannot fall below every real one (review finding)', async () => {
     const kit = buildCatalogUseCases();
     seedCatalog(kit);
@@ -249,7 +320,7 @@ describe('UpdateProductContentUseCase', () => {
           content: {
             ...Product.contentOf(live.product),
             imageMediaIds: [],
-            packagings: ['vacuum'],
+            packagings: [{ packaging: 'vacuum', extraPrice: Money.zero() }],
           },
         }),
       ).rejects.toMatchObject({

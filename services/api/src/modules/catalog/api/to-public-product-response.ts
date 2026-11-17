@@ -1,3 +1,4 @@
+import { toPackagingResponses } from './to-packaging-responses';
 import type { PublicProductView } from '../application/public-product-view.type';
 import type { PublicProductResponseDto } from './dto/public-product-response.dto';
 import { toImageResponses } from './to-image-responses';
@@ -21,7 +22,7 @@ export function toPublicProductResponse(
     fulfilment: product.fulfilment,
     images: toImageResponses(product.imageMediaIds, view.imageUrls),
     ...toProductOptionsResponse(product),
-    packagings: [...product.packagings],
+    packagings: toPackagingResponses(product.packagings),
     exclusions: [...product.exclusions],
     minPriceHalalas: product.minPrice.halalas,
   };

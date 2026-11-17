@@ -27,9 +27,9 @@ import type { ProductWriteScope } from './product-write-scope.type';
 import { toProductView } from './to-product-view';
 
 /**
- * Changes the prices of existing sizes and cutting styles, at once even when published
- * (no review). Each id must be one of the product's (VALIDATION_FAILED on
- * `sizes.<i>.sizeId` or `cuttings.<i>.cuttingStyleId`); under review:
+ * Changes the prices of existing sizes, cutting styles and packagings, at once even when
+ * published (no review). Each must be one of the product's (VALIDATION_FAILED on
+ * `sizes.<i>.sizeId`, `cuttings.<i>.cuttingStyleId` or `packagings.<i>.packaging`); under review:
  * PRODUCT_NOT_EDITABLE. One transaction, which first locks the product row
  * (lockProduct): the checks, the prices, the lowest price, and one audit entry per price
  * that actually changed (previous and new halalas, as read under the lock).
@@ -77,6 +77,9 @@ export class ChangeProductPricesUseCase {
     const cuttings = new Map(
       live.cuttings.map((cutting) => [cutting.cuttingStyleId, cutting]),
     );
+    const packagings = new Map(
+      live.packagings.map((option) => [option.packaging, option]),
+    );
     const details: FieldError[] = [
       ...input.changes.sizes.flatMap((change, index) =>
         sizes.has(change.sizeId)
@@ -95,6 +98,16 @@ export class ChangeProductPricesUseCase {
               {
                 field: `cuttings.${index}.cuttingStyleId`,
                 constraints: ['isCuttingOfProduct'],
+              },
+            ],
+      ),
+      ...input.changes.packagings.flatMap((change, index) =>
+        packagings.has(change.packaging)
+          ? []
+          : [
+              {
+                field: `packagings.${index}.packaging`,
+                constraints: ['isPackagingOfProduct'],
               },
             ],
       ),
@@ -123,6 +136,18 @@ export class ChangeProductPricesUseCase {
           : [
               {
                 cuttingStyleId: change.cuttingStyleId,
+                previousHalalas: previous.halalas,
+                newHalalas: change.extraPrice.halalas,
+              },
+            ];
+      }),
+      ...input.changes.packagings.flatMap((change) => {
+        const previous = packagings.get(change.packaging)?.extraPrice;
+        return previous === undefined || previous.equals(change.extraPrice)
+          ? []
+          : [
+              {
+                packaging: change.packaging,
                 previousHalalas: previous.halalas,
                 newHalalas: change.extraPrice.halalas,
               },

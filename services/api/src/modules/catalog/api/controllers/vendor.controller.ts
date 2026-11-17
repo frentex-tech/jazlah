@@ -172,7 +172,7 @@ export class VendorCatalogController {
     description:
       'Vendor dashboard, edit product form. Replaces the whole content (names, description, category, meat type, images, sizes, cutting styles, packagings, "without" items); send every field, lists in display order. Availability, fulfilment and prices have their own endpoints and are not changed here. ' +
       'By status: `draft` or `rejected`: saved at once (a rejected product stays rejected until submitted again). `published`: nothing changes on the live product; the edit becomes a new pending change request for admin review (any pending one is closed as `superseded`), returned in `changeRequest`, and it must meet the submission rules (at least one size and one image, no cutting style offered with a packaging it cannot be combined with). `pending_review`: refused with PRODUCT_NOT_EDITABLE until an admin decides. ' +
-      'Keep an existing size by sending its `id`; a size left out is removed; a size without `id` is new. Existing sizes and cutting styles must carry their current prices (VALIDATION_FAILED `isLivePrice`): change prices with PATCH …/{id}/prices, which applies at once. New sizes and cutting styles take the prices sent (halalas, VAT included). ' +
+      'Keep an existing size by sending its `id`; a size left out is removed; a size without `id` is new. Existing sizes, cutting styles and packagings must carry their current prices (VALIDATION_FAILED `isLivePrice`): change prices with PATCH …/{id}/prices, which applies at once. New sizes, cutting styles and packagings take the prices sent (halalas, VAT included). ' +
       'Errors: VALIDATION_FAILED also for an inactive reference, a size id not of this product (`isSizeOfProduct`) or a repeat (`isNotRepeated`); MEDIA_NOT_FOUND / MEDIA_NOT_READY for a new image not uploaded and confirmed by this user; PRODUCT_NOT_SUBMITTABLE (published only) with `details.reasons` (NO_SIZE, NO_IMAGE, INCOMPATIBLE_CUTTING_PACKAGING with `details.pairs`); NOT_FOUND for an unknown id or another vendor’s product.',
   })
   @ApiOkResponse({
@@ -309,10 +309,10 @@ export class VendorCatalogController {
   @Patch(':id/prices')
   @ApiOperation({
     operationId: 'vendorChangeProductPrices',
-    summary: 'Change size and cutting prices',
+    summary: 'Change size, cutting and packaging prices',
     description:
-      'Vendor dashboard, prices form. Sets new prices for some of the product’s existing sizes (by size id) and cutting styles (by cutting style id); the others keep theirs. Prices are integer halalas, VAT included. Applies at once in every status but `pending_review`, also on a published product: no review; the lowest price is updated and each price that actually changed is recorded in the audit log. A pending change request is not touched. ' +
-      'Errors: VALIDATION_FAILED for an invalid body, a size or cutting style that is not the product’s (`isSizeOfProduct`, `isCuttingOfProduct`) or named twice (`isNotRepeated`); PRODUCT_NOT_EDITABLE while the product is under review (`details.status`); NOT_FOUND for an unknown id or another vendor’s product.',
+      'Vendor dashboard, prices form. Sets new prices for some of the product’s existing sizes (by size id), cutting styles (by cutting style id) and packagings (by packaging); the others keep theirs. Prices are integer halalas, VAT included. Applies at once in every status but `pending_review`, also on a published product: no review; the lowest price is updated and each price that actually changed is recorded in the audit log. A pending change request is not touched. ' +
+      'Errors: VALIDATION_FAILED for an invalid body, a size, cutting style or packaging that is not the product’s (`isSizeOfProduct`, `isCuttingOfProduct`, `isPackagingOfProduct`) or named twice (`isNotRepeated`); PRODUCT_NOT_EDITABLE while the product is under review (`details.status`); NOT_FOUND for an unknown id or another vendor’s product.',
   })
   @ApiOkResponse({
     type: ProductResponseDto,

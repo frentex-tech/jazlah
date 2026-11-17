@@ -250,7 +250,7 @@ describe('Catalog (e2e)', () => {
         name: { ar: 'نعيمي', en: 'Naimi lamb' },
         minPriceHalalas: 95000,
         fulfilment: 'both',
-        packagings: ['trays'],
+        packagings: [{ packaging: 'trays', extraPriceHalalas: 300 }],
         changeRequest: null,
       });
       expect((read.body as ProductBody).images[0]?.url).toEqual(
@@ -277,7 +277,15 @@ describe('Catalog (e2e)', () => {
       const badPrice = await send({
         sizes: [{ approxWeightGrams: 1000, priceHalalas: 12.5 }],
       });
-      const badPackaging = await send({ packagings: ['box'] });
+      const badPackaging = await send({
+        packagings: [{ packaging: 'box', extraPriceHalalas: 0 }],
+      });
+      const duplicatePackaging = await send({
+        packagings: [
+          { packaging: 'trays', extraPriceHalalas: 0 },
+          { packaging: 'trays', extraPriceHalalas: 100 },
+        ],
+      });
       const duplicateCut = await send({
         cuttings: [
           { cuttingStyleId: options.cuttingStyleId, extraPriceHalalas: 0 },
@@ -291,7 +299,12 @@ describe('Catalog (e2e)', () => {
         details: [{ field: 'sizes.0.priceHalalas' }],
       });
       expect(badPackaging.body).toMatchObject({
-        details: [{ field: 'packagings' }],
+        details: [{ field: 'packagings.0.packaging' }],
+      });
+      expect(duplicatePackaging.body).toMatchObject({
+        details: [
+          { field: 'packagings.1.packaging', constraints: ['isNotRepeated'] },
+        ],
       });
       expect(duplicateCut.body).toMatchObject({
         details: [
@@ -452,8 +465,41 @@ describe('Catalog (e2e)', () => {
           cuttings: [
             { cuttingStyleId: options.cuttingStyleId, extraPriceHalalas: 0 },
           ],
+          packagings: [{ packaging: 'trays', extraPriceHalalas: 450 }],
         })
         .expect(200);
+      const notOffered = await catalog.http
+        .patch(`/v1/vendor/products/${id}/prices`)
+        .set(...bearer(owner))
+        .send({ packagings: [{ packaging: 'vacuum', extraPriceHalalas: 1 }] })
+        .expect(400);
+      const repeatedPackaging = await catalog.http
+        .patch(`/v1/vendor/products/${id}/prices`)
+        .set(...bearer(owner))
+        .send({
+          packagings: [
+            { packaging: 'trays', extraPriceHalalas: 1 },
+            { packaging: 'trays', extraPriceHalalas: 2 },
+          ],
+        })
+        .expect(400);
+      // A content edit cannot change a kept packaging's price; a new one takes any price.
+      const keptPrice = await catalog.http
+        .put(`/v1/vendor/products/${id}`)
+        .set(...bearer(owner))
+        .send(
+          catalog.body(options, [live.images[0].mediaId], {
+            fulfilment: undefined,
+            sizes: [
+              { id: sizeId, approxWeightGrams: 8000, priceHalalas: 89000 },
+            ],
+            cuttings: [
+              { cuttingStyleId: options.cuttingStyleId, extraPriceHalalas: 0 },
+            ],
+            packagings: [{ packaging: 'trays', extraPriceHalalas: 999 }],
+          }),
+        )
+        .expect(400);
       const pickup = await catalog.http
         .patch(`/v1/vendor/products/${id}/fulfilment`)
         .set(...bearer(owner))
@@ -483,7 +529,29 @@ describe('Catalog (e2e)', () => {
       expect(priced.body).toMatchObject({
         status: 'published',
         minPriceHalalas: 89000,
+        packagings: [{ packaging: 'trays', extraPriceHalalas: 450 }],
         changeRequest: null,
+      });
+      expect(notOffered.body).toMatchObject({
+        details: [
+          {
+            field: 'packagings.0.packaging',
+            constraints: ['isPackagingOfProduct'],
+          },
+        ],
+      });
+      expect(repeatedPackaging.body).toMatchObject({
+        details: [
+          { field: 'packagings.1.packaging', constraints: ['isNotRepeated'] },
+        ],
+      });
+      expect(keptPrice.body).toMatchObject({
+        details: [
+          {
+            field: 'packagings.0.extraPriceHalalas',
+            constraints: ['isLivePrice'],
+          },
+        ],
       });
       expect((pickup.body as ProductBody).fulfilment).toBe('pickup');
       expect((hidden.body as ProductBody).isAvailable).toBe(false);
@@ -513,6 +581,7 @@ describe('Catalog (e2e)', () => {
             previousHalalas: 1500,
             newHalalas: 0,
           },
+          { packaging: 'trays', previousHalalas: 300, newHalalas: 450 },
         ]),
       );
       expect(await publicIds(`vendorId=${vendorId}`)).toEqual([]);
@@ -1071,7 +1140,7 @@ describe('Catalog (e2e)', () => {
         cuttings: [
           { cuttingStyleId: options.cuttingStyleId, extraPriceHalalas: 1500 },
         ],
-        packagings: ['trays'],
+        packagings: [{ packaging: 'trays', extraPriceHalalas: 300 }],
         exclusions: [{ id: options.exclusionItemId }],
       });
       expect(categories).toContain(options.categoryId);
@@ -1338,6 +1407,46 @@ describe('Catalog (e2e)', () => {
         prices: [70000, 65000],
         minPrice: 65000,
       });
+    });
+
+    it('chains the audit entries of two price edits of one packaging sent at once', async () => {
+      const { owner, admin, options } = await setUp();
+      const id = await catalog.published(owner, admin, options);
+      const price = (extraPriceHalalas: number) =>
+        start(
+          catalog.http
+            .patch(`/v1/vendor/products/${id}/prices`)
+            .set(...bearer(owner))
+            .send({ packagings: [{ packaging: 'trays', extraPriceHalalas }] }),
+        );
+
+      // Both edits queue behind a lock on the product row, then go on together.
+      const lock = await holdRowLock(prisma, 'products', id);
+      const edits = [price(700), price(800)];
+      try {
+        await lock.waitForWaiters(2);
+      } finally {
+        await lock.release();
+      }
+      const responses = await Promise.all(edits);
+
+      expect(responses.map((res) => res.status)).toEqual([200, 200]);
+      const entries = (
+        await prisma.auditLog.findMany({
+          where: { entityId: id, action: 'catalog.product.price_changed' },
+        })
+      ).map(
+        (entry) =>
+          entry.metadata as { previousHalalas: number; newHalalas: number },
+      );
+      // With the product lock the second edit reads the first one's price, so the previous
+      // prices chain: one entry from the original 300, the other from the first edit's new
+      // price. Without the lock both edits read 300 and both entries record it.
+      expect(entries).toHaveLength(2);
+      const first = entries.find((entry) => entry.previousHalalas === 300);
+      expect(first).toBeDefined();
+      const second = entries.find((entry) => entry !== first);
+      expect(second?.previousHalalas).toBe(first?.newHalalas);
     });
 
     /** A vendor's pending change request on `id`, renaming it; returns its id. */

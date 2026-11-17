@@ -5,7 +5,6 @@ import {
   ArrayUnique,
   IsArray,
   IsDefined,
-  IsIn,
   IsOptional,
   IsUUID,
   ValidateIf,
@@ -15,8 +14,8 @@ import { LocalizedDescriptionDto } from '@common/dto/localized-description.dto';
 import { LocalizedNameDto } from '@common/dto/localized-name.dto';
 import { PRODUCT_LIMITS } from '../../domain/product-limits.constants';
 import { PRODUCT_PACKAGINGS } from '../../domain/product-packagings.constants';
-import type { ProductPackaging } from '../../domain/product-packaging.type';
 import { ProductCuttingDto } from './product-cutting.dto';
+import { ProductPackagingDto } from './product-packaging.dto';
 import { ProductSizeDto } from './product-size.dto';
 
 const UUID_EXAMPLE = '7f3a2c1e-0b9d-4e5f-8a6b-1c2d3e4f5a6b';
@@ -108,16 +107,17 @@ export class ProductContentDto {
   cuttings!: ProductCuttingDto[];
 
   @ApiProperty({
-    enum: PRODUCT_PACKAGINGS,
-    isArray: true,
-    example: ['trays', 'vacuum'],
+    type: [ProductPackagingDto],
+    maxItems: PRODUCT_PACKAGINGS.length,
     description:
-      'The packagings offered, each at most once: `trays`, `bags`, `vacuum`, `none`. A cutting style offered with a packaging an admin rule forbids blocks submission (PRODUCT_NOT_SUBMITTABLE, INCOMPATIBLE_CUTTING_PACKAGING).',
+      'The packagings offered with their extra prices, each packaging at most once (VALIDATION_FAILED `isNotRepeated` on `packagings.<i>.packaging`). Empty: no packaging choice.',
   })
+  @IsDefined()
   @IsArray()
-  @ArrayUnique()
-  @IsIn(PRODUCT_PACKAGINGS, { each: true })
-  packagings!: ProductPackaging[];
+  @ArrayMaxSize(PRODUCT_PACKAGINGS.length)
+  @ValidateNested({ each: true })
+  @Type(() => ProductPackagingDto)
+  packagings!: ProductPackagingDto[];
 
   @ApiProperty({
     type: [String],

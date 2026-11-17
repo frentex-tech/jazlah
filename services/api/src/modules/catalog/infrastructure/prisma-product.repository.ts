@@ -52,7 +52,7 @@ export class PrismaProductRepository implements ProductRepository {
           },
           cuttings: { create: this.cuttingRows(content) },
           packagings: {
-            create: content.packagings.map((packaging) => ({ packaging })),
+            create: this.packagingRows(content),
           },
           exclusions: {
             create: content.exclusionItemIds.map((exclusionItemId) => ({
@@ -169,14 +169,17 @@ export class PrismaProductRepository implements ProductRepository {
         skipDuplicates: true,
       });
 
+      const packagings = content.packagings.map((option) => option.packaging);
       await client.productPackagingOption.deleteMany({
-        where: { productId: id },
+        where: { productId: id, packaging: { notIn: packagings } },
       });
+      // A kept packaging keeps its stored extra price (ON CONFLICT DO NOTHING on the pair).
       await client.productPackagingOption.createMany({
-        data: content.packagings.map((packaging) => ({
+        data: this.packagingRows(content).map((row) => ({
+          ...row,
           productId: id,
-          packaging,
         })),
+        skipDuplicates: true,
       });
       await client.productExclusion.deleteMany({ where: { productId: id } });
       await client.productExclusion.createMany({
@@ -257,6 +260,12 @@ export class PrismaProductRepository implements ProductRepository {
       for (const change of changes.cuttings) {
         await client.productCutting.updateMany({
           where: { productId: id, cuttingStyleId: change.cuttingStyleId },
+          data: { extraPriceHalalas: change.extraPrice.halalas },
+        });
+      }
+      for (const change of changes.packagings) {
+        await client.productPackagingOption.updateMany({
+          where: { productId: id, packaging: change.packaging },
           data: { extraPriceHalalas: change.extraPrice.halalas },
         });
       }
@@ -399,6 +408,13 @@ export class PrismaProductRepository implements ProductRepository {
     return content.cuttings.map((cutting) => ({
       cuttingStyleId: cutting.cuttingStyleId,
       extraPriceHalalas: cutting.extraPrice.halalas,
+    }));
+  }
+
+  private packagingRows(content: ProductContent) {
+    return content.packagings.map((option) => ({
+      packaging: option.packaging,
+      extraPriceHalalas: option.extraPrice.halalas,
     }));
   }
 }

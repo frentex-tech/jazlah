@@ -107,7 +107,7 @@ export class CatalogJourney {
       cuttings: [
         { cuttingStyleId: options.cuttingStyleId, extraPriceHalalas: 1500 },
       ],
-      packagings: ['trays'],
+      packagings: [{ packaging: 'trays', extraPriceHalalas: 300 }],
       exclusionItemIds: [options.exclusionItemId],
       fulfilment: 'both',
       ...overrides,

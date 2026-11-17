@@ -140,6 +140,13 @@ export class InMemoryProductRepository implements ProductRepository {
               (old) => old.cuttingStyleId === cutting.cuttingStyleId,
             )?.extraPrice ?? cutting.extraPrice,
         })),
+        packagings: content.packagings.map((option) => ({
+          ...option,
+          extraPrice:
+            stored.content.packagings.find(
+              (old) => old.packaging === option.packaging,
+            )?.extraPrice ?? option.extraPrice,
+        })),
       },
       sizes,
       minPrice: this.minPriceOf(sizes),
@@ -206,6 +213,13 @@ export class InMemoryProductRepository implements ProductRepository {
           changes.cuttings.find(
             (change) => change.cuttingStyleId === cutting.cuttingStyleId,
           )?.extraPrice ?? cutting.extraPrice,
+      })),
+      packagings: stored.content.packagings.map((option) => ({
+        ...option,
+        extraPrice:
+          changes.packagings.find(
+            (change) => change.packaging === option.packaging,
+          )?.extraPrice ?? option.extraPrice,
       })),
     };
     const saved: StoredProduct = {

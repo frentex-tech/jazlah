@@ -5045,7 +5045,7 @@
         ]
       },
       "put": {
-        "description": "Vendor dashboard, edit product form. Replaces the whole content (names, description, category, meat type, images, sizes, cutting styles, packagings, \"without\" items); send every field, lists in display order. Availability, fulfilment and prices have their own endpoints and are not changed here. By status: `draft` or `rejected`: saved at once (a rejected product stays rejected until submitted again). `published`: nothing changes on the live product; the edit becomes a new pending change request for admin review (any pending one is closed as `superseded`), returned in `changeRequest`, and it must meet the submission rules (at least one size and one image, no cutting style offered with a packaging it cannot be combined with). `pending_review`: refused with PRODUCT_NOT_EDITABLE until an admin decides. Keep an existing size by sending its `id`; a size left out is removed; a size without `id` is new. Existing sizes and cutting styles must carry their current prices (VALIDATION_FAILED `isLivePrice`): change prices with PATCH …/{id}/prices, which applies at once. New sizes and cutting styles take the prices sent (halalas, VAT included). Errors: VALIDATION_FAILED also for an inactive reference, a size id not of this product (`isSizeOfProduct`) or a repeat (`isNotRepeated`); MEDIA_NOT_FOUND / MEDIA_NOT_READY for a new image not uploaded and confirmed by this user; PRODUCT_NOT_SUBMITTABLE (published only) with `details.reasons` (NO_SIZE, NO_IMAGE, INCOMPATIBLE_CUTTING_PACKAGING with `details.pairs`); NOT_FOUND for an unknown id or another vendor’s product.",
+        "description": "Vendor dashboard, edit product form. Replaces the whole content (names, description, category, meat type, images, sizes, cutting styles, packagings, \"without\" items); send every field, lists in display order. Availability, fulfilment and prices have their own endpoints and are not changed here. By status: `draft` or `rejected`: saved at once (a rejected product stays rejected until submitted again). `published`: nothing changes on the live product; the edit becomes a new pending change request for admin review (any pending one is closed as `superseded`), returned in `changeRequest`, and it must meet the submission rules (at least one size and one image, no cutting style offered with a packaging it cannot be combined with). `pending_review`: refused with PRODUCT_NOT_EDITABLE until an admin decides. Keep an existing size by sending its `id`; a size left out is removed; a size without `id` is new. Existing sizes, cutting styles and packagings must carry their current prices (VALIDATION_FAILED `isLivePrice`): change prices with PATCH …/{id}/prices, which applies at once. New sizes, cutting styles and packagings take the prices sent (halalas, VAT included). Errors: VALIDATION_FAILED also for an inactive reference, a size id not of this product (`isSizeOfProduct`) or a repeat (`isNotRepeated`); MEDIA_NOT_FOUND / MEDIA_NOT_READY for a new image not uploaded and confirmed by this user; PRODUCT_NOT_SUBMITTABLE (published only) with `details.reasons` (NO_SIZE, NO_IMAGE, INCOMPATIBLE_CUTTING_PACKAGING with `details.pairs`); NOT_FOUND for an unknown id or another vendor’s product.",
         "operationId": "vendorUpdateProductContent",
         "parameters": [
           {
@@ -5575,7 +5575,7 @@
     },
     "/v1/vendor/products/{id}/prices": {
       "patch": {
-        "description": "Vendor dashboard, prices form. Sets new prices for some of the product’s existing sizes (by size id) and cutting styles (by cutting style id); the others keep theirs. Prices are integer halalas, VAT included. Applies at once in every status but `pending_review`, also on a published product: no review; the lowest price is updated and each price that actually changed is recorded in the audit log. A pending change request is not touched. Errors: VALIDATION_FAILED for an invalid body, a size or cutting style that is not the product’s (`isSizeOfProduct`, `isCuttingOfProduct`) or named twice (`isNotRepeated`); PRODUCT_NOT_EDITABLE while the product is under review (`details.status`); NOT_FOUND for an unknown id or another vendor’s product.",
+        "description": "Vendor dashboard, prices form. Sets new prices for some of the product’s existing sizes (by size id), cutting styles (by cutting style id) and packagings (by packaging); the others keep theirs. Prices are integer halalas, VAT included. Applies at once in every status but `pending_review`, also on a published product: no review; the lowest price is updated and each price that actually changed is recorded in the audit log. A pending change request is not touched. Errors: VALIDATION_FAILED for an invalid body, a size, cutting style or packaging that is not the product’s (`isSizeOfProduct`, `isCuttingOfProduct`, `isPackagingOfProduct`) or named twice (`isNotRepeated`); PRODUCT_NOT_EDITABLE while the product is under review (`details.status`); NOT_FOUND for an unknown id or another vendor’s product.",
         "operationId": "vendorChangeProductPrices",
         "parameters": [
           {
@@ -5697,7 +5697,7 @@
             "bearer": []
           }
         ],
-        "summary": "Change size and cutting prices",
+        "summary": "Change size, cutting and packaging prices",
         "tags": [
           "Vendor products"
         ]
@@ -6780,7 +6780,7 @@
         ]
       },
       "put": {
-        "description": "Admin dashboard, JAZLA products, edit form. Replaces the whole content of a platform vendor product (send every field, lists in display order); availability, fulfilment and prices have their own endpoints. Applies at once, also when published: no change request. An edit of a published product is recorded in the audit log and must meet the submission rules (at least one size and one image, no cutting style offered with a packaging it cannot be combined with). Keep an existing size by sending its `id`; a size left out is removed; a size without `id` is new. Existing sizes and cutting styles must carry their current prices (VALIDATION_FAILED `isLivePrice`): change them with PATCH …/{id}/prices. Errors: VALIDATION_FAILED also for an inactive reference, a size id not of this product or a repeat; MEDIA_NOT_FOUND / MEDIA_NOT_READY for a new image not uploaded and confirmed by this admin; PRODUCT_NOT_SUBMITTABLE (published only) with `details.reasons` and `details.pairs`; PRODUCT_NOT_EDITABLE for a product under review; NOT_FOUND for an unknown id or a product of another vendor (admins act on other vendors’ products only through review), and with `details.reason` PLATFORM_VENDOR_MISSING while JAZLA’s own vendor has not been set up.",
+        "description": "Admin dashboard, JAZLA products, edit form. Replaces the whole content of a platform vendor product (send every field, lists in display order); availability, fulfilment and prices have their own endpoints. Applies at once, also when published: no change request. An edit of a published product is recorded in the audit log and must meet the submission rules (at least one size and one image, no cutting style offered with a packaging it cannot be combined with). Keep an existing size by sending its `id`; a size left out is removed; a size without `id` is new. Existing sizes, cutting styles and packagings must carry their current prices (VALIDATION_FAILED `isLivePrice`): change them with PATCH …/{id}/prices. Errors: VALIDATION_FAILED also for an inactive reference, a size id not of this product or a repeat; MEDIA_NOT_FOUND / MEDIA_NOT_READY for a new image not uploaded and confirmed by this admin; PRODUCT_NOT_SUBMITTABLE (published only) with `details.reasons` and `details.pairs`; PRODUCT_NOT_EDITABLE for a product under review; NOT_FOUND for an unknown id or a product of another vendor (admins act on other vendors’ products only through review), and with `details.reason` PLATFORM_VENDOR_MISSING while JAZLA’s own vendor has not been set up.",
         "operationId": "adminUpdatePlatformProductContent",
         "parameters": [
           {
@@ -7282,7 +7282,7 @@
     },
     "/v1/admin/product-change-requests/{id}/approve": {
       "post": {
-        "description": "Admin dashboard, review queue of edits. The request becomes `approved` and its content replaces the live product at once, exactly as shown in the queue (a request never changes). Sizes and cutting styles the product already has keep their live prices (prices change only through the prices endpoints); new ones take the prices of the request. The product stays `published`. Recorded in the audit log. No body. Errors: PRODUCT_CHANGE_REQUEST_SUPERSEDED when the vendor has edited again since: reload, the newer request is in the queue; NOT_FOUND for an unknown request or one already approved or rejected; PRODUCT_NOT_EDITABLE if the product is no longer published.",
+        "description": "Admin dashboard, review queue of edits. The request becomes `approved` and its content replaces the live product at once, exactly as shown in the queue (a request never changes). Sizes, cutting styles and packagings the product already has keep their live prices (prices change only through the prices endpoints); new ones take the prices of the request. The product stays `published`. Recorded in the audit log. No body. Errors: PRODUCT_CHANGE_REQUEST_SUPERSEDED when the vendor has edited again since: reload, the newer request is in the queue; NOT_FOUND for an unknown request or one already approved or rejected; PRODUCT_NOT_EDITABLE if the product is no longer published.",
         "operationId": "adminApproveProductChangeRequest",
         "parameters": [
           {
@@ -7915,7 +7915,7 @@
     },
     "/v1/admin/products/{id}/prices": {
       "patch": {
-        "description": "Admin dashboard, JAZLA products, prices form. Sets new prices for some of the product’s existing sizes (by size id) and cutting styles (by cutting style id); the others keep theirs. Integer halalas, VAT included. Applies at once, also on a published product; the lowest price is updated and each price that actually changed is recorded in the audit log. Errors: VALIDATION_FAILED for a size or cutting style that is not the product’s (`isSizeOfProduct`, `isCuttingOfProduct`) or named twice (`isNotRepeated`); PRODUCT_NOT_EDITABLE for a product under review (`details.status`); NOT_FOUND for an unknown id or a product of another vendor (admins act on other vendors’ products only through review), and with `details.reason` PLATFORM_VENDOR_MISSING while JAZLA’s own vendor has not been set up.",
+        "description": "Admin dashboard, JAZLA products, prices form. Sets new prices for some of the product’s existing sizes (by size id), cutting styles (by cutting style id) and packagings (by packaging); the others keep theirs. Integer halalas, VAT included. Applies at once, also on a published product; the lowest price is updated and each price that actually changed is recorded in the audit log. Errors: VALIDATION_FAILED for a size, cutting style or packaging that is not the product’s (`isSizeOfProduct`, `isCuttingOfProduct`, `isPackagingOfProduct`) or named twice (`isNotRepeated`); PRODUCT_NOT_EDITABLE for a product under review (`details.status`); NOT_FOUND for an unknown id or a product of another vendor (admins act on other vendors’ products only through review), and with `details.reason` PLATFORM_VENDOR_MISSING while JAZLA’s own vendor has not been set up.",
         "operationId": "adminChangePlatformProductPrices",
         "parameters": [
           {
@@ -10473,6 +10473,33 @@
           "extraPriceHalalas"
         ]
       },
+      "ProductPackagingDto": {
+        "type": "object",
+        "properties": {
+          "packaging": {
+            "type": "string",
+            "enum": [
+              "trays",
+              "bags",
+              "vacuum",
+              "none"
+            ],
+            "example": "vacuum",
+            "description": "The packaging: `trays`, `bags`, `vacuum`, `none`. A cutting style offered with a packaging an admin rule forbids blocks submission (PRODUCT_NOT_SUBMITTABLE, INCOMPATIBLE_CUTTING_PACKAGING)."
+          },
+          "extraPriceHalalas": {
+            "type": "number",
+            "minimum": 0,
+            "maximum": 100000000,
+            "example": 500,
+            "description": "The extra price in halalas, VAT included (`500` is 5.00 SAR); 0 for none. A packaging the product already offers keeps its live extra price here (VALIDATION_FAILED `isLivePrice` otherwise): change it with the prices endpoint."
+          }
+        },
+        "required": [
+          "packaging",
+          "extraPriceHalalas"
+        ]
+      },
       "CreateProductDto": {
         "type": "object",
         "properties": {
@@ -10533,20 +10560,11 @@
             }
           },
           "packagings": {
+            "maxItems": 4,
+            "description": "The packagings offered with their extra prices, each packaging at most once (VALIDATION_FAILED `isNotRepeated` on `packagings.<i>.packaging`). Empty: no packaging choice.",
             "type": "array",
-            "example": [
-              "trays",
-              "vacuum"
-            ],
-            "description": "The packagings offered, each at most once: `trays`, `bags`, `vacuum`, `none`. A cutting style offered with a packaging an admin rule forbids blocks submission (PRODUCT_NOT_SUBMITTABLE, INCOMPATIBLE_CUTTING_PACKAGING).",
             "items": {
-              "type": "string",
-              "enum": [
-                "trays",
-                "bags",
-                "vacuum",
-                "none"
-              ]
+              "$ref": "#/components/schemas/ProductPackagingDto"
             }
           },
           "exclusionItemIds": {
@@ -10695,6 +10713,31 @@
           "extraPriceHalalas"
         ]
       },
+      "ProductPackagingResponseDto": {
+        "type": "object",
+        "properties": {
+          "packaging": {
+            "type": "string",
+            "enum": [
+              "trays",
+              "bags",
+              "vacuum",
+              "none"
+            ],
+            "example": "vacuum",
+            "description": "The packaging: `trays`, `bags`, `vacuum`, `none`."
+          },
+          "extraPriceHalalas": {
+            "type": "number",
+            "example": 500,
+            "description": "The extra price for this packaging, in halalas, VAT included (`500` is 5.00 SAR); 0 for no extra charge."
+          }
+        },
+        "required": [
+          "packaging",
+          "extraPriceHalalas"
+        ]
+      },
       "ProductContentResponseDto": {
         "type": "object",
         "properties": {
@@ -10749,19 +10792,10 @@
             }
           },
           "packagings": {
+            "description": "The proposed packagings, with their extra prices.",
             "type": "array",
-            "example": [
-              "trays"
-            ],
-            "description": "The proposed packagings: `trays`, `bags`, `vacuum`, `none`.",
             "items": {
-              "type": "string",
-              "enum": [
-                "trays",
-                "bags",
-                "vacuum",
-                "none"
-              ]
+              "$ref": "#/components/schemas/ProductPackagingResponseDto"
             }
           },
           "exclusionItemIds": {
@@ -10955,19 +10989,10 @@
             }
           },
           "packagings": {
+            "description": "The packagings offered (`trays`, `bags`, `vacuum`, `none`), with their extra prices.",
             "type": "array",
-            "example": [
-              "trays"
-            ],
-            "description": "The packagings offered: `trays`, `bags`, `vacuum`, `none`.",
             "items": {
-              "type": "string",
-              "enum": [
-                "trays",
-                "bags",
-                "vacuum",
-                "none"
-              ]
+              "$ref": "#/components/schemas/ProductPackagingResponseDto"
             }
           },
           "exclusions": {
@@ -11251,20 +11276,11 @@
             }
           },
           "packagings": {
+            "maxItems": 4,
+            "description": "The packagings offered with their extra prices, each packaging at most once (VALIDATION_FAILED `isNotRepeated` on `packagings.<i>.packaging`). Empty: no packaging choice.",
             "type": "array",
-            "example": [
-              "trays",
-              "vacuum"
-            ],
-            "description": "The packagings offered, each at most once: `trays`, `bags`, `vacuum`, `none`. A cutting style offered with a packaging an admin rule forbids blocks submission (PRODUCT_NOT_SUBMITTABLE, INCOMPATIBLE_CUTTING_PACKAGING).",
             "items": {
-              "type": "string",
-              "enum": [
-                "trays",
-                "bags",
-                "vacuum",
-                "none"
-              ]
+              "$ref": "#/components/schemas/ProductPackagingDto"
             }
           },
           "exclusionItemIds": {
@@ -11364,6 +11380,33 @@
           "extraPriceHalalas"
         ]
       },
+      "PackagingPriceDto": {
+        "type": "object",
+        "properties": {
+          "packaging": {
+            "type": "string",
+            "enum": [
+              "trays",
+              "bags",
+              "vacuum",
+              "none"
+            ],
+            "example": "vacuum",
+            "description": "A packaging the product offers: `trays`, `bags`, `vacuum`, `none`; another one is VALIDATION_FAILED `isPackagingOfProduct`."
+          },
+          "extraPriceHalalas": {
+            "type": "number",
+            "minimum": 0,
+            "maximum": 100000000,
+            "example": 500,
+            "description": "The new extra price for this packaging, in halalas, VAT included (`500` is 5.00 SAR); 0 for no extra charge."
+          }
+        },
+        "required": [
+          "packaging",
+          "extraPriceHalalas"
+        ]
+      },
       "ChangeProductPricesDto": {
         "type": "object",
         "properties": {
@@ -11381,6 +11424,14 @@
             "type": "array",
             "items": {
               "$ref": "#/components/schemas/CuttingPriceDto"
+            }
+          },
+          "packagings": {
+            "maxItems": 4,
+            "description": "New packaging extra prices, each packaging at most once (VALIDATION_FAILED `isNotRepeated` on `packagings.<i>.packaging`); left out or empty: no packaging price changes.",
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/PackagingPriceDto"
             }
           }
         }
@@ -11706,19 +11757,10 @@
             }
           },
           "packagings": {
+            "description": "The packagings to choose from (`trays`, `bags`, `vacuum`, `none`), with their extra prices; empty when there is no packaging choice.",
             "type": "array",
-            "example": [
-              "trays"
-            ],
-            "description": "The packagings to choose from: `trays`, `bags`, `vacuum`, `none`.",
             "items": {
-              "type": "string",
-              "enum": [
-                "trays",
-                "bags",
-                "vacuum",
-                "none"
-              ]
+              "$ref": "#/components/schemas/ProductPackagingResponseDto"
             }
           },
           "exclusions": {

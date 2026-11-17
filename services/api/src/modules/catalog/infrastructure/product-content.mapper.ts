@@ -23,7 +23,10 @@ export function toStoredProductContent(
       cuttingStyleId: cutting.cuttingStyleId,
       extraPriceHalalas: cutting.extraPrice.halalas,
     })),
-    packagings: [...content.packagings],
+    packagings: content.packagings.map((option) => ({
+      packaging: option.packaging,
+      extraPriceHalalas: option.extraPrice.halalas,
+    })),
     exclusionItemIds: [...content.exclusionItemIds],
   };
 }
@@ -42,6 +45,10 @@ export function toProductContent(json: unknown): ProductContent {
     cuttings: stored.cuttings.map((cutting) => ({
       cuttingStyleId: cutting.cuttingStyleId,
       extraPrice: Money.of(cutting.extraPriceHalalas),
+    })),
+    packagings: stored.packagings.map((option) => ({
+      packaging: option.packaging,
+      extraPrice: Money.of(option.extraPriceHalalas),
     })),
   };
 }

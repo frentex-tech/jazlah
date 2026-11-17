@@ -71,7 +71,7 @@ export function content(
       },
     ],
     cuttings: [{ cuttingStyleId: CUT, extraPrice: Money.of(1_500) }],
-    packagings: ['trays'],
+    packagings: [{ packaging: 'trays', extraPrice: Money.of(300) }],
     exclusionItemIds: [EXCLUSION],
     ...overrides,
   };

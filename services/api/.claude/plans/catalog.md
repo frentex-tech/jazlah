@@ -23,7 +23,7 @@ categories, products, product_images, product_sizes, cutting_styles, exclusion_i
 
 - **Sizes:** an approximate weight, a price, and one optional tag.
 - **Cutting styles:** a shared admin list, with an optional extra price per product.
-- **Packaging:** trays, bags, vacuum or none; no price.
+- **Packaging:** trays, bags, vacuum or none, with an optional extra price per product, changed like a cutting style's. (Was "no price" until 2026-11-17: reversed by the backend owner, issue #243; DECISIONS.md, "Catalog".)
 - **Compatibility** between cutting and packaging: global rules.
 - **"Without" items:** a shared admin list.
 

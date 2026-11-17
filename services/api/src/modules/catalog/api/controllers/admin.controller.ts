@@ -453,7 +453,7 @@ export class AdminCatalogController {
     operationId: 'adminApproveProductChangeRequest',
     summary: 'Approve a change request: it becomes the live product',
     description:
-      'Admin dashboard, review queue of edits. The request becomes `approved` and its content replaces the live product at once, exactly as shown in the queue (a request never changes). Sizes and cutting styles the product already has keep their live prices (prices change only through the prices endpoints); new ones take the prices of the request. The product stays `published`. Recorded in the audit log. No body. ' +
+      'Admin dashboard, review queue of edits. The request becomes `approved` and its content replaces the live product at once, exactly as shown in the queue (a request never changes). Sizes, cutting styles and packagings the product already has keep their live prices (prices change only through the prices endpoints); new ones take the prices of the request. The product stays `published`. Recorded in the audit log. No body. ' +
       'Errors: PRODUCT_CHANGE_REQUEST_SUPERSEDED when the vendor has edited again since: reload, the newer request is in the queue; NOT_FOUND for an unknown request or one already approved or rejected; PRODUCT_NOT_EDITABLE if the product is no longer published.',
   })
   @ApiOkResponse({
@@ -558,7 +558,7 @@ export class AdminCatalogController {
     summary: 'Replace a JAZLA product’s content',
     description:
       'Admin dashboard, JAZLA products, edit form. Replaces the whole content of a platform vendor product (send every field, lists in display order); availability, fulfilment and prices have their own endpoints. Applies at once, also when published: no change request. An edit of a published product is recorded in the audit log and must meet the submission rules (at least one size and one image, no cutting style offered with a packaging it cannot be combined with). ' +
-      'Keep an existing size by sending its `id`; a size left out is removed; a size without `id` is new. Existing sizes and cutting styles must carry their current prices (VALIDATION_FAILED `isLivePrice`): change them with PATCH …/{id}/prices. ' +
+      'Keep an existing size by sending its `id`; a size left out is removed; a size without `id` is new. Existing sizes, cutting styles and packagings must carry their current prices (VALIDATION_FAILED `isLivePrice`): change them with PATCH …/{id}/prices. ' +
       'Errors: VALIDATION_FAILED also for an inactive reference, a size id not of this product or a repeat; MEDIA_NOT_FOUND / MEDIA_NOT_READY for a new image not uploaded and confirmed by this admin; PRODUCT_NOT_SUBMITTABLE (published only) with `details.reasons` and `details.pairs`; PRODUCT_NOT_EDITABLE for a product under review; ' +
       'NOT_FOUND for an unknown id or a product of another vendor (admins act on other vendors’ products only through review), and with `details.reason` PLATFORM_VENDOR_MISSING while JAZLA’s own vendor has not been set up.',
   })
@@ -702,8 +702,8 @@ export class AdminCatalogController {
     operationId: 'adminChangePlatformProductPrices',
     summary: 'Change a JAZLA product’s prices, at once',
     description:
-      'Admin dashboard, JAZLA products, prices form. Sets new prices for some of the product’s existing sizes (by size id) and cutting styles (by cutting style id); the others keep theirs. Integer halalas, VAT included. Applies at once, also on a published product; the lowest price is updated and each price that actually changed is recorded in the audit log. ' +
-      'Errors: VALIDATION_FAILED for a size or cutting style that is not the product’s (`isSizeOfProduct`, `isCuttingOfProduct`) or named twice (`isNotRepeated`); PRODUCT_NOT_EDITABLE for a product under review (`details.status`); ' +
+      'Admin dashboard, JAZLA products, prices form. Sets new prices for some of the product’s existing sizes (by size id), cutting styles (by cutting style id) and packagings (by packaging); the others keep theirs. Integer halalas, VAT included. Applies at once, also on a published product; the lowest price is updated and each price that actually changed is recorded in the audit log. ' +
+      'Errors: VALIDATION_FAILED for a size, cutting style or packaging that is not the product’s (`isSizeOfProduct`, `isCuttingOfProduct`, `isPackagingOfProduct`) or named twice (`isNotRepeated`); PRODUCT_NOT_EDITABLE for a product under review (`details.status`); ' +
       'NOT_FOUND for an unknown id or a product of another vendor (admins act on other vendors’ products only through review), and with `details.reason` PLATFORM_VENDOR_MISSING while JAZLA’s own vendor has not been set up.',
   })
   @ApiOkResponse({

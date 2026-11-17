@@ -23,7 +23,10 @@ export function toProductContent(body: ProductContentDto): ProductContent {
       cuttingStyleId: cutting.cuttingStyleId,
       extraPrice: Money.of(cutting.extraPriceHalalas),
     })),
-    packagings: body.packagings,
+    packagings: body.packagings.map((option) => ({
+      packaging: option.packaging,
+      extraPrice: Money.of(option.extraPriceHalalas),
+    })),
     exclusionItemIds: body.exclusionItemIds,
   };
 }

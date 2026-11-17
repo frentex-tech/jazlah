@@ -1,3 +1,4 @@
+import { toPackagingResponses } from './to-packaging-responses';
 import type { ProductChangeRequest } from '../domain/product-change-request.type';
 import type { ProductChangeRequestResponseDto } from './dto/product-change-request-response.dto';
 import { toImageResponses } from './to-image-responses';
@@ -29,7 +30,7 @@ export function toChangeRequestResponse(
         name: null,
         extraPriceHalalas: cutting.extraPrice.halalas,
       })),
-      packagings: [...content.packagings],
+      packagings: toPackagingResponses(content.packagings),
       exclusionItemIds: [...content.exclusionItemIds],
     },
     rejectionReason: request.rejectionReason,

@@ -1,3 +1,4 @@
+import { toPackagingResponses } from './to-packaging-responses';
 import type { ProductView } from '../application/product-view.type';
 import type { ProductResponseDto } from './dto/product-response.dto';
 import { toChangeRequestResponse } from './to-change-request-response';
@@ -19,7 +20,7 @@ export function toProductResponse(view: ProductView): ProductResponseDto {
     meatType: product.meatType,
     images: toImageResponses(product.imageMediaIds, view.imageUrls),
     ...toProductOptionsResponse(product),
-    packagings: [...product.packagings],
+    packagings: toPackagingResponses(product.packagings),
     exclusions: [...product.exclusions],
     minPriceHalalas: product.minPrice?.halalas ?? null,
     rejectionReason: product.rejectionReason,
