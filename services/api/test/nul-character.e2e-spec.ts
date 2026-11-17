@@ -109,6 +109,14 @@ describe('A NUL character in input (e2e)', () => {
     expect(answer(res)).toEqual(refusedNul('cursor'));
   });
 
+  it('refuses it in a free-text query parameter that reaches a query', async () => {
+    const res = await http().get(
+      `/v1/public/products?q=${encodeURIComponent('لحم\u0000 نعيمي')}`,
+    );
+
+    expect(answer(res)).toEqual(refusedNul('q'));
+  });
+
   it('refuses it in a path parameter', async () => {
     const res = await http().get('/v1/public/vendors/%00');
 
