@@ -30,6 +30,7 @@ This task also covers:
 - **Guest cart merge on login:** a cart built as a guest moves to the account after login.
 
 **Output:**
+- **Moved in 2026-11-17 from CAT-API-1:** the authoritative `PricingService.priceLine({productId, sizeId, cutId?, packagingId?, exclusionIds[], quantity})` (unit = size + cut extra + packaging extra, prices include VAT, pure function), with table-driven tests and 100% branch coverage.
 
 *Cart service (single-vendor rule, totals)*
 - `Cart` (userId unique, vendorId?, couponId?, fulfilment?, addressId?, deliveryDate?) and `CartItem` (productId, sizeId, cutId?, packagingId?, exclusionIds[], notes, quantity, unitPriceSnapshot)
@@ -120,7 +121,9 @@ Delivery vs pickup, one daily delivery window, cutoffs per order type in Riyadh 
 
 **What:** every operating rule, editable by the admin without a deploy.
 
-**Output:** setting keys with zod schemas and seeded defaults:
+**Output:**
+- **Moved in 2026-11-17 from FND-API-4:** the typed settings store (`Setting` model, `SettingsService.get<T>(key)` with a zod schema per key, cached, a registry so unknown keys can't be written), with its acceptance: writing a setting with an invalid shape returns 400.
+- Setting keys with zod schemas and seeded defaults:
 - `ops.deliveryWindow {start:"16:00", end:"22:00"}`
 - `ops.cutoffs {ready_meat:{time:"12:00", leadDays:0}, carcass:{time:"20:00", leadDays:1}, cooked:{time:"18:00", leadDays:1}, occasion:{leadDays:3}, adha:{…}}`
 - `ops.bookingHorizonDays 14`
@@ -378,6 +381,7 @@ This task also covers:
 - **Customer order history & detail:** customers see their orders.
 
 **Output:**
+- **Moved in 2026-11-17 from FND-API-4:** the socket.io realtime gateway (JWT on handshake, Redis adapter, rooms `user:{id}`, `vendor:{id}`, `kitchen:{id}`, `admin:orders`, `chat:{conversationId}`, `RealtimeService.emitTo`), with its acceptance: a valid token joins its room and receives a test event; a connection without a token is rejected.
 
 *Order routing to admin / vendor & realtime events*
 - `GET /v1/vendor/orders` (own orders, filters: status, date, method) and `GET /v1/vendor/orders/:id`; `GET /v1/admin/orders` (all; Jazlah's own orders are handled here because Jazlah is the platform vendor); realtime `order.created` / `order.updated` to `vendor:{id}` and `admin:orders`; `POST /v1/vendor/orders/:id/transition` and `/v1/admin/orders/:id/transition` (actor-checked)
