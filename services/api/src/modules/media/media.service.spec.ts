@@ -755,7 +755,7 @@ describe('MediaService', () => {
         ownerId,
       });
 
-    it("marks the owner's files of the purpose, except those kept, and the cleanup removes their objects and rows", async () => {
+    it("marks the owner's files of the purpose, except those kept; the cleanup removes a ready copy at once, the rest once the window ended", async () => {
       const context = setup();
       const ready = await document(context, OWNER);
       await context.service.confirmUpload(ready.mediaId);
@@ -780,15 +780,47 @@ describe('MediaService', () => {
       // Nothing is removed from storage until the cleanup runs (after the commit).
       expect(context.storage.hasObject(readyCopy)).toBe(true);
 
-      await expect(context.service.removeExpiredUploads()).resolves.toBe(2);
+      await expect(context.service.removeExpiredUploads()).resolves.toBe(0);
 
-      expect(context.client.rows.has(ready.mediaId)).toBe(false);
-      expect(context.client.rows.has(pending.mediaId)).toBe(false);
+      // Inside the window: the checked copy goes, the rows and staging objects stay.
       expect(context.storage.hasObject(readyCopy)).toBe(false);
-      expect(context.storage.hasObject(pending.staging)).toBe(false);
+      expect(context.client.rows.get(ready.mediaId)).toMatchObject({
+        bucket: null,
+        objectKey: null,
+      });
+      expect(context.storage.hasObject(pending.staging)).toBe(true);
       expect(context.client.rows.get(kept.mediaId)?.status).toBe('ready');
       expect(context.client.rows.get(others.mediaId)?.status).toBe('pending');
       expect(context.client.rows.get(image.mediaId)?.status).toBe('pending');
+
+      jest.setSystemTime(AFTER_EXPIRY);
+      await context.service.removeExpiredUploads();
+
+      expect(context.client.rows.has(ready.mediaId)).toBe(false);
+      expect(context.client.rows.has(pending.mediaId)).toBe(false);
+      expect(context.storage.hasObject(ready.staging)).toBe(false);
+      expect(context.storage.hasObject(pending.staging)).toBe(false);
+      expect(context.client.rows.get(kept.mediaId)?.status).toBe('ready');
+    });
+
+    it('keeps a marked row while its upload ticket is valid, so a late upload is removed too (review of #240)', async () => {
+      const context = setup();
+      const pending = await document(context, OWNER);
+      await context.service.discardOwnFiles(OWNER, 'vendor.document', []);
+      await context.service.removeExpiredUploads();
+      expect(context.client.rows.has(pending.mediaId)).toBe(true);
+
+      expect(
+        context.storage.upload(pending.ticket, {
+          bytes: file(PDF),
+          contentType: 'application/pdf',
+        }),
+      ).toEqual({ accepted: true });
+      jest.setSystemTime(AFTER_EXPIRY);
+      await expect(context.service.removeExpiredUploads()).resolves.toBe(1);
+
+      expect(context.client.rows.has(pending.mediaId)).toBe(false);
+      expect(context.storage.objectLocations()).toEqual([]);
     });
 
     it('also marks a file that failed its checks, so its row and file name go', async () => {
@@ -804,6 +836,7 @@ describe('MediaService', () => {
       await expect(
         context.service.discardOwnFiles(OWNER, 'vendor.document', []),
       ).resolves.toBe(1);
+      jest.setSystemTime(AFTER_EXPIRY);
       await context.service.removeExpiredUploads();
 
       expect(context.client.rows.has(failed.mediaId)).toBe(false);
