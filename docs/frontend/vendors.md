@@ -33,7 +33,9 @@ A customer becomes a vendor like this:
 | `iban` | a Saudi IBAN, `SA` + 22 characters, spaces allowed. Never returned in full afterwards, only masked |
 | `accountHolderName` | the name on the bank account, 2 to 100 characters |
 | `location` | `{ latitude, longitude }`: the shop or facility |
-| `documents` | 3 to 10 items `{ kind, mediaId }`, at least one of each kind: `commercial_registration`, `health_certificate`, `facility_photo`; each file once |
+| `city` | required: the city, as written in Arabic (`الرياض`), 2 to 50 characters after trimming. Shown on the store page. |
+| `vatNumber` | optional: the VAT registration number, 15 digits starting and ending with 3, Latin or Arabic (`310123456700003`). Leave it out when the business is not registered for VAT. |
+| `documents` | up to 10 items `{ kind, mediaId }`, each file once. At least one of each **required** kind: `commercial_registration`, `health_certificate`, `facility_photo`. Optional kinds: `municipality_licence`, `national_id`. |
 
 3. **Result:** 201 with the application, `status: "pending"`.
 
@@ -46,8 +48,6 @@ A customer becomes a vendor like this:
 | `VENDOR_APPLICATION_ALREADY_PENDING` | One application is already waiting. Show it instead. |
 | `VENDOR_ACCESS_ALREADY_HELD` | This user already works for a vendor. |
 
-Coming next: optional VAT number, city, and new document kinds (see [not-built-yet.md](not-built-yet.md#coming-next-decided-built-right-after-this-handoff)).
-
 ## Vendor dashboard: store profile
 
 Signing in is described in [auth.md](auth.md); the dashboard uses audience `vendor`.
@@ -56,21 +56,26 @@ Signing in is described in [auth.md](auth.md); the dashboard uses audience `vend
 
 **Read the profile:** `GET /v1/vendor/profile` returns:
 - the store name and description;
-- `logoUrl`;
+- `logoUrl` and `coverUrl` (the wide photo at the top of the store page);
+- `city`, `vatNumber`, `contactPhone`, `contactEmail` (each `null` when not set; the contact details and the VAT number are never public);
 - `commissionBasisPoints` (1250 is 12.5%);
 - the commercial registration;
 - `ibanMasked`;
 - `accountHolderName`;
 - `location`.
 
-The name, registration, bank details and location come from the approved application. **Only an admin can change them.**
+The name, registration, bank details, location and city come from the approved application. **Only an admin can change them.**
 
-**Change the logo or the description:** `PATCH /v1/vendor/profile`. It applies at once, with no review.
+**Change the logo, the cover photo, the description, the contact details or the VAT number:** `PATCH /v1/vendor/profile`. It applies at once, with no review.
 
 | Field | How it works |
 |---|---|
 | `logoMediaId` | Upload with purpose `vendor.logo` (JPEG, PNG or WebP, up to 2 MiB) through `POST /v1/vendor/media/uploads`, confirm it, then send its id. `null` removes the logo. |
+| `coverMediaId` | Upload with purpose `vendor.cover` (JPEG, PNG or WebP, up to 2 MiB), confirm it, then send its id. `null` removes the cover. |
 | `description` | `{ ar?, en? }`. A language left out stays as it is; `null` or blank clears it. |
+| `contactPhone` | The store's number for the platform's order operations, not shown to customers: a Saudi mobile or a landline (area code 011 to 017), in any usual form (`0112345678`, `05…`, `+966…`, Arabic digits, spaces). Returned in E.164 (`+966112345678`). `null` removes it. Anything else is `VALIDATION_FAILED` `isSaudiPhoneNumber`. |
+| `contactEmail` | The store's email for the platform, not shown to customers, up to 254 characters, stored lowercase and not verified. `null` or blank removes it. |
+| `vatNumber` | As on the application. `null` removes it. |
 
 A field left out stays as it is. An empty body changes nothing.
 
@@ -81,6 +86,7 @@ The vendor's products are in [catalog.md](catalog.md).
 **Review queue:** `GET /v1/admin/vendor-applications?status=pending`.
 - Paged (see [conventions.md](conventions.md#lists-keyset-pagination)).
 - Without `status` it lists every application, newest first.
+- `q` searches the store name or the commercial registration number, as on the vendors list.
 - The IBAN is masked.
 
 **Review screen:** `GET /v1/admin/vendor-applications/{id}` returns the application, who reviewed it, and for each document a **short-lived link** (`url`, `expiresAt`).
@@ -89,7 +95,7 @@ The vendor's products are in [catalog.md](catalog.md).
 - `NOT_FOUND` also means the applicant deleted their account; only pending and rejected applications are removed.
 
 **Approve:** `POST /v1/admin/vendor-applications/{id}/approve` with `{ "commissionBasisPoints": 1250 }`, a whole number from 0 to 10000. In one step it:
-- creates the vendor, active and listed publicly at once, without a logo;
+- creates the vendor, active and listed publicly at once, without a logo or cover, with the application's city and VAT number;
 - records the first commission;
 - gives the applicant vendor access.
 
@@ -109,6 +115,9 @@ The answer is the new vendor.
 **List:** `GET /v1/admin/vendors`, optionally with `?status=active` or `?status=suspended`.
 - It includes the platform vendor (`isPlatform: true`).
 - Paged.
+- **Search:** `q`, 2 to 100 characters, matches part of the store name in Arabic or English (any case) or of the commercial registration number (Latin or Arabic digits). `%` and `_` match themselves.
+- **City:** `city` keeps the vendors in exactly that city, as stored (trimmed). Vendors without a city are left out.
+- `q`, `city` and `status` combine, and paging works with them (keep them on every page's request).
 
 **One vendor:** `GET /v1/admin/vendors/{id}`. The answer includes:
 - `status`;
@@ -123,8 +132,8 @@ The answer is the new vendor.
 
 **Reinstate:** `POST /v1/admin/vendors/{id}/reinstate`, with no body. It answers `CONFLICT` with `details.reason: "VENDOR_NOT_SUSPENDED"` if the vendor is active.
 
-**Logo and description:** `PATCH /v1/admin/vendors/{id}/profile` works like the vendor's own `PATCH`.
-- Upload the logo as the admin, through `POST /v1/admin/media/uploads` and `POST /v1/admin/media/{id}/confirm`.
+**Profile:** `PATCH /v1/admin/vendors/{id}/profile` works like the vendor's own `PATCH`, and can also change the `city` (2 to 50 characters; `null` is `VALIDATION_FAILED`: a city is changed, not removed).
+- Upload the logo or cover as the admin, through `POST /v1/admin/media/uploads` and `POST /v1/admin/media/{id}/confirm`.
 - This is how the platform vendor's profile is set.
 
 **Commission:**
@@ -138,7 +147,7 @@ Every admin action here is recorded in the audit log.
 
 ## Customer app and website: stores
 
-- **Stores list:** `GET /v1/public/vendors`. It lists active vendors only (name, description, `logoUrl`), paged. No token is needed.
+- **Stores list:** `GET /v1/public/vendors`. It lists active vendors only (name, description, `logoUrl`, `coverUrl`, `city`), paged. No token is needed.
 - **Store page:** `GET /v1/public/vendors/{id}`. `NOT_FOUND` for an unknown or suspended vendor alike: show "store unavailable".
 - **The store's products:** `GET /v1/public/products?vendorId=<id>` (see [catalog.md](catalog.md)).
 
