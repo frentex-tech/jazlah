@@ -134,7 +134,6 @@ export class PrismaVendorApplicationRepository implements VendorApplicationRepos
     });
   }
 
-  /** The conditional update from pending; null when it matched nothing. */
   async deleteUnapprovedOf(applicantId: string): Promise<number> {
     try {
       // The documents' rows go with them (ON DELETE CASCADE); their files are the
@@ -160,6 +159,7 @@ export class PrismaVendorApplicationRepository implements VendorApplicationRepos
     }
   }
 
+  /** The conditional update from pending; null when it matched nothing. */
   private async review(
     id: string,
     data: {
