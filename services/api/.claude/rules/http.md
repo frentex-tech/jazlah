@@ -40,7 +40,7 @@ Every list endpoint follows one convention, so clients page every list the same 
 
 *Why: offsets skip or repeat rows while items are added, and a count costs a scan of the table; neither scales to Eid volumes.*
 
-Exception: `GET public/categories` returns every active category in the order admins set, not paged (DECISIONS.md, "Catalog").
+Exceptions: `GET public/categories` returns every active category in the order admins set, not paged (DECISIONS.md, "Catalog"); `GET customer/addresses` returns the customer's addresses, at most ten, default first, not paged (DECISIONS.md, "Customers").
 
 ## Security baseline
 
