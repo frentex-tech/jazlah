@@ -21,6 +21,22 @@ export class UsersServiceUserAccounts implements UserAccounts {
     return this.users.findById(id);
   }
 
+  lockForWrite(id: string): Promise<UserAccount | null> {
+    return this.users.lockForWrite(id);
+  }
+
+  lockForSignIn(id: string): Promise<UserAccount | null> {
+    return this.users.lockForShare(id);
+  }
+
+  hasActiveStaffAccess(id: string): Promise<boolean> {
+    return this.users.hasActiveStaffAccess(id);
+  }
+
+  markDeleted(id: string, at: Date): Promise<boolean> {
+    return this.users.markDeleted(id, at);
+  }
+
   async findStaffOrganisation(
     userId: string,
     audience: StaffAudience,

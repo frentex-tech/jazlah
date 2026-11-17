@@ -59,6 +59,12 @@ export class InMemoryOtpChallengeRepository implements OtpChallengeRepository {
     return Promise.resolve();
   }
 
+  deleteAllOf(phone: string): Promise<number> {
+    const before = this.rows.length;
+    this.rows = this.rows.filter((row) => row.phone !== phone);
+    return Promise.resolve(before - this.rows.length);
+  }
+
   makeUnverifiable(id: string, codeHash: string): Promise<void> {
     this.rows = this.rows.map((row) =>
       row.id === id

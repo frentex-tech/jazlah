@@ -9,4 +9,6 @@ export type NewAuthSession = Readonly<{
   deviceName: string | null;
   devicePlatform: DevicePlatform;
   lastUsedAt: Date;
+  /** The sign-in, from the use case's clock (AuthSession.signedInAt). */
+  createdAt: Date;
 }>;

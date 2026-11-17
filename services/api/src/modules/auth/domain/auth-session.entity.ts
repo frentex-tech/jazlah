@@ -1,5 +1,6 @@
 import type { Audience } from '@common/auth/audience.type';
 import type { DevicePlatform } from './device-platform.type';
+import { RECENT_SIGN_IN_SECONDS } from './recent-sign-in.constants';
 import type { SessionRevocationReason } from './session-revocation-reason.type';
 
 /**
@@ -23,9 +24,23 @@ export class AuthSession {
     readonly revokedAt: Date | null,
     /** Null unless revoked. */
     readonly revocationReason: SessionRevocationReason | null,
+    /** The sign-in: when the code was verified. A refresh does not change it. */
+    readonly signedInAt: Date,
   ) {}
 
   get isActive(): boolean {
     return this.revokedAt === null;
+  }
+
+  /**
+   * Whether the session is active and its sign-in happened at most
+   * RECENT_SIGN_IN_SECONDS before `now`: the proof of presence an action that cannot be
+   * undone asks for. Refreshing does not renew it; only a new sign-in does.
+   */
+  isRecentSignIn(now: Date): boolean {
+    return (
+      this.isActive &&
+      now.getTime() - this.signedInAt.getTime() <= RECENT_SIGN_IN_SECONDS * 1000
+    );
   }
 }

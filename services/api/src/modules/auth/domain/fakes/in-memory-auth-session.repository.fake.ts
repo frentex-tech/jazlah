@@ -20,6 +20,7 @@ export class InMemoryAuthSessionRepository implements AuthSessionRepository {
       session.lastUsedAt,
       null,
       null,
+      session.createdAt,
     );
     this.rows.push(row);
     return Promise.resolve(row);
@@ -57,6 +58,16 @@ export class InMemoryAuthSessionRepository implements AuthSessionRepository {
     return count;
   }
 
+  findById(id: string): Promise<AuthSession | null> {
+    return Promise.resolve(this.byId(id) ?? null);
+  }
+
+  deleteAllOf(userId: string): Promise<number> {
+    const before = this.rows.length;
+    this.rows = this.rows.filter((row) => row.userId !== userId);
+    return Promise.resolve(before - this.rows.length);
+  }
+
   touch(id: string, now: Date): Promise<void> {
     const row = this.byId(id);
     if (row !== undefined) {
@@ -88,6 +99,7 @@ export class InMemoryAuthSessionRepository implements AuthSessionRepository {
       change.lastUsedAt ?? row.lastUsedAt,
       change.revokedAt ?? row.revokedAt,
       change.revocationReason ?? row.revocationReason,
+      row.signedInAt,
     );
     this.rows = this.rows.map((each) => (each.id === row.id ? next : each));
   }

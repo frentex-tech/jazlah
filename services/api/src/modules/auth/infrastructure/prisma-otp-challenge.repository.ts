@@ -82,6 +82,21 @@ export class PrismaOtpChallengeRepository implements OtpChallengeRepository {
     }
   }
 
+  async deleteAllOf(phone: string): Promise<number> {
+    try {
+      // SKIP LOCKED: a challenge locked right now belongs to a sign-in in progress, which
+      // waits for the deletion's lock on the user and then signs in a new user with this
+      // phone; waiting for it here would deadlock, and the row is that new user's.
+      return await this.db.client.$executeRaw`
+        DELETE FROM "otp_challenges" WHERE "id" IN (
+          SELECT "id" FROM "otp_challenges" WHERE "phone" = ${phone}
+          FOR UPDATE SKIP LOCKED
+        )`;
+    } catch (error) {
+      mapPrismaError(error);
+    }
+  }
+
   async makeUnverifiable(id: string, codeHash: string): Promise<void> {
     try {
       await this.db.client.otpChallenge.updateMany({

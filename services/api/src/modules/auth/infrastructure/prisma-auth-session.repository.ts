@@ -56,6 +56,29 @@ export class PrismaAuthSessionRepository implements AuthSessionRepository {
     }
   }
 
+  async findById(id: string): Promise<AuthSession | null> {
+    try {
+      const row = await this.db.client.authSession.findUnique({
+        where: { id },
+      });
+      return row === null ? null : toAuthSession(row);
+    } catch (error) {
+      mapPrismaError(error);
+    }
+  }
+
+  async deleteAllOf(userId: string): Promise<number> {
+    try {
+      // refresh_tokens go with their session (ON DELETE CASCADE).
+      const { count } = await this.db.client.authSession.deleteMany({
+        where: { userId },
+      });
+      return count;
+    } catch (error) {
+      mapPrismaError(error);
+    }
+  }
+
   async touch(id: string, now: Date): Promise<void> {
     try {
       await this.db.client.authSession.updateMany({

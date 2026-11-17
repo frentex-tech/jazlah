@@ -27,4 +27,13 @@ export interface AuthSessionRepository {
 
   /** Records that the session was just used (a refresh). */
   touch(id: string, now: Date): Promise<void>;
+
+  /** The session, active or not; null when there is none. */
+  findById(id: string): Promise<AuthSession | null>;
+
+  /**
+   * Deletes every session of the user, in every audience, with their refresh tokens (an
+   * account deletion): a refresh token of the user is then unknown. Returns how many.
+   */
+  deleteAllOf(userId: string): Promise<number>;
 }

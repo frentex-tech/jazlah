@@ -33,4 +33,11 @@ export interface OtpChallengeRepository {
    * never be verified, yet it stays the newest, so the resend wait still applies.
    */
   makeUnverifiable(id: string, codeHash: string): Promise<void>;
+
+  /**
+   * Deletes every challenge of the phone, in every audience (an account deletion: the
+   * rows hold the number), except one a sign-in in progress holds: that sign-in ends as a
+   * new user with this phone, so the row is theirs. Returns how many.
+   */
+  deleteAllOf(phone: string): Promise<number>;
 }

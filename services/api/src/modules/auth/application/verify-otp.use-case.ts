@@ -17,6 +17,10 @@ import {
 } from '../domain/ports/auth-session.repository.port';
 import { CLOCK, type Clock } from '../domain/ports/clock.port';
 import {
+  CUSTOMER_PROFILES,
+  type CustomerProfiles,
+} from '../domain/ports/customer-profiles.port';
+import {
   OTP_CHALLENGE_REPOSITORY,
   type OtpChallengeRepository,
 } from '../domain/ports/otp-challenge.repository.port';
@@ -49,15 +53,19 @@ import type { VerifyOtpInput } from './verify-otp-input.type';
  * 3. A wrong code is OTP_INVALID. A staff request without access always ends here: its
  *    stored hash matches nothing.
  * 4. A correct code, in one transaction: the challenge is consumed (a code works
- *    once); the user is found (created, for a customer's first sign-in); a staff
+ *    once); the user is found (created, for a customer's first sign-in) and held with
+ *    a shared lock on its row until the commit, so an account deletion cannot commit in
+ *    between: a deletion that wins first leaves the phone free, and a customer is then
+ *    signed in as a new user, never into the deleted account; a staff
  *    audience needs active access, without which the answer is OTP_INVALID, the same
  *    as a wrong code; a disabled user gets ACCOUNT_DISABLED, which only the owner of
  *    the phone can ever see, since it takes the code; a vendor whose vendor is
  *    suspended (or with no VendorStatusChecker bound) gets VENDOR_SUSPENDED, likewise
  *    only after a correct code; the session and its first refresh token are stored. Any refusal rolls all of it back: the code is not
  *    consumed, the attempt stays counted.
- * 5. After the commit the access token is signed. Nothing outside the database happens
- *    inside the transaction.
+ * 5. After the commit the access token is signed, and a customer's answer says whether
+ *    their profile is complete (null for staff), so the app can offer the completion
+ *    screen. Nothing outside the database happens inside the transaction.
  */
 @Injectable()
 export class VerifyOtpUseCase {
@@ -79,6 +87,7 @@ export class VerifyOtpUseCase {
     // Narrowed to what is used, so a unit test passes a plain object.
     @Inject(TransactionRunner)
     private readonly transactions: Pick<TransactionRunner, 'run'>,
+    @Inject(CUSTOMER_PROFILES) private readonly profiles: CustomerProfiles,
     @Inject(authConfig.KEY)
     private readonly config: Pick<
       AuthConfig,
@@ -137,6 +146,7 @@ export class VerifyOtpUseCase {
         deviceName: input.deviceName,
         devicePlatform: input.devicePlatform,
         lastUsedAt: now,
+        createdAt: now,
       });
       await this.refreshTokens.create({
         sessionId: session.id,
@@ -176,6 +186,10 @@ export class VerifyOtpUseCase {
         refreshTokenExpiresInSeconds: this.config.refreshTokenTtlSeconds,
       },
       principal: { ...signedIn, phone },
+      profileComplete:
+        audience === 'customer'
+          ? await this.profiles.isComplete(signedIn.userId)
+          : null,
     };
   }
 
@@ -185,19 +199,22 @@ export class VerifyOtpUseCase {
   }
 
   /**
-   * The user signing in and, for staff, the organisation of their access. A staff
-   * audience without active access is refused exactly like a wrong code.
+   * The user signing in, held (UserAccounts.lockForSignIn) until the commit, and, for
+   * staff, the organisation of their access. A staff audience without active access is
+   * refused exactly like a wrong code.
    */
   private async resolveUser(
     input: VerifyOtpInput,
   ): Promise<{ user: UserAccount; organisationId: string | null }> {
     if (input.audience === 'customer') {
       return {
-        user: await this.users.findOrCreateByPhone(input.phone),
+        user: await this.holdCustomer(input.phone),
         organisationId: null,
       };
     }
-    const user = await this.users.findByPhone(input.phone);
+    const found = await this.users.findByPhone(input.phone);
+    const user =
+      found === null ? null : await this.users.lockForSignIn(found.id);
     const organisationId =
       user === null
         ? undefined
@@ -206,5 +223,22 @@ export class VerifyOtpUseCase {
       throw new AppError(ErrorCode.OTP_INVALID);
     }
     return { user, organisationId };
+  }
+
+  /**
+   * The customer with this phone, created if new, and held. When the account found was
+   * deleted before it could be held, the phone is free by then: the second round
+   * creates the new user. A third round cannot be needed (only that one account had the
+   * phone); it would be a conflict, which the client may retry.
+   */
+  private async holdCustomer(phone: string): Promise<UserAccount> {
+    for (let round = 0; round < 2; round += 1) {
+      const found = await this.users.findOrCreateByPhone(phone);
+      const held = await this.users.lockForSignIn(found.id);
+      if (held !== null) {
+        return held;
+      }
+    }
+    throw new AppError(ErrorCode.TRANSACTION_CONFLICT);
   }
 }
