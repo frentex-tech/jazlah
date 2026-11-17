@@ -47,6 +47,16 @@ export class InMemoryCuttingPackagingIncompatibilities implements CuttingPackagi
     return Promise.resolve(keysetPage(this.rows, page));
   }
 
+  listAll(): Promise<CuttingPackagingIncompatibility[]> {
+    return Promise.resolve(
+      [...this.rows].sort(
+        (a, b) =>
+          a.createdAt.getTime() - b.createdAt.getTime() ||
+          a.id.localeCompare(b.id),
+      ),
+    );
+  }
+
   delete(id: string): Promise<boolean> {
     const before = this.rows.length;
     this.rows = this.rows.filter((row) => row.id !== id);

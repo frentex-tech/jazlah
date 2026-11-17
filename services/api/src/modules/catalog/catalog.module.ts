@@ -2,6 +2,8 @@ import { Module } from '@nestjs/common';
 import { AuditModule } from '@infra/audit/audit.module';
 import { MediaModule } from '@modules/media';
 import { VendorsModule } from '@modules/vendors';
+import { ListVendorIncompatibilitiesUseCase } from './application/list-vendor-incompatibilities.use-case';
+import { ListVendorPickerItemsUseCase } from './application/list-vendor-picker-items.use-case';
 import { AdminCatalogController } from './api/controllers/admin.controller';
 import { PublicCatalogController } from './api/controllers/public.controller';
 import { VendorCatalogController } from './api/controllers/vendor.controller';
@@ -59,6 +61,8 @@ import { VendorDirectoryCatalogVendors } from './infrastructure/vendor-directory
     UpdateReferenceItemUseCase,
     ListReferenceItemsUseCase,
     ListPublicCategoriesUseCase,
+    ListVendorPickerItemsUseCase,
+    ListVendorIncompatibilitiesUseCase,
     CreateCuttingPackagingIncompatibilityUseCase,
     ListCuttingPackagingIncompatibilitiesUseCase,
     DeleteCuttingPackagingIncompatibilityUseCase,

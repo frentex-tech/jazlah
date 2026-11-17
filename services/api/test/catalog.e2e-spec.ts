@@ -1755,6 +1755,97 @@ describe('Catalog (e2e)', () => {
     });
   });
 
+  describe("a vendor's product form pickers", () => {
+    type NamedList = {
+      items: { id: string; name: { ar: string; en: string } }[];
+    };
+    type RuleList = {
+      items: {
+        cuttingStyle: { id: string; name: { en: string } };
+        packaging: string;
+      }[];
+    };
+
+    it('lists only active entries, in both languages; categories are not a vendor list', async () => {
+      const { owner, admin, options } = await setUp();
+      const inactive = await catalog.listItem(admin, 'cutting-styles');
+      await catalog.http
+        .patch(`/v1/admin/lists/cutting-styles/${inactive}`)
+        .set(...bearer(admin))
+        .send({ isActive: false })
+        .expect(200);
+
+      const cuts = (
+        await catalog.http
+          .get('/v1/vendor/lists/cutting-styles')
+          .set(...bearer(owner))
+          .expect(200)
+      ).body as NamedList;
+      const meatTypes = (
+        await catalog.http
+          .get('/v1/vendor/lists/meat-types')
+          .set(...bearer(owner))
+          .expect(200)
+      ).body as NamedList;
+      const exclusions = (
+        await catalog.http
+          .get('/v1/vendor/lists/exclusion-items')
+          .set(...bearer(owner))
+          .expect(200)
+      ).body as NamedList;
+      const categories = await catalog.http
+        .get('/v1/vendor/lists/categories')
+        .set(...bearer(owner))
+        .expect(400);
+
+      const ids = (list: NamedList) => list.items.map((item) => item.id);
+      const cut = cuts.items.find((item) => item.id === options.cuttingStyleId);
+      expect(cut?.name.ar).toMatch(/^عنصر \d+$/);
+      expect(cut?.name.en).toMatch(/^Item \d+$/);
+      expect(ids(cuts)).not.toContain(inactive);
+      expect(ids(meatTypes)).toContain(options.meatTypeId);
+      expect(ids(exclusions)).toContain(options.exclusionItemId);
+      expect(errorCode(categories.body)).toBe('VALIDATION_FAILED');
+    });
+
+    it('lists the rules of active cutting styles with their names', async () => {
+      const { owner, admin, options } = await setUp();
+      const inactive = await catalog.listItem(admin, 'cutting-styles');
+      for (const [cuttingStyleId, packaging] of [
+        [options.cuttingStyleId, 'vacuum'],
+        [inactive, 'bags'],
+      ]) {
+        const rule = await catalog.http
+          .post('/v1/admin/cutting-packaging-incompatibilities')
+          .set(...bearer(admin))
+          .send({ cuttingStyleId, packaging })
+          .expect(201);
+        catalog.rememberRule((rule.body as { id: string }).id);
+      }
+      await catalog.http
+        .patch(`/v1/admin/lists/cutting-styles/${inactive}`)
+        .set(...bearer(admin))
+        .send({ isActive: false })
+        .expect(200);
+
+      const rules = (
+        (
+          await catalog.http
+            .get('/v1/vendor/cutting-packaging-incompatibilities')
+            .set(...bearer(owner))
+            .expect(200)
+        ).body as RuleList
+      ).items;
+
+      const rule = rules.find(
+        (item) => item.cuttingStyle.id === options.cuttingStyleId,
+      );
+      expect(rule?.packaging).toBe('vacuum');
+      expect(rule?.cuttingStyle.name.en).toMatch(/^Item \d+$/);
+      expect(rules.map((rule) => rule.cuttingStyle.id)).not.toContain(inactive);
+    });
+  });
+
   describe('authentication', () => {
     const id = randomUUID();
     it.each([
@@ -1766,6 +1857,8 @@ describe('Catalog (e2e)', () => {
       ['patch', `/v1/vendor/products/${id}/availability`],
       ['patch', `/v1/vendor/products/${id}/fulfilment`],
       ['patch', `/v1/vendor/products/${id}/prices`],
+      ['get', '/v1/vendor/lists/cutting-styles'],
+      ['get', '/v1/vendor/cutting-packaging-incompatibilities'],
     ] as const)(
       '%s %s: 401 without a token, 403 with a customer token',
       async (method, path) => {

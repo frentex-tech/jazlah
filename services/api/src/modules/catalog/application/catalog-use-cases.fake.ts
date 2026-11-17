@@ -1,3 +1,5 @@
+import { ListVendorIncompatibilitiesUseCase } from './list-vendor-incompatibilities.use-case';
+import { ListVendorPickerItemsUseCase } from './list-vendor-picker-items.use-case';
 import { InMemoryAuditLog } from '@infra/audit/in-memory-audit-log.fake';
 import type { TransactionRunner } from '@infra/database/transaction-runner';
 import { InMemoryCatalogMedia } from '../domain/fakes/in-memory-catalog-media.fake';
@@ -80,6 +82,11 @@ export function buildCatalogUseCases() {
     updateReferenceItem: new UpdateReferenceItemUseCase(lists, media),
     listReferenceItems: new ListReferenceItemsUseCase(lists, media),
     listPublicCategories: new ListPublicCategoriesUseCase(lists, media),
+    listVendorPickerItems: new ListVendorPickerItemsUseCase(lists),
+    listVendorIncompatibilities: new ListVendorIncompatibilitiesUseCase(
+      rules,
+      lists,
+    ),
     createIncompatibility: new CreateCuttingPackagingIncompatibilityUseCase(
       rules,
       lists,

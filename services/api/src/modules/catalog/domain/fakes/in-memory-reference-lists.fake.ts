@@ -98,6 +98,19 @@ export class InMemoryReferenceLists implements ReferenceListRepository {
     );
   }
 
+  listActive(list: ReferenceList): Promise<ReferenceItem[]> {
+    return Promise.resolve(
+      this.rows
+        .filter((row) => row.list === list && row.item.isActive)
+        .map((row) => row.item)
+        .sort(
+          (a, b) =>
+            a.createdAt.getTime() - b.createdAt.getTime() ||
+            a.id.localeCompare(b.id),
+        ),
+    );
+  }
+
   findActiveIds(
     list: ReferenceList,
     ids: readonly string[],

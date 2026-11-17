@@ -116,6 +116,18 @@ export class PrismaReferenceListRepository implements ReferenceListRepository {
     }
   }
 
+  async listActive(list: ReferenceList): Promise<ReferenceItem[]> {
+    try {
+      const rows = await this.table(list).findMany({
+        where: { isActive: true },
+        orderBy: [{ createdAt: 'asc' }, { id: 'asc' }],
+      });
+      return rows.map(toReferenceItem);
+    } catch (error) {
+      mapPrismaError(error);
+    }
+  }
+
   async findActiveIds(
     list: ReferenceList,
     ids: readonly string[],
