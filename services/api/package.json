@@ -28,6 +28,7 @@
     "admin:create": "node -r ts-node/register/transpile-only -r tsconfig-paths/register src/create-admin.ts",
     "vendor:create-platform": "node -r ts-node/register/transpile-only -r tsconfig-paths/register src/create-platform-vendor.ts",
     "openapi:check": "node -r ts-node/register/transpile-only -r tsconfig-paths/register src/generate-openapi.ts check",
+    "docs:check": "node scripts/check-frontend-docs.mjs",
     "infra:up": "docker compose up -d --wait",
     "infra:down": "docker compose down",
     "db:migrate": "prisma migrate dev",
