@@ -16,6 +16,8 @@ export type SignedInBody = {
     organisationId: string | null;
     sessionId: string;
   };
+  /** A customer's: whether the profile has a full name; null for staff. */
+  profileComplete: boolean | null;
 };
 
 /**
@@ -63,6 +65,14 @@ export class AuthClient {
     return accessToken === undefined
       ? call
       : call.set('Authorization', `Bearer ${accessToken}`);
+  }
+
+  /** `DELETE /v1/customer/me`, with an optional `?reason=`. */
+  deleteAccount(accessToken: string, reason?: string): request.Test {
+    const call = request(this.app.getHttpServer())
+      .delete('/v1/customer/me')
+      .set('Authorization', `Bearer ${accessToken}`);
+    return reason === undefined ? call : call.query({ reason });
   }
 
   logoutAll(audience: string, accessToken: string): request.Test {

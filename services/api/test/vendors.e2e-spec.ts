@@ -256,6 +256,60 @@ describe('Vendors (e2e)', () => {
     );
   });
 
+  describe("the applicant's account deleted", () => {
+    const deleteAccount = (user: TestUser) =>
+      journey.http.delete('/v1/customer/me').set(...bearer(user));
+
+    it('removes a pending application, and marks its documents for the media cleanup', async () => {
+      const { customer, applicationId } = await journey.pendingApplication();
+      const documentIds = (
+        await prisma.vendorApplicationDocument.findMany({
+          where: { applicationId },
+          select: { mediaId: true },
+        })
+      ).map((document) => document.mediaId);
+
+      await deleteAccount(customer).expect(204);
+
+      expect(
+        await prisma.vendorApplication.count({ where: { id: applicationId } }),
+      ).toBe(0);
+      expect(
+        await prisma.media.findMany({
+          where: { id: { in: documentIds } },
+          select: { status: true, rejectionReason: true },
+        }),
+      ).toEqual(
+        documentIds.map(() => ({
+          status: 'rejected',
+          rejectionReason: 'OWNER_DELETED',
+        })),
+      );
+    });
+
+    it("keeps an approved application and its documents: the vendor's business record", async () => {
+      const { owner, applicationId, vendorId } = await journey.approvedVendor();
+      await prisma.userAccess.updateMany({
+        where: { userId: owner.userId },
+        data: { deactivatedAt: new Date() },
+      });
+      clock.advanceSeconds(61);
+      const customer = await journey.signIn(owner.phone, 'customer');
+
+      await deleteAccount(customer).expect(204);
+
+      const application = await prisma.vendorApplication.findUniqueOrThrow({
+        where: { id: applicationId },
+        include: { documents: { include: { media: true } } },
+      });
+      expect(application.status).toBe('approved');
+      expect(
+        application.documents.map((document) => document.media.status),
+      ).toEqual(application.documents.map(() => 'ready'));
+      expect(await prisma.vendor.count({ where: { id: vendorId } })).toBe(1);
+    });
+  });
+
   describe('an admin reviewing applications', () => {
     it('lists and reads applications, with a link to each document', async () => {
       const { applicationId } = await journey.pendingApplication();
