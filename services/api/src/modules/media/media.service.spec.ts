@@ -745,6 +745,84 @@ describe('MediaService', () => {
     });
   });
 
+  describe('discardOwnFiles', () => {
+    const OWNER = '00000000-0000-4000-8000-0000000000a1';
+    const OTHER = '00000000-0000-4000-8000-0000000000a2';
+    const document = (context: Context, ownerId: string) =>
+      uploaded(context, file(PDF), {
+        purpose: 'vendor.document',
+        contentType: 'application/pdf',
+        ownerId,
+      });
+
+    it("marks the owner's files of the purpose, except those kept, and the cleanup removes their objects and rows", async () => {
+      const context = setup();
+      const ready = await document(context, OWNER);
+      await context.service.confirmUpload(ready.mediaId);
+      const pending = await document(context, OWNER);
+      const kept = await document(context, OWNER);
+      await context.service.confirmUpload(kept.mediaId);
+      const others = await document(context, OTHER);
+      const image = await uploaded(context, file(JPEG), { ownerId: OWNER });
+      const readyCopy = finalLocation(context, ready.mediaId);
+
+      await expect(
+        context.service.discardOwnFiles(OWNER, 'vendor.document', [
+          kept.mediaId,
+        ]),
+      ).resolves.toBe(2);
+      for (const marked of [ready, pending]) {
+        expect(context.client.rows.get(marked.mediaId)).toMatchObject({
+          status: 'rejected',
+          rejectionReason: 'OWNER_DELETED',
+        });
+      }
+      // Nothing is removed from storage until the cleanup runs (after the commit).
+      expect(context.storage.hasObject(readyCopy)).toBe(true);
+
+      await expect(context.service.removeExpiredUploads()).resolves.toBe(2);
+
+      expect(context.client.rows.has(ready.mediaId)).toBe(false);
+      expect(context.client.rows.has(pending.mediaId)).toBe(false);
+      expect(context.storage.hasObject(readyCopy)).toBe(false);
+      expect(context.storage.hasObject(pending.staging)).toBe(false);
+      expect(context.client.rows.get(kept.mediaId)?.status).toBe('ready');
+      expect(context.client.rows.get(others.mediaId)?.status).toBe('pending');
+      expect(context.client.rows.get(image.mediaId)?.status).toBe('pending');
+    });
+
+    it('also marks a file that failed its checks, so its row and file name go', async () => {
+      const context = setup();
+      const failed = await uploaded(context, file(EXE), {
+        purpose: 'vendor.document',
+        contentType: 'application/pdf',
+        ownerId: OWNER,
+      });
+      await errorOf(context.service.confirmUpload(failed.mediaId));
+      expect(context.client.rows.get(failed.mediaId)?.status).toBe('rejected');
+
+      await expect(
+        context.service.discardOwnFiles(OWNER, 'vendor.document', []),
+      ).resolves.toBe(1);
+      await context.service.removeExpiredUploads();
+
+      expect(context.client.rows.has(failed.mediaId)).toBe(false);
+    });
+
+    it('turns a later confirmation of a marked upload into MEDIA_UPLOAD_REJECTED', async () => {
+      const context = setup();
+      const pending = await document(context, OWNER);
+      await context.service.discardOwnFiles(OWNER, 'vendor.document', []);
+
+      const error = await errorOf(
+        context.service.confirmUpload(pending.mediaId),
+      );
+
+      expect(error.code).toBe(ErrorCode.MEDIA_UPLOAD_REJECTED);
+      expect(error.details).toEqual({ reason: 'OWNER_DELETED' });
+    });
+  });
+
   describe('removeExpiredUploads', () => {
     it('removes only expired pending uploads: object and row', async () => {
       const context = setup();
