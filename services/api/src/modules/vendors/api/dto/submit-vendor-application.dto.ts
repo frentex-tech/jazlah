@@ -13,7 +13,7 @@ import {
 } from 'class-validator';
 import { VENDOR_APPLICATION_DOCUMENT_KINDS } from '../../domain/vendor-application-document-kinds.constants';
 import { VENDOR_APPLICATION_DOCUMENT_LIMITS } from '../../domain/vendor-application-document-limits.constants';
-import { GeoPointDto } from './geo-point.dto';
+import { GeoPointDto } from '@common/dto/geo-point.dto';
 import { IsSaudiIban } from './is-saudi-iban.decorator';
 import { LocalizedDescriptionDto } from '@common/dto/localized-description.dto';
 import { LocalizedNameDto } from '@common/dto/localized-name.dto';

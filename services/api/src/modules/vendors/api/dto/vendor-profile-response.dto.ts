@@ -1,5 +1,5 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { GeoPointDto } from './geo-point.dto';
+import { GeoPointDto } from '@common/dto/geo-point.dto';
 import { PublicVendorResponseDto } from './public-vendor-response.dto';
 
 /**

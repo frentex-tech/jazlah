@@ -25,4 +25,11 @@ export class MediaServiceVendorMedia implements VendorMedia {
   link(id: string): Promise<FileLink> {
     return this.media.getDownloadLink(id);
   }
+
+  async discardDocumentsOf(
+    ownerId: string,
+    keep: readonly string[],
+  ): Promise<void> {
+    await this.media.discardOwnFiles(ownerId, 'vendor.document', keep);
+  }
 }

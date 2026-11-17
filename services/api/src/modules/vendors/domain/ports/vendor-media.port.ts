@@ -14,4 +14,11 @@ export interface VendorMedia {
 
   /** Where a ready file is read (a document, for the admin reviewing an application). */
   link(id: string): Promise<FileLink>;
+
+  /**
+   * Marks every `vendor.document` file of `ownerId` for removal, except the ids in
+   * `keep` (an account deletion). Database only, inside the caller's transaction; the
+   * media cleanup job deletes the objects after the commit.
+   */
+  discardDocumentsOf(ownerId: string, keep: readonly string[]): Promise<void>;
 }

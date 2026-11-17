@@ -45,6 +45,25 @@ describe('SubmitVendorApplicationUseCase', () => {
     expect(kit.applications.rows).toHaveLength(1);
   });
 
+  it("holds the applicant's account while it stores the application", async () => {
+    const kit = buildVendorsUseCases();
+
+    await kit.submitApplication.execute(applicationInput(kit));
+
+    expect(kit.accounts.held).toEqual([APPLICANT]);
+  });
+
+  it('refuses a deleted account with UNAUTHORIZED, storing nothing', async () => {
+    const kit = buildVendorsUseCases();
+    kit.accounts.delete(APPLICANT);
+
+    expect(
+      await codeOf(kit.submitApplication.execute(applicationInput(kit))),
+    ).toBe(ErrorCode.UNAUTHORIZED);
+    expect(kit.applications.rows).toEqual([]);
+    expect(kit.cipher.sealed).toEqual([]);
+  });
+
   it('refuses an applicant who already works for a vendor with VENDOR_ACCESS_ALREADY_HELD, storing nothing', async () => {
     const kit = buildVendorsUseCases();
     await kit.access.grant(APPLICANT, '00000000-0000-4000-8000-0000000000a1');

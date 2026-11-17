@@ -135,6 +135,31 @@ export class PrismaVendorApplicationRepository implements VendorApplicationRepos
   }
 
   /** The conditional update from pending; null when it matched nothing. */
+  async deleteUnapprovedOf(applicantId: string): Promise<number> {
+    try {
+      // The documents' rows go with them (ON DELETE CASCADE); their files are the
+      // caller's to discard.
+      const { count } = await this.db.client.vendorApplication.deleteMany({
+        where: { applicantId, status: { in: ['pending', 'rejected'] } },
+      });
+      return count;
+    } catch (error) {
+      mapPrismaError(error);
+    }
+  }
+
+  async approvedDocumentMediaIdsOf(applicantId: string): Promise<string[]> {
+    try {
+      const rows = await this.db.client.vendorApplicationDocument.findMany({
+        where: { application: { applicantId, status: 'approved' } },
+        select: { mediaId: true },
+      });
+      return rows.map((row) => row.mediaId);
+    } catch (error) {
+      mapPrismaError(error);
+    }
+  }
+
   private async review(
     id: string,
     data: {

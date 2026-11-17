@@ -47,4 +47,13 @@ export interface VendorApplicationRepository {
     reviewerId: string,
     reason: string,
   ): Promise<VendorApplication | null>;
+
+  /**
+   * Deletes the applicant's pending and rejected applications with their documents'
+   * rows (an account deletion); approved ones stay. Returns how many were deleted.
+   */
+  deleteUnapprovedOf(applicantId: string): Promise<number>;
+
+  /** The media ids of the documents of the applicant's approved applications. */
+  approvedDocumentMediaIdsOf(applicantId: string): Promise<string[]>;
 }
