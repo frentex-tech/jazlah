@@ -34,6 +34,8 @@ enum MediaRejectionReason {
   CONTENT_TYPE_MISMATCH
   /// It was not confirmed in time; the cleanup job deletes the object and then the row.
   EXPIRED
+  /// Its owner deleted their account; the cleanup job deletes the object and then the row.
+  OWNER_DELETED
 
   @@map("media_rejection_reason")
 }

@@ -13,18 +13,27 @@ enum Audience {
 }
 
 /// One person, identified by a Saudi mobile number. Created on the first successful
-/// customer sign-in, or when staff access is granted to a phone not seen before.
+/// customer sign-in, or when staff access is granted to a phone not seen before. A
+/// deleted account stays as a tombstone, with no phone and `deleted_at` set, so the rows
+/// that refer to it (consent history, audit entries, reviews) keep a valid id while the
+/// phone is free for a new user (check constraint `users_deleted_check`).
 model User {
   id         String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  /// E.164 (`+9665XXXXXXXX`).
-  phone      String
+  /// E.164 (`+9665XXXXXXXX`). Nullable: null exactly when the account was deleted.
+  phone      String?
   /// Nullable: null while the user is enabled. A disabled user cannot sign in or refresh.
   disabledAt DateTime? @map("disabled_at") @db.Timestamptz(3)
+  /// Nullable: null unless the account was deleted (DELETE /v1/customer/me).
+  deletedAt  DateTime? @map("deleted_at") @db.Timestamptz(3)
   createdAt  DateTime  @default(now()) @map("created_at") @db.Timestamptz(3)
   updatedAt  DateTime  @updatedAt @map("updated_at") @db.Timestamptz(3)
 
   access   UserAccess[]
   sessions AuthSession[]
+
+  customerProfile   CustomerProfile?
+  customerAddresses CustomerAddress[]
+  consentRecords    ConsentRecord[]
 
   vendorApplications         VendorApplication[]      @relation("VendorApplicant")
   reviewedVendorApplications VendorApplication[]      @relation("VendorApplicationReviewer")
