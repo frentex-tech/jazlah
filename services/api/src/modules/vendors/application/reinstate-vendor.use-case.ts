@@ -14,8 +14,8 @@ import {
 import { VENDOR_AUDIT } from '../domain/vendor-audit-actions.constants';
 import { VendorStatusMachine } from '../domain/vendor-status.state-machine';
 import type { VendorActionInput } from './vendor-action-input.type';
-import type { VendorWithLogo } from './vendor-with-logo.type';
-import { withLogoUrls } from './with-logo-urls';
+import type { VendorWithImages } from './vendor-with-images.type';
+import { withImageUrls } from './with-image-urls';
 
 /**
  * An admin reinstates a suspended vendor. One transaction: the conditional update from
@@ -33,7 +33,7 @@ export class ReinstateVendorUseCase {
     private readonly transactions: Pick<TransactionRunner, 'run'>,
   ) {}
 
-  async execute(input: VendorActionInput): Promise<VendorWithLogo> {
+  async execute(input: VendorActionInput): Promise<VendorWithImages> {
     const vendor = await this.transactions.run(async () => {
       const found = await this.vendors.findById(input.vendorId);
       if (found === null) {
@@ -53,10 +53,10 @@ export class ReinstateVendorUseCase {
       });
       return updated;
     });
-    const [withLogo] = await withLogoUrls(this.media, [vendor]);
-    if (withLogo === undefined) {
-      throw new Error('withLogoUrls returned no vendor');
+    const [withImages] = await withImageUrls(this.media, [vendor]);
+    if (withImages === undefined) {
+      throw new Error('withImageUrls returned no vendor');
     }
-    return withLogo;
+    return withImages;
   }
 }

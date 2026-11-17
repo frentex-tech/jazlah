@@ -8,7 +8,7 @@ export class VendorApplicationDocumentDto {
   @ApiProperty({
     enum: VENDOR_APPLICATION_DOCUMENT_KINDS,
     description:
-      'What the document shows: commercial_registration, health_certificate or facility_photo.',
+      'What the document shows: commercial_registration, health_certificate, facility_photo, municipality_licence (optional) or national_id (optional).',
     example: 'commercial_registration',
   })
   @IsIn(VENDOR_APPLICATION_DOCUMENT_KINDS)

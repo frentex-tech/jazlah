@@ -17,7 +17,17 @@ export const UPLOAD_PURPOSES = {
     contentTypes: ['image/jpeg', 'image/png', 'image/webp'],
     maxSizeBytes: 5 * MEGABYTE,
   },
+  'catalog.category-image': {
+    visibility: 'public',
+    contentTypes: ['image/jpeg', 'image/png', 'image/webp'],
+    maxSizeBytes: 2 * MEGABYTE,
+  },
   'vendor.logo': {
+    visibility: 'public',
+    contentTypes: ['image/jpeg', 'image/png', 'image/webp'],
+    maxSizeBytes: 2 * MEGABYTE,
+  },
+  'vendor.cover': {
     visibility: 'public',
     contentTypes: ['image/jpeg', 'image/png', 'image/webp'],
     maxSizeBytes: 2 * MEGABYTE,

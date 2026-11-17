@@ -18,7 +18,10 @@ const CONTENT: ProductContent = {
     { id: null, approxWeightGrams: 8_000, price: Money.of(95_000), tag: null },
   ],
   cuttings: [{ cuttingStyleId: CUT, extraPrice: Money.zero() }],
-  packagings: ['trays', 'vacuum'],
+  packagings: [
+    { packaging: 'trays', extraPrice: Money.zero() },
+    { packaging: 'vacuum', extraPrice: Money.of(500) },
+  ],
   exclusionItemIds: [],
 };
 
@@ -48,7 +51,7 @@ const LIVE: ProductDetails = {
       extraPrice: Money.of(1_500),
     },
   ],
-  packagings: ['trays'],
+  packagings: [{ packaging: 'trays', extraPrice: Money.of(300) }],
   exclusions: [],
   minPrice: Money.of(95_000),
   rejectionReason: null,
@@ -158,7 +161,7 @@ describe('Product', () => {
       ).toBeNull();
     });
 
-    it('refuses a size id or a cutting style named twice, on each repeat', () => {
+    it('refuses a size id, a cutting style or a packaging named twice, on each repeat', () => {
       const own = { ...CONTENT.sizes[0], id: SIZE };
       expect(
         errorOf(() =>
@@ -170,6 +173,10 @@ describe('Product', () => {
               { cuttingStyleId: OTHER_CUT, extraPrice: Money.zero() },
               { cuttingStyleId: CUT, extraPrice: Money.of(1) },
             ],
+            packagings: [
+              { packaging: 'trays', extraPrice: Money.zero() },
+              { packaging: 'trays', extraPrice: Money.of(1) },
+            ],
           }),
         ),
       ).toMatchObject({
@@ -180,6 +187,7 @@ describe('Product', () => {
             field: 'cuttings.2.cuttingStyleId',
             constraints: ['isNotRepeated'],
           },
+          { field: 'packagings.1.packaging', constraints: ['isNotRepeated'] },
         ],
       });
     });
@@ -195,12 +203,16 @@ describe('Product', () => {
               { cuttingStyleId: CUT, extraPrice: Money.zero() },
               { cuttingStyleId: OTHER_CUT, extraPrice: Money.zero() },
             ],
+            packagings: [
+              { packaging: 'trays', extraPrice: Money.zero() },
+              { packaging: 'vacuum', extraPrice: Money.of(500) },
+            ],
           }),
         ),
       ).toBeNull();
     });
 
-    it('refuses a size or a cutting style named twice, on each repeat', () => {
+    it('refuses a size, a cutting style or a packaging named twice, on each repeat', () => {
       expect(
         errorOf(() =>
           Product.assertNoRepeatedPriceChanges({
@@ -212,6 +224,10 @@ describe('Product', () => {
               { cuttingStyleId: CUT, extraPrice: Money.zero() },
               { cuttingStyleId: CUT, extraPrice: Money.of(1) },
             ],
+            packagings: [
+              { packaging: 'bags', extraPrice: Money.zero() },
+              { packaging: 'bags', extraPrice: Money.of(1) },
+            ],
           }),
         ),
       ).toMatchObject({
@@ -222,6 +238,7 @@ describe('Product', () => {
             field: 'cuttings.1.cuttingStyleId',
             constraints: ['isNotRepeated'],
           },
+          { field: 'packagings.1.packaging', constraints: ['isNotRepeated'] },
         ],
       });
     });
@@ -248,12 +265,27 @@ describe('Product', () => {
       ).toBeNull();
     });
 
-    it('refuses a changed price of an existing size or cutting style', () => {
+    it('accepts a new packaging at any price beside a kept one', () => {
+      const content: ProductContent = {
+        ...Product.contentOf(LIVE),
+        packagings: [
+          { packaging: 'trays', extraPrice: Money.of(300) },
+          { packaging: 'vacuum', extraPrice: Money.of(900) },
+        ],
+      };
+
+      expect(
+        errorOf(() => Product.assertKeepsLivePrices(content, LIVE)),
+      ).toBeNull();
+    });
+
+    it('refuses a changed price of an existing size, cutting style or packaging', () => {
       const live = Product.contentOf(LIVE);
       const content: ProductContent = {
         ...live,
         sizes: [{ ...live.sizes[0], price: Money.of(90_000) }],
         cuttings: [{ cuttingStyleId: CUT, extraPrice: Money.zero() }],
+        packagings: [{ packaging: 'trays', extraPrice: Money.of(301) }],
       };
 
       expect(
@@ -264,6 +296,10 @@ describe('Product', () => {
           { field: 'sizes.0.priceHalalas', constraints: ['isLivePrice'] },
           {
             field: 'cuttings.0.extraPriceHalalas',
+            constraints: ['isLivePrice'],
+          },
+          {
+            field: 'packagings.0.extraPriceHalalas',
             constraints: ['isLivePrice'],
           },
         ],

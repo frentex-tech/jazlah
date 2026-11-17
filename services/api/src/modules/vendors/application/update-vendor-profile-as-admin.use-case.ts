@@ -12,15 +12,16 @@ import {
   type VendorRepository,
 } from '../domain/ports/vendor.repository.port';
 import { VENDOR_AUDIT } from '../domain/vendor-audit-actions.constants';
-import { assertUsableLogo } from './assert-usable-logo';
+import { assertUsableVendorImages } from './assert-usable-vendor-images';
 import type { UpdateVendorProfileAsAdminInput } from './update-vendor-profile-as-admin-input.type';
-import type { VendorWithLogo } from './vendor-with-logo.type';
-import { withLogoUrls } from './with-logo-urls';
+import type { VendorWithImages } from './vendor-with-images.type';
+import { withImageUrls } from './with-image-urls';
 
 /**
- * An admin changes any vendor's logo and descriptions, with the rules of the vendor's
- * own profile: a new logo is a ready `vendor.logo` file the admin uploaded
- * (assertUsableLogo). The platform vendor has no owner, so this is how its profile is
+ * An admin changes any vendor's profile: what the vendor may change (logo, cover photo,
+ * descriptions, contact phone and email, VAT number), with the same rules, and the city,
+ * which only an admin sets. A new logo or cover is a ready file of its purpose the admin
+ * uploaded (assertUsableVendorImages). The platform vendor has no owner, so this is how its profile is
  * set. One transaction: the update (NOT_FOUND for an unknown vendor) and the audit
  * entry, which names the fields given; a body that gives none changes and records
  * nothing.
@@ -38,11 +39,8 @@ export class UpdateVendorProfileAsAdminUseCase {
 
   async execute(
     input: UpdateVendorProfileAsAdminInput,
-  ): Promise<VendorWithLogo> {
-    const logoId = input.changes.logoMediaId;
-    if (logoId !== undefined && logoId !== null) {
-      await assertUsableLogo(this.media, logoId, input.actorId);
-    }
+  ): Promise<VendorWithImages> {
+    await assertUsableVendorImages(this.media, input.changes, input.actorId);
     const fields = Object.keys(input.changes).sort();
     const vendor = await this.transactions.run(async () => {
       const updated =
@@ -62,10 +60,10 @@ export class UpdateVendorProfileAsAdminUseCase {
       }
       return updated;
     });
-    const [withLogo] = await withLogoUrls(this.media, [vendor]);
-    if (withLogo === undefined) {
-      throw new Error('withLogoUrls returned no vendor');
+    const [withImages] = await withImageUrls(this.media, [vendor]);
+    if (withImages === undefined) {
+      throw new Error('withImageUrls returned no vendor');
     }
-    return withLogo;
+    return withImages;
   }
 }

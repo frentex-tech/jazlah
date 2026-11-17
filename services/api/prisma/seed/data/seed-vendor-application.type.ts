@@ -15,6 +15,10 @@ export type SeedVendorApplication = Readonly<{
   descriptionEn: string | null;
   /** 10 digits. */
   commercialRegistrationNumber: string;
+  /** Fictitious: 15 digits, starting and ending with 3; null when the applicant gave none. */
+  vatNumber: string | null;
+  /** The city, in Arabic. */
+  city: string;
   accountHolderName: string;
   latitude: number;
   longitude: number;

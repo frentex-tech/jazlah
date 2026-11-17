@@ -11,7 +11,9 @@ import type { VendorRepository } from '../domain/ports/vendor.repository.port';
 import type { Vendor } from '../domain/vendor.entity';
 import type { VendorApplication } from '../domain/vendor-application.entity';
 import type { VendorProfileChanges } from '../domain/vendor-profile-changes.type';
+import type { VendorListFilter } from '../domain/vendor-list-filter.type';
 import type { VendorStatus } from '../domain/vendor-status.type';
+import { businessSearchCondition } from './business-search-condition';
 import { toVendor } from './vendor.mapper';
 
 /**
@@ -47,6 +49,8 @@ export class PrismaVendorRepository implements VendorRepository {
             descriptionEn: details.description.en,
             commissionBasisPoints,
             commercialRegistrationNumber: details.commercialRegistrationNumber,
+            vatNumber: details.vatNumber,
+            city: details.city,
             ibanEncrypted: sealed.ibanEncrypted,
             ibanKeyId: sealed.ibanKeyId,
             ibanLast4: sealed.ibanLast4,
@@ -140,12 +144,17 @@ export class PrismaVendorRepository implements VendorRepository {
   }
 
   async list(
-    filter: Readonly<{ status?: VendorStatus }>,
+    filter: VendorListFilter,
     page: PageRequest,
   ): Promise<Page<Vendor>> {
     try {
       const rows = await this.db.client.vendor.findMany({
-        where: { ...filter, ...keysetAfter(page.cursor) },
+        where: {
+          ...(filter.status === undefined ? {} : { status: filter.status }),
+          ...(filter.city === undefined ? {} : { city: filter.city }),
+          ...(filter.q === undefined ? {} : businessSearchCondition(filter.q)),
+          ...keysetAfter(page.cursor),
+        },
         orderBy: [...KEYSET_ORDER],
         take: page.limit + 1,
       });
@@ -210,14 +219,11 @@ export class PrismaVendorRepository implements VendorRepository {
       status?: VendorStatus;
       commissionBasisPoints?: number;
     },
-    data: {
+    data: VendorProfileChanges & {
       status?: VendorStatus;
       suspendedAt?: Date | null;
       suspensionReason?: string | null;
       commissionBasisPoints?: number;
-      logoMediaId?: string | null;
-      descriptionAr?: string | null;
-      descriptionEn?: string | null;
     },
   ): Promise<Vendor | null> {
     try {

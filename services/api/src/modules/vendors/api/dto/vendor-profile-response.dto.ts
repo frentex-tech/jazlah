@@ -4,8 +4,8 @@ import { COMMISSION_BASIS_POINTS } from '../../domain/commission-basis-points.co
 import { PublicVendorResponseDto } from './public-vendor-response.dto';
 
 /**
- * A vendor's own profile: what anyone sees, plus its commission and its business and
- * bank details (the IBAN masked). The business fields are null only for the platform
+ * A vendor's own profile: what anyone sees, plus its commission, its contact details,
+ * and its business and bank details (the IBAN masked). The business fields are null only for the platform
  * vendor.
  */
 export class VendorProfileResponseDto extends PublicVendorResponseDto {
@@ -26,6 +26,33 @@ export class VendorProfileResponseDto extends PublicVendorResponseDto {
     example: '1010123456',
   })
   commercialRegistrationNumber!: string | null;
+
+  @ApiProperty({
+    type: String,
+    nullable: true,
+    description:
+      'The VAT registration number, 15 Latin digits starting and ending with 3; null when none was given. Not public.',
+    example: '310123456700003',
+  })
+  vatNumber!: string | null;
+
+  @ApiProperty({
+    type: String,
+    nullable: true,
+    description:
+      'The store’s contact number for the platform, in E.164 (a Saudi mobile +9665… or landline +9661…); null until set. Not public.',
+    example: '+966112345678',
+  })
+  contactPhone!: string | null;
+
+  @ApiProperty({
+    type: String,
+    nullable: true,
+    description:
+      'The store’s contact email for the platform, lowercase and not verified; null until set. Not public.',
+    example: 'contact@example.com',
+  })
+  contactEmail!: string | null;
 
   @ApiProperty({
     type: String,

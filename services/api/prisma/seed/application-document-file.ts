@@ -10,6 +10,8 @@ const DOCUMENT_TITLES: Readonly<Record<SeedDocumentKind, string>> = {
   commercial_registration: 'Commercial registration',
   health_certificate: 'Health certificate',
   facility_photo: 'Facility photo',
+  municipality_licence: 'Municipality licence',
+  national_id: 'National ID',
 };
 
 /**

@@ -9,6 +9,7 @@ import { UsersService } from '@modules/users';
 import { AuthClient, type SignedInBody } from './support/auth-client';
 import { createHttpApp } from './support/create-http-app';
 import { holdRowLock } from './support/row-lock';
+import { sent } from './support/sent-request';
 import { testPhone } from './support/test-phone';
 
 /** An address as the API answers it (dates as JSON strings). */
@@ -27,18 +28,6 @@ type AddressBody = {
 
 const errorOf = (res: Response): ErrorResponseBody =>
   res.body as ErrorResponseBody;
-
-/** A request sent now, its response read later; `done` once it has answered. */
-function sent(test: Test): { done: boolean; response: Promise<Response> } {
-  const tracked = {
-    done: false,
-    response: test.then((res) => {
-      tracked.done = true;
-      return res;
-    }),
-  };
-  return tracked;
-}
 
 /**
  * The customer's profile, marketing consent and saved addresses end to end, against the

@@ -8,6 +8,7 @@ export function toReferenceItem(row: ReferenceRow): ReferenceItem {
     name: { ar: row.nameAr, en: row.nameEn },
     isActive: row.isActive,
     sortOrder: row.sortOrder ?? null,
+    imageMediaId: row.imageMediaId ?? null,
     createdAt: row.createdAt,
   };
 }

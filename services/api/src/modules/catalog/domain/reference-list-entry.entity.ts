@@ -20,4 +20,20 @@ export class ReferenceListEntry {
       });
     }
   }
+
+  /**
+   * Only categories have an image; on another list `imageMediaId` (even null) would be
+   * dropped silently, so it is refused: VALIDATION_FAILED on `imageMediaId` (constraint
+   * `isCategoryList`).
+   */
+  static assertImageable(
+    list: ReferenceList,
+    imageMediaId: string | null | undefined,
+  ): void {
+    if (imageMediaId !== undefined && list !== 'categories') {
+      throw new AppError(ErrorCode.VALIDATION_FAILED, {
+        details: [{ field: 'imageMediaId', constraints: ['isCategoryList'] }],
+      });
+    }
+  }
 }

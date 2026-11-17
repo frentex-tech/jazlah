@@ -5,6 +5,11 @@ import type { Money } from '@common/money/money';
  * to the lowest size price, both ends included.
  */
 export type PublicProductFilter = Readonly<{
+  /**
+   * Text the name (Arabic or English) must contain, after search normalisation of both
+   * (diacritics, tatweel, alef forms, alef maqsura, teh marbuta, case).
+   */
+  text?: string;
   categoryId?: string;
   vendorId?: string;
   meatTypeId?: string;

@@ -80,7 +80,11 @@ describe('ApproveProductChangeRequestUseCase', () => {
       scope: { kind: 'vendor', vendorId: VENDOR },
       actorId: VENDOR_USER,
       productId: live.product.id,
-      changes: { sizes: [{ sizeId, price: Money.of(99_000) }], cuttings: [] },
+      changes: {
+        sizes: [{ sizeId, price: Money.of(99_000) }],
+        cuttings: [],
+        packagings: [],
+      },
     });
 
     const view = await kit.approveChangeRequest.execute({
@@ -89,6 +93,29 @@ describe('ApproveProductChangeRequestUseCase', () => {
     });
 
     expect(view.product.sizes[0]?.price.halalas).toBe(99_000);
+  });
+
+  it('keeps a packaging price changed after the request was made', async () => {
+    const kit = buildCatalogUseCases();
+    seedCatalog(kit);
+    const { live, request } = await withPendingEdit(kit);
+    await kit.changePrices.execute({
+      scope: { kind: 'vendor', vendorId: VENDOR },
+      actorId: VENDOR_USER,
+      productId: live.product.id,
+      changes: {
+        sizes: [],
+        cuttings: [],
+        packagings: [{ packaging: 'trays', extraPrice: Money.of(800) }],
+      },
+    });
+
+    const view = await kit.approveChangeRequest.execute({
+      reviewerId: ADMIN,
+      requestId: request.id,
+    });
+
+    expect(view.product.packagings[0]?.extraPrice.halalas).toBe(800);
   });
 
   it('answers NOT_FOUND for an unknown or already decided request', async () => {

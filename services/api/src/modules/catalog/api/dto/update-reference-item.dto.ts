@@ -4,6 +4,7 @@ import {
   IsBoolean,
   IsInt,
   IsOptional,
+  IsUUID,
   Max,
   Min,
   ValidateNested,
@@ -44,4 +45,16 @@ export class UpdateReferenceItemDto {
   @Min(0)
   @Max(MAX_SORT_ORDER)
   sortOrder?: number;
+
+  @ApiPropertyOptional({
+    type: String,
+    format: 'uuid',
+    nullable: true,
+    example: '7f3a2c1e-0b9d-4e5f-8a6b-1c2d3e4f5a6b',
+    description:
+      'Categories only: the new image, the id (UUID) of a `catalog.category-image` file the signed-in admin uploaded and confirmed (MEDIA_NOT_FOUND, MEDIA_NOT_READY otherwise); null removes the image; left out: unchanged. Another list refuses it, even null (VALIDATION_FAILED `isCategoryList`).',
+  })
+  @IsOptional()
+  @IsUUID()
+  imageMediaId?: string | null;
 }

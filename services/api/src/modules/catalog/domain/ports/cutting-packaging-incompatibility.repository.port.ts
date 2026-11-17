@@ -19,6 +19,9 @@ export interface CuttingPackagingIncompatibilityRepository {
   /** Newest first. */
   list(page: PageRequest): Promise<Page<CuttingPackagingIncompatibility>>;
 
+  /** Every rule, oldest first (`created_at`, then `id`): a short global list, whole. */
+  listAll(): Promise<CuttingPackagingIncompatibility[]>;
+
   /** Removes a rule; false when none has this id. */
   delete(id: string): Promise<boolean>;
 

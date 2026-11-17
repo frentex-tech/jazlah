@@ -21,7 +21,10 @@ const CONTENT: ProductContent = {
     { id: null, approxWeightGrams: 4_000, price: Money.of(1), tag: null },
   ],
   cuttings: [{ cuttingStyleId: 'k1', extraPrice: Money.zero() }],
-  packagings: ['trays', 'none'],
+  packagings: [
+    { packaging: 'trays', extraPrice: Money.of(250) },
+    { packaging: 'none', extraPrice: Money.zero() },
+  ],
   exclusionItemIds: ['e1'],
 };
 
@@ -39,6 +42,30 @@ describe('product content mapper', () => {
       cuttings: [],
     });
     expect(read.cuttings[0]?.extraPrice.halalas).toBe(0);
+    expect(stored.packagings).toEqual([
+      { packaging: 'trays', extraPriceHalalas: 250 },
+      { packaging: 'none', extraPriceHalalas: 0 },
+    ]);
+    expect(read.packagings.map((option) => option.extraPrice.halalas)).toEqual([
+      250, 0,
+    ]);
+  });
+
+  it('reads a request stored before packagings had prices as price 0', () => {
+    const read = toProductContent({
+      ...toStoredProductContent(CONTENT),
+      packagings: ['trays', 'vacuum'],
+    });
+
+    expect(
+      read.packagings.map((option) => [
+        option.packaging,
+        option.extraPrice.halalas,
+      ]),
+    ).toEqual([
+      ['trays', 0],
+      ['vacuum', 0],
+    ]);
   });
 
   it('refuses a stored row that does not match', () => {

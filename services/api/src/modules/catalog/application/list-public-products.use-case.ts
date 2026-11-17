@@ -20,7 +20,8 @@ import { toProductCards } from './to-product-cards';
 /**
  * The public product list (FR-CAT-03), for anyone: published, available products of
  * active vendors in active categories, newest first, filtered by category, vendor, meat
- * type and lowest price, each with its vendor's name and cover image.
+ * type, lowest price and a text in the name, each with its vendor's name and cover
+ * image.
  */
 @Injectable()
 export class ListPublicProductsUseCase {

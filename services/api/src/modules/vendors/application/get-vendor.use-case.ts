@@ -9,8 +9,8 @@ import {
   VENDOR_REPOSITORY,
   type VendorRepository,
 } from '../domain/ports/vendor.repository.port';
-import type { VendorWithLogo } from './vendor-with-logo.type';
-import { withLogoUrls } from './with-logo-urls';
+import type { VendorWithImages } from './vendor-with-images.type';
+import { withImageUrls } from './with-image-urls';
 
 /**
  * One vendor by id, in any status: for an admin, by any id; for a vendor, only the
@@ -23,10 +23,10 @@ export class GetVendorUseCase {
     @Inject(VENDOR_MEDIA) private readonly media: VendorMedia,
   ) {}
 
-  async execute(vendorId: string): Promise<VendorWithLogo> {
+  async execute(vendorId: string): Promise<VendorWithImages> {
     const vendor = await this.vendors.findById(vendorId);
     const [found] =
-      vendor === null ? [] : await withLogoUrls(this.media, [vendor]);
+      vendor === null ? [] : await withImageUrls(this.media, [vendor]);
     if (found === undefined) {
       throw new AppError(ErrorCode.NOT_FOUND);
     }

@@ -17,7 +17,7 @@ sequenceDiagram
     ST-->>A: 204 No Content
     A->>API: POST /v1/<audience>/media/{mediaId}/confirm
     API-->>A: 200 {id, purpose, visibility, status: "ready", sizeBytes, contentType, ...}
-    A->>API: use the id: a product's imageMediaIds, the vendor's logoMediaId, an application's documents[].mediaId
+    A->>API: use the id: a product's imageMediaIds, the vendor's logoMediaId or coverMediaId, a category's imageMediaId, an application's documents[].mediaId
 ```
 
 1. **Request a ticket:** `POST /v1/vendor/media/uploads` (or the `customer` or `admin` one; see the table below) with:
@@ -40,7 +40,7 @@ sequenceDiagram
 3. **Confirm:** `POST /v1/vendor/media/{id}/confirm` (same audience; `{id}` is the `mediaId`), **only after the storage answered 204**, and before `confirmBy`.
    - The API checks that the file exists, is not empty, is within the size limit, and that its real type (read from its first bytes) is one the purpose accepts and equals the declared `contentType`.
    - The answer is the file, `status: "ready"`. Confirming again returns it again.
-4. **Use the id** in the endpoint that takes the file: a product's `imageMediaIds`, the vendor's `logoMediaId`, or a vendor application's `documents[].mediaId`. A file that is not confirmed yet is refused there with `MEDIA_NOT_READY`.
+4. **Use the id** in the endpoint that takes the file: a product's `imageMediaIds`, the vendor's `logoMediaId` or `coverMediaId`, a category's `imageMediaId`, or a vendor application's `documents[].mediaId`. A file that is not confirmed yet is refused there with `MEDIA_NOT_READY`.
 
 Read `expiresAt` and `confirmBy` from the response: they are server settings.
 
@@ -76,10 +76,12 @@ The storage must accept the browser's origin (CORS on the bucket). Locally, MinI
 |---|---|---|---|---|---|
 | `vendor.document` | customer (`POST /v1/customer/media/uploads`) | `application/pdf`, `image/jpeg`, `image/png` | 10 MiB | private | a vendor application's `documents[].mediaId` |
 | `vendor.logo` | vendor (`POST /v1/vendor/media/uploads`), admin (`POST /v1/admin/media/uploads`) | `image/jpeg`, `image/png`, `image/webp` | 2 MiB | public | the vendor profile's `logoMediaId` |
+| `vendor.cover` | vendor (`POST /v1/vendor/media/uploads`), admin (`POST /v1/admin/media/uploads`) | `image/jpeg`, `image/png`, `image/webp` | 2 MiB | public | the vendor profile's `coverMediaId` |
+| `catalog.category-image` | admin (`POST /v1/admin/media/uploads`) | `image/jpeg`, `image/png`, `image/webp` | 2 MiB | public | a category's `imageMediaId` |
 | `catalog.product-image` | vendor, admin | `image/jpeg`, `image/png`, `image/webp` | 5 MiB | public | a product's `imageMediaIds` |
 
 - A purpose not listed for the audience is `VALIDATION_FAILED`.
-- **Public** files have a stable URL, returned by the endpoints that show them (`logoUrl`, a product's `images[].url`).
+- **Public** files have a stable URL, returned by the endpoints that show them (`logoUrl`, `coverUrl`, a category's `imageUrl`, a product's `images[].url`).
 - **Private** files (application documents) are read only through short-lived links the API gives to admins (see [vendors.md](vendors.md)).
 
 Check the type and the size in the app before requesting a ticket, so the user hears about it before uploading. Compress large photos on the device: 5 MiB is a ceiling, not a target.

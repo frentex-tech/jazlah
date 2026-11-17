@@ -6,9 +6,9 @@ import {
   type VendorApplicationRepository,
 } from '../domain/ports/vendor-application.repository.port';
 import type { VendorApplication } from '../domain/vendor-application.entity';
-import type { VendorApplicationStatus } from '../domain/vendor-application-status.type';
+import type { VendorApplicationListFilter } from '../domain/vendor-application-list-filter.type';
 
-/** The applications, newest first, optionally of one status, for admins. */
+/** The applications, newest first, optionally narrowed by status and search, for admins. */
 @Injectable()
 export class ListVendorApplicationsUseCase {
   constructor(
@@ -17,7 +17,7 @@ export class ListVendorApplicationsUseCase {
   ) {}
 
   async execute(
-    filter: Readonly<{ status?: VendorApplicationStatus }>,
+    filter: VendorApplicationListFilter,
     page: PageRequest,
   ): Promise<Page<VendorApplication>> {
     return this.applications.list(filter, page);

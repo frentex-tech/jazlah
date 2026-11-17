@@ -3,11 +3,11 @@ import { LocalizedTextResponseDto } from '@common/dto/localized-text-response.dt
 import { OptionalLocalizedTextResponseDto } from '@common/dto/optional-localized-text-response.dto';
 import { PRODUCT_FULFILMENTS } from '../../domain/product-fulfilments.constants';
 import type { ProductFulfilment } from '../../domain/product-fulfilment.type';
-import { PRODUCT_PACKAGINGS } from '../../domain/product-packagings.constants';
-import type { ProductPackaging } from '../../domain/product-packaging.type';
+
 import { NamedReferenceResponseDto } from './named-reference-response.dto';
 import { ProductCuttingResponseDto } from './product-cutting-response.dto';
 import { ProductImageResponseDto } from './product-image-response.dto';
+import { ProductPackagingResponseDto } from './product-packaging-response.dto';
 import { ProductSizeResponseDto } from './product-size-response.dto';
 import { ProductVendorResponseDto } from './product-vendor-response.dto';
 
@@ -82,13 +82,11 @@ export class PublicProductResponseDto {
   cuttings!: ProductCuttingResponseDto[];
 
   @ApiProperty({
-    enum: PRODUCT_PACKAGINGS,
-    isArray: true,
-    example: ['trays'],
+    type: [ProductPackagingResponseDto],
     description:
-      'The packagings to choose from: `trays`, `bags`, `vacuum`, `none`.',
+      'The packagings to choose from (`trays`, `bags`, `vacuum`, `none`), with their extra prices; empty when there is no packaging choice.',
   })
-  packagings!: ProductPackaging[];
+  packagings!: ProductPackagingResponseDto[];
 
   @ApiProperty({
     type: [NamedReferenceResponseDto],

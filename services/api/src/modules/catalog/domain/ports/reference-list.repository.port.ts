@@ -33,6 +33,12 @@ export interface ReferenceListRepository {
    */
   listActiveCategories(): Promise<ReferenceItem[]>;
 
+  /**
+   * Every active entry of the list, oldest first (`created_at`, then `id`): a vendor's
+   * pickers, whole. Short lists admins curate, so not paged.
+   */
+  listActive(list: ReferenceList): Promise<ReferenceItem[]>;
+
   /** Which of `ids` are active entries of the list. */
   findActiveIds(
     list: ReferenceList,

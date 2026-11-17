@@ -8,49 +8,22 @@ Everything in `openapi.json`, which is:
 - **Sign-in and sessions:** all four audiences.
 - **Customers:** the profile, marketing consent, addresses and account deletion.
 - **Vendors:**
-  - applications and their review;
-  - the vendor profile;
+  - applications (with city, optional VAT number and the optional document kinds) and their review;
+  - the vendor profile: logo, cover photo, description, contact phone and email, VAT number;
   - suspension and commission;
+  - admin search by store name or registration number, and the city filter;
   - the public vendor list.
 - **Catalog:**
-  - reference lists and incompatibilities;
+  - reference lists (categories with an image) and incompatibilities, and the vendor's read-only pickers;
   - vendor and admin products, review and change requests;
-  - prices, availability and fulfilment;
-  - public browsing.
+  - prices (sizes, cutting styles and packagings), availability and fulfilment;
+  - public browsing, with text search.
 - **Uploads:** for every audience that has a purpose.
+- **Input:** a NUL character (`\u0000`) in any text field, query or path is refused as `VALIDATION_FAILED` (`hasNoNulCharacter`). Strip control characters from pasted text in the app anyway.
 
-## Coming next (decided, built right after this handoff)
+The batch of API changes decided after the design comparison (issue #243) is built: none is "coming next" any more. The guides describe each where it belongs ([vendors.md](vendors.md), [catalog.md](catalog.md), [uploads.md](uploads.md)). **One change breaks the earlier shape:** a product's `packagings` is now `[{ packaging, extraPriceHalalas }]` everywhere; regenerate your client.
 
-These API changes are decided and will be built in one pull request after the frontend handoff and the staging server. Plan the screens that depend on them; the fields and endpoints will appear in `openapi.json` when they land. Until then, nothing below exists.
-
-### Vendors
-1. **Contact phone and email on the vendor.** The vendor edits them in its profile, and an admin can edit them too. They are for the platform's order operations and are not public, unless decided later.
-2. **VAT number**, optional, 15 digits in the Saudi format, on the application and on the vendor.
-3. **City** on the application and on the vendor: text, required for new applications.
-4. **Store cover photo:** a new public upload purpose, editable by the vendor and by an admin, and returned on the public vendor page.
-5. **Search in the admin vendor list:** by store name or commercial registration number, with a filter by city. The admin applications list gets the same search.
-6. **New document kinds:**
-   - The new kinds are the municipality licence and the national ID.
-   - They will be accepted as optional.
-   - Which kinds are required waits for the owner's decision. Until then the required set stays as today (see [vendors.md](vendors.md)).
-
-### Catalog
-7. **Text search on the public product list:**
-   - a `q` parameter matching the product name in Arabic and English;
-   - combined with the existing filters and pagination;
-   - Arabic search will ignore diacritics and treat the alef, yaa and taa marbuta forms as equal.
-8. **Packaging extra price:**
-   - each packaging option on a product may carry an optional extra price in halalas, like cutting styles;
-   - on a published product, a change applies at once and is recorded in the audit log.
-9. **Category image:** a new public upload purpose; categories will return an image URL.
-
-### Gaps found during the frontend handoff
-(Item 10 of the backend list is a backend test with no effect on the apps.)
-
-11. **Vendor pickers for the product form.** Today vendors can read only the active categories (`GET /v1/public/categories`); the meat types, cutting styles, "without" items and the incompatible cutting and packaging pairs are listed only by admin endpoints (`GET /v1/admin/lists/{list}`, `GET /v1/admin/cutting-packaging-incompatibilities`). Vendor read endpoints will return the active entries and the pairs, in both languages; the lists stay admin-only for writes. Until then, build the pickers behind an interface, and never call the admin endpoints with a vendor token (`FORBIDDEN`).
-12. **A NUL character in text.** A `\u0000` in a text field will be refused everywhere as `VALIDATION_FAILED`; today it probably ends as `INTERNAL_ERROR`. Strip control characters from pasted text in the app anyway.
-
-## Later (recorded, not scheduled in that batch)
+## Later (recorded, not scheduled)
 
 - Ratings and reviews, loyalty points, stories and banners, Eid al-Adha campaigns.
 - Store opening hours and an open or closed status, a minimum order, delivery time estimates.

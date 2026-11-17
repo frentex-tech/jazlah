@@ -14,8 +14,8 @@ import {
 import { VENDOR_AUDIT } from '../domain/vendor-audit-actions.constants';
 import { VendorStatusMachine } from '../domain/vendor-status.state-machine';
 import type { VendorActionInput } from './vendor-action-input.type';
-import type { VendorWithLogo } from './vendor-with-logo.type';
-import { withLogoUrls } from './with-logo-urls';
+import type { VendorWithImages } from './vendor-with-images.type';
+import { withImageUrls } from './with-image-urls';
 
 /**
  * An admin suspends an active vendor with a reason. One transaction: the conditional
@@ -36,7 +36,7 @@ export class SuspendVendorUseCase {
 
   async execute(
     input: VendorActionInput & { reason: string },
-  ): Promise<VendorWithLogo> {
+  ): Promise<VendorWithImages> {
     const vendor = await this.transactions.run(async () => {
       const found = await this.vendors.findById(input.vendorId);
       if (found === null) {
@@ -56,10 +56,10 @@ export class SuspendVendorUseCase {
       });
       return updated;
     });
-    const [withLogo] = await withLogoUrls(this.media, [vendor]);
-    if (withLogo === undefined) {
-      throw new Error('withLogoUrls returned no vendor');
+    const [withImages] = await withImageUrls(this.media, [vendor]);
+    if (withImages === undefined) {
+      throw new Error('withImageUrls returned no vendor');
     }
-    return withLogo;
+    return withImages;
   }
 }

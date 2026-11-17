@@ -38,8 +38,8 @@ export class VendorVendorsController {
     operationId: 'vendorGetProfile',
     summary: 'My store profile',
     description: [
-      'Vendor dashboard, store profile screen: the store the signed-in vendor user works for (always the one in the access token), with its logo, descriptions, commission in basis points and business and bank details (the IBAN masked).',
-      'The name, commercial registration, bank details and location come from the approved application and only an admin can change them; the vendor changes the logo and descriptions (PATCH). VENDOR_SUSPENDED: the store is suspended; sign the user out and explain.',
+      'Vendor dashboard, store profile screen: the store the signed-in vendor user works for (always the one in the access token), with its logo, cover photo, descriptions, city, contact phone and email, VAT number, commission in basis points and business and bank details (the IBAN masked).',
+      'The name, commercial registration, bank details, location and city come from the approved application and only an admin can change them; the vendor changes the logo, cover photo, descriptions, contact phone and email and VAT number (PATCH). VENDOR_SUSPENDED: the store is suspended; sign the user out and explain.',
     ].join('\n\n'),
   })
   @ApiOkResponse({
@@ -58,11 +58,11 @@ export class VendorVendorsController {
   @Patch()
   @ApiOperation({
     operationId: 'vendorUpdateProfile',
-    summary: 'Change my logo or descriptions',
+    summary: 'Change my store profile',
     description: [
-      'Vendor dashboard, store profile screen: the vendor changes its own logo and descriptions. Applied at once, with no review; customers see the change on the next read.',
-      'For a new logo, upload it first (POST /v1/vendor/media/uploads, purpose vendor.logo: JPEG, PNG or WebP up to 2 MB), confirm it (POST /v1/vendor/media/{id}/confirm), then send its id. A field left out stays as it is; logoMediaId null removes the logo; inside description, a language set to null or blank clears it. An empty body changes nothing.',
-      'Errors: MEDIA_NOT_FOUND (details.mediaId): no vendor.logo file uploaded by this user with that id. MEDIA_NOT_READY: the upload was not confirmed.',
+      'Vendor dashboard, store profile screen: the vendor changes its own logo, cover photo, descriptions, contact phone, contact email and VAT number. Applied at once, with no review; customers see the logo, cover and descriptions on the next read (the contact details and VAT number are never public). The city is not changed here: an admin sets it.',
+      'For a new logo or cover photo, upload it first (POST /v1/vendor/media/uploads, purpose vendor.logo or vendor.cover: JPEG, PNG or WebP up to 2 MB), confirm it (POST /v1/vendor/media/{id}/confirm), then send its id. A field left out stays as it is; logoMediaId, coverMediaId, contactPhone, contactEmail or vatNumber null removes it; inside description, a language set to null or blank clears it. An empty body changes nothing.',
+      'Errors: VALIDATION_FAILED for a malformed field (isSaudiPhoneNumber: not a Saudi mobile or landline; isEmail; matches on vatNumber) or a city in the body. MEDIA_NOT_FOUND (details.mediaId): no file of the right purpose (vendor.logo for the logo, vendor.cover for the cover) uploaded by this user with that id. MEDIA_NOT_READY: the upload was not confirmed.',
     ].join('\n\n'),
   })
   @ApiOkResponse({

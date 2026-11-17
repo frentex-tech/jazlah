@@ -11,5 +11,10 @@ export type ReferenceItem = Readonly<{
   isActive: boolean;
   /** A category's display order, lower first; null for the lists without one. */
   sortOrder: number | null;
+  /**
+   * A category's image, a ready `catalog.category-image` file; null without one, and for
+   * the lists without images.
+   */
+  imageMediaId: string | null;
   createdAt: Date;
 }>;

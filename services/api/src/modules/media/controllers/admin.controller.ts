@@ -49,7 +49,7 @@ export class AdminMediaController {
     operationId: 'adminRequestMediaUpload',
     summary: 'Get a ticket to upload one file',
     description: [
-      'Called by the admin dashboard to upload a vendor logo and product images (the platform vendor own products, and product edits made by an admin). The confirmed ids go in the vendor `logoMediaId` and a product `imageMediaIds`.',
+      'Called by the admin dashboard to upload a vendor logo, product images (the platform vendor own products, and product edits made by an admin) and category images. The confirmed ids go in the vendor `logoMediaId`, a product `imageMediaIds` and a category `imageMediaId`.',
       '',
       MEDIA_OPERATION_DESCRIPTIONS.requestUpload,
       '',

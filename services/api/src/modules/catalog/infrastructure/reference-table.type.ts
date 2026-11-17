@@ -19,7 +19,9 @@ export type ReferenceTable = Readonly<{
     where: { isActive?: boolean; id?: { in: string[] } } & ReturnType<
       typeof keysetAfter
     >;
-    orderBy?: (typeof KEYSET_ORDER)[number][];
+    orderBy?:
+      | (typeof KEYSET_ORDER)[number][]
+      | ({ createdAt: 'asc' } | { id: 'asc' })[];
     take?: number;
   }): Promise<ReferenceRow[]>;
 }>;

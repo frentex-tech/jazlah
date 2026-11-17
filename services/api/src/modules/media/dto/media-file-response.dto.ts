@@ -1,6 +1,6 @@
 import { ApiProperty } from '@nestjs/swagger';
 
-/** A confirmed file: what was checked. Refer to it by `id` (a vendor logo, a document). */
+/** A confirmed file: what was checked. Refer to it by `id` (a vendor logo or cover photo, a document). */
 export class MediaFileResponseDto {
   @ApiProperty({
     format: 'uuid',
@@ -13,7 +13,7 @@ export class MediaFileResponseDto {
   @ApiProperty({
     example: 'catalog.product-image',
     description:
-      'The upload purpose the ticket was requested for (`catalog.product-image`, `vendor.logo`, `vendor.document`); only an endpoint expecting this purpose accepts the file.',
+      'The upload purpose the ticket was requested for (`catalog.product-image`, `catalog.category-image`, `vendor.logo`, `vendor.cover`, `vendor.document`); only an endpoint expecting this purpose accepts the file.',
   })
   purpose!: string;
 

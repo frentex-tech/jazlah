@@ -1,3 +1,4 @@
+import { escapeLikePattern } from '@common/text/escape-like-pattern';
 import { Injectable } from '@nestjs/common';
 import type { Page } from '@common/pagination/page.type';
 import type { PageRequest } from '@common/pagination/page-request.type';
@@ -52,7 +53,7 @@ export class PrismaProductRepository implements ProductRepository {
           },
           cuttings: { create: this.cuttingRows(content) },
           packagings: {
-            create: content.packagings.map((packaging) => ({ packaging })),
+            create: this.packagingRows(content),
           },
           exclusions: {
             create: content.exclusionItemIds.map((exclusionItemId) => ({
@@ -169,14 +170,17 @@ export class PrismaProductRepository implements ProductRepository {
         skipDuplicates: true,
       });
 
+      const packagings = content.packagings.map((option) => option.packaging);
       await client.productPackagingOption.deleteMany({
-        where: { productId: id },
+        where: { productId: id, packaging: { notIn: packagings } },
       });
+      // A kept packaging keeps its stored extra price (ON CONFLICT DO NOTHING on the pair).
       await client.productPackagingOption.createMany({
-        data: content.packagings.map((packaging) => ({
+        data: this.packagingRows(content).map((row) => ({
+          ...row,
           productId: id,
-          packaging,
         })),
+        skipDuplicates: true,
       });
       await client.productExclusion.deleteMany({ where: { productId: id } });
       await client.productExclusion.createMany({
@@ -260,6 +264,12 @@ export class PrismaProductRepository implements ProductRepository {
           data: { extraPriceHalalas: change.extraPrice.halalas },
         });
       }
+      for (const change of changes.packagings) {
+        await client.productPackagingOption.updateMany({
+          where: { productId: id, packaging: change.packaging },
+          data: { extraPriceHalalas: change.extraPrice.halalas },
+        });
+      }
       return await this.refreshMinPrice(id);
     } catch (error) {
       mapPrismaError(error);
@@ -283,9 +293,21 @@ export class PrismaProductRepository implements ProductRepository {
                 : { lte: filter.maxPrice.halalas }),
             },
           };
+    const pattern =
+      filter.text === undefined
+        ? undefined
+        : await this.searchPattern(filter.text);
+    // A query of only diacritics or tatweel normalises to nothing: it names no product,
+    // so the answer is an empty page, never every product (`LIKE '%%'`).
+    if (pattern === '') {
+      return { items: [], nextCursor: null };
+    }
+    const search =
+      pattern === undefined ? {} : { searchText: { contains: pattern } };
     return this.summaries(
       {
         ...this.publicWhere(),
+        ...search,
         ...(filter.categoryId === undefined
           ? {}
           : { categoryId: filter.categoryId }),
@@ -306,6 +328,30 @@ export class PrismaProductRepository implements ProductRepository {
         include: PRODUCT_DETAILS_INCLUDE,
       });
       return row === null ? null : toProductDetails(row);
+    } catch (error) {
+      mapPrismaError(error);
+    }
+  }
+
+  /**
+   * The text search's pattern: the query normalised by the same SQL function as the
+   * stored `search_text` (`catalog_search_text`, one definition, in the migration), then
+   * its LIKE wildcards escaped so `%` and `_` match themselves.
+   */
+  private async searchPattern(text: string): Promise<string> {
+    try {
+      const rows = await this.db.client.$queryRaw<
+        unknown[]
+      >`SELECT catalog_search_text(${text}) AS "normalized"`;
+      const row = rows[0];
+      const normalized =
+        typeof row === 'object' &&
+        row !== null &&
+        'normalized' in row &&
+        typeof row.normalized === 'string'
+          ? row.normalized
+          : '';
+      return escapeLikePattern(normalized);
     } catch (error) {
       mapPrismaError(error);
     }
@@ -399,6 +445,13 @@ export class PrismaProductRepository implements ProductRepository {
     return content.cuttings.map((cutting) => ({
       cuttingStyleId: cutting.cuttingStyleId,
       extraPriceHalalas: cutting.extraPrice.halalas,
+    }));
+  }
+
+  private packagingRows(content: ProductContent) {
+    return content.packagings.map((option) => ({
+      packaging: option.packaging,
+      extraPriceHalalas: option.extraPrice.halalas,
     }));
   }
 }

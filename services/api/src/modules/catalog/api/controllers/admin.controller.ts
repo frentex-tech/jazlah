@@ -120,7 +120,7 @@ export class AdminCatalogController {
     summary: 'Add an entry to a list (it starts active)',
     description:
       'Admin dashboard, catalog settings. Adds an entry, with its Arabic and English name, to one of the lists products are built from: `categories`, `meat-types`, `cutting-styles` or `exclusion-items` (the "without" items a customer can ask to leave out). It starts active, so vendors can choose it at once. ' +
-      'Only a category takes a display order (`sortOrder`, lower first, 0 when left out); on another list it is refused with VALIDATION_FAILED `isOrderedList`. Names need not be unique.',
+      'Only a category takes a display order (`sortOrder`, lower first, 0 when left out); on another list it is refused with VALIDATION_FAILED `isOrderedList`. Only a category takes an image (`imageMediaId`: upload it first with POST /v1/admin/media/uploads, purpose `catalog.category-image`, then confirm it; MEDIA_NOT_FOUND for another user’s or another purpose’s file, MEDIA_NOT_READY before confirmation); on another list VALIDATION_FAILED `isCategoryList`. Names need not be unique.',
   })
   @ApiCreatedResponse({
     type: ReferenceItemResponseDto,
@@ -128,18 +128,30 @@ export class AdminCatalogController {
   })
   @ApiErrorResponses(
     ErrorCode.VALIDATION_FAILED,
+    ErrorCode.MEDIA_NOT_FOUND,
+    ErrorCode.MEDIA_NOT_READY,
     ErrorCode.SERVICE_UNAVAILABLE,
     ...ADMIN_AUTH_ERRORS,
   )
   async createListItem(
+    @CurrentUser() user: AuthenticatedUser,
     @Param() params: ReferenceListParamDto,
     @Body() body: CreateReferenceItemDto,
   ): Promise<ReferenceItemResponseDto> {
     return toReferenceItemResponse(
-      await this.createItem.execute(toReferenceList(params.list), {
-        name: body.name,
-        ...(body.sortOrder === undefined ? {} : { sortOrder: body.sortOrder }),
-      }),
+      await this.createItem.execute(
+        toReferenceList(params.list),
+        {
+          name: body.name,
+          ...(body.sortOrder === undefined
+            ? {}
+            : { sortOrder: body.sortOrder }),
+          ...(body.imageMediaId === undefined
+            ? {}
+            : { imageMediaId: body.imageMediaId }),
+        },
+        user.userId,
+      ),
     );
   }
 
@@ -181,7 +193,7 @@ export class AdminCatalogController {
     operationId: 'adminUpdateCatalogListEntry',
     summary: 'Rename an entry, switch it on or off, or reorder a category',
     description:
-      'Admin dashboard, catalog settings. Changes only the fields sent: the name (both languages together), `isActive`, and for a category `sortOrder` (the public order, lower first; on another list VALIDATION_FAILED `isOrderedList`). Applies at once. Entries are never deleted: switch one off instead. ' +
+      'Admin dashboard, catalog settings. Changes only the fields sent: the name (both languages together), `isActive`, and for a category `sortOrder` (the public order, lower first; on another list VALIDATION_FAILED `isOrderedList`) and `imageMediaId` (a confirmed `catalog.category-image` upload of the signed-in admin, MEDIA_NOT_FOUND or MEDIA_NOT_READY otherwise; null removes the image; on another list VALIDATION_FAILED `isCategoryList`). Applies at once. Entries are never deleted: switch one off instead. ' +
       'An inactive entry can no longer be chosen for a product (VALIDATION_FAILED on the product form); products already using it keep it. An inactive category also hides all its products from the public catalog at once, until it is switched on again. ' +
       'NOT_FOUND for an id that is not an entry of this list.',
   })
@@ -192,19 +204,32 @@ export class AdminCatalogController {
   @ApiErrorResponses(
     ErrorCode.VALIDATION_FAILED,
     ErrorCode.NOT_FOUND,
+    ErrorCode.MEDIA_NOT_FOUND,
+    ErrorCode.MEDIA_NOT_READY,
     ErrorCode.SERVICE_UNAVAILABLE,
     ...ADMIN_AUTH_ERRORS,
   )
   async updateListItem(
+    @CurrentUser() user: AuthenticatedUser,
     @Param() params: ReferenceItemParamDto,
     @Body() body: UpdateReferenceItemDto,
   ): Promise<ReferenceItemResponseDto> {
     return toReferenceItemResponse(
-      await this.updateItem.execute(toReferenceList(params.list), params.id, {
-        ...(body.name === undefined ? {} : { name: body.name }),
-        ...(body.isActive === undefined ? {} : { isActive: body.isActive }),
-        ...(body.sortOrder === undefined ? {} : { sortOrder: body.sortOrder }),
-      }),
+      await this.updateItem.execute(
+        toReferenceList(params.list),
+        params.id,
+        {
+          ...(body.name === undefined ? {} : { name: body.name }),
+          ...(body.isActive === undefined ? {} : { isActive: body.isActive }),
+          ...(body.sortOrder === undefined
+            ? {}
+            : { sortOrder: body.sortOrder }),
+          ...(body.imageMediaId === undefined
+            ? {}
+            : { imageMediaId: body.imageMediaId }),
+        },
+        user.userId,
+      ),
     );
   }
 
@@ -453,7 +478,7 @@ export class AdminCatalogController {
     operationId: 'adminApproveProductChangeRequest',
     summary: 'Approve a change request: it becomes the live product',
     description:
-      'Admin dashboard, review queue of edits. The request becomes `approved` and its content replaces the live product at once, exactly as shown in the queue (a request never changes). Sizes and cutting styles the product already has keep their live prices (prices change only through the prices endpoints); new ones take the prices of the request. The product stays `published`. Recorded in the audit log. No body. ' +
+      'Admin dashboard, review queue of edits. The request becomes `approved` and its content replaces the live product at once, exactly as shown in the queue (a request never changes). Sizes, cutting styles and packagings the product already has keep their live prices (prices change only through the prices endpoints); new ones take the prices of the request. The product stays `published`. Recorded in the audit log. No body. ' +
       'Errors: PRODUCT_CHANGE_REQUEST_SUPERSEDED when the vendor has edited again since: reload, the newer request is in the queue; NOT_FOUND for an unknown request or one already approved or rejected; PRODUCT_NOT_EDITABLE if the product is no longer published.',
   })
   @ApiOkResponse({
@@ -558,7 +583,7 @@ export class AdminCatalogController {
     summary: 'Replace a JAZLA product’s content',
     description:
       'Admin dashboard, JAZLA products, edit form. Replaces the whole content of a platform vendor product (send every field, lists in display order); availability, fulfilment and prices have their own endpoints. Applies at once, also when published: no change request. An edit of a published product is recorded in the audit log and must meet the submission rules (at least one size and one image, no cutting style offered with a packaging it cannot be combined with). ' +
-      'Keep an existing size by sending its `id`; a size left out is removed; a size without `id` is new. Existing sizes and cutting styles must carry their current prices (VALIDATION_FAILED `isLivePrice`): change them with PATCH …/{id}/prices. ' +
+      'Keep an existing size by sending its `id`; a size left out is removed; a size without `id` is new. Existing sizes, cutting styles and packagings must carry their current prices (VALIDATION_FAILED `isLivePrice`): change them with PATCH …/{id}/prices. ' +
       'Errors: VALIDATION_FAILED also for an inactive reference, a size id not of this product or a repeat; MEDIA_NOT_FOUND / MEDIA_NOT_READY for a new image not uploaded and confirmed by this admin; PRODUCT_NOT_SUBMITTABLE (published only) with `details.reasons` and `details.pairs`; PRODUCT_NOT_EDITABLE for a product under review; ' +
       'NOT_FOUND for an unknown id or a product of another vendor (admins act on other vendors’ products only through review), and with `details.reason` PLATFORM_VENDOR_MISSING while JAZLA’s own vendor has not been set up.',
   })
@@ -702,8 +727,8 @@ export class AdminCatalogController {
     operationId: 'adminChangePlatformProductPrices',
     summary: 'Change a JAZLA product’s prices, at once',
     description:
-      'Admin dashboard, JAZLA products, prices form. Sets new prices for some of the product’s existing sizes (by size id) and cutting styles (by cutting style id); the others keep theirs. Integer halalas, VAT included. Applies at once, also on a published product; the lowest price is updated and each price that actually changed is recorded in the audit log. ' +
-      'Errors: VALIDATION_FAILED for a size or cutting style that is not the product’s (`isSizeOfProduct`, `isCuttingOfProduct`) or named twice (`isNotRepeated`); PRODUCT_NOT_EDITABLE for a product under review (`details.status`); ' +
+      'Admin dashboard, JAZLA products, prices form. Sets new prices for some of the product’s existing sizes (by size id), cutting styles (by cutting style id) and packagings (by packaging); the others keep theirs. Integer halalas, VAT included. Applies at once, also on a published product; the lowest price is updated and each price that actually changed is recorded in the audit log. ' +
+      'Errors: VALIDATION_FAILED for a size, cutting style or packaging that is not the product’s (`isSizeOfProduct`, `isCuttingOfProduct`, `isPackagingOfProduct`) or named twice (`isNotRepeated`); PRODUCT_NOT_EDITABLE for a product under review (`details.status`); ' +
       'NOT_FOUND for an unknown id or a product of another vendor (admins act on other vendors’ products only through review), and with `details.reason` PLATFORM_VENDOR_MISSING while JAZLA’s own vendor has not been set up.',
   })
   @ApiOkResponse({

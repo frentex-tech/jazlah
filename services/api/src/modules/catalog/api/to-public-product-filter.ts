@@ -7,6 +7,7 @@ export function toPublicProductFilter(
   query: ListPublicProductsQueryDto,
 ): PublicProductFilter {
   return {
+    ...(query.q === undefined ? {} : { text: query.q }),
     ...(query.categoryId === undefined ? {} : { categoryId: query.categoryId }),
     ...(query.vendorId === undefined ? {} : { vendorId: query.vendorId }),
     ...(query.meatTypeId === undefined ? {} : { meatTypeId: query.meatTypeId }),

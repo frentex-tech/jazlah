@@ -1,4 +1,5 @@
 import type { Prisma } from '@infra/database/generated/prisma/client';
+import { PACKAGING_EXTRA_PRICES } from './data/packaging-extra-prices.constants';
 import type { SeedProduct } from './data/seed-product.type';
 import type { SeedProductChange } from './data/seed-product-change.type';
 import { productSizeId } from './product-size-id';
@@ -43,7 +44,10 @@ export function buildChangeContent(
       cuttingStyleId: seedId(`cutting-style:${cutting.style}`),
       extraPriceHalalas: cutting.extraPriceHalalas,
     })),
-    packagings: [...product.packagings],
+    packagings: product.packagings.map((packaging) => ({
+      packaging,
+      extraPriceHalalas: PACKAGING_EXTRA_PRICES[packaging],
+    })),
     exclusionItemIds: product.exclusions.map((key) =>
       seedId(`exclusion-item:${key}`),
     ),

@@ -12,7 +12,8 @@ export type HeldRowLock = Readonly<{
 }>;
 
 /** The tables whose rows a test can lock. */
-export type LockableTable = 'products' | 'product_change_requests' | 'users';
+export type LockableTable =
+  'products' | 'product_change_requests' | 'users' | 'auth_sessions';
 
 const WAIT_LIMIT_MS = 10_000;
 const POLL_MS = 10;
@@ -51,7 +52,11 @@ export async function holdRowLock(
             ? await tx.$queryRaw<{ pid: number }[]>`
               SELECT pg_backend_pid() AS pid FROM "users"
               WHERE "id" = ${id}::uuid FOR UPDATE`
-            : await tx.$queryRaw<{ pid: number }[]>`
+            : table === 'auth_sessions'
+              ? await tx.$queryRaw<{ pid: number }[]>`
+              SELECT pg_backend_pid() AS pid FROM "auth_sessions"
+              WHERE "id" = ${id}::uuid FOR UPDATE`
+              : await tx.$queryRaw<{ pid: number }[]>`
               SELECT pg_backend_pid() AS pid FROM "product_change_requests"
               WHERE "id" = ${id}::uuid FOR UPDATE`;
       const row = rows[0];

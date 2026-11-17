@@ -53,6 +53,8 @@ export function applicationInput(
       name: { ar: 'ملحمة النخبة', en: 'Al Nokhba Butchery' },
       description: { ar: null, en: null },
       commercialRegistrationNumber: '1010123456',
+      vatNumber: '310123456700003',
+      city: 'الرياض',
       accountHolderName: 'مؤسسة النخبة للحوم',
       location: { latitude: 24.7136, longitude: 46.6753 },
     },

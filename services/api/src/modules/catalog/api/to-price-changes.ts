@@ -15,5 +15,9 @@ export function toPriceChanges(
       cuttingStyleId: cutting.cuttingStyleId,
       extraPrice: Money.of(cutting.extraPriceHalalas),
     })),
+    packagings: (body.packagings ?? []).map((option) => ({
+      packaging: option.packaging,
+      extraPrice: Money.of(option.extraPriceHalalas),
+    })),
   };
 }

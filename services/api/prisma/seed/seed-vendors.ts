@@ -1,4 +1,5 @@
 import { encryptAes256Gcm } from '@common/crypto/encrypt-aes-256-gcm';
+import { normalizeSaudiPhoneNumber } from '@common/phone/normalize-saudi-phone-number';
 import { SEED_IBAN } from './data/seed-iban.constants';
 import { SEED_PARTNER_VENDORS } from './data/partner-vendors.constants';
 import type { SeedPartnerVendor } from './data/seed-partner-vendor.type';
@@ -16,7 +17,8 @@ import { seedTime } from './seed-time';
 /**
  * The vendor applications with their documents, then the partner vendors made from the
  * approved ones, as an admin's approval makes them (ApproveVendorApplicationUseCase):
- * names, description, business and bank details copied from the application, the first
+ * names, description, business and bank details, VAT number and city copied from the
+ * application, a placeholder logo and cover photo, a contact phone and email, the first
  * commission entry (changed by the admin), and vendor access for the applicant
  * (UsersService.grantVendorAccess). The suspended one has its time and reason. Each
  * application and each vendor is created with everything it owns in one transaction,
@@ -78,6 +80,8 @@ async function seedApplication(
         descriptionAr: application.descriptionAr,
         descriptionEn: application.descriptionEn,
         commercialRegistrationNumber: application.commercialRegistrationNumber,
+        vatNumber: application.vatNumber,
+        city: application.city,
         ibanEncrypted: iban.ciphertext,
         ibanKeyId: iban.keyId,
         ibanLast4: SEED_IBAN.last4,
@@ -131,7 +135,20 @@ async function seedPartnerVendor(
     ownerId: application.applicantId,
     fileName: `${vendor.key}-logo.png`,
   };
+  const cover: SeedFile = {
+    id: seedId(`media:vendor-cover:${vendor.key}`),
+    purpose: 'vendor.cover',
+    contentType: 'image/png',
+    bytes: encodeSolidPng(1200, 400, vendor.coverColor),
+    ownerId: application.applicantId,
+    fileName: `${vendor.key}-cover.png`,
+  };
   await ensureSeedFile(context, logo);
+  await ensureSeedFile(context, cover);
+  const contactPhone = normalizeSaudiPhoneNumber(vendor.contactPhone);
+  if (contactPhone === null) {
+    throw new Error(`Seed vendor ${vendor.key} has an invalid contact phone`);
+  }
   const approvedAt = application.reviewedAt ?? seedTime(30 + index);
   const suspended = vendor.suspensionReason !== null;
   const created = await transactions.run(async () => {
@@ -150,12 +167,17 @@ async function seedPartnerVendor(
         descriptionAr: application.descriptionAr,
         descriptionEn: application.descriptionEn,
         logoMediaId: logo.id,
+        coverMediaId: cover.id,
+        contactPhone,
+        contactEmail: vendor.contactEmail,
         isPlatform: false,
         status: suspended ? 'suspended' : 'active',
         suspendedAt: suspended ? seedTime(72 + index) : null,
         suspensionReason: vendor.suspensionReason,
         commissionBasisPoints: vendor.commissionBasisPoints,
         commercialRegistrationNumber: application.commercialRegistrationNumber,
+        vatNumber: application.vatNumber,
+        city: application.city,
         ibanEncrypted: application.ibanEncrypted,
         ibanKeyId: application.ibanKeyId,
         ibanLast4: application.ibanLast4,

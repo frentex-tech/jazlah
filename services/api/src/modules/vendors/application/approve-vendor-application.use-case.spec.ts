@@ -6,7 +6,7 @@ import { ADMIN, APPLICANT, submitted } from './vendors-test-data.fake';
 const UNKNOWN = '00000000-0000-4000-8000-0000000000ff';
 
 describe('ApproveVendorApplicationUseCase', () => {
-  it('approves, creates the vendor with its commission, records the history, grants access and audits, together', async () => {
+  it('approves, creates the vendor with its commission, VAT number and city, records the history, grants access and audits, together', async () => {
     const kit = buildVendorsUseCases();
     const application = await submitted(kit);
 
@@ -23,6 +23,11 @@ describe('ApproveVendorApplicationUseCase', () => {
       ibanLast4: '7519',
       applicationId: application.id,
       name: application.details.name,
+      vatNumber: '310123456700003',
+      city: 'الرياض',
+      contactPhone: null,
+      contactEmail: null,
+      coverMediaId: null,
     });
     expect(kit.vendors.rows[0]?.iban).toEqual(kit.applications.rows[0]?.iban);
     expect(await kit.applications.findById(application.id)).toMatchObject({
