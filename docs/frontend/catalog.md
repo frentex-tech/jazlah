@@ -128,7 +128,7 @@ Only the entries sent change.
 | `MEDIA_NOT_FOUND` / `MEDIA_NOT_READY` | `details.mediaId` names the image: not uploaded by this user, or not confirmed. |
 | `NOT_FOUND` | An unknown product, or another vendor's product. Both answer the same. |
 
-> **Known gap: the vendor's pickers.** The categories are public (`GET /v1/public/categories`). The **meat types, cutting styles, "without" items and the incompatible pairs can only be listed by admins** (`GET /v1/admin/lists/{list}`, `GET /v1/admin/cutting-packaging-incompatibilities`). A vendor can only see the names of those already on its own products. The vendor product form therefore cannot fill those pickers from the API yet. This is reported to the backend team (see [not-built-yet.md](not-built-yet.md#known-gaps)). Do not call the admin endpoints with a vendor token: they answer `FORBIDDEN`.
+> **Coming next: the vendor's pickers.** The categories are public (`GET /v1/public/categories`). The **meat types, cutting styles, "without" items and the incompatible pairs can only be listed by admins** (`GET /v1/admin/lists/{list}`, `GET /v1/admin/cutting-packaging-incompatibilities`). A vendor can only see the names of those already on its own products. The vendor product form therefore cannot fill those pickers from the API yet. Vendor read endpoints for them are decided and coming next (see [not-built-yet.md](not-built-yet.md#gaps-found-during-the-frontend-handoff)). Do not call the admin endpoints with a vendor token: they answer `FORBIDDEN`.
 
 ## Admin dashboard: catalog settings
 

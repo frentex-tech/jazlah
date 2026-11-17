@@ -10,6 +10,8 @@ The paths below assume the app lives in the same repository (`apps/mobile`, `app
 
 ## Dart (Flutter): `dart-dio`
 
+> **Not run yet.** These commands were not run against `openapi.json` when this guide was written. That machine had neither Java nor a running Docker, and the backend team did not install either to check. The first Flutter developer to run them: report any failure to the backend team with its output, so this section can be corrected and this note removed.
+
 The generator is OpenAPI Generator. Its `dart-dio` generator produces a Dio-based package with typed models. Run it with Docker, so you need no Java:
 
 ```bash
@@ -51,6 +53,11 @@ Notes:
 - Errors come as `DioException`. Read `response.data` as `ErrorResponseDto` and branch on `code` (see [errors.md](errors.md)).
 
 ## TypeScript (Next.js): `openapi-typescript` + `openapi-fetch`
+
+> **Checked on 2026-11-17** against this `openapi.json`, with exactly the versions below and TypeScript 5.9.3.
+> - Generation succeeded: all 76 operations by their `operationId`.
+> - The `client.ts` example below type-checked under `strict`.
+> - Nested objects come out as plain types.
 
 `openapi-typescript` turns `openapi.json` into types, and `openapi-fetch` is a small typed `fetch` wrapper over them. No runtime code is generated, and the paths, bodies, query parameters and responses are all type-checked.
 

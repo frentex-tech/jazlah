@@ -46,6 +46,8 @@ Read `expiresAt` and `confirmBy` from the response: they are server settings.
 
 ### Flutter (Dio)
 
+A sketch: the generated Dart client has not been checked yet (see [client-generation.md](client-generation.md)).
+
 ```dart
 final ticket = await mediaApi.vendorRequestMediaUpload(/* purpose, contentType, fileName */);
 final form = FormData.fromMap({

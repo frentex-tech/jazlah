@@ -44,6 +44,12 @@ These API changes are decided and will be built in one pull request after the fr
    - on a published product, a change applies at once and is recorded in the audit log.
 9. **Category image:** a new public upload purpose; categories will return an image URL.
 
+### Gaps found during the frontend handoff
+(Item 10 of the backend list is a backend test with no effect on the apps.)
+
+11. **Vendor pickers for the product form.** Today vendors can read only the active categories (`GET /v1/public/categories`); the meat types, cutting styles, "without" items and the incompatible cutting and packaging pairs are listed only by admin endpoints (`GET /v1/admin/lists/{list}`, `GET /v1/admin/cutting-packaging-incompatibilities`). Vendor read endpoints will return the active entries and the pairs, in both languages; the lists stay admin-only for writes. Until then, build the pickers behind an interface, and never call the admin endpoints with a vendor token (`FORBIDDEN`).
+12. **A NUL character in text.** A `\u0000` in a text field will be refused everywhere as `VALIDATION_FAILED`; today it probably ends as `INTERNAL_ERROR`. Strip control characters from pasted text in the app anyway.
+
 ## Later (recorded, not scheduled in that batch)
 
 - Ratings and reviews, loyalty points, stories and banners, Eid al-Adha campaigns.
@@ -51,14 +57,6 @@ These API changes are decided and will be built in one pull request after the fr
 - Per product: preparation time and availability by weekday.
 - Itemised rejection feedback (per field), and re-uploading a single document of an application.
 - Vendor invitations, exports, and product counts in admin lists.
-
-## Known gaps (found during the handoff, not yet scheduled)
-
-**The vendor product form's pickers.** Vendors can read the active categories (`GET /v1/public/categories`), but not:
-- the meat types, cutting styles and "without" items, which only `GET /v1/admin/lists/{list}` lists, for admins;
-- the incompatible cutting and packaging pairs, which only `GET /v1/admin/cutting-packaging-incompatibilities` lists.
-
-So the vendor dashboard cannot fill those pickers from the API yet. The backend team has to decide on an endpoint for vendors. Until then, build the pickers behind an interface and do not call the admin endpoints with a vendor token.
 
 ## Not built: the order side of the product
 
