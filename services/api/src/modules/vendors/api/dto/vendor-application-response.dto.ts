@@ -50,6 +50,24 @@ export class VendorApplicationResponseDto {
   commercialRegistrationNumber!: string;
 
   @ApiProperty({
+    type: String,
+    nullable: true,
+    description:
+      'The VAT registration number, 15 Latin digits starting and ending with 3; null when the applicant gave none.',
+    example: '310123456700003',
+  })
+  vatNumber!: string | null;
+
+  @ApiProperty({
+    type: String,
+    nullable: true,
+    description:
+      'The city the store is in, as the applicant wrote it; null only for applications submitted before the city was asked.',
+    example: 'الرياض',
+  })
+  city!: string | null;
+
+  @ApiProperty({
     description:
       'The payout IBAN with every character hidden but the country and the last four; the full IBAN is never sent.',
     example: 'SA** **** **** **** **** 7519',

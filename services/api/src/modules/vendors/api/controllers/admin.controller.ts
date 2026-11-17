@@ -43,7 +43,7 @@ import { CommissionDto } from '../dto/commission.dto';
 import { ListVendorApplicationsQueryDto } from '../dto/list-vendor-applications-query.dto';
 import { ListVendorsQueryDto } from '../dto/list-vendors-query.dto';
 import { ReasonDto } from '@common/dto/reason.dto';
-import { UpdateVendorProfileDto } from '../dto/update-vendor-profile.dto';
+import { UpdateVendorProfileAsAdminDto } from '../dto/update-vendor-profile-as-admin.dto';
 import { VendorApplicationDetailResponseDto } from '../dto/vendor-application-detail-response.dto';
 import { VendorApplicationPageResponseDto } from '../dto/vendor-application-page-response.dto';
 import { VendorApplicationResponseDto } from '../dto/vendor-application-response.dto';
@@ -58,7 +58,7 @@ import { toVendorProfileChanges } from '../to-vendor-profile-changes';
 /**
  * Vendor management for admins (FR-ADM-04): reviewing applications and their
  * documents, approving with a commission or rejecting, suspending and reinstating
- * vendors, their commission with its history, and any vendor's logo and descriptions
+ * vendors, their commission with its history, and any vendor's store profile (logo, cover, descriptions, contact, VAT number, city)
  * (the platform vendor's included). Every change is audited.
  */
 @ApiBearerAuth(BEARER_AUTH_SCHEME)
@@ -84,8 +84,8 @@ export class AdminVendorsController {
     operationId: 'adminListVendorApplications',
     summary: 'Vendor applications, newest first',
     description: [
-      'Admin dashboard, vendor applications list: every application, optionally only one status (status=pending for the review queue). The IBAN is shown masked; open one application for its document links.',
-      "Paged by cursor, newest first, no total count: send the previous page's nextCursor as cursor; limit 1 to 50, default 20. VALIDATION_FAILED for an unknown status, a cursor the API did not write or a limit out of range.",
+      'Admin dashboard, vendor applications list: every application, optionally only one status (status=pending for the review queue) and only those matching a search (q: part of the store name in Arabic or English, any case, or of the commercial registration number; % and _ match themselves). The IBAN is shown masked; open one application for its document links.',
+      "Paged by cursor, newest first, no total count: send the previous page's nextCursor as cursor; limit 1 to 50, default 20. VALIDATION_FAILED for an unknown status, a q shorter than 2 or longer than 100 characters, a cursor the API did not write or a limit out of range.",
     ].join('\n\n'),
   })
   @ApiOkResponse({
@@ -101,7 +101,10 @@ export class AdminVendorsController {
     @Query() query: ListVendorApplicationsQueryDto,
   ): Promise<VendorApplicationPageResponseDto> {
     const page = await this.listApplications.execute(
-      query.status === undefined ? {} : { status: query.status },
+      {
+        ...(query.status === undefined ? {} : { status: query.status }),
+        ...(query.q === undefined ? {} : { q: query.q }),
+      },
       toPageRequest(query),
     );
     return {
@@ -173,8 +176,8 @@ export class AdminVendorsController {
       reviewerId: user.userId,
       commissionBasisPoints: body.commissionBasisPoints,
     });
-    // A new vendor has no logo yet.
-    return toAdminVendorResponse({ vendor, logoUrl: null });
+    // A new vendor has no logo or cover yet.
+    return toAdminVendorResponse({ vendor, logoUrl: null, coverUrl: null });
   }
 
   @Post('vendor-applications/:id/reject')
@@ -220,8 +223,8 @@ export class AdminVendorsController {
     operationId: 'adminListVendors',
     summary: 'Vendors, newest first',
     description: [
-      'Admin dashboard, vendors list: every vendor, active and suspended, the platform vendor included (isPlatform), optionally only one status, with commission, masked IBAN and logo.',
-      "Paged by cursor, newest first, no total count: send the previous page's nextCursor as cursor; limit 1 to 50, default 20. VALIDATION_FAILED for an unknown status, a cursor the API did not write or a limit out of range.",
+      'Admin dashboard, vendors list: every vendor, active and suspended, the platform vendor included (isPlatform), optionally only one status, one city (city, exact) and those matching a search (q: part of the store name in Arabic or English, any case, or of the commercial registration number; % and _ match themselves), with commission, masked IBAN and logo.',
+      "Paged by cursor, newest first, no total count: send the previous page's nextCursor as cursor; limit 1 to 50, default 20. VALIDATION_FAILED for an unknown status, a q shorter than 2 or longer than 100 characters, a cursor the API did not write or a limit out of range.",
     ].join('\n\n'),
   })
   @ApiOkResponse({
@@ -237,7 +240,11 @@ export class AdminVendorsController {
     @Query() query: ListVendorsQueryDto,
   ): Promise<AdminVendorPageResponseDto> {
     const page = await this.listVendors.execute(
-      query.status === undefined ? {} : { status: query.status },
+      {
+        ...(query.status === undefined ? {} : { status: query.status }),
+        ...(query.q === undefined ? {} : { q: query.q }),
+        ...(query.city === undefined ? {} : { city: query.city }),
+      },
       toPageRequest(query),
     );
     return {
@@ -345,11 +352,11 @@ export class AdminVendorsController {
   @ApiTags(API_TAGS.adminVendors.name)
   @ApiOperation({
     operationId: 'adminUpdateVendorProfile',
-    summary: 'Change a vendor’s logo or descriptions',
+    summary: 'Change a vendor’s store profile',
     description: [
-      "Admin dashboard, vendor screen: changes any vendor's logo and descriptions, the platform vendor included (it has no owner, so this is how its profile is set). Applied at once. Audited with the names of the fields given.",
-      'For a new logo, upload it first as the signed-in admin (POST /v1/admin/media/uploads, purpose vendor.logo: JPEG, PNG or WebP up to 2 MB), confirm it (POST /v1/admin/media/{id}/confirm), then send its id. A field left out stays as it is; logoMediaId null removes the logo; inside description, a language set to null or blank clears it. An empty body changes nothing.',
-      'Errors: NOT_FOUND for an unknown vendor. MEDIA_NOT_FOUND (details.mediaId): no vendor.logo file uploaded by this admin with that id (a file another user uploaded counts as missing). MEDIA_NOT_READY: the upload was not confirmed. TRANSACTION_CONFLICT: nothing was saved; send again.',
+      "Admin dashboard, vendor screen: changes any vendor's logo, cover photo, descriptions, contact phone, contact email, VAT number and city, the platform vendor included (it has no owner, so this is how its profile is set). Only an admin changes the city. Applied at once. Audited with the names of the fields given.",
+      'For a new logo or cover photo, upload it first as the signed-in admin (POST /v1/admin/media/uploads, purpose vendor.logo or vendor.cover: JPEG, PNG or WebP up to 2 MB), confirm it (POST /v1/admin/media/{id}/confirm), then send its id. A field left out stays as it is; logoMediaId, coverMediaId, contactPhone, contactEmail or vatNumber null removes it; the city can be changed, not removed; inside description, a language set to null or blank clears it. An empty body changes nothing.',
+      'Errors: VALIDATION_FAILED for a malformed field (isSaudiPhoneNumber, isEmail, matches on vatNumber, charLength on city). NOT_FOUND for an unknown vendor. MEDIA_NOT_FOUND (details.mediaId): no file of the right purpose (vendor.logo, vendor.cover) uploaded by this admin with that id (a file another user uploaded counts as missing). MEDIA_NOT_READY: the upload was not confirmed. TRANSACTION_CONFLICT: nothing was saved; send again.',
     ].join('\n\n'),
   })
   @ApiOkResponse({
@@ -368,7 +375,7 @@ export class AdminVendorsController {
   async updateVendorProfile(
     @CurrentUser() user: AuthenticatedUser,
     @Param() params: IdParamDto,
-    @Body() body: UpdateVendorProfileDto,
+    @Body() body: UpdateVendorProfileAsAdminDto,
   ): Promise<AdminVendorResponseDto> {
     return toAdminVendorResponse(
       await this.updateProfile.execute({

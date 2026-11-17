@@ -3,6 +3,7 @@ import { buildVendorsUseCases } from './vendors-use-cases.fake';
 import { ADMIN, APPLICANT } from './vendors-test-data.fake';
 
 const LOGO = '00000000-0000-4000-8000-0000000000e2';
+const COVER = '00000000-0000-4000-8000-0000000000e3';
 const UNKNOWN = '00000000-0000-4000-8000-0000000000ff';
 
 describe('UpdateVendorProfileAsAdminUseCase', () => {
@@ -74,6 +75,66 @@ describe('UpdateVendorProfileAsAdminUseCase', () => {
     });
 
     expect((await kit.vendors.findById(vendor.id))?.logoMediaId).toBeNull();
+    expect(kit.audit.rows).toEqual([]);
+  });
+
+  it('sets the cover, contact details, VAT number and city, audited by field name', async () => {
+    const { kit, vendor } = await platformVendor();
+    kit.media.add({
+      id: COVER,
+      ownerId: ADMIN,
+      purpose: 'vendor.cover',
+      isReady: true,
+    });
+
+    const result = await kit.updateProfileAsAdmin.execute({
+      vendorId: vendor.id,
+      actorId: ADMIN,
+      changes: {
+        coverMediaId: COVER,
+        contactPhone: '+966112345678',
+        contactEmail: 'contact@example.com',
+        vatNumber: '310123456700003',
+        city: 'جدة',
+      },
+    });
+
+    expect(result.vendor).toMatchObject({
+      coverMediaId: COVER,
+      contactPhone: '+966112345678',
+      contactEmail: 'contact@example.com',
+      vatNumber: '310123456700003',
+      city: 'جدة',
+    });
+    expect(result.coverUrl).toBe(`https://cdn.example.invalid/${COVER}`);
+    expect(kit.audit.rows).toMatchObject([
+      {
+        metadata: {
+          fields: 'city,contactEmail,contactPhone,coverMediaId,vatNumber',
+        },
+      },
+    ]);
+  });
+
+  it('refuses a logo file as the cover (another purpose) with MEDIA_NOT_FOUND', async () => {
+    const { kit, vendor } = await platformVendor();
+    kit.media.add({
+      id: LOGO,
+      ownerId: ADMIN,
+      purpose: 'vendor.logo',
+      isReady: true,
+    });
+
+    await expect(
+      kit.updateProfileAsAdmin.execute({
+        vendorId: vendor.id,
+        actorId: ADMIN,
+        changes: { coverMediaId: LOGO },
+      }),
+    ).rejects.toMatchObject({
+      code: ErrorCode.MEDIA_NOT_FOUND,
+      details: { mediaId: LOGO },
+    });
     expect(kit.audit.rows).toEqual([]);
   });
 

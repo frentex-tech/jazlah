@@ -67,6 +67,8 @@ export class CustomerVendorsController {
             en: body.description?.en ?? null,
           },
           commercialRegistrationNumber: body.commercialRegistrationNumber,
+          vatNumber: body.vatNumber ?? null,
+          city: body.city,
           accountHolderName: body.accountHolderName,
           location: {
             latitude: body.location.latitude,

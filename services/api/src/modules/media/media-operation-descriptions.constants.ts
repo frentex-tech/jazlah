@@ -27,7 +27,7 @@ export const MEDIA_OPERATION_DESCRIPTIONS = {
   confirm: [
     'Step 3 of a file upload: call it once the storage answered 204 to the upload, before the ticket `confirmBy`. The path id is the ticket `mediaId`.',
     '',
-    'The API checks the uploaded file: present, not empty, not larger than the purpose allows, its real type (read from the file first bytes) one the purpose accepts and equal to the `contentType` declared for the ticket. A file that passes is ready: give its `id` to the endpoint that uses it (a product `imageMediaIds`, the vendor `logoMediaId`, the documents of a vendor application). A file that fails is deleted for good: request a new ticket and upload again. Confirming before the upload finished therefore rejects the file (OBJECT_MISSING).',
+    'The API checks the uploaded file: present, not empty, not larger than the purpose allows, its real type (read from the file first bytes) one the purpose accepts and equal to the `contentType` declared for the ticket. A file that passes is ready: give its `id` to the endpoint that uses it (a product `imageMediaIds`, the vendor `logoMediaId` or `coverMediaId`, the documents of a vendor application). A file that fails is deleted for good: request a new ticket and upload again. Confirming before the upload finished therefore rejects the file (OBJECT_MISSING).',
     '',
     'Idempotent: confirming a ready file again returns it again; a rejected file answers the same MEDIA_UPLOAD_REJECTED again. Only the user who requested the ticket can confirm it.',
     '',

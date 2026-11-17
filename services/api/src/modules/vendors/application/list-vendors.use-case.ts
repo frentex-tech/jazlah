@@ -9,11 +9,11 @@ import {
   VENDOR_REPOSITORY,
   type VendorRepository,
 } from '../domain/ports/vendor.repository.port';
-import type { VendorStatus } from '../domain/vendor-status.type';
-import type { VendorWithLogo } from './vendor-with-logo.type';
-import { withLogoUrls } from './with-logo-urls';
+import type { VendorListFilter } from '../domain/vendor-list-filter.type';
+import type { VendorWithImages } from './vendor-with-images.type';
+import { withImageUrls } from './with-image-urls';
 
-/** Every vendor, newest first, optionally of one status, for admins. */
+/** Every vendor, newest first, optionally narrowed by status, search and city, for admins. */
 @Injectable()
 export class ListVendorsUseCase {
   constructor(
@@ -22,12 +22,12 @@ export class ListVendorsUseCase {
   ) {}
 
   async execute(
-    filter: Readonly<{ status?: VendorStatus }>,
+    filter: VendorListFilter,
     page: PageRequest,
-  ): Promise<Page<VendorWithLogo>> {
+  ): Promise<Page<VendorWithImages>> {
     const found = await this.vendors.list(filter, page);
     return {
-      items: await withLogoUrls(this.media, found.items),
+      items: await withImageUrls(this.media, found.items),
       nextCursor: found.nextCursor,
     };
   }

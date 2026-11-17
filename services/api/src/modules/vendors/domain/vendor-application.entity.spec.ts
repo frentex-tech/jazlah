@@ -34,8 +34,27 @@ describe('VendorApplication.assertDocuments', () => {
     ).toBeNull();
   });
 
+  it('accepts the optional kinds beside the required ones', () => {
+    expect(
+      failedRules([
+        ...ONE_OF_EACH,
+        { kind: 'municipality_licence', mediaId: id(4) },
+        { kind: 'national_id', mediaId: id(5) },
+      ]),
+    ).toBeNull();
+  });
+
   it.each([
     ['a missing kind', ONE_OF_EACH.slice(0, 2), ['requiresEachDocumentKind']],
+    [
+      'a required kind replaced by the optional ones',
+      [
+        ...ONE_OF_EACH.slice(0, 2),
+        { kind: 'municipality_licence' as const, mediaId: id(4) },
+        { kind: 'national_id' as const, mediaId: id(5) },
+      ],
+      ['requiresEachDocumentKind'],
+    ],
     [
       'the same file twice',
       [...ONE_OF_EACH, { kind: 'facility_photo' as const, mediaId: id(3) }],

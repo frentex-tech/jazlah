@@ -2,7 +2,7 @@ import type { Page } from '@common/pagination/page.type';
 import type { PageRequest } from '@common/pagination/page-request.type';
 import type { NewVendorApplication } from '../new-vendor-application.type';
 import type { VendorApplication } from '../vendor-application.entity';
-import type { VendorApplicationStatus } from '../vendor-application-status.type';
+import type { VendorApplicationListFilter } from '../vendor-application-list-filter.type';
 
 /** Injection token of the VendorApplicationRepository. */
 export const VENDOR_APPLICATION_REPOSITORY = Symbol(
@@ -26,9 +26,9 @@ export interface VendorApplicationRepository {
 
   findById(id: string): Promise<VendorApplication | null>;
 
-  /** Newest first, optionally of one status. */
+  /** Newest first, narrowed by the filter (status, search; see its type). */
   list(
-    filter: Readonly<{ status?: VendorApplicationStatus }>,
+    filter: VendorApplicationListFilter,
     page: PageRequest,
   ): Promise<Page<VendorApplication>>;
 

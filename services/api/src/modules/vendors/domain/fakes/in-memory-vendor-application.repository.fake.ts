@@ -6,8 +6,9 @@ import type { NewVendorApplication } from '../new-vendor-application.type';
 import type { VendorApplicationRepository } from '../ports/vendor-application.repository.port';
 import type { SealedIban } from '../sealed-iban.type';
 import { VendorApplication } from '../vendor-application.entity';
-import type { VendorApplicationStatus } from '../vendor-application-status.type';
+import type { VendorApplicationListFilter } from '../vendor-application-list-filter.type';
 import { keysetPage } from '@common/pagination/keyset-page.fake';
+import { matchesBusinessSearch } from './matches-business-search.fake';
 
 /** One stored application: the entity and its sealed IBAN, as the table keeps both. */
 export type StoredVendorApplication = Readonly<{
@@ -75,7 +76,7 @@ export class InMemoryVendorApplicationRepository implements VendorApplicationRep
   }
 
   list(
-    filter: Readonly<{ status?: VendorApplicationStatus }>,
+    filter: VendorApplicationListFilter,
     page: PageRequest,
   ): Promise<Page<VendorApplication>> {
     return Promise.resolve(
@@ -84,8 +85,14 @@ export class InMemoryVendorApplicationRepository implements VendorApplicationRep
           .map((row) => row.application)
           .filter(
             (application) =>
-              filter.status === undefined ||
-              application.status === filter.status,
+              (filter.status === undefined ||
+                application.status === filter.status) &&
+              (filter.q === undefined ||
+                matchesBusinessSearch(
+                  filter.q,
+                  application.details.name,
+                  application.details.commercialRegistrationNumber,
+                )),
           ),
         page,
       ),

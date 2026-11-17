@@ -11,7 +11,8 @@ import { mapPrismaError } from '@infra/database/map-prisma-error';
 import type { NewVendorApplication } from '../domain/new-vendor-application.type';
 import type { VendorApplicationRepository } from '../domain/ports/vendor-application.repository.port';
 import type { VendorApplication } from '../domain/vendor-application.entity';
-import type { VendorApplicationStatus } from '../domain/vendor-application-status.type';
+import type { VendorApplicationListFilter } from '../domain/vendor-application-list-filter.type';
+import { businessSearchCondition } from './business-search-condition';
 import { toVendorApplication } from './vendor-application.mapper';
 
 /** Every read brings the documents along. */
@@ -42,6 +43,8 @@ export class PrismaVendorApplicationRepository implements VendorApplicationRepos
             descriptionAr: details.description.ar,
             descriptionEn: details.description.en,
             commercialRegistrationNumber: details.commercialRegistrationNumber,
+            vatNumber: details.vatNumber,
+            city: details.city,
             ibanEncrypted: iban.ciphertext,
             ibanKeyId: iban.keyId,
             ibanLast4: iban.last4,
@@ -94,12 +97,16 @@ export class PrismaVendorApplicationRepository implements VendorApplicationRepos
   }
 
   async list(
-    filter: Readonly<{ status?: VendorApplicationStatus }>,
+    filter: VendorApplicationListFilter,
     page: PageRequest,
   ): Promise<Page<VendorApplication>> {
     try {
       const rows = await this.db.client.vendorApplication.findMany({
-        where: { ...filter, ...keysetAfter(page.cursor) },
+        where: {
+          ...(filter.status === undefined ? {} : { status: filter.status }),
+          ...(filter.q === undefined ? {} : businessSearchCondition(filter.q)),
+          ...keysetAfter(page.cursor),
+        },
         orderBy: [...KEYSET_ORDER],
         take: page.limit + 1,
         include: WITH_DOCUMENTS,

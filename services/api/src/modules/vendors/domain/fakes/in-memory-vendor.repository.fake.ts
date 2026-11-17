@@ -6,7 +6,8 @@ import type { SealedIban } from '../sealed-iban.type';
 import { Vendor } from '../vendor.entity';
 import type { VendorApplication } from '../vendor-application.entity';
 import type { VendorProfileChanges } from '../vendor-profile-changes.type';
-import type { VendorStatus } from '../vendor-status.type';
+import type { VendorListFilter } from '../vendor-list-filter.type';
+import { matchesBusinessSearch } from './matches-business-search.fake';
 import type { InMemoryVendorApplicationRepository } from './in-memory-vendor-application.repository.fake';
 import { keysetPage } from '@common/pagination/keyset-page.fake';
 
@@ -44,6 +45,11 @@ export class InMemoryVendorRepository implements VendorRepository {
       details.name,
       details.description,
       null,
+      null,
+      null,
+      null,
+      details.vatNumber,
+      details.city,
       false,
       'active',
       null,
@@ -72,6 +78,11 @@ export class InMemoryVendorRepository implements VendorRepository {
       this.nextId(),
       name,
       { ar: null, en: null },
+      null,
+      null,
+      null,
+      null,
+      null,
       null,
       true,
       'active',
@@ -119,17 +130,22 @@ export class InMemoryVendorRepository implements VendorRepository {
     );
   }
 
-  list(
-    filter: Readonly<{ status?: VendorStatus }>,
-    page: PageRequest,
-  ): Promise<Page<Vendor>> {
+  list(filter: VendorListFilter, page: PageRequest): Promise<Page<Vendor>> {
     return Promise.resolve(
       keysetPage(
         this.rows
           .map((row) => row.vendor)
           .filter(
             (vendor) =>
-              filter.status === undefined || vendor.status === filter.status,
+              (filter.status === undefined ||
+                vendor.status === filter.status) &&
+              (filter.city === undefined || vendor.city === filter.city) &&
+              (filter.q === undefined ||
+                matchesBusinessSearch(
+                  filter.q,
+                  vendor.name,
+                  vendor.commercialRegistrationNumber,
+                )),
           ),
         page,
       ),
@@ -182,6 +198,23 @@ export class InMemoryVendorRepository implements VendorRepository {
           changes.logoMediaId === undefined
             ? vendor.logoMediaId
             : changes.logoMediaId,
+        coverMediaId:
+          changes.coverMediaId === undefined
+            ? vendor.coverMediaId
+            : changes.coverMediaId,
+        contactPhone:
+          changes.contactPhone === undefined
+            ? vendor.contactPhone
+            : changes.contactPhone,
+        contactEmail:
+          changes.contactEmail === undefined
+            ? vendor.contactEmail
+            : changes.contactEmail,
+        vatNumber:
+          changes.vatNumber === undefined
+            ? vendor.vatNumber
+            : changes.vatNumber,
+        city: changes.city ?? vendor.city,
         description: {
           ar:
             changes.descriptionAr === undefined
@@ -229,6 +262,11 @@ export class InMemoryVendorRepository implements VendorRepository {
         | 'suspensionReason'
         | 'commissionBasisPoints'
         | 'logoMediaId'
+        | 'coverMediaId'
+        | 'contactPhone'
+        | 'contactEmail'
+        | 'vatNumber'
+        | 'city'
         | 'description'
       >
     >,
@@ -239,6 +277,11 @@ export class InMemoryVendorRepository implements VendorRepository {
       merged.name,
       merged.description,
       merged.logoMediaId,
+      merged.coverMediaId,
+      merged.contactPhone,
+      merged.contactEmail,
+      merged.vatNumber,
+      merged.city,
       merged.isPlatform,
       merged.status,
       merged.suspendedAt,

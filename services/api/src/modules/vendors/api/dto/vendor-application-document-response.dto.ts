@@ -7,7 +7,7 @@ export class VendorApplicationDocumentResponseDto {
   @ApiProperty({
     enum: VENDOR_APPLICATION_DOCUMENT_KINDS,
     description:
-      'What the document shows: the commercial registration, the health certificate or a photo of the facility.',
+      'What the document shows: the commercial registration, the health certificate, a photo of the facility, the municipality licence or the national id.',
     example: 'health_certificate',
   })
   kind!: VendorApplicationDocumentKind;

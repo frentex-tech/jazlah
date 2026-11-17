@@ -2,7 +2,7 @@ import { AppError } from '@common/errors/app-error';
 import { ErrorCode } from '@common/errors/error-code.enum';
 import type { FieldError } from '@common/errors/field-error.type';
 import type { VendorApplicationDocument } from './vendor-application-document.type';
-import { VENDOR_APPLICATION_DOCUMENT_KINDS } from './vendor-application-document-kinds.constants';
+import { REQUIRED_VENDOR_APPLICATION_DOCUMENT_KINDS } from './required-vendor-application-document-kinds.constants';
 import { VENDOR_APPLICATION_DOCUMENT_LIMITS } from './vendor-application-document-limits.constants';
 import type { VendorApplicationStatus } from './vendor-application-status.type';
 import type { VendorBusinessDetails } from './vendor-business-details.type';
@@ -30,8 +30,8 @@ export class VendorApplication {
   ) {}
 
   /**
-   * The rules on the documents of a new application: at least one of each kind
-   * (commercial registration, health certificate, facility photo), each file once, at
+   * The rules on the documents of a new application: at least one of each required kind
+   * (REQUIRED_VENDOR_APPLICATION_DOCUMENT_KINDS; the other kinds are optional), each file once, at
    * most VENDOR_APPLICATION_DOCUMENT_LIMITS.max in all. Throws VALIDATION_FAILED with a
    * field error on `documents` naming the failed rules.
    */
@@ -40,7 +40,11 @@ export class VendorApplication {
   ): void {
     const failed: string[] = [];
     const kinds = new Set(documents.map((document) => document.kind));
-    if (VENDOR_APPLICATION_DOCUMENT_KINDS.some((kind) => !kinds.has(kind))) {
+    if (
+      REQUIRED_VENDOR_APPLICATION_DOCUMENT_KINDS.some(
+        (kind) => !kinds.has(kind),
+      )
+    ) {
       failed.push('requiresEachDocumentKind');
     }
     if (
