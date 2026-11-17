@@ -357,8 +357,12 @@ const LOOSE_FILES = [
   '{src,lint-fixtures/src}/{modules,integrations}/*.ts',
   '{src,lint-fixtures/src}/!(config|common|infra|integrations|modules)/**/*.ts',
 ];
-/** Unit tests: R21 does not apply to their test doubles. */
-const SPEC_FILES = ['**/*.spec.ts'];
+/**
+ * Unit tests under the architecture rules: R21 does not apply to their test doubles.
+ * Only those in SOURCE_FILES, where the plugins of the rules it relaxes are loaded; the
+ * seed's tests (prisma/seed/) get the general rules, like the e2e tests.
+ */
+const SPEC_FILES = ['src/**/*.spec.ts', 'lint-fixtures/src/**/*.spec.ts'];
 /** Business modules, where R20 applies. */
 const MODULE_FILES = ['src/modules/**', 'lint-fixtures/src/modules/**'];
 

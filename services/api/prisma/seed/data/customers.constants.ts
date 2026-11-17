@@ -1,0 +1,138 @@
+import type { SeedCustomer } from './seed-customer.type';
+
+/**
+ * The seeded customers' profiles, addresses (Riyadh districts, fake short national
+ * addresses) and marketing consent histories. The development customer has the most;
+ * `dev-customer-new` has a profile without a name, so the app offers the completion
+ * screen.
+ */
+export const SEED_CUSTOMERS: readonly SeedCustomer[] = [
+  {
+    user: 'dev-customer',
+    fullName: 'عبدالله بن محمد القحطاني',
+    email: 'dev.customer@example.com',
+    preferredLanguage: 'ar',
+    addresses: [
+      {
+        label: 'البيت',
+        latitude: 24.8121,
+        longitude: 46.6112,
+        city: 'الرياض',
+        district: 'الملقا',
+        street: 'شارع الأمير محمد بن سعد',
+        building: 'فيلا ١٢',
+        shortNationalAddress: 'RMQA1234',
+        driverInstructions: 'البوابة الجانبية، اتصل قبل الوصول.',
+        isDefault: true,
+      },
+      {
+        label: 'العمل',
+        latitude: 24.6903,
+        longitude: 46.6851,
+        city: 'الرياض',
+        district: 'العليا',
+        street: 'طريق الملك فهد',
+        building: 'برج ٧، الدور ١٤',
+        shortNationalAddress: 'ROLA5678',
+        driverInstructions: null,
+        isDefault: false,
+      },
+      {
+        label: 'بيت الأهل',
+        latitude: 24.7351,
+        longitude: 46.7728,
+        city: 'الرياض',
+        district: 'الروضة',
+        street: null,
+        building: null,
+        shortNationalAddress: null,
+        driverInstructions: null,
+        isDefault: false,
+      },
+    ],
+    marketingConsents: [true],
+  },
+  {
+    user: 'dev-customer-new',
+    fullName: null,
+    email: null,
+    preferredLanguage: 'en',
+    addresses: [],
+    marketingConsents: [],
+  },
+  {
+    user: 'customer-1',
+    fullName: 'نورة بنت سعد العتيبي',
+    email: 'noura.customer@example.com',
+    preferredLanguage: 'ar',
+    addresses: [
+      {
+        label: 'المنزل',
+        latitude: 24.8273,
+        longitude: 46.6401,
+        city: 'الرياض',
+        district: 'الياسمين',
+        street: 'شارع العليا العام',
+        building: '٤٥',
+        shortNationalAddress: 'RYSA2201',
+        driverInstructions: null,
+        isDefault: true,
+      },
+    ],
+    marketingConsents: [true, false],
+  },
+  {
+    user: 'customer-2',
+    fullName: 'Faisal Al-Dosari',
+    email: null,
+    preferredLanguage: 'en',
+    addresses: [
+      {
+        label: 'Home',
+        latitude: 24.7564,
+        longitude: 46.6372,
+        city: 'Riyadh',
+        district: 'Al Nakheel',
+        street: 'Uthman Bin Affan Rd',
+        building: '18',
+        shortNationalAddress: 'RNKA3310',
+        driverInstructions: 'Leave it with the guard.',
+        isDefault: true,
+      },
+      {
+        label: 'Istiraha',
+        latitude: 24.8652,
+        longitude: 46.6648,
+        city: 'Riyadh',
+        district: 'Al Narjis',
+        street: null,
+        building: null,
+        shortNationalAddress: null,
+        driverInstructions: null,
+        isDefault: false,
+      },
+    ],
+    marketingConsents: [false],
+  },
+  {
+    user: 'customer-3',
+    fullName: 'سارة الشهري',
+    email: 'sara.customer@example.com',
+    preferredLanguage: 'ar',
+    addresses: [
+      {
+        label: 'البيت',
+        latitude: 24.7042,
+        longitude: 46.7003,
+        city: 'الرياض',
+        district: 'السليمانية',
+        street: null,
+        building: null,
+        shortNationalAddress: 'RSLA4402',
+        driverInstructions: null,
+        isDefault: true,
+      },
+    ],
+    marketingConsents: [false, true],
+  },
+];
