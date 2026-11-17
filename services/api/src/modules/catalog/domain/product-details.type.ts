@@ -4,7 +4,7 @@ import type { Money } from '@common/money/money';
 import type { NamedReference } from './named-reference.type';
 import type { ProductCuttingOption } from './product-cutting-option.type';
 import type { ProductFulfilment } from './product-fulfilment.type';
-import type { ProductPackaging } from './product-packaging.type';
+import type { ProductPackagingOption } from './product-packaging-option.type';
 import type { ProductSize } from './product-size.type';
 import type { ProductStatus } from './product-status.type';
 
@@ -22,7 +22,7 @@ export type ProductDetails = Readonly<{
   imageMediaIds: readonly string[];
   sizes: readonly ProductSize[];
   cuttings: readonly ProductCuttingOption[];
-  packagings: readonly ProductPackaging[];
+  packagings: readonly ProductPackagingOption[];
   exclusions: readonly NamedReference[];
   /** The lowest size price; null while there is no size. */
   minPrice: Money | null;

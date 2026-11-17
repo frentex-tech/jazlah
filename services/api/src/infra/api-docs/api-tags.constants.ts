@@ -62,6 +62,11 @@ export const API_TAGS = {
     description:
       'The vendor own products: drafts, review, edits, prices, availability and fulfilment. Vendor dashboard.',
   },
+  vendorCatalogLists: {
+    name: 'Vendor catalog lists',
+    description:
+      'The active meat types, cutting styles and "without" items a product can choose, and the cutting and packaging pairs it cannot combine, for the product form. Vendor dashboard.',
+  },
   vendorMedia: {
     name: 'Vendor media',
     description: 'File uploads by a vendor (product images). Vendor dashboard.',

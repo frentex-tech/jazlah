@@ -47,6 +47,16 @@ export class PrismaCuttingPackagingIncompatibilityRepository implements CuttingP
     }
   }
 
+  async listAll(): Promise<CuttingPackagingIncompatibility[]> {
+    try {
+      return await this.db.client.cuttingPackagingIncompatibility.findMany({
+        orderBy: [{ createdAt: 'asc' }, { id: 'asc' }],
+      });
+    } catch (error) {
+      mapPrismaError(error);
+    }
+  }
+
   async delete(id: string): Promise<boolean> {
     try {
       const { count } =

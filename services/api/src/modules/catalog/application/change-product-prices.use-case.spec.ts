@@ -29,6 +29,7 @@ describe('ChangeProductPricesUseCase', () => {
       changes: {
         sizes: [{ sizeId, price: Money.of(89_999) }],
         cuttings: [{ cuttingStyleId: CUT, extraPrice: Money.of(1_500) }],
+        packagings: [{ packaging: 'trays', extraPrice: Money.of(300) }],
       },
     });
 
@@ -36,7 +37,7 @@ describe('ChangeProductPricesUseCase', () => {
     expect(view.product.minPrice?.halalas).toBe(89_999);
     expect(view.product.status).toBe('published');
     expect(kit.changeRequests.rows).toEqual([]);
-    // The cutting kept its price: no entry for it.
+    // The cutting and the packaging kept their prices: no entry for them.
     expect(kit.audit.rows).toEqual([
       {
         actorId: VENDOR_USER,
@@ -61,6 +62,7 @@ describe('ChangeProductPricesUseCase', () => {
       changes: {
         sizes: [],
         cuttings: [{ cuttingStyleId: CUT, extraPrice: Money.zero() }],
+        packagings: [],
       },
     });
 
@@ -72,6 +74,39 @@ describe('ChangeProductPricesUseCase', () => {
           newHalalas: 0,
         },
       }),
+    ]);
+  });
+
+  it('changes and audits a packaging extra price at once on a published product', async () => {
+    const kit = buildCatalogUseCases();
+    seedCatalog(kit);
+    const live = await publishedVendorProduct(kit);
+    kit.audit.rows = [];
+
+    const view = await kit.changePrices.execute({
+      scope,
+      actorId: VENDOR_USER,
+      productId: live.product.id,
+      changes: {
+        sizes: [],
+        cuttings: [],
+        packagings: [{ packaging: 'trays', extraPrice: Money.of(750) }],
+      },
+    });
+
+    expect(
+      view.product.packagings.map((option) => option.extraPrice.halalas),
+    ).toEqual([750]);
+    expect(view.product.status).toBe('published');
+    expect(kit.changeRequests.rows).toEqual([]);
+    expect(kit.audit.rows).toEqual([
+      {
+        actorId: VENDOR_USER,
+        action: 'catalog.product.price_changed',
+        entity: 'product',
+        entityId: live.product.id,
+        metadata: { packaging: 'trays', previousHalalas: 300, newHalalas: 750 },
+      },
     ]);
   });
 
@@ -89,6 +124,7 @@ describe('ChangeProductPricesUseCase', () => {
         changes: {
           sizes: [{ sizeId: UNKNOWN, price: Money.of(1) }],
           cuttings: [{ cuttingStyleId: OTHER_CUT, extraPrice: Money.of(1) }],
+          packagings: [{ packaging: 'vacuum', extraPrice: Money.of(1) }],
         },
       }),
     ).rejects.toMatchObject({
@@ -98,6 +134,10 @@ describe('ChangeProductPricesUseCase', () => {
         {
           field: 'cuttings.0.cuttingStyleId',
           constraints: ['isCuttingOfProduct'],
+        },
+        {
+          field: 'packagings.0.packaging',
+          constraints: ['isPackagingOfProduct'],
         },
       ],
     });
@@ -125,6 +165,10 @@ describe('ChangeProductPricesUseCase', () => {
             { cuttingStyleId: CUT, extraPrice: Money.zero() },
             { cuttingStyleId: CUT, extraPrice: Money.of(1) },
           ],
+          packagings: [
+            { packaging: 'trays', extraPrice: Money.zero() },
+            { packaging: 'trays', extraPrice: Money.of(1) },
+          ],
         },
       }),
     ).rejects.toMatchObject({
@@ -132,6 +176,7 @@ describe('ChangeProductPricesUseCase', () => {
       details: [
         { field: 'sizes.1.sizeId', constraints: ['isNotRepeated'] },
         { field: 'cuttings.1.cuttingStyleId', constraints: ['isNotRepeated'] },
+        { field: 'packagings.1.packaging', constraints: ['isNotRepeated'] },
       ],
     });
     expect(kit.products.rows).toBe(before);
@@ -151,7 +196,7 @@ describe('ChangeProductPricesUseCase', () => {
         scope,
         actorId: VENDOR_USER,
         productId: draft.product.id,
-        changes: { sizes: [], cuttings: [] },
+        changes: { sizes: [], cuttings: [], packagings: [] },
       }),
     ).rejects.toMatchObject({ code: ErrorCode.PRODUCT_NOT_EDITABLE });
   });

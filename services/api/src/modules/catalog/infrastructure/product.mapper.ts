@@ -46,7 +46,10 @@ export function toProductDetails(row: ProductDetailsRow): ProductDetails {
       },
       extraPrice: Money.of(cutting.extraPriceHalalas),
     })),
-    packagings: row.packagings.map((option) => option.packaging),
+    packagings: row.packagings.map((option) => ({
+      packaging: option.packaging,
+      extraPrice: Money.of(option.extraPriceHalalas),
+    })),
     exclusions: row.exclusions.map((exclusion) => ({
       id: exclusion.exclusionItemId,
       name: {

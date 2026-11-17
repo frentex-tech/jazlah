@@ -28,7 +28,7 @@ export async function seedDevelopmentData(
   const users = await ensureUsers(context);
   const adminId = pickId(users, 'dev-admin', 'user');
   await grantDevelopmentStaffAccess(context, users, platform.vendor.id);
-  await seedReferenceLists(context);
+  await seedReferenceLists(context, adminId);
 
   const partners = await seedVendors(context, users, adminId);
   const vendorIds = new Map([['platform', platform.vendor.id], ...partners]);

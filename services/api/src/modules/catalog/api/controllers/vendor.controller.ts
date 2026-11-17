@@ -32,6 +32,8 @@ import { ChangeProductPricesUseCase } from '../../application/change-product-pri
 import { CreateProductUseCase } from '../../application/create-product.use-case';
 import { GetProductUseCase } from '../../application/get-product.use-case';
 import { ListProductsUseCase } from '../../application/list-products.use-case';
+import { ListVendorIncompatibilitiesUseCase } from '../../application/list-vendor-incompatibilities.use-case';
+import { ListVendorPickerItemsUseCase } from '../../application/list-vendor-picker-items.use-case';
 import { SetProductAvailabilityUseCase } from '../../application/set-product-availability.use-case';
 import { SetProductFulfilmentUseCase } from '../../application/set-product-fulfilment.use-case';
 import { SubmitProductUseCase } from '../../application/submit-product.use-case';
@@ -39,24 +41,28 @@ import { UpdateProductContentUseCase } from '../../application/update-product-co
 import { ChangeProductPricesDto } from '../dto/change-product-prices.dto';
 import { CreateProductDto } from '../dto/create-product.dto';
 import { ListProductsQueryDto } from '../dto/list-products-query.dto';
+import { NamedReferenceListResponseDto } from '../dto/named-reference-list-response.dto';
 import { ProductCardPageResponseDto } from '../dto/product-card-page-response.dto';
 import { ProductContentDto } from '../dto/product-content.dto';
 import { ProductResponseDto } from '../dto/product-response.dto';
 import { SetProductAvailabilityDto } from '../dto/set-product-availability.dto';
 import { SetProductFulfilmentDto } from '../dto/set-product-fulfilment.dto';
+import { VendorIncompatibilityListResponseDto } from '../dto/vendor-incompatibility-list-response.dto';
+import { VendorPickerListParamDto } from '../dto/vendor-picker-list-param.dto';
 import { PRODUCT_CONTENT_ERRORS } from '../product-content-errors.constants';
 import { toPriceChanges } from '../to-price-changes';
 import { toProductCardResponse } from '../to-product-card-response';
 import { toProductContent } from '../to-product-content';
 import { toProductResponse } from '../to-product-response';
+import { VENDOR_PICKER_LIST_PATHS } from '../vendor-picker-list-paths.constants';
 
 /**
- * A vendor's own products (FR-VND-03). The vendor is always the access token's
- * organisation: another vendor's product is NOT_FOUND, exactly like a missing one.
+ * A vendor's own products (FR-VND-03), and the active list entries and rules its product
+ * form offers. The vendor is always the access token's organisation: another vendor's
+ * product is NOT_FOUND, exactly like a missing one.
  */
-@ApiTags(API_TAGS.vendorProducts.name)
 @ApiBearerAuth(BEARER_AUTH_SCHEME)
-@Controller('vendor/products')
+@Controller('vendor')
 export class VendorCatalogController {
   constructor(
     private readonly createProduct: CreateProductUseCase,
@@ -67,9 +73,65 @@ export class VendorCatalogController {
     private readonly setAvailability: SetProductAvailabilityUseCase,
     private readonly setFulfilment: SetProductFulfilmentUseCase,
     private readonly changePrices: ChangeProductPricesUseCase,
+    private readonly listPickerItems: ListVendorPickerItemsUseCase,
+    private readonly listIncompatibilities: ListVendorIncompatibilitiesUseCase,
   ) {}
 
-  @Post()
+  // The pickers of the product form.
+
+  @Get('lists/:list')
+  @ApiTags(API_TAGS.vendorCatalogLists.name)
+  @ApiOperation({
+    operationId: 'vendorListCatalogListEntries',
+    summary: 'The active entries of a list, for the product form',
+    description:
+      'Vendor dashboard, product form pickers. Every active entry of one list (`meat-types`, `cutting-styles`, `exclusion-items`), with its Arabic and English name, oldest first; inactive entries are left out, since a product cannot choose them. The whole list in one answer, not paged. Categories come from GET /v1/public/categories. The lists are managed by admins.',
+  })
+  @ApiOkResponse({
+    type: NamedReferenceListResponseDto,
+    description: 'Every active entry of the list.',
+  })
+  @ApiErrorResponses(
+    ErrorCode.VALIDATION_FAILED,
+    ErrorCode.SERVICE_UNAVAILABLE,
+    ...VENDOR_AUTH_ERRORS,
+  )
+  async pickerItems(
+    @Param() params: VendorPickerListParamDto,
+  ): Promise<NamedReferenceListResponseDto> {
+    return {
+      items: await this.listPickerItems.execute(
+        VENDOR_PICKER_LIST_PATHS[params.list],
+      ),
+    };
+  }
+
+  @Get('cutting-packaging-incompatibilities')
+  @ApiTags(API_TAGS.vendorCatalogLists.name)
+  @ApiOperation({
+    operationId: 'vendorListCuttingPackagingIncompatibilities',
+    summary: 'The cutting and packaging pairs a product cannot offer',
+    description:
+      'Vendor dashboard, product form. Every global rule whose cutting style is active: a product offering that cutting style with that packaging cannot be submitted (PRODUCT_NOT_SUBMITTABLE, INCOMPATIBLE_CUTTING_PACKAGING), so the form can warn first. Each pair carries the cutting style with its Arabic and English name; oldest rule first. The whole list in one answer, not paged. The rules are managed by admins.',
+  })
+  @ApiOkResponse({
+    type: VendorIncompatibilityListResponseDto,
+    description: 'Every pair whose cutting style is active.',
+  })
+  @ApiErrorResponses(ErrorCode.SERVICE_UNAVAILABLE, ...VENDOR_AUTH_ERRORS)
+  async incompatibilities(): Promise<VendorIncompatibilityListResponseDto> {
+    return {
+      items: (await this.listIncompatibilities.execute()).map((rule) => ({
+        cuttingStyle: rule.cuttingStyle,
+        packaging: rule.packaging,
+      })),
+    };
+  }
+
+  // The vendor's products.
+
+  @Post('products')
+  @ApiTags(API_TAGS.vendorProducts.name)
   @ApiOperation({
     operationId: 'vendorCreateProduct',
     summary: 'Create a draft product',
@@ -103,7 +165,8 @@ export class VendorCatalogController {
     );
   }
 
-  @Get()
+  @Get('products')
+  @ApiTags(API_TAGS.vendorProducts.name)
   @ApiOperation({
     operationId: 'vendorListProducts',
     summary: 'My products, newest first',
@@ -135,7 +198,8 @@ export class VendorCatalogController {
     };
   }
 
-  @Get(':id')
+  @Get('products/:id')
+  @ApiTags(API_TAGS.vendorProducts.name)
   @ApiOperation({
     operationId: 'vendorGetProduct',
     summary: 'One of my products',
@@ -165,14 +229,15 @@ export class VendorCatalogController {
     );
   }
 
-  @Put(':id')
+  @Put('products/:id')
+  @ApiTags(API_TAGS.vendorProducts.name)
   @ApiOperation({
     operationId: 'vendorUpdateProductContent',
     summary: 'Replace a product’s content',
     description:
       'Vendor dashboard, edit product form. Replaces the whole content (names, description, category, meat type, images, sizes, cutting styles, packagings, "without" items); send every field, lists in display order. Availability, fulfilment and prices have their own endpoints and are not changed here. ' +
       'By status: `draft` or `rejected`: saved at once (a rejected product stays rejected until submitted again). `published`: nothing changes on the live product; the edit becomes a new pending change request for admin review (any pending one is closed as `superseded`), returned in `changeRequest`, and it must meet the submission rules (at least one size and one image, no cutting style offered with a packaging it cannot be combined with). `pending_review`: refused with PRODUCT_NOT_EDITABLE until an admin decides. ' +
-      'Keep an existing size by sending its `id`; a size left out is removed; a size without `id` is new. Existing sizes and cutting styles must carry their current prices (VALIDATION_FAILED `isLivePrice`): change prices with PATCH …/{id}/prices, which applies at once. New sizes and cutting styles take the prices sent (halalas, VAT included). ' +
+      'Keep an existing size by sending its `id`; a size left out is removed; a size without `id` is new. Existing sizes, cutting styles and packagings must carry their current prices (VALIDATION_FAILED `isLivePrice`): change prices with PATCH …/{id}/prices, which applies at once. New sizes, cutting styles and packagings take the prices sent (halalas, VAT included). ' +
       'Errors: VALIDATION_FAILED also for an inactive reference, a size id not of this product (`isSizeOfProduct`) or a repeat (`isNotRepeated`); MEDIA_NOT_FOUND / MEDIA_NOT_READY for a new image not uploaded and confirmed by this user; PRODUCT_NOT_SUBMITTABLE (published only) with `details.reasons` (NO_SIZE, NO_IMAGE, INCOMPATIBLE_CUTTING_PACKAGING with `details.pairs`); NOT_FOUND for an unknown id or another vendor’s product.',
   })
   @ApiOkResponse({
@@ -204,7 +269,8 @@ export class VendorCatalogController {
     );
   }
 
-  @Post(':id/submit')
+  @Post('products/:id/submit')
+  @ApiTags(API_TAGS.vendorProducts.name)
   @HttpCode(HttpStatus.OK)
   @ApiOperation({
     operationId: 'vendorSubmitProduct',
@@ -238,7 +304,8 @@ export class VendorCatalogController {
     );
   }
 
-  @Patch(':id/availability')
+  @Patch('products/:id/availability')
+  @ApiTags(API_TAGS.vendorProducts.name)
   @ApiOperation({
     operationId: 'vendorSetProductAvailability',
     summary: 'Switch a product on or off',
@@ -272,7 +339,8 @@ export class VendorCatalogController {
     );
   }
 
-  @Patch(':id/fulfilment')
+  @Patch('products/:id/fulfilment')
+  @ApiTags(API_TAGS.vendorProducts.name)
   @ApiOperation({
     operationId: 'vendorSetProductFulfilment',
     summary: 'Set delivery, pickup or both',
@@ -306,13 +374,14 @@ export class VendorCatalogController {
     );
   }
 
-  @Patch(':id/prices')
+  @Patch('products/:id/prices')
+  @ApiTags(API_TAGS.vendorProducts.name)
   @ApiOperation({
     operationId: 'vendorChangeProductPrices',
-    summary: 'Change size and cutting prices',
+    summary: 'Change size, cutting and packaging prices',
     description:
-      'Vendor dashboard, prices form. Sets new prices for some of the product’s existing sizes (by size id) and cutting styles (by cutting style id); the others keep theirs. Prices are integer halalas, VAT included. Applies at once in every status but `pending_review`, also on a published product: no review; the lowest price is updated and each price that actually changed is recorded in the audit log. A pending change request is not touched. ' +
-      'Errors: VALIDATION_FAILED for an invalid body, a size or cutting style that is not the product’s (`isSizeOfProduct`, `isCuttingOfProduct`) or named twice (`isNotRepeated`); PRODUCT_NOT_EDITABLE while the product is under review (`details.status`); NOT_FOUND for an unknown id or another vendor’s product.',
+      'Vendor dashboard, prices form. Sets new prices for some of the product’s existing sizes (by size id), cutting styles (by cutting style id) and packagings (by packaging); the others keep theirs. Prices are integer halalas, VAT included. Applies at once in every status but `pending_review`, also on a published product: no review; the lowest price is updated and each price that actually changed is recorded in the audit log. A pending change request is not touched. ' +
+      'Errors: VALIDATION_FAILED for an invalid body, a size, cutting style or packaging that is not the product’s (`isSizeOfProduct`, `isCuttingOfProduct`, `isPackagingOfProduct`) or named twice (`isNotRepeated`); PRODUCT_NOT_EDITABLE while the product is under review (`details.status`); NOT_FOUND for an unknown id or another vendor’s product.',
   })
   @ApiOkResponse({
     type: ProductResponseDto,

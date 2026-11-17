@@ -22,6 +22,7 @@ export class InMemoryReferenceLists implements ReferenceListRepository {
       name: { ar: `${list} ${id.slice(-4)}`, en: `${list} ${id.slice(-4)}` },
       isActive,
       sortOrder: isOrderedReferenceList(list) ? 0 : null,
+      imageMediaId: null,
       createdAt: this.nextDate(),
     };
     this.rows = [...this.rows, { list, item }];
@@ -40,6 +41,7 @@ export class InMemoryReferenceLists implements ReferenceListRepository {
       name: entry.name,
       isActive: true,
       sortOrder: isOrderedReferenceList(list) ? (entry.sortOrder ?? 0) : null,
+      imageMediaId: entry.imageMediaId ?? null,
       createdAt: this.nextDate(),
     };
     this.rows = [...this.rows, { list, item }];
@@ -90,6 +92,19 @@ export class InMemoryReferenceLists implements ReferenceListRepository {
         .sort(
           (a, b) =>
             (a.sortOrder ?? 0) - (b.sortOrder ?? 0) ||
+            a.createdAt.getTime() - b.createdAt.getTime() ||
+            a.id.localeCompare(b.id),
+        ),
+    );
+  }
+
+  listActive(list: ReferenceList): Promise<ReferenceItem[]> {
+    return Promise.resolve(
+      this.rows
+        .filter((row) => row.list === list && row.item.isActive)
+        .map((row) => row.item)
+        .sort(
+          (a, b) =>
             a.createdAt.getTime() - b.createdAt.getTime() ||
             a.id.localeCompare(b.id),
         ),

@@ -1,10 +1,10 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { LocalizedTextResponseDto } from '@common/dto/localized-text-response.dto';
 import { OptionalLocalizedTextResponseDto } from '@common/dto/optional-localized-text-response.dto';
-import { PRODUCT_PACKAGINGS } from '../../domain/product-packagings.constants';
-import type { ProductPackaging } from '../../domain/product-packaging.type';
+
 import { ProductCuttingResponseDto } from './product-cutting-response.dto';
 import { ProductImageResponseDto } from './product-image-response.dto';
+import { ProductPackagingResponseDto } from './product-packaging-response.dto';
 import { ProductSizeResponseDto } from './product-size-response.dto';
 
 /** The content a change request proposes, as the vendor wrote it (ids, not names). */
@@ -59,12 +59,10 @@ export class ProductContentResponseDto {
   cuttings!: ProductCuttingResponseDto[];
 
   @ApiProperty({
-    enum: PRODUCT_PACKAGINGS,
-    isArray: true,
-    example: ['trays'],
-    description: 'The proposed packagings: `trays`, `bags`, `vacuum`, `none`.',
+    type: [ProductPackagingResponseDto],
+    description: 'The proposed packagings, with their extra prices.',
   })
-  packagings!: ProductPackaging[];
+  packagings!: ProductPackagingResponseDto[];
 
   @ApiProperty({
     type: [String],

@@ -19,8 +19,8 @@ import type { ReferenceTable } from './reference-table.type';
 
 /**
  * The admin lists, one table each, through the same columns; the ordered lists
- * (ORDERED_REFERENCE_LISTS: categories) also have a display order, written through
- * their own delegate (the use cases refuse an order for another list).
+ * (ORDERED_REFERENCE_LISTS: categories) also have a display order and an image, written
+ * through their own delegate (the use cases refuse both for another list).
  */
 @Injectable()
 export class PrismaReferenceListRepository implements ReferenceListRepository {
@@ -35,7 +35,11 @@ export class PrismaReferenceListRepository implements ReferenceListRepository {
       return toReferenceItem(
         isOrderedReferenceList(list)
           ? await this.orderedTable(list).create({
-              data: { ...data, sortOrder: item.sortOrder ?? 0 },
+              data: {
+                ...data,
+                sortOrder: item.sortOrder ?? 0,
+                imageMediaId: item.imageMediaId ?? null,
+              },
             })
           : await this.table(list).create({ data }),
       );
@@ -67,6 +71,9 @@ export class PrismaReferenceListRepository implements ReferenceListRepository {
               ...(changes.sortOrder === undefined
                 ? {}
                 : { sortOrder: changes.sortOrder }),
+              ...(changes.imageMediaId === undefined
+                ? {}
+                : { imageMediaId: changes.imageMediaId }),
             },
           })
         : await table.updateMany({ where: { id }, data });
@@ -102,6 +109,18 @@ export class PrismaReferenceListRepository implements ReferenceListRepository {
       const rows = await this.db.client.category.findMany({
         where: { isActive: true },
         orderBy: [{ sortOrder: 'asc' }, { createdAt: 'asc' }, { id: 'asc' }],
+      });
+      return rows.map(toReferenceItem);
+    } catch (error) {
+      mapPrismaError(error);
+    }
+  }
+
+  async listActive(list: ReferenceList): Promise<ReferenceItem[]> {
+    try {
+      const rows = await this.table(list).findMany({
+        where: { isActive: true },
+        orderBy: [{ createdAt: 'asc' }, { id: 'asc' }],
       });
       return rows.map(toReferenceItem);
     } catch (error) {

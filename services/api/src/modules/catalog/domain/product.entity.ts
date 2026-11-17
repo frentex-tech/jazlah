@@ -39,7 +39,9 @@ export class Product {
       .filter(
         (rule) =>
           offered.has(rule.cuttingStyleId) &&
-          content.packagings.includes(rule.packaging),
+          content.packagings.some(
+            (option) => option.packaging === rule.packaging,
+          ),
       )
       .map((rule) => ({
         cuttingStyleId: rule.cuttingStyleId,
@@ -56,11 +58,11 @@ export class Product {
   }
 
   /**
-   * One request names each existing size and each cutting style once. A repeat would
-   * write one row twice (the last value winning) while the lowest price counted both.
-   * Otherwise VALIDATION_FAILED on each repeat: `sizes.<i>.id`,
-   * `cuttings.<i>.cuttingStyleId` (constraint `isNotRepeated`). New sizes (id null)
-   * may repeat.
+   * One request names each existing size, each cutting style and each packaging once. A
+   * repeat would write one row twice (the last value winning) while the lowest price
+   * counted both. Otherwise VALIDATION_FAILED on each repeat: `sizes.<i>.id`,
+   * `cuttings.<i>.cuttingStyleId`, `packagings.<i>.packaging` (constraint
+   * `isNotRepeated`). New sizes (id null) may repeat.
    */
   static assertNoRepeats(content: ProductContent): void {
     Product.throwRepeats([
@@ -72,13 +74,17 @@ export class Product {
         content.cuttings.map((cutting) => cutting.cuttingStyleId),
         (index) => `cuttings.${index}.cuttingStyleId`,
       ),
+      ...Product.repeatsOf(
+        content.packagings.map((option) => option.packaging),
+        (index) => `packagings.${index}.packaging`,
+      ),
     ]);
   }
 
   /**
-   * A prices edit names each size and each cutting style once. Otherwise
-   * VALIDATION_FAILED on each repeat: `sizes.<i>.sizeId`, `cuttings.<i>.cuttingStyleId`
-   * (constraint `isNotRepeated`).
+   * A prices edit names each size, each cutting style and each packaging once. Otherwise
+   * VALIDATION_FAILED on each repeat: `sizes.<i>.sizeId`, `cuttings.<i>.cuttingStyleId`,
+   * `packagings.<i>.packaging` (constraint `isNotRepeated`).
    */
   static assertNoRepeatedPriceChanges(changes: ProductPriceChanges): void {
     Product.throwRepeats([
@@ -89,6 +95,10 @@ export class Product {
       ...Product.repeatsOf(
         changes.cuttings.map((change) => change.cuttingStyleId),
         (index) => `cuttings.${index}.cuttingStyleId`,
+      ),
+      ...Product.repeatsOf(
+        changes.packagings.map((change) => change.packaging),
+        (index) => `packagings.${index}.packaging`,
       ),
     ]);
   }
@@ -114,10 +124,11 @@ export class Product {
 
   /**
    * Prices change only at creation and through the prices edit (at once, audited): an
-   * existing size or cutting style in a content edit, whatever the status, must keep its
-   * live price (the repository keeps the stored one anyway). Otherwise
-   * VALIDATION_FAILED on `sizes.<i>.priceHalalas` or `cuttings.<i>.extraPriceHalalas`
-   * (constraint `isLivePrice`).
+   * existing size, cutting style or packaging in a content edit, whatever the status, must
+   * keep its live price (the repository keeps the stored one anyway); a new one takes any
+   * price. Otherwise VALIDATION_FAILED on `sizes.<i>.priceHalalas`,
+   * `cuttings.<i>.extraPriceHalalas` or `packagings.<i>.extraPriceHalalas` (constraint
+   * `isLivePrice`).
    */
   static assertKeepsLivePrices(
     content: ProductContent,
@@ -129,6 +140,9 @@ export class Product {
         cutting.cuttingStyleId,
         cutting.extraPrice,
       ]),
+    );
+    const packagingPrices = new Map(
+      live.packagings.map((option) => [option.packaging, option.extraPrice]),
     );
     const details: FieldError[] = [
       ...content.sizes.flatMap((size, index) => {
@@ -150,6 +164,17 @@ export class Product {
           : [
               {
                 field: `cuttings.${index}.extraPriceHalalas`,
+                constraints: ['isLivePrice'],
+              },
+            ];
+      }),
+      ...content.packagings.flatMap((option, index) => {
+        const livePrice = packagingPrices.get(option.packaging);
+        return livePrice === undefined || livePrice.equals(option.extraPrice)
+          ? []
+          : [
+              {
+                field: `packagings.${index}.extraPriceHalalas`,
                 constraints: ['isLivePrice'],
               },
             ];
@@ -178,7 +203,10 @@ export class Product {
         cuttingStyleId: cutting.cuttingStyleId,
         extraPrice: cutting.extraPrice,
       })),
-      packagings: live.packagings,
+      packagings: live.packagings.map((option) => ({
+        packaging: option.packaging,
+        extraPrice: option.extraPrice,
+      })),
       exclusionItemIds: live.exclusions.map((exclusion) => exclusion.id),
     };
   }

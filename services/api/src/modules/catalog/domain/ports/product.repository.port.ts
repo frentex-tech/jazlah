@@ -49,11 +49,12 @@ export interface ProductRepository {
   ): Promise<Page<ProductSummary>>;
 
   /**
-   * Replaces the content, in the caller's transaction: names, category, images,
-   * packagings and exclusions as given; sizes matched by id (kept, added, the others
-   * deleted) and cuttings by cutting style. **A kept size or cutting keeps its stored
-   * price** (the content's is ignored): prices change only at creation and through
-   * setPrices. Then the lowest price is worked out again from the stored sizes.
+   * Replaces the content, in the caller's transaction: names, category, images and
+   * exclusions as given; sizes matched by id (kept, added, the others deleted), cuttings
+   * by cutting style and packagings by packaging. **A kept size, cutting or packaging
+   * keeps its stored price** (the content's is ignored): prices change only at creation
+   * and through setPrices. Then the lowest price is worked out again from the stored
+   * sizes.
    */
   saveContent(id: string, content: ProductContent): Promise<ProductDetails>;
 

@@ -65,6 +65,11 @@ export class CatalogJourney {
     };
   }
 
+  /** Remembers a list entry created by a test, for cleanUp. */
+  rememberListItem(path: ListPath, id: string): void {
+    this.listItems.push({ path, id });
+  }
+
   /** Remembers a rule created by a test, for cleanUp. */
   rememberRule(id: string): void {
     this.ruleIds.push(id);
@@ -107,7 +112,7 @@ export class CatalogJourney {
       cuttings: [
         { cuttingStyleId: options.cuttingStyleId, extraPriceHalalas: 1500 },
       ],
-      packagings: ['trays'],
+      packagings: [{ packaging: 'trays', extraPriceHalalas: 300 }],
       exclusionItemIds: [options.exclusionItemId],
       fulfilment: 'both',
       ...overrides,

@@ -1,3 +1,4 @@
+import { searchTextOf } from './search-text.fake';
 import { Money } from '@common/money/money';
 import { keysetPage } from '@common/pagination/keyset-page.fake';
 import type { Page } from '@common/pagination/page.type';
@@ -140,6 +141,13 @@ export class InMemoryProductRepository implements ProductRepository {
               (old) => old.cuttingStyleId === cutting.cuttingStyleId,
             )?.extraPrice ?? cutting.extraPrice,
         })),
+        packagings: content.packagings.map((option) => ({
+          ...option,
+          extraPrice:
+            stored.content.packagings.find(
+              (old) => old.packaging === option.packaging,
+            )?.extraPrice ?? option.extraPrice,
+        })),
       },
       sizes,
       minPrice: this.minPriceOf(sizes),
@@ -207,6 +215,13 @@ export class InMemoryProductRepository implements ProductRepository {
             (change) => change.cuttingStyleId === cutting.cuttingStyleId,
           )?.extraPrice ?? cutting.extraPrice,
       })),
+      packagings: stored.content.packagings.map((option) => ({
+        ...option,
+        extraPrice:
+          changes.packagings.find(
+            (change) => change.packaging === option.packaging,
+          )?.extraPrice ?? option.extraPrice,
+      })),
     };
     const saved: StoredProduct = {
       ...stored,
@@ -229,6 +244,10 @@ export class InMemoryProductRepository implements ProductRepository {
           .filter(
             (row) =>
               this.isPublic(row) &&
+              (filter.text === undefined ||
+                searchTextOf(
+                  `${row.content.name.ar} ${row.content.name.en}`,
+                ).includes(searchTextOf(filter.text))) &&
               (filter.categoryId === undefined ||
                 row.content.categoryId === filter.categoryId) &&
               (filter.vendorId === undefined ||

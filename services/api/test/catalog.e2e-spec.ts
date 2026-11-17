@@ -38,7 +38,9 @@ type QueuedRequest = {
   productId: string;
   content: { images: { mediaId: string; url: string | null }[] };
 };
-type CategoryList = { items: { id: string; sortOrder: number | null }[] };
+type CategoryList = {
+  items: { id: string; sortOrder: number | null; imageUrl: string | null }[];
+};
 type Card = { id: string; vendor: { id: string; name: { en: string } | null } };
 
 const errorCode = (body: unknown): string => (body as ErrorResponseBody).code;
@@ -166,6 +168,81 @@ describe('Catalog (e2e)', () => {
       });
     });
 
+    it("sets, shows and clears a category's image; refuses it on another list and for a wrong file", async () => {
+      const { owner, admin, options } = await setUp();
+      const upload = (user: TestUser, audience: 'vendor' | 'admin') =>
+        catalog.vendors.uploadedFile(
+          user,
+          audience,
+          'catalog.category-image',
+          'png',
+        );
+      const image = await upload(admin, 'admin');
+      const patch = (path: string, id: string, imageMediaId: string | null) =>
+        catalog.http
+          .patch(`/v1/admin/lists/${path}/${id}`)
+          .set(...bearer(admin))
+          .send({ imageMediaId });
+
+      const set = await patch('categories', options.categoryId, image).expect(
+        200,
+      );
+      const listed = (
+        (await catalog.http.get('/v1/public/categories').expect(200))
+          .body as CategoryList
+      ).items.find((item) => item.id === options.categoryId);
+      const created = await catalog.http
+        .post('/v1/admin/lists/categories')
+        .set(...bearer(admin))
+        .send({ name: { ar: 'مشاوي', en: 'Grills' }, imageMediaId: image })
+        .expect(201);
+      catalog.rememberListItem(
+        'categories',
+        (created.body as { id: string }).id,
+      );
+      const cleared = await patch(
+        'categories',
+        options.categoryId,
+        null,
+      ).expect(200);
+      const otherList = await patch(
+        'meat-types',
+        options.meatTypeId,
+        image,
+      ).expect(400);
+      const productImage = await patch(
+        'categories',
+        options.categoryId,
+        await catalog.image(admin, 'admin'),
+      ).expect(404);
+      const unknown = await patch(
+        'categories',
+        options.categoryId,
+        randomUUID(),
+      ).expect(404);
+      const vendorUpload = await catalog.http
+        .post('/v1/vendor/media/uploads')
+        .set(...bearer(owner))
+        .send({ purpose: 'catalog.category-image', contentType: 'image/png' })
+        .expect(400);
+
+      expect((set.body as { imageUrl: string | null }).imageUrl).toEqual(
+        expect.any(String),
+      );
+      expect(listed?.imageUrl).toEqual(expect.any(String));
+      expect((created.body as { imageUrl: string | null }).imageUrl).toEqual(
+        expect.any(String),
+      );
+      expect((cleared.body as { imageUrl: string | null }).imageUrl).toBeNull();
+      expect(otherList.body).toMatchObject({
+        code: 'VALIDATION_FAILED',
+        details: [{ field: 'imageMediaId', constraints: ['isCategoryList'] }],
+      });
+      expect(errorCode(productImage.body)).toBe('MEDIA_NOT_FOUND');
+      expect(errorCode(unknown.body)).toBe('MEDIA_NOT_FOUND');
+      expect(errorCode(vendorUpload.body)).toBe('VALIDATION_FAILED');
+    });
+
     it('adds, lists and removes a cutting and packaging rule; the same pair twice is CONFLICT', async () => {
       const admin = await vendors.admin();
       const cut = await catalog.listItem(admin, 'cutting-styles');
@@ -250,7 +327,7 @@ describe('Catalog (e2e)', () => {
         name: { ar: 'نعيمي', en: 'Naimi lamb' },
         minPriceHalalas: 95000,
         fulfilment: 'both',
-        packagings: ['trays'],
+        packagings: [{ packaging: 'trays', extraPriceHalalas: 300 }],
         changeRequest: null,
       });
       expect((read.body as ProductBody).images[0]?.url).toEqual(
@@ -277,7 +354,15 @@ describe('Catalog (e2e)', () => {
       const badPrice = await send({
         sizes: [{ approxWeightGrams: 1000, priceHalalas: 12.5 }],
       });
-      const badPackaging = await send({ packagings: ['box'] });
+      const badPackaging = await send({
+        packagings: [{ packaging: 'box', extraPriceHalalas: 0 }],
+      });
+      const duplicatePackaging = await send({
+        packagings: [
+          { packaging: 'trays', extraPriceHalalas: 0 },
+          { packaging: 'trays', extraPriceHalalas: 100 },
+        ],
+      });
       const duplicateCut = await send({
         cuttings: [
           { cuttingStyleId: options.cuttingStyleId, extraPriceHalalas: 0 },
@@ -291,7 +376,12 @@ describe('Catalog (e2e)', () => {
         details: [{ field: 'sizes.0.priceHalalas' }],
       });
       expect(badPackaging.body).toMatchObject({
-        details: [{ field: 'packagings' }],
+        details: [{ field: 'packagings.0.packaging' }],
+      });
+      expect(duplicatePackaging.body).toMatchObject({
+        details: [
+          { field: 'packagings.1.packaging', constraints: ['isNotRepeated'] },
+        ],
       });
       expect(duplicateCut.body).toMatchObject({
         details: [
@@ -452,8 +542,41 @@ describe('Catalog (e2e)', () => {
           cuttings: [
             { cuttingStyleId: options.cuttingStyleId, extraPriceHalalas: 0 },
           ],
+          packagings: [{ packaging: 'trays', extraPriceHalalas: 450 }],
         })
         .expect(200);
+      const notOffered = await catalog.http
+        .patch(`/v1/vendor/products/${id}/prices`)
+        .set(...bearer(owner))
+        .send({ packagings: [{ packaging: 'vacuum', extraPriceHalalas: 1 }] })
+        .expect(400);
+      const repeatedPackaging = await catalog.http
+        .patch(`/v1/vendor/products/${id}/prices`)
+        .set(...bearer(owner))
+        .send({
+          packagings: [
+            { packaging: 'trays', extraPriceHalalas: 1 },
+            { packaging: 'trays', extraPriceHalalas: 2 },
+          ],
+        })
+        .expect(400);
+      // A content edit cannot change a kept packaging's price; a new one takes any price.
+      const keptPrice = await catalog.http
+        .put(`/v1/vendor/products/${id}`)
+        .set(...bearer(owner))
+        .send(
+          catalog.body(options, [live.images[0].mediaId], {
+            fulfilment: undefined,
+            sizes: [
+              { id: sizeId, approxWeightGrams: 8000, priceHalalas: 89000 },
+            ],
+            cuttings: [
+              { cuttingStyleId: options.cuttingStyleId, extraPriceHalalas: 0 },
+            ],
+            packagings: [{ packaging: 'trays', extraPriceHalalas: 999 }],
+          }),
+        )
+        .expect(400);
       const pickup = await catalog.http
         .patch(`/v1/vendor/products/${id}/fulfilment`)
         .set(...bearer(owner))
@@ -483,7 +606,29 @@ describe('Catalog (e2e)', () => {
       expect(priced.body).toMatchObject({
         status: 'published',
         minPriceHalalas: 89000,
+        packagings: [{ packaging: 'trays', extraPriceHalalas: 450 }],
         changeRequest: null,
+      });
+      expect(notOffered.body).toMatchObject({
+        details: [
+          {
+            field: 'packagings.0.packaging',
+            constraints: ['isPackagingOfProduct'],
+          },
+        ],
+      });
+      expect(repeatedPackaging.body).toMatchObject({
+        details: [
+          { field: 'packagings.1.packaging', constraints: ['isNotRepeated'] },
+        ],
+      });
+      expect(keptPrice.body).toMatchObject({
+        details: [
+          {
+            field: 'packagings.0.extraPriceHalalas',
+            constraints: ['isLivePrice'],
+          },
+        ],
       });
       expect((pickup.body as ProductBody).fulfilment).toBe('pickup');
       expect((hidden.body as ProductBody).isAvailable).toBe(false);
@@ -513,6 +658,7 @@ describe('Catalog (e2e)', () => {
             previousHalalas: 1500,
             newHalalas: 0,
           },
+          { packaging: 'trays', previousHalalas: 300, newHalalas: 450 },
         ]),
       );
       expect(await publicIds(`vendorId=${vendorId}`)).toEqual([]);
@@ -1071,7 +1217,7 @@ describe('Catalog (e2e)', () => {
         cuttings: [
           { cuttingStyleId: options.cuttingStyleId, extraPriceHalalas: 1500 },
         ],
-        packagings: ['trays'],
+        packagings: [{ packaging: 'trays', extraPriceHalalas: 300 }],
         exclusions: [{ id: options.exclusionItemId }],
       });
       expect(categories).toContain(options.categoryId);
@@ -1255,6 +1401,111 @@ describe('Catalog (e2e)', () => {
       expect(card.items[0]?.vendor.name).not.toBeNull();
     });
 
+    describe('text search (q)', () => {
+      /** A published product of the vendor named `ar` / `en`; returns its id. */
+      const named = (
+        ctx: Awaited<ReturnType<typeof setUp>>,
+        ar: string,
+        en: string,
+      ) =>
+        catalog.published(ctx.owner, ctx.admin, ctx.options, {
+          name: { ar, en },
+        });
+      // Suites share one database: every search is limited to the test's own vendor.
+      const search = (vendorId: string, q: string, extra = '') =>
+        publicIds(`vendorId=${vendorId}&q=${encodeURIComponent(q)}${extra}`);
+
+      it('ignores Arabic diacritics and tatweel, both ways', async () => {
+        const ctx = await setUp('search-marks');
+        const marked = await named(ctx, 'لَحْمُ نعيمي', 'Naimi meat');
+        const plain = await named(ctx, 'كبدة طازجة', 'Fresh liver');
+        const stretched = await named(ctx, 'كـبـاب', 'Kebab');
+
+        expect(await search(ctx.vendorId, 'لحم نعيمي')).toEqual([marked]);
+        expect(await search(ctx.vendorId, 'كَبِدَة')).toEqual([plain]);
+        expect(await search(ctx.vendorId, 'كباب')).toEqual([stretched]);
+      });
+
+      it('reads أ إ آ as ا, ى as ي and ة as ه', async () => {
+        const ctx = await setUp('search-letters');
+        const ribs = await named(ctx, 'أضلاع مشوى', 'Grilled ribs');
+        const liver = await named(ctx, 'كبده', 'Liver');
+        const lamb = await named(ctx, 'لحم آدم إسلام', 'Lamb');
+
+        expect(await search(ctx.vendorId, 'اضلاع مشوي')).toEqual([ribs]);
+        expect(await search(ctx.vendorId, 'كبدة')).toEqual([liver]);
+        expect(await search(ctx.vendorId, 'ادم اسلام')).toEqual([lamb]);
+      });
+
+      it('ignores English case and combines with the category filter', async () => {
+        const ctx = await setUp('search-case');
+        const id = await named(ctx, 'ريش', 'Lamb RIBS Special');
+
+        expect(await search(ctx.vendorId, 'ribs special')).toEqual([id]);
+        expect(
+          await search(
+            ctx.vendorId,
+            'Ribs',
+            `&categoryId=${ctx.options.categoryId}`,
+          ),
+        ).toEqual([id]);
+        expect(
+          await search(ctx.vendorId, 'ribs', `&categoryId=${randomUUID()}`),
+        ).toEqual([]);
+        expect(await search(ctx.vendorId, 'goat')).toEqual([]);
+      });
+
+      it('pages through the matches', async () => {
+        const ctx = await setUp('search-pages');
+        const ids: string[] = [];
+        for (let n = 0; n < 3; n += 1) {
+          ids.push(await named(ctx, `خروف ${n}`, `Sheep ${n}`));
+        }
+        await named(ctx, 'بقر', 'Beef');
+
+        const seen: string[] = [];
+        let cursor: string | null = null;
+        let pages = 0;
+        do {
+          const res = await catalog.http
+            .get(
+              `/v1/public/products?vendorId=${ctx.vendorId}&q=sheep&limit=2${cursor === null ? '' : `&cursor=${cursor}`}`,
+            )
+            .expect(200);
+          const body = res.body as Page<Card>;
+          seen.push(...body.items.map((card) => card.id));
+          cursor = body.nextCursor;
+          pages += 1;
+        } while (cursor !== null);
+
+        expect(pages).toBe(2);
+        expect([...seen].sort()).toEqual([...ids].sort());
+      });
+
+      it('matches % and _ literally', async () => {
+        const ctx = await setUp('search-wildcards');
+        const percent = await named(ctx, 'عرض', '50% off');
+        await named(ctx, 'عرض اخر', '500 off');
+        const underscore = await named(ctx, 'قطع', 'cut_a');
+        await named(ctx, 'قطع اخرى', 'cutxa');
+
+        expect(await search(ctx.vendorId, '50%')).toEqual([percent]);
+        expect(await search(ctx.vendorId, 'cut_a')).toEqual([underscore]);
+      });
+
+      it('refuses a q shorter than 2 or longer than 100 characters', async () => {
+        const short = await catalog.http
+          .get(`/v1/public/products?q=${encodeURIComponent(' a ')}`)
+          .expect(400);
+        const long = await catalog.http
+          .get(`/v1/public/products?q=${'a'.repeat(101)}`)
+          .expect(400);
+
+        expect(short.body).toMatchObject({ details: [{ field: 'q' }] });
+        expect(long.body).toMatchObject({ details: [{ field: 'q' }] });
+      });
+    });
+
     it('refuses invalid filters, a foreign cursor and a malformed id', async () => {
       const badPrice = await catalog.http
         .get('/v1/public/products?minPriceHalalas=cheap')
@@ -1338,6 +1589,46 @@ describe('Catalog (e2e)', () => {
         prices: [70000, 65000],
         minPrice: 65000,
       });
+    });
+
+    it('chains the audit entries of two price edits of one packaging sent at once', async () => {
+      const { owner, admin, options } = await setUp();
+      const id = await catalog.published(owner, admin, options);
+      const price = (extraPriceHalalas: number) =>
+        start(
+          catalog.http
+            .patch(`/v1/vendor/products/${id}/prices`)
+            .set(...bearer(owner))
+            .send({ packagings: [{ packaging: 'trays', extraPriceHalalas }] }),
+        );
+
+      // Both edits queue behind a lock on the product row, then go on together.
+      const lock = await holdRowLock(prisma, 'products', id);
+      const edits = [price(700), price(800)];
+      try {
+        await lock.waitForWaiters(2);
+      } finally {
+        await lock.release();
+      }
+      const responses = await Promise.all(edits);
+
+      expect(responses.map((res) => res.status)).toEqual([200, 200]);
+      const entries = (
+        await prisma.auditLog.findMany({
+          where: { entityId: id, action: 'catalog.product.price_changed' },
+        })
+      ).map(
+        (entry) =>
+          entry.metadata as { previousHalalas: number; newHalalas: number },
+      );
+      // With the product lock the second edit reads the first one's price, so the previous
+      // prices chain: one entry from the original 300, the other from the first edit's new
+      // price. Without the lock both edits read 300 and both entries record it.
+      expect(entries).toHaveLength(2);
+      const first = entries.find((entry) => entry.previousHalalas === 300);
+      expect(first).toBeDefined();
+      const second = entries.find((entry) => entry !== first);
+      expect(second?.previousHalalas).toBe(first?.newHalalas);
     });
 
     /** A vendor's pending change request on `id`, renaming it; returns its id. */
@@ -1464,6 +1755,97 @@ describe('Catalog (e2e)', () => {
     });
   });
 
+  describe("a vendor's product form pickers", () => {
+    type NamedList = {
+      items: { id: string; name: { ar: string; en: string } }[];
+    };
+    type RuleList = {
+      items: {
+        cuttingStyle: { id: string; name: { en: string } };
+        packaging: string;
+      }[];
+    };
+
+    it('lists only active entries, in both languages; categories are not a vendor list', async () => {
+      const { owner, admin, options } = await setUp();
+      const inactive = await catalog.listItem(admin, 'cutting-styles');
+      await catalog.http
+        .patch(`/v1/admin/lists/cutting-styles/${inactive}`)
+        .set(...bearer(admin))
+        .send({ isActive: false })
+        .expect(200);
+
+      const cuts = (
+        await catalog.http
+          .get('/v1/vendor/lists/cutting-styles')
+          .set(...bearer(owner))
+          .expect(200)
+      ).body as NamedList;
+      const meatTypes = (
+        await catalog.http
+          .get('/v1/vendor/lists/meat-types')
+          .set(...bearer(owner))
+          .expect(200)
+      ).body as NamedList;
+      const exclusions = (
+        await catalog.http
+          .get('/v1/vendor/lists/exclusion-items')
+          .set(...bearer(owner))
+          .expect(200)
+      ).body as NamedList;
+      const categories = await catalog.http
+        .get('/v1/vendor/lists/categories')
+        .set(...bearer(owner))
+        .expect(400);
+
+      const ids = (list: NamedList) => list.items.map((item) => item.id);
+      const cut = cuts.items.find((item) => item.id === options.cuttingStyleId);
+      expect(cut?.name.ar).toMatch(/^عنصر \d+$/);
+      expect(cut?.name.en).toMatch(/^Item \d+$/);
+      expect(ids(cuts)).not.toContain(inactive);
+      expect(ids(meatTypes)).toContain(options.meatTypeId);
+      expect(ids(exclusions)).toContain(options.exclusionItemId);
+      expect(errorCode(categories.body)).toBe('VALIDATION_FAILED');
+    });
+
+    it('lists the rules of active cutting styles with their names', async () => {
+      const { owner, admin, options } = await setUp();
+      const inactive = await catalog.listItem(admin, 'cutting-styles');
+      for (const [cuttingStyleId, packaging] of [
+        [options.cuttingStyleId, 'vacuum'],
+        [inactive, 'bags'],
+      ]) {
+        const rule = await catalog.http
+          .post('/v1/admin/cutting-packaging-incompatibilities')
+          .set(...bearer(admin))
+          .send({ cuttingStyleId, packaging })
+          .expect(201);
+        catalog.rememberRule((rule.body as { id: string }).id);
+      }
+      await catalog.http
+        .patch(`/v1/admin/lists/cutting-styles/${inactive}`)
+        .set(...bearer(admin))
+        .send({ isActive: false })
+        .expect(200);
+
+      const rules = (
+        (
+          await catalog.http
+            .get('/v1/vendor/cutting-packaging-incompatibilities')
+            .set(...bearer(owner))
+            .expect(200)
+        ).body as RuleList
+      ).items;
+
+      const rule = rules.find(
+        (item) => item.cuttingStyle.id === options.cuttingStyleId,
+      );
+      expect(rule?.packaging).toBe('vacuum');
+      expect(rule?.cuttingStyle.name.en).toMatch(/^Item \d+$/);
+      expect(rules.map((rule) => rule.cuttingStyle.id)).not.toContain(inactive);
+    });
+  });
+
   describe('authentication', () => {
     const id = randomUUID();
     it.each([
@@ -1475,6 +1857,8 @@ describe('Catalog (e2e)', () => {
       ['patch', `/v1/vendor/products/${id}/availability`],
       ['patch', `/v1/vendor/products/${id}/fulfilment`],
       ['patch', `/v1/vendor/products/${id}/prices`],
+      ['get', '/v1/vendor/lists/cutting-styles'],
+      ['get', '/v1/vendor/cutting-packaging-incompatibilities'],
     ] as const)(
       '%s %s: 401 without a token, 403 with a customer token',
       async (method, path) => {

@@ -33,6 +33,16 @@ export class ReferenceItemResponseDto {
   sortOrder!: number | null;
 
   @ApiProperty({
+    type: String,
+    nullable: true,
+    example:
+      'https://cdn.example.com/catalog/category-image/2026/11/17/7f3a.webp',
+    description:
+      'A category’s image, its public URL; null without an image, and for the other lists.',
+  })
+  imageUrl!: string | null;
+
+  @ApiProperty({
     description: 'When the entry was added, UTC ISO 8601.',
     example: '2026-11-15T10:00:00.000Z',
   })

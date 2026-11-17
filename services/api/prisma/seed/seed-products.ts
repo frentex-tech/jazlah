@@ -1,3 +1,4 @@
+import { PACKAGING_EXTRA_PRICES } from './data/packaging-extra-prices.constants';
 import { Money } from '@common/money/money';
 import { SEED_PRODUCTS } from './data/products.constants';
 import type { SeedProduct } from './data/seed-product.type';
@@ -128,6 +129,7 @@ async function seedProduct(
           create: product.packagings.map((packaging) => ({
             id: seedId(`product-packaging:${product.key}:${packaging}`),
             packaging,
+            extraPriceHalalas: PACKAGING_EXTRA_PRICES[packaging],
             createdAt,
           })),
         },

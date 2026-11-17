@@ -1,3 +1,4 @@
+import { ADMIN } from './catalog-test-data.fake';
 import { ErrorCode } from '@common/errors/error-code.enum';
 import { buildCatalogUseCases } from './catalog-use-cases.fake';
 import {
@@ -43,9 +44,14 @@ describe('GetPublicProductUseCase', () => {
     kit.products.suspendedVendors.add(VENDOR);
     await expect(read()).rejects.toMatchObject({ code: ErrorCode.NOT_FOUND });
     kit.products.suspendedVendors.clear();
-    await kit.updateReferenceItem.execute('categories', CATEGORY, {
-      isActive: false,
-    });
+    await kit.updateReferenceItem.execute(
+      'categories',
+      CATEGORY,
+      {
+        isActive: false,
+      },
+      ADMIN,
+    );
     await expect(read()).rejects.toMatchObject({ code: ErrorCode.NOT_FOUND });
   });
 });
