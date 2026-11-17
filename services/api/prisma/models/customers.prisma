@@ -1,0 +1,111 @@
+// Domain: customers. Owned by the customers module (src/modules/customers/): what a
+// customer keeps with us beyond their identity: the profile, saved addresses and the
+// history of their marketing consent.
+
+/// The language a customer wants messages in.
+enum PreferredLanguage {
+  ar
+  en
+
+  @@map("preferred_language")
+}
+
+/// What a consent record is about. Terms and privacy acceptance come later (HRD-DOC-1).
+enum ConsentKind {
+  marketing
+
+  @@map("consent_kind")
+}
+
+/// Who wrote a consent record.
+enum ConsentSource {
+  /// The customer changed their choice.
+  customer
+  /// The account was deleted while consent was granted: the history ends withdrawn.
+  account_deletion
+
+  @@map("consent_source")
+}
+
+/// A customer's profile: one row per customer, created at the first save. The full name
+/// is 2 to 60 characters (check constraint `customer_profiles_full_name_check`) and the
+/// email is stored lowercase (`customer_profiles_email_check`). Deleted with the account.
+model CustomerProfile {
+  id                String            @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  userId            String            @map("user_id") @db.Uuid
+  /// Nullable: null until the customer gives a name; the profile is incomplete until then.
+  fullName          String?           @map("full_name")
+  /// Nullable: null when the customer gave none, or removed it. Not verified.
+  email             String?
+  preferredLanguage PreferredLanguage @default(ar) @map("preferred_language")
+  createdAt         DateTime          @default(now()) @map("created_at") @db.Timestamptz(3)
+  updatedAt         DateTime          @updatedAt @map("updated_at") @db.Timestamptz(3)
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  // Also the index of the foreign key.
+  @@unique([userId], map: "customer_profiles_user_id_key")
+  @@map("customer_profiles")
+}
+
+/// A saved address. At most 10 per customer, and exactly one default once any exist:
+/// both kept by the customers module under the lock on the user's row; the database
+/// guarantees at most one default (partial unique index
+/// `customer_addresses_user_id_default_key`). Coordinates in range (check constraint
+/// `customer_addresses_location_check`), label 1 to 30 characters and the short national
+/// address as four letters then four digits (`customer_addresses_text_check`). Deleted
+/// with the account.
+model CustomerAddress {
+  id                   String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  userId               String   @map("user_id") @db.Uuid
+  /// The customer's name for it (Home, Work).
+  label                String
+  /// Degrees, -90 to 90.
+  latitude             Float
+  /// Degrees, -180 to 180.
+  longitude            Float
+  /// Nullable: null when the customer gave none (the app fills it from the map).
+  city                 String?
+  /// Nullable: null when the customer gave none.
+  district             String?
+  /// Nullable: null when the customer gave none.
+  street               String?
+  /// Nullable: null when the customer gave none. Building number, floor, apartment.
+  building             String?
+  /// Nullable: null when the customer gave none. The Saudi short national address, as
+  /// `ABCD1234` (uppercase, no space).
+  shortNationalAddress String?  @map("short_national_address")
+  /// Nullable: null when the customer wrote none.
+  driverInstructions   String?  @map("driver_instructions")
+  isDefault            Boolean  @default(false) @map("is_default")
+  createdAt            DateTime @default(now()) @map("created_at") @db.Timestamptz(3)
+  updatedAt            DateTime @updatedAt @map("updated_at") @db.Timestamptz(3)
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  // Also the index of the foreign key (user_id is its first column).
+  @@index([userId, createdAt, id])
+  @@map("customer_addresses")
+}
+
+/// The history of a customer's consent, insert-only: one row per change, never updated
+/// or deleted, so a consent can be proven later. The current state of a kind is the row
+/// with the highest sequence (1, 2, 3… per user and kind). Kept when the account is
+/// deleted: it then names only the tombstone's id.
+model ConsentRecord {
+  id        String        @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  userId    String        @map("user_id") @db.Uuid
+  kind      ConsentKind
+  granted   Boolean
+  /// 1 for the user's first record of the kind, then one more each time (check
+  /// constraint `consent_records_sequence_check`).
+  sequence  Int
+  source    ConsentSource
+  createdAt DateTime      @default(now()) @map("created_at") @db.Timestamptz(3)
+
+  user User @relation(fields: [userId], references: [id], onDelete: Restrict)
+
+  // Also the index of the foreign key (user_id is its first column).
+  @@unique([userId, kind, sequence], map: "consent_records_user_id_kind_sequence_key")
+  @@map("consent_records")
+}

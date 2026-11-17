@@ -91,14 +91,20 @@ export class PublicAuthController {
     ErrorCode.SERVICE_UNAVAILABLE,
   )
   async verify(@Body() body: VerifyOtpDto): Promise<SignedInResponseDto> {
-    const { tokens, principal } = await this.verifyOtp.execute({
-      phone: body.phone,
-      audience: body.audience,
-      code: body.code,
-      devicePlatform: body.devicePlatform,
-      deviceName: body.deviceName ?? null,
-    });
-    return { ...tokens, principal: toPrincipalResponse(principal) };
+    const { tokens, principal, profileComplete } = await this.verifyOtp.execute(
+      {
+        phone: body.phone,
+        audience: body.audience,
+        code: body.code,
+        devicePlatform: body.devicePlatform,
+        deviceName: body.deviceName ?? null,
+      },
+    );
+    return {
+      ...tokens,
+      principal: toPrincipalResponse(principal),
+      profileComplete,
+    };
   }
 
   @Post('refresh')

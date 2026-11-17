@@ -318,6 +318,7 @@
     },
     "/v1/customer/me": {
       "get": {
+        "description": "The phone is in full here, and only here. profileComplete false: the app may show the profile completion screen.",
         "operationId": "CustomerAuthController_me",
         "parameters": [],
         "responses": {
@@ -326,7 +327,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/PrincipalResponseDto"
+                  "$ref": "#/components/schemas/CustomerMeResponseDto"
                 }
               }
             }
@@ -342,7 +343,7 @@
             }
           },
           "403": {
-            "description": "Error. code: FORBIDDEN, ACCOUNT_DISABLED.",
+            "description": "Error. code: ACCOUNT_DISABLED, FORBIDDEN.",
             "content": {
               "application/json": {
                 "schema": {
@@ -377,7 +378,104 @@
             "bearer": []
           }
         ],
-        "summary": "Who is signed in",
+        "summary": "Who is signed in, with my profile",
+        "tags": [
+          "auth"
+        ]
+      },
+      "delete": {
+        "description": "At once and for good: every session ends, the profile, addresses and vendor applications are removed, and the phone can sign up again as a new user. Needs a sign-in within the last 10 minutes (RECENT_SIGN_IN_REQUIRED: sign in again). Refused while the account has vendor, kitchen or admin access (ACCOUNT_HAS_STAFF_ACCESS), and for a disabled account (ACCOUNT_DISABLED: contact support).",
+        "operationId": "CustomerAuthController_remove",
+        "parameters": [
+          {
+            "name": "reason",
+            "required": false,
+            "in": "query",
+            "description": "Why the customer leaves; kept in the audit log, with nothing that identifies them.",
+            "schema": {
+              "example": "not_using",
+              "type": "string",
+              "enum": [
+                "not_using",
+                "privacy",
+                "bad_experience",
+                "other_account",
+                "other"
+              ]
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "The account is deleted."
+          },
+          "400": {
+            "description": "Error. code: VALIDATION_FAILED.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Error. code: UNAUTHORIZED, ACCESS_TOKEN_EXPIRED.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Error. code: RECENT_SIGN_IN_REQUIRED, ACCOUNT_DISABLED, FORBIDDEN.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Error. code: ACCOUNT_HAS_STAFF_ACCESS, TRANSACTION_CONFLICT.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Error. code: RATE_LIMITED.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Error. code: INTERNAL_ERROR.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Delete my account",
         "tags": [
           "auth"
         ]
@@ -3305,6 +3403,740 @@
         "summary": "Confirm an uploaded file",
         "tags": [
           "media"
+        ]
+      }
+    },
+    "/v1/customer/profile": {
+      "patch": {
+        "description": "Saves the fields sent; the profile is complete once it has a full name (FR-ACC-02).",
+        "operationId": "CustomerCustomersController_updateProfile",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateCustomerProfileDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CustomerProfileResponseDto"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Error. code: VALIDATION_FAILED.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Error. code: UNAUTHORIZED, ACCESS_TOKEN_EXPIRED.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Error. code: ACCOUNT_DISABLED, FORBIDDEN.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Error. code: RATE_LIMITED.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Error. code: INTERNAL_ERROR.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Update my profile",
+        "tags": [
+          "customers"
+        ]
+      }
+    },
+    "/v1/customer/profile/marketing-consent": {
+      "put": {
+        "description": "Each change is recorded and kept, so the consent can be proven later; sending the current choice again records nothing.",
+        "operationId": "CustomerCustomersController_setMarketingConsent",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SetMarketingConsentDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MarketingConsentResponseDto"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Error. code: VALIDATION_FAILED.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Error. code: UNAUTHORIZED, ACCESS_TOKEN_EXPIRED.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Error. code: ACCOUNT_DISABLED, FORBIDDEN.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Error. code: RATE_LIMITED.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Error. code: INTERNAL_ERROR.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Grant or withdraw my marketing consent",
+        "tags": [
+          "customers"
+        ]
+      }
+    },
+    "/v1/customer/addresses": {
+      "get": {
+        "description": "All of them (at most 10), the default first, then newest first. Not paged.",
+        "operationId": "CustomerCustomersController_listAddresses",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CustomerAddressListResponseDto"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Error. code: UNAUTHORIZED, ACCESS_TOKEN_EXPIRED.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Error. code: ACCOUNT_DISABLED, FORBIDDEN.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Error. code: RATE_LIMITED.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Error. code: INTERNAL_ERROR.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "My saved addresses",
+        "tags": [
+          "customers"
+        ]
+      },
+      "post": {
+        "description": "At most 10 (ADDRESS_LIMIT_REACHED). The first address becomes the default; isDefault makes a later one the default.",
+        "operationId": "CustomerCustomersController_createAddress",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateCustomerAddressDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CustomerAddressResponseDto"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Error. code: VALIDATION_FAILED.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Error. code: UNAUTHORIZED, ACCESS_TOKEN_EXPIRED.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Error. code: ACCOUNT_DISABLED, FORBIDDEN.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Error. code: ADDRESS_LIMIT_REACHED.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Error. code: RATE_LIMITED.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Error. code: INTERNAL_ERROR.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Save an address",
+        "tags": [
+          "customers"
+        ]
+      }
+    },
+    "/v1/customer/addresses/{id}": {
+      "get": {
+        "operationId": "CustomerCustomersController_getAddress",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "format": "uuid",
+              "example": "7f3a2c1e-0b9d-4e5f-8a6b-1c2d3e4f5a6b",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CustomerAddressResponseDto"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Error. code: VALIDATION_FAILED.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Error. code: UNAUTHORIZED, ACCESS_TOKEN_EXPIRED.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Error. code: ACCOUNT_DISABLED, FORBIDDEN.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Error. code: NOT_FOUND.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Error. code: RATE_LIMITED.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Error. code: INTERNAL_ERROR.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "One of my saved addresses",
+        "tags": [
+          "customers"
+        ]
+      },
+      "patch": {
+        "description": "Saves the fields sent; null clears a readable field. The default changes through POST …/default.",
+        "operationId": "CustomerCustomersController_updateAddress",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "format": "uuid",
+              "example": "7f3a2c1e-0b9d-4e5f-8a6b-1c2d3e4f5a6b",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateCustomerAddressDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CustomerAddressResponseDto"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Error. code: VALIDATION_FAILED.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Error. code: UNAUTHORIZED, ACCESS_TOKEN_EXPIRED.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Error. code: ACCOUNT_DISABLED, FORBIDDEN.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Error. code: NOT_FOUND.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Error. code: RATE_LIMITED.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Error. code: INTERNAL_ERROR.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Change a saved address",
+        "tags": [
+          "customers"
+        ]
+      },
+      "delete": {
+        "description": "When it was the default, the newest remaining address becomes the default.",
+        "operationId": "CustomerCustomersController_deleteAddress",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "format": "uuid",
+              "example": "7f3a2c1e-0b9d-4e5f-8a6b-1c2d3e4f5a6b",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Deleted."
+          },
+          "400": {
+            "description": "Error. code: VALIDATION_FAILED.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Error. code: UNAUTHORIZED, ACCESS_TOKEN_EXPIRED.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Error. code: ACCOUNT_DISABLED, FORBIDDEN.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Error. code: NOT_FOUND.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Error. code: RATE_LIMITED.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Error. code: INTERNAL_ERROR.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Delete a saved address",
+        "tags": [
+          "customers"
+        ]
+      }
+    },
+    "/v1/customer/addresses/{id}/default": {
+      "post": {
+        "description": "The old default stops being the default.",
+        "operationId": "CustomerCustomersController_makeDefaultAddress",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "format": "uuid",
+              "example": "7f3a2c1e-0b9d-4e5f-8a6b-1c2d3e4f5a6b",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CustomerAddressResponseDto"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Error. code: VALIDATION_FAILED.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Error. code: UNAUTHORIZED, ACCESS_TOKEN_EXPIRED.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Error. code: ACCOUNT_DISABLED, FORBIDDEN.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Error. code: NOT_FOUND.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Error. code: RATE_LIMITED.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Error. code: INTERNAL_ERROR.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Make an address my default",
+        "tags": [
+          "customers"
         ]
       }
     },
@@ -6804,7 +7636,10 @@
           "VENDOR_ACCESS_ALREADY_HELD",
           "PRODUCT_NOT_EDITABLE",
           "PRODUCT_NOT_SUBMITTABLE",
-          "PRODUCT_CHANGE_REQUEST_SUPERSEDED"
+          "PRODUCT_CHANGE_REQUEST_SUPERSEDED",
+          "ADDRESS_LIMIT_REACHED",
+          "ACCOUNT_HAS_STAFF_ACCESS",
+          "RECENT_SIGN_IN_REQUIRED"
         ],
         "description": "Stable error code. Clients branch on it; it is never renamed or reused."
       },
@@ -6971,6 +7806,12 @@
           },
           "principal": {
             "$ref": "#/components/schemas/PrincipalResponseDto"
+          },
+          "profileComplete": {
+            "type": "boolean",
+            "nullable": true,
+            "description": "Whether the customer's profile is complete (has a full name): when false the app may show the completion screen, which the customer can skip. Null for vendor, kitchen and admin sign-ins.",
+            "example": false
           }
         },
         "required": [
@@ -6978,7 +7819,8 @@
           "accessTokenExpiresInSeconds",
           "refreshToken",
           "refreshTokenExpiresInSeconds",
-          "principal"
+          "principal",
+          "profileComplete"
         ]
       },
       "RefreshTokenDto": {
@@ -7025,6 +7867,100 @@
           "accessTokenExpiresInSeconds",
           "refreshToken",
           "refreshTokenExpiresInSeconds"
+        ]
+      },
+      "MarketingConsentResponseDto": {
+        "type": "object",
+        "properties": {
+          "granted": {
+            "type": "boolean",
+            "description": "False until the customer grants it (opt-in).",
+            "example": true
+          },
+          "changedAt": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true,
+            "description": "When the current choice was recorded; null when the customer never chose.",
+            "example": "2026-11-17T09:00:00.000Z"
+          }
+        },
+        "required": [
+          "granted",
+          "changedAt"
+        ]
+      },
+      "CustomerMeResponseDto": {
+        "type": "object",
+        "properties": {
+          "userId": {
+            "type": "string",
+            "format": "uuid",
+            "example": "6f1c0c53-3f0b-4d0a-9a6f-2f0f0f8f7a11"
+          },
+          "phone": {
+            "type": "string",
+            "description": "The customer's own phone number, in full (E.164).",
+            "example": "+966512345678"
+          },
+          "audience": {
+            "type": "string",
+            "enum": [
+              "customer"
+            ],
+            "example": "customer"
+          },
+          "organisationId": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true,
+            "description": "Always null for a customer.",
+            "example": null
+          },
+          "sessionId": {
+            "type": "string",
+            "format": "uuid",
+            "example": "0b9f6a0e-58e5-4f6b-8e0a-5a1d3d0c2b10"
+          },
+          "fullName": {
+            "type": "string",
+            "nullable": true,
+            "description": "Null until the customer gives a name.",
+            "example": "محمد العتيبي"
+          },
+          "email": {
+            "type": "string",
+            "nullable": true,
+            "example": "mohammed@example.com"
+          },
+          "preferredLanguage": {
+            "type": "string",
+            "enum": [
+              "ar",
+              "en"
+            ],
+            "example": "ar"
+          },
+          "profileComplete": {
+            "type": "boolean",
+            "description": "Whether the profile has a full name. The app may be used without it; placing an order will require it.",
+            "example": true
+          },
+          "marketingConsent": {
+            "$ref": "#/components/schemas/MarketingConsentResponseDto"
+          }
+        },
+        "required": [
+          "userId",
+          "phone",
+          "audience",
+          "organisationId",
+          "sessionId",
+          "fullName",
+          "email",
+          "preferredLanguage",
+          "profileComplete",
+          "marketingConsent"
         ]
       },
       "LocalizedNameDto": {
@@ -7988,6 +8924,293 @@
           "contentType",
           "purpose"
         ]
+      },
+      "UpdateCustomerProfileDto": {
+        "type": "object",
+        "properties": {
+          "fullName": {
+            "type": "string",
+            "minLength": 2,
+            "maxLength": 60,
+            "description": "The full name; the profile is complete once it has one. It cannot be removed.",
+            "example": "محمد العتيبي"
+          },
+          "email": {
+            "type": "string",
+            "nullable": true,
+            "maxLength": 254,
+            "description": "Stored lowercase and not verified; null (or blank) removes it.",
+            "example": "mohammed@example.com"
+          },
+          "preferredLanguage": {
+            "type": "string",
+            "enum": [
+              "ar",
+              "en"
+            ],
+            "description": "The language of messages to this customer.",
+            "example": "ar"
+          }
+        }
+      },
+      "CustomerProfileResponseDto": {
+        "type": "object",
+        "properties": {
+          "fullName": {
+            "type": "string",
+            "nullable": true,
+            "description": "Null until the customer gives a name.",
+            "example": "محمد العتيبي"
+          },
+          "email": {
+            "type": "string",
+            "nullable": true,
+            "example": "mohammed@example.com"
+          },
+          "preferredLanguage": {
+            "type": "string",
+            "enum": [
+              "ar",
+              "en"
+            ],
+            "example": "ar"
+          },
+          "isComplete": {
+            "type": "boolean",
+            "description": "Whether the profile has a full name. The app may be used without it; placing an order will require it.",
+            "example": true
+          }
+        },
+        "required": [
+          "fullName",
+          "email",
+          "preferredLanguage",
+          "isComplete"
+        ]
+      },
+      "SetMarketingConsentDto": {
+        "type": "object",
+        "properties": {
+          "granted": {
+            "type": "boolean",
+            "description": "True grants marketing messages, false withdraws the consent.",
+            "example": true
+          }
+        },
+        "required": [
+          "granted"
+        ]
+      },
+      "CustomerAddressResponseDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "example": "3d6f0a2b-8c1e-4f7a-9b2d-5e6f7a8b9c0d"
+          },
+          "label": {
+            "type": "string",
+            "example": "البيت"
+          },
+          "location": {
+            "$ref": "#/components/schemas/GeoPointDto"
+          },
+          "city": {
+            "type": "string",
+            "nullable": true,
+            "example": "الرياض"
+          },
+          "district": {
+            "type": "string",
+            "nullable": true,
+            "example": "حي الملقا"
+          },
+          "street": {
+            "type": "string",
+            "nullable": true,
+            "example": "طريق أنس بن مالك"
+          },
+          "building": {
+            "type": "string",
+            "nullable": true,
+            "example": "مبنى 4321، الدور الثاني، شقة 5"
+          },
+          "shortNationalAddress": {
+            "type": "string",
+            "nullable": true,
+            "example": "RRRD2929"
+          },
+          "driverInstructions": {
+            "type": "string",
+            "nullable": true,
+            "example": "الباب الجانبي، اتصل قبل الوصول"
+          },
+          "isDefault": {
+            "type": "boolean",
+            "description": "Exactly one address is the default once any exist.",
+            "example": true
+          },
+          "createdAt": {
+            "format": "date-time",
+            "type": "string",
+            "example": "2026-11-17T09:00:00.000Z"
+          },
+          "updatedAt": {
+            "format": "date-time",
+            "type": "string",
+            "example": "2026-11-17T09:00:00.000Z"
+          }
+        },
+        "required": [
+          "id",
+          "label",
+          "location",
+          "city",
+          "district",
+          "street",
+          "building",
+          "shortNationalAddress",
+          "driverInstructions",
+          "isDefault",
+          "createdAt",
+          "updatedAt"
+        ]
+      },
+      "CustomerAddressListResponseDto": {
+        "type": "object",
+        "properties": {
+          "items": {
+            "maxItems": 10,
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/CustomerAddressResponseDto"
+            }
+          }
+        },
+        "required": [
+          "items"
+        ]
+      },
+      "CreateCustomerAddressDto": {
+        "type": "object",
+        "properties": {
+          "city": {
+            "type": "string",
+            "nullable": true,
+            "maxLength": 100,
+            "example": "الرياض"
+          },
+          "district": {
+            "type": "string",
+            "nullable": true,
+            "maxLength": 100,
+            "example": "حي الملقا"
+          },
+          "street": {
+            "type": "string",
+            "nullable": true,
+            "maxLength": 100,
+            "example": "طريق أنس بن مالك"
+          },
+          "building": {
+            "type": "string",
+            "nullable": true,
+            "maxLength": 100,
+            "description": "Building number, floor, apartment.",
+            "example": "مبنى 4321، الدور الثاني، شقة 5"
+          },
+          "shortNationalAddress": {
+            "type": "string",
+            "nullable": true,
+            "pattern": "^[A-Z]{4}\\d{4}$",
+            "description": "The Saudi short national address: four letters then four digits. Spaces, lowercase and Arabic digits are accepted and stored as `ABCD1234`.",
+            "example": "RRRD2929"
+          },
+          "driverInstructions": {
+            "type": "string",
+            "nullable": true,
+            "maxLength": 300,
+            "example": "الباب الجانبي، اتصل قبل الوصول"
+          },
+          "label": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 30,
+            "description": "The customer's name for it.",
+            "example": "البيت"
+          },
+          "location": {
+            "description": "The point picked on the map.",
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/GeoPointDto"
+              }
+            ]
+          },
+          "isDefault": {
+            "type": "boolean",
+            "description": "Makes it the default address instead of the current one. The first address is the default anyway.",
+            "default": false,
+            "example": false
+          }
+        },
+        "required": [
+          "label",
+          "location"
+        ]
+      },
+      "UpdateCustomerAddressDto": {
+        "type": "object",
+        "properties": {
+          "city": {
+            "type": "string",
+            "nullable": true,
+            "maxLength": 100,
+            "example": "الرياض"
+          },
+          "district": {
+            "type": "string",
+            "nullable": true,
+            "maxLength": 100,
+            "example": "حي الملقا"
+          },
+          "street": {
+            "type": "string",
+            "nullable": true,
+            "maxLength": 100,
+            "example": "طريق أنس بن مالك"
+          },
+          "building": {
+            "type": "string",
+            "nullable": true,
+            "maxLength": 100,
+            "description": "Building number, floor, apartment.",
+            "example": "مبنى 4321، الدور الثاني، شقة 5"
+          },
+          "shortNationalAddress": {
+            "type": "string",
+            "nullable": true,
+            "pattern": "^[A-Z]{4}\\d{4}$",
+            "description": "The Saudi short national address: four letters then four digits. Spaces, lowercase and Arabic digits are accepted and stored as `ABCD1234`.",
+            "example": "RRRD2929"
+          },
+          "driverInstructions": {
+            "type": "string",
+            "nullable": true,
+            "maxLength": 300,
+            "example": "الباب الجانبي، اتصل قبل الوصول"
+          },
+          "label": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 30,
+            "example": "العمل"
+          },
+          "location": {
+            "$ref": "#/components/schemas/GeoPointDto"
+          }
+        }
       },
       "LivenessResponseDto": {
         "type": "object",

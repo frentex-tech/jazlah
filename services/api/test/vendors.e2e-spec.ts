@@ -114,7 +114,7 @@ describe('Vendors (e2e)', () => {
       expect(row?.ibanEncrypted).not.toContain(IBAN_DIGITS);
     });
 
-    it('refuses an invalid IBAN, a missing document kind and a malformed body with VALIDATION_FAILED', async () => {
+    it('refuses an invalid IBAN, a missing document kind and a malformed or missing field with VALIDATION_FAILED', async () => {
       const customer = await journey.customer();
       const documents = await journey.documents(customer);
       const send = (body: Record<string, unknown>) =>
@@ -142,6 +142,12 @@ describe('Vendors (e2e)', () => {
           location: { latitude: '24.7', longitude: '46.6' },
         }),
       );
+      const noLocation = await send(
+        journey.applicationBody(documents, { location: undefined }),
+      );
+      const noName = await send(
+        journey.applicationBody(documents, { name: undefined }),
+      );
 
       expect(badIban.body).toMatchObject({
         code: 'VALIDATION_FAILED',
@@ -158,6 +164,14 @@ describe('Vendors (e2e)', () => {
           { field: 'location.latitude' },
           { field: 'location.longitude' },
         ],
+      });
+      expect(noLocation.body).toMatchObject({
+        code: 'VALIDATION_FAILED',
+        details: [{ field: 'location', constraints: ['isDefined'] }],
+      });
+      expect(noName.body).toMatchObject({
+        code: 'VALIDATION_FAILED',
+        details: [{ field: 'name', constraints: ['isDefined'] }],
       });
     });
 
@@ -254,6 +268,60 @@ describe('Vendors (e2e)', () => {
         expect(errorCode(wrong.body)).toBe('FORBIDDEN');
       },
     );
+  });
+
+  describe("the applicant's account deleted", () => {
+    const deleteAccount = (user: TestUser) =>
+      journey.http.delete('/v1/customer/me').set(...bearer(user));
+
+    it('removes a pending application, and marks its documents for the media cleanup', async () => {
+      const { customer, applicationId } = await journey.pendingApplication();
+      const documentIds = (
+        await prisma.vendorApplicationDocument.findMany({
+          where: { applicationId },
+          select: { mediaId: true },
+        })
+      ).map((document) => document.mediaId);
+
+      await deleteAccount(customer).expect(204);
+
+      expect(
+        await prisma.vendorApplication.count({ where: { id: applicationId } }),
+      ).toBe(0);
+      expect(
+        await prisma.media.findMany({
+          where: { id: { in: documentIds } },
+          select: { status: true, rejectionReason: true },
+        }),
+      ).toEqual(
+        documentIds.map(() => ({
+          status: 'rejected',
+          rejectionReason: 'OWNER_DELETED',
+        })),
+      );
+    });
+
+    it("keeps an approved application and its documents: the vendor's business record", async () => {
+      const { owner, applicationId, vendorId } = await journey.approvedVendor();
+      await prisma.userAccess.updateMany({
+        where: { userId: owner.userId },
+        data: { deactivatedAt: new Date() },
+      });
+      clock.advanceSeconds(61);
+      const customer = await journey.signIn(owner.phone, 'customer');
+
+      await deleteAccount(customer).expect(204);
+
+      const application = await prisma.vendorApplication.findUniqueOrThrow({
+        where: { id: applicationId },
+        include: { documents: { include: { media: true } } },
+      });
+      expect(application.status).toBe('approved');
+      expect(
+        application.documents.map((document) => document.media.status),
+      ).toEqual(application.documents.map(() => 'ready'));
+      expect(await prisma.vendor.count({ where: { id: vendorId } })).toBe(1);
+    });
   });
 
   describe('an admin reviewing applications', () => {

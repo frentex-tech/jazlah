@@ -107,6 +107,31 @@ export class InMemoryVendorApplicationRepository implements VendorApplicationRep
     return this.review(id, 'rejected', reviewerId, reason);
   }
 
+  deleteUnapprovedOf(applicantId: string): Promise<number> {
+    const before = this.rows.length;
+    this.rows = this.rows.filter(
+      ({ application }) =>
+        application.applicantId !== applicantId ||
+        application.status === 'approved',
+    );
+    return Promise.resolve(before - this.rows.length);
+  }
+
+  approvedDocumentMediaIdsOf(applicantId: string): Promise<string[]> {
+    return Promise.resolve(
+      this.rows
+        .map(({ application }) => application)
+        .filter(
+          (application) =>
+            application.applicantId === applicantId &&
+            application.status === 'approved',
+        )
+        .flatMap((application) =>
+          application.documents.map((document) => document.mediaId),
+        ),
+    );
+  }
+
   /** The sealed IBAN of an application, as PrismaVendorRepository copies it. */
   sealedIbanOf(id: string): SealedIban | undefined {
     return this.rows.find(({ application }) => application.id === id)?.iban;

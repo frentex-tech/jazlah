@@ -282,8 +282,9 @@ model ProductExclusion {
 
 /// A vendor's edit of a published product, waiting for an admin while the live version
 /// stays. At most one pending per product (partial unique index
-/// `product_change_requests_product_id_pending_key`); a second edit replaces its content.
-/// The review fields follow the status (check constraint
+/// `product_change_requests_product_id_pending_key`). A request never changes after it is
+/// created: a second edit closes the pending one as `superseded` and opens a new one. The
+/// review fields are set exactly when an admin decided (check constraint
 /// `product_change_requests_review_check`).
 model ProductChangeRequest {
   id              String                     @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid

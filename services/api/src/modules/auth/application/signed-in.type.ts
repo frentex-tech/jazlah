@@ -5,4 +5,6 @@ import type { CurrentUserProfile } from './current-user-profile.type';
 export type SignedIn = Readonly<{
   tokens: AuthTokens;
   principal: CurrentUserProfile;
+  /** Whether a customer's profile is complete; null for a staff sign-in. */
+  profileComplete: boolean | null;
 }>;

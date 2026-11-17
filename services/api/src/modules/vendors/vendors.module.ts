@@ -20,12 +20,14 @@ import { ListVendorsUseCase } from './application/list-vendors.use-case';
 import { ReinstateVendorUseCase } from './application/reinstate-vendor.use-case';
 import { RejectVendorApplicationUseCase } from './application/reject-vendor-application.use-case';
 import { SubmitVendorApplicationUseCase } from './application/submit-vendor-application.use-case';
+import { EraseApplicantDataUseCase } from './application/erase-applicant-data.use-case';
 import { SuspendVendorUseCase } from './application/suspend-vendor.use-case';
 import { UpdateOwnVendorProfileUseCase } from './application/update-own-vendor-profile.use-case';
 import { UpdateVendorProfileAsAdminUseCase } from './application/update-vendor-profile-as-admin.use-case';
 import { VendorDirectory } from './application/vendor-directory.service';
 import { IBAN_CIPHER } from './domain/ports/iban-cipher.port';
 import { VENDOR_ACCESS } from './domain/ports/vendor-access.port';
+import { APPLICANT_ACCOUNTS } from './domain/ports/applicant-accounts.port';
 import { VENDOR_APPLICATION_REPOSITORY } from './domain/ports/vendor-application.repository.port';
 import { VENDOR_MEDIA } from './domain/ports/vendor-media.port';
 import { AesGcmIbanCipher } from './infrastructure/aes-gcm-iban-cipher';
@@ -33,6 +35,7 @@ import { MediaServiceVendorMedia } from './infrastructure/media-service-vendor-m
 import { PrismaVendorApplicationRepository } from './infrastructure/prisma-vendor-application.repository';
 import { RepositoryVendorStatusChecker } from './infrastructure/repository-vendor-status-checker';
 import { UsersServiceVendorAccess } from './infrastructure/users-service-vendor-access';
+import { UsersServiceApplicantAccounts } from './infrastructure/users-service-applicant-accounts';
 import { PlatformVendorModule } from './platform-vendor.module';
 
 /**
@@ -43,8 +46,9 @@ import { PlatformVendorModule } from './platform-vendor.module';
  * This file binds the ports, except the two PlatformVendorModule binds for the platform
  * vendor command (the vendor repository and the commission history). It also provides
  * VENDOR_STATUS_CHECKER (exported), which the organisation status guard and
- * the auth module use to refuse suspended vendors, and VendorDirectory (exported), the
- * reads other modules need (the catalog: the platform vendor, vendor names).
+ * the auth module use to refuse suspended vendors, VendorDirectory (exported), the
+ * reads other modules need (the catalog: the platform vendor, vendor names), and
+ * EraseApplicantDataUseCase (exported), which the auth module's account deletion calls.
  */
 @Module({
   imports: [AuditModule, MediaModule, UsersModule, PlatformVendorModule],
@@ -71,6 +75,7 @@ import { PlatformVendorModule } from './platform-vendor.module';
     UpdateVendorProfileAsAdminUseCase,
     ListPublicVendorsUseCase,
     GetPublicVendorUseCase,
+    EraseApplicantDataUseCase,
     VendorDirectory,
     {
       provide: VENDOR_APPLICATION_REPOSITORY,
@@ -79,8 +84,9 @@ import { PlatformVendorModule } from './platform-vendor.module';
     { provide: IBAN_CIPHER, useClass: AesGcmIbanCipher },
     { provide: VENDOR_MEDIA, useClass: MediaServiceVendorMedia },
     { provide: VENDOR_ACCESS, useClass: UsersServiceVendorAccess },
+    { provide: APPLICANT_ACCOUNTS, useClass: UsersServiceApplicantAccounts },
     { provide: VENDOR_STATUS_CHECKER, useClass: RepositoryVendorStatusChecker },
   ],
-  exports: [VENDOR_STATUS_CHECKER, VendorDirectory],
+  exports: [VENDOR_STATUS_CHECKER, VendorDirectory, EraseApplicantDataUseCase],
 })
 export class VendorsModule {}

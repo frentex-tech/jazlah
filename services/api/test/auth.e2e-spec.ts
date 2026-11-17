@@ -1,5 +1,5 @@
 import type { INestApplication } from '@nestjs/common';
-import request from 'supertest';
+import request, { type Response, type Test } from 'supertest';
 import type { App } from 'supertest/types';
 import type { Redis } from 'ioredis';
 import { ERROR_MESSAGES } from '@common/errors/error-messages.constants';
@@ -20,6 +20,7 @@ import {
 import { AuthClient, type SignedInBody } from './support/auth-client';
 import { createHttpApp } from './support/create-http-app';
 import type { HttpAppOptions } from './support/http-app-options.type';
+import { holdRowLock } from './support/row-lock';
 import { TestClock } from './support/test-clock';
 import { testPhone } from './support/test-phone';
 
@@ -28,9 +29,23 @@ import { testPhone } from './support/test-phone';
  * provider as the phone and a clock the tests move. Each test uses its own phone
  * numbers (testPhone) and client address, so nothing is shared between tests.
  */
+/** A request sent now, its response read later; `done` once it has answered. */
+function sent(test: Test): { done: boolean; response: Promise<Response> } {
+  const tracked = {
+    done: false,
+    response: test.then((res) => {
+      tracked.done = true;
+      return res;
+    }),
+  };
+  return tracked;
+}
+
 describe('Authentication (e2e)', () => {
   const apps: INestApplication<App>[] = [];
   const phones: string[] = [];
+  /** Users this file deleted: a tombstone has no phone, so they are found by id. */
+  const deletedUserIds: string[] = [];
   let app: INestApplication<App>;
   let prisma: PrismaService;
   let sms: FakeSmsProvider;
@@ -134,11 +149,20 @@ describe('Authentication (e2e)', () => {
       await prisma.otpChallenge.deleteMany({
         where: { phone: { in: phones } },
       });
+      const userIds = [
+        ...(
+          await prisma.user.findMany({
+            where: { phone: { in: phones } },
+            select: { id: true },
+          })
+        ).map((user) => user.id),
+        ...deletedUserIds,
+      ];
       // Access rows first: they hold the vendors (Restrict), which hold the
-      // applications, which hold their applicants. Sessions and refresh tokens go with
-      // their user (cascade).
+      // applications, which hold their applicants. Sessions, refresh tokens, profiles
+      // and addresses go with their user (cascade); consent history restricts it.
       await prisma.userAccess.deleteMany({
-        where: { user: { phone: { in: phones } } },
+        where: { userId: { in: userIds } },
       });
       await prisma.vendor.deleteMany({
         where: { id: { in: organisations.map((each) => each.vendorId) } },
@@ -146,7 +170,13 @@ describe('Authentication (e2e)', () => {
       await prisma.vendorApplication.deleteMany({
         where: { id: { in: organisations.map((each) => each.applicationId) } },
       });
-      await prisma.user.deleteMany({ where: { phone: { in: phones } } });
+      await prisma.auditLog.deleteMany({
+        where: { entityId: { in: userIds } },
+      });
+      await prisma.consentRecord.deleteMany({
+        where: { userId: { in: userIds } },
+      });
+      await prisma.user.deleteMany({ where: { id: { in: userIds } } });
     }
     await Promise.all(apps.map((each) => each.close()));
   });
@@ -177,9 +207,19 @@ describe('Authentication (e2e)', () => {
         organisationId: null,
         sessionId: body.principal.sessionId,
       });
+      expect(body.profileComplete).toBe(false);
 
+      // The customer's own `me` shows the phone in full, with the profile.
       const me = await client.me('customer', body.accessToken).expect(200);
-      expect(me.body).toEqual(body.principal);
+      expect(me.body).toEqual({
+        ...body.principal,
+        phone: number,
+        fullName: null,
+        email: null,
+        preferredLanguage: 'ar',
+        profileComplete: false,
+        marketingConsent: { granted: false, changedAt: null },
+      });
 
       const session = await prisma.authSession.findUniqueOrThrow({
         where: { id: body.principal.sessionId },
@@ -778,6 +818,327 @@ describe('Authentication (e2e)', () => {
           where: { userId: signedIn.principal.userId },
         }),
       ).toBe(1);
+    });
+  });
+
+  describe('the profile at sign-in', () => {
+    it('says the profile is complete once the customer has a name, and null for staff', async () => {
+      const number = phone();
+      const first = await client.signIn(number);
+      await request(app.getHttpServer())
+        .patch('/v1/customer/profile')
+        .set('Authorization', `Bearer ${first.accessToken}`)
+        .send({ fullName: 'محمد العتيبي' })
+        .expect(200);
+      clock.advanceSeconds(61);
+
+      const second = await client.signIn(number);
+      const staff = phone('staff');
+      await grant(staff, 'admin');
+      const admin = await client.signIn(staff, 'admin');
+
+      expect(first.profileComplete).toBe(false);
+      expect(second.profileComplete).toBe(true);
+      expect(admin.profileComplete).toBeNull();
+      expect(
+        (await client.me('customer', second.accessToken).expect(200)).body,
+      ).toMatchObject({ fullName: 'محمد العتيبي', profileComplete: true });
+    });
+  });
+
+  describe('deleting the account', () => {
+    const http = () => request(app.getHttpServer());
+    const bearer = (token: string): [string, string] => [
+      'Authorization',
+      `Bearer ${token}`,
+    ];
+
+    /** A signed-in customer whose account a test deletes (cleaned up by id). */
+    async function customer(label = ''): Promise<SignedInBody> {
+      const signedIn = await client.signIn(phone(label));
+      deletedUserIds.push(signedIn.principal.userId);
+      return signedIn;
+    }
+
+    it('removes everything personal, keeps the consent history ended withdrawn, and audits the reason', async () => {
+      const signedIn = await customer();
+      const { userId } = signedIn.principal;
+      const number = (
+        await prisma.user.findUniqueOrThrow({
+          where: { id: userId },
+        })
+      ).phone;
+      await http()
+        .patch('/v1/customer/profile')
+        .set(...bearer(signedIn.accessToken))
+        .send({ fullName: 'محمد العتيبي', email: 'mohammed@example.com' })
+        .expect(200);
+      await http()
+        .put('/v1/customer/profile/marketing-consent')
+        .set(...bearer(signedIn.accessToken))
+        .send({ granted: true })
+        .expect(200);
+      await http()
+        .post('/v1/customer/addresses')
+        .set(...bearer(signedIn.accessToken))
+        .send({
+          label: 'البيت',
+          location: { latitude: 24.7136, longitude: 46.6753 },
+        })
+        .expect(201);
+
+      await client.deleteAccount(signedIn.accessToken, 'privacy').expect(204);
+
+      const user = await prisma.user.findUniqueOrThrow({
+        where: { id: userId },
+      });
+      expect(user.phone).toBeNull();
+      expect(user.deletedAt).toBeInstanceOf(Date);
+      expect(await prisma.customerProfile.count({ where: { userId } })).toBe(0);
+      expect(await prisma.customerAddress.count({ where: { userId } })).toBe(0);
+      expect(await prisma.authSession.count({ where: { userId } })).toBe(0);
+      expect(
+        await prisma.refreshToken.count({
+          where: { sessionId: signedIn.principal.sessionId },
+        }),
+      ).toBe(0);
+      expect(
+        await prisma.otpChallenge.count({ where: { phone: number ?? '' } }),
+      ).toBe(0);
+      expect(
+        (
+          await prisma.consentRecord.findMany({
+            where: { userId },
+            orderBy: { sequence: 'asc' },
+          })
+        ).map(({ granted, sequence, source }) => ({
+          granted,
+          sequence,
+          source,
+        })),
+      ).toEqual([
+        { granted: true, sequence: 1, source: 'customer' },
+        { granted: false, sequence: 2, source: 'account_deletion' },
+      ]);
+      expect(
+        await prisma.auditLog.findMany({
+          where: { entityId: userId },
+          select: { actorId: true, action: true, entity: true, metadata: true },
+        }),
+      ).toEqual([
+        {
+          actorId: userId,
+          action: 'auth.account.deleted',
+          entity: 'user',
+          metadata: { reason: 'privacy' },
+        },
+      ]);
+    });
+
+    it("fails the deleted customer's old refresh token, and refuses the old access token", async () => {
+      const signedIn = await customer();
+      await client.deleteAccount(signedIn.accessToken).expect(204);
+
+      const refreshed = await client.refresh(signedIn.refreshToken).expect(401);
+      const me = await client.me('customer', signedIn.accessToken).expect(401);
+      const save = await http()
+        .patch('/v1/customer/profile')
+        .set(...bearer(signedIn.accessToken))
+        .send({ fullName: 'محمد' })
+        .expect(401);
+      const again = await client
+        .deleteAccount(signedIn.accessToken)
+        .expect(401);
+
+      expect((refreshed.body as ErrorResponseBody).code).toBe(
+        'REFRESH_TOKEN_INVALID',
+      );
+      for (const res of [me, save, again]) {
+        expect((res.body as ErrorResponseBody).code).toBe('UNAUTHORIZED');
+      }
+    });
+
+    it('lets the same phone sign up again as a new user with no old data', async () => {
+      const number = phone();
+      const old = await client.signIn(number);
+      deletedUserIds.push(old.principal.userId);
+      await http()
+        .patch('/v1/customer/profile')
+        .set(...bearer(old.accessToken))
+        .send({ fullName: 'محمد العتيبي' })
+        .expect(200);
+      await http()
+        .put('/v1/customer/profile/marketing-consent')
+        .set(...bearer(old.accessToken))
+        .send({ granted: true })
+        .expect(200);
+      await http()
+        .post('/v1/customer/addresses')
+        .set(...bearer(old.accessToken))
+        .send({
+          label: 'البيت',
+          location: { latitude: 24.7136, longitude: 46.6753 },
+        })
+        .expect(201);
+      await client.deleteAccount(old.accessToken).expect(204);
+
+      const fresh = await client.signIn(number);
+
+      expect(fresh.principal.userId).not.toBe(old.principal.userId);
+      expect(fresh.profileComplete).toBe(false);
+      expect(
+        (await client.me('customer', fresh.accessToken).expect(200)).body,
+      ).toMatchObject({
+        phone: number,
+        fullName: null,
+        marketingConsent: { granted: false, changedAt: null },
+      });
+      expect(
+        (
+          await http()
+            .get('/v1/customer/addresses')
+            .set(...bearer(fresh.accessToken))
+            .expect(200)
+        ).body,
+      ).toEqual({ items: [] });
+    });
+
+    it('refuses a sign-in older than ten minutes with RECENT_SIGN_IN_REQUIRED, and deletes after a new sign-in', async () => {
+      const number = phone();
+      const old = await client.signIn(number);
+      deletedUserIds.push(old.principal.userId);
+      clock.advanceSeconds(601);
+
+      const refused = await client.deleteAccount(old.accessToken).expect(403);
+
+      expect((refused.body as ErrorResponseBody).code).toBe(
+        'RECENT_SIGN_IN_REQUIRED',
+      );
+      expect(
+        (
+          await prisma.user.findUniqueOrThrow({
+            where: { id: old.principal.userId },
+          })
+        ).phone,
+      ).toBe(number);
+
+      const fresh = await client.signIn(number);
+      await client.deleteAccount(fresh.accessToken).expect(204);
+    });
+
+    it('refuses a user with vendor access with ACCOUNT_HAS_STAFF_ACCESS, and deletes once the access is removed', async () => {
+      const number = phone();
+      const { userId } = await grant(number, 'vendor');
+      deletedUserIds.push(userId);
+      const signedIn = await client.signIn(number);
+
+      const refused = await client
+        .deleteAccount(signedIn.accessToken)
+        .expect(409);
+      expect((refused.body as ErrorResponseBody).code).toBe(
+        'ACCOUNT_HAS_STAFF_ACCESS',
+      );
+      expect(
+        (await prisma.user.findUniqueOrThrow({ where: { id: userId } })).phone,
+      ).toBe(number);
+
+      await prisma.userAccess.updateMany({
+        where: { userId },
+        data: { deactivatedAt: new Date() },
+      });
+      await client.deleteAccount(signedIn.accessToken).expect(204);
+    });
+
+    it('refuses a disabled user with ACCOUNT_DISABLED', async () => {
+      const signedIn = await customer();
+      await prisma.user.update({
+        where: { id: signedIn.principal.userId },
+        data: { disabledAt: new Date() },
+      });
+
+      const refused = await client
+        .deleteAccount(signedIn.accessToken)
+        .expect(403);
+
+      expect((refused.body as ErrorResponseBody).code).toBe('ACCOUNT_DISABLED');
+    });
+
+    it('refuses a reason outside the list with VALIDATION_FAILED', async () => {
+      const signedIn = await customer();
+
+      const refused = await client
+        .deleteAccount(signedIn.accessToken, 'my name is Mohammed')
+        .expect(400);
+
+      expect((refused.body as ErrorResponseBody).code).toBe(
+        'VALIDATION_FAILED',
+      );
+    });
+
+    it('signs in a new user, never into the deleted account, when a sign-in waited on the deletion', async () => {
+      const number = phone();
+      const old = await client.signIn(number);
+      deletedUserIds.push(old.principal.userId);
+      clock.advanceSeconds(61);
+      await client.requestCode(number).expect(200);
+      const code = await client.codeFor(number);
+
+      // The deletion, then the sign-in, queue behind a lock on the user's row; the
+      // sign-in has found the old account by then.
+      const lock = await holdRowLock(prisma, 'users', old.principal.userId);
+      let deletion!: ReturnType<typeof sent>;
+      let signIn!: ReturnType<typeof sent>;
+      try {
+        deletion = sent(client.deleteAccount(old.accessToken));
+        await lock.waitForWaiters(1, () => deletion.done);
+        signIn = sent(client.verify(number, code));
+        await lock.waitForWaiters(2, () => signIn.done);
+      } finally {
+        await lock.release();
+      }
+      const deleted = await deletion.response;
+      const signedIn = await signIn.response;
+
+      expect(deleted.status).toBe(204);
+      expect(signedIn.status).toBe(200);
+      const fresh = (signedIn.body as SignedInBody).principal.userId;
+      expect(fresh).not.toBe(old.principal.userId);
+      expect(
+        await prisma.authSession.count({
+          where: { userId: old.principal.userId },
+        }),
+      ).toBe(0);
+      expect(await prisma.authSession.count({ where: { userId: fresh } })).toBe(
+        1,
+      );
+    });
+
+    it('refuses a profile save that waited on the deletion', async () => {
+      const signedIn = await customer();
+      const { userId } = signedIn.principal;
+
+      const lock = await holdRowLock(prisma, 'users', userId);
+      let deletion!: ReturnType<typeof sent>;
+      let save!: ReturnType<typeof sent>;
+      try {
+        deletion = sent(client.deleteAccount(signedIn.accessToken));
+        await lock.waitForWaiters(1, () => deletion.done);
+        save = sent(
+          http()
+            .patch('/v1/customer/profile')
+            .set(...bearer(signedIn.accessToken))
+            .send({ fullName: 'محمد' }),
+        );
+        await lock.waitForWaiters(2, () => save.done);
+      } finally {
+        await lock.release();
+      }
+
+      expect((await deletion.response).status).toBe(204);
+      const saved = await save.response;
+      expect(saved.status).toBe(401);
+      expect((saved.body as ErrorResponseBody).code).toBe('UNAUTHORIZED');
+      expect(await prisma.customerProfile.count({ where: { userId } })).toBe(0);
     });
   });
 

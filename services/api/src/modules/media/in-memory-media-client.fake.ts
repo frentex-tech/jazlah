@@ -4,7 +4,8 @@ type Where = Readonly<Record<string, unknown>>;
 /**
  * The part of the database client MediaService uses (`client.media`), in memory, for
  * its unit tests: rows are plain objects, and the `where` filters understand equality,
- * `{ lt: Date }`, `{ in: [...] }` and `{ not: null }`, which is all the service sends.
+ * `{ lt: Date }`, `{ in: [...] }`, `{ notIn: [...] }` and `{ not: null }`, which is all
+ * the service sends.
  * Each call is asynchronous, like the database, so concurrent calls interleave. Excluded from the build
  * (`*.fake.ts`). Unit tests never need a database (.claude/rules/database.md, 19).
  *
@@ -78,6 +79,14 @@ export class InMemoryMediaClient {
           Array.isArray(condition.in)
         ) {
           return condition.in.includes(value);
+        }
+        if (
+          typeof condition === 'object' &&
+          condition !== null &&
+          'notIn' in condition &&
+          Array.isArray(condition.notIn)
+        ) {
+          return !condition.notIn.includes(value);
         }
         if (
           typeof condition === 'object' &&

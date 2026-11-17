@@ -19,7 +19,11 @@ prisma/
   models/audit.prisma         AuditLog -> audit_logs
   models/idempotency.prisma   IdempotencyKey -> idempotency_keys
   models/media.prisma         Media -> media (enums media_visibility, media_status, media_rejection_reason)
-  models/users.prisma         User -> users, UserAccess -> user_access (enum audience; organisation -> vendors)
+  models/users.prisma         User -> users (a deleted account is a tombstone: no phone), UserAccess -> user_access
+                              (enum audience; organisation -> vendors)
+  models/customers.prisma     CustomerProfile -> customer_profiles, CustomerAddress -> customer_addresses,
+                              ConsentRecord -> consent_records (enums preferred_language, consent_kind,
+                              consent_source)
   models/vendors.prisma       Vendor -> vendors, VendorApplication -> vendor_applications,
                               VendorApplicationDocument -> vendor_application_documents, VendorCommissionChange ->
                               vendor_commission_changes (enums vendor_status, vendor_application_status,
@@ -40,7 +44,8 @@ prisma/
                               public list's composite indexes, replacing unusable partial ones);
                               20261116140000_catalog_category_sort_order (categories' display order, check by hand);
                               20261116160000_catalog_change_request_superseded (superseded status; review check
-                              rewritten by hand)
+                              rewritten by hand); 20261117120000_customers (profiles, addresses, consent records;
+                              users' tombstone; checks and the default address index by hand)
 src/
   main.ts                     bootstrap: validates the environment, pino as Nest's logger, configureHttpApp,
                               shutdownOnSignals (the shutdown deadline), port from config; an invalid
@@ -131,12 +136,17 @@ src/
                               SMS_PROVIDER_TIMEOUT_MS each, log masked), .module.ts (SMS_PROVIDERS), index.ts,
                               testing.ts, providers/log.provider.ts (development only), providers/fake.provider.ts
   modules/
-    users/                    CRUD-shaped, no controller: users.service.ts (users, staff access in user_access)
+    users/                    CRUD-shaped, no controller: users.service.ts (users, staff access in user_access,
+                              the user row locks, tombstones of deleted accounts)
+    customers/                CRUD-shaped, one service per sub-resource: customer-profiles.service.ts,
+                              marketing-consents.service.ts (insert-only history), customer-addresses.service.ts;
+                              controllers/customer.controller.ts (profile, marketing consent, addresses), dto/
     auth/                     the reference four-layer module: phone and OTP sign-in scoped to one audience.
                               api/ (public.controller.ts: otp/request, otp/verify, refresh, logout under
-                              /v1/public/auth; customer, vendor, kitchen, admin controllers: me, auth/logout-all),
-                              application/ (request-otp, verify-otp, refresh-session, logout, logout-all,
-                              get-current-user), domain/ (otp-challenge, refresh-token, auth-session entities;
+                              /v1/public/auth; customer, vendor, kitchen, admin controllers: me, auth/logout-all;
+                              the customer's me with the profile, and DELETE me), application/ (request-otp,
+                              verify-otp, refresh-session, logout, logout-all, get-current-user, get-customer-me,
+                              delete-customer-account), domain/ (otp-challenge, refresh-token, auth-session entities;
                               ports/; fakes/), infrastructure/ (Prisma repositories and mappers, hmac-otp-codes,
                               jwt-access-tokens, random-refresh-token-secrets, sms-otp-sender,
                               rate-limited-otp-requests, tracked-detached-work, system-clock)

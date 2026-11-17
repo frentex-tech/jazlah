@@ -2,7 +2,12 @@ import { Inject, Injectable } from '@nestjs/common';
 import { AppError } from '@common/errors/app-error';
 import { ErrorCode } from '@common/errors/error-code.enum';
 import type { FieldError } from '@common/errors/field-error.type';
+import { TransactionRunner } from '@infra/database/transaction-runner';
 import { Iban } from '../domain/iban';
+import {
+  APPLICANT_ACCOUNTS,
+  type ApplicantAccounts,
+} from '../domain/ports/applicant-accounts.port';
 import { IBAN_CIPHER, type IbanCipher } from '../domain/ports/iban-cipher.port';
 import {
   VENDOR_ACCESS,
@@ -37,6 +42,11 @@ const DOCUMENT_PURPOSE = 'vendor.document';
  * 4. The IBAN is encrypted and the application stored, pending, with its documents in
  *    one statement: a second pending application of the same applicant is
  *    VENDOR_APPLICATION_ALREADY_PENDING, even when both arrive at once.
+ *
+ * Steps 0 to 4 run in one transaction that first holds the applicant's account
+ * (ApplicantAccounts): a deleted account is UNAUTHORIZED (its access token may still be
+ * valid for a few minutes), and a deletion waits until the application is stored, then
+ * removes it with the rest of the account's data.
  */
 @Injectable()
 export class SubmitVendorApplicationUseCase {
@@ -46,9 +56,22 @@ export class SubmitVendorApplicationUseCase {
     @Inject(VENDOR_MEDIA) private readonly media: VendorMedia,
     @Inject(IBAN_CIPHER) private readonly cipher: IbanCipher,
     @Inject(VENDOR_ACCESS) private readonly access: VendorAccess,
+    @Inject(APPLICANT_ACCOUNTS) private readonly accounts: ApplicantAccounts,
+    // Narrowed to what is used, so a unit test passes a plain object.
+    @Inject(TransactionRunner)
+    private readonly transactions: Pick<TransactionRunner, 'run'>,
   ) {}
 
-  async execute(
+  execute(input: SubmitVendorApplicationInput): Promise<VendorApplication> {
+    return this.transactions.run(async () => {
+      if (!(await this.accounts.holdLive(input.applicantId))) {
+        throw new AppError(ErrorCode.UNAUTHORIZED);
+      }
+      return this.submit(input);
+    });
+  }
+
+  private async submit(
     input: SubmitVendorApplicationInput,
   ): Promise<VendorApplication> {
     if (await this.access.isHeldBy(input.applicantId)) {

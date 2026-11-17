@@ -132,4 +132,16 @@ export const ERROR_MESSAGES: Readonly<Record<ErrorCode, LocalizedText>> = {
     ar: 'التاجر عدّل المنتج بعد هالطلب، حدّث الصفحة وراجع التعديل الجديد',
     en: 'The vendor has edited this product again since this request. Reload and review the newer request.',
   },
+  [ErrorCode.ADDRESS_LIMIT_REACHED]: {
+    ar: 'وصلت للحد الأعلى من العناوين، احذف عنوان عشان تضيف جديد',
+    en: 'You have reached the maximum number of addresses. Delete one to add another.',
+  },
+  [ErrorCode.ACCOUNT_HAS_STAFF_ACCESS]: {
+    ar: 'حسابك عنده صلاحية تاجر أو مطبخ أو إدارة، تواصل معنا نشيلها قبل حذف الحساب',
+    en: 'Your account has vendor, kitchen or admin access. Contact us to remove it before deleting your account.',
+  },
+  [ErrorCode.RECENT_SIGN_IN_REQUIRED]: {
+    ar: 'عشان نحمي حسابك، سجّل دخولك مرة ثانية وبعدها احذف الحساب',
+    en: 'For your security, sign in again, then delete your account.',
+  },
 };

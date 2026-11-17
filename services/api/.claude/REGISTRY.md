@@ -41,3 +41,4 @@ What exists, by area. Before writing anything, read this index, then open the ar
 - **money** — `.claude/registry/money.md` — `Money`: all halala arithmetic.
 - **vendors** — `.claude/registry/vendors.md` — `VendorsModule` (the vendor status checker), the platform vendor, `VendorDirectory`.
 - **catalog** — `.claude/registry/catalog.md` — `CatalogModule`.
+- **customers** — `.claude/registry/customers.md` — `CustomersModule`: profiles, marketing consent, addresses.

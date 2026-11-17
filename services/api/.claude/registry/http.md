@@ -12,3 +12,6 @@ One line per building block: name, path, purpose; the detail is in that file's d
 - **ReasonDto** — `src/common/dto/reason.dto.ts` — a `{ reason }` body (1 to 500 characters), for rejections and suspensions.
 - **ADMIN_AUTH_ERRORS** — `src/common/decorators/admin-auth-errors.constants.ts` — the authentication error codes every admin endpoint lists in `@ApiErrorResponses`.
 - **VENDOR_AUTH_ERRORS** — `src/common/decorators/vendor-auth-errors.constants.ts` — the authentication error codes every vendor endpoint lists (VENDOR_SUSPENDED included).
+- **CUSTOMER_AUTH_ERRORS** — `src/common/decorators/customer-auth-errors.constants.ts` — the authentication error codes every customer endpoint lists.
+- **CharLength** — `src/common/decorators/char-length.decorator.ts` — a string length in code points, as PostgreSQL's `char_length` counts it (constraint `charLength`): for every length a check constraint also limits.
+- **GeoPointDto** — `src/common/dto/geo-point.dto.ts` — a `{ latitude, longitude }` point in degrees, request and response, numbers only (vendors, customers' addresses).

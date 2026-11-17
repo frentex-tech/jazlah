@@ -7,6 +7,9 @@ export class InMemoryVendorMedia implements VendorMedia {
   private readonly files = new Map<string, VendorMediaFile>();
   /** How many times publicUrls was called, to prove one read per list. */
   publicUrlCalls = 0;
+  /** Each discardDocumentsOf call: the owner and the ids kept. */
+  readonly discarded: Readonly<{ ownerId: string; keep: readonly string[] }>[] =
+    [];
 
   add(file: VendorMediaFile): void {
     this.files.set(file.id, file);
@@ -30,6 +33,11 @@ export class InMemoryVendorMedia implements VendorMedia {
           .map((id) => [id, `https://cdn.example.invalid/${id}`]),
       ),
     );
+  }
+
+  discardDocumentsOf(ownerId: string, keep: readonly string[]): Promise<void> {
+    this.discarded.push({ ownerId, keep: [...keep] });
+    return Promise.resolve();
   }
 
   link(id: string): Promise<FileLink> {

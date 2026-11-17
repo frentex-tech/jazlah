@@ -43,6 +43,8 @@ export type TestUser = Readonly<{
 export class VendorJourney {
   private readonly auth: AuthClient;
   private readonly phones: string[] = [];
+  /** Every user signed in, also found after the account was deleted (no phone then). */
+  private readonly userIds = new Set<string>();
   private readonly mediaIds: string[] = [];
   private labels = 0;
 
@@ -69,6 +71,7 @@ export class VendorJourney {
   /** Signs `phone` in for `audience`. */
   async signIn(phone: string, audience: string): Promise<TestUser> {
     const body: SignedInBody = await this.auth.signIn(phone, audience);
+    this.userIds.add(body.principal.userId);
     return {
       phone,
       userId: body.principal.userId,
@@ -218,7 +221,9 @@ export class VendorJourney {
       where: { phone: { in: this.phones } },
       select: { id: true },
     });
-    const userIds = users.map((user) => user.id);
+    const userIds = [
+      ...new Set([...users.map((user) => user.id), ...this.userIds]),
+    ];
     const applications = await prisma.vendorApplication.findMany({
       where: { applicantId: { in: userIds } },
       select: { id: true },
@@ -243,6 +248,11 @@ export class VendorJourney {
     });
     await prisma.otpChallenge.deleteMany({
       where: { phone: { in: this.phones } },
+    });
+    await prisma.auditLog.deleteMany({ where: { entityId: { in: userIds } } });
+    // Consent history is insert-only and restricts its user's deletion.
+    await prisma.consentRecord.deleteMany({
+      where: { userId: { in: userIds } },
     });
     await prisma.user.deleteMany({ where: { id: { in: userIds } } });
   }

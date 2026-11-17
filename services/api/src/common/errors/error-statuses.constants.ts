@@ -37,4 +37,7 @@ export const ERROR_STATUSES: Readonly<Record<ErrorCode, number>> = {
   [ErrorCode.PRODUCT_NOT_EDITABLE]: 409,
   [ErrorCode.PRODUCT_NOT_SUBMITTABLE]: 422,
   [ErrorCode.PRODUCT_CHANGE_REQUEST_SUPERSEDED]: 409,
+  [ErrorCode.ADDRESS_LIMIT_REACHED]: 409,
+  [ErrorCode.ACCOUNT_HAS_STAFF_ACCESS]: 409,
+  [ErrorCode.RECENT_SIGN_IN_REQUIRED]: 403,
 };

@@ -126,7 +126,7 @@ describe('Catalog (e2e)', () => {
       ).toContain(id);
     });
 
-    it('refuses an unknown list, an invalid name, an unknown entry and a bad filter', async () => {
+    it('refuses an unknown list, an invalid or missing name, an unknown entry and a bad filter', async () => {
       const admin = await vendors.admin();
 
       const unknownList = await catalog.http
@@ -138,6 +138,11 @@ describe('Catalog (e2e)', () => {
         .post('/v1/admin/lists/categories')
         .set(...bearer(admin))
         .send({ name: { ar: 'أ', en: '' } })
+        .expect(400);
+      const noName = await catalog.http
+        .post('/v1/admin/lists/categories')
+        .set(...bearer(admin))
+        .send({})
         .expect(400);
       const unknownEntry = await catalog.http
         .patch(`/v1/admin/lists/categories/${randomUUID()}`)
@@ -151,6 +156,10 @@ describe('Catalog (e2e)', () => {
 
       expect(unknownList.body).toMatchObject({ details: [{ field: 'list' }] });
       expect(errorCode(badName.body)).toBe('VALIDATION_FAILED');
+      expect(noName.body).toMatchObject({
+        code: 'VALIDATION_FAILED',
+        details: [{ field: 'name', constraints: ['isDefined'] }],
+      });
       expect(errorCode(unknownEntry.body)).toBe('NOT_FOUND');
       expect(badFilter.body).toMatchObject({
         details: [{ field: 'isActive' }],

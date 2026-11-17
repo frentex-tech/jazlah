@@ -85,4 +85,19 @@ export enum ErrorCode {
    * newer edit: the dashboard reloads and shows the newer request.
    */
   PRODUCT_CHANGE_REQUEST_SUPERSEDED = 'PRODUCT_CHANGE_REQUEST_SUPERSEDED',
+  /**
+   * The customer already has the most saved addresses allowed; nothing was added.
+   * Details: `{ limit }`.
+   */
+  ADDRESS_LIMIT_REACHED = 'ADDRESS_LIMIT_REACHED',
+  /**
+   * The account holds vendor, kitchen or admin access, so it cannot be deleted through
+   * the app until that access is removed.
+   */
+  ACCOUNT_HAS_STAFF_ACCESS = 'ACCOUNT_HAS_STAFF_ACCESS',
+  /**
+   * The action needs a recent sign-in (account deletion: within the last 10 minutes).
+   * Sign in again, then repeat it. 403, not 401, so a client does not just refresh.
+   */
+  RECENT_SIGN_IN_REQUIRED = 'RECENT_SIGN_IN_REQUIRED',
 }

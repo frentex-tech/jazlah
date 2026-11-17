@@ -1,5 +1,6 @@
 import type { TransactionRunner } from '@infra/database/transaction-runner';
 import { InMemoryAuditLog } from '@infra/audit/in-memory-audit-log.fake';
+import { InMemoryApplicantAccounts } from '../domain/fakes/in-memory-applicant-accounts.fake';
 import { InMemoryIbanCipher } from '../domain/fakes/in-memory-iban-cipher.fake';
 import { InMemoryVendorAccess } from '../domain/fakes/in-memory-vendor-access.fake';
 import { InMemoryVendorApplicationRepository } from '../domain/fakes/in-memory-vendor-application.repository.fake';
@@ -9,6 +10,7 @@ import { InMemoryVendorRepository } from '../domain/fakes/in-memory-vendor.repos
 import { ApproveVendorApplicationUseCase } from './approve-vendor-application.use-case';
 import { ChangeVendorCommissionUseCase } from './change-vendor-commission.use-case';
 import { CreatePlatformVendorUseCase } from './create-platform-vendor.use-case';
+import { EraseApplicantDataUseCase } from './erase-applicant-data.use-case';
 import { GetLatestVendorApplicationUseCase } from './get-latest-vendor-application.use-case';
 import { GetPublicVendorUseCase } from './get-public-vendor.use-case';
 import { GetVendorApplicationUseCase } from './get-vendor-application.use-case';
@@ -37,6 +39,7 @@ export function buildVendorsUseCases() {
   const cipher = new InMemoryIbanCipher();
   const media = new InMemoryVendorMedia();
   const access = new InMemoryVendorAccess();
+  const accounts = new InMemoryApplicantAccounts();
   const audit = new InMemoryAuditLog();
 
   const transactions: Pick<TransactionRunner, 'run'> = {
@@ -68,13 +71,17 @@ export function buildVendorsUseCases() {
     cipher,
     media,
     access,
+    accounts,
     audit,
     submitApplication: new SubmitVendorApplicationUseCase(
       applications,
       media,
       cipher,
       access,
+      accounts,
+      transactions,
     ),
+    eraseApplicantData: new EraseApplicantDataUseCase(applications, media),
     getLatestApplication: new GetLatestVendorApplicationUseCase(applications),
     listApplications: new ListVendorApplicationsUseCase(applications),
     getApplication: new GetVendorApplicationUseCase(applications, media),

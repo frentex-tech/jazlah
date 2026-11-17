@@ -8,4 +8,5 @@ export type MediaRejectionReason =
   | 'TOO_LARGE'
   | 'TYPE_NOT_ALLOWED'
   | 'CONTENT_TYPE_MISMATCH'
-  | 'EXPIRED';
+  | 'EXPIRED'
+  | 'OWNER_DELETED';

@@ -13,5 +13,6 @@ export function toAuthSession(row: AuthSessionRow): AuthSession {
     row.lastUsedAt,
     row.revokedAt,
     row.revocationReason,
+    row.createdAt,
   );
 }

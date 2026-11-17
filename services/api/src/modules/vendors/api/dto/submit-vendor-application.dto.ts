@@ -4,6 +4,7 @@ import {
   ArrayMaxSize,
   ArrayMinSize,
   IsArray,
+  IsDefined,
   IsOptional,
   IsString,
   Matches,
@@ -13,7 +14,7 @@ import {
 } from 'class-validator';
 import { VENDOR_APPLICATION_DOCUMENT_KINDS } from '../../domain/vendor-application-document-kinds.constants';
 import { VENDOR_APPLICATION_DOCUMENT_LIMITS } from '../../domain/vendor-application-document-limits.constants';
-import { GeoPointDto } from './geo-point.dto';
+import { GeoPointDto } from '@common/dto/geo-point.dto';
 import { IsSaudiIban } from './is-saudi-iban.decorator';
 import { LocalizedDescriptionDto } from '@common/dto/localized-description.dto';
 import { LocalizedNameDto } from '@common/dto/localized-name.dto';
@@ -25,6 +26,7 @@ import { VendorApplicationDocumentDto } from './vendor-application-document.dto'
 /** The body of a vendor application (FR-VND-01). */
 export class SubmitVendorApplicationDto {
   @ApiProperty({ type: LocalizedNameDto })
+  @IsDefined()
   @ValidateNested()
   @Type(() => LocalizedNameDto)
   name!: LocalizedNameDto;
@@ -67,6 +69,7 @@ export class SubmitVendorApplicationDto {
   accountHolderName!: string;
 
   @ApiProperty({ type: GeoPointDto, description: 'Where the facility is.' })
+  @IsDefined()
   @ValidateNested()
   @Type(() => GeoPointDto)
   location!: GeoPointDto;
@@ -77,6 +80,7 @@ export class SubmitVendorApplicationDto {
     minItems: VENDOR_APPLICATION_DOCUMENT_KINDS.length,
     maxItems: VENDOR_APPLICATION_DOCUMENT_LIMITS.max,
   })
+  @IsDefined()
   @IsArray()
   @ArrayMinSize(VENDOR_APPLICATION_DOCUMENT_KINDS.length)
   @ArrayMaxSize(VENDOR_APPLICATION_DOCUMENT_LIMITS.max)

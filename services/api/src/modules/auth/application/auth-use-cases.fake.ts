@@ -1,9 +1,12 @@
 import type { AuthConfig } from '@config/auth-config.type';
+import { InMemoryAuditLog } from '@infra/audit/in-memory-audit-log.fake';
 import type { TransactionRunner } from '@infra/database/transaction-runner';
 import { FixedClock } from '../domain/fakes/fixed-clock.fake';
 import { InMemoryAccessTokens } from '../domain/fakes/in-memory-access-tokens.fake';
 import { InMemoryAuthSessionRepository } from '../domain/fakes/in-memory-auth-session.repository.fake';
+import { InMemoryCustomerProfiles } from '../domain/fakes/in-memory-customer-profiles.fake';
 import { InMemoryDetachedWork } from '../domain/fakes/in-memory-detached-work.fake';
+import { InMemoryErasures } from '../domain/fakes/in-memory-erasures.fake';
 import { InMemoryOtpChallengeRepository } from '../domain/fakes/in-memory-otp-challenge.repository.fake';
 import { InMemoryOtpCodes } from '../domain/fakes/in-memory-otp-codes.fake';
 import { InMemoryOtpRequestLimit } from '../domain/fakes/in-memory-otp-request-limit.fake';
@@ -12,7 +15,9 @@ import { InMemoryRefreshTokenRepository } from '../domain/fakes/in-memory-refres
 import { InMemoryRefreshTokenSecrets } from '../domain/fakes/in-memory-refresh-token-secrets.fake';
 import { InMemoryUserAccounts } from '../domain/fakes/in-memory-user-accounts.fake';
 import { InMemoryVendorStatusChecker } from '../domain/fakes/in-memory-vendor-status-checker.fake';
+import { DeleteCustomerAccountUseCase } from './delete-customer-account.use-case';
 import { GetCurrentUserUseCase } from './get-current-user.use-case';
+import { GetCustomerMeUseCase } from './get-customer-me.use-case';
 import { LogoutAllUseCase } from './logout-all.use-case';
 import { LogoutUseCase } from './logout.use-case';
 import { RefreshSessionUseCase } from './refresh-session.use-case';
@@ -59,6 +64,9 @@ export function buildAuthUseCases(
   const users = new InMemoryUserAccounts();
   const detached = new InMemoryDetachedWork();
   const vendors = new InMemoryVendorStatusChecker();
+  const profiles = new InMemoryCustomerProfiles();
+  const erasures = new InMemoryErasures();
+  const audit = new InMemoryAuditLog();
 
   const transactions: Pick<TransactionRunner, 'run'> = {
     async run<T>(work: () => Promise<T>): Promise<T> {
@@ -67,6 +75,9 @@ export function buildAuthUseCases(
         sessions: sessions.rows,
         refreshTokens: refreshTokens.rows,
         users: users.users,
+        deleted: users.deleted,
+        erasures: erasures.rows,
+        audit: audit.rows,
       };
       try {
         return await work();
@@ -75,6 +86,9 @@ export function buildAuthUseCases(
         sessions.rows = before.sessions;
         refreshTokens.rows = before.refreshTokens;
         users.users = before.users;
+        users.deleted = before.deleted;
+        erasures.rows = before.erasures;
+        audit.rows = before.audit;
         throw error;
       }
     },
@@ -93,6 +107,9 @@ export function buildAuthUseCases(
     users,
     detached,
     vendors,
+    profiles,
+    erasures,
+    audit,
     requestOtp: new RequestOtpUseCase(
       challenges,
       codes,
@@ -113,6 +130,7 @@ export function buildAuthUseCases(
       accessTokens,
       clock,
       transactions,
+      profiles,
       settings,
       vendors,
     ),
@@ -130,5 +148,16 @@ export function buildAuthUseCases(
     logout: new LogoutUseCase(refreshTokens, sessions, secrets, clock),
     logoutAll: new LogoutAllUseCase(sessions, clock),
     getCurrentUser: new GetCurrentUserUseCase(users),
+    getCustomerMe: new GetCustomerMeUseCase(users, profiles),
+    deleteCustomerAccount: new DeleteCustomerAccountUseCase(
+      users,
+      sessions,
+      challenges,
+      erasures.customers,
+      erasures.applicants,
+      audit,
+      clock,
+      transactions,
+    ),
   };
 }

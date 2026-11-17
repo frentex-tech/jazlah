@@ -92,7 +92,9 @@ describe('VerifyOtpUseCase', () => {
           organisationId: null,
           phone: PHONE,
         },
+        profileComplete: false,
       });
+      expect(kit.sessions.rows[0]?.signedInAt).toEqual(kit.clock.now());
     });
 
     it('signs the access token for the session, with exactly one audience', async () => {
@@ -320,6 +322,65 @@ describe('VerifyOtpUseCase', () => {
         organisationId: ORGANISATION,
       });
       expect(kit.sessions.rows[0]?.organisationId).toBe(ORGANISATION);
+    });
+  });
+
+  describe('the profile', () => {
+    it('says a customer without a name has an incomplete profile, and one with a name a complete one', async () => {
+      const kit = buildAuthUseCases();
+      await request(kit);
+      const first = await kit.verifyOtp.execute(input());
+      kit.profiles.name(first.principal.userId, 'محمد');
+      kit.clock.advanceSeconds(60);
+      await request(kit);
+
+      const second = await kit.verifyOtp.execute(input());
+
+      expect(first.profileComplete).toBe(false);
+      expect(second.profileComplete).toBe(true);
+    });
+
+    it('is null for a staff sign-in', async () => {
+      const kit = buildAuthUseCases();
+      kit.users.grant(STAFF_PHONE, 'vendor', ORGANISATION);
+      await request(kit, STAFF_PHONE, 'vendor');
+
+      const result = await kit.verifyOtp.execute(
+        input({ phone: STAFF_PHONE, audience: 'vendor' }),
+      );
+
+      expect(result.profileComplete).toBeNull();
+    });
+  });
+
+  describe('a sign-in racing an account deletion', () => {
+    it('holds the user it signs in, so a deletion waits for it', async () => {
+      const kit = buildAuthUseCases();
+      await request(kit);
+
+      const result = await kit.verifyOtp.execute(input());
+
+      expect(kit.users.locks).toEqual([`sign-in ${result.principal.userId}`]);
+    });
+
+    it('signs in a new user when the account found is deleted before it is held', async () => {
+      const kit = buildAuthUseCases();
+      const old = kit.users.add(PHONE);
+      await request(kit);
+      kit.users.beforeNextSignInLock = () => {
+        void kit.users.markDeleted(old.id, kit.clock.now());
+      };
+
+      const result = await kit.verifyOtp.execute(input());
+
+      expect(result.principal.userId).not.toBe(old.id);
+      expect(kit.sessions.rows.map((row) => row.userId)).toEqual([
+        result.principal.userId,
+      ]);
+      expect(kit.users.locks).toEqual([
+        `sign-in ${old.id}`,
+        `sign-in ${result.principal.userId}`,
+      ]);
     });
   });
 

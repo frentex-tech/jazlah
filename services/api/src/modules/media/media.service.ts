@@ -17,10 +17,13 @@ import { isUploadPurpose } from './is-upload-purpose';
 import { MEDIA_CLEANUP_SCOPE } from './media-cleanup-scope.constants';
 import type { MediaCleanupScope } from './media-cleanup-scope.type';
 import { MEDIA_CLEANUP } from './media-cleanup.constants';
+import { MEDIA_CHECK_FAILURE_REASONS } from './media-check-failure-reasons.constants';
+import { MEDIA_REMOVAL_REASONS } from './media-removal-reasons.constants';
 import { MEDIA_RATE_LIMITS } from './media-rate-limits.constants';
 import type { MediaFile } from './media-file.type';
 import type { MediaRejectionReason } from './media-rejection-reason.type';
 import type { RequestUploadInput } from './request-upload-input.type';
+import type { UploadPurpose } from './upload-purpose.type';
 import type { UploadPurposePolicy } from './upload-purpose-policy.type';
 import { UPLOAD_PURPOSES } from './upload-purposes.constants';
 import type { UploadTicket } from './upload-ticket.type';
@@ -48,7 +51,8 @@ import type { UploadTicket } from './upload-ticket.type';
  * confirmations racing a re-upload cannot overwrite each other's checked copy: the one
  * whose conditional update wins keeps its copy, the other deletes its own.
  *
- * Uploads not confirmed within MEDIA_PENDING_UPLOAD_TTL_SECONDS are removed by
+ * Uploads not confirmed within MEDIA_PENDING_UPLOAD_TTL_SECONDS, and the files of a
+ * deleted account (`discardOwnFiles`), are removed by
  * `removeExpiredUploads` (the media-cleanup job), which also deletes the staging object
  * of every confirmed or rejected upload once its ticket has expired (a client may
  * re-upload until then). Every state change is a conditional update on the current
@@ -257,12 +261,60 @@ export class MediaService {
   }
 
   /**
-   * The cleanup, in two passes. Returns how many rows it removed.
+   * Marks for removal every file of `ownerId` with `purpose`, except the ids in `keep`:
+   * pending, ready, or rejected by a check, each becomes rejected with OWNER_DELETED. The
+   * cleanup job then deletes a ready file's checked copy at its next run, and the row
+   * with its staging object once the confirm window has ended: until then the upload
+   * ticket may still write to the staging key. For an account deletion: the files of a
+   * person who is gone. Returns how many rows were marked.
    *
-   * 1. Every upload not confirmed in time: its objects and then its row. The expired
-   *    rows are first claimed in one conditional update (pending to rejected, EXPIRED);
-   *    each row is deleted only while still claimed.
-   * 2. The staging object of every confirmed or rejected upload whose confirm window,
+   * Database only, so it runs inside the caller's transaction and never calls the
+   * storage: if the deletion rolls back, nothing was marked. A confirmation racing it
+   * loses its conditional update and answers MEDIA_UPLOAD_REJECTED. The caller keeps every
+   * file another table still refers to (`keep`): a removal would fail on its foreign key.
+   */
+  async discardOwnFiles(
+    ownerId: string,
+    purpose: UploadPurpose,
+    keep: readonly string[],
+  ): Promise<number> {
+    const owned = { ownerId, purpose, id: { notIn: [...keep] } };
+    const data = {
+      status: 'rejected',
+      rejectionReason: 'OWNER_DELETED',
+    } as const;
+    const live = await this.query(() =>
+      this.db.client.media.updateMany({
+        where: { ...owned, status: { in: ['pending', 'ready'] } },
+        data,
+      }),
+    );
+    const failed = await this.query(() =>
+      this.db.client.media.updateMany({
+        where: {
+          ...owned,
+          status: 'rejected',
+          rejectionReason: { in: [...MEDIA_CHECK_FAILURE_REASONS] },
+        },
+        data,
+      }),
+    );
+    return live.count + failed.count;
+  }
+
+  /**
+   * The cleanup, in three passes. Returns how many rows it removed.
+   *
+   * 1. Every upload not confirmed in time, and every file marked by discardOwnFiles whose
+   *    confirm window has ended: its objects and then its row. The expired rows are first
+   *    claimed in one conditional update (pending to rejected, EXPIRED); each row is
+   *    deleted only while still claimed (MEDIA_REMOVAL_REASONS). A marked row inside its
+   *    window stays, so a late upload to its staging key is still found by its row and
+   *    removed by a later run: an upload is never removed while its ticket is valid.
+   * 2. The checked copy of every marked file still inside its window: deleted, then the
+   *    row's location cleared while it is unchanged. The staging object goes with the
+   *    row in pass 1.
+   * 3. The staging object of every confirmed or rejected upload whose confirm window,
    *    and so its ticket, has ended: deleted, then the row's staging key cleared while
    *    it is unchanged. Until then the client may re-upload to it; it is never read.
    *
@@ -285,6 +337,7 @@ export class MediaService {
       }),
     );
     const removed = await this.removeClaimedRows(signal);
+    await this.removeDiscardedCopies(signal);
     await this.removeSettledStagingObjects(signal);
     return removed;
   }
@@ -297,7 +350,8 @@ export class MediaService {
           where: {
             ...this.inCleanupScope(),
             status: 'rejected',
-            rejectionReason: 'EXPIRED',
+            rejectionReason: { in: [...MEDIA_REMOVAL_REASONS] },
+            expiresAt: { lt: new Date() },
           },
           select: { id: true, bucket: true, objectKey: true, stagingKey: true },
           orderBy: { expiresAt: 'asc' },
@@ -321,7 +375,7 @@ export class MediaService {
             where: {
               id: row.id,
               status: 'rejected',
-              rejectionReason: 'EXPIRED',
+              rejectionReason: { in: [...MEDIA_REMOVAL_REASONS] },
             },
           }),
         );
@@ -329,6 +383,43 @@ export class MediaService {
       }
       if (claimed.length < MEDIA_CLEANUP.batchSize) {
         return removed;
+      }
+    }
+  }
+
+  private async removeDiscardedCopies(signal?: AbortSignal): Promise<void> {
+    for (;;) {
+      const discarded = await this.query(() =>
+        this.db.client.media.findMany({
+          where: {
+            ...this.inCleanupScope(),
+            status: 'rejected',
+            rejectionReason: 'OWNER_DELETED',
+            objectKey: { not: null },
+          },
+          select: { id: true, bucket: true, objectKey: true },
+          orderBy: { expiresAt: 'asc' },
+          take: MEDIA_CLEANUP.batchSize,
+        }),
+      );
+      for (const row of discarded) {
+        signal?.throwIfAborted();
+        if (row.bucket === null || row.objectKey === null) {
+          continue;
+        }
+        await this.storage.deleteObject({
+          bucket: row.bucket,
+          key: row.objectKey,
+        });
+        await this.query(() =>
+          this.db.client.media.updateMany({
+            where: { id: row.id, objectKey: row.objectKey },
+            data: { bucket: null, objectKey: null },
+          }),
+        );
+      }
+      if (discarded.length < MEDIA_CLEANUP.batchSize) {
+        return;
       }
     }
   }
