@@ -1,12 +1,20 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import { Type } from 'class-transformer';
-import { IsInt, IsOptional, Max, Min, ValidateNested } from 'class-validator';
+import {
+  IsDefined,
+  IsInt,
+  IsOptional,
+  Max,
+  Min,
+  ValidateNested,
+} from 'class-validator';
 import { LocalizedNameDto } from '@common/dto/localized-name.dto';
 import { MAX_SORT_ORDER } from '../../domain/ordered-reference-lists.constants';
 
 /** A new entry of an admin list: its name in both languages; a category's order. */
 export class CreateReferenceItemDto {
   @ApiProperty({ type: LocalizedNameDto })
+  @IsDefined()
   @ValidateNested()
   @Type(() => LocalizedNameDto)
   name!: LocalizedNameDto;

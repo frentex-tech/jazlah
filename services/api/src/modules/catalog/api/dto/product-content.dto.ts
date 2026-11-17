@@ -4,6 +4,7 @@ import {
   ArrayMaxSize,
   ArrayUnique,
   IsArray,
+  IsDefined,
   IsIn,
   IsOptional,
   IsUUID,
@@ -27,6 +28,7 @@ const UUID_EXAMPLE = '7f3a2c1e-0b9d-4e5f-8a6b-1c2d3e4f5a6b';
  */
 export class ProductContentDto {
   @ApiProperty({ type: LocalizedNameDto })
+  @IsDefined()
   @ValidateNested()
   @Type(() => LocalizedNameDto)
   name!: LocalizedNameDto;
@@ -76,6 +78,7 @@ export class ProductContentDto {
     description:
       'Each existing size id at most once (VALIDATION_FAILED `isNotRepeated` on `sizes.<i>.id`); an existing size keeps its live price.',
   })
+  @IsDefined()
   @IsArray()
   @ArrayMaxSize(PRODUCT_LIMITS.sizes)
   @ValidateNested({ each: true })
@@ -88,6 +91,7 @@ export class ProductContentDto {
     description:
       'Each cutting style at most once (VALIDATION_FAILED `isNotRepeated` on `cuttings.<i>.cuttingStyleId`).',
   })
+  @IsDefined()
   @IsArray()
   @ArrayMaxSize(PRODUCT_LIMITS.cuttings)
   @ValidateNested({ each: true })

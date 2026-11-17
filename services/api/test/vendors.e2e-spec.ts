@@ -114,7 +114,7 @@ describe('Vendors (e2e)', () => {
       expect(row?.ibanEncrypted).not.toContain(IBAN_DIGITS);
     });
 
-    it('refuses an invalid IBAN, a missing document kind and a malformed body with VALIDATION_FAILED', async () => {
+    it('refuses an invalid IBAN, a missing document kind and a malformed or missing field with VALIDATION_FAILED', async () => {
       const customer = await journey.customer();
       const documents = await journey.documents(customer);
       const send = (body: Record<string, unknown>) =>
@@ -142,6 +142,12 @@ describe('Vendors (e2e)', () => {
           location: { latitude: '24.7', longitude: '46.6' },
         }),
       );
+      const noLocation = await send(
+        journey.applicationBody(documents, { location: undefined }),
+      );
+      const noName = await send(
+        journey.applicationBody(documents, { name: undefined }),
+      );
 
       expect(badIban.body).toMatchObject({
         code: 'VALIDATION_FAILED',
@@ -158,6 +164,14 @@ describe('Vendors (e2e)', () => {
           { field: 'location.latitude' },
           { field: 'location.longitude' },
         ],
+      });
+      expect(noLocation.body).toMatchObject({
+        code: 'VALIDATION_FAILED',
+        details: [{ field: 'location', constraints: ['isDefined'] }],
+      });
+      expect(noName.body).toMatchObject({
+        code: 'VALIDATION_FAILED',
+        details: [{ field: 'name', constraints: ['isDefined'] }],
       });
     });
 

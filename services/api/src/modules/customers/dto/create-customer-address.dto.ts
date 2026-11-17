@@ -2,6 +2,7 @@ import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import { Transform, Type } from 'class-transformer';
 import {
   IsBoolean,
+  IsDefined,
   IsOptional,
   IsString,
   MaxLength,
@@ -31,6 +32,7 @@ export class CreateCustomerAddressDto extends CustomerAddressTextDto {
     type: GeoPointDto,
     description: 'The point picked on the map.',
   })
+  @IsDefined()
   @ValidateNested()
   @Type(() => GeoPointDto)
   location!: GeoPointDto;
