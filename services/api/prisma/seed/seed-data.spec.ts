@@ -1,4 +1,5 @@
 import { normalizeSaudiMobileNumber } from '@common/phone/normalize-saudi-mobile-number';
+import { normalizeSaudiPhoneNumber } from '@common/phone/normalize-saudi-phone-number';
 // The catalog's own reader of stored change requests, reached past its index on purpose:
 // a seeded change request must be one the API can read back, and this test fails as soon
 // as the stored format changes.
@@ -135,6 +136,13 @@ describe('the seed data', () => {
           application.status === 'rejected',
         );
         expect(application.commercialRegistrationNumber).toMatch(/^\d{10}$/);
+        // vendor_applications_vat_number_check, vendor_applications_city_check
+        expect(
+          application.vatNumber === null ||
+            /^3\d{13}3$/.test(application.vatNumber),
+        ).toBe(true);
+        expect(chars(application.city)).toBeGreaterThanOrEqual(2);
+        expect(chars(application.city)).toBeLessThanOrEqual(50);
         expect(Math.abs(application.latitude)).toBeLessThanOrEqual(90);
         expect(Math.abs(application.longitude)).toBeLessThanOrEqual(180);
         expect(application.documents.length).toBeGreaterThan(0);
@@ -163,6 +171,11 @@ describe('the seed data', () => {
         expect(vendor.commissionBasisPoints).toBeGreaterThanOrEqual(0);
         expect(vendor.commissionBasisPoints).toBeLessThanOrEqual(10_000);
         expect(vendor.logoColor).toMatch(/^#[0-9A-F]{6}$/i);
+        expect(vendor.coverColor).toMatch(/^#[0-9A-F]{6}$/i);
+        expect(normalizeSaudiPhoneNumber(vendor.contactPhone)).not.toBeNull();
+        expect(vendor.contactEmail).toMatch(
+          /^[a-z.]+@([a-z]+\.)?example\.com$/,
+        );
       }
       expect(ACTIVE_VENDORS.size - 1).toBeGreaterThanOrEqual(3);
       expect(

@@ -2,7 +2,8 @@ import type { SeedVendorApplication } from './seed-vendor-application.type';
 
 /**
  * The seeded vendor applications, one per status: four approved (each became a partner
- * vendor), one pending and one rejected. Registration numbers are fake (1010000NNN).
+ * vendor), one pending (with the optional municipality licence and national id) and one rejected.
+ * Registration numbers (1010000NNN) and VAT numbers (15 digits, 3 at both ends) are fictitious.
  */
 export const SEED_VENDOR_APPLICATIONS: readonly SeedVendorApplication[] = [
   {
@@ -14,6 +15,8 @@ export const SEED_VENDOR_APPLICATIONS: readonly SeedVendorApplication[] = [
     descriptionEn:
       'Fresh Naimi and Harri carcasses every day, cut the way you ask.',
     commercialRegistrationNumber: '1010000101',
+    vatNumber: '300000000100003',
+    city: 'الرياض',
     accountHolderName: 'مؤسسة النخبة للحوم',
     latitude: 24.7136,
     longitude: 46.6753,
@@ -34,6 +37,8 @@ export const SEED_VENDOR_APPLICATIONS: readonly SeedVendorApplication[] = [
     descriptionEn:
       'From our farm to your door: local livestock and camel, slaughtered daily.',
     commercialRegistrationNumber: '1010000102',
+    vatNumber: '300000000200003',
+    city: 'الرياض',
     accountHolderName: 'شركة الوادي للمواشي',
     latitude: 24.5734,
     longitude: 46.7507,
@@ -53,6 +58,8 @@ export const SEED_VENDOR_APPLICATIONS: readonly SeedVendorApplication[] = [
     descriptionAr: null,
     descriptionEn: null,
     commercialRegistrationNumber: '1010000103',
+    vatNumber: null,
+    city: 'الرياض',
     accountHolderName: 'مؤسسة ذبائح نجد',
     latitude: 24.7743,
     longitude: 46.7386,
@@ -68,9 +75,11 @@ export const SEED_VENDOR_APPLICATIONS: readonly SeedVendorApplication[] = [
     descriptionAr: 'لحوم بلدية بأسعار السوق.',
     descriptionEn: 'Local meat at market prices.',
     commercialRegistrationNumber: '1010000104',
+    vatNumber: null,
+    city: 'جدة',
     accountHolderName: 'ملحمة السوق القديم',
-    latitude: 24.6311,
-    longitude: 46.7134,
+    latitude: 21.4858,
+    longitude: 39.1925,
     status: 'approved',
     rejectionReason: null,
     documents: [
@@ -87,6 +96,8 @@ export const SEED_VENDOR_APPLICATIONS: readonly SeedVendorApplication[] = [
     descriptionAr: 'مزرعة عائلية في الخرج، نبيع ذبائح نعيمي وسواكني.',
     descriptionEn: 'A family farm in Al Kharj selling Naimi and Sawakni.',
     commercialRegistrationNumber: '1010000105',
+    vatNumber: '300000000500003',
+    city: 'الخرج',
     accountHolderName: 'مزرعة الخير',
     latitude: 24.1556,
     longitude: 47.3346,
@@ -96,6 +107,8 @@ export const SEED_VENDOR_APPLICATIONS: readonly SeedVendorApplication[] = [
       'commercial_registration',
       'health_certificate',
       'facility_photo',
+      'municipality_licence',
+      'national_id',
     ],
   },
   {
@@ -106,9 +119,11 @@ export const SEED_VENDOR_APPLICATIONS: readonly SeedVendorApplication[] = [
     descriptionAr: null,
     descriptionEn: null,
     commercialRegistrationNumber: '1010000106',
+    vatNumber: null,
+    city: 'الدمام',
     accountHolderName: 'ملحمة الشرق',
-    latitude: 24.7208,
-    longitude: 46.8106,
+    latitude: 26.4207,
+    longitude: 50.0888,
     status: 'rejected',
     rejectionReason:
       'صورة السجل التجاري غير واضحة. فضلًا ارفع نسخة أوضح وقدّم الطلب من جديد.',
