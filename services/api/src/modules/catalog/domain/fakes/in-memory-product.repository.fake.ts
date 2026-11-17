@@ -1,3 +1,4 @@
+import { searchTextOf } from './search-text.fake';
 import { Money } from '@common/money/money';
 import { keysetPage } from '@common/pagination/keyset-page.fake';
 import type { Page } from '@common/pagination/page.type';
@@ -243,6 +244,10 @@ export class InMemoryProductRepository implements ProductRepository {
           .filter(
             (row) =>
               this.isPublic(row) &&
+              (filter.text === undefined ||
+                searchTextOf(
+                  `${row.content.name.ar} ${row.content.name.en}`,
+                ).includes(searchTextOf(filter.text))) &&
               (filter.categoryId === undefined ||
                 row.content.categoryId === filter.categoryId) &&
               (filter.vendorId === undefined ||

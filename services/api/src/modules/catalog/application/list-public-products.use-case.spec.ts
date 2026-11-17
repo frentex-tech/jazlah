@@ -51,4 +51,24 @@ describe('ListPublicProductsUseCase', () => {
     expect(await list({ minPrice: Money.of(95_001) })).toEqual([]);
     expect(await list({ maxPrice: Money.of(94_999) })).toEqual([]);
   });
+
+  it('searches the name in both languages, normalised, with the other filters', async () => {
+    const kit = buildCatalogUseCases();
+    seedCatalog(kit);
+    const live = await publishedVendorProduct(kit);
+    const list = (
+      filter: Parameters<typeof kit.listPublicProducts.execute>[0],
+    ) =>
+      kit.listPublicProducts
+        .execute(filter, page)
+        .then((result) => result.items.map((card) => card.summary.id));
+
+    expect(await list({ text: 'NAIMI' })).toEqual([live.product.id]);
+    expect(await list({ text: 'نعيمى' })).toEqual([live.product.id]);
+    expect(await list({ text: 'نَعيمي', categoryId: CATEGORY })).toEqual([
+      live.product.id,
+    ]);
+    expect(await list({ text: 'naimi', vendorId: OTHER_VENDOR })).toEqual([]);
+    expect(await list({ text: 'goat' })).toEqual([]);
+  });
 });

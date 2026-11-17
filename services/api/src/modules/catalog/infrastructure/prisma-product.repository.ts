@@ -1,3 +1,4 @@
+import { escapeLikePattern } from '@common/text/escape-like-pattern';
 import { Injectable } from '@nestjs/common';
 import type { Page } from '@common/pagination/page.type';
 import type { PageRequest } from '@common/pagination/page-request.type';
@@ -292,9 +293,14 @@ export class PrismaProductRepository implements ProductRepository {
                 : { lte: filter.maxPrice.halalas }),
             },
           };
+    const search =
+      filter.text === undefined
+        ? {}
+        : { searchText: { contains: await this.searchPattern(filter.text) } };
     return this.summaries(
       {
         ...this.publicWhere(),
+        ...search,
         ...(filter.categoryId === undefined
           ? {}
           : { categoryId: filter.categoryId }),
@@ -315,6 +321,30 @@ export class PrismaProductRepository implements ProductRepository {
         include: PRODUCT_DETAILS_INCLUDE,
       });
       return row === null ? null : toProductDetails(row);
+    } catch (error) {
+      mapPrismaError(error);
+    }
+  }
+
+  /**
+   * The text search's pattern: the query normalised by the same SQL function as the
+   * stored `search_text` (`catalog_search_text`, one definition, in the migration), then
+   * its LIKE wildcards escaped so `%` and `_` match themselves.
+   */
+  private async searchPattern(text: string): Promise<string> {
+    try {
+      const rows = await this.db.client.$queryRaw<
+        unknown[]
+      >`SELECT catalog_search_text(${text}) AS "normalized"`;
+      const row = rows[0];
+      const normalized =
+        typeof row === 'object' &&
+        row !== null &&
+        'normalized' in row &&
+        typeof row.normalized === 'string'
+          ? row.normalized
+          : '';
+      return escapeLikePattern(normalized);
     } catch (error) {
       mapPrismaError(error);
     }

@@ -356,7 +356,7 @@ export const SEED_PRODUCTS: readonly SeedProduct[] = [
     vendor: 'nokhba',
     category: 'cut-meat',
     meatType: 'naimi',
-    name: { ar: 'ريش غنم', en: 'Lamb chops' },
+    name: { ar: 'أضلاع وريش غنم', en: 'Lamb chops' },
     description: {
       ar: 'ريش نعيمي للشوي.',
       en: 'Naimi chops for grilling.',
@@ -380,7 +380,7 @@ export const SEED_PRODUCTS: readonly SeedProduct[] = [
     vendor: 'nokhba',
     category: 'cut-meat',
     meatType: 'naimi',
-    name: { ar: 'فخذ غنم', en: 'Leg of lamb' },
+    name: { ar: 'فخذ غنم للشوى', en: 'Leg of lamb' },
     description: {
       ar: 'فخذ كامل بالعظم.',
       en: 'A whole bone-in leg.',

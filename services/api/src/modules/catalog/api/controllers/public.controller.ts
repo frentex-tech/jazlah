@@ -56,7 +56,7 @@ export class PublicCatalogController {
     summary: 'Products, newest first, with filters',
     description:
       'Customer app and web, product lists (home, a category, a store, search by price); public, no sign-in needed. Only products customers can buy: published, switched on (available), of an active (not suspended) vendor, in an active category. Newest first; keyset paging: send `nextCursor` back as `cursor` until it is null; no total count. ' +
-      'Optional filters, combined: `categoryId`, `vendorId`, `meatTypeId`, and a range on the product’s lowest size price in halalas, VAT included (`minPriceHalalas`, `maxPriceHalalas`, both ends included; a range with min above max simply finds nothing). An unknown id finds nothing rather than an error.',
+      'Optional filters, combined: `categoryId`, `vendorId`, `meatTypeId`, and a range on the product’s lowest size price in halalas, VAT included (`minPriceHalalas`, `maxPriceHalalas`, both ends included; a range with min above max simply finds nothing), and `q`, a text of 2 to 100 characters the Arabic or English name must contain (Arabic diacritics, tatweel, alef forms, alef maqsura, teh marbuta and English case ignored). An unknown id finds nothing rather than an error.',
   })
   @ApiOkResponse({
     type: ProductCardPageResponseDto,

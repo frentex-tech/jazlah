@@ -7,3 +7,4 @@ One line per building block: name, path, purpose; the detail is in that file's d
 - **maskPhoneNumber** — `src/common/phone/mask-phone-number.ts` — what logs hold instead of a number.
 - **toLatinDigits** — `src/common/text/to-latin-digits.ts` — Arabic-Indic digits to Latin.
 - **removeFormatCharacters** — `src/common/text/remove-format-characters.ts` — strips invisible format characters (direction marks) from pasted text.
+- **escapeLikePattern** — `src/common/text/escape-like-pattern.ts` — escapes `\`, `%`, `_` for a SQL `LIKE` pattern (Prisma's `contains` does not).

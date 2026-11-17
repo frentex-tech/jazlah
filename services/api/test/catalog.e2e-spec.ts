@@ -1324,6 +1324,111 @@ describe('Catalog (e2e)', () => {
       expect(card.items[0]?.vendor.name).not.toBeNull();
     });
 
+    describe('text search (q)', () => {
+      /** A published product of the vendor named `ar` / `en`; returns its id. */
+      const named = (
+        ctx: Awaited<ReturnType<typeof setUp>>,
+        ar: string,
+        en: string,
+      ) =>
+        catalog.published(ctx.owner, ctx.admin, ctx.options, {
+          name: { ar, en },
+        });
+      // Suites share one database: every search is limited to the test's own vendor.
+      const search = (vendorId: string, q: string, extra = '') =>
+        publicIds(`vendorId=${vendorId}&q=${encodeURIComponent(q)}${extra}`);
+
+      it('ignores Arabic diacritics and tatweel, both ways', async () => {
+        const ctx = await setUp('search-marks');
+        const marked = await named(ctx, 'لَحْمُ نعيمي', 'Naimi meat');
+        const plain = await named(ctx, 'كبدة طازجة', 'Fresh liver');
+        const stretched = await named(ctx, 'كـبـاب', 'Kebab');
+
+        expect(await search(ctx.vendorId, 'لحم نعيمي')).toEqual([marked]);
+        expect(await search(ctx.vendorId, 'كَبِدَة')).toEqual([plain]);
+        expect(await search(ctx.vendorId, 'كباب')).toEqual([stretched]);
+      });
+
+      it('reads أ إ آ as ا, ى as ي and ة as ه', async () => {
+        const ctx = await setUp('search-letters');
+        const ribs = await named(ctx, 'أضلاع مشوى', 'Grilled ribs');
+        const liver = await named(ctx, 'كبده', 'Liver');
+        const lamb = await named(ctx, 'لحم آدم إسلام', 'Lamb');
+
+        expect(await search(ctx.vendorId, 'اضلاع مشوي')).toEqual([ribs]);
+        expect(await search(ctx.vendorId, 'كبدة')).toEqual([liver]);
+        expect(await search(ctx.vendorId, 'ادم اسلام')).toEqual([lamb]);
+      });
+
+      it('ignores English case and combines with the category filter', async () => {
+        const ctx = await setUp('search-case');
+        const id = await named(ctx, 'ريش', 'Lamb RIBS Special');
+
+        expect(await search(ctx.vendorId, 'ribs special')).toEqual([id]);
+        expect(
+          await search(
+            ctx.vendorId,
+            'Ribs',
+            `&categoryId=${ctx.options.categoryId}`,
+          ),
+        ).toEqual([id]);
+        expect(
+          await search(ctx.vendorId, 'ribs', `&categoryId=${randomUUID()}`),
+        ).toEqual([]);
+        expect(await search(ctx.vendorId, 'goat')).toEqual([]);
+      });
+
+      it('pages through the matches', async () => {
+        const ctx = await setUp('search-pages');
+        const ids: string[] = [];
+        for (let n = 0; n < 3; n += 1) {
+          ids.push(await named(ctx, `خروف ${n}`, `Sheep ${n}`));
+        }
+        await named(ctx, 'بقر', 'Beef');
+
+        const seen: string[] = [];
+        let cursor: string | null = null;
+        let pages = 0;
+        do {
+          const res = await catalog.http
+            .get(
+              `/v1/public/products?vendorId=${ctx.vendorId}&q=sheep&limit=2${cursor === null ? '' : `&cursor=${cursor}`}`,
+            )
+            .expect(200);
+          const body = res.body as Page<Card>;
+          seen.push(...body.items.map((card) => card.id));
+          cursor = body.nextCursor;
+          pages += 1;
+        } while (cursor !== null);
+
+        expect(pages).toBe(2);
+        expect([...seen].sort()).toEqual([...ids].sort());
+      });
+
+      it('matches % and _ literally', async () => {
+        const ctx = await setUp('search-wildcards');
+        const percent = await named(ctx, 'عرض', '50% off');
+        await named(ctx, 'عرض اخر', '500 off');
+        const underscore = await named(ctx, 'قطع', 'cut_a');
+        await named(ctx, 'قطع اخرى', 'cutxa');
+
+        expect(await search(ctx.vendorId, '50%')).toEqual([percent]);
+        expect(await search(ctx.vendorId, 'cut_a')).toEqual([underscore]);
+      });
+
+      it('refuses a q shorter than 2 or longer than 100 characters', async () => {
+        const short = await catalog.http
+          .get(`/v1/public/products?q=${encodeURIComponent(' a ')}`)
+          .expect(400);
+        const long = await catalog.http
+          .get(`/v1/public/products?q=${'a'.repeat(101)}`)
+          .expect(400);
+
+        expect(short.body).toMatchObject({ details: [{ field: 'q' }] });
+        expect(long.body).toMatchObject({ details: [{ field: 'q' }] });
+      });
+    });
+
     it('refuses invalid filters, a foreign cursor and a malformed id', async () => {
       const badPrice = await catalog.http
         .get('/v1/public/products?minPriceHalalas=cheap')
