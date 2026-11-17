@@ -167,6 +167,7 @@ export class VendorJourney {
       name: { ar: 'ملحمة النخبة', en: 'Al Nokhba Butchery' },
       description: { ar: 'لحوم بلدية', en: 'Local meat' },
       commercialRegistrationNumber: '١٠١٠١٢٣٤٥٦',
+      city: ' الرياض ',
       iban: TEST_IBAN,
       accountHolderName: 'مؤسسة النخبة للحوم',
       location: { latitude: 24.7136, longitude: 46.6753 },
@@ -175,30 +176,41 @@ export class VendorJourney {
     };
   }
 
-  /** A customer's pending application: the customer and the application's id. */
+  /**
+   * A customer's pending application, its body changed by `overrides`: the customer
+   * and the application's id.
+   */
   async pendingApplication(
     label = 'applicant',
+    overrides: Record<string, unknown> = {},
   ): Promise<{ customer: TestUser; applicationId: string }> {
     const customer = await this.customer(label);
     const res = await this.http
       .post('/v1/customer/vendor-applications')
       .set('Authorization', `Bearer ${customer.accessToken}`)
-      .send(this.applicationBody(await this.documents(customer)))
+      .send(this.applicationBody(await this.documents(customer), overrides))
       .expect(201);
     return { customer, applicationId: (res.body as { id: string }).id };
   }
 
   /**
-   * An approved vendor: its id, its owner signed in as a vendor, and the admin who
+   * An approved vendor (its application changed by `overrides`): its id, its owner
+   * signed in as a vendor, and the admin who
    * approved it.
    */
-  async approvedVendor(label = 'vendor'): Promise<{
+  async approvedVendor(
+    label = 'vendor',
+    overrides: Record<string, unknown> = {},
+  ): Promise<{
     vendorId: string;
     owner: TestUser;
     admin: TestUser;
     applicationId: string;
   }> {
-    const { customer, applicationId } = await this.pendingApplication(label);
+    const { customer, applicationId } = await this.pendingApplication(
+      label,
+      overrides,
+    );
     const admin = await this.admin();
     const res = await this.http
       .post(`/v1/admin/vendor-applications/${applicationId}/approve`)
