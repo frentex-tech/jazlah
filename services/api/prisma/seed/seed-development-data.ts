@@ -14,8 +14,9 @@ import { seedVendors } from './seed-vendors';
  * The whole development seed, in dependency order: the platform vendor (exactly as
  * `pnpm vendor:create-platform` creates it, through its use case), the users, the
  * admin and kitchen access, the admin lists, the applications and partner vendors, the
- * products, the customers. Every step creates only what is missing and never updates
- * or deletes a row, so running it again changes nothing.
+ * products, the customers. Every step creates only what is missing and never deletes a
+ * row, so running it again changes nothing. The one update: re-granting the development
+ * admin re-activates that admin access if it was deactivated (grantAdminAccess).
  */
 export async function seedDevelopmentData(
   context: SeedContext,
