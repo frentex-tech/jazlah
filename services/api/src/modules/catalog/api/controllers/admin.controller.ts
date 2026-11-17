@@ -120,7 +120,7 @@ export class AdminCatalogController {
     summary: 'Add an entry to a list (it starts active)',
     description:
       'Admin dashboard, catalog settings. Adds an entry, with its Arabic and English name, to one of the lists products are built from: `categories`, `meat-types`, `cutting-styles` or `exclusion-items` (the "without" items a customer can ask to leave out). It starts active, so vendors can choose it at once. ' +
-      'Only a category takes a display order (`sortOrder`, lower first, 0 when left out); on another list it is refused with VALIDATION_FAILED `isOrderedList`. Names need not be unique.',
+      'Only a category takes a display order (`sortOrder`, lower first, 0 when left out); on another list it is refused with VALIDATION_FAILED `isOrderedList`. Only a category takes an image (`imageMediaId`: upload it first with POST /v1/admin/media/uploads, purpose `catalog.category-image`, then confirm it; MEDIA_NOT_FOUND for another user’s or another purpose’s file, MEDIA_NOT_READY before confirmation); on another list VALIDATION_FAILED `isCategoryList`. Names need not be unique.',
   })
   @ApiCreatedResponse({
     type: ReferenceItemResponseDto,
@@ -128,18 +128,30 @@ export class AdminCatalogController {
   })
   @ApiErrorResponses(
     ErrorCode.VALIDATION_FAILED,
+    ErrorCode.MEDIA_NOT_FOUND,
+    ErrorCode.MEDIA_NOT_READY,
     ErrorCode.SERVICE_UNAVAILABLE,
     ...ADMIN_AUTH_ERRORS,
   )
   async createListItem(
+    @CurrentUser() user: AuthenticatedUser,
     @Param() params: ReferenceListParamDto,
     @Body() body: CreateReferenceItemDto,
   ): Promise<ReferenceItemResponseDto> {
     return toReferenceItemResponse(
-      await this.createItem.execute(toReferenceList(params.list), {
-        name: body.name,
-        ...(body.sortOrder === undefined ? {} : { sortOrder: body.sortOrder }),
-      }),
+      await this.createItem.execute(
+        toReferenceList(params.list),
+        {
+          name: body.name,
+          ...(body.sortOrder === undefined
+            ? {}
+            : { sortOrder: body.sortOrder }),
+          ...(body.imageMediaId === undefined
+            ? {}
+            : { imageMediaId: body.imageMediaId }),
+        },
+        user.userId,
+      ),
     );
   }
 
@@ -181,7 +193,7 @@ export class AdminCatalogController {
     operationId: 'adminUpdateCatalogListEntry',
     summary: 'Rename an entry, switch it on or off, or reorder a category',
     description:
-      'Admin dashboard, catalog settings. Changes only the fields sent: the name (both languages together), `isActive`, and for a category `sortOrder` (the public order, lower first; on another list VALIDATION_FAILED `isOrderedList`). Applies at once. Entries are never deleted: switch one off instead. ' +
+      'Admin dashboard, catalog settings. Changes only the fields sent: the name (both languages together), `isActive`, and for a category `sortOrder` (the public order, lower first; on another list VALIDATION_FAILED `isOrderedList`) and `imageMediaId` (a confirmed `catalog.category-image` upload of the signed-in admin, MEDIA_NOT_FOUND or MEDIA_NOT_READY otherwise; null removes the image; on another list VALIDATION_FAILED `isCategoryList`). Applies at once. Entries are never deleted: switch one off instead. ' +
       'An inactive entry can no longer be chosen for a product (VALIDATION_FAILED on the product form); products already using it keep it. An inactive category also hides all its products from the public catalog at once, until it is switched on again. ' +
       'NOT_FOUND for an id that is not an entry of this list.',
   })
@@ -192,19 +204,32 @@ export class AdminCatalogController {
   @ApiErrorResponses(
     ErrorCode.VALIDATION_FAILED,
     ErrorCode.NOT_FOUND,
+    ErrorCode.MEDIA_NOT_FOUND,
+    ErrorCode.MEDIA_NOT_READY,
     ErrorCode.SERVICE_UNAVAILABLE,
     ...ADMIN_AUTH_ERRORS,
   )
   async updateListItem(
+    @CurrentUser() user: AuthenticatedUser,
     @Param() params: ReferenceItemParamDto,
     @Body() body: UpdateReferenceItemDto,
   ): Promise<ReferenceItemResponseDto> {
     return toReferenceItemResponse(
-      await this.updateItem.execute(toReferenceList(params.list), params.id, {
-        ...(body.name === undefined ? {} : { name: body.name }),
-        ...(body.isActive === undefined ? {} : { isActive: body.isActive }),
-        ...(body.sortOrder === undefined ? {} : { sortOrder: body.sortOrder }),
-      }),
+      await this.updateItem.execute(
+        toReferenceList(params.list),
+        params.id,
+        {
+          ...(body.name === undefined ? {} : { name: body.name }),
+          ...(body.isActive === undefined ? {} : { isActive: body.isActive }),
+          ...(body.sortOrder === undefined
+            ? {}
+            : { sortOrder: body.sortOrder }),
+          ...(body.imageMediaId === undefined
+            ? {}
+            : { imageMediaId: body.imageMediaId }),
+        },
+        user.userId,
+      ),
     );
   }
 

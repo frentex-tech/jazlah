@@ -6,4 +6,6 @@ export type ReferenceItemChanges = Readonly<{
   isActive?: boolean;
   /** A category's display order (ORDERED_REFERENCE_LISTS only). */
   sortOrder?: number;
+  /** A category's image (categories only): a media id to set, null to clear. */
+  imageMediaId?: string | null;
 }>;

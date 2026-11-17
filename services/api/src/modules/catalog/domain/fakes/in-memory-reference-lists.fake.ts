@@ -22,6 +22,7 @@ export class InMemoryReferenceLists implements ReferenceListRepository {
       name: { ar: `${list} ${id.slice(-4)}`, en: `${list} ${id.slice(-4)}` },
       isActive,
       sortOrder: isOrderedReferenceList(list) ? 0 : null,
+      imageMediaId: null,
       createdAt: this.nextDate(),
     };
     this.rows = [...this.rows, { list, item }];
@@ -40,6 +41,7 @@ export class InMemoryReferenceLists implements ReferenceListRepository {
       name: entry.name,
       isActive: true,
       sortOrder: isOrderedReferenceList(list) ? (entry.sortOrder ?? 0) : null,
+      imageMediaId: entry.imageMediaId ?? null,
       createdAt: this.nextDate(),
     };
     this.rows = [...this.rows, { list, item }];

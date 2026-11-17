@@ -10,6 +10,12 @@ describe('describeUploadPurposes', () => {
     );
   });
 
+  it('describes a category image with the limits of a vendor logo', () => {
+    expect(describeUploadPurposes(['catalog.category-image'])).toBe(
+      '- `catalog.category-image`: image/jpeg, image/png, image/webp; 1 byte to 2 MiB (2097152 bytes); public (anyone can read it at a stable URL).',
+    );
+  });
+
   it('is empty for no purpose', () => {
     expect(describeUploadPurposes([])).toBe('');
   });

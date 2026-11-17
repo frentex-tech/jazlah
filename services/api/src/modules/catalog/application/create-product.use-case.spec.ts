@@ -103,9 +103,14 @@ describe('CreateProductUseCase', () => {
   it('refuses unknown or inactive list entries, each on its field', async () => {
     const kit = buildCatalogUseCases();
     seedCatalog(kit);
-    await kit.updateReferenceItem.execute('cutting_styles', CUT, {
-      isActive: false,
-    });
+    await kit.updateReferenceItem.execute(
+      'cutting_styles',
+      CUT,
+      {
+        isActive: false,
+      },
+      ADMIN,
+    );
 
     await expect(
       vendorDraft(kit, {

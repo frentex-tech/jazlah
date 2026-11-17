@@ -65,6 +65,11 @@ export class CatalogJourney {
     };
   }
 
+  /** Remembers a list entry created by a test, for cleanUp. */
+  rememberListItem(path: ListPath, id: string): void {
+    this.listItems.push({ path, id });
+  }
+
   /** Remembers a rule created by a test, for cleanUp. */
   rememberRule(id: string): void {
     this.ruleIds.push(id);

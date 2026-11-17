@@ -38,7 +38,9 @@ type QueuedRequest = {
   productId: string;
   content: { images: { mediaId: string; url: string | null }[] };
 };
-type CategoryList = { items: { id: string; sortOrder: number | null }[] };
+type CategoryList = {
+  items: { id: string; sortOrder: number | null; imageUrl: string | null }[];
+};
 type Card = { id: string; vendor: { id: string; name: { en: string } | null } };
 
 const errorCode = (body: unknown): string => (body as ErrorResponseBody).code;
@@ -164,6 +166,81 @@ describe('Catalog (e2e)', () => {
       expect(badFilter.body).toMatchObject({
         details: [{ field: 'isActive' }],
       });
+    });
+
+    it("sets, shows and clears a category's image; refuses it on another list and for a wrong file", async () => {
+      const { owner, admin, options } = await setUp();
+      const upload = (user: TestUser, audience: 'vendor' | 'admin') =>
+        catalog.vendors.uploadedFile(
+          user,
+          audience,
+          'catalog.category-image',
+          'png',
+        );
+      const image = await upload(admin, 'admin');
+      const patch = (path: string, id: string, imageMediaId: string | null) =>
+        catalog.http
+          .patch(`/v1/admin/lists/${path}/${id}`)
+          .set(...bearer(admin))
+          .send({ imageMediaId });
+
+      const set = await patch('categories', options.categoryId, image).expect(
+        200,
+      );
+      const listed = (
+        (await catalog.http.get('/v1/public/categories').expect(200))
+          .body as CategoryList
+      ).items.find((item) => item.id === options.categoryId);
+      const created = await catalog.http
+        .post('/v1/admin/lists/categories')
+        .set(...bearer(admin))
+        .send({ name: { ar: 'مشاوي', en: 'Grills' }, imageMediaId: image })
+        .expect(201);
+      catalog.rememberListItem(
+        'categories',
+        (created.body as { id: string }).id,
+      );
+      const cleared = await patch(
+        'categories',
+        options.categoryId,
+        null,
+      ).expect(200);
+      const otherList = await patch(
+        'meat-types',
+        options.meatTypeId,
+        image,
+      ).expect(400);
+      const productImage = await patch(
+        'categories',
+        options.categoryId,
+        await catalog.image(admin, 'admin'),
+      ).expect(404);
+      const unknown = await patch(
+        'categories',
+        options.categoryId,
+        randomUUID(),
+      ).expect(404);
+      const vendorUpload = await catalog.http
+        .post('/v1/vendor/media/uploads')
+        .set(...bearer(owner))
+        .send({ purpose: 'catalog.category-image', contentType: 'image/png' })
+        .expect(400);
+
+      expect((set.body as { imageUrl: string | null }).imageUrl).toEqual(
+        expect.any(String),
+      );
+      expect(listed?.imageUrl).toEqual(expect.any(String));
+      expect((created.body as { imageUrl: string | null }).imageUrl).toEqual(
+        expect.any(String),
+      );
+      expect((cleared.body as { imageUrl: string | null }).imageUrl).toBeNull();
+      expect(otherList.body).toMatchObject({
+        code: 'VALIDATION_FAILED',
+        details: [{ field: 'imageMediaId', constraints: ['isCategoryList'] }],
+      });
+      expect(errorCode(productImage.body)).toBe('MEDIA_NOT_FOUND');
+      expect(errorCode(unknown.body)).toBe('MEDIA_NOT_FOUND');
+      expect(errorCode(vendorUpload.body)).toBe('VALIDATION_FAILED');
     });
 
     it('adds, lists and removes a cutting and packaging rule; the same pair twice is CONFLICT', async () => {
