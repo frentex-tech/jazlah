@@ -3501,7 +3501,7 @@
     },
     "/v1/admin/media/uploads": {
       "post": {
-        "description": "Called by the admin dashboard to upload a vendor logo and product images (the platform vendor own products, and product edits made by an admin). The confirmed ids go in the vendor `logoMediaId` and a product `imageMediaIds`.\n\nStep 1 of 3 of a file upload. The file never passes through this API: this returns a ticket for a direct upload to storage.\n\n1. Call this with the purpose, the file Content-Type and, optionally, its name. Nothing is uploaded yet.\n2. Before `expiresAt` (5 minutes after the request by default), send `POST` to `url` as `multipart/form-data`: first one text part for every entry of `fields`, name and value exactly as given (add none, change none), then the file itself as the **last** part, named `file`. Send no Authorization header to the storage. The storage answers 204 with no body when it stored the file. It refuses an empty file, a file larger than the purpose allows, a changed field or an expired ticket with an error status (4xx) and an XML body of its own, not this API error format. Until `expiresAt` the same ticket can be used again (after a network failure): the last upload replaces the earlier one.\n3. Only after the storage answered 204, and before `confirmBy` (1 hour after the request by default), confirm the file: `POST .../media/{mediaId}/confirm`. Only a confirmed file can be used, and only by the user who uploaded it.\n\nRead both times from the response: they are server settings and may change.\n\nLimits: 30 ticket requests a minute per client address and 100 an hour per user; over them, 429 RATE_LIMITED with Retry-After.\n\nErrors:\n- MEDIA_CONTENT_TYPE_NOT_ALLOWED (415): the purpose does not accept this `contentType`; `details.allowed` lists the types it accepts. Nothing was created.\n- VALIDATION_FAILED (400): a purpose this app may not upload, or a missing or too long `contentType` or `fileName`.\n- SERVICE_UNAVAILABLE (503): the storage or the database cannot be reached, or the upload limits cannot be counted right now (uploads are then refused). Nothing was created; try again shortly.\n\nPurposes accepted here (accepted types; size; who can read the file):\n- `vendor.logo`: image/jpeg, image/png, image/webp; 1 byte to 2 MiB (2097152 bytes); public (anyone can read it at a stable URL).\n- `catalog.product-image`: image/jpeg, image/png, image/webp; 1 byte to 5 MiB (5242880 bytes); public (anyone can read it at a stable URL).",
+        "description": "Called by the admin dashboard to upload a vendor logo, product images (the platform vendor own products, and product edits made by an admin) and category images. The confirmed ids go in the vendor `logoMediaId`, a product `imageMediaIds` and a category `imageMediaId`.\n\nStep 1 of 3 of a file upload. The file never passes through this API: this returns a ticket for a direct upload to storage.\n\n1. Call this with the purpose, the file Content-Type and, optionally, its name. Nothing is uploaded yet.\n2. Before `expiresAt` (5 minutes after the request by default), send `POST` to `url` as `multipart/form-data`: first one text part for every entry of `fields`, name and value exactly as given (add none, change none), then the file itself as the **last** part, named `file`. Send no Authorization header to the storage. The storage answers 204 with no body when it stored the file. It refuses an empty file, a file larger than the purpose allows, a changed field or an expired ticket with an error status (4xx) and an XML body of its own, not this API error format. Until `expiresAt` the same ticket can be used again (after a network failure): the last upload replaces the earlier one.\n3. Only after the storage answered 204, and before `confirmBy` (1 hour after the request by default), confirm the file: `POST .../media/{mediaId}/confirm`. Only a confirmed file can be used, and only by the user who uploaded it.\n\nRead both times from the response: they are server settings and may change.\n\nLimits: 30 ticket requests a minute per client address and 100 an hour per user; over them, 429 RATE_LIMITED with Retry-After.\n\nErrors:\n- MEDIA_CONTENT_TYPE_NOT_ALLOWED (415): the purpose does not accept this `contentType`; `details.allowed` lists the types it accepts. Nothing was created.\n- VALIDATION_FAILED (400): a purpose this app may not upload, or a missing or too long `contentType` or `fileName`.\n- SERVICE_UNAVAILABLE (503): the storage or the database cannot be reached, or the upload limits cannot be counted right now (uploads are then refused). Nothing was created; try again shortly.\n\nPurposes accepted here (accepted types; size; who can read the file):\n- `vendor.logo`: image/jpeg, image/png, image/webp; 1 byte to 2 MiB (2097152 bytes); public (anyone can read it at a stable URL).\n- `catalog.product-image`: image/jpeg, image/png, image/webp; 1 byte to 5 MiB (5242880 bytes); public (anyone can read it at a stable URL).\n- `catalog.category-image`: image/jpeg, image/png, image/webp; 1 byte to 2 MiB (2097152 bytes); public (anyone can read it at a stable URL).",
         "operationId": "adminRequestMediaUpload",
         "parameters": [],
         "requestBody": {
@@ -4691,6 +4691,188 @@
         "security": []
       }
     },
+    "/v1/vendor/lists/{list}": {
+      "get": {
+        "description": "Vendor dashboard, product form pickers. Every active entry of one list (`meat-types`, `cutting-styles`, `exclusion-items`), with its Arabic and English name, oldest first; inactive entries are left out, since a product cannot choose them. The whole list in one answer, not paged. Categories come from GET /v1/public/categories. The lists are managed by admins.",
+        "operationId": "vendorListCatalogListEntries",
+        "parameters": [
+          {
+            "name": "list",
+            "required": true,
+            "in": "path",
+            "description": "Which list: `meat-types`, `cutting-styles` or `exclusion-items` (the \"without\" items a customer can ask to leave out). Categories come from GET /v1/public/categories. Another value is VALIDATION_FAILED on `list`.",
+            "schema": {
+              "example": "cutting-styles",
+              "type": "string",
+              "enum": [
+                "meat-types",
+                "cutting-styles",
+                "exclusion-items"
+              ]
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Every active entry of the list.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/NamedReferenceListResponseDto"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Error. code: VALIDATION_FAILED.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Error. code: UNAUTHORIZED, ACCESS_TOKEN_EXPIRED.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Error. code: FORBIDDEN, VENDOR_SUSPENDED.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Error. code: RATE_LIMITED.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Error. code: INTERNAL_ERROR.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "Error. code: SERVICE_UNAVAILABLE.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "The active entries of a list, for the product form",
+        "tags": [
+          "Vendor catalog lists"
+        ]
+      }
+    },
+    "/v1/vendor/cutting-packaging-incompatibilities": {
+      "get": {
+        "description": "Vendor dashboard, product form. Every global rule whose cutting style is active: a product offering that cutting style with that packaging cannot be submitted (PRODUCT_NOT_SUBMITTABLE, INCOMPATIBLE_CUTTING_PACKAGING), so the form can warn first. Each pair carries the cutting style with its Arabic and English name; oldest rule first. The whole list in one answer, not paged. The rules are managed by admins.",
+        "operationId": "vendorListCuttingPackagingIncompatibilities",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Every pair whose cutting style is active.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/VendorIncompatibilityListResponseDto"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Error. code: UNAUTHORIZED, ACCESS_TOKEN_EXPIRED.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Error. code: FORBIDDEN, VENDOR_SUSPENDED.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Error. code: RATE_LIMITED.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Error. code: INTERNAL_ERROR.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "Error. code: SERVICE_UNAVAILABLE.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "The cutting and packaging pairs a product cannot offer",
+        "tags": [
+          "Vendor catalog lists"
+        ]
+      }
+    },
     "/v1/vendor/products": {
       "post": {
         "description": "Vendor dashboard, new product form. Creates a product of the signed-in vendor in status `draft`, available, with the content and fulfilment sent; nobody but the vendor and admins sees it until it is published. Upload each image first (POST /v1/vendor/media/uploads with purpose `catalog.product-image`, then POST /v1/vendor/media/{id}/confirm) and send the media ids in display order: the first is the cover. A draft may be incomplete (no size, no image): the submission rules apply only when it is submitted (POST …/{id}/submit). Prices are integer halalas, VAT included (`95000` is 950.00 SAR). Errors: VALIDATION_FAILED for an invalid body and also, with field details, for a category, meat type, cutting style or \"without\" item that is not an active entry (`isActiveCategory`, `isActiveMeatType`, `isActiveCuttingStyle`, `isActiveExclusionItem`) or a repeated cutting style (`isNotRepeated`); MEDIA_NOT_FOUND for an image id that is not a product image uploaded by this user; MEDIA_NOT_READY for an image whose upload was not confirmed (`details.mediaId` names it).",
@@ -5705,7 +5887,7 @@
     },
     "/v1/admin/lists/{list}": {
       "post": {
-        "description": "Admin dashboard, catalog settings. Adds an entry, with its Arabic and English name, to one of the lists products are built from: `categories`, `meat-types`, `cutting-styles` or `exclusion-items` (the \"without\" items a customer can ask to leave out). It starts active, so vendors can choose it at once. Only a category takes a display order (`sortOrder`, lower first, 0 when left out); on another list it is refused with VALIDATION_FAILED `isOrderedList`. Names need not be unique.",
+        "description": "Admin dashboard, catalog settings. Adds an entry, with its Arabic and English name, to one of the lists products are built from: `categories`, `meat-types`, `cutting-styles` or `exclusion-items` (the \"without\" items a customer can ask to leave out). It starts active, so vendors can choose it at once. Only a category takes a display order (`sortOrder`, lower first, 0 when left out); on another list it is refused with VALIDATION_FAILED `isOrderedList`. Only a category takes an image (`imageMediaId`: upload it first with POST /v1/admin/media/uploads, purpose `catalog.category-image`, then confirm it; MEDIA_NOT_FOUND for another user’s or another purpose’s file, MEDIA_NOT_READY before confirmation); on another list VALIDATION_FAILED `isCategoryList`. Names need not be unique.",
         "operationId": "adminCreateCatalogListEntry",
         "parameters": [
           {
@@ -5768,6 +5950,26 @@
           },
           "403": {
             "description": "Error. code: FORBIDDEN.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Error. code: MEDIA_NOT_FOUND.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Error. code: MEDIA_NOT_READY.",
             "content": {
               "application/json": {
                 "schema": {
@@ -5960,7 +6162,7 @@
     },
     "/v1/admin/lists/{list}/{id}": {
       "patch": {
-        "description": "Admin dashboard, catalog settings. Changes only the fields sent: the name (both languages together), `isActive`, and for a category `sortOrder` (the public order, lower first; on another list VALIDATION_FAILED `isOrderedList`). Applies at once. Entries are never deleted: switch one off instead. An inactive entry can no longer be chosen for a product (VALIDATION_FAILED on the product form); products already using it keep it. An inactive category also hides all its products from the public catalog at once, until it is switched on again. NOT_FOUND for an id that is not an entry of this list.",
+        "description": "Admin dashboard, catalog settings. Changes only the fields sent: the name (both languages together), `isActive`, and for a category `sortOrder` (the public order, lower first; on another list VALIDATION_FAILED `isOrderedList`) and `imageMediaId` (a confirmed `catalog.category-image` upload of the signed-in admin, MEDIA_NOT_FOUND or MEDIA_NOT_READY otherwise; null removes the image; on another list VALIDATION_FAILED `isCategoryList`). Applies at once. Entries are never deleted: switch one off instead. An inactive entry can no longer be chosen for a product (VALIDATION_FAILED on the product form); products already using it keep it. An inactive category also hides all its products from the public catalog at once, until it is switched on again. NOT_FOUND for an id that is not an entry of this list.",
         "operationId": "adminUpdateCatalogListEntry",
         "parameters": [
           {
@@ -6043,7 +6245,17 @@
             }
           },
           "404": {
-            "description": "Error. code: NOT_FOUND.",
+            "description": "Error. code: NOT_FOUND, MEDIA_NOT_FOUND.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Error. code: MEDIA_NOT_READY.",
             "content": {
               "application/json": {
                 "schema": {
@@ -8099,7 +8311,7 @@
     },
     "/v1/public/products": {
       "get": {
-        "description": "Customer app and web, product lists (home, a category, a store, search by price); public, no sign-in needed. Only products customers can buy: published, switched on (available), of an active (not suspended) vendor, in an active category. Newest first; keyset paging: send `nextCursor` back as `cursor` until it is null; no total count. Optional filters, combined: `categoryId`, `vendorId`, `meatTypeId`, and a range on the product’s lowest size price in halalas, VAT included (`minPriceHalalas`, `maxPriceHalalas`, both ends included; a range with min above max simply finds nothing). An unknown id finds nothing rather than an error.",
+        "description": "Customer app and web, product lists (home, a category, a store, search by price); public, no sign-in needed. Only products customers can buy: published, switched on (available), of an active (not suspended) vendor, in an active category. Newest first; keyset paging: send `nextCursor` back as `cursor` until it is null; no total count. Optional filters, combined: `categoryId`, `vendorId`, `meatTypeId`, and a range on the product’s lowest size price in halalas, VAT included (`minPriceHalalas`, `maxPriceHalalas`, both ends included; a range with min above max simply finds nothing), and `q`, a text of 2 to 100 characters the Arabic or English name must contain (Arabic diacritics, tatweel, alef forms, alef maqsura, teh marbuta and English case ignored). An unknown id finds nothing rather than an error.",
         "operationId": "publicListProducts",
         "parameters": [
           {
@@ -8123,6 +8335,18 @@
               "default": 20,
               "example": 20,
               "type": "number"
+            }
+          },
+          {
+            "name": "q",
+            "required": false,
+            "in": "query",
+            "description": "Only products whose name, in Arabic or English, contains this text; surrounding spaces are removed, then 2 to 100 characters. Matching ignores Arabic diacritics and tatweel, reads أ إ آ as ا, ى as ي and ة as ه, and ignores English letter case; `%` and `_` match themselves. Combined with every other filter and the paging. No match: an empty page. Left out: no text search.",
+            "schema": {
+              "minLength": 2,
+              "maxLength": 100,
+              "example": "نعيمي",
+              "type": "string"
             }
           },
           {
@@ -8379,6 +8603,10 @@
     {
       "name": "Vendor products",
       "description": "The vendor own products: drafts, review, edits, prices, availability and fulfilment. Vendor dashboard."
+    },
+    {
+      "name": "Vendor catalog lists",
+      "description": "The active meat types, cutting styles and \"without\" items a product can choose, and the cutting and packaging pairs it cannot combine, for the product form. Vendor dashboard."
     },
     {
       "name": "Vendor media",
@@ -9900,7 +10128,7 @@
           "purpose": {
             "type": "string",
             "example": "catalog.product-image",
-            "description": "The upload purpose the ticket was requested for (`catalog.product-image`, `vendor.logo`, `vendor.document`); only an endpoint expecting this purpose accepts the file."
+            "description": "The upload purpose the ticket was requested for (`catalog.product-image`, `catalog.category-image`, `vendor.logo`, `vendor.document`); only an endpoint expecting this purpose accepts the file."
           },
           "visibility": {
             "type": "string",
@@ -10005,10 +10233,11 @@
             "type": "string",
             "enum": [
               "vendor.logo",
-              "catalog.product-image"
+              "catalog.product-image",
+              "catalog.category-image"
             ],
             "example": "vendor.logo",
-            "description": "Why the file is uploaded: decides the accepted types, the size limit and who can read the file. Accepted here:\n\n- `vendor.logo`: image/jpeg, image/png, image/webp; 1 byte to 2 MiB (2097152 bytes); public (anyone can read it at a stable URL).\n- `catalog.product-image`: image/jpeg, image/png, image/webp; 1 byte to 5 MiB (5242880 bytes); public (anyone can read it at a stable URL)."
+            "description": "Why the file is uploaded: decides the accepted types, the size limit and who can read the file. Accepted here:\n\n- `vendor.logo`: image/jpeg, image/png, image/webp; 1 byte to 2 MiB (2097152 bytes); public (anyone can read it at a stable URL).\n- `catalog.product-image`: image/jpeg, image/png, image/webp; 1 byte to 5 MiB (5242880 bytes); public (anyone can read it at a stable URL).\n- `catalog.category-image`: image/jpeg, image/png, image/webp; 1 byte to 2 MiB (2097152 bytes); public (anyone can read it at a stable URL)."
           }
         },
         "required": [
@@ -10411,6 +10640,87 @@
           "checks"
         ]
       },
+      "NamedReferenceResponseDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "example": "7f3a2c1e-0b9d-4e5f-8a6b-1c2d3e4f5a6b",
+            "description": "The entry’s id (UUID)."
+          },
+          "name": {
+            "description": "The entry’s name in Arabic and English.",
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/LocalizedTextResponseDto"
+              }
+            ]
+          }
+        },
+        "required": [
+          "id",
+          "name"
+        ]
+      },
+      "NamedReferenceListResponseDto": {
+        "type": "object",
+        "properties": {
+          "items": {
+            "description": "Every active entry, with its Arabic and English name, oldest first; empty when there is none.",
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/NamedReferenceResponseDto"
+            }
+          }
+        },
+        "required": [
+          "items"
+        ]
+      },
+      "VendorIncompatibilityResponseDto": {
+        "type": "object",
+        "properties": {
+          "cuttingStyle": {
+            "description": "The cutting style (active), with its Arabic and English name.",
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/NamedReferenceResponseDto"
+              }
+            ]
+          },
+          "packaging": {
+            "type": "string",
+            "enum": [
+              "trays",
+              "bags",
+              "vacuum",
+              "none"
+            ],
+            "example": "vacuum",
+            "description": "The packaging it cannot be packed in: `trays`, `bags`, `vacuum`, `none`."
+          }
+        },
+        "required": [
+          "cuttingStyle",
+          "packaging"
+        ]
+      },
+      "VendorIncompatibilityListResponseDto": {
+        "type": "object",
+        "properties": {
+          "items": {
+            "description": "Every pair whose cutting style is active, oldest rule first; empty when there is none.",
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/VendorIncompatibilityResponseDto"
+            }
+          }
+        },
+        "required": [
+          "items"
+        ]
+      },
       "ProductSizeDto": {
         "type": "object",
         "properties": {
@@ -10598,29 +10908,6 @@
           "packagings",
           "exclusionItemIds",
           "fulfilment"
-        ]
-      },
-      "NamedReferenceResponseDto": {
-        "type": "object",
-        "properties": {
-          "id": {
-            "type": "string",
-            "format": "uuid",
-            "example": "7f3a2c1e-0b9d-4e5f-8a6b-1c2d3e4f5a6b",
-            "description": "The entry’s id (UUID)."
-          },
-          "name": {
-            "description": "The entry’s name in Arabic and English.",
-            "allOf": [
-              {
-                "$ref": "#/components/schemas/LocalizedTextResponseDto"
-              }
-            ]
-          }
-        },
-        "required": [
-          "id",
-          "name"
         ]
       },
       "ProductImageResponseDto": {
@@ -11453,6 +11740,13 @@
             "maximum": 100000,
             "description": "Categories only: the display order, lower first (0 by default). Another list refuses it (VALIDATION_FAILED `isOrderedList`).",
             "example": 1
+          },
+          "imageMediaId": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true,
+            "example": "7f3a2c1e-0b9d-4e5f-8a6b-1c2d3e4f5a6b",
+            "description": "Categories only: the image, the id (UUID) of a `catalog.category-image` file the signed-in admin uploaded and confirmed (MEDIA_NOT_FOUND, MEDIA_NOT_READY otherwise); left out or null: no image. Another list refuses it, even null (VALIDATION_FAILED `isCategoryList`)."
           }
         },
         "required": [
@@ -11487,6 +11781,12 @@
             "description": "A category’s display order, lower first; null for the other lists.",
             "example": 0
           },
+          "imageUrl": {
+            "type": "string",
+            "nullable": true,
+            "example": "https://cdn.example.com/catalog/category-image/2026/11/17/7f3a.webp",
+            "description": "A category’s image, its public URL; null without an image, and for the other lists."
+          },
           "createdAt": {
             "format": "date-time",
             "type": "string",
@@ -11499,6 +11799,7 @@
           "name",
           "isActive",
           "sortOrder",
+          "imageUrl",
           "createdAt"
         ]
       },
@@ -11546,6 +11847,13 @@
             "maximum": 100000,
             "description": "Categories only: the display order, lower first (0 by default). Another list refuses it (VALIDATION_FAILED `isOrderedList`).",
             "example": 1
+          },
+          "imageMediaId": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true,
+            "example": "7f3a2c1e-0b9d-4e5f-8a6b-1c2d3e4f5a6b",
+            "description": "Categories only: the new image, the id (UUID) of a `catalog.category-image` file the signed-in admin uploaded and confirmed (MEDIA_NOT_FOUND, MEDIA_NOT_READY otherwise); null removes the image; left out: unchanged. Another list refuses it, even null (VALIDATION_FAILED `isCategoryList`)."
           }
         }
       },
