@@ -163,7 +163,10 @@ describe('API documentation (e2e)', () => {
       expect(schemas.ReadinessResponseDto).toMatchObject({
         properties: {
           status: { enum: ['ok', 'unavailable'] },
-          checks: { $ref: '#/components/schemas/ReadinessChecksDto' },
+          // A described nested DTO is written as allOf around its reference.
+          checks: {
+            allOf: [{ $ref: '#/components/schemas/ReadinessChecksDto' }],
+          },
         },
       });
     });
