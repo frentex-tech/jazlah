@@ -1,11 +1,4 @@
-import { removeFormatCharacters } from '../text/remove-format-characters';
-import { toLatinDigits } from '../text/to-latin-digits';
-
-/**
- * Spaces and dashes a person may type between the digits, removed before the number is
- * read (invisible format characters are removed by removeFormatCharacters).
- */
-const SEPARATORS = /[\s-]/gu;
+import { compactPhoneInput } from './compact-phone-input';
 
 /** The forms accepted once separators are removed; group 1 is the 8 digits after 5. */
 const SAUDI_MOBILE_FORMS: readonly RegExp[] = [
@@ -19,17 +12,18 @@ const SAUDI_MOBILE_FORMS: readonly RegExp[] = [
 /**
  * A Saudi mobile number in E.164 (`+9665XXXXXXXX`), from the forms people type: `05…`,
  * `5…`, `9665…`, `009665…` or `+9665…`, with spaces, dashes or invisible format
- * characters (direction marks, zero-width characters) anywhere between the digits, in Latin, Arabic-Indic (٠ to ٩) or Extended Arabic-Indic (۰ to ۹) digits, mixed
- * or not: they are converted to Latin before the number is checked. Anything else returns null: a landline, another country, a trunk zero after
- * the country code (`+96605…`), letters, other punctuation, or the wrong length.
+ * characters (direction marks, zero-width characters) anywhere between the digits, in
+ * Latin, Arabic-Indic (٠ to ٩) or Extended Arabic-Indic (۰ to ۹) digits, mixed or not
+ * (compactPhoneInput). Anything else returns null: a landline, another country, a trunk
+ * zero after the country code (`+96605…`), letters, other punctuation, or the wrong
+ * length. Sign-in relies on it being mobile only; normalizeSaudiPhoneNumber also accepts
+ * landlines.
  *
  * Mobile means the national range 5 followed by 8 digits; operators' prefixes inside it
  * are not checked, so a newly assigned prefix is accepted.
  */
 export function normalizeSaudiMobileNumber(input: string): string | null {
-  const compact = toLatinDigits(
-    removeFormatCharacters(input).replace(SEPARATORS, ''),
-  );
+  const compact = compactPhoneInput(input);
   for (const form of SAUDI_MOBILE_FORMS) {
     const match = form.exec(compact);
     if (match !== null) {
