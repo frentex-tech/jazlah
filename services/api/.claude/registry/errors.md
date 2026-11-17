@@ -8,5 +8,5 @@ One line per building block: name, path, purpose; the detail is in that file's d
 - **Error filter** — `src/common/filters/all-exceptions.filter.ts` — writes every error (`src/common/filters/error-response-body.interface.ts`, `src/common/filters/http-status-error-codes.constants.ts`).
 - **ErrorResponseDto** — `src/common/filters/error-response.dto.ts` — the documented error body, with `src/common/filters/field-error.dto.ts`.
 - **Language** — `src/common/i18n/resolve-language.ts` — `Accept-Language` to `src/common/i18n/language.type.ts`; `src/common/i18n/localized-text.type.ts`, `src/common/i18n/optional-localized-text.type.ts` (either language or neither).
-- **Validation pipe** — `src/common/pipes/app-validation.pipe.ts` — the global pipe; `src/common/pipes/to-field-errors.ts`.
+- **Validation pipe** — `src/common/pipes/app-validation.pipe.ts` — the global pipe, which also refuses a NUL character in any input (`src/common/pipes/find-nul-character-fields.ts`); `src/common/pipes/to-field-errors.ts`.
 - **Error codes** — `src/common/errors/error-code.enum.ts` — a new code also needs `src/common/errors/error-messages.constants.ts` and `src/common/errors/error-statuses.constants.ts`. Never rename, remove or reuse one.
