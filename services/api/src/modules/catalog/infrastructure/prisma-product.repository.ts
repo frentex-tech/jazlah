@@ -293,10 +293,17 @@ export class PrismaProductRepository implements ProductRepository {
                 : { lte: filter.maxPrice.halalas }),
             },
           };
-    const search =
+    const pattern =
       filter.text === undefined
-        ? {}
-        : { searchText: { contains: await this.searchPattern(filter.text) } };
+        ? undefined
+        : await this.searchPattern(filter.text);
+    // A query of only diacritics or tatweel normalises to nothing: it names no product,
+    // so the answer is an empty page, never every product (`LIKE '%%'`).
+    if (pattern === '') {
+      return { items: [], nextCursor: null };
+    }
+    const search =
+      pattern === undefined ? {} : { searchText: { contains: pattern } };
     return this.summaries(
       {
         ...this.publicWhere(),

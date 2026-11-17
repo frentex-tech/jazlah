@@ -245,9 +245,10 @@ export class InMemoryProductRepository implements ProductRepository {
             (row) =>
               this.isPublic(row) &&
               (filter.text === undefined ||
-                searchTextOf(
-                  `${row.content.name.ar} ${row.content.name.en}`,
-                ).includes(searchTextOf(filter.text))) &&
+                (searchTextOf(filter.text) !== '' &&
+                  searchTextOf(
+                    `${row.content.name.ar} ${row.content.name.en}`,
+                  ).includes(searchTextOf(filter.text)))) &&
               (filter.categoryId === undefined ||
                 row.content.categoryId === filter.categoryId) &&
               (filter.vendorId === undefined ||

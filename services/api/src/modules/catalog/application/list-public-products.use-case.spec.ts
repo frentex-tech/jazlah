@@ -70,5 +70,7 @@ describe('ListPublicProductsUseCase', () => {
     ]);
     expect(await list({ text: 'naimi', vendorId: OTHER_VENDOR })).toEqual([]);
     expect(await list({ text: 'goat' })).toEqual([]);
+    // Only marks: nothing is left to match, so nothing matches.
+    expect(await list({ text: 'ًـ' })).toEqual([]);
   });
 });
