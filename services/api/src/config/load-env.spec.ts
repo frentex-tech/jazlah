@@ -6,6 +6,7 @@ jest.mock('./validate-env');
 
 const validated: Env = {
   NODE_ENV: 'test',
+  DEPLOYMENT_ENV: 'development',
   PORT: 3000,
   SHUTDOWN_DEADLINE_MS: 28_000,
   LOG_LEVEL: 'info',
