@@ -25,7 +25,7 @@ An access token is issued for **one** audience. A customer token used on a `/v1/
 | Environment | Base URL | Swagger page | OpenAPI JSON |
 |---|---|---|---|
 | Local (your machine) | `http://localhost:3000/v1` | `http://localhost:3000/docs` | `http://localhost:3000/docs-json` |
-| Staging | not deployed yet: the backend team will add the URL here when the staging server is up | | |
+| Staging | `https://<staging-host>.onrender.com/v1` (placeholder: the backend team replaces it with the real host once the service exists) | `https://<staging-host>.onrender.com/docs` | `https://<staging-host>.onrender.com/docs-json` |
 | Production | not deployed yet | off by default in production | off by default in production |
 
 Calling the local API from a device:
