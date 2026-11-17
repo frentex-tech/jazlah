@@ -6,7 +6,12 @@ import { ProductContentDto } from './product-content.dto';
 
 /** A new draft product: its content and how it reaches the customer. */
 export class CreateProductDto extends ProductContentDto {
-  @ApiProperty({ enum: PRODUCT_FULFILMENTS, example: 'both' })
+  @ApiProperty({
+    enum: PRODUCT_FULFILMENTS,
+    example: 'both',
+    description:
+      'How the product reaches the customer: `delivery`, `pickup` or `both`. Change it later with PATCH …/{id}/fulfilment.',
+  })
   @IsIn(PRODUCT_FULFILMENTS)
   fulfilment!: ProductFulfilment;
 }

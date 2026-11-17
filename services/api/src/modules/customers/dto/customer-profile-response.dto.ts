@@ -1,4 +1,5 @@
 import { ApiProperty } from '@nestjs/swagger';
+import { CUSTOMER_LIMITS } from '../customer-limits.constants';
 import type { PreferredLanguage } from '../preferred-language.type';
 import { PREFERRED_LANGUAGES } from '../preferred-languages.constants';
 
@@ -7,7 +8,7 @@ export class CustomerProfileResponseDto {
   @ApiProperty({
     type: String,
     nullable: true,
-    description: 'Null until the customer gives a name.',
+    description: `The customer's full name, ${CUSTOMER_LIMITS.fullName.min} to ${CUSTOMER_LIMITS.fullName.max} characters; null until the customer gives one.`,
     example: 'محمد العتيبي',
   })
   fullName!: string | null;
@@ -15,11 +16,18 @@ export class CustomerProfileResponseDto {
   @ApiProperty({
     type: String,
     nullable: true,
+    description:
+      'The email address, lowercase and not verified; null when the customer gave none or removed it.',
     example: 'mohammed@example.com',
   })
   email!: string | null;
 
-  @ApiProperty({ enum: PREFERRED_LANGUAGES, example: 'ar' })
+  @ApiProperty({
+    enum: PREFERRED_LANGUAGES,
+    description:
+      'The language of messages to this customer: `ar` (Arabic, the default until the customer chooses) or `en`.',
+    example: 'ar',
+  })
   preferredLanguage!: PreferredLanguage;
 
   @ApiProperty({

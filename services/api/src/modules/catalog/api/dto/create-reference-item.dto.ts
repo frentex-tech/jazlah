@@ -13,7 +13,11 @@ import { MAX_SORT_ORDER } from '../../domain/ordered-reference-lists.constants';
 
 /** A new entry of an admin list: its name in both languages; a category's order. */
 export class CreateReferenceItemDto {
-  @ApiProperty({ type: LocalizedNameDto })
+  @ApiProperty({
+    type: LocalizedNameDto,
+    description:
+      'The entry’s name in Arabic and English, as vendors and customers see it.',
+  })
   @IsDefined()
   @ValidateNested()
   @Type(() => LocalizedNameDto)

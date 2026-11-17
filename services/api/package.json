@@ -15,7 +15,7 @@
     "start:dev": "nest start --watch",
     "start:debug": "nest start --debug --watch",
     "start:prod": "node dist/main",
-    "lint": "eslint \"{src,apps,libs,test}/**/*.ts\" --fix",
+    "lint": "eslint \"{src,apps,libs,test,prisma}/**/*.ts\" --fix",
     "test": "node --experimental-vm-modules ./node_modules/jest/bin/jest.js",
     "test:watch": "node --experimental-vm-modules ./node_modules/jest/bin/jest.js --watch",
     "test:cov": "node --experimental-vm-modules ./node_modules/jest/bin/jest.js --coverage",
@@ -28,6 +28,7 @@
     "admin:create": "node -r ts-node/register/transpile-only -r tsconfig-paths/register src/create-admin.ts",
     "vendor:create-platform": "node -r ts-node/register/transpile-only -r tsconfig-paths/register src/create-platform-vendor.ts",
     "openapi:check": "node -r ts-node/register/transpile-only -r tsconfig-paths/register src/generate-openapi.ts check",
+    "docs:check": "node scripts/check-frontend-docs.mjs",
     "infra:up": "docker compose up -d --wait",
     "infra:down": "docker compose down",
     "db:migrate": "prisma migrate dev",
@@ -35,6 +36,7 @@
     "db:generate": "prisma generate",
     "db:drift": "prisma migrate diff --from-migrations prisma/migrations --to-schema prisma --exit-code",
     "db:reset": "prisma migrate reset --force",
+    "db:seed": "node -r ts-node/register/transpile-only -r tsconfig-paths/register prisma/seed/seed.ts",
     "prepare": "node .husky/install.mjs"
   },
   "dependencies": {

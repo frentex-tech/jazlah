@@ -7,10 +7,12 @@ on:
   pull_request:
     paths:
       - 'services/api/**'
+      - 'docs/frontend/**'
       - '.github/workflows/api-ci.yml'
   push:
     paths:
       - 'services/api/**'
+      - 'docs/frontend/**'
       - '.github/workflows/api-ci.yml'
 
 permissions:
@@ -136,6 +138,26 @@ jobs:
       - name: Start MinIO
         run: docker compose up -d --wait minio
 
+      # The development seed on the migrated jazla database, twice: the second run must
+      # leave every table with the same number of rows (the seed is idempotent).
+      - name: Seed, twice
+        run: |
+          count_rows() {
+            psql -h localhost -p 5434 -U jazla -d jazla -v ON_ERROR_STOP=1 -At -c "
+              SELECT table_name || ' ' || (xpath('/row/c/text()', query_to_xml(
+                format('SELECT count(*) AS c FROM %I.%I', table_schema, table_name),
+                false, true, '')))[1]::text
+              FROM information_schema.tables
+              WHERE table_schema = 'public' AND table_type = 'BASE TABLE'
+              ORDER BY table_name"
+          }
+          pnpm db:seed
+          count_rows > "$RUNNER_TEMP/seed-first.txt"
+          pnpm db:seed
+          count_rows > "$RUNNER_TEMP/seed-second.txt"
+          cat "$RUNNER_TEMP/seed-first.txt"
+          diff "$RUNNER_TEMP/seed-first.txt" "$RUNNER_TEMP/seed-second.txt"
+
       # Applies the migrations to jazla_test itself, then runs the e2e suites.
       - name: e2e tests
         run: pnpm test:e2e --detectOpenHandles
@@ -160,3 +182,7 @@ jobs:
 
       - name: Registry
         run: node .claude/hooks/check-registry.mjs
+
+      # Every endpoint path and error code docs/frontend/ names exists in openapi.json.
+      - name: Frontend guides match the OpenAPI document
+        run: pnpm docs:check

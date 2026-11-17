@@ -3,7 +3,11 @@ import { ProductChangeRequestResponseDto } from './product-change-request-respon
 
 /** One page of pending change requests, newest first. */
 export class ProductChangeRequestPageResponseDto {
-  @ApiProperty({ type: [ProductChangeRequestResponseDto] })
+  @ApiProperty({
+    type: [ProductChangeRequestResponseDto],
+    description:
+      'The pending change requests of this page, newest first; empty when none wait.',
+  })
   items!: ProductChangeRequestResponseDto[];
 
   @ApiProperty({

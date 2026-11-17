@@ -13,6 +13,9 @@ export default defineConfig({
   schema: 'prisma',
   migrations: {
     path: 'prisma/migrations',
+    // `prisma db seed` runs the same script as `pnpm db:seed`. Prisma 7 runs it only on
+    // that explicit command, never after `migrate dev` or `migrate reset`.
+    seed: 'node -r ts-node/register/transpile-only -r tsconfig-paths/register prisma/seed/seed.ts',
   },
   datasource: {
     // Read directly rather than through env(), which throws when the variable is unset:

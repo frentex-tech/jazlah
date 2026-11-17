@@ -8,6 +8,8 @@ import type { VendorApplicationStatus } from '../../domain/vendor-application-st
 export class ListVendorApplicationsQueryDto extends PageQueryDto {
   @ApiPropertyOptional({
     enum: VENDOR_APPLICATION_STATUSES,
+    description:
+      'Only applications in this status: pending (waiting for review), approved or rejected. Omit it for every status.',
     example: 'pending',
   })
   @IsOptional()

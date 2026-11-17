@@ -20,7 +20,7 @@ export class UpdateVendorProfileDto {
     format: 'uuid',
     nullable: true,
     description:
-      'A confirmed upload (purpose vendor.logo) by the signed-in user; null removes the logo.',
+      'The id (UUID) of a file the signed-in user uploaded with purpose vendor.logo and confirmed (JPEG, PNG or WebP, up to 2 MB); null removes the logo; omit it to keep the current one.',
     example: '7f3a2c1e-0b9d-4e5f-8a6b-1c2d3e4f5a6b',
   })
   @ValidateIf((_dto, value) => value !== null)
@@ -28,7 +28,11 @@ export class UpdateVendorProfileDto {
   @IsUUID()
   logoMediaId?: string | null;
 
-  @ApiPropertyOptional({ type: LocalizedDescriptionDto })
+  @ApiPropertyOptional({
+    type: LocalizedDescriptionDto,
+    description:
+      'The store description: an object, never null. Inside it a language left out stays as it is, and null or a blank text clears it. Omit the whole field to keep both.',
+  })
   @ValidateIf((_dto, value) => value !== undefined)
   @IsObject()
   @ValidateNested()

@@ -7,6 +7,8 @@ export class ProductCuttingDto {
   @ApiProperty({
     format: 'uuid',
     example: '7f3a2c1e-0b9d-4e5f-8a6b-1c2d3e4f5a6b',
+    description:
+      'The id (UUID) of an active cutting style; an inactive or unknown one is VALIDATION_FAILED `isActiveCuttingStyle`.',
   })
   @IsUUID()
   cuttingStyleId!: string;

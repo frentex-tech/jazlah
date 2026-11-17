@@ -3,7 +3,11 @@ import { ProductCardResponseDto } from './product-card-response.dto';
 
 /** One page of products, newest first. */
 export class ProductCardPageResponseDto {
-  @ApiProperty({ type: [ProductCardResponseDto] })
+  @ApiProperty({
+    type: [ProductCardResponseDto],
+    description:
+      'The products of this page, newest first; empty when none match.',
+  })
   items!: ProductCardResponseDto[];
 
   @ApiProperty({

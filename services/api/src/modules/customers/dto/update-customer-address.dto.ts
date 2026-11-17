@@ -16,6 +16,7 @@ export class UpdateCustomerAddressDto extends CustomerAddressTextDto {
   @ApiPropertyOptional({
     minLength: 1,
     maxLength: CUSTOMER_LIMITS.labelMax,
+    description: `A new name for the address (Home, Work): 1 to ${CUSTOMER_LIMITS.labelMax} characters after surrounding spaces are removed, counted in Unicode code points (an emoji with a variation selector counts as 2). Left out keeps the current label; null is VALIDATION_FAILED (an address always has a label).`,
     example: 'العمل',
   })
   @Transform(trimText)
@@ -24,7 +25,11 @@ export class UpdateCustomerAddressDto extends CustomerAddressTextDto {
   @CharLength(1, CUSTOMER_LIMITS.labelMax)
   label?: string;
 
-  @ApiPropertyOptional({ type: GeoPointDto })
+  @ApiPropertyOptional({
+    type: GeoPointDto,
+    description:
+      'A new point on the map, in degrees (JSON numbers). Left out keeps the current one; null is VALIDATION_FAILED (an address always has a location).',
+  })
   @ValidateIf((_dto, value) => value !== undefined)
   @ValidateNested()
   @Type(() => GeoPointDto)

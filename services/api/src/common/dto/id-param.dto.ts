@@ -8,6 +8,8 @@ import { IsUUID } from 'class-validator';
 export class IdParamDto {
   @ApiProperty({
     format: 'uuid',
+    description:
+      'The id (a UUID) of the item the path names; another value is VALIDATION_FAILED on `id`.',
     example: '7f3a2c1e-0b9d-4e5f-8a6b-1c2d3e4f5a6b',
   })
   @IsUUID()

@@ -25,13 +25,21 @@ import { VendorApplicationDocumentDto } from './vendor-application-document.dto'
 
 /** The body of a vendor application (FR-VND-01). */
 export class SubmitVendorApplicationDto {
-  @ApiProperty({ type: LocalizedNameDto })
+  @ApiProperty({
+    type: LocalizedNameDto,
+    description:
+      'The store name customers will see, in Arabic and English (both required).',
+  })
   @IsDefined()
   @ValidateNested()
   @Type(() => LocalizedNameDto)
   name!: LocalizedNameDto;
 
-  @ApiPropertyOptional({ type: LocalizedDescriptionDto })
+  @ApiPropertyOptional({
+    type: LocalizedDescriptionDto,
+    description:
+      'An optional store description in Arabic and English; omit it, or either language, when there is none.',
+  })
   @IsOptional()
   @ValidateNested()
   @Type(() => LocalizedDescriptionDto)
@@ -59,7 +67,8 @@ export class SubmitVendorApplicationDto {
   @ApiProperty({
     minLength: 2,
     maxLength: 100,
-    description: 'The name on the bank account.',
+    description:
+      'The name on the payout bank account, 2 to 100 characters; trimmed.',
     example: 'مؤسسة النخبة للحوم',
   })
   @Transform(trimText)
@@ -68,7 +77,10 @@ export class SubmitVendorApplicationDto {
   @MaxLength(100)
   accountHolderName!: string;
 
-  @ApiProperty({ type: GeoPointDto, description: 'Where the facility is.' })
+  @ApiProperty({
+    type: GeoPointDto,
+    description: 'Where the facility (shop or slaughterhouse) is.',
+  })
   @IsDefined()
   @ValidateNested()
   @Type(() => GeoPointDto)

@@ -16,7 +16,7 @@ export class ChangeProductPricesDto {
     type: [SizePriceDto],
     maxItems: PRODUCT_LIMITS.sizes,
     description:
-      'Each size at most once (VALIDATION_FAILED `isNotRepeated` on `sizes.<i>.sizeId`).',
+      'New size prices, each size at most once (VALIDATION_FAILED `isNotRepeated` on `sizes.<i>.sizeId`); left out or empty: no size price changes.',
   })
   @IsOptional()
   @IsArray()
@@ -29,7 +29,7 @@ export class ChangeProductPricesDto {
     type: [CuttingPriceDto],
     maxItems: PRODUCT_LIMITS.cuttings,
     description:
-      'Each cutting style at most once (VALIDATION_FAILED `isNotRepeated` on `cuttings.<i>.cuttingStyleId`).',
+      'New cutting style extra prices, each cutting style at most once (VALIDATION_FAILED `isNotRepeated` on `cuttings.<i>.cuttingStyleId`); left out or empty: no cutting price changes.',
   })
   @IsOptional()
   @IsArray()

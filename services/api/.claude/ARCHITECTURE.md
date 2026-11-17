@@ -46,6 +46,11 @@ prisma/
                               20261116160000_catalog_change_request_superseded (superseded status; review check
                               rewritten by hand); 20261117120000_customers (profiles, addresses, consent records;
                               users' tombstone; checks and the default address index by hand)
+  seed/                       pnpm db:seed (and `prisma db seed`): development data for the frontends, idempotent,
+                              refuses production. seed.ts (entry), seed.module.ts, one step per file (seed-vendors.ts,
+                              seed-products.ts…), placeholder PNG and PDF encoders, data/ (*.constants.ts data sets,
+                              their types). Outside src/: never in dist/; linted, type-checked and unit-tested with
+                              the rest (seed-data.spec.ts checks the data against the schema's constraints)
 src/
   main.ts                     bootstrap: validates the environment, pino as Nest's logger, configureHttpApp,
                               shutdownOnSignals (the shutdown deadline), port from config; an invalid

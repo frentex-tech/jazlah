@@ -6,19 +6,23 @@ import { AUDIENCES } from '@common/auth/audiences.constants';
 export class PrincipalResponseDto {
   @ApiProperty({
     format: 'uuid',
-    example: '6f1c0c53-3f0b-4d0a-9a6f-2f0f0f8f7a11',
+    description:
+      'The user (UUID). The same person has one user id in every app.',
+    example: '7f3a2c1e-0b9d-4e5f-8a6b-1c2d3e4f5a6b',
   })
   userId!: string;
 
   @ApiProperty({
-    description: 'The phone number, masked.',
+    description:
+      'The phone number, masked: the country code and the last two digits only.',
     example: '+966*******78',
   })
   phone!: string;
 
   @ApiProperty({
     enum: AUDIENCES,
-    description: 'The one audience this sign-in is for.',
+    description:
+      'The one audience this sign-in is for: its tokens work only on the routes of that audience (`/v1/<audience>/...`).',
     example: 'customer',
   })
   audience!: Audience;
@@ -28,13 +32,15 @@ export class PrincipalResponseDto {
     format: 'uuid',
     nullable: true,
     description:
-      'The vendor or kitchen the user acts for; null for customers and admins.',
+      'The vendor or kitchen the user acts for (UUID); null for customers and admins.',
     example: null,
   })
   organisationId!: string | null;
 
   @ApiProperty({
     format: 'uuid',
+    description:
+      'The session (UUID): one sign-in on one device, ended by signing out.',
     example: '0b9f6a0e-58e5-4f6b-8e0a-5a1d3d0c2b10',
   })
   sessionId!: string;

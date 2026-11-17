@@ -4,7 +4,10 @@ import { PrincipalResponseDto } from './principal-response.dto';
 
 /** A successful sign-in: the tokens, and who signed in. */
 export class SignedInResponseDto extends AuthTokensResponseDto {
-  @ApiProperty({ type: PrincipalResponseDto })
+  @ApiProperty({
+    type: PrincipalResponseDto,
+    description: 'Who signed in, for which audience and session.',
+  })
   principal!: PrincipalResponseDto;
 
   @ApiProperty({

@@ -27,6 +27,7 @@ import { IdParamDto } from '@common/dto/id-param.dto';
 import { ErrorCode } from '@common/errors/error-code.enum';
 import { toNextCursor } from '@common/pagination/to-next-cursor';
 import { toPageRequest } from '@common/pagination/to-page-request';
+import { API_TAGS } from '@infra/api-docs/api-tags.constants';
 import { ChangeProductPricesUseCase } from '../../application/change-product-prices.use-case';
 import { CreateProductUseCase } from '../../application/create-product.use-case';
 import { GetProductUseCase } from '../../application/get-product.use-case';
@@ -53,7 +54,7 @@ import { toProductResponse } from '../to-product-response';
  * A vendor's own products (FR-VND-03). The vendor is always the access token's
  * organisation: another vendor's product is NOT_FOUND, exactly like a missing one.
  */
-@ApiTags('catalog')
+@ApiTags(API_TAGS.vendorProducts.name)
 @ApiBearerAuth(BEARER_AUTH_SCHEME)
 @Controller('vendor/products')
 export class VendorCatalogController {
@@ -70,12 +71,24 @@ export class VendorCatalogController {
 
   @Post()
   @ApiOperation({
+    operationId: 'vendorCreateProduct',
     summary: 'Create a draft product',
     description:
-      'Upload each image first (POST /v1/vendor/media/uploads, purpose catalog.product-image) and confirm it. A draft may be incomplete; submit it for review when ready.',
+      'Vendor dashboard, new product form. Creates a product of the signed-in vendor in status `draft`, available, with the content and fulfilment sent; nobody but the vendor and admins sees it until it is published. ' +
+      'Upload each image first (POST /v1/vendor/media/uploads with purpose `catalog.product-image`, then POST /v1/vendor/media/{id}/confirm) and send the media ids in display order: the first is the cover. ' +
+      'A draft may be incomplete (no size, no image): the submission rules apply only when it is submitted (POST …/{id}/submit). Prices are integer halalas, VAT included (`95000` is 950.00 SAR). ' +
+      'Errors: VALIDATION_FAILED for an invalid body and also, with field details, for a category, meat type, cutting style or "without" item that is not an active entry (`isActiveCategory`, `isActiveMeatType`, `isActiveCuttingStyle`, `isActiveExclusionItem`) or a repeated cutting style (`isNotRepeated`); MEDIA_NOT_FOUND for an image id that is not a product image uploaded by this user; MEDIA_NOT_READY for an image whose upload was not confirmed (`details.mediaId` names it).',
   })
-  @ApiCreatedResponse({ type: ProductResponseDto })
-  @ApiErrorResponses(...PRODUCT_CONTENT_ERRORS, ...VENDOR_AUTH_ERRORS)
+  @ApiCreatedResponse({
+    type: ProductResponseDto,
+    description: 'The new draft product.',
+  })
+  @ApiErrorResponses(
+    ...PRODUCT_CONTENT_ERRORS,
+    ErrorCode.TRANSACTION_CONFLICT,
+    ErrorCode.SERVICE_UNAVAILABLE,
+    ...VENDOR_AUTH_ERRORS,
+  )
   async create(
     @CurrentUser() user: AuthenticatedUser,
     @Body() body: CreateProductDto,
@@ -91,9 +104,22 @@ export class VendorCatalogController {
   }
 
   @Get()
-  @ApiOperation({ summary: 'My products, newest first' })
-  @ApiOkResponse({ type: ProductCardPageResponseDto })
-  @ApiErrorResponses(ErrorCode.VALIDATION_FAILED, ...VENDOR_AUTH_ERRORS)
+  @ApiOperation({
+    operationId: 'vendorListProducts',
+    summary: 'My products, newest first',
+    description:
+      'Vendor dashboard, products list. The signed-in vendor’s own products in every status, newest first, optionally of one status (`draft`, `pending_review`, `published`, `rejected`). Keyset paging: send `nextCursor` back as `cursor` until it is null; no total count. ' +
+      'Each card carries the lowest size price in halalas (VAT included) and the cover image URL. A pending change request does not show here: open the product (GET …/{id}).',
+  })
+  @ApiOkResponse({
+    type: ProductCardPageResponseDto,
+    description: 'One page of the vendor’s products.',
+  })
+  @ApiErrorResponses(
+    ErrorCode.VALIDATION_FAILED,
+    ErrorCode.SERVICE_UNAVAILABLE,
+    ...VENDOR_AUTH_ERRORS,
+  )
   async list(
     @CurrentUser() user: AuthenticatedUser,
     @Query() query: ListProductsQueryDto,
@@ -111,14 +137,20 @@ export class VendorCatalogController {
 
   @Get(':id')
   @ApiOperation({
+    operationId: 'vendorGetProduct',
     summary: 'One of my products',
     description:
-      'With its latest change request (pending, or the last decided one).',
+      'Vendor dashboard, product page and edit form. The product as it is live (or as the draft stands), with its status, the admin’s rejection reason when `rejected`, and its latest change request: the pending one with the proposed content, or the last decided one (approved, rejected with its reason, or superseded); null when there has never been one. ' +
+      'NOT_FOUND for an unknown id and for another vendor’s product, answered the same way.',
   })
-  @ApiOkResponse({ type: ProductResponseDto })
+  @ApiOkResponse({
+    type: ProductResponseDto,
+    description: 'The product with its latest change request.',
+  })
   @ApiErrorResponses(
     ErrorCode.VALIDATION_FAILED,
     ErrorCode.NOT_FOUND,
+    ErrorCode.SERVICE_UNAVAILABLE,
     ...VENDOR_AUTH_ERRORS,
   )
   async read(
@@ -135,17 +167,26 @@ export class VendorCatalogController {
 
   @Put(':id')
   @ApiOperation({
+    operationId: 'vendorUpdateProductContent',
     summary: 'Replace a product’s content',
     description:
-      'Existing sizes and cuttings must keep their live prices (change them with PATCH …/prices). A draft or rejected product changes at once. On a published product the edit becomes a new pending change request (a pending one is closed as superseded) while the live version stays, and the submission rules apply. PRODUCT_NOT_EDITABLE while under review.',
+      'Vendor dashboard, edit product form. Replaces the whole content (names, description, category, meat type, images, sizes, cutting styles, packagings, "without" items); send every field, lists in display order. Availability, fulfilment and prices have their own endpoints and are not changed here. ' +
+      'By status: `draft` or `rejected`: saved at once (a rejected product stays rejected until submitted again). `published`: nothing changes on the live product; the edit becomes a new pending change request for admin review (any pending one is closed as `superseded`), returned in `changeRequest`, and it must meet the submission rules (at least one size and one image, no cutting style offered with a packaging it cannot be combined with). `pending_review`: refused with PRODUCT_NOT_EDITABLE until an admin decides. ' +
+      'Keep an existing size by sending its `id`; a size left out is removed; a size without `id` is new. Existing sizes and cutting styles must carry their current prices (VALIDATION_FAILED `isLivePrice`): change prices with PATCH …/{id}/prices, which applies at once. New sizes and cutting styles take the prices sent (halalas, VAT included). ' +
+      'Errors: VALIDATION_FAILED also for an inactive reference, a size id not of this product (`isSizeOfProduct`) or a repeat (`isNotRepeated`); MEDIA_NOT_FOUND / MEDIA_NOT_READY for a new image not uploaded and confirmed by this user; PRODUCT_NOT_SUBMITTABLE (published only) with `details.reasons` (NO_SIZE, NO_IMAGE, INCOMPATIBLE_CUTTING_PACKAGING with `details.pairs`); NOT_FOUND for an unknown id or another vendor’s product.',
   })
-  @ApiOkResponse({ type: ProductResponseDto })
+  @ApiOkResponse({
+    type: ProductResponseDto,
+    description:
+      'The product: with the new content (draft, rejected), or unchanged with the new pending change request (published).',
+  })
   @ApiErrorResponses(
     ...PRODUCT_CONTENT_ERRORS,
     ErrorCode.NOT_FOUND,
     ErrorCode.PRODUCT_NOT_EDITABLE,
     ErrorCode.PRODUCT_NOT_SUBMITTABLE,
     ErrorCode.TRANSACTION_CONFLICT,
+    ErrorCode.SERVICE_UNAVAILABLE,
     ...VENDOR_AUTH_ERRORS,
   )
   async update(
@@ -166,16 +207,23 @@ export class VendorCatalogController {
   @Post(':id/submit')
   @HttpCode(HttpStatus.OK)
   @ApiOperation({
+    operationId: 'vendorSubmitProduct',
     summary: 'Send a draft or rejected product to review',
     description:
-      'PRODUCT_NOT_SUBMITTABLE without a size or an image, or with a cutting style and a packaging that do not go together.',
+      'Vendor dashboard, "submit for review" on a draft or rejected product. Moves it to `pending_review`, where admins approve it (it becomes `published`) or reject it with a reason (`rejected`, editable and submittable again). While under review the product cannot be edited. No body. ' +
+      'Errors: PRODUCT_NOT_SUBMITTABLE when the product has no size or no image, or offers a cutting style with a packaging it cannot be combined with: `details.reasons` lists every reason (NO_SIZE, NO_IMAGE, INCOMPATIBLE_CUTTING_PACKAGING) and `details.pairs` the incompatible pairs; PRODUCT_NOT_EDITABLE when the product is already under review or published (`details.status`); NOT_FOUND for an unknown id or another vendor’s product.',
   })
-  @ApiOkResponse({ type: ProductResponseDto })
+  @ApiOkResponse({
+    type: ProductResponseDto,
+    description: 'The product, now `pending_review`.',
+  })
   @ApiErrorResponses(
     ErrorCode.VALIDATION_FAILED,
     ErrorCode.NOT_FOUND,
     ErrorCode.PRODUCT_NOT_EDITABLE,
     ErrorCode.PRODUCT_NOT_SUBMITTABLE,
+    ErrorCode.TRANSACTION_CONFLICT,
+    ErrorCode.SERVICE_UNAVAILABLE,
     ...VENDOR_AUTH_ERRORS,
   )
   async submit(
@@ -192,14 +240,22 @@ export class VendorCatalogController {
 
   @Patch(':id/availability')
   @ApiOperation({
+    operationId: 'vendorSetProductAvailability',
     summary: 'Switch a product on or off',
-    description: 'Applies at once, also on a published product.',
+    description:
+      'Vendor dashboard, the availability switch (out of stock, back in stock). Applies at once in every status but `pending_review`, also on a published product: no review. An unavailable published product leaves the public catalog at once and comes back when switched on. ' +
+      'Errors: PRODUCT_NOT_EDITABLE while the product is under review (`details.status`); NOT_FOUND for an unknown id or another vendor’s product.',
   })
-  @ApiOkResponse({ type: ProductResponseDto })
+  @ApiOkResponse({
+    type: ProductResponseDto,
+    description: 'The product with its new availability.',
+  })
   @ApiErrorResponses(
     ErrorCode.VALIDATION_FAILED,
     ErrorCode.NOT_FOUND,
     ErrorCode.PRODUCT_NOT_EDITABLE,
+    ErrorCode.TRANSACTION_CONFLICT,
+    ErrorCode.SERVICE_UNAVAILABLE,
     ...VENDOR_AUTH_ERRORS,
   )
   async availability(
@@ -218,14 +274,22 @@ export class VendorCatalogController {
 
   @Patch(':id/fulfilment')
   @ApiOperation({
+    operationId: 'vendorSetProductFulfilment',
     summary: 'Set delivery, pickup or both',
-    description: 'Applies at once, also on a published product.',
+    description:
+      'Vendor dashboard, product page. Sets how the product reaches the customer: `delivery`, `pickup` or `both`. Applies at once in every status but `pending_review`, also on a published product: no review. ' +
+      'Errors: PRODUCT_NOT_EDITABLE while the product is under review (`details.status`); NOT_FOUND for an unknown id or another vendor’s product.',
   })
-  @ApiOkResponse({ type: ProductResponseDto })
+  @ApiOkResponse({
+    type: ProductResponseDto,
+    description: 'The product with its new fulfilment.',
+  })
   @ApiErrorResponses(
     ErrorCode.VALIDATION_FAILED,
     ErrorCode.NOT_FOUND,
     ErrorCode.PRODUCT_NOT_EDITABLE,
+    ErrorCode.TRANSACTION_CONFLICT,
+    ErrorCode.SERVICE_UNAVAILABLE,
     ...VENDOR_AUTH_ERRORS,
   )
   async fulfilment(
@@ -244,16 +308,22 @@ export class VendorCatalogController {
 
   @Patch(':id/prices')
   @ApiOperation({
+    operationId: 'vendorChangeProductPrices',
     summary: 'Change size and cutting prices',
     description:
-      'Applies at once, also on a published product; each change is recorded in the audit log.',
+      'Vendor dashboard, prices form. Sets new prices for some of the product’s existing sizes (by size id) and cutting styles (by cutting style id); the others keep theirs. Prices are integer halalas, VAT included. Applies at once in every status but `pending_review`, also on a published product: no review; the lowest price is updated and each price that actually changed is recorded in the audit log. A pending change request is not touched. ' +
+      'Errors: VALIDATION_FAILED for an invalid body, a size or cutting style that is not the product’s (`isSizeOfProduct`, `isCuttingOfProduct`) or named twice (`isNotRepeated`); PRODUCT_NOT_EDITABLE while the product is under review (`details.status`); NOT_FOUND for an unknown id or another vendor’s product.',
   })
-  @ApiOkResponse({ type: ProductResponseDto })
+  @ApiOkResponse({
+    type: ProductResponseDto,
+    description: 'The product with its new prices.',
+  })
   @ApiErrorResponses(
     ErrorCode.VALIDATION_FAILED,
     ErrorCode.NOT_FOUND,
     ErrorCode.PRODUCT_NOT_EDITABLE,
     ErrorCode.TRANSACTION_CONFLICT,
+    ErrorCode.SERVICE_UNAVAILABLE,
     ...VENDOR_AUTH_ERRORS,
   )
   async prices(

@@ -5,9 +5,9 @@ import { relative } from 'node:path';
 
 const quote = (files) => files.map((file) => `"${file}"`).join(' ');
 
-/** ESLint covers what `pnpm lint` covers: src/ and test/. The lint fixtures break rules on purpose. */
+/** ESLint covers what `pnpm lint` covers: src/, test/ and prisma/ (the seed). The lint fixtures break rules on purpose. */
 const isLinted = (file) =>
-  /^(src|test)[\\/]/.test(relative(import.meta.dirname, file));
+  /^(src|test|prisma)[\\/]/.test(relative(import.meta.dirname, file));
 
 export default {
   '*.ts': (files) => {

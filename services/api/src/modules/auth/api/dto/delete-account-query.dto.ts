@@ -8,7 +8,7 @@ export class DeleteAccountQueryDto {
   @ApiPropertyOptional({
     enum: ACCOUNT_DELETION_REASONS,
     description:
-      'Why the customer leaves; kept in the audit log, with nothing that identifies them.',
+      'Optional: why the customer leaves, one value of a fixed list the app shows (`not_using`, `privacy`, `bad_experience`, `other_account`, `other`; never free text). Kept in the audit log, with nothing that identifies the customer.',
     example: 'not_using',
   })
   @IsOptional()

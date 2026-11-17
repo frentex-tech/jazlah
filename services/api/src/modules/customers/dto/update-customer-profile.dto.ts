@@ -20,8 +20,7 @@ export class UpdateCustomerProfileDto {
   @ApiPropertyOptional({
     minLength: CUSTOMER_LIMITS.fullName.min,
     maxLength: CUSTOMER_LIMITS.fullName.max,
-    description:
-      'The full name; the profile is complete once it has one. It cannot be removed.',
+    description: `The customer's full name: ${CUSTOMER_LIMITS.fullName.min} to ${CUSTOMER_LIMITS.fullName.max} characters, counted in Unicode code points (an emoji with a variation selector counts as 2), after invisible format characters are removed and runs of spaces made one. The profile is complete once it has one. Left out keeps the current name; null is VALIDATION_FAILED (a name cannot be removed).`,
     example: 'محمد العتيبي',
   })
   @Transform(toPersonName)
@@ -34,8 +33,7 @@ export class UpdateCustomerProfileDto {
     type: String,
     nullable: true,
     maxLength: CUSTOMER_LIMITS.emailMax,
-    description:
-      'Stored lowercase and not verified; null (or blank) removes it.',
+    description: `An email address, up to ${CUSTOMER_LIMITS.emailMax} characters; stored lowercase and not verified (two accounts may give the same one). null or blank removes it; left out keeps the current one.`,
     example: 'mohammed@example.com',
   })
   @Transform(toEmail)
@@ -48,7 +46,8 @@ export class UpdateCustomerProfileDto {
 
   @ApiPropertyOptional({
     enum: PREFERRED_LANGUAGES,
-    description: 'The language of messages to this customer.',
+    description:
+      'The language of messages to this customer: `ar` or `en`. Left out keeps the current one; null is VALIDATION_FAILED.',
     example: 'ar',
   })
   @ValidateIf((_dto, value) => value !== undefined)

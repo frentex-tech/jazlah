@@ -13,16 +13,20 @@ import { MAX_SORT_ORDER } from '../../domain/ordered-reference-lists.constants';
 
 /** Changes to an admin list entry; a field left out stays as it is. */
 export class UpdateReferenceItemDto {
-  @ApiPropertyOptional({ type: LocalizedNameDto })
+  @ApiPropertyOptional({
+    type: LocalizedNameDto,
+    description:
+      'The new name in Arabic and English, both together; left out: the name stays.',
+  })
   @IsOptional()
   @ValidateNested()
   @Type(() => LocalizedNameDto)
   name?: LocalizedNameDto;
 
   @ApiPropertyOptional({
-    description:
-      'False: no longer offered for new products; an inactive category hides its products.',
     example: false,
+    description:
+      '`false`: the entry can no longer be chosen for a product (products using it keep it), and an inactive category hides its products from the public catalog; `true`: back in use. Left out: unchanged.',
   })
   @IsOptional()
   @IsBoolean()

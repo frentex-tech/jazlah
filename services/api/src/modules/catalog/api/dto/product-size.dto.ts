@@ -53,7 +53,8 @@ export class ProductSizeDto {
   @ApiPropertyOptional({
     type: LocalizedNameDto,
     nullable: true,
-    description: 'An optional tag, such as “enough for an aqiqah”.',
+    description:
+      'An optional label in Arabic and English, such as “يكفي لعقيقة” / “Enough for an aqiqah”; null or left out for none.',
   })
   @ValidateIf((_dto, value) => value !== null)
   @IsOptional()
