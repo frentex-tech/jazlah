@@ -2,8 +2,9 @@ import { randomUUID } from 'node:crypto';
 
 type UserRow = {
   id: string;
-  phone: string;
+  phone: string | null;
   disabledAt: Date | null;
+  deletedAt: Date | null;
 };
 
 type AccessRow = {
@@ -16,14 +17,43 @@ type AccessRow = {
 
 /**
  * The part of the database client UsersService uses (`client.user`,
- * `client.userAccess`), in memory, for its unit tests. It understands exactly the
- * queries the service sends. Excluded from the build (`*.fake.ts`).
+ * `client.userAccess`, `$queryRaw` for the row locks), in memory, for its unit tests.
+ * It understands exactly the queries the service sends. Excluded from the build
+ * (`*.fake.ts`).
  *
  * Use it as `{ client: fake } as unknown as DbContext`.
  */
 export class InMemoryUsersClient {
   readonly users: UserRow[] = [];
   readonly accesses: AccessRow[] = [];
+  /** Each row lock taken, in order: `<FOR UPDATE|FOR SHARE> <id>`. */
+  readonly locks: string[] = [];
+
+  /**
+   * The two row locks (`SELECT … WHERE id = $1 AND deleted_at IS NULL FOR UPDATE` or
+   * `FOR SHARE`): the live user with that id, or nothing.
+   */
+  readonly $queryRaw = (
+    strings: TemplateStringsArray,
+    ...values: unknown[]
+  ): Promise<Omit<UserRow, 'deletedAt'>[]> => {
+    const sql = strings.join('?');
+    const id = values[0];
+    if (!/"deleted_at" IS NULL\s+FOR (UPDATE|SHARE)/.test(sql)) {
+      throw new Error(`Unexpected query: ${sql}`);
+    }
+    this.locks.push(
+      `${sql.includes('FOR UPDATE') ? 'FOR UPDATE' : 'FOR SHARE'} ${String(id)}`,
+    );
+    const row = this.users.find(
+      (user) => user.id === id && user.deletedAt === null,
+    );
+    return Promise.resolve(
+      row === undefined
+        ? []
+        : [{ id: row.id, phone: row.phone, disabledAt: row.disabledAt }],
+    );
+  };
 
   readonly user = {
     createMany: (args: {
@@ -33,20 +63,45 @@ export class InMemoryUsersClient {
       let count = 0;
       for (const { phone } of args.data) {
         if (!this.users.some((row) => row.phone === phone)) {
-          this.users.push({ id: randomUUID(), phone, disabledAt: null });
+          this.users.push({
+            id: randomUUID(),
+            phone,
+            disabledAt: null,
+            deletedAt: null,
+          });
           count += 1;
         }
       }
       return Promise.resolve({ count });
     },
     findUnique: (args: {
-      where: { id?: string; phone?: string };
+      where: { phone: string };
     }): Promise<UserRow | null> => {
-      const { id, phone } = args.where;
-      const row = this.users.find((user) =>
-        id === undefined ? user.phone === phone : user.id === id,
+      const row = this.users.find((user) => user.phone === args.where.phone);
+      return Promise.resolve(row === undefined ? null : { ...row });
+    },
+    findFirst: (args: {
+      where: { id: string; deletedAt: null };
+    }): Promise<UserRow | null> => {
+      const row = this.users.find(
+        (user) => user.id === args.where.id && user.deletedAt === null,
       );
       return Promise.resolve(row === undefined ? null : { ...row });
+    },
+    /** markDeleted's conditional update: `where: { id, deletedAt: null }`. */
+    updateMany: (args: {
+      where: { id: string; deletedAt: null };
+      data: { phone: null; deletedAt: Date };
+    }): Promise<{ count: number }> => {
+      const row = this.users.find(
+        (user) => user.id === args.where.id && user.deletedAt === null,
+      );
+      if (row === undefined) {
+        return Promise.resolve({ count: 0 });
+      }
+      row.phone = args.data.phone;
+      row.deletedAt = args.data.deletedAt;
+      return Promise.resolve({ count: 1 });
     },
   };
 
@@ -119,5 +174,16 @@ export class InMemoryUsersClient {
       );
       return Promise.resolve(row === undefined ? null : { ...row });
     },
+    /** hasActiveStaffAccess: `where: { userId, deactivatedAt: null }`. */
+    count: (args: {
+      where: { userId: string; deactivatedAt: null };
+    }): Promise<number> =>
+      Promise.resolve(
+        this.accesses.filter(
+          (access) =>
+            access.userId === args.where.userId &&
+            access.deactivatedAt === null,
+        ).length,
+      ),
   };
 }

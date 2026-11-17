@@ -51,6 +51,88 @@ describe('UsersService', () => {
     expect(await service.findByPhone('+966500000000')).toBeNull();
   });
 
+  describe('a deleted account', () => {
+    const AT = new Date('2026-11-17T09:00:00.000Z');
+
+    it('becomes a tombstone: no phone, deleted_at set, and deleting again does nothing', async () => {
+      const { service, client } = build();
+      const user = await service.findOrCreateByPhone(PHONE);
+
+      expect(await service.markDeleted(user.id, AT)).toBe(true);
+      expect(await service.markDeleted(user.id, AT)).toBe(false);
+
+      expect(client.users).toEqual([
+        { id: user.id, phone: null, disabledAt: null, deletedAt: AT },
+      ]);
+    });
+
+    it('is not found by id or phone, and cannot be locked', async () => {
+      const { service } = build();
+      const user = await service.findOrCreateByPhone(PHONE);
+      await service.markDeleted(user.id, AT);
+
+      expect(await service.findById(user.id)).toBeNull();
+      expect(await service.findByPhone(PHONE)).toBeNull();
+      expect(await service.lockForWrite(user.id)).toBeNull();
+      expect(await service.lockForShare(user.id)).toBeNull();
+    });
+
+    it('frees the phone: the next sign-in creates a new user', async () => {
+      const { service, client } = build();
+      const old = await service.findOrCreateByPhone(PHONE);
+      await service.markDeleted(old.id, AT);
+
+      const fresh = await service.findOrCreateByPhone(PHONE);
+
+      expect(fresh.id).not.toBe(old.id);
+      expect(fresh).toEqual({ id: fresh.id, phone: PHONE, disabledAt: null });
+      expect(client.users).toHaveLength(2);
+    });
+  });
+
+  describe('row locks', () => {
+    it('lock a live user for update or for share, and return it', async () => {
+      const { service, client } = build();
+      const user = await service.findOrCreateByPhone(PHONE);
+
+      expect(await service.lockForWrite(user.id)).toEqual(user);
+      expect(await service.lockForShare(user.id)).toEqual(user);
+
+      expect(client.locks).toEqual([
+        `FOR UPDATE ${user.id}`,
+        `FOR SHARE ${user.id}`,
+      ]);
+    });
+
+    it('answer null for a user that does not exist', async () => {
+      const { service } = build();
+
+      expect(
+        await service.lockForWrite('00000000-0000-4000-8000-000000000000'),
+      ).toBeNull();
+    });
+  });
+
+  describe('hasActiveStaffAccess', () => {
+    it('is false for a customer, true with any active staff access, false once deactivated', async () => {
+      const { service, client } = build();
+      const user = await service.findOrCreateByPhone(PHONE);
+
+      expect(await service.hasActiveStaffAccess(user.id)).toBe(false);
+
+      await service.grantVendorAccess(
+        user.id,
+        '00000000-0000-4000-8000-00000000000a',
+      );
+      expect(await service.hasActiveStaffAccess(user.id)).toBe(true);
+
+      for (const access of client.accesses) {
+        access.deactivatedAt = new Date('2026-11-17T09:00:00.000Z');
+      }
+      expect(await service.hasActiveStaffAccess(user.id)).toBe(false);
+    });
+  });
+
   describe('findActiveAccess', () => {
     it('is null without a grant: a customer is not staff', async () => {
       const { service } = build();
@@ -91,7 +173,7 @@ describe('UsersService', () => {
       const user = await service.grantAdminAccess(PHONE);
 
       expect(client.users).toEqual([
-        { id: user.id, phone: PHONE, disabledAt: null },
+        { id: user.id, phone: PHONE, disabledAt: null, deletedAt: null },
       ]);
       expect(client.accesses).toHaveLength(1);
     });
