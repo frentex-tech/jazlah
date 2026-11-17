@@ -6,9 +6,9 @@ import {
   IsOptional,
   IsString,
   MaxLength,
-  MinLength,
   ValidateIf,
 } from 'class-validator';
+import { CharLength } from '@common/decorators/char-length.decorator';
 import { CUSTOMER_LIMITS } from '../customer-limits.constants';
 import type { PreferredLanguage } from '../preferred-language.type';
 import { PREFERRED_LANGUAGES } from '../preferred-languages.constants';
@@ -27,8 +27,7 @@ export class UpdateCustomerProfileDto {
   @Transform(toPersonName)
   @ValidateIf((_dto, value) => value !== undefined)
   @IsString()
-  @MinLength(CUSTOMER_LIMITS.fullName.min)
-  @MaxLength(CUSTOMER_LIMITS.fullName.max)
+  @CharLength(CUSTOMER_LIMITS.fullName.min, CUSTOMER_LIMITS.fullName.max)
   fullName?: string;
 
   @ApiPropertyOptional({

@@ -1,12 +1,7 @@
 import { ApiPropertyOptional } from '@nestjs/swagger';
 import { Transform, Type } from 'class-transformer';
-import {
-  IsString,
-  MaxLength,
-  MinLength,
-  ValidateIf,
-  ValidateNested,
-} from 'class-validator';
+import { IsString, ValidateIf, ValidateNested } from 'class-validator';
+import { CharLength } from '@common/decorators/char-length.decorator';
 import { GeoPointDto } from '@common/dto/geo-point.dto';
 import { trimText } from '@common/dto/trim-text';
 import { CUSTOMER_LIMITS } from '../customer-limits.constants';
@@ -26,8 +21,7 @@ export class UpdateCustomerAddressDto extends CustomerAddressTextDto {
   @Transform(trimText)
   @ValidateIf((_dto, value) => value !== undefined)
   @IsString()
-  @MinLength(1)
-  @MaxLength(CUSTOMER_LIMITS.labelMax)
+  @CharLength(1, CUSTOMER_LIMITS.labelMax)
   label?: string;
 
   @ApiPropertyOptional({ type: GeoPointDto })

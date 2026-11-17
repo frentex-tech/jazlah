@@ -5,10 +5,9 @@ import {
   IsDefined,
   IsOptional,
   IsString,
-  MaxLength,
-  MinLength,
   ValidateNested,
 } from 'class-validator';
+import { CharLength } from '@common/decorators/char-length.decorator';
 import { GeoPointDto } from '@common/dto/geo-point.dto';
 import { trimText } from '@common/dto/trim-text';
 import { CUSTOMER_LIMITS } from '../customer-limits.constants';
@@ -24,8 +23,7 @@ export class CreateCustomerAddressDto extends CustomerAddressTextDto {
   })
   @Transform(trimText)
   @IsString()
-  @MinLength(1)
-  @MaxLength(CUSTOMER_LIMITS.labelMax)
+  @CharLength(1, CUSTOMER_LIMITS.labelMax)
   label!: string;
 
   @ApiProperty({

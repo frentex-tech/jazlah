@@ -181,6 +181,11 @@ describe('Customers (e2e)', () => {
     it.each([
       ['a one-letter name', { fullName: 'م' }, 'fullName'],
       ['a 61-letter name', { fullName: 'م'.repeat(61) }, 'fullName'],
+      [
+        'a name of 61 code points with a variation selector',
+        { fullName: `${'م'.repeat(59)}\u2764\uFE0F` },
+        'fullName',
+      ],
       ['a name removed', { fullName: null }, 'fullName'],
       ['an email that is not one', { email: 'not-an-email' }, 'email'],
       ['an unknown language', { preferredLanguage: 'fr' }, 'preferredLanguage'],
@@ -344,6 +349,11 @@ describe('Customers (e2e)', () => {
       ['no location', { location: undefined }, 'location'],
       ['an empty label', { label: '  ' }, 'label'],
       ['a 31-letter label', { label: 'ب'.repeat(31) }, 'label'],
+      [
+        'a label of 31 code points with a variation selector',
+        { label: `${'ب'.repeat(29)}\u2764\uFE0F` },
+        'label',
+      ],
       [
         'a short national address of another shape',
         { shortNationalAddress: 'RRR29290' },
