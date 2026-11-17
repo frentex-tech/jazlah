@@ -13,6 +13,7 @@ import { RedisModule } from '@infra/redis/redis.module';
 import { AuthModule } from '@modules/auth';
 import { CatalogModule } from '@modules/catalog';
 import { MediaModule } from '@modules/media';
+import { CustomersModule } from '@modules/customers';
 import { VendorsModule } from '@modules/vendors';
 
 @Module({
@@ -32,6 +33,7 @@ import { VendorsModule } from '@modules/vendors';
     MediaModule,
     VendorsModule,
     CatalogModule,
+    CustomersModule,
   ],
   providers: [
     { provide: APP_FILTER, useClass: AllExceptionsFilter },
