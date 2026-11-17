@@ -35,6 +35,7 @@ This task also covers:
 - **Local development environment (docker-compose):** one command that starts every backing service the API needs locally.
 
 **Output:**
+- **Re-scoped 2026-11-17:** decided otherwise: `services/api` is a standalone project with its own Docker Compose and no Turborepo (`services/api/.claude/DECISIONS.md`, 2026-11-13). Each app sets up its own tooling in its scaffold task (APP-MOB-1, APP-WEB-1, APP-DSH-1).
 
 *Monorepo tooling (pnpm workspaces + Turborepo + shared config)*
 - `package.json` (root, private, `packageManager: pnpm@9`), `pnpm-workspace.yaml` (`apps/web`, `apps/dashboard`, `services/api`, `packages/*`), `turbo.json` with `lint`, `typecheck`, `test`, `build`, `dev` pipelines
@@ -75,6 +76,7 @@ This task also covers:
 - **Database: Prisma + PostGIS + migrations + seed:** the persistence layer and the conventions every model follows.
 
 **Output:**
+- **Re-scoped 2026-11-17:** built as issue #227 (PR #228); the seed came with #241. The geo helpers (`pointFromLatLng`, `isPointInPolygon`, `toGeoJSON`) and their Riyadh-polygon test moved to LOC-API-1, the first task that uses them. The API is a standalone project (`services/api/.claude/DECISIONS.md`), so paths below are indicative.
 
 *Scaffold NestJS API core*
 - `services/api` NestJS 11 app, `/v1` URI versioning, global prefix
@@ -145,6 +147,7 @@ This task also covers:
 - **Settings store & audit log:** typed platform settings (used by operations, payments, occasions, Adha…) and an audit trail of sensitive actions.
 
 **Output:**
+- **Re-scoped 2026-11-17:** queue, event bus, storage, uploads and audit log built as issues #227 and #229 (PR #228, #230). The realtime gateway and its acceptance moved to ORD-API-3; the settings store and its acceptance moved to SCH-API-1.
 
 *Redis, BullMQ queues, domain events, realtime gateway*
 - `RedisModule` (ioredis) with a cache helper (`getOrSet`, `invalidate(prefix)`)
@@ -478,6 +481,7 @@ This task also covers:
 - **Account deletion (PDPL / store compliance):** customers can delete their account from inside the app.
 
 **Output:**
+- **Re-scoped 2026-11-17:** profile, consent, addresses and account deletion built as issue #239 (PR #240). Devices (push tokens) moved to NOT-API-1; `isCovered` on addresses moved to LOC-API-1.
 
 *Customer profile & device registration*
 - `GET /v1/customer/me`, `PATCH /v1/customer/me` `{name, email?, locale: ar|en}`, `POST /v1/customer/devices` `{fcmToken, platform, appVersion}`, `DELETE /v1/customer/devices/:token`; `Device` model
@@ -598,6 +602,7 @@ Coverage polygons managed by the admin, location detection in the apps, and serv
 **What:** store service areas as polygons and answer "is this point covered?".
 
 **Output:**
+- **Moved in 2026-11-17:** from FND-API-1, the geo helpers (`pointFromLatLng`, `isPointInPolygon`, `toGeoJSON`) with a unit test on a sample Riyadh polygon; from ACC-API-2, `isCovered` on every returned address.
 - `CoverageZone` model (nameAr, nameEn, city, polygon geometry(Polygon,4326) with GIST index, isActive)
 - Admin: `GET/POST/PATCH/DELETE /v1/admin/coverage-zones` (GeoJSON in/out), audited
 - Public: `GET /v1/public/coverage/check?lat=&lng=` → `{covered, zone?: {id, name, city}}`

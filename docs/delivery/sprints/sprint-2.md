@@ -128,6 +128,7 @@ This task also covers:
 - **Pricing service (authoritative line price):** one function that prices a configured product line. The cart, checkout, occasions and Adha all use it.
 
 **Output:**
+- **Re-scoped 2026-11-17:** the catalog model and money helpers built as issue #237 (PR #238) and #243. The authoritative `PricingService.priceLine` and its tests moved to CRT-API-1, the first task that prices a cart line.
 
 *Pricing service (authoritative line price)*
 - `PricingService.priceLine({productId, sizeId, cutId?, packagingId?, exclusionIds[], quantity})` → `{unitPrice, lineTotal, breakdown[], errors[]}`; error codes `PRODUCT_UNAVAILABLE`, `SIZE_UNAVAILABLE`, `CUT_PACKAGING_INCOMPATIBLE`, `OPTION_NOT_IN_PRODUCT`

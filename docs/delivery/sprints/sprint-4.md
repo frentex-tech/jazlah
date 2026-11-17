@@ -279,6 +279,7 @@ This task also covers:
 - **Marketing campaigns & segments:** admins send marketing pushes.
 
 **Output:**
+- **Moved in 2026-11-17 from ACC-API-2:** `POST /v1/customer/devices` `{fcmToken, platform, appVersion}` and `DELETE /v1/customer/devices/:token` with a `Device` model, deleted with the account; acceptance: the same token is not duplicated.
 
 *Notification service (push, SMS, inbox)*
 - `Notification` (userId, type, titleAr/En, bodyAr/En, data {route, id}, readAt) and the inbox endpoints `GET /v1/customer/notifications`, `POST …/read`, unread count
