@@ -7,7 +7,8 @@ export class CommissionDto {
   @ApiProperty({
     minimum: COMMISSION_BASIS_POINTS.min,
     maximum: COMMISSION_BASIS_POINTS.max,
-    description: 'Basis points: 1250 is 12.5%.',
+    description:
+      'The platform commission on future orders, in basis points: a whole number from 0 (0%) to 10000 (100%); 1250 is 12.5%. A fraction (12.5) is VALIDATION_FAILED.',
     example: 1250,
   })
   @IsInt()

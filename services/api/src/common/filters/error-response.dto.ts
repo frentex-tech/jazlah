@@ -33,6 +33,7 @@ export class ErrorResponseDto implements ErrorResponseBody {
       { type: 'array', items: { $ref: getSchemaPath(FieldErrorDto) } },
       { type: 'object', additionalProperties: true },
     ],
+    example: [{ field: 'location', constraints: ['isDefined'] }],
   })
   readonly details?: unknown;
 

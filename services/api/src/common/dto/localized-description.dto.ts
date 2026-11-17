@@ -12,6 +12,8 @@ export class LocalizedDescriptionDto {
     type: String,
     nullable: true,
     maxLength: 1000,
+    description:
+      'The text in Arabic, up to 1000 characters; trimmed. In an update, omit it to keep the current text, or send null or a blank text to clear it.',
     example: 'لحوم بلدية طازجة يوميًا',
   })
   @Transform(toOptionalText)
@@ -25,6 +27,8 @@ export class LocalizedDescriptionDto {
     type: String,
     nullable: true,
     maxLength: 1000,
+    description:
+      'The text in English, up to 1000 characters; trimmed. In an update, omit it to keep the current text, or send null or a blank text to clear it.',
     example: 'Fresh local meat every day',
   })
   @Transform(toOptionalText)

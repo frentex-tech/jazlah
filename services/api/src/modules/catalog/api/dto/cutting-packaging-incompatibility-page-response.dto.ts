@@ -3,7 +3,11 @@ import { CuttingPackagingIncompatibilityResponseDto } from './cutting-packaging-
 
 /** One page of cutting and packaging rules, newest first. */
 export class CuttingPackagingIncompatibilityPageResponseDto {
-  @ApiProperty({ type: [CuttingPackagingIncompatibilityResponseDto] })
+  @ApiProperty({
+    type: [CuttingPackagingIncompatibilityResponseDto],
+    description:
+      'The rules of this page, newest first; empty when there are none.',
+  })
   items!: CuttingPackagingIncompatibilityResponseDto[];
 
   @ApiProperty({

@@ -11,17 +11,32 @@ const UUID_EXAMPLE = '7f3a2c1e-0b9d-4e5f-8a6b-1c2d3e4f5a6b';
  * range applies to a product's lowest size price, both ends included.
  */
 export class ListPublicProductsQueryDto extends PageQueryDto {
-  @ApiPropertyOptional({ format: 'uuid', example: UUID_EXAMPLE })
+  @ApiPropertyOptional({
+    format: 'uuid',
+    example: UUID_EXAMPLE,
+    description:
+      'Only products of this category (its id, a UUID, from GET /v1/public/categories). Left out: every category.',
+  })
   @IsOptional()
   @IsUUID()
   categoryId?: string;
 
-  @ApiPropertyOptional({ format: 'uuid', example: UUID_EXAMPLE })
+  @ApiPropertyOptional({
+    format: 'uuid',
+    example: UUID_EXAMPLE,
+    description:
+      'Only products of this vendor (its id, a UUID, from the public vendor list). Left out: every vendor.',
+  })
   @IsOptional()
   @IsUUID()
   vendorId?: string;
 
-  @ApiPropertyOptional({ format: 'uuid', example: UUID_EXAMPLE })
+  @ApiPropertyOptional({
+    format: 'uuid',
+    example: UUID_EXAMPLE,
+    description:
+      'Only products of this meat type (its id, a UUID). Left out: every meat type.',
+  })
   @IsOptional()
   @IsUUID()
   meatTypeId?: string;
@@ -29,8 +44,9 @@ export class ListPublicProductsQueryDto extends PageQueryDto {
   @ApiPropertyOptional({
     minimum: 0,
     maximum: PRODUCT_LIMITS.maxPriceHalalas,
-    description: 'Halalas.',
     example: 50000,
+    description:
+      'Only products whose lowest size price is at least this, in halalas, VAT included (`50000` is 500.00 SAR); included.',
   })
   @IsOptional()
   @Type(() => Number)
@@ -42,8 +58,9 @@ export class ListPublicProductsQueryDto extends PageQueryDto {
   @ApiPropertyOptional({
     minimum: 0,
     maximum: PRODUCT_LIMITS.maxPriceHalalas,
-    description: 'Halalas.',
     example: 150000,
+    description:
+      'Only products whose lowest size price is at most this, in halalas, VAT included (`150000` is 1,500.00 SAR); included.',
   })
   @IsOptional()
   @Type(() => Number)

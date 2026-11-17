@@ -3,14 +3,18 @@ import { VendorCommissionChangeResponseDto } from './vendor-commission-change-re
 
 /** One page of a vendor's commission history, newest first. */
 export class VendorCommissionChangePageResponseDto {
-  @ApiProperty({ type: [VendorCommissionChangeResponseDto] })
+  @ApiProperty({
+    type: [VendorCommissionChangeResponseDto],
+    description: 'The commission changes of this page, newest first.',
+  })
   items!: VendorCommissionChangeResponseDto[];
 
   @ApiProperty({
     type: String,
     nullable: true,
-    description: 'Send as `cursor` for the next page; null on the last page.',
-    example: null,
+    description:
+      'Send as `cursor` to get the next page; null on the last page. Opaque: never build or change it.',
+    example: 'WyIyMDI2LTExLTE1VDEwOjAwOjAwLjAwMFoiLCI3ZjNhIl0',
   })
   nextCursor!: string | null;
 }

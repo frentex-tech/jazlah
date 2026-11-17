@@ -3,7 +3,11 @@ import { ReferenceItemResponseDto } from './reference-item-response.dto';
 
 /** One page of list entries, newest first. */
 export class ReferenceItemPageResponseDto {
-  @ApiProperty({ type: [ReferenceItemResponseDto] })
+  @ApiProperty({
+    type: [ReferenceItemResponseDto],
+    description:
+      'The entries of this page, newest first; empty when none match.',
+  })
   items!: ReferenceItemResponseDto[];
 
   @ApiProperty({

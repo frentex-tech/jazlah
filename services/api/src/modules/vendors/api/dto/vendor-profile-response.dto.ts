@@ -1,5 +1,6 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { GeoPointDto } from '@common/dto/geo-point.dto';
+import { COMMISSION_BASIS_POINTS } from '../../domain/commission-basis-points.constants';
 import { PublicVendorResponseDto } from './public-vendor-response.dto';
 
 /**
@@ -9,29 +10,53 @@ import { PublicVendorResponseDto } from './public-vendor-response.dto';
  */
 export class VendorProfileResponseDto extends PublicVendorResponseDto {
   @ApiProperty({
-    description: 'Basis points on future orders: 1250 is 12.5%.',
+    minimum: COMMISSION_BASIS_POINTS.min,
+    maximum: COMMISSION_BASIS_POINTS.max,
+    description:
+      'The platform commission on future orders, in basis points (an integer, 0 to 10000): 1250 is 12.5%. Orders already placed keep the commission they were placed with.',
     example: 1250,
   })
   commissionBasisPoints!: number;
 
-  @ApiProperty({ type: String, nullable: true, example: '1010123456' })
+  @ApiProperty({
+    type: String,
+    nullable: true,
+    description:
+      'The commercial registration number, 10 Latin digits; null only for the platform vendor.',
+    example: '1010123456',
+  })
   commercialRegistrationNumber!: string | null;
 
   @ApiProperty({
     type: String,
     nullable: true,
     description:
-      'The IBAN with every character hidden but the country and the last four.',
+      'The payout IBAN with every character hidden but the country and the last four (the full IBAN is never sent); null only for the platform vendor.',
     example: 'SA** **** **** **** **** 7519',
   })
   ibanMasked!: string | null;
 
-  @ApiProperty({ type: String, nullable: true, example: 'مؤسسة النخبة للحوم' })
+  @ApiProperty({
+    type: String,
+    nullable: true,
+    description:
+      'The name on the payout bank account; null only for the platform vendor.',
+    example: 'مؤسسة النخبة للحوم',
+  })
   accountHolderName!: string | null;
 
-  @ApiProperty({ type: GeoPointDto, nullable: true })
+  @ApiProperty({
+    type: GeoPointDto,
+    nullable: true,
+    description:
+      'Where the facility is, from the application; null only for the platform vendor.',
+  })
   location!: GeoPointDto | null;
 
-  @ApiProperty({ example: '2026-11-15T10:00:00.000Z' })
+  @ApiProperty({
+    description:
+      'When the vendor was created (its application approved), UTC ISO 8601.',
+    example: '2026-11-15T10:00:00.000Z',
+  })
   createdAt!: Date;
 }

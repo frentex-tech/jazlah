@@ -1,9 +1,15 @@
 import { Controller, Get, HttpStatus, Res } from '@nestjs/common';
-import { ApiOkResponse, ApiResponse, ApiTags } from '@nestjs/swagger';
+import {
+  ApiOkResponse,
+  ApiOperation,
+  ApiResponse,
+  ApiTags,
+} from '@nestjs/swagger';
 import type { Response } from 'express';
 import { ApiErrorResponses } from '@common/decorators/api-error-responses.decorator';
 import { Public } from '@common/decorators/public.decorator';
 import { SkipRateLimit } from '@infra/rate-limit/skip-rate-limit.decorator';
+import { API_TAGS } from '../api-docs/api-tags.constants';
 import { LivenessResponseDto } from './dto/liveness-response.dto';
 import { ReadinessResponseDto } from './dto/readiness-response.dto';
 import { ReadinessService } from './readiness.service';
@@ -12,7 +18,7 @@ import { ReadinessService } from './readiness.service';
  * Liveness and readiness. Never rate limited: load balancers probe it constantly.
  * Public: it sits outside the audience prefixes and needs no sign-in.
  */
-@ApiTags('health')
+@ApiTags(API_TAGS.health.name)
 @Public()
 @SkipRateLimit()
 @Controller('health')
@@ -21,6 +27,12 @@ export class HealthController {
 
   /** Liveness: the process answers. Touches no dependency. */
   @Get()
+  @ApiOperation({
+    operationId: 'healthCheckLiveness',
+    summary: 'Liveness',
+    description:
+      'Answers 200 while the process runs; checks no dependency. Called by the load balancer and the container runtime, never by the apps. Public, not rate limited.',
+  })
   @ApiOkResponse({
     type: LivenessResponseDto,
     description: 'The process answers.',
@@ -32,6 +44,12 @@ export class HealthController {
 
   /** Readiness: every dependency answers. 200 when all are up, 503 naming the one that is down. */
   @Get('ready')
+  @ApiOperation({
+    operationId: 'healthCheckReadiness',
+    summary: 'Readiness',
+    description:
+      'Checks the database and Redis: 200 when both answer, 503 with the same body naming the one that is down, or while the instance shuts down. Called by the load balancer and monitoring, never by the apps. Public, not rate limited.',
+  })
   @ApiOkResponse({
     type: ReadinessResponseDto,
     description: 'Every dependency answered.',

@@ -6,12 +6,15 @@ import { VENDOR_APPLICATION_DOCUMENT_KINDS } from '../../domain/vendor-applicati
 export class VendorApplicationDocumentResponseDto {
   @ApiProperty({
     enum: VENDOR_APPLICATION_DOCUMENT_KINDS,
+    description:
+      'What the document shows: the commercial registration, the health certificate or a photo of the facility.',
     example: 'health_certificate',
   })
   kind!: VendorApplicationDocumentKind;
 
   @ApiProperty({
     format: 'uuid',
+    description: 'The uploaded file (UUID, purpose vendor.document).',
     example: '7f3a2c1e-0b9d-4e5f-8a6b-1c2d3e4f5a6b',
   })
   mediaId!: string;

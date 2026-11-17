@@ -7,6 +7,8 @@ export class CuttingPriceDto {
   @ApiProperty({
     format: 'uuid',
     example: '7f3a2c1e-0b9d-4e5f-8a6b-1c2d3e4f5a6b',
+    description:
+      'The id (UUID) of a cutting style the product offers; another one is VALIDATION_FAILED `isCuttingOfProduct`.',
   })
   @IsUUID()
   cuttingStyleId!: string;
@@ -14,8 +16,9 @@ export class CuttingPriceDto {
   @ApiProperty({
     minimum: 0,
     maximum: PRODUCT_LIMITS.maxPriceHalalas,
-    description: 'Halalas, VAT included; 0 for none.',
     example: 1000,
+    description:
+      'The new extra price for this cutting style, in halalas, VAT included (`1500` is 15.00 SAR); 0 for no extra charge.',
   })
   @IsInt()
   @Min(0)

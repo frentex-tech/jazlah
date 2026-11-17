@@ -7,17 +7,31 @@ export class ProductSizeResponseDto {
     type: String,
     format: 'uuid',
     nullable: true,
-    description: 'Null only for a new size in a change request.',
     example: '7f3a2c1e-0b9d-4e5f-8a6b-1c2d3e4f5a6b',
+    description:
+      'The size id (UUID): send it back to keep the size in a content edit, or as `sizeId` to change its price. Null only for a new size proposed in a change request.',
   })
   id!: string | null;
 
-  @ApiProperty({ description: 'Grams.', example: 8000 })
+  @ApiProperty({
+    example: 8000,
+    description:
+      'The approximate weight in grams (`8000` is 8 kg); the final weight may differ.',
+  })
   approxWeightGrams!: number;
 
-  @ApiProperty({ description: 'Halalas, VAT included.', example: 95000 })
+  @ApiProperty({
+    example: 95000,
+    description:
+      'The price of this size in halalas, VAT included (`95000` is 950.00 SAR).',
+  })
   priceHalalas!: number;
 
-  @ApiProperty({ type: LocalizedTextResponseDto, nullable: true })
+  @ApiProperty({
+    type: LocalizedTextResponseDto,
+    nullable: true,
+    description:
+      'An optional label in Arabic and English, such as “Enough for an aqiqah”; null for none.',
+  })
   tag!: LocalizedTextResponseDto | null;
 }

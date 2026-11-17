@@ -11,17 +11,23 @@ import {
 export class CustomerMeResponseDto {
   @ApiProperty({
     format: 'uuid',
-    example: '6f1c0c53-3f0b-4d0a-9a6f-2f0f0f8f7a11',
+    description: 'The customer (user id, UUID).',
+    example: '7f3a2c1e-0b9d-4e5f-8a6b-1c2d3e4f5a6b',
   })
   userId!: string;
 
   @ApiProperty({
-    description: "The customer's own phone number, in full (E.164).",
+    description:
+      "The customer's own phone number, in full, in E.164 (`+9665` and 8 digits). For the profile screen.",
     example: '+966512345678',
   })
   phone!: string;
 
-  @ApiProperty({ enum: ['customer'], example: 'customer' })
+  @ApiProperty({
+    enum: ['customer'],
+    description: 'The audience of this sign-in: always `customer` here.',
+    example: 'customer',
+  })
   audience!: 'customer';
 
   @ApiProperty({
@@ -35,6 +41,8 @@ export class CustomerMeResponseDto {
 
   @ApiProperty({
     format: 'uuid',
+    description:
+      'The session (UUID): this sign-in on this device, ended by signing out.',
     example: '0b9f6a0e-58e5-4f6b-8e0a-5a1d3d0c2b10',
   })
   sessionId!: string;
@@ -42,7 +50,8 @@ export class CustomerMeResponseDto {
   @ApiProperty({
     type: String,
     nullable: true,
-    description: 'Null until the customer gives a name.',
+    description:
+      'The full name as the customer typed it; null until the customer gives one.',
     example: 'محمد العتيبي',
   })
   fullName!: string | null;
@@ -50,11 +59,18 @@ export class CustomerMeResponseDto {
   @ApiProperty({
     type: String,
     nullable: true,
+    description:
+      'The email address, lowercase and not verified; null when the customer gave none or removed it.',
     example: 'mohammed@example.com',
   })
   email!: string | null;
 
-  @ApiProperty({ enum: PREFERRED_LANGUAGES, example: 'ar' })
+  @ApiProperty({
+    enum: PREFERRED_LANGUAGES,
+    description:
+      'The language of messages sent to the customer (SMS, notifications): `ar` (the default) or `en`.',
+    example: 'ar',
+  })
   preferredLanguage!: string;
 
   @ApiProperty({
@@ -64,6 +80,9 @@ export class CustomerMeResponseDto {
   })
   profileComplete!: boolean;
 
-  @ApiProperty({ type: MarketingConsentResponseDto })
+  @ApiProperty({
+    type: MarketingConsentResponseDto,
+    description: 'Whether the customer agreed to receive marketing messages.',
+  })
   marketingConsent!: MarketingConsentResponseDto;
 }

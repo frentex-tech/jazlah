@@ -7,14 +7,19 @@ export class VendorApplicationDetailResponseDto extends OmitType(
   VendorApplicationResponseDto,
   ['documents'] as const,
 ) {
-  @ApiProperty({ type: [VendorApplicationDocumentLinkResponseDto] })
+  @ApiProperty({
+    type: [VendorApplicationDocumentLinkResponseDto],
+    description:
+      'The attached documents, each with a short-lived link to open it.',
+  })
   documents!: VendorApplicationDocumentLinkResponseDto[];
 
   @ApiProperty({
     type: String,
     format: 'uuid',
     nullable: true,
-    description: 'The admin who approved or rejected it; null while pending.',
+    description:
+      'The admin (user UUID) who approved or rejected it; null while pending.',
     example: null,
   })
   reviewedById!: string | null;

@@ -5,6 +5,7 @@ export class OptionalLocalizedTextResponseDto {
   @ApiProperty({
     type: String,
     nullable: true,
+    description: 'The text in Arabic; null when there is none.',
     example: 'لحوم بلدية طازجة يوميًا',
   })
   ar!: string | null;
@@ -12,6 +13,7 @@ export class OptionalLocalizedTextResponseDto {
   @ApiProperty({
     type: String,
     nullable: true,
+    description: 'The text in English; null when there is none.',
     example: 'Fresh local meat every day',
   })
   en!: string | null;

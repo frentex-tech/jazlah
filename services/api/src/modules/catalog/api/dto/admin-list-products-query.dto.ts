@@ -10,6 +10,8 @@ export class AdminListProductsQueryDto extends ListProductsQueryDto {
   @ApiPropertyOptional({
     format: 'uuid',
     example: '7f3a2c1e-0b9d-4e5f-8a6b-1c2d3e4f5a6b',
+    description:
+      'Only the products of this vendor (its id, a UUID; JAZLA’s own products are those of the platform vendor). Left out: every vendor.',
   })
   @IsOptional()
   @IsUUID()

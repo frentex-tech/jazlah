@@ -12,6 +12,7 @@ import { RATE_LIMIT_REDIS } from '@infra/rate-limit/rate-limit.constants';
 import { MEDIA_CLEANUP_SCOPE } from '@modules/media/media-cleanup-scope.constants';
 import { AppModule } from '../../src/app.module';
 import type { NextFunction, Request, Response } from 'express';
+import { recordUndocumentedErrorCodes } from './documented-error-codes';
 import { enableWorkers } from './enable-workers';
 import { testClientAddress } from './test-client-address';
 import type { HttpAppOptions } from './http-app-options.type';
@@ -76,6 +77,9 @@ export async function createHttpApp(
     req.headers['x-forwarded-for'] ??= testClientAddress();
     next();
   });
+  // Fails the suite on an error code openapi.json does not list for its route
+  // (documented-error-codes.ts); it only reads the answers.
+  recordUndocumentedErrorCodes(app);
   configureHttpApp(app);
   await app.init();
   // As a load balancer waits for readiness: until the shared Redis client has

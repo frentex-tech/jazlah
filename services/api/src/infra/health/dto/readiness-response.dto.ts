@@ -12,7 +12,10 @@ export class ReadinessResponseDto implements ReadinessReport {
   })
   readonly status!: 'ok' | 'unavailable';
 
-  @ApiProperty({ type: ReadinessChecksDto })
+  @ApiProperty({
+    type: ReadinessChecksDto,
+    description: 'The answer of each dependency.',
+  })
   readonly checks!: ReadinessChecksDto;
 
   @ApiPropertyOptional({
