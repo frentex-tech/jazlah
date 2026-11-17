@@ -945,7 +945,7 @@ describe('Catalog (e2e)', () => {
               priceHalalas: 95000,
             },
           ],
-          packagings: ['bags'],
+          packagings: [{ packaging: 'bags', extraPriceHalalas: 0 }],
           exclusionItemIds: [exclusion],
         });
         const requestId = requestOf(
@@ -980,7 +980,7 @@ describe('Catalog (e2e)', () => {
               priceHalalas: 95000,
             },
           ],
-          packagings: ['bags'],
+          packagings: [{ packaging: 'bags', extraPriceHalalas: 0 }],
           exclusions: [{ id: exclusion }],
           minPriceHalalas: 50000,
         });
@@ -1493,6 +1493,18 @@ describe('Catalog (e2e)', () => {
         expect(await search(ctx.vendorId, 'cut_a')).toEqual([underscore]);
       });
 
+      it('answers an empty page for a q of only diacritics and tatweel', async () => {
+        const ctx = await setUp('search-marks-only');
+        await named(ctx, 'لَحْمُ غنم', 'Lamb meat');
+
+        // Valid length, but nothing is left once normalised: no product matches it.
+        const res = await catalog.http
+          .get(`/v1/public/products?q=${encodeURIComponent('ًـٌ')}`)
+          .expect(200);
+
+        expect(res.body).toEqual({ items: [], nextCursor: null });
+      });
+
       it('refuses a q shorter than 2 or longer than 100 characters', async () => {
         const short = await catalog.http
           .get(`/v1/public/products?q=${encodeURIComponent(' a ')}`)
@@ -1657,7 +1669,8 @@ describe('Catalog (e2e)', () => {
       const id = await catalog.published(owner, admin, options);
       const live = await vendorProduct(owner, id);
       const sizeId = live.sizes[0].id;
-      // The request carries the prices of its time: the size at 95000, the cutting at 1500.
+      // The request carries the prices of its time: the size at 95000, the cutting at
+      // 1500, the trays packaging at 300.
       const requestId = await requestChange(owner, options, live, [
         { id: sizeId, approxWeightGrams: 8000, priceHalalas: 95000 },
       ]);
@@ -1670,6 +1683,7 @@ describe('Catalog (e2e)', () => {
           cuttings: [
             { cuttingStyleId: options.cuttingStyleId, extraPriceHalalas: 0 },
           ],
+          packagings: [{ packaging: 'trays', extraPriceHalalas: 800 }],
         })
         .expect(200);
       await catalog.http
@@ -1678,13 +1692,21 @@ describe('Catalog (e2e)', () => {
         .expect(200);
 
       // One request after the other, no lock involved: only the repository rule that a
-      // kept size or cutting keeps its stored price protects the new prices here.
+      // kept size, cutting or packaging keeps its stored price protects the new prices
+      // here (saveContent never writes a kept option's price).
       expect(await stored(id)).toEqual({ prices: [90000], minPrice: 90000 });
       expect(
         (
           await prisma.productCutting.findMany({ where: { productId: id } })
         ).map((cutting) => cutting.extraPriceHalalas),
       ).toEqual([0]);
+      expect(
+        (
+          await prisma.productPackagingOption.findMany({
+            where: { productId: id },
+          })
+        ).map((option) => [option.packaging, option.extraPriceHalalas]),
+      ).toEqual([['trays', 800]]);
       expect((await vendorProduct(owner, id)).name.en).toBe('Local Naimi');
     });
 

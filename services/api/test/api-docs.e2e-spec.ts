@@ -148,6 +148,7 @@ describe('API documentation (e2e)', () => {
         'UpdateCustomerAddressDto',
         'UpdateCustomerProfileDto',
         'UpdateReferenceItemDto',
+        'UpdateVendorProfileAsAdminDto',
         'UpdateVendorProfileDto',
         'UploadTicketResponseDto',
         'VendorApplicationDetailResponseDto',
