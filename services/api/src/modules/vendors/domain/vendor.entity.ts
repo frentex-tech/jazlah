@@ -20,6 +20,19 @@ export class Vendor {
     readonly description: OptionalLocalizedText,
     /** Null until the vendor sets a logo. */
     readonly logoMediaId: string | null,
+    /** Null until the vendor or an admin sets a cover photo. */
+    readonly coverMediaId: string | null,
+    /** Null until set. E.164, a Saudi mobile or landline. Not public. */
+    readonly contactPhone: string | null,
+    /** Null until set. Lowercase. Not public. */
+    readonly contactEmail: string | null,
+    /** Null until set or copied from the application. 15 digits. Not public. */
+    readonly vatNumber: string | null,
+    /**
+     * Null for the platform vendor and vendors approved before the city was asked. Only
+     * an admin changes it. Public.
+     */
+    readonly city: string | null,
     readonly isPlatform: boolean,
     readonly status: VendorStatus,
     /** Null while active. */

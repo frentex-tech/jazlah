@@ -1271,7 +1271,7 @@
     },
     "/v1/vendor/profile": {
       "get": {
-        "description": "Vendor dashboard, store profile screen: the store the signed-in vendor user works for (always the one in the access token), with its logo, descriptions, commission in basis points and business and bank details (the IBAN masked).\n\nThe name, commercial registration, bank details and location come from the approved application and only an admin can change them; the vendor changes the logo and descriptions (PATCH). VENDOR_SUSPENDED: the store is suspended; sign the user out and explain.",
+        "description": "Vendor dashboard, store profile screen: the store the signed-in vendor user works for (always the one in the access token), with its logo, cover photo, descriptions, city, contact phone and email, VAT number, commission in basis points and business and bank details (the IBAN masked).\n\nThe name, commercial registration, bank details, location and city come from the approved application and only an admin can change them; the vendor changes the logo, cover photo, descriptions, contact phone and email and VAT number (PATCH). VENDOR_SUSPENDED: the store is suspended; sign the user out and explain.",
         "operationId": "vendorGetProfile",
         "parameters": [],
         "responses": {
@@ -1347,7 +1347,7 @@
         ]
       },
       "patch": {
-        "description": "Vendor dashboard, store profile screen: the vendor changes its own logo and descriptions. Applied at once, with no review; customers see the change on the next read.\n\nFor a new logo, upload it first (POST /v1/vendor/media/uploads, purpose vendor.logo: JPEG, PNG or WebP up to 2 MB), confirm it (POST /v1/vendor/media/{id}/confirm), then send its id. A field left out stays as it is; logoMediaId null removes the logo; inside description, a language set to null or blank clears it. An empty body changes nothing.\n\nErrors: MEDIA_NOT_FOUND (details.mediaId): no vendor.logo file uploaded by this user with that id. MEDIA_NOT_READY: the upload was not confirmed.",
+        "description": "Vendor dashboard, store profile screen: the vendor changes its own logo, cover photo, descriptions, contact phone, contact email and VAT number. Applied at once, with no review; customers see the logo, cover and descriptions on the next read (the contact details and VAT number are never public). The city is not changed here: an admin sets it.\n\nFor a new logo or cover photo, upload it first (POST /v1/vendor/media/uploads, purpose vendor.logo or vendor.cover: JPEG, PNG or WebP up to 2 MB), confirm it (POST /v1/vendor/media/{id}/confirm), then send its id. A field left out stays as it is; logoMediaId, coverMediaId, contactPhone, contactEmail or vatNumber null removes it; inside description, a language set to null or blank clears it. An empty body changes nothing.\n\nErrors: VALIDATION_FAILED for a malformed field (isSaudiPhoneNumber: not a Saudi mobile or landline; isEmail; matches on vatNumber) or a city in the body. MEDIA_NOT_FOUND (details.mediaId): no file of the right purpose (vendor.logo for the logo, vendor.cover for the cover) uploaded by this user with that id. MEDIA_NOT_READY: the upload was not confirmed.",
         "operationId": "vendorUpdateProfile",
         "parameters": [],
         "requestBody": {
@@ -1457,7 +1457,7 @@
             "bearer": []
           }
         ],
-        "summary": "Change my logo or descriptions",
+        "summary": "Change my store profile",
         "tags": [
           "Vendor profile"
         ]
@@ -1465,7 +1465,7 @@
     },
     "/v1/admin/vendor-applications": {
       "get": {
-        "description": "Admin dashboard, vendor applications list: every application, optionally only one status (status=pending for the review queue). The IBAN is shown masked; open one application for its document links.\n\nPaged by cursor, newest first, no total count: send the previous page's nextCursor as cursor; limit 1 to 50, default 20. VALIDATION_FAILED for an unknown status, a cursor the API did not write or a limit out of range.",
+        "description": "Admin dashboard, vendor applications list: every application, optionally only one status (status=pending for the review queue) and only those matching a search (q: part of the store name in Arabic or English, any case, or of the commercial registration number; % and _ match themselves). The IBAN is shown masked; open one application for its document links.\n\nPaged by cursor, newest first, no total count: send the previous page's nextCursor as cursor; limit 1 to 50, default 20. VALIDATION_FAILED for an unknown status, a q shorter than 2 or longer than 100 characters, a cursor the API did not write or a limit out of range.",
         "operationId": "adminListVendorApplications",
         "parameters": [
           {
@@ -1489,6 +1489,18 @@
               "default": 20,
               "example": 20,
               "type": "number"
+            }
+          },
+          {
+            "name": "q",
+            "required": false,
+            "in": "query",
+            "description": "Search: part of the store name in Arabic or English (any case) or of the commercial registration number (Latin or Arabic digits). 2 to 100 characters after trimming; % and _ match themselves.",
+            "schema": {
+              "minLength": 2,
+              "maxLength": 100,
+              "example": "النخبة",
+              "type": "string"
             }
           },
           {
@@ -1972,7 +1984,7 @@
     },
     "/v1/admin/vendors": {
       "get": {
-        "description": "Admin dashboard, vendors list: every vendor, active and suspended, the platform vendor included (isPlatform), optionally only one status, with commission, masked IBAN and logo.\n\nPaged by cursor, newest first, no total count: send the previous page's nextCursor as cursor; limit 1 to 50, default 20. VALIDATION_FAILED for an unknown status, a cursor the API did not write or a limit out of range.",
+        "description": "Admin dashboard, vendors list: every vendor, active and suspended, the platform vendor included (isPlatform), optionally only one status, one city (city, exact) and those matching a search (q: part of the store name in Arabic or English, any case, or of the commercial registration number; % and _ match themselves), with commission, masked IBAN and logo.\n\nPaged by cursor, newest first, no total count: send the previous page's nextCursor as cursor; limit 1 to 50, default 20. VALIDATION_FAILED for an unknown status, a q shorter than 2 or longer than 100 characters, a cursor the API did not write or a limit out of range.",
         "operationId": "adminListVendors",
         "parameters": [
           {
@@ -1999,6 +2011,18 @@
             }
           },
           {
+            "name": "q",
+            "required": false,
+            "in": "query",
+            "description": "Search: part of the store name in Arabic or English (any case) or of the commercial registration number (Latin or Arabic digits). 2 to 100 characters after trimming; % and _ match themselves.",
+            "schema": {
+              "minLength": 2,
+              "maxLength": 100,
+              "example": "النخبة",
+              "type": "string"
+            }
+          },
+          {
             "name": "status",
             "required": false,
             "in": "query",
@@ -2010,6 +2034,18 @@
                 "active",
                 "suspended"
               ]
+            }
+          },
+          {
+            "name": "city",
+            "required": false,
+            "in": "query",
+            "description": "Only vendors in exactly this city, as stored (trimmed; 2 to 50 characters). Vendors without a city are left out.",
+            "schema": {
+              "minLength": 2,
+              "maxLength": 50,
+              "example": "الرياض",
+              "type": "string"
             }
           }
         ],
@@ -2458,7 +2494,7 @@
     },
     "/v1/admin/vendors/{id}/profile": {
       "patch": {
-        "description": "Admin dashboard, vendor screen: changes any vendor's logo and descriptions, the platform vendor included (it has no owner, so this is how its profile is set). Applied at once. Audited with the names of the fields given.\n\nFor a new logo, upload it first as the signed-in admin (POST /v1/admin/media/uploads, purpose vendor.logo: JPEG, PNG or WebP up to 2 MB), confirm it (POST /v1/admin/media/{id}/confirm), then send its id. A field left out stays as it is; logoMediaId null removes the logo; inside description, a language set to null or blank clears it. An empty body changes nothing.\n\nErrors: NOT_FOUND for an unknown vendor. MEDIA_NOT_FOUND (details.mediaId): no vendor.logo file uploaded by this admin with that id (a file another user uploaded counts as missing). MEDIA_NOT_READY: the upload was not confirmed. TRANSACTION_CONFLICT: nothing was saved; send again.",
+        "description": "Admin dashboard, vendor screen: changes any vendor's logo, cover photo, descriptions, contact phone, contact email, VAT number and city, the platform vendor included (it has no owner, so this is how its profile is set). Only an admin changes the city. Applied at once. Audited with the names of the fields given.\n\nFor a new logo or cover photo, upload it first as the signed-in admin (POST /v1/admin/media/uploads, purpose vendor.logo or vendor.cover: JPEG, PNG or WebP up to 2 MB), confirm it (POST /v1/admin/media/{id}/confirm), then send its id. A field left out stays as it is; logoMediaId, coverMediaId, contactPhone, contactEmail or vatNumber null removes it; the city can be changed, not removed; inside description, a language set to null or blank clears it. An empty body changes nothing.\n\nErrors: VALIDATION_FAILED for a malformed field (isSaudiPhoneNumber, isEmail, matches on vatNumber, charLength on city). NOT_FOUND for an unknown vendor. MEDIA_NOT_FOUND (details.mediaId): no file of the right purpose (vendor.logo, vendor.cover) uploaded by this admin with that id (a file another user uploaded counts as missing). MEDIA_NOT_READY: the upload was not confirmed. TRANSACTION_CONFLICT: nothing was saved; send again.",
         "operationId": "adminUpdateVendorProfile",
         "parameters": [
           {
@@ -2478,7 +2514,7 @@
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/UpdateVendorProfileDto"
+                "$ref": "#/components/schemas/UpdateVendorProfileAsAdminDto"
               }
             }
           }
@@ -2580,7 +2616,7 @@
             "bearer": []
           }
         ],
-        "summary": "Change a vendor’s logo or descriptions",
+        "summary": "Change a vendor’s store profile",
         "tags": [
           "Admin vendors"
         ]
@@ -3133,7 +3169,7 @@
     },
     "/v1/customer/media/{id}/confirm": {
       "post": {
-        "description": "Step 3 of a file upload: call it once the storage answered 204 to the upload, before the ticket `confirmBy`. The path id is the ticket `mediaId`.\n\nThe API checks the uploaded file: present, not empty, not larger than the purpose allows, its real type (read from the file first bytes) one the purpose accepts and equal to the `contentType` declared for the ticket. A file that passes is ready: give its `id` to the endpoint that uses it (a product `imageMediaIds`, the vendor `logoMediaId`, the documents of a vendor application). A file that fails is deleted for good: request a new ticket and upload again. Confirming before the upload finished therefore rejects the file (OBJECT_MISSING).\n\nIdempotent: confirming a ready file again returns it again; a rejected file answers the same MEDIA_UPLOAD_REJECTED again. Only the user who requested the ticket can confirm it.\n\nLimit: 60 confirmations a minute per client address; over it, 429 RATE_LIMITED with Retry-After.\n\nErrors:\n- MEDIA_NOT_FOUND (404): no such file for this user: an unknown id, a file another user uploaded, or an unconfirmed upload already removed after its `confirmBy`.\n- MEDIA_UPLOAD_EXPIRED (410): `confirmBy` has passed. Request a new ticket and upload again.\n- MEDIA_UPLOAD_REJECTED (422): the file failed a check and was deleted. `details.reason`: OBJECT_MISSING (nothing was uploaded with the ticket), EMPTY_FILE, TOO_LARGE, TYPE_NOT_ALLOWED (the content is none of the accepted types), CONTENT_TYPE_MISMATCH (the content is another type than the declared `contentType`, a PNG declared as image/jpeg for example), or OWNER_DELETED (the account was deleted).\n- VALIDATION_FAILED (400): the id is not a UUID.\n- SERVICE_UNAVAILABLE (503): the storage or the database cannot be reached, or the limit cannot be counted right now. Confirm again shortly, before `confirmBy`.",
+        "description": "Step 3 of a file upload: call it once the storage answered 204 to the upload, before the ticket `confirmBy`. The path id is the ticket `mediaId`.\n\nThe API checks the uploaded file: present, not empty, not larger than the purpose allows, its real type (read from the file first bytes) one the purpose accepts and equal to the `contentType` declared for the ticket. A file that passes is ready: give its `id` to the endpoint that uses it (a product `imageMediaIds`, the vendor `logoMediaId` or `coverMediaId`, the documents of a vendor application). A file that fails is deleted for good: request a new ticket and upload again. Confirming before the upload finished therefore rejects the file (OBJECT_MISSING).\n\nIdempotent: confirming a ready file again returns it again; a rejected file answers the same MEDIA_UPLOAD_REJECTED again. Only the user who requested the ticket can confirm it.\n\nLimit: 60 confirmations a minute per client address; over it, 429 RATE_LIMITED with Retry-After.\n\nErrors:\n- MEDIA_NOT_FOUND (404): no such file for this user: an unknown id, a file another user uploaded, or an unconfirmed upload already removed after its `confirmBy`.\n- MEDIA_UPLOAD_EXPIRED (410): `confirmBy` has passed. Request a new ticket and upload again.\n- MEDIA_UPLOAD_REJECTED (422): the file failed a check and was deleted. `details.reason`: OBJECT_MISSING (nothing was uploaded with the ticket), EMPTY_FILE, TOO_LARGE, TYPE_NOT_ALLOWED (the content is none of the accepted types), CONTENT_TYPE_MISMATCH (the content is another type than the declared `contentType`, a PNG declared as image/jpeg for example), or OWNER_DELETED (the account was deleted).\n- VALIDATION_FAILED (400): the id is not a UUID.\n- SERVICE_UNAVAILABLE (503): the storage or the database cannot be reached, or the limit cannot be counted right now. Confirm again shortly, before `confirmBy`.",
         "operationId": "customerConfirmMediaUpload",
         "parameters": [
           {
@@ -3263,7 +3299,7 @@
     },
     "/v1/vendor/media/uploads": {
       "post": {
-        "description": "Called by the vendor dashboard to upload the store logo and product images. The confirmed ids go in the vendor profile `logoMediaId` and a product `imageMediaIds`.\n\nStep 1 of 3 of a file upload. The file never passes through this API: this returns a ticket for a direct upload to storage.\n\n1. Call this with the purpose, the file Content-Type and, optionally, its name. Nothing is uploaded yet.\n2. Before `expiresAt` (5 minutes after the request by default), send `POST` to `url` as `multipart/form-data`: first one text part for every entry of `fields`, name and value exactly as given (add none, change none), then the file itself as the **last** part, named `file`. Send no Authorization header to the storage. The storage answers 204 with no body when it stored the file. It refuses an empty file, a file larger than the purpose allows, a changed field or an expired ticket with an error status (4xx) and an XML body of its own, not this API error format. Until `expiresAt` the same ticket can be used again (after a network failure): the last upload replaces the earlier one.\n3. Only after the storage answered 204, and before `confirmBy` (1 hour after the request by default), confirm the file: `POST .../media/{mediaId}/confirm`. Only a confirmed file can be used, and only by the user who uploaded it.\n\nRead both times from the response: they are server settings and may change.\n\nLimits: 30 ticket requests a minute per client address and 100 an hour per user; over them, 429 RATE_LIMITED with Retry-After.\n\nErrors:\n- MEDIA_CONTENT_TYPE_NOT_ALLOWED (415): the purpose does not accept this `contentType`; `details.allowed` lists the types it accepts. Nothing was created.\n- VALIDATION_FAILED (400): a purpose this app may not upload, or a missing or too long `contentType` or `fileName`.\n- SERVICE_UNAVAILABLE (503): the storage or the database cannot be reached, or the upload limits cannot be counted right now (uploads are then refused). Nothing was created; try again shortly.\n\nPurposes accepted here (accepted types; size; who can read the file):\n- `vendor.logo`: image/jpeg, image/png, image/webp; 1 byte to 2 MiB (2097152 bytes); public (anyone can read it at a stable URL).\n- `catalog.product-image`: image/jpeg, image/png, image/webp; 1 byte to 5 MiB (5242880 bytes); public (anyone can read it at a stable URL).",
+        "description": "Called by the vendor dashboard to upload the store logo and product images. The confirmed ids go in the vendor profile `logoMediaId` and a product `imageMediaIds`.\n\nStep 1 of 3 of a file upload. The file never passes through this API: this returns a ticket for a direct upload to storage.\n\n1. Call this with the purpose, the file Content-Type and, optionally, its name. Nothing is uploaded yet.\n2. Before `expiresAt` (5 minutes after the request by default), send `POST` to `url` as `multipart/form-data`: first one text part for every entry of `fields`, name and value exactly as given (add none, change none), then the file itself as the **last** part, named `file`. Send no Authorization header to the storage. The storage answers 204 with no body when it stored the file. It refuses an empty file, a file larger than the purpose allows, a changed field or an expired ticket with an error status (4xx) and an XML body of its own, not this API error format. Until `expiresAt` the same ticket can be used again (after a network failure): the last upload replaces the earlier one.\n3. Only after the storage answered 204, and before `confirmBy` (1 hour after the request by default), confirm the file: `POST .../media/{mediaId}/confirm`. Only a confirmed file can be used, and only by the user who uploaded it.\n\nRead both times from the response: they are server settings and may change.\n\nLimits: 30 ticket requests a minute per client address and 100 an hour per user; over them, 429 RATE_LIMITED with Retry-After.\n\nErrors:\n- MEDIA_CONTENT_TYPE_NOT_ALLOWED (415): the purpose does not accept this `contentType`; `details.allowed` lists the types it accepts. Nothing was created.\n- VALIDATION_FAILED (400): a purpose this app may not upload, or a missing or too long `contentType` or `fileName`.\n- SERVICE_UNAVAILABLE (503): the storage or the database cannot be reached, or the upload limits cannot be counted right now (uploads are then refused). Nothing was created; try again shortly.\n\nPurposes accepted here (accepted types; size; who can read the file):\n- `vendor.logo`: image/jpeg, image/png, image/webp; 1 byte to 2 MiB (2097152 bytes); public (anyone can read it at a stable URL).\n- `vendor.cover`: image/jpeg, image/png, image/webp; 1 byte to 2 MiB (2097152 bytes); public (anyone can read it at a stable URL).\n- `catalog.product-image`: image/jpeg, image/png, image/webp; 1 byte to 5 MiB (5242880 bytes); public (anyone can read it at a stable URL).",
         "operationId": "vendorRequestMediaUpload",
         "parameters": [],
         "requestBody": {
@@ -3371,7 +3407,7 @@
     },
     "/v1/vendor/media/{id}/confirm": {
       "post": {
-        "description": "Step 3 of a file upload: call it once the storage answered 204 to the upload, before the ticket `confirmBy`. The path id is the ticket `mediaId`.\n\nThe API checks the uploaded file: present, not empty, not larger than the purpose allows, its real type (read from the file first bytes) one the purpose accepts and equal to the `contentType` declared for the ticket. A file that passes is ready: give its `id` to the endpoint that uses it (a product `imageMediaIds`, the vendor `logoMediaId`, the documents of a vendor application). A file that fails is deleted for good: request a new ticket and upload again. Confirming before the upload finished therefore rejects the file (OBJECT_MISSING).\n\nIdempotent: confirming a ready file again returns it again; a rejected file answers the same MEDIA_UPLOAD_REJECTED again. Only the user who requested the ticket can confirm it.\n\nLimit: 60 confirmations a minute per client address; over it, 429 RATE_LIMITED with Retry-After.\n\nErrors:\n- MEDIA_NOT_FOUND (404): no such file for this user: an unknown id, a file another user uploaded, or an unconfirmed upload already removed after its `confirmBy`.\n- MEDIA_UPLOAD_EXPIRED (410): `confirmBy` has passed. Request a new ticket and upload again.\n- MEDIA_UPLOAD_REJECTED (422): the file failed a check and was deleted. `details.reason`: OBJECT_MISSING (nothing was uploaded with the ticket), EMPTY_FILE, TOO_LARGE, TYPE_NOT_ALLOWED (the content is none of the accepted types), CONTENT_TYPE_MISMATCH (the content is another type than the declared `contentType`, a PNG declared as image/jpeg for example), or OWNER_DELETED (the account was deleted).\n- VALIDATION_FAILED (400): the id is not a UUID.\n- SERVICE_UNAVAILABLE (503): the storage or the database cannot be reached, or the limit cannot be counted right now. Confirm again shortly, before `confirmBy`.",
+        "description": "Step 3 of a file upload: call it once the storage answered 204 to the upload, before the ticket `confirmBy`. The path id is the ticket `mediaId`.\n\nThe API checks the uploaded file: present, not empty, not larger than the purpose allows, its real type (read from the file first bytes) one the purpose accepts and equal to the `contentType` declared for the ticket. A file that passes is ready: give its `id` to the endpoint that uses it (a product `imageMediaIds`, the vendor `logoMediaId` or `coverMediaId`, the documents of a vendor application). A file that fails is deleted for good: request a new ticket and upload again. Confirming before the upload finished therefore rejects the file (OBJECT_MISSING).\n\nIdempotent: confirming a ready file again returns it again; a rejected file answers the same MEDIA_UPLOAD_REJECTED again. Only the user who requested the ticket can confirm it.\n\nLimit: 60 confirmations a minute per client address; over it, 429 RATE_LIMITED with Retry-After.\n\nErrors:\n- MEDIA_NOT_FOUND (404): no such file for this user: an unknown id, a file another user uploaded, or an unconfirmed upload already removed after its `confirmBy`.\n- MEDIA_UPLOAD_EXPIRED (410): `confirmBy` has passed. Request a new ticket and upload again.\n- MEDIA_UPLOAD_REJECTED (422): the file failed a check and was deleted. `details.reason`: OBJECT_MISSING (nothing was uploaded with the ticket), EMPTY_FILE, TOO_LARGE, TYPE_NOT_ALLOWED (the content is none of the accepted types), CONTENT_TYPE_MISMATCH (the content is another type than the declared `contentType`, a PNG declared as image/jpeg for example), or OWNER_DELETED (the account was deleted).\n- VALIDATION_FAILED (400): the id is not a UUID.\n- SERVICE_UNAVAILABLE (503): the storage or the database cannot be reached, or the limit cannot be counted right now. Confirm again shortly, before `confirmBy`.",
         "operationId": "vendorConfirmMediaUpload",
         "parameters": [
           {
@@ -3501,7 +3537,7 @@
     },
     "/v1/admin/media/uploads": {
       "post": {
-        "description": "Called by the admin dashboard to upload a vendor logo and product images (the platform vendor own products, and product edits made by an admin). The confirmed ids go in the vendor `logoMediaId` and a product `imageMediaIds`.\n\nStep 1 of 3 of a file upload. The file never passes through this API: this returns a ticket for a direct upload to storage.\n\n1. Call this with the purpose, the file Content-Type and, optionally, its name. Nothing is uploaded yet.\n2. Before `expiresAt` (5 minutes after the request by default), send `POST` to `url` as `multipart/form-data`: first one text part for every entry of `fields`, name and value exactly as given (add none, change none), then the file itself as the **last** part, named `file`. Send no Authorization header to the storage. The storage answers 204 with no body when it stored the file. It refuses an empty file, a file larger than the purpose allows, a changed field or an expired ticket with an error status (4xx) and an XML body of its own, not this API error format. Until `expiresAt` the same ticket can be used again (after a network failure): the last upload replaces the earlier one.\n3. Only after the storage answered 204, and before `confirmBy` (1 hour after the request by default), confirm the file: `POST .../media/{mediaId}/confirm`. Only a confirmed file can be used, and only by the user who uploaded it.\n\nRead both times from the response: they are server settings and may change.\n\nLimits: 30 ticket requests a minute per client address and 100 an hour per user; over them, 429 RATE_LIMITED with Retry-After.\n\nErrors:\n- MEDIA_CONTENT_TYPE_NOT_ALLOWED (415): the purpose does not accept this `contentType`; `details.allowed` lists the types it accepts. Nothing was created.\n- VALIDATION_FAILED (400): a purpose this app may not upload, or a missing or too long `contentType` or `fileName`.\n- SERVICE_UNAVAILABLE (503): the storage or the database cannot be reached, or the upload limits cannot be counted right now (uploads are then refused). Nothing was created; try again shortly.\n\nPurposes accepted here (accepted types; size; who can read the file):\n- `vendor.logo`: image/jpeg, image/png, image/webp; 1 byte to 2 MiB (2097152 bytes); public (anyone can read it at a stable URL).\n- `catalog.product-image`: image/jpeg, image/png, image/webp; 1 byte to 5 MiB (5242880 bytes); public (anyone can read it at a stable URL).",
+        "description": "Called by the admin dashboard to upload a vendor logo and product images (the platform vendor own products, and product edits made by an admin). The confirmed ids go in the vendor `logoMediaId` and a product `imageMediaIds`.\n\nStep 1 of 3 of a file upload. The file never passes through this API: this returns a ticket for a direct upload to storage.\n\n1. Call this with the purpose, the file Content-Type and, optionally, its name. Nothing is uploaded yet.\n2. Before `expiresAt` (5 minutes after the request by default), send `POST` to `url` as `multipart/form-data`: first one text part for every entry of `fields`, name and value exactly as given (add none, change none), then the file itself as the **last** part, named `file`. Send no Authorization header to the storage. The storage answers 204 with no body when it stored the file. It refuses an empty file, a file larger than the purpose allows, a changed field or an expired ticket with an error status (4xx) and an XML body of its own, not this API error format. Until `expiresAt` the same ticket can be used again (after a network failure): the last upload replaces the earlier one.\n3. Only after the storage answered 204, and before `confirmBy` (1 hour after the request by default), confirm the file: `POST .../media/{mediaId}/confirm`. Only a confirmed file can be used, and only by the user who uploaded it.\n\nRead both times from the response: they are server settings and may change.\n\nLimits: 30 ticket requests a minute per client address and 100 an hour per user; over them, 429 RATE_LIMITED with Retry-After.\n\nErrors:\n- MEDIA_CONTENT_TYPE_NOT_ALLOWED (415): the purpose does not accept this `contentType`; `details.allowed` lists the types it accepts. Nothing was created.\n- VALIDATION_FAILED (400): a purpose this app may not upload, or a missing or too long `contentType` or `fileName`.\n- SERVICE_UNAVAILABLE (503): the storage or the database cannot be reached, or the upload limits cannot be counted right now (uploads are then refused). Nothing was created; try again shortly.\n\nPurposes accepted here (accepted types; size; who can read the file):\n- `vendor.logo`: image/jpeg, image/png, image/webp; 1 byte to 2 MiB (2097152 bytes); public (anyone can read it at a stable URL).\n- `vendor.cover`: image/jpeg, image/png, image/webp; 1 byte to 2 MiB (2097152 bytes); public (anyone can read it at a stable URL).\n- `catalog.product-image`: image/jpeg, image/png, image/webp; 1 byte to 5 MiB (5242880 bytes); public (anyone can read it at a stable URL).",
         "operationId": "adminRequestMediaUpload",
         "parameters": [],
         "requestBody": {
@@ -3609,7 +3645,7 @@
     },
     "/v1/admin/media/{id}/confirm": {
       "post": {
-        "description": "Step 3 of a file upload: call it once the storage answered 204 to the upload, before the ticket `confirmBy`. The path id is the ticket `mediaId`.\n\nThe API checks the uploaded file: present, not empty, not larger than the purpose allows, its real type (read from the file first bytes) one the purpose accepts and equal to the `contentType` declared for the ticket. A file that passes is ready: give its `id` to the endpoint that uses it (a product `imageMediaIds`, the vendor `logoMediaId`, the documents of a vendor application). A file that fails is deleted for good: request a new ticket and upload again. Confirming before the upload finished therefore rejects the file (OBJECT_MISSING).\n\nIdempotent: confirming a ready file again returns it again; a rejected file answers the same MEDIA_UPLOAD_REJECTED again. Only the user who requested the ticket can confirm it.\n\nLimit: 60 confirmations a minute per client address; over it, 429 RATE_LIMITED with Retry-After.\n\nErrors:\n- MEDIA_NOT_FOUND (404): no such file for this user: an unknown id, a file another user uploaded, or an unconfirmed upload already removed after its `confirmBy`.\n- MEDIA_UPLOAD_EXPIRED (410): `confirmBy` has passed. Request a new ticket and upload again.\n- MEDIA_UPLOAD_REJECTED (422): the file failed a check and was deleted. `details.reason`: OBJECT_MISSING (nothing was uploaded with the ticket), EMPTY_FILE, TOO_LARGE, TYPE_NOT_ALLOWED (the content is none of the accepted types), CONTENT_TYPE_MISMATCH (the content is another type than the declared `contentType`, a PNG declared as image/jpeg for example), or OWNER_DELETED (the account was deleted).\n- VALIDATION_FAILED (400): the id is not a UUID.\n- SERVICE_UNAVAILABLE (503): the storage or the database cannot be reached, or the limit cannot be counted right now. Confirm again shortly, before `confirmBy`.",
+        "description": "Step 3 of a file upload: call it once the storage answered 204 to the upload, before the ticket `confirmBy`. The path id is the ticket `mediaId`.\n\nThe API checks the uploaded file: present, not empty, not larger than the purpose allows, its real type (read from the file first bytes) one the purpose accepts and equal to the `contentType` declared for the ticket. A file that passes is ready: give its `id` to the endpoint that uses it (a product `imageMediaIds`, the vendor `logoMediaId` or `coverMediaId`, the documents of a vendor application). A file that fails is deleted for good: request a new ticket and upload again. Confirming before the upload finished therefore rejects the file (OBJECT_MISSING).\n\nIdempotent: confirming a ready file again returns it again; a rejected file answers the same MEDIA_UPLOAD_REJECTED again. Only the user who requested the ticket can confirm it.\n\nLimit: 60 confirmations a minute per client address; over it, 429 RATE_LIMITED with Retry-After.\n\nErrors:\n- MEDIA_NOT_FOUND (404): no such file for this user: an unknown id, a file another user uploaded, or an unconfirmed upload already removed after its `confirmBy`.\n- MEDIA_UPLOAD_EXPIRED (410): `confirmBy` has passed. Request a new ticket and upload again.\n- MEDIA_UPLOAD_REJECTED (422): the file failed a check and was deleted. `details.reason`: OBJECT_MISSING (nothing was uploaded with the ticket), EMPTY_FILE, TOO_LARGE, TYPE_NOT_ALLOWED (the content is none of the accepted types), CONTENT_TYPE_MISMATCH (the content is another type than the declared `contentType`, a PNG declared as image/jpeg for example), or OWNER_DELETED (the account was deleted).\n- VALIDATION_FAILED (400): the id is not a UUID.\n- SERVICE_UNAVAILABLE (503): the storage or the database cannot be reached, or the limit cannot be counted right now. Confirm again shortly, before `confirmBy`.",
         "operationId": "adminConfirmMediaUpload",
         "parameters": [
           {
@@ -8970,9 +9006,11 @@
             "enum": [
               "commercial_registration",
               "health_certificate",
-              "facility_photo"
+              "facility_photo",
+              "municipality_licence",
+              "national_id"
             ],
-            "description": "What the document shows: commercial_registration, health_certificate or facility_photo.",
+            "description": "What the document shows: commercial_registration, health_certificate, facility_photo, municipality_licence (optional) or national_id (optional).",
             "example": "commercial_registration"
           },
           "mediaId": {
@@ -9011,6 +9049,18 @@
             "description": "The commercial registration number: 10 digits, Latin or Arabic.",
             "example": "1010123456"
           },
+          "vatNumber": {
+            "type": "string",
+            "description": "The VAT registration number, optional: 15 digits starting and ending with 3, Latin or Arabic. Omit it when the business is not registered for VAT.",
+            "example": "310123456700003"
+          },
+          "city": {
+            "type": "string",
+            "minLength": 2,
+            "maxLength": 50,
+            "description": "The city the store is in, as written (Arabic expected): 2 to 50 characters after invisible format characters are removed and spaces trimmed. Shown on the public store page.",
+            "example": "الرياض"
+          },
           "iban": {
             "type": "string",
             "description": "The Saudi IBAN of the account payouts go to (SA and 22 more characters; spaces allowed). Never returned: responses show it masked.",
@@ -9032,7 +9082,7 @@
             ]
           },
           "documents": {
-            "description": "At least one document of each kind (commercial_registration, health_certificate, facility_photo), each file once, at most 10 in all.",
+            "description": "At least one document of each required kind (commercial_registration, health_certificate, facility_photo); the other kinds (municipality_licence, national_id) are optional. Each file once, at most 10 in all.",
             "minItems": 3,
             "maxItems": 10,
             "type": "array",
@@ -9044,6 +9094,7 @@
         "required": [
           "name",
           "commercialRegistrationNumber",
+          "city",
           "iban",
           "accountHolderName",
           "location",
@@ -9098,9 +9149,11 @@
             "enum": [
               "commercial_registration",
               "health_certificate",
-              "facility_photo"
+              "facility_photo",
+              "municipality_licence",
+              "national_id"
             ],
-            "description": "What the document shows: the commercial registration, the health certificate or a photo of the facility.",
+            "description": "What the document shows: the commercial registration, the health certificate, a photo of the facility, the municipality licence or the national id.",
             "example": "health_certificate"
           },
           "mediaId": {
@@ -9161,6 +9214,18 @@
             "description": "The commercial registration number, 10 Latin digits.",
             "example": "1010123456"
           },
+          "vatNumber": {
+            "type": "string",
+            "nullable": true,
+            "description": "The VAT registration number, 15 Latin digits starting and ending with 3; null when the applicant gave none.",
+            "example": "310123456700003"
+          },
+          "city": {
+            "type": "string",
+            "nullable": true,
+            "description": "The city the store is in, as the applicant wrote it; null only for applications submitted before the city was asked.",
+            "example": "الرياض"
+          },
           "ibanMasked": {
             "type": "string",
             "description": "The payout IBAN with every character hidden but the country and the last four; the full IBAN is never sent.",
@@ -9213,6 +9278,8 @@
           "name",
           "description",
           "commercialRegistrationNumber",
+          "vatNumber",
+          "city",
           "ibanMasked",
           "accountHolderName",
           "location",
@@ -9253,6 +9320,18 @@
             "description": "The logo’s stable public URL, to show as is (it does not expire); null when the vendor has no logo.",
             "example": "https://cdn.example.com/vendor/logo/2026/11/15/7f3a2c1e-0b9d-4e5f-8a6b-1c2d3e4f5a6b/2c9d4e1f-6a7b-4c8d-9e0f-1a2b3c4d5e6f"
           },
+          "coverUrl": {
+            "type": "string",
+            "nullable": true,
+            "description": "The cover photo’s stable public URL (the wide image at the top of the store page), to show as is; null when the vendor has none.",
+            "example": "https://cdn.example.com/vendor/cover/2026/11/17/7f3a2c1e-0b9d-4e5f-8a6b-1c2d3e4f5a6b/3d0e5f2a-7b8c-4d9e-8f1a-2b3c4d5e6f7a"
+          },
+          "city": {
+            "type": "string",
+            "nullable": true,
+            "description": "The city the store is in, as written (usually Arabic); null for stores approved before the city was asked and for the platform vendor.",
+            "example": "الرياض"
+          },
           "commissionBasisPoints": {
             "type": "number",
             "minimum": 0,
@@ -9265,6 +9344,24 @@
             "nullable": true,
             "description": "The commercial registration number, 10 Latin digits; null only for the platform vendor.",
             "example": "1010123456"
+          },
+          "vatNumber": {
+            "type": "string",
+            "nullable": true,
+            "description": "The VAT registration number, 15 Latin digits starting and ending with 3; null when none was given. Not public.",
+            "example": "310123456700003"
+          },
+          "contactPhone": {
+            "type": "string",
+            "nullable": true,
+            "description": "The store’s contact number for the platform, in E.164 (a Saudi mobile +9665… or landline +9661…); null until set. Not public.",
+            "example": "+966112345678"
+          },
+          "contactEmail": {
+            "type": "string",
+            "nullable": true,
+            "description": "The store’s contact email for the platform, lowercase and not verified; null until set. Not public.",
+            "example": "contact@example.com"
           },
           "ibanMasked": {
             "type": "string",
@@ -9300,8 +9397,13 @@
           "name",
           "description",
           "logoUrl",
+          "coverUrl",
+          "city",
           "commissionBasisPoints",
           "commercialRegistrationNumber",
+          "vatNumber",
+          "contactPhone",
+          "contactEmail",
           "ibanMasked",
           "accountHolderName",
           "location",
@@ -9317,6 +9419,32 @@
             "nullable": true,
             "description": "The id (UUID) of a file the signed-in user uploaded with purpose vendor.logo and confirmed (JPEG, PNG or WebP, up to 2 MB); null removes the logo; omit it to keep the current one.",
             "example": "7f3a2c1e-0b9d-4e5f-8a6b-1c2d3e4f5a6b"
+          },
+          "coverMediaId": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true,
+            "description": "The id (UUID) of a file the signed-in user uploaded with purpose vendor.cover and confirmed (JPEG, PNG or WebP, up to 2 MB): the wide photo at the top of the store page. null removes it; omit it to keep the current one.",
+            "example": "8a4b3d2f-1c0e-4f6a-9b7c-2d3e4f5a6b7c"
+          },
+          "contactPhone": {
+            "type": "string",
+            "nullable": true,
+            "description": "The store’s contact number for the platform (not shown to customers): a Saudi mobile or landline (area code 011 to 017), in any usual form (05…, 011…, +966…, Arabic digits, spaces). Stored and returned in E.164 (+966…). null removes it; omit it to keep the current one. VALIDATION_FAILED with isSaudiPhoneNumber otherwise.",
+            "example": "0112345678"
+          },
+          "contactEmail": {
+            "type": "string",
+            "nullable": true,
+            "maxLength": 254,
+            "description": "The store’s contact email for the platform (not shown to customers), up to 254 characters; stored lowercase and not verified. null or blank removes it; omit it to keep the current one.",
+            "example": "contact@example.com"
+          },
+          "vatNumber": {
+            "type": "string",
+            "nullable": true,
+            "description": "The VAT registration number: 15 digits starting and ending with 3, Latin or Arabic. null removes it; omit it to keep the current one.",
+            "example": "310123456700003"
           },
           "description": {
             "description": "The store description: an object, never null. Inside it a language left out stays as it is, and null or a blank text clears it. Omit the whole field to keep both.",
@@ -9358,9 +9486,11 @@
             "enum": [
               "commercial_registration",
               "health_certificate",
-              "facility_photo"
+              "facility_photo",
+              "municipality_licence",
+              "national_id"
             ],
-            "description": "What the document shows: the commercial registration, the health certificate or a photo of the facility.",
+            "description": "What the document shows: the commercial registration, the health certificate, a photo of the facility, the municipality licence or the national id.",
             "example": "health_certificate"
           },
           "mediaId": {
@@ -9435,6 +9565,18 @@
             "description": "The commercial registration number, 10 Latin digits.",
             "example": "1010123456"
           },
+          "vatNumber": {
+            "type": "string",
+            "nullable": true,
+            "description": "The VAT registration number, 15 Latin digits starting and ending with 3; null when the applicant gave none.",
+            "example": "310123456700003"
+          },
+          "city": {
+            "type": "string",
+            "nullable": true,
+            "description": "The city the store is in, as the applicant wrote it; null only for applications submitted before the city was asked.",
+            "example": "الرياض"
+          },
           "ibanMasked": {
             "type": "string",
             "description": "The payout IBAN with every character hidden but the country and the last four; the full IBAN is never sent.",
@@ -9494,6 +9636,8 @@
           "name",
           "description",
           "commercialRegistrationNumber",
+          "vatNumber",
+          "city",
           "ibanMasked",
           "accountHolderName",
           "location",
@@ -9550,6 +9694,18 @@
             "description": "The logo’s stable public URL, to show as is (it does not expire); null when the vendor has no logo.",
             "example": "https://cdn.example.com/vendor/logo/2026/11/15/7f3a2c1e-0b9d-4e5f-8a6b-1c2d3e4f5a6b/2c9d4e1f-6a7b-4c8d-9e0f-1a2b3c4d5e6f"
           },
+          "coverUrl": {
+            "type": "string",
+            "nullable": true,
+            "description": "The cover photo’s stable public URL (the wide image at the top of the store page), to show as is; null when the vendor has none.",
+            "example": "https://cdn.example.com/vendor/cover/2026/11/17/7f3a2c1e-0b9d-4e5f-8a6b-1c2d3e4f5a6b/3d0e5f2a-7b8c-4d9e-8f1a-2b3c4d5e6f7a"
+          },
+          "city": {
+            "type": "string",
+            "nullable": true,
+            "description": "The city the store is in, as written (usually Arabic); null for stores approved before the city was asked and for the platform vendor.",
+            "example": "الرياض"
+          },
           "commissionBasisPoints": {
             "type": "number",
             "minimum": 0,
@@ -9562,6 +9718,24 @@
             "nullable": true,
             "description": "The commercial registration number, 10 Latin digits; null only for the platform vendor.",
             "example": "1010123456"
+          },
+          "vatNumber": {
+            "type": "string",
+            "nullable": true,
+            "description": "The VAT registration number, 15 Latin digits starting and ending with 3; null when none was given. Not public.",
+            "example": "310123456700003"
+          },
+          "contactPhone": {
+            "type": "string",
+            "nullable": true,
+            "description": "The store’s contact number for the platform, in E.164 (a Saudi mobile +9665… or landline +9661…); null until set. Not public.",
+            "example": "+966112345678"
+          },
+          "contactEmail": {
+            "type": "string",
+            "nullable": true,
+            "description": "The store’s contact email for the platform, lowercase and not verified; null until set. Not public.",
+            "example": "contact@example.com"
           },
           "ibanMasked": {
             "type": "string",
@@ -9631,8 +9805,13 @@
           "name",
           "description",
           "logoUrl",
+          "coverUrl",
+          "city",
           "commissionBasisPoints",
           "commercialRegistrationNumber",
+          "vatNumber",
+          "contactPhone",
+          "contactEmail",
           "ibanMasked",
           "accountHolderName",
           "location",
@@ -9680,6 +9859,59 @@
           "items",
           "nextCursor"
         ]
+      },
+      "UpdateVendorProfileAsAdminDto": {
+        "type": "object",
+        "properties": {
+          "logoMediaId": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true,
+            "description": "The id (UUID) of a file the signed-in user uploaded with purpose vendor.logo and confirmed (JPEG, PNG or WebP, up to 2 MB); null removes the logo; omit it to keep the current one.",
+            "example": "7f3a2c1e-0b9d-4e5f-8a6b-1c2d3e4f5a6b"
+          },
+          "coverMediaId": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true,
+            "description": "The id (UUID) of a file the signed-in user uploaded with purpose vendor.cover and confirmed (JPEG, PNG or WebP, up to 2 MB): the wide photo at the top of the store page. null removes it; omit it to keep the current one.",
+            "example": "8a4b3d2f-1c0e-4f6a-9b7c-2d3e4f5a6b7c"
+          },
+          "contactPhone": {
+            "type": "string",
+            "nullable": true,
+            "description": "The store’s contact number for the platform (not shown to customers): a Saudi mobile or landline (area code 011 to 017), in any usual form (05…, 011…, +966…, Arabic digits, spaces). Stored and returned in E.164 (+966…). null removes it; omit it to keep the current one. VALIDATION_FAILED with isSaudiPhoneNumber otherwise.",
+            "example": "0112345678"
+          },
+          "contactEmail": {
+            "type": "string",
+            "nullable": true,
+            "maxLength": 254,
+            "description": "The store’s contact email for the platform (not shown to customers), up to 254 characters; stored lowercase and not verified. null or blank removes it; omit it to keep the current one.",
+            "example": "contact@example.com"
+          },
+          "vatNumber": {
+            "type": "string",
+            "nullable": true,
+            "description": "The VAT registration number: 15 digits starting and ending with 3, Latin or Arabic. null removes it; omit it to keep the current one.",
+            "example": "310123456700003"
+          },
+          "description": {
+            "description": "The store description: an object, never null. Inside it a language left out stays as it is, and null or a blank text clears it. Omit the whole field to keep both.",
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/LocalizedDescriptionDto"
+              }
+            ]
+          },
+          "city": {
+            "type": "string",
+            "minLength": 2,
+            "maxLength": 50,
+            "description": "The city the store is in, as written (Arabic expected): 2 to 50 characters after invisible format characters are removed and spaces trimmed. Shown on the public store page. Omit it to keep the current one; null is VALIDATION_FAILED (a city is changed, not removed).",
+            "example": "جدة"
+          }
+        }
       },
       "VendorCommissionChangeResponseDto": {
         "type": "object",
@@ -9775,13 +10007,27 @@
             "nullable": true,
             "description": "The logo’s stable public URL, to show as is (it does not expire); null when the vendor has no logo.",
             "example": "https://cdn.example.com/vendor/logo/2026/11/15/7f3a2c1e-0b9d-4e5f-8a6b-1c2d3e4f5a6b/2c9d4e1f-6a7b-4c8d-9e0f-1a2b3c4d5e6f"
+          },
+          "coverUrl": {
+            "type": "string",
+            "nullable": true,
+            "description": "The cover photo’s stable public URL (the wide image at the top of the store page), to show as is; null when the vendor has none.",
+            "example": "https://cdn.example.com/vendor/cover/2026/11/17/7f3a2c1e-0b9d-4e5f-8a6b-1c2d3e4f5a6b/3d0e5f2a-7b8c-4d9e-8f1a-2b3c4d5e6f7a"
+          },
+          "city": {
+            "type": "string",
+            "nullable": true,
+            "description": "The city the store is in, as written (usually Arabic); null for stores approved before the city was asked and for the platform vendor.",
+            "example": "الرياض"
           }
         },
         "required": [
           "id",
           "name",
           "description",
-          "logoUrl"
+          "logoUrl",
+          "coverUrl",
+          "city"
         ]
       },
       "PublicVendorPageResponseDto": {
@@ -9900,7 +10146,7 @@
           "purpose": {
             "type": "string",
             "example": "catalog.product-image",
-            "description": "The upload purpose the ticket was requested for (`catalog.product-image`, `vendor.logo`, `vendor.document`); only an endpoint expecting this purpose accepts the file."
+            "description": "The upload purpose the ticket was requested for (`catalog.product-image`, `vendor.logo`, `vendor.cover`, `vendor.document`); only an endpoint expecting this purpose accepts the file."
           },
           "visibility": {
             "type": "string",
@@ -9974,10 +10220,11 @@
             "type": "string",
             "enum": [
               "vendor.logo",
+              "vendor.cover",
               "catalog.product-image"
             ],
             "example": "vendor.logo",
-            "description": "Why the file is uploaded: decides the accepted types, the size limit and who can read the file. Accepted here:\n\n- `vendor.logo`: image/jpeg, image/png, image/webp; 1 byte to 2 MiB (2097152 bytes); public (anyone can read it at a stable URL).\n- `catalog.product-image`: image/jpeg, image/png, image/webp; 1 byte to 5 MiB (5242880 bytes); public (anyone can read it at a stable URL)."
+            "description": "Why the file is uploaded: decides the accepted types, the size limit and who can read the file. Accepted here:\n\n- `vendor.logo`: image/jpeg, image/png, image/webp; 1 byte to 2 MiB (2097152 bytes); public (anyone can read it at a stable URL).\n- `vendor.cover`: image/jpeg, image/png, image/webp; 1 byte to 2 MiB (2097152 bytes); public (anyone can read it at a stable URL).\n- `catalog.product-image`: image/jpeg, image/png, image/webp; 1 byte to 5 MiB (5242880 bytes); public (anyone can read it at a stable URL)."
           }
         },
         "required": [
@@ -10005,10 +10252,11 @@
             "type": "string",
             "enum": [
               "vendor.logo",
+              "vendor.cover",
               "catalog.product-image"
             ],
             "example": "vendor.logo",
-            "description": "Why the file is uploaded: decides the accepted types, the size limit and who can read the file. Accepted here:\n\n- `vendor.logo`: image/jpeg, image/png, image/webp; 1 byte to 2 MiB (2097152 bytes); public (anyone can read it at a stable URL).\n- `catalog.product-image`: image/jpeg, image/png, image/webp; 1 byte to 5 MiB (5242880 bytes); public (anyone can read it at a stable URL)."
+            "description": "Why the file is uploaded: decides the accepted types, the size limit and who can read the file. Accepted here:\n\n- `vendor.logo`: image/jpeg, image/png, image/webp; 1 byte to 2 MiB (2097152 bytes); public (anyone can read it at a stable URL).\n- `vendor.cover`: image/jpeg, image/png, image/webp; 1 byte to 2 MiB (2097152 bytes); public (anyone can read it at a stable URL).\n- `catalog.product-image`: image/jpeg, image/png, image/webp; 1 byte to 5 MiB (5242880 bytes); public (anyone can read it at a stable URL)."
           }
         },
         "required": [

@@ -18,6 +18,8 @@ export function toVendorApplication(
       name: { ar: row.nameAr, en: row.nameEn },
       description: { ar: row.descriptionAr, en: row.descriptionEn },
       commercialRegistrationNumber: row.commercialRegistrationNumber,
+      vatNumber: row.vatNumber,
+      city: row.city,
       accountHolderName: row.accountHolderName,
       location: { latitude: row.latitude, longitude: row.longitude },
     },

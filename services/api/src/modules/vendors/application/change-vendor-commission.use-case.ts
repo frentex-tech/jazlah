@@ -18,8 +18,8 @@ import {
 import { Vendor } from '../domain/vendor.entity';
 import { VENDOR_AUDIT } from '../domain/vendor-audit-actions.constants';
 import type { VendorActionInput } from './vendor-action-input.type';
-import type { VendorWithLogo } from './vendor-with-logo.type';
-import { withLogoUrls } from './with-logo-urls';
+import type { VendorWithImages } from './vendor-with-images.type';
+import { withImageUrls } from './with-image-urls';
 
 /**
  * An admin sets a vendor's commission for future orders (FR-ADM-04); orders already
@@ -43,7 +43,7 @@ export class ChangeVendorCommissionUseCase {
 
   async execute(
     input: VendorActionInput & { commissionBasisPoints: number },
-  ): Promise<VendorWithLogo> {
+  ): Promise<VendorWithImages> {
     Vendor.assertCommission(input.commissionBasisPoints);
     const vendor = await this.transactions.run(async () => {
       const found = await this.vendors.findById(input.vendorId);
@@ -79,10 +79,10 @@ export class ChangeVendorCommissionUseCase {
       });
       return updated;
     });
-    const [withLogo] = await withLogoUrls(this.media, [vendor]);
-    if (withLogo === undefined) {
-      throw new Error('withLogoUrls returned no vendor');
+    const [withImages] = await withImageUrls(this.media, [vendor]);
+    if (withImages === undefined) {
+      throw new Error('withImageUrls returned no vendor');
     }
-    return withLogo;
+    return withImages;
   }
 }

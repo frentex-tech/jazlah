@@ -10,6 +10,8 @@ import { FakeStorageProvider } from '@integrations/storage/testing';
 import { CLOCK } from '@modules/auth/domain/ports/clock.port';
 import { CreatePlatformVendorUseCase } from '@modules/vendors/application/create-platform-vendor.use-case';
 import { createHttpApp } from './support/create-http-app';
+import { holdRowLock } from './support/row-lock';
+import { sent, type SentRequest } from './support/sent-request';
 import { TestClock } from './support/test-clock';
 import {
   TEST_IBAN,
@@ -173,6 +175,108 @@ describe('Vendors (e2e)', () => {
         code: 'VALIDATION_FAILED',
         details: [{ field: 'name', constraints: ['isDefined'] }],
       });
+      const noCity = await send(
+        journey.applicationBody(documents, { city: undefined }),
+      );
+      const shortCity = await send(
+        journey.applicationBody(documents, { city: ' ج‏ ' }),
+      );
+      const badVat = await send(
+        journey.applicationBody(documents, { vatNumber: '210123456700003' }),
+      );
+      expect(noCity.body).toMatchObject({ details: [{ field: 'city' }] });
+      expect(shortCity.body).toMatchObject({
+        details: [{ field: 'city', constraints: ['charLength'] }],
+      });
+      expect(badVat.body).toMatchObject({
+        details: [{ field: 'vatNumber', constraints: ['matches'] }],
+      });
+    });
+
+    it('accepts the optional document kinds and a VAT number, which approval copies to the vendor with the city', async () => {
+      const customer = await journey.customer();
+      const documents = await journey.documents(customer);
+      for (const kind of ['municipality_licence', 'national_id']) {
+        documents.push({
+          kind,
+          mediaId: await journey.uploadedFile(
+            customer,
+            'customer',
+            'vendor.document',
+            'pdf',
+          ),
+        });
+      }
+
+      const res = await journey.http
+        .post('/v1/customer/vendor-applications')
+        .set(...bearer(customer))
+        .send(
+          journey.applicationBody(documents, {
+            vatNumber: '٣١٠١٢٣٤٥٦٧٠٠٠٠٣',
+          }),
+        )
+        .expect(201);
+      const admin = await journey.admin();
+      const approved = await journey.http
+        .post(
+          `/v1/admin/vendor-applications/${(res.body as ApplicationBody).id}/approve`,
+        )
+        .set(...bearer(admin))
+        .send({ commissionBasisPoints: 1000 })
+        .expect(200);
+
+      expect(res.body).toMatchObject({
+        vatNumber: '310123456700003',
+        city: 'الرياض',
+      });
+      expect(
+        (res.body as ApplicationBody).documents
+          .map((document) => document.kind)
+          .sort(),
+      ).toEqual([
+        'commercial_registration',
+        'facility_photo',
+        'health_certificate',
+        'municipality_licence',
+        'national_id',
+      ]);
+      expect(approved.body).toMatchObject({
+        vatNumber: '310123456700003',
+        city: 'الرياض',
+        contactPhone: null,
+        contactEmail: null,
+        coverUrl: null,
+      });
+    });
+
+    it('still refuses an application missing a required kind, even with the optional ones', async () => {
+      const customer = await journey.customer();
+      const documents = (await journey.documents(customer)).slice(1);
+      for (const kind of ['municipality_licence', 'national_id']) {
+        documents.push({
+          kind,
+          mediaId: await journey.uploadedFile(
+            customer,
+            'customer',
+            'vendor.document',
+            'pdf',
+          ),
+        });
+      }
+
+      const res = await journey.http
+        .post('/v1/customer/vendor-applications')
+        .set(...bearer(customer))
+        .send(journey.applicationBody(documents))
+        .expect(400);
+
+      expect(res.body).toMatchObject({
+        code: 'VALIDATION_FAILED',
+        details: [
+          { field: 'documents', constraints: ['requiresEachDocumentKind'] },
+        ],
+      });
     });
 
     it('refuses a second pending application with VENDOR_APPLICATION_ALREADY_PENDING', async () => {
@@ -299,6 +403,55 @@ describe('Vendors (e2e)', () => {
           rejectionReason: 'OWNER_DELETED',
         })),
       );
+    });
+
+    it('stores no application on the account when the submission waits on its deletion', async () => {
+      const customer = await journey.customer('deleted-while-applying');
+      const documents = await journey.documents(customer);
+      const session = await prisma.authSession.findFirst({
+        where: { userId: customer.userId },
+        select: { id: true },
+      });
+      if (session === null) {
+        throw new Error('the signed-in customer has no session');
+      }
+      // The deletion locks the user row FOR UPDATE, erases the applicant data, then
+      // deletes the sessions: holding the session row pauses it there, with the user
+      // row locked. The submission then queues behind the user lock (holdLive, FOR
+      // SHARE) and, once the deletion commits, finds the user deleted.
+      // Without holdLive the submission reads the user as live (a plain read does not
+      // wait), its INSERT's foreign key check waits for the deletion's FOR UPDATE, and
+      // then succeeds on the tombstoned row: an application stored on the deleted
+      // account, and this test fails on the count below.
+      const lock = await holdRowLock(prisma, 'auth_sessions', session.id);
+      let deletion!: SentRequest;
+      let submission!: SentRequest;
+      try {
+        deletion = sent(
+          journey.http.delete('/v1/customer/me').set(...bearer(customer)),
+        );
+        await lock.waitForWaiters(1, () => deletion.done);
+        submission = sent(
+          journey.http
+            .post('/v1/customer/vendor-applications')
+            .set(...bearer(customer))
+            .send(journey.applicationBody(documents)),
+        );
+        await lock.waitForWaiters(2, () => deletion.done || submission.done);
+      } finally {
+        await lock.release();
+      }
+      const deleted = await deletion.response;
+      const submitted = await submission.response;
+
+      expect(deleted.status).toBe(204);
+      expect(submitted.status).toBe(401);
+      expect(errorCode(submitted.body)).toBe('UNAUTHORIZED');
+      expect(
+        await prisma.vendorApplication.count({
+          where: { applicantId: customer.userId },
+        }),
+      ).toBe(0);
     });
 
     it("keeps an approved application and its documents: the vendor's business record", async () => {
@@ -785,6 +938,178 @@ describe('Vendors (e2e)', () => {
 
       expect(errorCode(res.body)).toBe('FORBIDDEN');
     });
+
+    it("sets a vendor's city, contact details, VAT number and cover, audited; refuses a null city", async () => {
+      const { vendorId, admin } = await journey.approvedVendor();
+      const cover = await journey.uploadedFile(
+        admin,
+        'admin',
+        'vendor.cover',
+        'png',
+      );
+      const patch = (body: Record<string, unknown>) =>
+        journey.http
+          .patch(`/v1/admin/vendors/${vendorId}/profile`)
+          .set(...bearer(admin))
+          .send(body);
+
+      const updated = await patch({
+        city: ' جدة‏ ',
+        coverMediaId: cover,
+        contactPhone: '+966 50 123 4567',
+        contactEmail: 'Owner@Example.com',
+        vatNumber: '310123456700003',
+      }).expect(200);
+      const nullCity = await patch({ city: null }).expect(400);
+      const publicPage = await journey.http
+        .get(`/v1/public/vendors/${vendorId}`)
+        .expect(200);
+
+      expect(updated.body).toMatchObject({
+        city: 'جدة',
+        contactPhone: '+966501234567',
+        contactEmail: 'owner@example.com',
+        vatNumber: '310123456700003',
+      });
+      expect((updated.body as { coverUrl: unknown }).coverUrl).toEqual(
+        expect.any(String),
+      );
+      expect(nullCity.body).toMatchObject({ details: [{ field: 'city' }] });
+      expect(publicPage.body).toMatchObject({ city: 'جدة' });
+      expect(
+        await prisma.auditLog.findMany({
+          where: {
+            entityId: vendorId,
+            action: 'vendors.vendor.profile_updated',
+          },
+          select: { metadata: true },
+        }),
+      ).toEqual([
+        {
+          metadata: {
+            fields: 'city,contactEmail,contactPhone,coverMediaId,vatNumber',
+          },
+        },
+      ]);
+    });
+  });
+
+  describe('an admin searching vendors and applications', () => {
+    /** Names, a CR number and a city no other test or suite uses. */
+    function unique() {
+      const token = randomUUID().slice(0, 8);
+      const digits = String(
+        Number.parseInt(randomUUID().replace(/-/g, '').slice(0, 12), 16),
+      )
+        .padStart(10, '7')
+        .slice(-10);
+      return { token, digits, city: `مدينة ${token}` };
+    }
+    const ids = (res: { body: unknown }) =>
+      (res.body as Page<{ id: string }>).items.map((item) => item.id);
+
+    it('finds vendors by either name in any case, by CR number in Arabic digits, by city, with the status', async () => {
+      const { token, digits, city } = unique();
+      const { vendorId, admin } = await journey.approvedVendor('searched', {
+        name: { ar: `ملحمة ${token}`, en: `Butchery ${token}` },
+        commercialRegistrationNumber: digits,
+        city,
+      });
+      const list = (query: Record<string, string>) =>
+        journey.http
+          .get('/v1/admin/vendors')
+          .query(query)
+          .set(...bearer(admin))
+          .expect(200);
+      const arabicDigits = digits
+        .slice(2, 8)
+        .replace(/\d/g, (digit) => '٠١٢٣٤٥٦٧٨٩'[Number(digit)] ?? digit);
+
+      expect(ids(await list({ q: `ملحمة ${token}` }))).toEqual([vendorId]);
+      expect(
+        ids(await list({ q: ` BUTCHERY ${token.toUpperCase()} ` })),
+      ).toEqual([vendorId]);
+      expect(ids(await list({ q: arabicDigits }))).toContain(vendorId);
+      expect(ids(await list({ city }))).toEqual([vendorId]);
+      expect(ids(await list({ city, status: 'active' }))).toEqual([vendorId]);
+      expect(ids(await list({ q: token, status: 'suspended' }))).toEqual([]);
+      expect(ids(await list({ q: token, city: 'الرياض' }))).toEqual([]);
+    });
+
+    it('takes % and _ literally, and pages the matches', async () => {
+      const { token, digits } = unique();
+      const literal = await journey.approvedVendor('literal', {
+        name: { ar: `عرض ${token}`, en: `Deal ${token} 50%_off` },
+        commercialRegistrationNumber: digits,
+      });
+      const lookalike = await journey.approvedVendor('lookalike', {
+        name: { ar: `عرض ${token} آخر`, en: `Deal ${token} 50xyoff` },
+        commercialRegistrationNumber: unique().digits,
+      });
+      const admin = literal.admin;
+      const list = (query: Record<string, string>) =>
+        journey.http
+          .get('/v1/admin/vendors')
+          .query(query)
+          .set(...bearer(admin))
+          .expect(200);
+
+      expect(ids(await list({ q: `${token} 50%_` }))).toEqual([
+        literal.vendorId,
+      ]);
+      const first = await list({ q: `Deal ${token}`, limit: '1' });
+      const second = await list({
+        q: `Deal ${token}`,
+        limit: '1',
+        cursor: (first.body as Page<unknown>).nextCursor ?? '',
+      });
+      expect([...ids(first), ...ids(second)]).toEqual([
+        lookalike.vendorId,
+        literal.vendorId,
+      ]);
+      expect((second.body as Page<unknown>).nextCursor).toBeNull();
+    });
+
+    it('finds applications by name or CR number, with the status', async () => {
+      const { token, digits } = unique();
+      const { applicationId } = await journey.pendingApplication('searched', {
+        name: { ar: `مذبح ${token}`, en: `Abattoir ${token}` },
+        commercialRegistrationNumber: digits,
+      });
+      const admin = await journey.admin();
+      const list = (query: Record<string, string>) =>
+        journey.http
+          .get('/v1/admin/vendor-applications')
+          .query(query)
+          .set(...bearer(admin))
+          .expect(200);
+
+      expect(ids(await list({ q: `abattoir ${token}` }))).toEqual([
+        applicationId,
+      ]);
+      expect(
+        ids(await list({ q: `مذبح ${token}`, status: 'pending' })),
+      ).toEqual([applicationId]);
+      expect(ids(await list({ q: digits }))).toContain(applicationId);
+      expect(ids(await list({ q: token, status: 'approved' }))).toEqual([]);
+    });
+
+    it('refuses a q shorter than 2 or longer than 100 characters', async () => {
+      const admin = await journey.admin();
+
+      const short = await journey.http
+        .get('/v1/admin/vendors?q=%20a%20')
+        .set(...bearer(admin))
+        .expect(400);
+      const long = await journey.http
+        .get('/v1/admin/vendor-applications')
+        .query({ q: 'x'.repeat(101) })
+        .set(...bearer(admin))
+        .expect(400);
+
+      expect(short.body).toMatchObject({ details: [{ field: 'q' }] });
+      expect(long.body).toMatchObject({ details: [{ field: 'q' }] });
+    });
   });
 
   describe('a vendor and its profile', () => {
@@ -829,6 +1154,107 @@ describe('Vendors (e2e)', () => {
         name: { ar: 'ملحمة النخبة', en: 'Al Nokhba Butchery' },
         description: { ar: 'لحوم بلدية', en: 'Fresh daily' },
         logoUrl: (updated.body as VendorBody).logoUrl,
+        coverUrl: null,
+        city: 'الرياض',
+      });
+    });
+
+    it('sets its cover, contact phone (a landline), email and VAT number; the public page shows the cover and city only', async () => {
+      const { vendorId, owner } = await journey.approvedVendor();
+      const cover = await journey.uploadedFile(
+        owner,
+        'vendor',
+        'vendor.cover',
+        'png',
+      );
+
+      const updated = await journey.http
+        .patch('/v1/vendor/profile')
+        .set(...bearer(owner))
+        .send({
+          coverMediaId: cover,
+          contactPhone: '٠١١ ٢٣٤ ٥٦٧٨',
+          contactEmail: ' Shop@Example.COM ',
+          vatNumber: '٣١٠١٢٣٤٥٦٧٠٠٠٠٣',
+        })
+        .expect(200);
+      const publicPage = await journey.http
+        .get(`/v1/public/vendors/${vendorId}`)
+        .expect(200);
+
+      expect(updated.body).toMatchObject({
+        contactPhone: '+966112345678',
+        contactEmail: 'shop@example.com',
+        vatNumber: '310123456700003',
+        city: 'الرياض',
+      });
+      expect((updated.body as { coverUrl: unknown }).coverUrl).toEqual(
+        expect.any(String),
+      );
+      expect(publicPage.body).toMatchObject({
+        coverUrl: (updated.body as { coverUrl: string }).coverUrl,
+        city: 'الرياض',
+      });
+      expect(Object.keys(publicPage.body as object).sort()).toEqual([
+        'city',
+        'coverUrl',
+        'description',
+        'id',
+        'logoUrl',
+        'name',
+      ]);
+
+      const cleared = await journey.http
+        .patch('/v1/vendor/profile')
+        .set(...bearer(owner))
+        .send({
+          coverMediaId: null,
+          contactPhone: null,
+          contactEmail: null,
+          vatNumber: null,
+        })
+        .expect(200);
+      expect(cleared.body).toMatchObject({
+        coverUrl: null,
+        contactPhone: null,
+        contactEmail: null,
+        vatNumber: null,
+      });
+    });
+
+    it('refuses a city, a malformed phone, email or VAT number, and a logo as the cover', async () => {
+      const { owner } = await journey.approvedVendor();
+      const logo = await journey.uploadedFile(
+        owner,
+        'vendor',
+        'vendor.logo',
+        'png',
+      );
+      const patch = (body: Record<string, unknown>) =>
+        journey.http
+          .patch('/v1/vendor/profile')
+          .set(...bearer(owner))
+          .send(body);
+
+      const answers = await Promise.all([
+        patch({ city: 'جدة' }),
+        patch({ contactPhone: '0152345678' }),
+        patch({ contactEmail: 'not-an-email' }),
+        patch({ vatNumber: '310123456700004' }),
+        patch({ coverMediaId: logo }),
+      ]);
+
+      expect(answers.map((res) => [res.status, errorCode(res.body)])).toEqual([
+        [400, 'VALIDATION_FAILED'],
+        [400, 'VALIDATION_FAILED'],
+        [400, 'VALIDATION_FAILED'],
+        [400, 'VALIDATION_FAILED'],
+        [404, 'MEDIA_NOT_FOUND'],
+      ]);
+      expect(answers[1]?.body).toMatchObject({
+        details: [
+          { field: 'contactPhone', constraints: ['isSaudiPhoneNumber'] },
+        ],
       });
     });
 

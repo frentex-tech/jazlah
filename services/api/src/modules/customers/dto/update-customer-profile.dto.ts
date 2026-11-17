@@ -12,8 +12,8 @@ import { CharLength } from '@common/decorators/char-length.decorator';
 import { CUSTOMER_LIMITS } from '../customer-limits.constants';
 import type { PreferredLanguage } from '../preferred-language.type';
 import { PREFERRED_LANGUAGES } from '../preferred-languages.constants';
-import { toEmail } from './to-email';
-import { toPersonName } from './to-person-name';
+import { toEmail } from '@common/dto/to-email';
+import { toCompactText } from '@common/dto/to-compact-text';
 
 /** Changes to the signed-in customer's profile; a field left out stays as it is. */
 export class UpdateCustomerProfileDto {
@@ -23,7 +23,7 @@ export class UpdateCustomerProfileDto {
     description: `The customer's full name: ${CUSTOMER_LIMITS.fullName.min} to ${CUSTOMER_LIMITS.fullName.max} characters, counted in Unicode code points (an emoji with a variation selector counts as 2), after invisible format characters are removed and runs of spaces made one. The profile is complete once it has one. Left out keeps the current name; null is VALIDATION_FAILED (a name cannot be removed).`,
     example: 'محمد العتيبي',
   })
-  @Transform(toPersonName)
+  @Transform(toCompactText)
   @ValidateIf((_dto, value) => value !== undefined)
   @IsString()
   @CharLength(CUSTOMER_LIMITS.fullName.min, CUSTOMER_LIMITS.fullName.max)

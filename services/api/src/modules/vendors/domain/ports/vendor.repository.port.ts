@@ -4,7 +4,7 @@ import type { PageRequest } from '@common/pagination/page-request.type';
 import type { Vendor } from '../vendor.entity';
 import type { VendorApplication } from '../vendor-application.entity';
 import type { VendorProfileChanges } from '../vendor-profile-changes.type';
-import type { VendorStatus } from '../vendor-status.type';
+import type { VendorListFilter } from '../vendor-list-filter.type';
 
 /** Injection token of the VendorRepository. */
 export const VENDOR_REPOSITORY = Symbol('VENDOR_REPOSITORY');
@@ -48,11 +48,8 @@ export interface VendorRepository {
   /** Whether the vendor is suspended; true when no vendor has this id. */
   isSuspended(id: string): Promise<boolean>;
 
-  /** Newest first, optionally of one status. */
-  list(
-    filter: Readonly<{ status?: VendorStatus }>,
-    page: PageRequest,
-  ): Promise<Page<Vendor>>;
+  /** Newest first, narrowed by the filter (status, search; see its type). */
+  list(filter: VendorListFilter, page: PageRequest): Promise<Page<Vendor>>;
 
   /**
    * Suspends an active vendor now (conditional update); null when it was not active.

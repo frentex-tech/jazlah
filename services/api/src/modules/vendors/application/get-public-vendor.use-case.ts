@@ -9,8 +9,8 @@ import {
   VENDOR_REPOSITORY,
   type VendorRepository,
 } from '../domain/ports/vendor.repository.port';
-import type { VendorWithLogo } from './vendor-with-logo.type';
-import { withLogoUrls } from './with-logo-urls';
+import type { VendorWithImages } from './vendor-with-images.type';
+import { withImageUrls } from './with-image-urls';
 
 /**
  * One active vendor's page, for anyone (FR-CAT-02). A suspended vendor is answered
@@ -23,10 +23,10 @@ export class GetPublicVendorUseCase {
     @Inject(VENDOR_MEDIA) private readonly media: VendorMedia,
   ) {}
 
-  async execute(vendorId: string): Promise<VendorWithLogo> {
+  async execute(vendorId: string): Promise<VendorWithImages> {
     const vendor = await this.vendors.findActiveById(vendorId);
     const [found] =
-      vendor === null ? [] : await withLogoUrls(this.media, [vendor]);
+      vendor === null ? [] : await withImageUrls(this.media, [vendor]);
     if (found === undefined) {
       throw new AppError(ErrorCode.NOT_FOUND);
     }

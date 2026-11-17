@@ -4,7 +4,7 @@ import type { VendorProfileChanges } from '../domain/vendor-profile-changes.type
 export type UpdateOwnVendorProfileInput = Readonly<{
   /** The token's organisation. */
   vendorId: string;
-  /** The signed-in user: a new logo must be a file they uploaded. */
+  /** The signed-in user: a new logo or cover must be a file they uploaded. */
   userId: string;
   changes: VendorProfileChanges;
 }>;

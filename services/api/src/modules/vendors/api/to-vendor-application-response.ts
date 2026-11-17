@@ -14,6 +14,8 @@ export function toVendorApplicationResponse(
     name: { ...details.name },
     description: { ...details.description },
     commercialRegistrationNumber: details.commercialRegistrationNumber,
+    vatNumber: details.vatNumber,
+    city: details.city,
     ibanMasked: maskIban(application.ibanLast4),
     accountHolderName: details.accountHolderName,
     location: { ...details.location },

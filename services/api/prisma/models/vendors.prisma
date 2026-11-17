@@ -23,6 +23,8 @@ enum VendorApplicationDocumentKind {
   commercial_registration
   health_certificate
   facility_photo
+  municipality_licence
+  national_id
 
   @@map("vendor_application_document_kind")
 }
@@ -43,7 +45,24 @@ model Vendor {
   /// Nullable: null until the vendor sets a logo, and when its file is deleted. A ready
   /// `vendor.logo` file.
   logoMediaId                  String?      @map("logo_media_id") @db.Uuid
-  isPlatform                   Boolean      @default(false) @map("is_platform")
+  /// Nullable: null until the vendor or an admin sets a cover photo, and when its file is
+  /// deleted. A ready `vendor.cover` file.
+  coverMediaId                 String?      @map("cover_media_id") @db.Uuid
+  /// Nullable: null until the vendor or an admin sets one (vendors approved before it
+  /// existed have none). E.164, a Saudi mobile or landline (check constraint
+  /// `vendors_contact_phone_check`). Not public.
+  contactPhone                 String?      @map("contact_phone")
+  /// Nullable: null until the vendor or an admin sets one. Stored lowercase (check
+  /// constraint `vendors_contact_email_check`). Not public.
+  contactEmail                 String?      @map("contact_email")
+  /// Nullable: null when the application gave none and no one set it since. 15 digits,
+  /// starting and ending with 3 (check constraint `vendors_vat_number_check`). Not public.
+  vatNumber                    String?      @map("vat_number")
+  /// Nullable: null for the platform vendor and vendors approved before the city was
+  /// asked. The city name as typed, 2 to 50 characters (check constraint
+  /// `vendors_city_check`); only an admin changes it. Public.
+  city                         String?
+  isPlatform                  Boolean      @default(false) @map("is_platform")
   status                       VendorStatus @default(active)
   /// Nullable: null while the vendor is active (check constraint `vendors_suspension_check`).
   suspendedAt                  DateTime?    @map("suspended_at") @db.Timestamptz(3)
@@ -75,7 +94,8 @@ model Vendor {
   createdAt                    DateTime     @default(now()) @map("created_at") @db.Timestamptz(3)
   updatedAt                    DateTime     @updatedAt @map("updated_at") @db.Timestamptz(3)
 
-  logo              Media?                   @relation(fields: [logoMediaId], references: [id], onDelete: SetNull)
+  logo              Media?                   @relation("VendorLogo", fields: [logoMediaId], references: [id], onDelete: SetNull)
+  cover             Media?                   @relation("VendorCover", fields: [coverMediaId], references: [id], onDelete: SetNull)
   application       VendorApplication?       @relation(fields: [applicationId], references: [id], onDelete: Restrict)
   commissionChanges VendorCommissionChange[]
   access            UserAccess[]
@@ -83,6 +103,8 @@ model Vendor {
 
   @@unique([applicationId], map: "vendors_application_id_key")
   @@index([logoMediaId])
+  @@index([coverMediaId])
+  @@index([city, createdAt, id])
   @@index([status, createdAt, id])
   @@index([createdAt, id])
   @@map("vendors")
@@ -104,6 +126,12 @@ model VendorApplication {
   descriptionEn                String?                 @map("description_en")
   /// 10 digits.
   commercialRegistrationNumber String                  @map("commercial_registration_number")
+  /// Nullable: null when the applicant gave none (it is optional). 15 digits, starting and
+  /// ending with 3 (check constraint `vendor_applications_vat_number_check`).
+  vatNumber                    String?                 @map("vat_number")
+  /// Nullable: null only for applications submitted before the city was asked; required
+  /// on new ones. 2 to 50 characters (check constraint `vendor_applications_city_check`).
+  city                         String?
   /// The IBAN, AES-256-GCM encrypted (as vendors.iban_encrypted); never sent or logged.
   ibanEncrypted                String                  @map("iban_encrypted")
   ibanKeyId                    String                  @map("iban_key_id")

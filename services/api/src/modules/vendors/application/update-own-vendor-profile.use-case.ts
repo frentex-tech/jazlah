@@ -9,15 +9,17 @@ import {
   VENDOR_REPOSITORY,
   type VendorRepository,
 } from '../domain/ports/vendor.repository.port';
-import { assertUsableLogo } from './assert-usable-logo';
+import { assertUsableVendorImages } from './assert-usable-vendor-images';
 import type { UpdateOwnVendorProfileInput } from './update-own-vendor-profile-input.type';
-import type { VendorWithLogo } from './vendor-with-logo.type';
-import { withLogoUrls } from './with-logo-urls';
+import type { VendorWithImages } from './vendor-with-images.type';
+import { withImageUrls } from './with-image-urls';
 
 /**
- * A vendor changes its own profile: the logo and the descriptions (FR-VND-02). The
- * vendor is the token's organisation, never one named in the request. A new logo must be
- * a ready `vendor.logo` file the signed-in user uploaded (assertUsableLogo).
+ * A vendor changes its own profile: the logo, the cover photo, the descriptions, the
+ * contact phone and email and the VAT number (FR-VND-02); never the city, which only an
+ * admin sets. The vendor is the token's organisation, never one named in the request. A
+ * new logo or cover must be a ready file of its purpose the signed-in user uploaded
+ * (assertUsableVendorImages).
  */
 @Injectable()
 export class UpdateOwnVendorProfileUseCase {
@@ -26,11 +28,8 @@ export class UpdateOwnVendorProfileUseCase {
     @Inject(VENDOR_MEDIA) private readonly media: VendorMedia,
   ) {}
 
-  async execute(input: UpdateOwnVendorProfileInput): Promise<VendorWithLogo> {
-    const logoId = input.changes.logoMediaId;
-    if (logoId !== undefined && logoId !== null) {
-      await assertUsableLogo(this.media, logoId, input.userId);
-    }
+  async execute(input: UpdateOwnVendorProfileInput): Promise<VendorWithImages> {
+    await assertUsableVendorImages(this.media, input.changes, input.userId);
     const vendor = await this.vendors.updateProfile(
       input.vendorId,
       input.changes,
@@ -38,10 +37,10 @@ export class UpdateOwnVendorProfileUseCase {
     if (vendor === null) {
       throw new AppError(ErrorCode.NOT_FOUND);
     }
-    const [withLogo] = await withLogoUrls(this.media, [vendor]);
-    if (withLogo === undefined) {
-      throw new Error('withLogoUrls returned no vendor');
+    const [withImages] = await withImageUrls(this.media, [vendor]);
+    if (withImages === undefined) {
+      throw new Error('withImageUrls returned no vendor');
     }
-    return withLogo;
+    return withImages;
   }
 }

@@ -22,6 +22,11 @@ export const UPLOAD_PURPOSES = {
     contentTypes: ['image/jpeg', 'image/png', 'image/webp'],
     maxSizeBytes: 2 * MEGABYTE,
   },
+  'vendor.cover': {
+    visibility: 'public',
+    contentTypes: ['image/jpeg', 'image/png', 'image/webp'],
+    maxSizeBytes: 2 * MEGABYTE,
+  },
   'vendor.document': {
     visibility: 'private',
     contentTypes: ['application/pdf', 'image/jpeg', 'image/png'],

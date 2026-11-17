@@ -9,8 +9,8 @@ import {
   VENDOR_REPOSITORY,
   type VendorRepository,
 } from '../domain/ports/vendor.repository.port';
-import type { VendorWithLogo } from './vendor-with-logo.type';
-import { withLogoUrls } from './with-logo-urls';
+import type { VendorWithImages } from './vendor-with-images.type';
+import { withImageUrls } from './with-image-urls';
 
 /** The active vendors, newest first, for anyone (FR-CAT-02): suspended ones never appear. */
 @Injectable()
@@ -20,10 +20,10 @@ export class ListPublicVendorsUseCase {
     @Inject(VENDOR_MEDIA) private readonly media: VendorMedia,
   ) {}
 
-  async execute(page: PageRequest): Promise<Page<VendorWithLogo>> {
+  async execute(page: PageRequest): Promise<Page<VendorWithImages>> {
     const found = await this.vendors.list({ status: 'active' }, page);
     return {
-      items: await withLogoUrls(this.media, found.items),
+      items: await withImageUrls(this.media, found.items),
       nextCursor: found.nextCursor,
     };
   }

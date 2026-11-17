@@ -77,7 +77,8 @@ model Media {
   createdAt           DateTime              @default(now()) @map("created_at") @db.Timestamptz(3)
   updatedAt           DateTime              @updatedAt @map("updated_at") @db.Timestamptz(3)
 
-  vendorLogos                Vendor[]
+  vendorLogos                Vendor[]                    @relation("VendorLogo")
+  vendorCovers               Vendor[]                    @relation("VendorCover")
   vendorApplicationDocuments VendorApplicationDocument[]
   productImages              ProductImage[]
 
