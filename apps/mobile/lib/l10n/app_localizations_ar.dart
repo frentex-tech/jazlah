@@ -1,0 +1,337 @@
+// ignore: unused_import
+import 'package:intl/intl.dart' as intl;
+import 'app_localizations.dart';
+
+// ignore_for_file: type=lint
+
+/// The translations for Arabic (`ar`).
+class AppLocalizationsAr extends AppLocalizations {
+  AppLocalizationsAr([String locale = 'ar']) : super(locale);
+
+  @override
+  String get appName => 'جزلة';
+
+  @override
+  String get languageName => 'العربية';
+
+  @override
+  String get otherLanguageCode => 'EN';
+
+  @override
+  String get otherLanguageName => 'English';
+
+  @override
+  String get errorGeneric => 'حدث خطأ غير متوقع. حاول مرة أخرى.';
+
+  @override
+  String get errorNetwork => 'تعذّر الاتصال. تحقق من الإنترنت وحاول مرة أخرى.';
+
+  @override
+  String get retry => 'إعادة المحاولة';
+
+  @override
+  String get galleryTitle => 'معرض المكوّنات';
+
+  @override
+  String get galleryLangAr => 'العربية';
+
+  @override
+  String get galleryLangEn => 'English';
+
+  @override
+  String get galleryInteractiveNote => 'حالات الضغط والتركيز تظهر عند التفاعل';
+
+  @override
+  String get galleryButtons => 'الأزرار';
+
+  @override
+  String get galleryInputs => 'حقول الإدخال';
+
+  @override
+  String get galleryPhone => 'حقل رقم الجوال';
+
+  @override
+  String get galleryOtp => 'رمز التحقق';
+
+  @override
+  String get galleryChips => 'الرقائق';
+
+  @override
+  String get galleryChoices => 'مربع الاختيار والراديو والمفتاح';
+
+  @override
+  String get galleryBadges => 'الشارات';
+
+  @override
+  String get galleryCards => 'البطاقات';
+
+  @override
+  String get galleryProductCards => 'بطاقات المنتجات';
+
+  @override
+  String get galleryHeaders => 'رأس الصفحة';
+
+  @override
+  String get galleryTabBar => 'شريط التبويب';
+
+  @override
+  String get gallerySearch => 'شريط البحث';
+
+  @override
+  String get galleryMapPins => 'دبابيس الخريطة';
+
+  @override
+  String get galleryTimeline => 'مراحل الطلب';
+
+  @override
+  String get galleryStates => 'حالات الشاشة';
+
+  @override
+  String get gallerySkeleton => 'هيكل التحميل';
+
+  @override
+  String get galleryOverlays => 'النوافذ والتنبيهات';
+
+  @override
+  String get galleryOrderNow => 'اطلب الآن';
+
+  @override
+  String get galleryFullName => 'الاسم الكامل';
+
+  @override
+  String get galleryTypeHere => 'اكتب هنا';
+
+  @override
+  String get galleryHelper => 'نص مساعد';
+
+  @override
+  String get galleryNameValue => 'عبدالرحمن محمد';
+
+  @override
+  String get galleryRequired => 'هذا الحقل مطلوب';
+
+  @override
+  String get galleryPhoneLabel => 'رقم الجوال';
+
+  @override
+  String get galleryPhoneHint => 'سنرسل لك رمز التحقق';
+
+  @override
+  String get galleryPhoneError => 'رقم الجوال غير مكتمل';
+
+  @override
+  String get galleryOtpError => 'الرمز غير صحيح، حاول مرة أخرى';
+
+  @override
+  String get galleryChipLabel => 'خروف نعيمي';
+
+  @override
+  String get galleryGiftWrap => 'إضافة تغليف هدية';
+
+  @override
+  String get galleryBadgeNew => 'جديد';
+
+  @override
+  String get galleryBadgeReview => 'قيد المراجعة';
+
+  @override
+  String get galleryBadgePreparing => 'قيد التجهيز';
+
+  @override
+  String get galleryBadgeDelivered => 'تم التسليم';
+
+  @override
+  String get galleryBadgeCancelled => 'ملغي';
+
+  @override
+  String get galleryBadgeToday => 'ذُبح اليوم';
+
+  @override
+  String get galleryCardTitle => 'عنوان البطاقة';
+
+  @override
+  String get galleryCardBody => 'نص توضيحي قصير يصف محتوى البطاقة.';
+
+  @override
+  String get galleryVendor => 'مجازر الفلاح';
+
+  @override
+  String get galleryProduct => 'ريب آي بقري طازج';
+
+  @override
+  String get galleryProductMeta => '500 جم · تقطيع شرائح';
+
+  @override
+  String get galleryCurrency => 'ر.س';
+
+  @override
+  String get galleryAdd => 'أضف إلى السلة';
+
+  @override
+  String get galleryLocation => 'التوصيل إلى الملقا، الرياض';
+
+  @override
+  String get galleryNotifications => 'الإشعارات';
+
+  @override
+  String get galleryCart => 'السلة';
+
+  @override
+  String get galleryPageTitle => 'عنوان الصفحة';
+
+  @override
+  String get galleryTabHome => 'الرئيسية';
+
+  @override
+  String get galleryTabServices => 'الخدمات';
+
+  @override
+  String get galleryTabOrders => 'الطلبات';
+
+  @override
+  String get galleryTabAccount => 'حسابي';
+
+  @override
+  String get gallerySearchHint => 'ابحث عن لحوم أو متاجر';
+
+  @override
+  String get galleryFilter => 'التصفية';
+
+  @override
+  String get galleryClear => 'مسح';
+
+  @override
+  String get galleryPinAddress => 'موقع التوصيل';
+
+  @override
+  String get galleryPinCourier => 'المندوب';
+
+  @override
+  String get galleryStepReceived => 'تم استلام الطلب';
+
+  @override
+  String get galleryStepPreparing => 'جارٍ التجهيز';
+
+  @override
+  String get galleryStepSlaughtered => 'ذُبح وجُهّز';
+
+  @override
+  String get galleryStepOnTheWay => 'في الطريق';
+
+  @override
+  String get galleryStepDelivered => 'تم التسليم';
+
+  @override
+  String get galleryTime1 => '10:02 ص';
+
+  @override
+  String get galleryTime2 => '10:15 ص';
+
+  @override
+  String get galleryTime3 => '11:30 ص';
+
+  @override
+  String get galleryTime4 => '12:10 م';
+
+  @override
+  String get galleryTime5 => '12:40 م';
+
+  @override
+  String get galleryCartTitle => 'سلتك فارغة';
+
+  @override
+  String get galleryCartBody => 'أضف منتجات من المتاجر وسنجهّزها لك طازجة.';
+
+  @override
+  String get galleryCartAction => 'تصفّح المنتجات';
+
+  @override
+  String get galleryOrdersTitle => 'لا توجد طلبات بعد';
+
+  @override
+  String get galleryOrdersBody => 'طلباتك السابقة والحالية ستظهر هنا.';
+
+  @override
+  String get galleryOrdersAction => 'ابدأ أول طلب';
+
+  @override
+  String get gallerySearchTitle => 'لا توجد نتائج';
+
+  @override
+  String get gallerySearchBody => 'جرّب كلمات أخرى أو غيّر عوامل التصفية.';
+
+  @override
+  String get gallerySearchAction => 'مسح التصفية';
+
+  @override
+  String get galleryErrorTitle => 'حدث خطأ غير متوقع';
+
+  @override
+  String get galleryErrorBody => 'تعذّر تحميل البيانات. حاول مرة أخرى.';
+
+  @override
+  String get galleryOfflineTitle => 'لا يوجد اتصال بالإنترنت';
+
+  @override
+  String get galleryOfflineBody => 'تحقق من اتصالك ثم أعد المحاولة.';
+
+  @override
+  String get galleryDeniedTitle => 'ليست لديك صلاحية';
+
+  @override
+  String get galleryDeniedBody => 'تواصل مع مدير الحساب للحصول على الوصول.';
+
+  @override
+  String get galleryBack => 'رجوع';
+
+  @override
+  String get gallerySheetTitle => 'اختر الحجم';
+
+  @override
+  String get gallerySheetContent => 'المحتوى';
+
+  @override
+  String get galleryShowSheet => 'عرض النافذة السفلية';
+
+  @override
+  String get galleryShowDialog => 'عرض نافذة التأكيد';
+
+  @override
+  String get galleryShowDestructive => 'عرض نافذة الحذف';
+
+  @override
+  String get galleryShowToast => 'عرض تنبيه';
+
+  @override
+  String get galleryDialogTitle => 'تأكيد الطلب؟';
+
+  @override
+  String get galleryDialogBody => 'سيتم إرسال طلبك إلى المتجر فور التأكيد.';
+
+  @override
+  String get galleryConfirm => 'تأكيد';
+
+  @override
+  String get galleryCancel => 'إلغاء';
+
+  @override
+  String get galleryDeleteTitle => 'حذف العنوان؟';
+
+  @override
+  String get galleryDeleteBody => 'لن تتمكن من استرجاع هذا العنوان بعد الحذف.';
+
+  @override
+  String get galleryDelete => 'حذف';
+
+  @override
+  String get galleryToastSuccess => 'تمت إضافة المنتج إلى السلة';
+
+  @override
+  String get galleryToastError => 'تعذّر إتمام العملية، حاول مرة أخرى';
+
+  @override
+  String get galleryToastWarning => 'الكمية المتاحة محدودة';
+
+  @override
+  String get galleryToastInfo => 'سيصلك إشعار عند تجهيز الطلب';
+}
