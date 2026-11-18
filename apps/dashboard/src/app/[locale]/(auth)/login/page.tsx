@@ -17,7 +17,7 @@ export default async function LoginPage({
   return (
     <LoginLayout panel={panel}>
       <LoginCard>
-        <LoginFlow panel={panel} next={safeNext(q.next) ?? undefined} otpLength={Math.min(8, Math.max(4, Number(process.env.OTP_LENGTH) || 4))} />
+        <LoginFlow panel={panel} next={safeNext(q.next) ?? undefined} otpLength={Math.min(8, Math.max(4, Number(process.env.OTP_LENGTH) || 6))} />
       </LoginCard>
     </LoginLayout>
   );
