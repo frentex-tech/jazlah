@@ -19,12 +19,21 @@ The project owner chose a third mark instead of options A and B: the gold profil
 ## Latin name (2026-11-18)
 The owner decided the Latin spelling is «JAZLA», as in the client's logo. Repo, package and file names still say «Jazlah» and were not renamed.
 
+## Vector logo (2026-11-18)
+Traced from the two PNG files below with `tools/dev/trace_logo.py` (marching squares on the alpha mask, then smoothing): no vector source came from the client.
+
+- `logo-jazla.svg`: full logo for dark backgrounds, gold `#caad50` with the red diamond `#b2313c` (viewBox 848×834).
+- `logo-jazla-on-light.svg`: the same paths with the gold as `color/gold-text` `#8e6129`, for light backgrounds.
+- `mark-jazla.svg`, `mark-jazla-on-light.svg`: the horns only (viewBox 746×345).
+
+Use these in the apps instead of the PNG files. They follow the PNG cut-out exactly, so the edges carry the small unevenness of the 658×550 screenshot they came from; replace them when the client sends the designer's file. The screens in the Figma file still use the PNG; the vector is on the `Design System` page, Logo section.
+
 ## Update 2026-11-13 (client logo)
 The client supplied the final logo: two gold horns above the Arabic wordmark «جزلة» with a red diamond dot, and «JAZLA» below. It replaces the gold profile mark and options A and B everywhere in the Figma file (365 placements: app sign-in and onboarding, dashboard side menu, sign-in panels, start page, prototype pages). The separate «جزلة» text next to the old mark was hidden, because the logo carries the name.
 
 - `logo-jazla-gold.png`: full logo, transparent background (848×834).
 - `mark-jazla-gold.png`: horns only, transparent background (746×345).
 
-Both were cut from a 658×550 screenshot the client sent on a burgundy background, so the edges are not production quality. Still needed from the client: the vector source (SVG or AI). On light backgrounds the Figma file darkens the gold for contrast; the client has not confirmed a light-background version. The Latin spelling in the logo is «JAZLA», while the repo and product name use «Jazlah».
+Both were cut from a 658×550 screenshot the client sent on a burgundy background, so the edges are not production quality. Still wanted from the client: the designer's vector source (a traced SVG was made on 2026-11-18, see above). On light backgrounds the Figma file darkens the gold for contrast; the client has not confirmed a light-background version. The Latin spelling in the logo is «JAZLA», while the repo and product name use «Jazlah».
 
 Figma: [Logo section](https://www.figma.com/design/puWXbmOVpnQpjc7mUahTnw/Jazlah-Product-Design?node-id=21-2). Options A and B are kept there, dimmed and marked as archive.
