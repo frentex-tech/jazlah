@@ -44,6 +44,7 @@
 - **Loyalty points, stories and Sahm Al-Khair are in the launch scope.** Epics LOY, STY and CHR moved from post-launch to Sprint 6. They were placed there because their dependencies land in Sprints 3 and 4; the sprint was not re-sized. Their design was done on 2026-11-13.
 - **Vendor applicants are answered by email** (received, approved, rejected); SMS is for the sign-in code plus one SMS on approval: `NOT-API-2`, Sprint 4. The API has no mail integration yet.
 - **Latin brand name: JAZLA**, as written in the client's logo. The repo, package and file names still say Jazlah and were not renamed.
+- **Verification codes are 4 digits** (as in Figma), for customers and staff. The API keeps its code default of 6 for its own tests; every environment sets `AUTH_OTP_LENGTH=4` (`services/api/.env.example`, staging, production), the dashboard `OTP_LENGTH=4`. The mobile app follows the length the API sends.
 - **Build fonts: Readex Pro and El Messiri for now, in the app and the dashboard.** Figma stays in Thmanyah. Thmanyah is not bundled until its licence is checked at the end of the build; `docs/design/tokens.json` holds both (`family` = build, `designFamily` = Figma). Design QA compares size, weight and line height, not the font family.
 - The plan is 150 tasks after this change (161 before). `tools/backlog/sync.py` was run on 2026-11-18 (new issues: NOT-API-2 #252, CMS-DSH-2 #253), and the 13 removed web issues (#21, #27, #58, #59, #65, #72, #86, #87, #95, #102, #135, #153, #171) were closed as not planned.
 
