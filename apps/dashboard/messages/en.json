@@ -1,0 +1,136 @@
+{
+  "meta": {
+    "title": "JAZLA · Dashboard"
+  },
+  "panel": {
+    "admin": "Admin",
+    "vendor": "Vendor",
+    "kitchen": "Kitchen"
+  },
+  "nav": {
+    "label": "Main menu",
+    "signOut": "Sign out",
+    "admin": {
+      "overview": "Overview",
+      "orders": "Orders",
+      "stores": "Stores",
+      "products": "Products",
+      "customers": "Customers",
+      "delivery": "Delivery",
+      "cooking": "Cooking tasks",
+      "finance": "Finance",
+      "stories": "Stories",
+      "loyalty": "Loyalty & points",
+      "charity": "Sahm Al-Khair",
+      "settings": "Settings"
+    },
+    "vendor": {
+      "orders": "Orders board",
+      "products": "My products",
+      "earnings": "Earnings",
+      "store": "Store profile",
+      "visits": "Visits & livestock",
+      "settings": "Settings"
+    },
+    "kitchen": {
+      "orders": "Current orders"
+    }
+  },
+  "topBar": {
+    "search": "Search by order number or customer",
+    "notifications": "Notifications"
+  },
+  "pages": {
+    "admin": {
+      "breadcrumb": "Admin / Overview",
+      "title": "Overview",
+      "range": "Last 7 days",
+      "export": "Export report"
+    },
+    "vendor": {
+      "breadcrumb": "Orders / Live board",
+      "title": "Live orders"
+    },
+    "kitchen": {
+      "breadcrumb": "Kitchen / Current orders",
+      "title": "Kitchen board · Today",
+      "export": "Export",
+      "print": "Print prep cards"
+    },
+    "placeholder": "This page's content is built in its own task.",
+    "tableDemo": {
+      "breadcrumb": "Admin / Table demo",
+      "title": "Table demo"
+    },
+    "login": "Sign in"
+  },
+  "table": {
+    "showing": "Showing {from} to {to} of {total}",
+    "prev": "Previous page",
+    "next": "Next page",
+    "page": "Page {page}",
+    "actions": "Actions",
+    "filter": "Search",
+    "clearAll": "Clear all"
+  },
+  "demo": {
+    "orderNo": "Order no.",
+    "customer": "Customer",
+    "store": "Store",
+    "status": "Status",
+    "amount": "Amount",
+    "date": "Date",
+    "statusAll": "All statuses",
+    "statuses": {
+      "preparing": "Preparing",
+      "delivered": "Delivered",
+      "review": "In review",
+      "cancelled": "Cancelled",
+      "new": "New"
+    },
+    "currency": "SAR"
+  },
+  "state": {
+    "empty": {
+      "title": "No orders yet",
+      "body": "Your past and current orders will show here.",
+      "action": "Start the first order"
+    },
+    "noResults": {
+      "title": "No results",
+      "body": "Try other words or change the filters.",
+      "action": "Clear filters"
+    },
+    "error": {
+      "title": "Something went wrong",
+      "body": "We couldn't load the data. Try again.",
+      "action": "Try again"
+    },
+    "offline": {
+      "title": "No internet connection",
+      "body": "Check your connection, then try again.",
+      "action": "Try again"
+    },
+    "denied": {
+      "title": "You don't have access",
+      "body": "Ask your account manager for access.",
+      "action": "Back"
+    },
+    "loading": "Loading"
+  },
+  "dialog": {
+    "cancel": "Cancel",
+    "confirm": "Confirm",
+    "delete": "Delete"
+  },
+  "upload": {
+    "choose": "Choose a file",
+    "uploading": "Uploading…",
+    "done": "Uploaded",
+    "failed": "The file couldn't be uploaded. Try again.",
+    "remove": "Remove"
+  },
+  "form": {
+    "required": "This field is required"
+  }
+}
