@@ -12,6 +12,20 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 /// Pumps a full screen with Riverpod, go_router and the app's localisations on a 390x844 phone.
 extension PumpScreen on WidgetTester {
+  /// Like [pumpScreen], with [screen] pushed over a root page, so it can pop like in the app.
+  Future<ProviderContainer> pumpPushed(Widget screen, {List<dynamic> overrides = const []}) async {
+    final c = await pumpScreen(
+      Builder(
+        builder: (context) => TextButton(onPressed: () => context.push('/pushed'), child: const Text('root')),
+      ),
+      overrides: overrides,
+      routes: [GoRoute(path: '/pushed', builder: (_, _) => screen)],
+    );
+    await tap(find.text('root'));
+    await pumpAndSettle();
+    return c;
+  }
+
   Future<ProviderContainer> pumpScreen(
     Widget screen, {
     List<dynamic> overrides = const [],

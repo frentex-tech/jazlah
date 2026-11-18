@@ -16,8 +16,9 @@ final geocoderProvider = Provider<Geocoder>(
   (ref) => Env.googleMapsApiKey.isNotEmpty && !Env.useMocks ? GoogleGeocoder(Env.googleMapsApiKey) : MockGeocoder(),
 );
 
-/// shortcut: always the mock until LOC-API-1 (#24) ships the coverage check.
-final coverageRepositoryProvider = Provider<CoverageRepository>((ref) => MockCoverageRepository());
+final coverageRepositoryProvider = Provider<CoverageRepository>(
+  (ref) => Env.useMocks ? MockCoverageRepository() : ApiCoverageRepository(ref.watch(apiProvider)),
+);
 
 final selectedLocationProvider = NotifierProvider<SelectedLocationController, SelectedLocation?>(
   SelectedLocationController.new,

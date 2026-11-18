@@ -7,6 +7,9 @@ import 'package:jazlah/app/shell/home_tab.dart';
 import 'package:jazlah/app/shell/main_shell.dart';
 import 'package:jazlah/core/geo/geo_point.dart';
 import 'package:jazlah/core/widgets/gallery/gallery_screen.dart';
+import 'package:jazlah/features/addresses/domain/address.dart';
+import 'package:jazlah/features/addresses/presentation/address_form_screen.dart';
+import 'package:jazlah/features/addresses/presentation/addresses_screen.dart';
 import 'package:jazlah/features/auth/domain/otp_challenge.dart';
 import 'package:jazlah/features/auth/presentation/complete_profile_screen.dart';
 import 'package:jazlah/features/auth/presentation/onboarding_controller.dart';
@@ -32,6 +35,10 @@ abstract final class Routes {
   static const editProfile = '/account/edit';
   static const settings = '/account/settings';
   static const reauth = '/account/settings/verify';
+  static const addresses = '/account/addresses';
+  static const addressNew = '/account/addresses/new';
+  static const addressEdit = '/account/addresses/edit';
+  static const addAddressMap = '/account/addresses/map';
   static const pickLocation = '/location';
   static const outOfCoverage = '/location/outside';
   static const gallery = '/gallery';
@@ -75,6 +82,21 @@ final routerProvider = Provider<GoRouter>((ref) {
         builder: (_, state) => OtpScreen(challenge: state.extra! as OtpChallenge, reauth: true),
       ),
       GoRoute(path: Routes.pickLocation, builder: (_, _) => const MapPickerScreen()),
+      // Saving an address accepts a point outside coverage; it is flagged, not refused.
+      GoRoute(
+        path: Routes.addAddressMap,
+        builder: (_, state) => MapPickerScreen(initial: state.extra as GeoPoint?, allowOutOfCoverage: true),
+      ),
+      GoRoute(
+        path: Routes.addressNew,
+        redirect: (_, state) => state.extra is PickedPlace ? null : Routes.addresses,
+        builder: (_, state) => AddressFormScreen.add(place: state.extra! as PickedPlace),
+      ),
+      GoRoute(
+        path: Routes.addressEdit,
+        redirect: (_, state) => state.extra is Address ? null : Routes.addresses,
+        builder: (_, state) => AddressFormScreen.edit(address: state.extra! as Address),
+      ),
       GoRoute(
         path: Routes.outOfCoverage,
         redirect: (_, state) => state.extra is GeoPoint ? null : Routes.pickLocation,
@@ -94,6 +116,7 @@ final routerProvider = Provider<GoRouter>((ref) {
           ),
           GoRoute(path: Routes.account, builder: (_, _) => const AccountScreen()),
           GoRoute(path: Routes.settings, builder: (_, _) => const SettingsScreen()),
+          GoRoute(path: Routes.addresses, builder: (_, _) => const AddressesScreen()),
         ],
       ),
       if (env.showGallery) GoRoute(path: Routes.gallery, builder: (_, _) => const GalleryScreen()),

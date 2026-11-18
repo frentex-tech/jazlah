@@ -715,4 +715,101 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get listSeparator => ', ';
+
+  @override
+  String get addrTitle => 'My addresses';
+
+  @override
+  String get addrDefault => 'Default';
+
+  @override
+  String get addrOutOfCoverage => 'Out of coverage';
+
+  @override
+  String get addrAdd => 'Add a new address';
+
+  @override
+  String get addrAddShort => 'Add address';
+
+  @override
+  String get addrEmptyTitle => 'No addresses yet';
+
+  @override
+  String get addrEmptyBody => 'Add your address so we can find stores near you and deliver to you.';
+
+  @override
+  String get addrLoadError => 'Couldn\'t load your addresses';
+
+  @override
+  String get addrLoadErrorBody => 'Something went wrong while loading your addresses. Try again.';
+
+  @override
+  String get addrEdit => 'Edit address';
+
+  @override
+  String get addrNewTitle => 'New address';
+
+  @override
+  String get addrLabel => 'Address name';
+
+  @override
+  String get addrLabelRequired => 'The address name is required';
+
+  @override
+  String get addrCity => 'City';
+
+  @override
+  String get addrDistrict => 'District';
+
+  @override
+  String get addrDistrictRequired => 'The district is required';
+
+  @override
+  String get addrStreet => 'Street and building details';
+
+  @override
+  String get addrDriverNotes => 'Notes for the driver (optional)';
+
+  @override
+  String get addrDriverNotesHint => 'For example: back gate, second floor';
+
+  @override
+  String get addrMakeDefault => 'Make this my default address';
+
+  @override
+  String get addrChangeOnMap => 'Change the location on the map';
+
+  @override
+  String get addrSave => 'Save changes';
+
+  @override
+  String get addrSaveNew => 'Save address';
+
+  @override
+  String get addrDelete => 'Delete address';
+
+  @override
+  String get addrDeleteTitle => 'Delete this address?';
+
+  @override
+  String get addrDeleteBody => 'You won\'t be able to restore this address after deleting it.';
+
+  @override
+  String get delete => 'Delete';
+
+  @override
+  String get addrLockedNotice =>
+      'This address is used by an order in progress. You can edit or delete it once the order is complete.';
+
+  @override
+  String get addrLockedLabel => 'Locked address';
+
+  @override
+  String get addrOutOfCoverageNotice =>
+      'This address is outside our delivery area for now. You can still save it, and store pickup is available.';
+
+  @override
+  String addrLimitReached(int limit) {
+    return 'You\'ve reached the maximum of $limit addresses. Delete one to add another.';
+  }
 }

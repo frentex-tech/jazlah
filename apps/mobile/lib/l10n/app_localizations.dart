@@ -1483,6 +1483,192 @@ abstract class AppLocalizations {
   /// In ar, this message translates to:
   /// **'، '**
   String get listSeparator;
+
+  /// No description provided for @addrTitle.
+  ///
+  /// In ar, this message translates to:
+  /// **'عناويني'**
+  String get addrTitle;
+
+  /// No description provided for @addrDefault.
+  ///
+  /// In ar, this message translates to:
+  /// **'افتراضي'**
+  String get addrDefault;
+
+  /// No description provided for @addrOutOfCoverage.
+  ///
+  /// In ar, this message translates to:
+  /// **'خارج النطاق'**
+  String get addrOutOfCoverage;
+
+  /// No description provided for @addrAdd.
+  ///
+  /// In ar, this message translates to:
+  /// **'إضافة عنوان جديد'**
+  String get addrAdd;
+
+  /// No description provided for @addrAddShort.
+  ///
+  /// In ar, this message translates to:
+  /// **'إضافة عنوان'**
+  String get addrAddShort;
+
+  /// No description provided for @addrEmptyTitle.
+  ///
+  /// In ar, this message translates to:
+  /// **'لا توجد عناوين بعد'**
+  String get addrEmptyTitle;
+
+  /// No description provided for @addrEmptyBody.
+  ///
+  /// In ar, this message translates to:
+  /// **'أضف عنوانك لنعرف المتاجر القريبة منك ونوصّل إليك.'**
+  String get addrEmptyBody;
+
+  /// No description provided for @addrLoadError.
+  ///
+  /// In ar, this message translates to:
+  /// **'تعذّر تحميل العناوين'**
+  String get addrLoadError;
+
+  /// No description provided for @addrLoadErrorBody.
+  ///
+  /// In ar, this message translates to:
+  /// **'حدث خطأ أثناء جلب عناوينك. حاول مرة أخرى.'**
+  String get addrLoadErrorBody;
+
+  /// No description provided for @addrEdit.
+  ///
+  /// In ar, this message translates to:
+  /// **'تعديل العنوان'**
+  String get addrEdit;
+
+  /// No description provided for @addrNewTitle.
+  ///
+  /// In ar, this message translates to:
+  /// **'عنوان جديد'**
+  String get addrNewTitle;
+
+  /// No description provided for @addrLabel.
+  ///
+  /// In ar, this message translates to:
+  /// **'اسم العنوان'**
+  String get addrLabel;
+
+  /// No description provided for @addrLabelRequired.
+  ///
+  /// In ar, this message translates to:
+  /// **'اسم العنوان مطلوب'**
+  String get addrLabelRequired;
+
+  /// No description provided for @addrCity.
+  ///
+  /// In ar, this message translates to:
+  /// **'المدينة'**
+  String get addrCity;
+
+  /// No description provided for @addrDistrict.
+  ///
+  /// In ar, this message translates to:
+  /// **'الحي'**
+  String get addrDistrict;
+
+  /// No description provided for @addrDistrictRequired.
+  ///
+  /// In ar, this message translates to:
+  /// **'الحي مطلوب'**
+  String get addrDistrictRequired;
+
+  /// No description provided for @addrStreet.
+  ///
+  /// In ar, this message translates to:
+  /// **'الشارع وتفاصيل المبنى'**
+  String get addrStreet;
+
+  /// No description provided for @addrDriverNotes.
+  ///
+  /// In ar, this message translates to:
+  /// **'ملاحظات للسائق (اختياري)'**
+  String get addrDriverNotes;
+
+  /// No description provided for @addrDriverNotesHint.
+  ///
+  /// In ar, this message translates to:
+  /// **'مثلًا: البوابة الخلفية، الدور الثاني'**
+  String get addrDriverNotesHint;
+
+  /// No description provided for @addrMakeDefault.
+  ///
+  /// In ar, this message translates to:
+  /// **'اجعله العنوان الافتراضي'**
+  String get addrMakeDefault;
+
+  /// No description provided for @addrChangeOnMap.
+  ///
+  /// In ar, this message translates to:
+  /// **'تغيير الموقع على الخريطة'**
+  String get addrChangeOnMap;
+
+  /// No description provided for @addrSave.
+  ///
+  /// In ar, this message translates to:
+  /// **'حفظ التغييرات'**
+  String get addrSave;
+
+  /// No description provided for @addrSaveNew.
+  ///
+  /// In ar, this message translates to:
+  /// **'حفظ العنوان'**
+  String get addrSaveNew;
+
+  /// No description provided for @addrDelete.
+  ///
+  /// In ar, this message translates to:
+  /// **'حذف العنوان'**
+  String get addrDelete;
+
+  /// No description provided for @addrDeleteTitle.
+  ///
+  /// In ar, this message translates to:
+  /// **'حذف العنوان؟'**
+  String get addrDeleteTitle;
+
+  /// No description provided for @addrDeleteBody.
+  ///
+  /// In ar, this message translates to:
+  /// **'لن تتمكن من استرجاع هذا العنوان بعد الحذف.'**
+  String get addrDeleteBody;
+
+  /// No description provided for @delete.
+  ///
+  /// In ar, this message translates to:
+  /// **'حذف'**
+  String get delete;
+
+  /// No description provided for @addrLockedNotice.
+  ///
+  /// In ar, this message translates to:
+  /// **'هذا العنوان مرتبط بطلب قيد التنفيذ، ولا يمكن تعديله أو حذفه حتى يكتمل الطلب.'**
+  String get addrLockedNotice;
+
+  /// No description provided for @addrLockedLabel.
+  ///
+  /// In ar, this message translates to:
+  /// **'عنوان مقفل'**
+  String get addrLockedLabel;
+
+  /// No description provided for @addrOutOfCoverageNotice.
+  ///
+  /// In ar, this message translates to:
+  /// **'هذا العنوان خارج نطاق التوصيل حاليًا. يمكنك حفظه، والاستلام من المتجر متاح.'**
+  String get addrOutOfCoverageNotice;
+
+  /// No description provided for @addrLimitReached.
+  ///
+  /// In ar, this message translates to:
+  /// **'وصلت إلى الحد الأقصى من العناوين ({limit}). احذف عنوانًا لإضافة آخر.'**
+  String addrLimitReached(int limit);
 }
 
 class _AppLocalizationsDelegate extends LocalizationsDelegate<AppLocalizations> {

@@ -1,5 +1,8 @@
 import 'package:dio/dio.dart';
 import 'package:geolocator/geolocator.dart';
+import 'package:jazla_api/jazla_api.dart';
+
+import 'package:jazlah/core/errors/api_error.dart';
 
 import 'package:jazlah/features/location/domain/location.dart';
 
@@ -112,7 +115,7 @@ class GoogleGeocoder implements Geocoder {
   }
 }
 
-/// Delivery zones. LOC-API-1 (#24) has no endpoint yet: `GET /v1/public/coverage/check` comes with it.
+/// Delivery zones (docs/frontend/coverage.md).
 abstract interface class CoverageRepository {
   Future<Coverage> check(GeoPoint point);
 
@@ -120,7 +123,30 @@ abstract interface class CoverageRepository {
   Future<List<String>> cities(String language);
 }
 
-/// shortcut: rough boxes around Riyadh, Jeddah and Dammam until LOC-API-1 answers from the zone polygons.
+/// `GET /v1/public/coverage/check` (no token, so it works before sign-in).
+class ApiCoverageRepository implements CoverageRepository {
+  ApiCoverageRepository(this._api);
+
+  final JazlaApi _api;
+
+  @override
+  Future<Coverage> check(GeoPoint p) async {
+    try {
+      final res = await _api.getPublicCoverageApi().publicCheckCoverage(lat: p.latitude, lng: p.longitude);
+      final body = res.data!;
+      return Coverage(covered: body.covered, zoneName: body.zone?.name.ar);
+    } catch (e) {
+      throw ApiError.from(e);
+    }
+  }
+
+  /// shortcut: the API has no public list of served cities; the out-of-coverage screen shows these
+  /// until one exists (ask the backend team for `GET /v1/public/coverage/cities` or similar).
+  @override
+  Future<List<String>> cities(String language) => MockCoverageRepository().cities(language);
+}
+
+/// Rough boxes around Riyadh, Jeddah and Dammam: for USE_MOCKS and tests.
 class MockCoverageRepository implements CoverageRepository {
   static const List<({String ar, String en, double south, double west, double north, double east})> _zones = [
     (ar: 'الرياض', en: 'Riyadh', south: 24.40, west: 46.40, north: 25.05, east: 47.05),

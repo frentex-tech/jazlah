@@ -46,7 +46,12 @@ class _Coverage extends MockCoverageRepository {
 const _malqa = GeoPoint(24.8168, 46.6195);
 const _outside = GeoPoint(23.2, 45.1);
 
-List<dynamic> _o({LocationAccess access = LocationAccess.granted, bool hangCurrent = false, String geo = 'ok', String cov = 'ok'}) => [
+List<dynamic> _o({
+  LocationAccess access = LocationAccess.granted,
+  bool hangCurrent = false,
+  String geo = 'ok',
+  String cov = 'ok',
+}) => [
   deviceLocationProvider.overrideWithValue(_Device(access, hangCurrent: hangCurrent)),
   geocoderProvider.overrideWithValue(_Geo(mode: geo)),
   coverageRepositoryProvider.overrideWithValue(_Coverage(mode: cov)),
@@ -76,13 +81,33 @@ void main() {
       },
     );
     await shoot(t, '86-3439', const MapPickerScreen(initial: _outside), overrides: _o());
-    await shoot(t, '86-3490', const MapPickerScreen(initial: _malqa), overrides: _o(geo: 'hang'));
-    await shoot(t, '86-3535', const MapPickerScreen(initial: _malqa), overrides: _o(geo: 'error'));
+    await shoot(
+      t,
+      '86-3490',
+      const MapPickerScreen(initial: _malqa),
+      overrides: _o(geo: 'hang'),
+    );
+    await shoot(
+      t,
+      '86-3535',
+      const MapPickerScreen(initial: _malqa),
+      overrides: _o(geo: 'error'),
+    );
   });
 
   testWidgets('out of coverage', (t) async {
     await shoot(t, '86-3823', const OutOfCoverageScreen(point: _outside), overrides: _o());
-    await shoot(t, '86-3864', const OutOfCoverageScreen(point: _outside), overrides: _o(cov: 'hang'));
-    await shoot(t, '86-3907', const OutOfCoverageScreen(point: _outside), overrides: _o(cov: 'error'));
+    await shoot(
+      t,
+      '86-3864',
+      const OutOfCoverageScreen(point: _outside),
+      overrides: _o(cov: 'hang'),
+    );
+    await shoot(
+      t,
+      '86-3907',
+      const OutOfCoverageScreen(point: _outside),
+      overrides: _o(cov: 'error'),
+    );
   });
 }

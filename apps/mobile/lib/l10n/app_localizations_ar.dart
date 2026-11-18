@@ -713,4 +713,99 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get listSeparator => '، ';
+
+  @override
+  String get addrTitle => 'عناويني';
+
+  @override
+  String get addrDefault => 'افتراضي';
+
+  @override
+  String get addrOutOfCoverage => 'خارج النطاق';
+
+  @override
+  String get addrAdd => 'إضافة عنوان جديد';
+
+  @override
+  String get addrAddShort => 'إضافة عنوان';
+
+  @override
+  String get addrEmptyTitle => 'لا توجد عناوين بعد';
+
+  @override
+  String get addrEmptyBody => 'أضف عنوانك لنعرف المتاجر القريبة منك ونوصّل إليك.';
+
+  @override
+  String get addrLoadError => 'تعذّر تحميل العناوين';
+
+  @override
+  String get addrLoadErrorBody => 'حدث خطأ أثناء جلب عناوينك. حاول مرة أخرى.';
+
+  @override
+  String get addrEdit => 'تعديل العنوان';
+
+  @override
+  String get addrNewTitle => 'عنوان جديد';
+
+  @override
+  String get addrLabel => 'اسم العنوان';
+
+  @override
+  String get addrLabelRequired => 'اسم العنوان مطلوب';
+
+  @override
+  String get addrCity => 'المدينة';
+
+  @override
+  String get addrDistrict => 'الحي';
+
+  @override
+  String get addrDistrictRequired => 'الحي مطلوب';
+
+  @override
+  String get addrStreet => 'الشارع وتفاصيل المبنى';
+
+  @override
+  String get addrDriverNotes => 'ملاحظات للسائق (اختياري)';
+
+  @override
+  String get addrDriverNotesHint => 'مثلًا: البوابة الخلفية، الدور الثاني';
+
+  @override
+  String get addrMakeDefault => 'اجعله العنوان الافتراضي';
+
+  @override
+  String get addrChangeOnMap => 'تغيير الموقع على الخريطة';
+
+  @override
+  String get addrSave => 'حفظ التغييرات';
+
+  @override
+  String get addrSaveNew => 'حفظ العنوان';
+
+  @override
+  String get addrDelete => 'حذف العنوان';
+
+  @override
+  String get addrDeleteTitle => 'حذف العنوان؟';
+
+  @override
+  String get addrDeleteBody => 'لن تتمكن من استرجاع هذا العنوان بعد الحذف.';
+
+  @override
+  String get delete => 'حذف';
+
+  @override
+  String get addrLockedNotice => 'هذا العنوان مرتبط بطلب قيد التنفيذ، ولا يمكن تعديله أو حذفه حتى يكتمل الطلب.';
+
+  @override
+  String get addrLockedLabel => 'عنوان مقفل';
+
+  @override
+  String get addrOutOfCoverageNotice => 'هذا العنوان خارج نطاق التوصيل حاليًا. يمكنك حفظه، والاستلام من المتجر متاح.';
+
+  @override
+  String addrLimitReached(int limit) {
+    return 'وصلت إلى الحد الأقصى من العناوين ($limit). احذف عنوانًا لإضافة آخر.';
+  }
 }
