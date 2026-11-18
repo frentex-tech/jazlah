@@ -44,5 +44,28 @@ messages/ar.json, en.json       every UI string
 - Colors, radii, spacing and text styles come from the preset only (`bg-brand`, `text-h1`, `rounded-md`, `gap-s24` …). Fonts: Readex Pro and El Messiri through `next/font` (Figma's Thmanyah is not bundled).
 - RTL first: logical properties only. English mirrors the layout.
 
-## Mocks
+## Sign-in and session (ACC-DSH-1)
+- `/login` (admin texts), `/login?panel=vendor|kitchen`: phone → code with `audience` = the panel. A protected page sends you to `/login?panel=…&next=…`.
+- Route handlers `src/app/api/auth/*` call the API on the server and keep the tokens in HTTP-only cookies (`jz_rt_<panel>`, `jz_at_<panel>`); page scripts never see them.
+- `jz_panels` lists the panels with a live session and lives 12 h, renewed on every page load: that is the idle timeout.
+- The middleware refreshes an expired access token on page loads, and sends signed-in staff from `/login` to their panel (several panels: `/login/choose`).
+- Settings: `.env.example` (`API_URL`, `OTP_LENGTH`, `DASHBOARD_API_MOCK`). `OTP_LENGTH` must equal the API's `AUTH_OTP_LENGTH`.
+- Auth calls are refused unless they come from our own pages (`Sec-Fetch-Site: same-origin` and a JSON body), against login CSRF.
+- The dashboard server forwards the user's address as `X-Forwarded-For`. Set the API's `TRUST_PROXY_HOPS` so its per-address code limits apply per user and not to the dashboard server as a whole.
+
+## API gaps (worked around in the dashboard)
+- **Staff display name:** `GET /v1/<panel>/me` returns only the principal, so the top bar shows the masked phone and a panel initial.
+- **Panels a phone or user can open:** the API does not list them, and tokens are per audience. So the panel picker (`/login/choose`) lists the panels with a live session, which means it appears after the second sign-in.
+- **Code length:** not in the OTP request response, so it is a dashboard setting (`OTP_LENGTH`). Figma draws 4 digits; the API default is 6.
+
+## Mocks (`DASHBOARD_API_MOCK=1`)
+- Auth (`src/lib/auth/backend.ts`), like the API's review accounts. The code is the last digit six times:
+  - `0500000004` admin
+  - `0500000002` vendor
+  - `0500000003` kitchen
+  - `0500000009` all three panels
+  - `0500000001` customer only (no access)
+  - `0500000007` rate limited
+  - `0500000008` disabled
+  - code `000000` = expired
 - `/api/mock/orders` + `/admin/table-demo`: the DataTable demo (`?fail=1` shows the error state).
