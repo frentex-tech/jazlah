@@ -2,7 +2,7 @@
  "dashboard": 199,
  "issues": {
   "ACC": {
-   "digest": "a8abac7fcabb",
+   "digest": "9a85846d6ca9",
    "fields": {
     "Status": "Backlog"
    },
@@ -16,7 +16,7 @@
     "FND-API-3",
     "FND-API-4"
    ],
-   "digest": "46f8a1e69f13",
+   "digest": "aafdd019b176",
    "fields": {
     "Area": "api",
     "Priority": "P0",
@@ -33,7 +33,7 @@
     "ACC-API-1",
     "LOC-API-1"
    ],
-   "digest": "fda09653ee31",
+   "digest": "ca6cc2a3c4f1",
    "fields": {
     "Area": "api",
     "Priority": "P0",
@@ -153,7 +153,7 @@
     "CRT-API-1",
     "PAY-API-1"
    ],
-   "digest": "c1e5b2fa6ebc",
+   "digest": "01f0d6a3ca05",
    "fields": {
     "Area": "api",
     "Priority": "P0",
@@ -215,7 +215,7 @@
     "FND-API-3",
     "FND-API-4"
    ],
-   "digest": "416366478009",
+   "digest": "380001976823",
    "fields": {
     "Area": "api",
     "Priority": "P0",
@@ -283,7 +283,7 @@
    "number": 114
   },
   "APP": {
-   "digest": "140b0e3826e3",
+   "digest": "b28607163d3a",
    "fields": {
     "Status": "Backlog"
    },
@@ -297,7 +297,7 @@
     "FND-INF-3",
     "FND-API-3"
    ],
-   "digest": "fcd2428e6a6b",
+   "digest": "18a802f47788",
    "fields": {
     "Area": "dashboard",
     "Priority": "P0",
@@ -330,11 +330,11 @@
     "FND-INF-3",
     "APP-DSH-1"
    ],
-   "digest": "e5bee64cb185",
+   "digest": "e7b744e72cf9",
    "fields": {
-    "Area": "web",
+    "Area": "dashboard",
     "Priority": "P0",
-    "Size": "L",
+    "Size": "S",
     "Status": "Todo"
    },
    "id": 6291170047,
@@ -343,7 +343,7 @@
    "number": 11
   },
   "BNPL": {
-   "digest": "bacdb305cbc0",
+   "digest": "b4619de85764",
    "fields": {
     "Status": "Backlog"
    },
@@ -356,7 +356,7 @@
    "deps": [
     "PAY-API-2"
    ],
-   "digest": "33193b45ab0f",
+   "digest": "b5ac2e9c72c3",
    "fields": {
     "Area": "api",
     "Priority": "P2",
@@ -372,7 +372,7 @@
    "deps": [
     "BNPL-API-1"
    ],
-   "digest": "7c9d49a6dfe0",
+   "digest": "58a30962a042",
    "fields": {
     "Area": "mobile",
     "Priority": "P2",
@@ -385,7 +385,7 @@
    "number": 183
   },
   "CAN": {
-   "digest": "9cc740ef9f84",
+   "digest": "d26a780fc0b0",
    "fields": {
     "Status": "Backlog"
    },
@@ -401,7 +401,7 @@
     "WAL-API-1",
     "FND-API-4"
    ],
-   "digest": "8d83cb69978e",
+   "digest": "92ebe6b5058e",
    "fields": {
     "Area": "api",
     "Priority": "P0",
@@ -518,7 +518,7 @@
     "CAT-API-1",
     "VND-API-2"
    ],
-   "digest": "93789b31ca31",
+   "digest": "2cc357f43385",
    "fields": {
     "Area": "api",
     "Priority": "P0",
@@ -565,7 +565,7 @@
    "number": 52
   },
   "CHR": {
-   "digest": "b79d16a67fe3",
+   "digest": "211571e7c40c",
    "fields": {
     "Status": "Backlog"
    },
@@ -579,7 +579,7 @@
     "PAY-API-2",
     "NOT-API-1"
    ],
-   "digest": "f509481d21b6",
+   "digest": "7b8b54984b29",
    "fields": {
     "Area": "api",
     "Priority": "P1",
@@ -595,7 +595,7 @@
    "deps": [
     "CHR-API-1"
    ],
-   "digest": "cc5038c66f88",
+   "digest": "80d2d59239fb",
    "fields": {
     "Area": "mobile",
     "Priority": "P1",
@@ -653,7 +653,7 @@
    "number": 156
   },
   "CMS": {
-   "digest": "39b3faf55fe2",
+   "digest": "ae1db34c0814",
    "fields": {
     "Status": "Backlog"
    },
@@ -667,7 +667,7 @@
     "FND-API-4",
     "CAT-API-5"
    ],
-   "digest": "cbf5adabaa03",
+   "digest": "eb1d9110f124",
    "fields": {
     "Area": "api",
     "Priority": "P0",
@@ -695,13 +695,29 @@
    "node_id": "I_kwDOVoYHnc8AAAABdv1Wfg",
    "number": 163
   },
+  "CMS-DSH-2": {
+   "deps": [
+    "APP-DSH-1",
+    "VND-DSH-1"
+   ],
+   "digest": "e0fec34b87a4",
+   "fields": {
+    "Area": "dashboard",
+    "Priority": "P1",
+    "Size": "M",
+    "Status": "Backlog"
+   },
+   "id": 6472174840,
+   "item": "PVTI_lADOFIc2Jc4Bq4SzzhJ5cmI",
+   "node_id": "I_kwDOVoYHnc8AAAABgcWM-A",
+   "number": 253
+  },
   "CMS-MOB-1": {
    "deps": [
     "CMS-API-1",
-    "STF-MOB-1",
-    "STF-WEB-1"
+    "STF-MOB-1"
    ],
-   "digest": "9eeecf0c5bfa",
+   "digest": "c4e79fe428b0",
    "fields": {
     "Area": "mobile",
     "Priority": "P0",
@@ -714,7 +730,7 @@
    "number": 164
   },
   "CRT": {
-   "digest": "c2720841230e",
+   "digest": "fb3750346b40",
    "fields": {
     "Status": "Backlog"
    },
@@ -729,7 +745,7 @@
     "ACC-API-1",
     "SCH-API-1"
    ],
-   "digest": "3672ba2f8299",
+   "digest": "67fdec7e6fe4",
    "fields": {
     "Area": "api",
     "Priority": "P0",
@@ -745,7 +761,7 @@
    "deps": [
     "CRT-API-1"
    ],
-   "digest": "c84fb8d78060",
+   "digest": "234f29d4619f",
    "fields": {
     "Area": "api",
     "Priority": "P0",
@@ -810,7 +826,7 @@
    "number": 65
   },
   "DLV": {
-   "digest": "5f1c2e33bf9d",
+   "digest": "ac8880935fde",
    "fields": {
     "Status": "Backlog"
    },
@@ -823,7 +839,7 @@
    "deps": [
     "ORD-API-2"
    ],
-   "digest": "770db349d851",
+   "digest": "c88159520db6",
    "fields": {
     "Area": "api",
     "Priority": "P0",
@@ -954,7 +970,7 @@
     "OCC-DES-1",
     "FED-DES-1"
    ],
-   "digest": "77b435a2631d",
+   "digest": "a732780d5676",
    "fields": {
     "Area": "design",
     "Priority": "P0",
@@ -967,7 +983,7 @@
    "number": 204
   },
   "FED": {
-   "digest": "68eabc7ede95",
+   "digest": "78dc5d76e732",
    "fields": {
     "Status": "Backlog"
    },
@@ -982,7 +998,7 @@
     "FND-API-4",
     "LOC-API-1"
    ],
-   "digest": "41288dcb3f23",
+   "digest": "ae1bef65bc0e",
    "fields": {
     "Area": "api",
     "Priority": "P0",
@@ -1216,7 +1232,7 @@
    "deps": [
     "FND-API-1"
    ],
-   "digest": "b56773ca2b33",
+   "digest": "13fb5875568c",
    "fields": {
     "Area": "infra",
     "Priority": "P0",
@@ -1305,7 +1321,7 @@
    "number": 195
   },
   "HRD": {
-   "digest": "916930a0ff67",
+   "digest": "ccc3b46d163c",
    "fields": {
     "Status": "Backlog"
    },
@@ -1348,7 +1364,7 @@
    "deps": [
     "FND-INF-5"
    ],
-   "digest": "aab70719403b",
+   "digest": "299cef1b9ccb",
    "fields": {
     "Area": "infra",
     "Priority": "P0",
@@ -1448,11 +1464,11 @@
    "deps": [
     "HRD-INF-1"
    ],
-   "digest": "0b86499802e2",
+   "digest": "a2eaaab4b295",
    "fields": {
-    "Area": "web",
+    "Area": "dashboard",
     "Priority": "P1",
-    "Size": "M",
+    "Size": "S",
     "Status": "Backlog"
    },
    "id": 6291267907,
@@ -1461,7 +1477,7 @@
    "number": 145
   },
   "INV": {
-   "digest": "23fb49f6ea07",
+   "digest": "f3231b25062a",
    "fields": {
     "Status": "Backlog"
    },
@@ -1478,7 +1494,7 @@
     "VIS-API-2",
     "OCC-API-2"
    ],
-   "digest": "b9cbe56e1458",
+   "digest": "b0b630c0dbe3",
    "fields": {
     "Area": "api",
     "Priority": "P0",
@@ -1522,10 +1538,9 @@
   "INV-MOB-1": {
    "deps": [
     "INV-API-1",
-    "ORD-MOB-2",
-    "ORD-WEB-2"
+    "ORD-MOB-2"
    ],
-   "digest": "2b28cb546341",
+   "digest": "5cfed1f4c413",
    "fields": {
     "Area": "mobile",
     "Priority": "P0",
@@ -1570,7 +1585,7 @@
     "DLV-API-1",
     "SCH-API-2"
    ],
-   "digest": "701838c1cf7c",
+   "digest": "0e0c971a77c6",
    "fields": {
     "Area": "api",
     "Priority": "P0",
@@ -1586,7 +1601,7 @@
    "deps": [
     "KIT-API-2"
    ],
-   "digest": "30b4dec65c5f",
+   "digest": "1cd057809b11",
    "fields": {
     "Area": "dashboard",
     "Priority": "P0",
@@ -1617,7 +1632,7 @@
    "number": 129
   },
   "LOC": {
-   "digest": "c696d838bc41",
+   "digest": "541d0dc6f71f",
    "fields": {
     "Status": "Backlog"
    },
@@ -1631,7 +1646,7 @@
     "FND-API-1",
     "FND-API-4"
    ],
-   "digest": "0a6ae5930eaf",
+   "digest": "e43eacdf0d9c",
    "fields": {
     "Area": "api",
     "Priority": "P0",
@@ -1698,7 +1713,7 @@
    "number": 27
   },
   "LOY": {
-   "digest": "f0cfccaa8300",
+   "digest": "dea841f8004b",
    "fields": {
     "Status": "Backlog"
    },
@@ -1712,7 +1727,7 @@
     "ORD-API-2",
     "PAY-API-1"
    ],
-   "digest": "b5bb55a08b0a",
+   "digest": "f4f73aaf9f68",
    "fields": {
     "Area": "api",
     "Priority": "P1",
@@ -1728,7 +1743,7 @@
    "deps": [
     "LOY-API-1"
    ],
-   "digest": "49235db3f753",
+   "digest": "79e2dcaec672",
    "fields": {
     "Area": "mobile",
     "Priority": "P1",
@@ -1741,7 +1756,7 @@
    "number": 174
   },
   "MSL": {
-   "digest": "be0848090868",
+   "digest": "b86ecb9a358e",
    "fields": {
     "Status": "Backlog"
    },
@@ -1754,7 +1769,7 @@
    "deps": [
     "SCH-API-2"
    ],
-   "digest": "d8d41f1f8ae8",
+   "digest": "b5dc8617b69c",
    "fields": {
     "Area": "api",
     "Priority": "P1",
@@ -1770,7 +1785,7 @@
    "deps": [
     "MSL-API-1"
    ],
-   "digest": "6b1ad481a5dd",
+   "digest": "7b2543f1f7e4",
    "fields": {
     "Area": "mobile",
     "Priority": "P1",
@@ -1783,7 +1798,7 @@
    "number": 186
   },
   "NOT": {
-   "digest": "13c10811b006",
+   "digest": "37fa708051dd",
    "fields": {
     "Status": "Backlog"
    },
@@ -1797,7 +1812,7 @@
     "ACC-API-2",
     "ORD-API-2"
    ],
-   "digest": "28320f636da9",
+   "digest": "485a19c91c12",
    "fields": {
     "Area": "api",
     "Priority": "P0",
@@ -1808,6 +1823,22 @@
    "item": "PVTI_lADOFIc2Jc4Bq4SzzhHRYNA",
    "node_id": "I_kwDOVoYHnc8AAAABdvywYA",
    "number": 104
+  },
+  "NOT-API-2": {
+   "deps": [
+    "VND-API-2"
+   ],
+   "digest": "66b09c6e78e5",
+   "fields": {
+    "Area": "api",
+    "Priority": "P0",
+    "Size": "M",
+    "Status": "Backlog"
+   },
+   "id": 6472158827,
+   "item": "PVTI_lADOFIc2Jc4Bq4SzzhJ5cak",
+   "node_id": "I_kwDOVoYHnc8AAAABgcVOaw",
+   "number": 252
   },
   "NOT-DSH-1": {
    "deps": [
@@ -1879,7 +1910,7 @@
     "OCC-API-1",
     "PAY-API-1"
    ],
-   "digest": "06e0a8b91da0",
+   "digest": "e58d0aa3d5af",
    "fields": {
     "Area": "api",
     "Priority": "P0",
@@ -1956,7 +1987,7 @@
    "deps": [
     "DSN-DES-1"
    ],
-   "digest": "b9cbf4ca4fa5",
+   "digest": "bf7be3f50b80",
    "fields": {
     "Area": "design",
     "Priority": "P0",
@@ -1969,7 +2000,7 @@
    "number": 201
   },
   "ORD": {
-   "digest": "f91778bb2fb3",
+   "digest": "e181c2597805",
    "fields": {
     "Status": "Backlog"
    },
@@ -1986,7 +2017,7 @@
     "PAY-API-1",
     "WAL-API-1"
    ],
-   "digest": "8f253c3e8c2a",
+   "digest": "882adf6d402a",
    "fields": {
     "Area": "api",
     "Priority": "P0",
@@ -2019,7 +2050,7 @@
     "ORD-API-2",
     "FND-API-4"
    ],
-   "digest": "3d1997ebbdd0",
+   "digest": "9d6c7eb207d7",
    "fields": {
     "Area": "api",
     "Priority": "P0",
@@ -2068,7 +2099,7 @@
    "deps": [
     "ORD-API-3"
    ],
-   "digest": "44aeef8878a8",
+   "digest": "ce7696dbde1f",
    "fields": {
     "Area": "mobile",
     "Priority": "P0",
@@ -2115,7 +2146,7 @@
    "number": 87
   },
   "PAY": {
-   "digest": "6bc5c2a2fe2f",
+   "digest": "d25a03cd4023",
    "fields": {
     "Status": "Backlog"
    },
@@ -2130,7 +2161,7 @@
     "WAL-API-1",
     "SCH-API-1"
    ],
-   "digest": "17e37ea29307",
+   "digest": "79c3751ea781",
    "fields": {
     "Area": "api",
     "Priority": "P0",
@@ -2147,7 +2178,7 @@
     "PAY-API-1",
     "PAY-DOC-1"
    ],
-   "digest": "252d242c7ae1",
+   "digest": "94642ce7811c",
    "fields": {
     "Area": "api",
     "Priority": "P0",
@@ -2177,7 +2208,7 @@
     "PAY-API-1",
     "ORD-MOB-1"
    ],
-   "digest": "b792314d0e1a",
+   "digest": "fcedb41fb55c",
    "fields": {
     "Area": "mobile",
     "Priority": "P0",
@@ -2192,10 +2223,9 @@
   "PAY-MOB-2": {
    "deps": [
     "PAY-API-2",
-    "PAY-MOB-1",
-    "ORD-WEB-1"
+    "PAY-MOB-1"
    ],
-   "digest": "66991ca1ce30",
+   "digest": "823bee02be4c",
    "fields": {
     "Area": "mobile",
     "Priority": "P0",
@@ -2221,7 +2251,7 @@
    "deps": [
     "DSN-DES-1"
    ],
-   "digest": "50f4b6537422",
+   "digest": "8001941bacd0",
    "fields": {
     "Area": "design",
     "Priority": "P1",
@@ -2234,7 +2264,7 @@
    "number": 203
   },
   "RAT": {
-   "digest": "022191256154",
+   "digest": "e3bedd5d6fd8",
    "fields": {
     "Status": "Backlog"
    },
@@ -2248,7 +2278,7 @@
     "ORD-API-2",
     "NOT-API-1"
    ],
-   "digest": "f1d6cf4db54f",
+   "digest": "a5322bf84c01",
    "fields": {
     "Area": "api",
     "Priority": "P1",
@@ -2279,10 +2309,9 @@
   "RAT-MOB-1": {
    "deps": [
     "RAT-API-1",
-    "ORD-MOB-2",
-    "ORD-WEB-2"
+    "ORD-MOB-2"
    ],
-   "digest": "02560fc0ef73",
+   "digest": "0d0548eff24a",
    "fields": {
     "Area": "mobile",
     "Priority": "P1",
@@ -2295,7 +2324,7 @@
    "number": 159
   },
   "REL": {
-   "digest": "797e9eeb6ffa",
+   "digest": "e9ab67800b2d",
    "fields": {
     "Status": "Backlog"
    },
@@ -2312,13 +2341,11 @@
     "APP-DSH-1",
     "ACC-MOB-1",
     "ACC-MOB-3",
-    "ACC-WEB-1",
     "ACC-DSH-1",
     "LOC-DSH-1",
-    "LOC-WEB-1",
     "DSN-DES-2"
    ],
-   "digest": "c57f4c5e0cf7",
+   "digest": "1f8c50199765",
    "fields": {
     "Area": "infra",
     "Priority": "P0",
@@ -2337,11 +2364,9 @@
     "CAT-DSH-2",
     "STF-MOB-1",
     "STF-MOB-3",
-    "STF-MOB-4",
-    "STF-WEB-1",
-    "STF-WEB-2"
+    "STF-MOB-4"
    ],
-   "digest": "a913633818a6",
+   "digest": "3b90b155a3c1",
    "fields": {
     "Area": "infra",
     "Priority": "P0",
@@ -2356,19 +2381,15 @@
   "REL-INF-3": {
    "deps": [
     "CRT-MOB-1",
-    "CRT-WEB-1",
     "CRT-DSH-1",
     "SCH-DSH-1",
     "SCH-MOB-1",
-    "SCH-WEB-1",
     "SCH-QA-1",
     "PAY-MOB-1",
-    "ORD-WEB-1",
     "ORD-MOB-2",
-    "ORD-WEB-2",
     "ORD-DSH-1"
    ],
-   "digest": "4d8d06813b8c",
+   "digest": "8049af3097a5",
    "fields": {
     "Area": "infra",
     "Priority": "P0",
@@ -2393,7 +2414,7 @@
     "CAN-DSH-1",
     "PAY-MOB-2"
    ],
-   "digest": "8bd7efe75387",
+   "digest": "10e618cc1503",
    "fields": {
     "Area": "infra",
     "Priority": "P0",
@@ -2411,10 +2432,9 @@
     "KIT-MOB-1",
     "KIT-DSH-1",
     "ADH-MOB-1",
-    "SVC-WEB-1",
     "SVC-QA-1"
    ],
-   "digest": "7d2404293873",
+   "digest": "1d3a3c05454b",
    "fields": {
     "Area": "infra",
     "Priority": "P0",
@@ -2434,11 +2454,14 @@
     "INV-API-2",
     "INV-MOB-1",
     "VIS-MOB-1",
-    "VIS-WEB-1",
     "RAT-MOB-1",
-    "CMS-MOB-1"
+    "CMS-MOB-1",
+    "LOY-MOB-1",
+    "STY-MOB-1",
+    "CHR-MOB-1",
+    "CMS-DSH-2"
    ],
-   "digest": "839d6dc04896",
+   "digest": "197b2b6ab256",
    "fields": {
     "Area": "infra",
     "Priority": "P0",
@@ -2456,7 +2479,7 @@
     "HRD-QA-2",
     "HRD-WEB-1"
    ],
-   "digest": "597af07afcd3",
+   "digest": "539aa21ca9d6",
    "fields": {
     "Area": "infra",
     "Priority": "P0",
@@ -2469,7 +2492,7 @@
    "number": 40
   },
   "RGF": {
-   "digest": "998de3d94ea4",
+   "digest": "5bc26f1408da",
    "fields": {
     "Status": "Backlog"
    },
@@ -2482,7 +2505,7 @@
    "deps": [
     "ORD-API-1"
    ],
-   "digest": "a47c64a7956c",
+   "digest": "6b2b64e075a3",
    "fields": {
     "Area": "api",
     "Priority": "P1",
@@ -2498,7 +2521,7 @@
    "deps": [
     "RGF-API-1"
    ],
-   "digest": "73063a5068de",
+   "digest": "20711ecdf177",
    "fields": {
     "Area": "mobile",
     "Priority": "P1",
@@ -2511,7 +2534,7 @@
    "number": 189
   },
   "SCH": {
-   "digest": "2c820a348ea2",
+   "digest": "2f9179adb268",
    "fields": {
     "Status": "Backlog"
    },
@@ -2542,7 +2565,7 @@
     "CAT-API-1",
     "CRT-API-1"
    ],
-   "digest": "842d88fde132",
+   "digest": "8f4dc03b2f7e",
    "fields": {
     "Area": "api",
     "Priority": "P0",
@@ -2558,7 +2581,7 @@
    "deps": [
     "DSN-DES-1"
    ],
-   "digest": "04bcfaff0210",
+   "digest": "b9e51869bbdc",
    "fields": {
     "Area": "design",
     "Priority": "P0",
@@ -2644,7 +2667,7 @@
    "number": 72
   },
   "STF": {
-   "digest": "632b1fc05e13",
+   "digest": "1f15ab33f174",
    "fields": {
     "Status": "Backlog"
    },
@@ -2657,7 +2680,7 @@
    "deps": [
     "DSN-DES-1"
    ],
-   "digest": "2a2083c8eb16",
+   "digest": "bafc579a9a54",
    "fields": {
     "Area": "design",
     "Priority": "P0",
@@ -2675,7 +2698,7 @@
     "STF-DES-1",
     "LOC-MOB-1"
    ],
-   "digest": "7304c7b6733f",
+   "digest": "de7a04aa073e",
    "fields": {
     "Area": "mobile",
     "Priority": "P0",
@@ -2758,7 +2781,7 @@
    "number": 59
   },
   "STY": {
-   "digest": "07471db5dd95",
+   "digest": "469529c6ef04",
    "fields": {
     "Status": "Backlog"
    },
@@ -2773,7 +2796,7 @@
     "ORD-API-2",
     "ADM-API-1"
    ],
-   "digest": "d421dcf547f7",
+   "digest": "bd0c1982084b",
    "fields": {
     "Area": "api",
     "Priority": "P1",
@@ -2789,7 +2812,7 @@
    "deps": [
     "STY-API-1"
    ],
-   "digest": "e0c2dd0e377b",
+   "digest": "ec6b3bc249ac",
    "fields": {
     "Area": "mobile",
     "Priority": "P1",
@@ -2802,7 +2825,7 @@
    "number": 177
   },
   "SVC": {
-   "digest": "f0a62009ca1a",
+   "digest": "ae78ff3a37f5",
    "fields": {
     "Status": "Backlog"
    },
@@ -2849,7 +2872,7 @@
    "number": 135
   },
   "VIS": {
-   "digest": "7f320fb4869c",
+   "digest": "1fd14936dd1e",
    "fields": {
     "Status": "Backlog"
    },
@@ -2881,7 +2904,7 @@
     "VIS-API-1",
     "OCC-API-1"
    ],
-   "digest": "9e43365a1a1d",
+   "digest": "be5b553778f5",
    "fields": {
     "Area": "api",
     "Priority": "P0",
@@ -2993,7 +3016,7 @@
    "deps": [
     "VND-API-1"
    ],
-   "digest": "408cfa5a143b",
+   "digest": "a9e3a54a7828",
    "fields": {
     "Area": "api",
     "Priority": "P0",
@@ -3028,7 +3051,7 @@
     "ACC-DSH-1",
     "VND-API-2"
    ],
-   "digest": "cc754c0cc313",
+   "digest": "7ddf7b1befa8",
    "fields": {
     "Area": "dashboard",
     "Priority": "P0",
@@ -3072,7 +3095,7 @@
     "ORD-API-3",
     "FND-API-4"
    ],
-   "digest": "a4e784e62f37",
+   "digest": "a0f59dc5c1be",
    "fields": {
     "Area": "api",
     "Priority": "P0",
@@ -3103,7 +3126,7 @@
    "number": 109
   },
   "VRF": {
-   "digest": "10147c89b96a",
+   "digest": "88c5e7459755",
    "fields": {
     "Status": "Backlog"
    },
@@ -3117,7 +3140,7 @@
     "VOP-API-1",
     "ADH-API-1"
    ],
-   "digest": "a1140ca08e44",
+   "digest": "0bcc62a6a563",
    "fields": {
     "Area": "api",
     "Priority": "P2",
@@ -3133,7 +3156,7 @@
    "deps": [
     "VRF-API-1"
    ],
-   "digest": "2ee4e4a8dcc0",
+   "digest": "f8dd51828054",
    "fields": {
     "Area": "mobile",
     "Priority": "P2",
@@ -3202,7 +3225,7 @@
    "deps": [
     "ACC-API-1"
    ],
-   "digest": "c809c4a3378e",
+   "digest": "f5f5a6809abc",
    "fields": {
     "Area": "api",
     "Priority": "P0",
