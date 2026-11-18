@@ -144,4 +144,8 @@ export const ERROR_MESSAGES: Readonly<Record<ErrorCode, LocalizedText>> = {
     ar: 'عشان نحمي حسابك، سجّل دخولك مرة ثانية وبعدها احذف الحساب',
     en: 'For your security, sign in again, then delete your account.',
   },
+  [ErrorCode.INVALID_POLYGON]: {
+    ar: 'حدود المنطقة غير صحيحة، تأكد إن الشكل مقفول وإن خطوطه ما تتقاطع',
+    en: 'The zone boundary is not a valid shape. Make sure it is closed and its edges do not cross.',
+  },
 };

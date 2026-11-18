@@ -4642,6 +4642,682 @@
         ]
       }
     },
+    "/v1/admin/coverage-zones": {
+      "get": {
+        "description": "Admin dashboard, the coverage zones map and list. Every zone, active and inactive, with its polygon, newest first. Keyset paging: send `nextCursor` back as `cursor` until it is null; no total count.",
+        "operationId": "adminListCoverageZones",
+        "parameters": [
+          {
+            "name": "cursor",
+            "required": false,
+            "in": "query",
+            "description": "The `nextCursor` of the previous page; omit it for the first page. Opaque: never build or change it.",
+            "schema": {
+              "example": "WyIyMDI2LTExLTE1VDEwOjAwOjAwLjAwMFoiLCI3ZjNhIl0",
+              "type": "string"
+            }
+          },
+          {
+            "name": "limit",
+            "required": false,
+            "in": "query",
+            "description": "How many items to return, 1 to 50.",
+            "schema": {
+              "minimum": 1,
+              "maximum": 50,
+              "default": 20,
+              "example": 20,
+              "type": "number"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "One page of zones.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CoverageZonePageResponseDto"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Error. code: VALIDATION_FAILED.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Error. code: UNAUTHORIZED, ACCESS_TOKEN_EXPIRED.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Error. code: FORBIDDEN.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Error. code: RATE_LIMITED.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Error. code: INTERNAL_ERROR.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "Error. code: SERVICE_UNAVAILABLE.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "The coverage zones, newest first",
+        "tags": [
+          "Admin coverage zones"
+        ]
+      },
+      "post": {
+        "description": "Admin dashboard, the zone editor: the admin draws the boundary on the map. Active at once unless `isActive` is false; the coverage check uses it from the next request. INVALID_POLYGON: the boundary is not a valid polygon (a ring not closed or with fewer than four positions, a position out of range, edges that cross); nothing was saved, let the admin redraw it.",
+        "operationId": "adminCreateCoverageZone",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateCoverageZoneDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "The new zone.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CoverageZoneResponseDto"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Error. code: VALIDATION_FAILED.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Error. code: UNAUTHORIZED, ACCESS_TOKEN_EXPIRED.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Error. code: FORBIDDEN.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Error. code: TRANSACTION_CONFLICT.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Error. code: INVALID_POLYGON.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Error. code: RATE_LIMITED.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Error. code: INTERNAL_ERROR.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "Error. code: SERVICE_UNAVAILABLE.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Add a coverage zone",
+        "tags": [
+          "Admin coverage zones"
+        ]
+      }
+    },
+    "/v1/admin/coverage-zones/{id}": {
+      "get": {
+        "description": "Admin dashboard, the zone editor. NOT_FOUND for an unknown id.",
+        "operationId": "adminGetCoverageZone",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "description": "The id (a UUID) of the item the path names; another value is VALIDATION_FAILED on `id`.",
+            "schema": {
+              "format": "uuid",
+              "example": "7f3a2c1e-0b9d-4e5f-8a6b-1c2d3e4f5a6b",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "The zone.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CoverageZoneResponseDto"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Error. code: VALIDATION_FAILED.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Error. code: UNAUTHORIZED, ACCESS_TOKEN_EXPIRED.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Error. code: FORBIDDEN.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Error. code: NOT_FOUND.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Error. code: RATE_LIMITED.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Error. code: INTERNAL_ERROR.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "Error. code: SERVICE_UNAVAILABLE.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "One coverage zone",
+        "tags": [
+          "Admin coverage zones"
+        ]
+      },
+      "patch": {
+        "description": "Admin dashboard, the zone editor. Changes only the fields sent; applies to the coverage check from the next request. NOT_FOUND for an unknown id. INVALID_POLYGON: the new boundary is not a valid polygon; nothing was saved.",
+        "operationId": "adminUpdateCoverageZone",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "description": "The id (a UUID) of the item the path names; another value is VALIDATION_FAILED on `id`.",
+            "schema": {
+              "format": "uuid",
+              "example": "7f3a2c1e-0b9d-4e5f-8a6b-1c2d3e4f5a6b",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateCoverageZoneDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "The zone as saved.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CoverageZoneResponseDto"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Error. code: VALIDATION_FAILED.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Error. code: UNAUTHORIZED, ACCESS_TOKEN_EXPIRED.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Error. code: FORBIDDEN.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Error. code: NOT_FOUND.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Error. code: TRANSACTION_CONFLICT.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Error. code: INVALID_POLYGON.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Error. code: RATE_LIMITED.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Error. code: INTERNAL_ERROR.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "Error. code: SERVICE_UNAVAILABLE.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Edit a zone, redraw it, or switch it on or off",
+        "tags": [
+          "Admin coverage zones"
+        ]
+      },
+      "delete": {
+        "description": "Admin dashboard, the zone editor. Deletes the zone for good; addresses in it stop being covered from the next request. To pause a zone instead, set `isActive` to false. NOT_FOUND for an unknown id, also when already deleted.",
+        "operationId": "adminDeleteCoverageZone",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "description": "The id (a UUID) of the item the path names; another value is VALIDATION_FAILED on `id`.",
+            "schema": {
+              "format": "uuid",
+              "example": "7f3a2c1e-0b9d-4e5f-8a6b-1c2d3e4f5a6b",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Deleted. No body."
+          },
+          "400": {
+            "description": "Error. code: VALIDATION_FAILED.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Error. code: UNAUTHORIZED, ACCESS_TOKEN_EXPIRED.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Error. code: FORBIDDEN.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Error. code: NOT_FOUND.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Error. code: TRANSACTION_CONFLICT.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Error. code: RATE_LIMITED.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Error. code: INTERNAL_ERROR.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "Error. code: SERVICE_UNAVAILABLE.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Delete a coverage zone",
+        "tags": [
+          "Admin coverage zones"
+        ]
+      }
+    },
+    "/v1/public/coverage/check": {
+      "get": {
+        "description": "Customer app, the map pin (before or after sign-in): whether an active coverage zone covers the point, and which. Public: no token needed.\n\nInactive zones never count. Saved addresses also carry `isCovered` (GET /v1/customer/addresses).\n\nVALIDATION_FAILED for a missing or out-of-range lat or lng.",
+        "operationId": "publicCheckCoverage",
+        "parameters": [
+          {
+            "name": "lat",
+            "required": true,
+            "in": "query",
+            "description": "Latitude in decimal degrees (WGS 84), -90 to 90.",
+            "schema": {
+              "minimum": -90,
+              "maximum": 90,
+              "example": 24.7136,
+              "type": "number"
+            }
+          },
+          {
+            "name": "lng",
+            "required": true,
+            "in": "query",
+            "description": "Longitude in decimal degrees (WGS 84), -180 to 180.",
+            "schema": {
+              "minimum": -180,
+              "maximum": 180,
+              "example": 46.6753,
+              "type": "number"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Whether the point is covered, and the zone when it is.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CoverageCheckResponseDto"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Error. code: VALIDATION_FAILED.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Error. code: RATE_LIMITED.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Error. code: INTERNAL_ERROR.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "Error. code: SERVICE_UNAVAILABLE.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                }
+              }
+            }
+          }
+        },
+        "summary": "Do we deliver to this point?",
+        "tags": [
+          "Public coverage"
+        ],
+        "security": []
+      }
+    },
     "/v1/health": {
       "get": {
         "description": "Answers 200 while the process runs; checks no dependency. Called by the load balancer and the container runtime, never by the apps. Public, not rate limited.",
@@ -8609,6 +9285,10 @@
       "description": "Active vendors (stores) as customers see them. Public."
     },
     {
+      "name": "Public coverage",
+      "description": "Whether we deliver to a point on the map (the active coverage zones). Public."
+    },
+    {
       "name": "Customer account",
       "description": "The signed-in customer: who they are, signing out everywhere, and deleting the account. Customer app."
     },
@@ -8679,6 +9359,10 @@
     {
       "name": "Admin media",
       "description": "File uploads by an admin (images of the platform vendor products). Admin dashboard."
+    },
+    {
+      "name": "Admin coverage zones",
+      "description": "The delivery areas, drawn as polygons on the map: list, read, create, edit, switch on or off, delete. Admin dashboard."
     },
     {
       "name": "Health",
@@ -8804,7 +9488,8 @@
           "PRODUCT_CHANGE_REQUEST_SUPERSEDED",
           "ADDRESS_LIMIT_REACHED",
           "ACCOUNT_HAS_STAFF_ACCESS",
-          "RECENT_SIGN_IN_REQUIRED"
+          "RECENT_SIGN_IN_REQUIRED",
+          "INVALID_POLYGON"
         ],
         "description": "Stable error code. Clients branch on it; it is never renamed or reused."
       },
@@ -10635,6 +11320,11 @@
             "description": "Whether this is the customer's default address. Exactly one address is the default once any exist.",
             "example": true
           },
+          "isCovered": {
+            "type": "boolean",
+            "description": "Whether we deliver to this address now: an active coverage zone covers its point. Worked out on every read, so it changes when admins change the zones. The same check as GET /v1/public/coverage/check.",
+            "example": true
+          },
           "createdAt": {
             "format": "date-time",
             "type": "string",
@@ -10659,6 +11349,7 @@
           "shortNationalAddress",
           "driverInstructions",
           "isDefault",
+          "isCovered",
           "createdAt",
           "updatedAt"
         ]
@@ -10810,6 +11501,269 @@
             ]
           }
         }
+      },
+      "GeoJsonPolygonDto": {
+        "type": "object",
+        "properties": {
+          "type": {
+            "type": "string",
+            "enum": [
+              "Polygon"
+            ],
+            "description": "Always `Polygon`.",
+            "example": "Polygon"
+          },
+          "coordinates": {
+            "type": "array",
+            "items": {
+              "type": "array",
+              "minItems": 4,
+              "items": {
+                "type": "array",
+                "minItems": 2,
+                "maxItems": 2,
+                "items": {
+                  "type": "number"
+                }
+              }
+            },
+            "minItems": 1,
+            "description": "The rings, as GeoJSON: the outer boundary first, then any holes. Each ring is a list of at least four `[longitude, latitude]` positions in degrees (WGS 84; longitude first), the last repeating the first. Edges must not cross (INVALID_POLYGON otherwise).",
+            "example": [
+              [
+                [
+                  46.6,
+                  24.6
+                ],
+                [
+                  46.8,
+                  24.6
+                ],
+                [
+                  46.8,
+                  24.8
+                ],
+                [
+                  46.6,
+                  24.8
+                ],
+                [
+                  46.6,
+                  24.6
+                ]
+              ]
+            ]
+          }
+        },
+        "required": [
+          "type",
+          "coordinates"
+        ]
+      },
+      "CoverageZoneResponseDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "description": "The zone id (UUID), for the `{id}` of /v1/admin/coverage-zones/{id}.",
+            "example": "7f3a2c1e-0b9d-4e5f-8a6b-1c2d3e4f5a6b"
+          },
+          "name": {
+            "description": "The zone name in Arabic and English.",
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/LocalizedTextResponseDto"
+              }
+            ]
+          },
+          "city": {
+            "type": "string",
+            "description": "The city, as written.",
+            "example": "الرياض"
+          },
+          "polygon": {
+            "description": "The boundary, a GeoJSON polygon (coordinates rounded to 9 decimal places).",
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/GeoJsonPolygonDto"
+              }
+            ]
+          },
+          "isActive": {
+            "type": "boolean",
+            "description": "Whether the zone counts in the coverage check.",
+            "example": true
+          },
+          "createdAt": {
+            "format": "date-time",
+            "type": "string",
+            "description": "When the zone was created, UTC (ISO 8601).",
+            "example": "2026-11-18T10:00:00.000Z"
+          },
+          "updatedAt": {
+            "format": "date-time",
+            "type": "string",
+            "description": "When the zone last changed, UTC (ISO 8601).",
+            "example": "2026-11-18T10:00:00.000Z"
+          }
+        },
+        "required": [
+          "id",
+          "name",
+          "city",
+          "polygon",
+          "isActive",
+          "createdAt",
+          "updatedAt"
+        ]
+      },
+      "CoverageZonePageResponseDto": {
+        "type": "object",
+        "properties": {
+          "items": {
+            "description": "The zones of this page, newest first; empty when none exist.",
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/CoverageZoneResponseDto"
+            }
+          },
+          "nextCursor": {
+            "type": "string",
+            "nullable": true,
+            "description": "Send as `cursor` for the next page; null on the last page.",
+            "example": null
+          }
+        },
+        "required": [
+          "items",
+          "nextCursor"
+        ]
+      },
+      "CreateCoverageZoneDto": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "description": "The zone name in Arabic and English (a district or area name).",
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/LocalizedNameDto"
+              }
+            ]
+          },
+          "city": {
+            "type": "string",
+            "minLength": 2,
+            "maxLength": 50,
+            "description": "The city the zone is in, as written (Arabic expected): 2 to 50 characters after invisible format characters are removed and spaces trimmed.",
+            "example": "الرياض"
+          },
+          "polygon": {
+            "description": "The zone boundary, a GeoJSON polygon.",
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/GeoJsonPolygonDto"
+              }
+            ]
+          },
+          "isActive": {
+            "type": "boolean",
+            "default": true,
+            "description": "Whether the zone counts in the coverage check at once; true when left out.",
+            "example": true
+          }
+        },
+        "required": [
+          "name",
+          "city",
+          "polygon"
+        ]
+      },
+      "UpdateCoverageZoneDto": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "description": "The new name in Arabic and English, both together; left out: unchanged.",
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/LocalizedNameDto"
+              }
+            ]
+          },
+          "city": {
+            "type": "string",
+            "minLength": 2,
+            "maxLength": 50,
+            "description": "The city, 2 to 50 characters; left out: unchanged.",
+            "example": "الرياض"
+          },
+          "polygon": {
+            "description": "The new boundary, a GeoJSON polygon; left out: unchanged.",
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/GeoJsonPolygonDto"
+              }
+            ]
+          },
+          "isActive": {
+            "type": "boolean",
+            "description": "`false`: the zone stops counting in the coverage check at once (addresses in it show as not covered); `true`: it counts again. Left out: unchanged.",
+            "example": false
+          }
+        }
+      },
+      "CoveringZoneResponseDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "description": "The zone id (UUID).",
+            "example": "7f3a2c1e-0b9d-4e5f-8a6b-1c2d3e4f5a6b"
+          },
+          "name": {
+            "description": "The zone name in Arabic and English.",
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/LocalizedTextResponseDto"
+              }
+            ]
+          },
+          "city": {
+            "type": "string",
+            "description": "The city, as written.",
+            "example": "الرياض"
+          }
+        },
+        "required": [
+          "id",
+          "name",
+          "city"
+        ]
+      },
+      "CoverageCheckResponseDto": {
+        "type": "object",
+        "properties": {
+          "covered": {
+            "type": "boolean",
+            "description": "Whether an active coverage zone covers the point.",
+            "example": true
+          },
+          "zone": {
+            "nullable": true,
+            "description": "The zone covering the point; null when `covered` is false.",
+            "type": "object",
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/CoveringZoneResponseDto"
+              }
+            ]
+          }
+        },
+        "required": [
+          "covered",
+          "zone"
+        ]
       },
       "LivenessResponseDto": {
         "type": "object",

@@ -1,0 +1,24 @@
+// Domain: coverage. Owned by the coverage module (src/modules/coverage/): the areas we
+// deliver to, as PostGIS polygons.
+
+/// A delivery area (FR-LOC-02): a polygon on the map in WGS 84 (SRID 4326), written and
+/// read through the geo helpers of src/infra/database/ (the Prisma client cannot touch
+/// the column). Only active zones count in the coverage check. The polygon is valid
+/// (check constraint `coverage_zones_polygon_check`: ST_IsValid, so no self-intersection).
+model CoverageZone {
+  id        String                                 @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  nameAr    String                                 @map("name_ar")
+  nameEn    String                                 @map("name_en")
+  /// The city as written (Arabic expected), 2 to 50 characters.
+  city      String
+  polygon   Unsupported("geometry(Polygon, 4326)")
+  isActive  Boolean                                @default(true) @map("is_active")
+  createdAt DateTime                               @default(now()) @map("created_at") @db.Timestamptz(3)
+  updatedAt DateTime                               @updatedAt @map("updated_at") @db.Timestamptz(3)
+
+  // The coverage check's fallback while the cache is unavailable (ST_Covers).
+  @@index([polygon], type: Gist)
+  // The admin list, newest first (keyset).
+  @@index([createdAt, id])
+  @@map("coverage_zones")
+}

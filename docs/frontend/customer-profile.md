@@ -63,7 +63,7 @@ The current value is also in `GET /v1/customer/me`.
 
 3. On `ADDRESS_LIMIT_REACHED` (409), the customer already has the maximum (`details.limit`, 10). Nothing was saved; ask them to delete one first.
 
-Whether the point is inside a delivery area is **not checked yet**. Delivery zones are not built (see [not-built-yet.md](not-built-yet.md)).
+Every address returned has **`isCovered`**: whether we deliver to its point now (an active coverage zone contains it). It is worked out on every read, so it follows the admins' zone changes. Saving an address outside every zone is allowed; show that it is not covered. To check a pin before saving, call `GET /v1/public/coverage/check` (see [coverage.md](coverage.md)).
 
 **Edit an address:**
 1. Load it with `GET /v1/customer/addresses/{id}`.

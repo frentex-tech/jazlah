@@ -42,3 +42,4 @@ What exists, by area. Before writing anything, read this index, then open the ar
 - **vendors** — `.claude/registry/vendors.md` — `VendorsModule` (the vendor status checker), the platform vendor, `VendorDirectory`.
 - **catalog** — `.claude/registry/catalog.md` — `CatalogModule`.
 - **customers** — `.claude/registry/customers.md` — `CustomersModule`: profiles, marketing consent, addresses.
+- **coverage** — `.claude/registry/coverage.md` — `CoverageModule`: delivery zones, `CoverageService` (is a point covered).

@@ -12,6 +12,7 @@ import { RateLimitModule } from '@infra/rate-limit/rate-limit.module';
 import { RedisModule } from '@infra/redis/redis.module';
 import { AuthModule } from '@modules/auth';
 import { CatalogModule } from '@modules/catalog';
+import { CoverageModule } from '@modules/coverage';
 import { MediaModule } from '@modules/media';
 import { CustomersModule } from '@modules/customers';
 import { VendorsModule } from '@modules/vendors';
@@ -34,6 +35,7 @@ import { VendorsModule } from '@modules/vendors';
     VendorsModule,
     CatalogModule,
     CustomersModule,
+    CoverageModule,
   ],
   providers: [
     { provide: APP_FILTER, useClass: AllExceptionsFilter },

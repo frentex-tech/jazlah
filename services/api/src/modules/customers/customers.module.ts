@@ -1,4 +1,5 @@
 import { Module } from '@nestjs/common';
+import { CoverageModule } from '@modules/coverage';
 import { UsersModule } from '@modules/users';
 import { CustomerCustomersController } from './controllers/customer.controller';
 import { CustomerAddressesService } from './customer-addresses.service';
@@ -14,10 +15,11 @@ import { MarketingConsentsService } from './marketing-consents.service';
  *
  * All three are exported: the auth module reads the profile and the consent for
  * sign-in and `me`, and erases them when an account is deleted; orders will read
- * addresses and whether a profile is complete.
+ * addresses and whether a profile is complete. Each address returned says whether it
+ * is covered (CoverageModule).
  */
 @Module({
-  imports: [UsersModule],
+  imports: [UsersModule, CoverageModule],
   controllers: [CustomerCustomersController],
   providers: [
     CustomerProfilesService,
