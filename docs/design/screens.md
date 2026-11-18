@@ -1,18 +1,18 @@
 # Screen inventory
 
-Every launch screen in the Figma file [Jazlah — Product Design](https://www.figma.com/design/puWXbmOVpnQpjc7mUahTnw/Jazlah-Product-Design): its Arabic name, its Figma link, and the task that will build it. 587 screens on 7 area pages plus the `Design System` page (generated from the file with `design/figma/scripts/36-export-index.js`; tasks matched by feature against `docs/delivery/sprints/`).
+Every launch screen in the Figma file [Jazlah — Product Design](https://www.figma.com/design/puWXbmOVpnQpjc7mUahTnw/Jazlah-Product-Design): its Arabic name, its Figma link, and the task that will build it. 619 screens on two design pages plus the `Design System` page (generated from the file with `design/figma/scripts/36-export-index.js`; tasks matched by feature against `docs/delivery/sprints/`).
 
 How the file is laid out (since 2026-11-13): one design page per platform. `01 التطبيق` holds every app screen and `02 لوحات التحكم` the admin, vendor and kitchen dashboards. The customer web design was removed from the file on 2026-11-13 at the owner's request (the client wants the app and the dashboards only); the list of what was removed is in [archive/web-screens-2026-11-13.md](archive/web-screens-2026-11-13.md). Inside a page the main screens are grouped by product area (dashboards: by role), right to left in journey order, and every state sits in the `الحالات` section at the bottom of the page. The lists below are grouped by product area, because that is how the build tasks are cut. Screens are Arabic RTL only; English comes from mirroring and i18n (rules on the `Design System` page).
 
 | Design page | Screens | Open |
 |---|---|---|
 | 01 التطبيق | 310 (78 main, 232 states) | [open](https://www.figma.com/design/puWXbmOVpnQpjc7mUahTnw/Jazlah-Product-Design?node-id=199-6633) |
-| 02 لوحات التحكم | 277 (55 main, 222 states) | [open](https://www.figma.com/design/puWXbmOVpnQpjc7mUahTnw/Jazlah-Product-Design?node-id=199-6635) |
+| 02 لوحات التحكم | 309 (73 main, 236 states) | [open](https://www.figma.com/design/puWXbmOVpnQpjc7mUahTnw/Jazlah-Product-Design?node-id=199-6635) |
 | Design System | | [open](https://www.figma.com/design/puWXbmOVpnQpjc7mUahTnw/Jazlah-Product-Design?node-id=199-6640) |
 
 ## Prototype flows
 
-**Start here (for the client):** [▶ ابدأ من هنا](https://www.figma.com/proto/puWXbmOVpnQpjc7mUahTnw/Jazlah-Product-Design?page-id=239%3A97236&node-id=239-97309&starting-point-node-id=239%3A97309&scaling=scale-down&hide-ui=1) is one screen with four cards (customer app, Jazlah admin dashboard, vendor dashboard, kitchen board). Each card opens that prototype in a new tab.
+**Start here (for the client):** [▶ ابدأ من هنا](https://www.figma.com/proto/puWXbmOVpnQpjc7mUahTnw/Jazlah-Product-Design?page-id=239%3A97236&node-id=239-97309&starting-point-node-id=239%3A97309&scaling=scale-down&hide-ui=1) is one screen with five cards (customer app, Jazlah admin dashboard, vendor dashboard, kitchen board, public page with the vendor application). Each card opens that prototype in a new tab.
 
 The clickable versions are on two pages at the end of the file. The screens there are copies of the main screens, so a design change needs the prototype pages rebuilt.
 
@@ -21,9 +21,10 @@ The clickable versions are on two pages at the end of the file. The screens ther
 | تجربة التطبيق (mobile) | [▶ تجربة التطبيق](https://www.figma.com/design/puWXbmOVpnQpjc7mUahTnw/Jazlah-Product-Design?node-id=227-44237) | [present](https://www.figma.com/proto/puWXbmOVpnQpjc7mUahTnw/Jazlah-Product-Design?page-id=227%3A44237&node-id=352-42301&starting-point-node-id=352%3A42301&scaling=scale-down) | 76 + 2 bottom sheets | 320 |
 | لوحة الإدارة | [▶ تجربة لوحة التحكم](https://www.figma.com/design/puWXbmOVpnQpjc7mUahTnw/Jazlah-Product-Design?node-id=227-61372) | [present](https://www.figma.com/proto/puWXbmOVpnQpjc7mUahTnw/Jazlah-Product-Design?page-id=227%3A61372&node-id=352-48216&starting-point-node-id=352%3A48216&scaling=scale-down) | 39 + login | 608 on the page (all three roles) |
 | لوحة البائع | same page | [present](https://www.figma.com/proto/puWXbmOVpnQpjc7mUahTnw/Jazlah-Product-Design?page-id=227%3A61372&node-id=352-55869&starting-point-node-id=352%3A55869&scaling=scale-down) | 11 + login | |
-| لوحة المطبخ | same page | [present](https://www.figma.com/proto/puWXbmOVpnQpjc7mUahTnw/Jazlah-Product-Design?page-id=227%3A61372&node-id=352-57997&starting-point-node-id=352%3A57997&scaling=scale-down) | 1 | |
+| لوحة المطبخ | same page | [present](https://www.figma.com/proto/puWXbmOVpnQpjc7mUahTnw/Jazlah-Product-Design?page-id=227%3A61372&node-id=410-40806&starting-point-node-id=410%3A40806&scaling=scale-down) | sign-in (2) + board + task details + finished tab | |
+| الصفحة العامة وانضمام التاجر | same page | [present](https://www.figma.com/proto/puWXbmOVpnQpjc7mUahTnw/Jazlah-Product-Design?page-id=227%3A61372&node-id=410-41160&starting-point-node-id=410%3A41160&scaling=scale-down) | public page, phone, code, 5 steps, status, approved | |
 
-Link check by script on 2026-11-13, after the last rebuild: 928 links, 0 pointing to a missing screen. One dashboard screen has an enabled primary button without a link.
+Link check by script on 2026-11-18, after the gap-closing pass: 939 links between screens, 0 pointing to a missing screen (2026-11-13: 928). Clicked in Present on 2026-11-18: public page → join → phone → code → step 1 of the application; the other new links were checked by script only. One dashboard screen has an enabled primary button without a link.
 
 Clicked through in Present after the last rebuild (2026-11-13): app: onboarding → sign-in → home → customer story → points → rewards; services → Sahm Al-Khair → share → intention → contribution done → my contributions; product → cart → checkout (scrolled) → payment → order placed → tracking timeline. Vendor: sign-in → code → live orders board → earnings → visits. Admin: sign-in → code → overview → stories review → loyalty → Sahm batches. The kitchen board's primary button has no link.
 
@@ -701,6 +702,76 @@ Added on 2026-11-13: the vendor dashboard had no sign-in of its own.
 |---|---|---|
 | دخول التاجر: رقم الجوال | [open](https://www.figma.com/design/puWXbmOVpnQpjc7mUahTnw/Jazlah-Product-Design?node-id=352-59207) | ACC-DSH-1 (#22) |
 | دخول التاجر: رمز التحقق | [open](https://www.figma.com/design/puWXbmOVpnQpjc7mUahTnw/Jazlah-Product-Design?node-id=352-59258) | ACC-DSH-1 (#22) |
+
+## الصفحة العامة وانضمام التاجر · Public page and vendor application (2026-11-18)
+
+Added on 2026-11-18 on page `02 لوحات التحكم`, in a group of its own under the kitchen group. The application is the dashboard app's public route (`/vendor/apply`, `/vendor/application`); the public page is new scope with no build task yet.
+
+### الشاشات · Screens (9)
+
+| Screen | Figma | Task |
+|---|---|---|
+| الصفحة العامة | [open](https://www.figma.com/design/puWXbmOVpnQpjc7mUahTnw/Jazlah-Product-Design?node-id=410-40478) | no task yet (new scope) |
+| انضمام التاجر: رقم الجوال | [open](https://www.figma.com/design/puWXbmOVpnQpjc7mUahTnw/Jazlah-Product-Design?node-id=410-40299) | VND-DSH-1 (#45) |
+| انضمام التاجر: رمز التحقق | [open](https://www.figma.com/design/puWXbmOVpnQpjc7mUahTnw/Jazlah-Product-Design?node-id=410-40343) | VND-DSH-1 (#45) |
+| انضمام التاجر: بيانات المنشأة | [open](https://www.figma.com/design/puWXbmOVpnQpjc7mUahTnw/Jazlah-Product-Design?node-id=410-39654) | VND-DSH-1 (#45) |
+| انضمام التاجر: المستندات | [open](https://www.figma.com/design/puWXbmOVpnQpjc7mUahTnw/Jazlah-Product-Design?node-id=410-39867) | VND-DSH-1 (#45) |
+| انضمام التاجر: الحساب البنكي | [open](https://www.figma.com/design/puWXbmOVpnQpjc7mUahTnw/Jazlah-Product-Design?node-id=410-39936) | VND-DSH-1 (#45) |
+| انضمام التاجر: الموقع | [open](https://www.figma.com/design/puWXbmOVpnQpjc7mUahTnw/Jazlah-Product-Design?node-id=410-40011) | VND-DSH-1 (#45) |
+| انضمام التاجر: الصور والمراجعة | [open](https://www.figma.com/design/puWXbmOVpnQpjc7mUahTnw/Jazlah-Product-Design?node-id=410-40094) | VND-DSH-1 (#45) |
+| انضمام التاجر: حالة الطلب | [open](https://www.figma.com/design/puWXbmOVpnQpjc7mUahTnw/Jazlah-Product-Design?node-id=410-40216) | VND-DSH-1 (#45) |
+
+### الحالات · States (4)
+
+| Screen | Figma | Task |
+|---|---|---|
+| انضمام التاجر: بيانات المنشأة · خطأ | [open](https://www.figma.com/design/puWXbmOVpnQpjc7mUahTnw/Jazlah-Product-Design?node-id=410-39774) | VND-DSH-1 (#45) |
+| انضمام التاجر: الصور والمراجعة · تحميل | [open](https://www.figma.com/design/puWXbmOVpnQpjc7mUahTnw/Jazlah-Product-Design?node-id=410-40179) | VND-DSH-1 (#45) |
+| انضمام التاجر: حالة الطلب · مقبول | [open](https://www.figma.com/design/puWXbmOVpnQpjc7mUahTnw/Jazlah-Product-Design?node-id=410-40259) | VND-DSH-1 (#45) |
+| انضمام التاجر: حالة الطلب · مرفوض | [open](https://www.figma.com/design/puWXbmOVpnQpjc7mUahTnw/Jazlah-Product-Design?node-id=410-40298) | VND-DSH-1 (#45) |
+
+### الجوال · 390 wide (3)
+
+Only these three were drawn at 390; the other steps follow the same single-column pattern.
+
+| Screen | Figma | Task |
+|---|---|---|
+| الصفحة العامة (390) | [open](https://www.figma.com/design/puWXbmOVpnQpjc7mUahTnw/Jazlah-Product-Design?node-id=410-40546) | no task yet (new scope) |
+| انضمام التاجر: بيانات المنشأة (390) | [open](https://www.figma.com/design/puWXbmOVpnQpjc7mUahTnw/Jazlah-Product-Design?node-id=410-40547) | VND-DSH-1 (#45) |
+| انضمام التاجر: حالة الطلب (390) | [open](https://www.figma.com/design/puWXbmOVpnQpjc7mUahTnw/Jazlah-Product-Design?node-id=410-40644) | VND-DSH-1 (#45) |
+
+### الرسائل · Messages to the applicant (4)
+
+| Message | Figma | Task |
+|---|---|---|
+| بريد: استلام الطلب | [open](https://www.figma.com/design/puWXbmOVpnQpjc7mUahTnw/Jazlah-Product-Design?node-id=410-40695) | no task yet (the API has no mail integration) |
+| بريد: قبول الطلب | [open](https://www.figma.com/design/puWXbmOVpnQpjc7mUahTnw/Jazlah-Product-Design?node-id=410-40712) | no task yet |
+| بريد: رفض الطلب | [open](https://www.figma.com/design/puWXbmOVpnQpjc7mUahTnw/Jazlah-Product-Design?node-id=410-40728) | no task yet |
+| رسالة نصية: قبول الطلب | [open](https://www.figma.com/design/puWXbmOVpnQpjc7mUahTnw/Jazlah-Product-Design?node-id=410-40733) | no task yet |
+
+### دخول المطبخ · Kitchen sign-in (2) and new kitchen states (2)
+
+| Screen | Figma | Task |
+|---|---|---|
+| دخول المطبخ: رقم الجوال | [open](https://www.figma.com/design/puWXbmOVpnQpjc7mUahTnw/Jazlah-Product-Design?node-id=410-38561) | ACC-DSH-1 (#22) |
+| دخول المطبخ: رمز التحقق | [open](https://www.figma.com/design/puWXbmOVpnQpjc7mUahTnw/Jazlah-Product-Design?node-id=410-38605) | ACC-DSH-1 (#22) |
+| لوحة المطبخ · تفاصيل المهمة | [open](https://www.figma.com/design/puWXbmOVpnQpjc7mUahTnw/Jazlah-Product-Design?node-id=410-39291) | KIT-DSH-1 (#128) |
+| لوحة المطبخ · المنتهية | [open](https://www.figma.com/design/puWXbmOVpnQpjc7mUahTnw/Jazlah-Product-Design?node-id=410-39150) | KIT-DSH-1 (#128) (beyond its Output) |
+
+### حالات الدخول · Sign-in states (8)
+
+| Screen | Figma | Task |
+|---|---|---|
+| دخول التاجر: رقم الجوال · خطأ | [open](https://www.figma.com/design/puWXbmOVpnQpjc7mUahTnw/Jazlah-Product-Design?node-id=410-38667) | ACC-DSH-1 (#22) |
+| دخول التاجر: رقم الجوال · تحميل | [open](https://www.figma.com/design/puWXbmOVpnQpjc7mUahTnw/Jazlah-Product-Design?node-id=410-38726) | ACC-DSH-1 (#22) |
+| دخول التاجر: رمز التحقق · خطأ | [open](https://www.figma.com/design/puWXbmOVpnQpjc7mUahTnw/Jazlah-Product-Design?node-id=410-38780) | ACC-DSH-1 (#22) |
+| دخول التاجر: رمز التحقق · تحميل | [open](https://www.figma.com/design/puWXbmOVpnQpjc7mUahTnw/Jazlah-Product-Design?node-id=410-38842) | ACC-DSH-1 (#22) |
+| دخول المطبخ: رقم الجوال · خطأ | [open](https://www.figma.com/design/puWXbmOVpnQpjc7mUahTnw/Jazlah-Product-Design?node-id=410-38896) | ACC-DSH-1 (#22) |
+| دخول المطبخ: رقم الجوال · تحميل | [open](https://www.figma.com/design/puWXbmOVpnQpjc7mUahTnw/Jazlah-Product-Design?node-id=410-38955) | ACC-DSH-1 (#22) |
+| دخول المطبخ: رمز التحقق · خطأ | [open](https://www.figma.com/design/puWXbmOVpnQpjc7mUahTnw/Jazlah-Product-Design?node-id=410-39009) | ACC-DSH-1 (#22) |
+| دخول المطبخ: رمز التحقق · تحميل | [open](https://www.figma.com/design/puWXbmOVpnQpjc7mUahTnw/Jazlah-Product-Design?node-id=410-39071) | ACC-DSH-1 (#22) |
+
+PNG exports of the 151 main screens: [exports/README.md](exports/README.md).
 
 ## English (LTR) examples
 
