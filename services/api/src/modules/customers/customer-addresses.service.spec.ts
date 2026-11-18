@@ -64,6 +64,22 @@ describe('CustomerAddressesService', () => {
     expect(kit.accounts.locked).toEqual([CUSTOMER, CUSTOMER]);
   });
 
+  it('says whether each address is covered, on every read', async () => {
+    const kit = kitWithFakes();
+    const home = await kit.addresses.create(CUSTOMER, address('Home'));
+    await kit.addresses.create(
+      CUSTOMER,
+      address('Jeddah', { location: { latitude: 21.54, longitude: 39.17 } }),
+    );
+
+    expect(home.isCovered).toBe(true);
+    expect(
+      (await kit.addresses.list(CUSTOMER)).map(
+        (each) => `${each.label}:${each.isCovered}`,
+      ),
+    ).toEqual(['Home:true', 'Jeddah:false']);
+  });
+
   it('moves the default to a new address created with makeDefault', async () => {
     const kit = kitWithFakes();
     await kit.addresses.create(CUSTOMER, address('Home'));

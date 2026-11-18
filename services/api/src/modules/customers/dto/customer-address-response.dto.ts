@@ -85,6 +85,13 @@ export class CustomerAddressResponseDto {
   isDefault!: boolean;
 
   @ApiProperty({
+    description:
+      'Whether we deliver to this address now: an active coverage zone covers its point. Worked out on every read, so it changes when admins change the zones. The same check as GET /v1/public/coverage/check.',
+    example: true,
+  })
+  isCovered!: boolean;
+
+  @ApiProperty({
     format: 'date-time',
     description: 'When the address was saved, UTC (ISO 8601).',
     example: '2026-11-15T10:00:00.000Z',

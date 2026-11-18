@@ -23,6 +23,11 @@ export const API_TAGS = {
     name: 'Public vendors',
     description: 'Active vendors (stores) as customers see them. Public.',
   },
+  publicCoverage: {
+    name: 'Public coverage',
+    description:
+      'Whether we deliver to a point on the map (the active coverage zones). Public.',
+  },
   customerAccount: {
     name: 'Customer account',
     description:
@@ -110,6 +115,11 @@ export const API_TAGS = {
     name: 'Admin media',
     description:
       'File uploads by an admin (images of the platform vendor products). Admin dashboard.',
+  },
+  adminCoverageZones: {
+    name: 'Admin coverage zones',
+    description:
+      'The delivery areas, drawn as polygons on the map: list, read, create, edit, switch on or off, delete. Admin dashboard.',
   },
   health: {
     name: 'Health',

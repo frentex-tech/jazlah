@@ -1,5 +1,5 @@
 import type { CustomerAddressText } from './customer-address-text.type';
-import type { GeoPoint } from './geo-point.type';
+import type { GeoPoint } from '@infra/database/geo-point.type';
 
 /** A new address, as the customer gives it. */
 export type NewCustomerAddress = CustomerAddressText &

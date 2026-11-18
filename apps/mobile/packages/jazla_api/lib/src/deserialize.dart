@@ -3,6 +3,11 @@ import 'package:jazla_api/src/model/admin_vendor_response_dto.dart';
 import 'package:jazla_api/src/model/auth_tokens_response_dto.dart';
 import 'package:jazla_api/src/model/change_product_prices_dto.dart';
 import 'package:jazla_api/src/model/commission_dto.dart';
+import 'package:jazla_api/src/model/coverage_check_response_dto.dart';
+import 'package:jazla_api/src/model/coverage_zone_page_response_dto.dart';
+import 'package:jazla_api/src/model/coverage_zone_response_dto.dart';
+import 'package:jazla_api/src/model/covering_zone_response_dto.dart';
+import 'package:jazla_api/src/model/create_coverage_zone_dto.dart';
 import 'package:jazla_api/src/model/create_customer_address_dto.dart';
 import 'package:jazla_api/src/model/create_cutting_packaging_incompatibility_dto.dart';
 import 'package:jazla_api/src/model/create_product_dto.dart';
@@ -17,6 +22,7 @@ import 'package:jazla_api/src/model/cutting_price_dto.dart';
 import 'package:jazla_api/src/model/error_response_dto.dart';
 import 'package:jazla_api/src/model/error_response_dto_details.dart';
 import 'package:jazla_api/src/model/field_error_dto.dart';
+import 'package:jazla_api/src/model/geo_json_polygon_dto.dart';
 import 'package:jazla_api/src/model/geo_point_dto.dart';
 import 'package:jazla_api/src/model/liveness_response_dto.dart';
 import 'package:jazla_api/src/model/localized_description_dto.dart';
@@ -65,6 +71,7 @@ import 'package:jazla_api/src/model/set_product_fulfilment_dto.dart';
 import 'package:jazla_api/src/model/signed_in_response_dto.dart';
 import 'package:jazla_api/src/model/size_price_dto.dart';
 import 'package:jazla_api/src/model/submit_vendor_application_dto.dart';
+import 'package:jazla_api/src/model/update_coverage_zone_dto.dart';
 import 'package:jazla_api/src/model/update_customer_address_dto.dart';
 import 'package:jazla_api/src/model/update_customer_profile_dto.dart';
 import 'package:jazla_api/src/model/update_reference_item_dto.dart';
@@ -112,6 +119,16 @@ final _regMap = RegExp(r'^Map<String,(.*)>$');
           return ChangeProductPricesDto.fromJson(value as Map<String, dynamic>) as ReturnType;
         case 'CommissionDto':
           return CommissionDto.fromJson(value as Map<String, dynamic>) as ReturnType;
+        case 'CoverageCheckResponseDto':
+          return CoverageCheckResponseDto.fromJson(value as Map<String, dynamic>) as ReturnType;
+        case 'CoverageZonePageResponseDto':
+          return CoverageZonePageResponseDto.fromJson(value as Map<String, dynamic>) as ReturnType;
+        case 'CoverageZoneResponseDto':
+          return CoverageZoneResponseDto.fromJson(value as Map<String, dynamic>) as ReturnType;
+        case 'CoveringZoneResponseDto':
+          return CoveringZoneResponseDto.fromJson(value as Map<String, dynamic>) as ReturnType;
+        case 'CreateCoverageZoneDto':
+          return CreateCoverageZoneDto.fromJson(value as Map<String, dynamic>) as ReturnType;
         case 'CreateCustomerAddressDto':
           return CreateCustomerAddressDto.fromJson(value as Map<String, dynamic>) as ReturnType;
         case 'CreateCuttingPackagingIncompatibilityDto':
@@ -143,6 +160,8 @@ final _regMap = RegExp(r'^Map<String,(.*)>$');
           return ErrorResponseDtoDetails.fromJson(value as Map<String, dynamic>) as ReturnType;
         case 'FieldErrorDto':
           return FieldErrorDto.fromJson(value as Map<String, dynamic>) as ReturnType;
+        case 'GeoJsonPolygonDto':
+          return GeoJsonPolygonDto.fromJson(value as Map<String, dynamic>) as ReturnType;
         case 'GeoPointDto':
           return GeoPointDto.fromJson(value as Map<String, dynamic>) as ReturnType;
         case 'LivenessResponseDto':
@@ -239,6 +258,8 @@ final _regMap = RegExp(r'^Map<String,(.*)>$');
           return SizePriceDto.fromJson(value as Map<String, dynamic>) as ReturnType;
         case 'SubmitVendorApplicationDto':
           return SubmitVendorApplicationDto.fromJson(value as Map<String, dynamic>) as ReturnType;
+        case 'UpdateCoverageZoneDto':
+          return UpdateCoverageZoneDto.fromJson(value as Map<String, dynamic>) as ReturnType;
         case 'UpdateCustomerAddressDto':
           return UpdateCustomerAddressDto.fromJson(value as Map<String, dynamic>) as ReturnType;
         case 'UpdateCustomerProfileDto':

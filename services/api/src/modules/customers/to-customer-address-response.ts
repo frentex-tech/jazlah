@@ -19,6 +19,7 @@ export function toCustomerAddressResponse(
     shortNationalAddress: address.shortNationalAddress,
     driverInstructions: address.driverInstructions,
     isDefault: address.isDefault,
+    isCovered: address.isCovered,
     createdAt: address.createdAt,
     updatedAt: address.updatedAt,
   };

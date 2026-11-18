@@ -5,6 +5,7 @@ lib/jazla_api.dart
 lib/src/api.dart
 lib/src/api/admin_account_api.dart
 lib/src/api/admin_catalog_lists_api.dart
+lib/src/api/admin_coverage_zones_api.dart
 lib/src/api/admin_media_api.dart
 lib/src/api/admin_product_change_requests_api.dart
 lib/src/api/admin_products_api.dart
@@ -19,6 +20,7 @@ lib/src/api/health_api.dart
 lib/src/api/kitchen_account_api.dart
 lib/src/api/public_auth_api.dart
 lib/src/api/public_catalog_api.dart
+lib/src/api/public_coverage_api.dart
 lib/src/api/public_vendors_api.dart
 lib/src/api/vendor_account_api.dart
 lib/src/api/vendor_catalog_lists_api.dart
@@ -36,6 +38,11 @@ lib/src/model/admin_vendor_response_dto.dart
 lib/src/model/auth_tokens_response_dto.dart
 lib/src/model/change_product_prices_dto.dart
 lib/src/model/commission_dto.dart
+lib/src/model/coverage_check_response_dto.dart
+lib/src/model/coverage_zone_page_response_dto.dart
+lib/src/model/coverage_zone_response_dto.dart
+lib/src/model/covering_zone_response_dto.dart
+lib/src/model/create_coverage_zone_dto.dart
 lib/src/model/create_customer_address_dto.dart
 lib/src/model/create_cutting_packaging_incompatibility_dto.dart
 lib/src/model/create_product_dto.dart
@@ -51,6 +58,7 @@ lib/src/model/error_code.dart
 lib/src/model/error_response_dto.dart
 lib/src/model/error_response_dto_details.dart
 lib/src/model/field_error_dto.dart
+lib/src/model/geo_json_polygon_dto.dart
 lib/src/model/geo_point_dto.dart
 lib/src/model/liveness_response_dto.dart
 lib/src/model/localized_description_dto.dart
@@ -99,6 +107,7 @@ lib/src/model/set_product_fulfilment_dto.dart
 lib/src/model/signed_in_response_dto.dart
 lib/src/model/size_price_dto.dart
 lib/src/model/submit_vendor_application_dto.dart
+lib/src/model/update_coverage_zone_dto.dart
 lib/src/model/update_customer_address_dto.dart
 lib/src/model/update_customer_profile_dto.dart
 lib/src/model/update_reference_item_dto.dart

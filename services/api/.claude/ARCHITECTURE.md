@@ -34,6 +34,7 @@ prisma/
                               ProductCutting, ProductPackagingOption (product_packagings), ProductExclusion,
                               ProductChangeRequest (enums product_status, product_fulfilment, product_packaging,
                               product_change_request_status)
+  models/coverage.prisma      CoverageZone -> coverage_zones (polygon geometry(Polygon, 4326), GIST index)
   models/auth.prisma          OtpChallenge -> otp_challenges, AuthSession -> auth_sessions, RefreshToken ->
                               refresh_tokens (enums device_platform, auth_session_revocation_reason)
   migrations/                 20261113150318_init: PostGIS extension, audit_logs; 20261113224826_idempotency_keys;
@@ -45,7 +46,8 @@ prisma/
                               20261116140000_catalog_category_sort_order (categories' display order, check by hand);
                               20261116160000_catalog_change_request_superseded (superseded status; review check
                               rewritten by hand); 20261117120000_customers (profiles, addresses, consent records;
-                              users' tombstone; checks and the default address index by hand)
+                              users' tombstone; checks and the default address index by hand);
+                              20261118120000_coverage_zones (the ST_IsValid check by hand)
   seed/                       pnpm db:seed (and `prisma db seed`): development data for the frontends, idempotent,
                               refuses production. seed.ts (entry), seed.module.ts, one step per file (seed-vendors.ts,
                               seed-products.ts…), placeholder PNG and PDF encoders, data/ (*.constants.ts data sets,
@@ -58,7 +60,7 @@ src/
   create-admin.ts             pnpm admin:create <phone>: grants admin access (create-admin.module.ts)
   create-platform-vendor.ts   pnpm vendor:create-platform: creates the platform vendor (create-platform-vendor.module.ts)
   app.module.ts               imports config, logger, database, redis, queue, event bus, rate limit, auth (after
-                              rate limit: guard order), health, media, vendors, catalog;
+                              rate limit: guard order), health, media, vendors, catalog, customers, coverage;
                               registers the global filter and pipe
   generate-openapi.ts         pnpm openapi:generate / openapi:check (Nest preview mode: nothing connects)
   config/                     env.schema.ts (zod), validate-env.ts, load-env.ts (the one reader of process.env),
@@ -108,6 +110,8 @@ src/
                               transaction scope (with its state), idempotency-runner.ts (runOnce, table
                               idempotency_keys), map-prisma-error.ts, map-constraint-violation.ts (a named constraint
                               to its code), keyset-after.ts + keyset-order.constants.ts (keyset pages);
+                              the geo helper: point-from-lat-lng.ts, polygon-from-geo-json.ts, to-geo-json.ts (SQL
+                              and GeoJSON), is-geo-json-polygon.ts, is-point-in-polygon.ts (in memory), their types;
                               generated/prisma/ (not committed)
     audit/                    audit-log-writer.ts (an audit_logs entry inside the caller's transaction), audit.module.ts
     redis/                    redis.module.ts (global), redis.service.ts (shared client), redis-readiness.check.ts
@@ -166,6 +170,9 @@ src/
                               status state machines, entities, ports, fakes), infrastructure/ (Prisma repositories,
                               AES-GCM IBAN cipher, MediaService and UsersService adapters, the status checker);
                               platform-vendor.module.ts (what the command needs); exports VendorDirectory
+    coverage/                 CRUD-shaped: coverage-zones.service.ts (admins' zones, audited; the database side of
+                              the check), coverage.service.ts (findZone, isCovered: exported),
+                              active-coverage-zones.cache.ts (Redis, versioned), controllers/ (admin, public), dto/
     catalog/                  four layers: admin lists (categories, meat types, cutting styles, "without" items),
                               cutting and packaging rules, products (sizes, cuttings, packagings, exclusions,
                               images), their review (state machine), change requests on published products,
@@ -176,7 +183,8 @@ test/
   *.e2e-spec.ts               health, errors, request-id, database, queue, event-bus, api-docs, http-security,
                               rate-limit, startup, logging, redis-logging, shutdown, media (fake storage),
                               media-storage (MinIO), auth, auth-guard, media-endpoints, vendors,
-                              vendors-logging, vendor-routes-suspension (walks every vendor route), catalog;
+                              vendors-logging, vendor-routes-suspension (walks every vendor route), catalog,
+                              customers, coverage;
                               jest-e2e.json
   support/                    test-only code: createHttpApp() (the real app set up as main.ts does; no workers
                               unless `workers` turns one on, enableWorkers), probe

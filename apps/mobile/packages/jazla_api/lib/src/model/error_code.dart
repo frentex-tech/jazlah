@@ -107,6 +107,9 @@ enum ErrorCode {
       @JsonValue(r'RECENT_SIGN_IN_REQUIRED')
       RECENT_SIGN_IN_REQUIRED(r'RECENT_SIGN_IN_REQUIRED'),
           /// Stable error code. Clients branch on it; it is never renamed or reused.
+      @JsonValue(r'INVALID_POLYGON')
+      INVALID_POLYGON(r'INVALID_POLYGON'),
+          /// Stable error code. Clients branch on it; it is never renamed or reused.
       @JsonValue(r'unknown_default_open_api')
       unknownDefaultOpenApi(r'unknown_default_open_api');
 

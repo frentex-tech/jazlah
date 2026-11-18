@@ -6,7 +6,8 @@ The designs cover the whole product, but the API is built in steps. **If a scree
 
 Everything in `openapi.json`, which is:
 - **Sign-in and sessions:** all four audiences.
-- **Customers:** the profile, marketing consent, addresses and account deletion.
+- **Customers:** the profile, marketing consent, addresses (each with `isCovered`) and account deletion.
+- **Coverage zones:** the admin's zones (polygons) and the public coverage check ([coverage.md](coverage.md)).
 - **Vendors:**
   - applications (with city, optional VAT number and the optional document kinds) and their review;
   - the vendor profile: logo, cover photo, description, contact phone and email, VAT number;
@@ -41,7 +42,7 @@ None of these has an endpoint yet:
 | **Checkout** | Address choice, delivery slot, totals with VAT, payment method; the complete-profile check and the address lock at checkout | not built |
 | **Orders** | Order list and detail, statuses, cancellation, re-order; the vendor's and kitchen's order queues | not built |
 | **Payments** | Card payment (Geidea), Apple Pay, cash on delivery, BNPL (instalments) | not built |
-| **Delivery and scheduling** | Delivery zones (the check on addresses comes with zones), slots and capacity, Eid days, driver tracking | not built |
+| **Delivery and scheduling** | Slots and capacity, Eid days, driver tracking (coverage zones are built) | not built |
 | **Refunds and wallet** | Refunds, partial refunds, weight adjustments, wallet balance | not built |
 | **Finance** | Vendor statements, payouts, commission reports | not built |
 | **Invoices** | VAT invoices (ZATCA e-invoicing) | not built |

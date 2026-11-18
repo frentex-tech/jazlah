@@ -4,7 +4,10 @@ import { normalizeSaudiPhoneNumber } from '@common/phone/normalize-saudi-phone-n
 // a seeded change request must be one the API can read back, and this test fails as soon
 // as the stored format changes.
 import { STORED_PRODUCT_CONTENT } from '@modules/catalog/infrastructure/stored-product-content.schema';
+import { isGeoJsonPolygon } from '@infra/database/is-geo-json-polygon';
+import { isPointInPolygon } from '@infra/database/is-point-in-polygon';
 import { SEED_CATEGORIES } from './data/categories.constants';
+import { SEED_COVERAGE_ZONES } from './data/coverage-zones.constants';
 import { SEED_CUSTOMERS } from './data/customers.constants';
 import { SEED_CUTTING_STYLES } from './data/cutting-styles.constants';
 import { DEVELOPMENT_ACCOUNTS } from './data/development-accounts.constants';
@@ -389,6 +392,30 @@ describe('the seed data', () => {
       expect(byUser.get('dev-customer')?.fullName).not.toBeNull();
       expect(byUser.get('dev-customer')?.addresses.length).toBeGreaterThan(0);
       expect(byUser.get('dev-customer-new')?.fullName).toBeNull();
+    });
+  });
+
+  describe('coverage zones', () => {
+    it('has unique keys, GeoJSON polygons, #RRGGBB colours and cities of 2 to 50 characters', () => {
+      expect(unique(keysOf(SEED_COVERAGE_ZONES))).toBe(true);
+      for (const zone of SEED_COVERAGE_ZONES) {
+        expect(isGeoJsonPolygon(zone.polygon)).toBe(true);
+        expect(zone.color).toMatch(/^#[0-9A-Fa-f]{6}$/);
+        expect(chars(zone.city)).toBeGreaterThanOrEqual(2);
+        expect(chars(zone.city)).toBeLessThanOrEqual(50);
+      }
+    });
+
+    it('covers the seeded addresses except one, so both cases show', () => {
+      const covered = SEED_CUSTOMERS.flatMap(
+        (customer) => customer.addresses,
+      ).map((address) =>
+        SEED_COVERAGE_ZONES.some((zone) =>
+          isPointInPolygon(address, zone.polygon),
+        ),
+      );
+
+      expect(covered.filter((each) => !each)).toHaveLength(1);
     });
   });
 });

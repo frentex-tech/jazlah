@@ -5,6 +5,7 @@ import { DbContext } from '@infra/database/db-context';
 import type { CustomerAddress as CustomerAddressRow } from '@infra/database/generated/prisma/client';
 import { mapPrismaError } from '@infra/database/map-prisma-error';
 import { TransactionRunner } from '@infra/database/transaction-runner';
+import { CoverageService } from '@modules/coverage';
 import { UsersService } from '@modules/users';
 import type { CustomerAccounts } from './customer-accounts.type';
 import type { CustomerAddress } from './customer-address.type';
@@ -30,9 +31,10 @@ const NEWEST_FIRST = [{ createdAt: 'desc' }, { id: 'desc' }] as const;
  * `customer_addresses_user_id_default_key` guarantees at most one default even if this
  * code were wrong; "at least one" is this code's alone.
  *
- * Another customer's address is NOT_FOUND, exactly like a missing one. Whether an address
- * is inside a delivery zone is checked when zones exist; orders copy the address at
- * checkout, so editing a saved one never changes an order.
+ * Another customer's address is NOT_FOUND, exactly like a missing one. Every address
+ * returned says whether an active coverage zone covers it (`isCovered`), asked of
+ * CoverageService after any transaction (the check may read Redis). Orders copy the
+ * address at checkout, so editing a saved one never changes an order.
  */
 @Injectable()
 export class CustomerAddressesService {
@@ -42,6 +44,8 @@ export class CustomerAddressesService {
     // Narrowed to what is used, so a unit test passes a plain object.
     @Inject(TransactionRunner)
     private readonly transactions: Pick<TransactionRunner, 'run'>,
+    @Inject(CoverageService)
+    private readonly coverage: Pick<CoverageService, 'isCovered'>,
   ) {}
 
   /** The customer's addresses, the default first, then newest first; at most ten. */
@@ -53,7 +57,7 @@ export class CustomerAddressesService {
         orderBy: [{ isDefault: 'desc' }, ...NEWEST_FIRST],
       }),
     );
-    return rows.map((row) => this.toAddress(row));
+    return Promise.all(rows.map((row) => this.toAddress(row)));
   }
 
   /** One of the customer's addresses, or NOT_FOUND. */
@@ -67,11 +71,11 @@ export class CustomerAddressesService {
    * allowed, and nothing is added. The first address is the default; `makeDefault`
    * makes a later one the default instead of the current one.
    */
-  create(
+  async create(
     userId: string,
     address: NewCustomerAddress,
   ): Promise<CustomerAddress> {
-    return this.transactions.run(async () => {
+    const row = await this.transactions.run(async () => {
       await lockCustomer(this.accounts, userId);
       const count = await this.query(() =>
         this.db.client.customerAddress.count({ where: { userId } }),
@@ -85,67 +89,64 @@ export class CustomerAddressesService {
       if (isDefault) {
         await this.clearDefault(userId);
       }
-      return this.toAddress(
-        await this.query(() =>
-          this.db.client.customerAddress.create({
-            data: {
-              userId,
-              label: address.label,
-              latitude: address.location.latitude,
-              longitude: address.location.longitude,
-              city: address.city,
-              district: address.district,
-              street: address.street,
-              building: address.building,
-              shortNationalAddress: address.shortNationalAddress,
-              driverInstructions: address.driverInstructions,
-              isDefault,
-            },
-          }),
-        ),
+      return this.query(() =>
+        this.db.client.customerAddress.create({
+          data: {
+            userId,
+            label: address.label,
+            latitude: address.location.latitude,
+            longitude: address.location.longitude,
+            city: address.city,
+            district: address.district,
+            street: address.street,
+            building: address.building,
+            shortNationalAddress: address.shortNationalAddress,
+            driverInstructions: address.driverInstructions,
+            isDefault,
+          },
+        }),
       );
     });
+    return this.toAddress(row);
   }
 
   /** Changes an address; the default stays as it is. NOT_FOUND for another's. */
-  update(
+  async update(
     userId: string,
     id: string,
     changes: CustomerAddressChanges,
   ): Promise<CustomerAddress> {
-    return this.transactions.run(async () => {
+    const row = await this.transactions.run(async () => {
       await lockCustomer(this.accounts, userId);
       await this.ownRow(userId, id);
       const { location, ...fields } = changes;
-      return this.toAddress(
-        await this.query(() =>
-          this.db.client.customerAddress.update({
-            where: { id },
-            data: { ...fields, ...location },
-          }),
-        ),
+      return this.query(() =>
+        this.db.client.customerAddress.update({
+          where: { id },
+          data: { ...fields, ...location },
+        }),
       );
     });
+    return this.toAddress(row);
   }
 
   /** Makes an address the default, clearing the old one. NOT_FOUND for another's. */
-  makeDefault(userId: string, id: string): Promise<CustomerAddress> {
-    return this.transactions.run(async () => {
+  async makeDefault(userId: string, id: string): Promise<CustomerAddress> {
+    const row = await this.transactions.run(async () => {
       await lockCustomer(this.accounts, userId);
-      const row = await this.ownRow(userId, id);
-      if (row.isDefault) {
-        return this.toAddress(row);
+      const own = await this.ownRow(userId, id);
+      if (own.isDefault) {
+        return own;
       }
       await this.clearDefault(userId);
-      return this.toAddress(
-        await this.query(() =>
-          this.db.client.customerAddress.update({
-            where: { id },
-            data: { isDefault: true },
-          }),
-        ),
+      return this.query(() =>
+        this.db.client.customerAddress.update({
+          where: { id },
+          data: { isDefault: true },
+        }),
       );
     });
+    return this.toAddress(row);
   }
 
   /**
@@ -212,11 +213,12 @@ export class CustomerAddressesService {
     );
   }
 
-  private toAddress(row: CustomerAddressRow): CustomerAddress {
+  private async toAddress(row: CustomerAddressRow): Promise<CustomerAddress> {
+    const location = { latitude: row.latitude, longitude: row.longitude };
     return {
       id: row.id,
       label: row.label,
-      location: { latitude: row.latitude, longitude: row.longitude },
+      location,
       city: row.city,
       district: row.district,
       street: row.street,
@@ -224,6 +226,7 @@ export class CustomerAddressesService {
       shortNationalAddress: row.shortNationalAddress,
       driverInstructions: row.driverInstructions,
       isDefault: row.isDefault,
+      isCovered: await this.coverage.isCovered(location),
       createdAt: row.createdAt,
       updatedAt: row.updatedAt,
     };

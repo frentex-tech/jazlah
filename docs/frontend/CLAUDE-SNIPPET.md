@@ -7,7 +7,7 @@ Paste the block below into your app's `CLAUDE.md` (Flutter app, Next.js website,
 
 The backend's contract is `services/api/openapi.json`; the integration guides are in `docs/frontend/`.
 
-- Before integrating any endpoint, read `docs/frontend/README.md`, `conventions.md`, `errors.md` and `auth.md`, then the guide of the module you are working on (`customer-profile.md`, `vendors.md`, `catalog.md`, `uploads.md`). Check `not-built-yet.md` before assuming an endpoint exists.
+- Before integrating any endpoint, read `docs/frontend/README.md`, `conventions.md`, `errors.md` and `auth.md`, then the guide of the module you are working on (`customer-profile.md`, `vendors.md`, `catalog.md`, `coverage.md`, `uploads.md`). Check `not-built-yet.md` before assuming an endpoint exists.
 - Use the generated API client (`docs/frontend/client-generation.md`). Never hand-write an endpoint call, a URL, a request body or a response type. If `openapi.json` changed, regenerate the client first.
 - Branch on the error `code`, never on `message` (`docs/frontend/errors.md`). Handle the codes the operation lists in `openapi.json`.
 - Money is integer halalas with VAT included; timestamps are UTC, shown in Asia/Riyadh time; lists are paged with an opaque cursor (`docs/frontend/conventions.md`).

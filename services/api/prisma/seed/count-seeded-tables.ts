@@ -37,6 +37,7 @@ export async function countSeededTables(
     ['customer_profiles', await client.customerProfile.count()],
     ['customer_addresses', await client.customerAddress.count()],
     ['consent_records', await client.consentRecord.count()],
+    ['coverage_zones', await client.coverageZone.count()],
     ['audit_logs', await client.auditLog.count()],
   ];
 }

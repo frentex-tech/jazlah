@@ -100,4 +100,9 @@ export enum ErrorCode {
    * Sign in again, then repeat it. 403, not 401, so a client does not just refresh.
    */
   RECENT_SIGN_IN_REQUIRED = 'RECENT_SIGN_IN_REQUIRED',
+  /**
+   * A coverage zone's boundary is not a valid polygon: not closed, too few points, a
+   * position out of range, or edges that cross (PostGIS ST_IsValid). Nothing was saved.
+   */
+  INVALID_POLYGON = 'INVALID_POLYGON',
 }
