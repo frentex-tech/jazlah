@@ -108,5 +108,127 @@
   "galleryToastSuccess": "تمت إضافة المنتج إلى السلة",
   "galleryToastError": "تعذّر إتمام العملية، حاول مرة أخرى",
   "galleryToastWarning": "الكمية المتاحة محدودة",
-  "galleryToastInfo": "سيصلك إشعار عند تجهيز الطلب"
+  "galleryToastInfo": "سيصلك إشعار عند تجهيز الطلب",
+  "back": "رجوع",
+  "onboardingTitle1": "لحوم طازجة من أفضل المتاجر",
+  "onboardingBody1": "اختر من متاجر موثّقة، واعرف وقت الذبح وجودة كل قطعة قبل أن تطلب.",
+  "onboardingTitle2": "وصّل طلبك في يومك",
+  "onboardingBody2": "حدّد يوم التوصيل المناسب لك، وتابع طلبك لحظة بلحظة حتى باب البيت.",
+  "onboardingTitle3": "لكل مناسبة ما يناسبها",
+  "onboardingBody3": "ولائم وعقائق وأضاحٍ وزيارات مزارع، ونطبخها لك إن أردت.",
+  "onboardingNext": "التالي",
+  "onboardingSkip": "تخطي",
+  "onboardingStart": "ابدأ الآن",
+  "phoneTitle": "أهلًا بك في جزلة",
+  "phoneSubtitle": "أدخل رقم جوالك وسنرسل لك رمز التحقق.",
+  "phoneLabel": "رقم الجوال",
+  "phoneHint": "سنرسل لك رمز التحقق",
+  "phoneInvalid": "أدخل رقم جوال سعودي صحيح مكوّن من 9 أرقام",
+  "trustVerified": "متاجر موثّقة",
+  "trustFresh": "طازج يوم الذبح",
+  "trustDelivery": "توصيل في يومك",
+  "termsNotice": "بالمتابعة فأنت توافق على الشروط وسياسة الخصوصية.",
+  "sendCode": "إرسال الرمز",
+  "otpTitle": "أدخل رمز التحقق",
+  "otpSubtitle": "أرسلنا رمزًا من {length} أرقام إلى {phone}",
+  "@otpSubtitle": {
+    "placeholders": {
+      "length": {
+        "type": "int"
+      },
+      "phone": {
+        "type": "String"
+      }
+    }
+  },
+  "otpFieldLabel": "رمز التحقق",
+  "otpResendIn": "إعادة الإرسال بعد {time}",
+  "@otpResendIn": {
+    "placeholders": {
+      "time": {
+        "type": "String"
+      }
+    }
+  },
+  "otpResend": "إعادة إرسال الرمز",
+  "otpInvalid": "الرمز غير صحيح، حاول مرة أخرى",
+  "otpExpired": "انتهت صلاحية الرمز، اطلب رمزًا جديدًا",
+  "otpReauthNotice": "لأمانك، أكّد أنه أنت قبل حذف الحساب",
+  "confirm": "تأكيد",
+  "profileTitle": "أكمل ملفك",
+  "profileSubtitle": "نحتاج اسمك لنُجهّز طلباتك ونتواصل معك.",
+  "editProfileTitle": "تعديل الملف",
+  "fullNameLabel": "الاسم الكامل",
+  "fieldPlaceholder": "اكتب هنا",
+  "nameRequired": "الاسم مطلوب",
+  "nameLength": "الاسم من 2 إلى 60 حرفًا",
+  "emailLabel": "البريد الإلكتروني (اختياري)",
+  "emailHint": "لن نرسل لك إلا إشعارات طلباتك",
+  "emailInvalid": "أدخل بريدًا إلكترونيًا صحيحًا",
+  "marketingConsent": "أوافق على استلام العروض والأخبار",
+  "saveAndContinue": "حفظ ومتابعة",
+  "save": "حفظ",
+  "tabHome": "الرئيسية",
+  "tabServices": "الخدمات",
+  "tabOrders": "الطلبات",
+  "tabAccount": "حسابي",
+  "cart": "السلة",
+  "accountTitle": "حسابي",
+  "editProfile": "تعديل الملف",
+  "statOrders": "طلبًا",
+  "statAddresses": "عناوين",
+  "statAnimals": "مواشٍ",
+  "statListings": "إعلانات",
+  "menuOrders": "طلباتي",
+  "menuOrdersActive": "{count} طلب نشط",
+  "@menuOrdersActive": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "menuAddresses": "عناويني",
+  "menuAnimals": "مواشيّ",
+  "menuFeedListings": "إعلاناتي في سوق الأعلاف",
+  "menuPoints": "نقاط جزلة",
+  "menuPointsValue": "{points} نقطة",
+  "@menuPointsValue": {
+    "placeholders": {
+      "points": {
+        "type": "int"
+      }
+    }
+  },
+  "menuStories": "قصص الاستلام",
+  "menuCharity": "صدقاتي · سهم الخير",
+  "menuNotifications": "الإشعارات",
+  "menuSettings": "الإعدادات",
+  "menuHelp": "المساعدة والدعم",
+  "signOut": "تسجيل الخروج",
+  "settingsTitle": "الإعدادات",
+  "settingsLanguage": "اللغة",
+  "settingsNotifications": "الإشعارات",
+  "settingsOrderNotifications": "إشعارات الطلبات",
+  "settingsOffers": "العروض والأخبار",
+  "settingsLoadError": "تعذّر تحميل الإعدادات",
+  "checkConnection": "تحقق من اتصالك ثم حاول مرة أخرى.",
+  "deleteAccount": "حذف الحساب",
+  "deleteAccountTitle": "حذف الحساب؟",
+  "deleteAccountBody": "سيتم حذف حسابك وعناوينك وطلباتك السابقة نهائيًا، ولا يمكن التراجع عن ذلك.",
+  "cancel": "إلغاء",
+  "deleteReasonTitle": "لماذا تريد حذف حسابك؟",
+  "deleteReasonHint": "اختياري، يساعدنا على التحسّن.",
+  "deleteReasonNotUsing": "لم أعد أستخدم التطبيق",
+  "deleteReasonPrivacy": "مخاوف تتعلق بالخصوصية",
+  "deleteReasonBadExperience": "مررت بتجربة سيئة",
+  "deleteReasonOtherAccount": "لدي حساب آخر",
+  "deleteReasonOther": "سبب آخر",
+  "deleteAccountForever": "حذف الحساب نهائيًا",
+  "accountDeleted": "تم حذف حسابك",
+  "guestTitle": "سجّل دخولك",
+  "guestBody": "سجّل دخولك لتتابع طلباتك وعناوينك.",
+  "signIn": "تسجيل الدخول",
+  "comingSoonTitle": "قريبًا",
+  "comingSoonBody": "هذا القسم قيد التجهيز."
 }

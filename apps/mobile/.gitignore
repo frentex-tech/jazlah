@@ -53,3 +53,7 @@ android/key.properties
 ios/Runner/GoogleService-Info.plist
 android/app/google-services.json
 ios/Flutter/Secrets.xcconfig
+
+# Design QA renders (tool/screenshots)
+tool/screenshots/out/
+tool/screenshots/failures/

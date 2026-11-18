@@ -7,6 +7,13 @@ import 'package:flutter/widgets.dart';
 /// once a phosphor_flutter release builds on our Flutter. Add icons here with their codepoint from
 /// phosphor_flutter's `phosphor_icons_regular.dart` / `phosphor_icons_fill.dart`.
 abstract final class JIcons {
+  static const pencilSimple = IconData(0xe3b4, fontFamily: _regular, fontPackage: _package);
+  static const pawPrint = IconData(0xe648, fontFamily: _regular, fontPackage: _package);
+  static const camera = IconData(0xe10e, fontFamily: _regular, fontPackage: _package);
+  static const gear = IconData(0xe270, fontFamily: _regular, fontPackage: _package);
+  static const chatCircleText = IconData(0xe16e, fontFamily: _regular, fontPackage: _package);
+  static const signOut = IconData(0xe42a, fontFamily: _regular, fontPackage: _package);
+  static const starFill = IconData(0xe46a, fontFamily: _fill, fontPackage: _package);
   static const check = IconData(0xe182, fontFamily: _regular, fontPackage: _package);
   static const storefront = IconData(0xe470, fontFamily: _regular, fontPackage: _package);
   static const plus = IconData(0xe3d4, fontFamily: _regular, fontPackage: _package);

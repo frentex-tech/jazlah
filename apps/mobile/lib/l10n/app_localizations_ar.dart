@@ -334,4 +334,285 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get galleryToastInfo => 'سيصلك إشعار عند تجهيز الطلب';
+
+  @override
+  String get back => 'رجوع';
+
+  @override
+  String get onboardingTitle1 => 'لحوم طازجة من أفضل المتاجر';
+
+  @override
+  String get onboardingBody1 => 'اختر من متاجر موثّقة، واعرف وقت الذبح وجودة كل قطعة قبل أن تطلب.';
+
+  @override
+  String get onboardingTitle2 => 'وصّل طلبك في يومك';
+
+  @override
+  String get onboardingBody2 => 'حدّد يوم التوصيل المناسب لك، وتابع طلبك لحظة بلحظة حتى باب البيت.';
+
+  @override
+  String get onboardingTitle3 => 'لكل مناسبة ما يناسبها';
+
+  @override
+  String get onboardingBody3 => 'ولائم وعقائق وأضاحٍ وزيارات مزارع، ونطبخها لك إن أردت.';
+
+  @override
+  String get onboardingNext => 'التالي';
+
+  @override
+  String get onboardingSkip => 'تخطي';
+
+  @override
+  String get onboardingStart => 'ابدأ الآن';
+
+  @override
+  String get phoneTitle => 'أهلًا بك في جزلة';
+
+  @override
+  String get phoneSubtitle => 'أدخل رقم جوالك وسنرسل لك رمز التحقق.';
+
+  @override
+  String get phoneLabel => 'رقم الجوال';
+
+  @override
+  String get phoneHint => 'سنرسل لك رمز التحقق';
+
+  @override
+  String get phoneInvalid => 'أدخل رقم جوال سعودي صحيح مكوّن من 9 أرقام';
+
+  @override
+  String get trustVerified => 'متاجر موثّقة';
+
+  @override
+  String get trustFresh => 'طازج يوم الذبح';
+
+  @override
+  String get trustDelivery => 'توصيل في يومك';
+
+  @override
+  String get termsNotice => 'بالمتابعة فأنت توافق على الشروط وسياسة الخصوصية.';
+
+  @override
+  String get sendCode => 'إرسال الرمز';
+
+  @override
+  String get otpTitle => 'أدخل رمز التحقق';
+
+  @override
+  String otpSubtitle(int length, String phone) {
+    return 'أرسلنا رمزًا من $length أرقام إلى $phone';
+  }
+
+  @override
+  String get otpFieldLabel => 'رمز التحقق';
+
+  @override
+  String otpResendIn(String time) {
+    return 'إعادة الإرسال بعد $time';
+  }
+
+  @override
+  String get otpResend => 'إعادة إرسال الرمز';
+
+  @override
+  String get otpInvalid => 'الرمز غير صحيح، حاول مرة أخرى';
+
+  @override
+  String get otpExpired => 'انتهت صلاحية الرمز، اطلب رمزًا جديدًا';
+
+  @override
+  String get otpReauthNotice => 'لأمانك، أكّد أنه أنت قبل حذف الحساب';
+
+  @override
+  String get confirm => 'تأكيد';
+
+  @override
+  String get profileTitle => 'أكمل ملفك';
+
+  @override
+  String get profileSubtitle => 'نحتاج اسمك لنُجهّز طلباتك ونتواصل معك.';
+
+  @override
+  String get editProfileTitle => 'تعديل الملف';
+
+  @override
+  String get fullNameLabel => 'الاسم الكامل';
+
+  @override
+  String get fieldPlaceholder => 'اكتب هنا';
+
+  @override
+  String get nameRequired => 'الاسم مطلوب';
+
+  @override
+  String get nameLength => 'الاسم من 2 إلى 60 حرفًا';
+
+  @override
+  String get emailLabel => 'البريد الإلكتروني (اختياري)';
+
+  @override
+  String get emailHint => 'لن نرسل لك إلا إشعارات طلباتك';
+
+  @override
+  String get emailInvalid => 'أدخل بريدًا إلكترونيًا صحيحًا';
+
+  @override
+  String get marketingConsent => 'أوافق على استلام العروض والأخبار';
+
+  @override
+  String get saveAndContinue => 'حفظ ومتابعة';
+
+  @override
+  String get save => 'حفظ';
+
+  @override
+  String get tabHome => 'الرئيسية';
+
+  @override
+  String get tabServices => 'الخدمات';
+
+  @override
+  String get tabOrders => 'الطلبات';
+
+  @override
+  String get tabAccount => 'حسابي';
+
+  @override
+  String get cart => 'السلة';
+
+  @override
+  String get accountTitle => 'حسابي';
+
+  @override
+  String get editProfile => 'تعديل الملف';
+
+  @override
+  String get statOrders => 'طلبًا';
+
+  @override
+  String get statAddresses => 'عناوين';
+
+  @override
+  String get statAnimals => 'مواشٍ';
+
+  @override
+  String get statListings => 'إعلانات';
+
+  @override
+  String get menuOrders => 'طلباتي';
+
+  @override
+  String menuOrdersActive(int count) {
+    return '$count طلب نشط';
+  }
+
+  @override
+  String get menuAddresses => 'عناويني';
+
+  @override
+  String get menuAnimals => 'مواشيّ';
+
+  @override
+  String get menuFeedListings => 'إعلاناتي في سوق الأعلاف';
+
+  @override
+  String get menuPoints => 'نقاط جزلة';
+
+  @override
+  String menuPointsValue(int points) {
+    return '$points نقطة';
+  }
+
+  @override
+  String get menuStories => 'قصص الاستلام';
+
+  @override
+  String get menuCharity => 'صدقاتي · سهم الخير';
+
+  @override
+  String get menuNotifications => 'الإشعارات';
+
+  @override
+  String get menuSettings => 'الإعدادات';
+
+  @override
+  String get menuHelp => 'المساعدة والدعم';
+
+  @override
+  String get signOut => 'تسجيل الخروج';
+
+  @override
+  String get settingsTitle => 'الإعدادات';
+
+  @override
+  String get settingsLanguage => 'اللغة';
+
+  @override
+  String get settingsNotifications => 'الإشعارات';
+
+  @override
+  String get settingsOrderNotifications => 'إشعارات الطلبات';
+
+  @override
+  String get settingsOffers => 'العروض والأخبار';
+
+  @override
+  String get settingsLoadError => 'تعذّر تحميل الإعدادات';
+
+  @override
+  String get checkConnection => 'تحقق من اتصالك ثم حاول مرة أخرى.';
+
+  @override
+  String get deleteAccount => 'حذف الحساب';
+
+  @override
+  String get deleteAccountTitle => 'حذف الحساب؟';
+
+  @override
+  String get deleteAccountBody => 'سيتم حذف حسابك وعناوينك وطلباتك السابقة نهائيًا، ولا يمكن التراجع عن ذلك.';
+
+  @override
+  String get cancel => 'إلغاء';
+
+  @override
+  String get deleteReasonTitle => 'لماذا تريد حذف حسابك؟';
+
+  @override
+  String get deleteReasonHint => 'اختياري، يساعدنا على التحسّن.';
+
+  @override
+  String get deleteReasonNotUsing => 'لم أعد أستخدم التطبيق';
+
+  @override
+  String get deleteReasonPrivacy => 'مخاوف تتعلق بالخصوصية';
+
+  @override
+  String get deleteReasonBadExperience => 'مررت بتجربة سيئة';
+
+  @override
+  String get deleteReasonOtherAccount => 'لدي حساب آخر';
+
+  @override
+  String get deleteReasonOther => 'سبب آخر';
+
+  @override
+  String get deleteAccountForever => 'حذف الحساب نهائيًا';
+
+  @override
+  String get accountDeleted => 'تم حذف حسابك';
+
+  @override
+  String get guestTitle => 'سجّل دخولك';
+
+  @override
+  String get guestBody => 'سجّل دخولك لتتابع طلباتك وعناوينك.';
+
+  @override
+  String get signIn => 'تسجيل الدخول';
+
+  @override
+  String get comingSoonTitle => 'قريبًا';
+
+  @override
+  String get comingSoonBody => 'هذا القسم قيد التجهيز.';
 }

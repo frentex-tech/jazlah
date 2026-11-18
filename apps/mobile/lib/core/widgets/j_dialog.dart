@@ -2,7 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:jazlah/app/theme/theme.dart';
 import 'package:jazlah/core/widgets/j_button.dart';
 
-enum JDialogType { normal, destructive }
+/// `destructiveText`: the Settings delete-account dialog, whose confirm is a red text button
+/// (ghost S, 52 high, Medium 13 in `danger`) instead of the filled danger button.
+enum JDialogType { normal, destructive, destructiveText }
 
 /// Figma `Dialog`: title, body and two actions (confirm at the start, cancel at the end);
 /// type default (primary confirm) / destructive (danger confirm).
@@ -50,12 +52,14 @@ class JDialog extends StatelessWidget {
             Row(
               children: [
                 Expanded(
-                  child: JButton(
-                    label: confirmLabel,
-                    onPressed: onConfirm,
-                    expand: true,
-                    variant: type == JDialogType.destructive ? JButtonVariant.danger : JButtonVariant.primary,
-                  ),
+                  child: type == JDialogType.destructiveText
+                      ? _TextConfirm(label: confirmLabel, onPressed: onConfirm)
+                      : JButton(
+                          label: confirmLabel,
+                          onPressed: onConfirm,
+                          expand: true,
+                          variant: type == JDialogType.destructive ? JButtonVariant.danger : JButtonVariant.primary,
+                        ),
                 ),
                 const SizedBox(width: JSpace.s12),
                 Expanded(
@@ -103,4 +107,34 @@ Future<bool?> showJDialog(
       ),
     ),
   );
+}
+
+class _TextConfirm extends StatelessWidget {
+  const _TextConfirm({required this.label, required this.onPressed});
+
+  final String label;
+  final VoidCallback? onPressed;
+
+  @override
+  Widget build(BuildContext context) {
+    return Semantics(
+      button: true,
+      child: GestureDetector(
+        behavior: HitTestBehavior.opaque,
+        onTap: onPressed,
+        child: Container(
+          height: 52,
+          padding: const EdgeInsetsDirectional.symmetric(horizontal: JSpace.s16),
+          decoration: BoxDecoration(borderRadius: BorderRadius.circular(JRadius.sm)),
+          alignment: Alignment.center,
+          child: Text(
+            label,
+            style: JText.raw(13, FontWeight.w500, color: JColors.danger).copyWith(height: 1.5),
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+          ),
+        ),
+      ),
+    );
+  }
 }
