@@ -1,0 +1,51 @@
+{
+  "name": "@jazlah/dashboard",
+  "private": true,
+  "packageManager": "pnpm@10.20.0",
+  "engines": {
+    "node": ">=22"
+  },
+  "scripts": {
+    "dev": "next dev -p 3001",
+    "build": "next build",
+    "start": "next start -p 3001",
+    "lint": "eslint .",
+    "typecheck": "tsc --noEmit",
+    "test:e2e": "playwright test",
+    "api:generate": "openapi-typescript ../../services/api/openapi.json -o src/api/schema.d.ts",
+    "test:unit": "node --experimental-strip-types --no-warnings src/lib/phone.test.ts && node --experimental-strip-types --no-warnings src/features/coverage/geo.test.ts"
+  },
+  "dependencies": {
+    "@hookform/resolvers": "^7.0.7",
+    "@phosphor-icons/react": "^2.1.10",
+    "@radix-ui/react-dialog": "^1.3.1",
+    "@tanstack/react-table": "^8.21.3",
+    "class-variance-authority": "^0.7.1",
+    "clsx": "^2.1.1",
+    "maplibre-gl": "^5.24.1",
+    "next": "^15.5.29",
+    "next-intl": "^4.15.1",
+    "openapi-fetch": "0.17.0",
+    "react": "^19.3.1",
+    "react-dom": "^19.3.1",
+    "react-hook-form": "^7.92.0",
+    "tailwind-merge": "^3.7.0",
+    "terra-draw": "^1.40.0",
+    "terra-draw-maplibre-gl-adapter": "^1.5.0",
+    "zod": "^4.6.7"
+  },
+  "devDependencies": {
+    "@eslint/eslintrc": "^3.3.7",
+    "@playwright/test": "^1.65.1",
+    "@types/node": "^26.6.6",
+    "@types/react": "^19.3.0",
+    "@types/react-dom": "^19.3.0",
+    "autoprefixer": "^10.6.2",
+    "eslint": "^9.39.5",
+    "eslint-config-next": "^15.5.29",
+    "openapi-typescript": "7.13.0",
+    "postcss": "^8.5.33",
+    "tailwindcss": "^3.4.19",
+    "typescript": "5.9.3"
+  }
+}

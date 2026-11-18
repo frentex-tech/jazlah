@@ -292,7 +292,7 @@ This task also covers:
 **Output:**
 
 *Scaffold Flutter customer app*
-- `apps/mobile` Flutter (stable) app, bundle ids `sa.jazlah.app` (+ `.dev`, `.staging`), flavors dev/staging/prod with `main_<flavor>.dart` and per-flavor Firebase config
+- `apps/mobile` Flutter (stable) app, bundle ids `sa.jazlah.app` (+ `.dev`, `.staging`), flavors dev/staging/prod with `main_<flavor>.dart` and per-flavor config files (`config/<flavor>.json`, git-ignored). **Changed 2026-11-18:** the per-flavor Firebase files land with NOT-MOB-1 (FCM/APNs setup per flavor), because the Firebase projects (FND-INF-5) do not exist yet
 - Structure from `docs/architecture.md §4`: `app/`, `core/`, `features/`, `l10n/`
 - Riverpod, go_router with deep-link scheme `jazlah://` and universal links placeholder, `flutter_localizations` + ARB files (ar default, en), RTL by locale
 - `core/api`: generated dart-dio client wired with an interceptor that adds the token and `Accept-Language` and refreshes on 401 (single-flight)

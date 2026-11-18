@@ -1,0 +1,270 @@
+{
+  "meta": {
+    "title": "JAZLA · Dashboard"
+  },
+  "panel": {
+    "admin": "Admin",
+    "vendor": "Vendor",
+    "kitchen": "Kitchen"
+  },
+  "nav": {
+    "label": "Main menu",
+    "signOut": "Sign out",
+    "admin": {
+      "overview": "Overview",
+      "orders": "Orders",
+      "stores": "Stores",
+      "products": "Products",
+      "customers": "Customers",
+      "delivery": "Delivery",
+      "cooking": "Cooking tasks",
+      "finance": "Finance",
+      "stories": "Stories",
+      "loyalty": "Loyalty & points",
+      "charity": "Sahm Al-Khair",
+      "settings": "Settings"
+    },
+    "vendor": {
+      "orders": "Orders board",
+      "products": "My products",
+      "earnings": "Earnings",
+      "store": "Store profile",
+      "visits": "Visits & livestock",
+      "settings": "Settings"
+    },
+    "kitchen": {
+      "orders": "Current orders"
+    }
+  },
+  "topBar": {
+    "search": "Search by order number or customer",
+    "notifications": "Notifications"
+  },
+  "pages": {
+    "admin": {
+      "breadcrumb": "Admin / Overview",
+      "title": "Overview",
+      "range": "Last 7 days",
+      "export": "Export report"
+    },
+    "vendor": {
+      "breadcrumb": "Orders / Live board",
+      "title": "Live orders"
+    },
+    "kitchen": {
+      "breadcrumb": "Kitchen / Current orders",
+      "title": "Kitchen board · Today",
+      "export": "Export",
+      "print": "Print prep cards"
+    },
+    "placeholder": "This page's content is built in its own task.",
+    "tableDemo": {
+      "breadcrumb": "Admin / Table demo",
+      "title": "Table demo"
+    }
+  },
+  "table": {
+    "showing": "Showing {from} to {to} of {total}",
+    "prev": "Previous page",
+    "next": "Next page",
+    "page": "Page {page}",
+    "actions": "Actions",
+    "filter": "Search",
+    "clearAll": "Clear all"
+  },
+  "demo": {
+    "orderNo": "Order no.",
+    "customer": "Customer",
+    "store": "Store",
+    "status": "Status",
+    "amount": "Amount",
+    "date": "Date",
+    "statusAll": "All statuses",
+    "statuses": {
+      "preparing": "Preparing",
+      "delivered": "Delivered",
+      "review": "In review",
+      "cancelled": "Cancelled",
+      "new": "New"
+    },
+    "currency": "SAR"
+  },
+  "state": {
+    "empty": {
+      "title": "No orders yet",
+      "body": "Your past and current orders will show here.",
+      "action": "Start the first order"
+    },
+    "noResults": {
+      "title": "No results",
+      "body": "Try other words or change the filters.",
+      "action": "Clear filters"
+    },
+    "error": {
+      "title": "Something went wrong",
+      "body": "We couldn't load the data. Try again.",
+      "action": "Try again"
+    },
+    "offline": {
+      "title": "No internet connection",
+      "body": "Check your connection, then try again.",
+      "action": "Try again"
+    },
+    "denied": {
+      "title": "You don't have access",
+      "body": "Ask your account manager for access.",
+      "action": "Back"
+    },
+    "loading": "Loading"
+  },
+  "dialog": {
+    "cancel": "Cancel",
+    "confirm": "Confirm",
+    "delete": "Delete"
+  },
+  "upload": {
+    "choose": "Choose a file",
+    "uploading": "Uploading…",
+    "done": "Uploaded",
+    "failed": "The file couldn't be uploaded. Try again.",
+    "remove": "Remove"
+  },
+  "form": {
+    "required": "This field is required",
+    "save": "Save"
+  },
+  "login": {
+    "phoneLabel": "Mobile number",
+    "phonePlaceholder": "5X XXX XXXX",
+    "phoneHint": "We'll send you a verification code",
+    "send": "Send code",
+    "otpTitle": "Enter the verification code",
+    "otpSent": "We sent a {length}-digit code to {number}",
+    "otpLabel": "Verification code",
+    "confirm": "Confirm",
+    "resendIn": "Resend in {time}",
+    "resend": "Resend code",
+    "errors": {
+      "phoneInvalid": "Enter a valid Saudi mobile number starting with 5",
+      "otpInvalid": "The code is wrong, try again",
+      "noAccess": "If the code is right, this number has no access to the {panel}.",
+      "otpExpired": "The code has expired. Ask for a new one.",
+      "rateLimited": "Too many attempts. Try again in {seconds} seconds.",
+      "disabled": "This account is disabled. Contact the JAZLA team.",
+      "suspended": "Your store is suspended. Contact the JAZLA team.",
+      "unavailable": "We couldn't connect. Try again."
+    },
+    "choose": {
+      "title": "Choose a dashboard",
+      "body": "Your number has access to more than one dashboard. Choose the one to open.",
+      "open": "Open",
+      "addAnother": "Sign in to another dashboard"
+    },
+    "admin": {
+      "brand": "Staff dashboard",
+      "title": "Staff sign-in",
+      "subtitle": "Enter the mobile number registered with the admin team.",
+      "footer": "This dashboard is for authorised staff only.",
+      "panelName": "admin dashboard",
+      "heroTitle": "JAZLA dashboard",
+      "heroBody": "Orders, stores, delivery and finance in one place. Authorised staff only.",
+      "p1": "Live orders board",
+      "p1b": "Follow every order from receipt to delivery",
+      "p2": "Reports & finance",
+      "p2b": "Store sales and settlements in real time",
+      "p3": "Role-based access",
+      "p3b": "Admin · Vendor · Kitchen"
+    },
+    "vendor": {
+      "brand": "Vendor dashboard",
+      "title": "Vendor sign-in",
+      "subtitle": "Enter your business mobile number registered with JAZLA.",
+      "footer": "No vendor account yet?",
+      "apply": "Apply to join",
+      "panelName": "vendor dashboard",
+      "heroTitle": "Vendor dashboard",
+      "heroBody": "Receive your orders, set slaughter times and follow your earnings in one place.",
+      "p1": "Live orders",
+      "p1b": "Instant alert for every new order",
+      "p2": "Earnings & payouts",
+      "p2b": "Weekly settlement to your bank account",
+      "p3": "Products & stock",
+      "p3b": "Update prices and availability"
+    },
+    "kitchen": {
+      "brand": "Kitchen dashboard",
+      "title": "Kitchen sign-in",
+      "subtitle": "Enter the mobile number registered for your kitchen.",
+      "footer": "Kitchen accounts are created by the JAZLA team. Contact them if your number isn't registered.",
+      "panelName": "kitchen dashboard",
+      "heroTitle": "Kitchen dashboard",
+      "heroBody": "Receive cooking tasks, update their status and hand them over on time.",
+      "p1": "Today and upcoming",
+      "p1b": "Sound alert for every new task",
+      "p2": "Every dish in detail",
+      "p2b": "Number of guests and customer notes",
+      "p3": "On-time handover",
+      "p3b": "Call the courier when it's ready"
+    }
+  },
+  "coverage": {
+    "breadcrumb": "Admin / Settings / Coverage zones",
+    "title": "Coverage zones",
+    "newZone": "New zone",
+    "mapLabel": "Coverage zones map",
+    "nameAr": "Arabic name",
+    "nameEn": "English name",
+    "city": "City",
+    "color": "Zone color",
+    "status": "Status",
+    "active": "Active",
+    "inactive": "Inactive",
+    "activeToggle": "Zone is active",
+    "selectZone": "Edit {zone}",
+    "cities": {
+      "riyadh": "Riyadh",
+      "jeddah": "Jeddah",
+      "dammam": "Dammam",
+      "makkah": "Makkah",
+      "madinah": "Madinah"
+    },
+    "hints": {
+      "draw": "Click the map to place the boundary points, then click the first point to close the zone.",
+      "edit": "Drag the points to change the boundary, or click a point to remove it.",
+      "test": "Click anywhere on the map to see whether it is covered."
+    },
+    "test": {
+      "start": "Test a point",
+      "stop": "Stop testing",
+      "covered": "Covered: {zone}",
+      "notCovered": "Not covered",
+      "loading": "Checking…"
+    },
+    "form": {
+      "newTitle": "New zone",
+      "editTitle": "Zone details",
+      "body": "Customers see the name when their address is checked. Inactive zones don't count as covered.",
+      "editShape": "Edit boundary",
+      "delete": "Delete zone"
+    },
+    "errors": {
+      "invalidPolygon": "The boundary isn't valid. Draw at least three points without crossing lines."
+    },
+    "empty": {
+      "title": "No coverage zones",
+      "body": "Draw the first zone on the map to start taking orders from it."
+    },
+    "deleteDialog": {
+      "title": "Delete the zone?",
+      "body": "Orders from “{zone}” won't be accepted after it is deleted."
+    },
+    "colors": {
+      "ember": "Ember",
+      "info": "Blue",
+      "success": "Green",
+      "warning": "Orange",
+      "gold-text": "Gold",
+      "brand": "Dark wine"
+    }
+  }
+}
