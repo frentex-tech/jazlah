@@ -617,4 +617,102 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get comingSoonBody => 'This section is on its way.';
+
+  @override
+  String get clear => 'Clear';
+
+  @override
+  String get locAddAddressTitle => 'Add address';
+
+  @override
+  String get locSearchHint => 'Search for a district or street';
+
+  @override
+  String get locSearchActiveHint => 'Search for an address or district';
+
+  @override
+  String get locMoveHint => 'Move the map to set the pin on your location.';
+
+  @override
+  String get locConfirm => 'Confirm location';
+
+  @override
+  String get locPinLabel => 'Delivery location';
+
+  @override
+  String get locOutOfCoverageBanner => 'Sorry, we don\'t deliver to this location yet.';
+
+  @override
+  String get locGeocodeError => 'We couldn\'t find the address for this spot. Try again.';
+
+  @override
+  String get locPermTitle => 'Allow access to your location';
+
+  @override
+  String get locPermBody => 'We use your location to show nearby stores and set your delivery address precisely.';
+
+  @override
+  String get locPermManual => 'Enter the address manually';
+
+  @override
+  String get locPermAllow => 'Allow while using the app';
+
+  @override
+  String get locPermDeniedTitle => 'Location access is off';
+
+  @override
+  String get locPermDeniedBody => 'Turn on location access in your device settings, or enter your address manually.';
+
+  @override
+  String get locPermOpenSettings => 'Open settings';
+
+  @override
+  String get locPermLoadingTitle => 'Finding your location';
+
+  @override
+  String get locPermLoadingBody => 'One moment while we find your current location…';
+
+  @override
+  String get locPermErrorTitle => 'We couldn\'t find your location';
+
+  @override
+  String get locPermErrorBody => 'Make sure location services are on, then try again.';
+
+  @override
+  String get locOutScreenTitle => 'Location';
+
+  @override
+  String get locOutTitle => 'Outside our delivery area';
+
+  @override
+  String get locOutBody => 'We don\'t deliver to this location yet. Choose another location inside our service areas.';
+
+  @override
+  String get locOutChange => 'Change location';
+
+  @override
+  String get locOutPickup => 'Browse and pick up from a store';
+
+  @override
+  String locOutCities(String cities) {
+    return 'Available now in: $cities.';
+  }
+
+  @override
+  String get locOutChecking => 'Checking coverage for your location…';
+
+  @override
+  String get locOutErrorTitle => 'We couldn\'t check coverage';
+
+  @override
+  String get locOutErrorBody => 'Something went wrong while checking your location. Try again.';
+
+  @override
+  String get locHomeOutOfCoverage => 'Outside our delivery area: browse and order for pickup from a store.';
+
+  @override
+  String get locChoose => 'Choose your location';
+
+  @override
+  String get listSeparator => ', ';
 }

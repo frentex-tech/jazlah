@@ -1291,6 +1291,198 @@ abstract class AppLocalizations {
   /// In ar, this message translates to:
   /// **'هذا القسم قيد التجهيز.'**
   String get comingSoonBody;
+
+  /// No description provided for @clear.
+  ///
+  /// In ar, this message translates to:
+  /// **'مسح'**
+  String get clear;
+
+  /// No description provided for @locAddAddressTitle.
+  ///
+  /// In ar, this message translates to:
+  /// **'إضافة عنوان'**
+  String get locAddAddressTitle;
+
+  /// No description provided for @locSearchHint.
+  ///
+  /// In ar, this message translates to:
+  /// **'ابحث عن حي أو شارع'**
+  String get locSearchHint;
+
+  /// No description provided for @locSearchActiveHint.
+  ///
+  /// In ar, this message translates to:
+  /// **'ابحث عن عنوان أو حي'**
+  String get locSearchActiveHint;
+
+  /// No description provided for @locMoveHint.
+  ///
+  /// In ar, this message translates to:
+  /// **'حرّك الخريطة لضبط الدبوس على موقعك.'**
+  String get locMoveHint;
+
+  /// No description provided for @locConfirm.
+  ///
+  /// In ar, this message translates to:
+  /// **'تأكيد الموقع'**
+  String get locConfirm;
+
+  /// No description provided for @locPinLabel.
+  ///
+  /// In ar, this message translates to:
+  /// **'موقع التوصيل'**
+  String get locPinLabel;
+
+  /// No description provided for @locOutOfCoverageBanner.
+  ///
+  /// In ar, this message translates to:
+  /// **'عذرًا، لا نوصّل إلى هذا الموقع حاليًا.'**
+  String get locOutOfCoverageBanner;
+
+  /// No description provided for @locGeocodeError.
+  ///
+  /// In ar, this message translates to:
+  /// **'تعذّر تحديد العنوان لهذا الموقع. حاول مرة أخرى.'**
+  String get locGeocodeError;
+
+  /// No description provided for @locPermTitle.
+  ///
+  /// In ar, this message translates to:
+  /// **'السماح بالوصول إلى موقعك'**
+  String get locPermTitle;
+
+  /// No description provided for @locPermBody.
+  ///
+  /// In ar, this message translates to:
+  /// **'نستخدم موقعك لنعرض لك المتاجر القريبة ونحدد عنوان التوصيل بدقة.'**
+  String get locPermBody;
+
+  /// No description provided for @locPermManual.
+  ///
+  /// In ar, this message translates to:
+  /// **'إدخال العنوان يدويًا'**
+  String get locPermManual;
+
+  /// No description provided for @locPermAllow.
+  ///
+  /// In ar, this message translates to:
+  /// **'السماح أثناء الاستخدام'**
+  String get locPermAllow;
+
+  /// No description provided for @locPermDeniedTitle.
+  ///
+  /// In ar, this message translates to:
+  /// **'إذن الموقع متوقف'**
+  String get locPermDeniedTitle;
+
+  /// No description provided for @locPermDeniedBody.
+  ///
+  /// In ar, this message translates to:
+  /// **'فعّل إذن الموقع من إعدادات الجهاز، أو أدخل عنوانك يدويًا.'**
+  String get locPermDeniedBody;
+
+  /// No description provided for @locPermOpenSettings.
+  ///
+  /// In ar, this message translates to:
+  /// **'فتح الإعدادات'**
+  String get locPermOpenSettings;
+
+  /// No description provided for @locPermLoadingTitle.
+  ///
+  /// In ar, this message translates to:
+  /// **'نحدد موقعك'**
+  String get locPermLoadingTitle;
+
+  /// No description provided for @locPermLoadingBody.
+  ///
+  /// In ar, this message translates to:
+  /// **'لحظات ونجد موقعك الحالي…'**
+  String get locPermLoadingBody;
+
+  /// No description provided for @locPermErrorTitle.
+  ///
+  /// In ar, this message translates to:
+  /// **'تعذّر تحديد موقعك'**
+  String get locPermErrorTitle;
+
+  /// No description provided for @locPermErrorBody.
+  ///
+  /// In ar, this message translates to:
+  /// **'تأكد من تفعيل خدمة الموقع في جهازك ثم حاول مرة أخرى.'**
+  String get locPermErrorBody;
+
+  /// No description provided for @locOutScreenTitle.
+  ///
+  /// In ar, this message translates to:
+  /// **'الموقع'**
+  String get locOutScreenTitle;
+
+  /// No description provided for @locOutTitle.
+  ///
+  /// In ar, this message translates to:
+  /// **'خارج نطاق التوصيل'**
+  String get locOutTitle;
+
+  /// No description provided for @locOutBody.
+  ///
+  /// In ar, this message translates to:
+  /// **'لا نوصّل إلى هذا الموقع حتى الآن. اختر موقعًا آخر داخل مناطق الخدمة.'**
+  String get locOutBody;
+
+  /// No description provided for @locOutChange.
+  ///
+  /// In ar, this message translates to:
+  /// **'تغيير الموقع'**
+  String get locOutChange;
+
+  /// No description provided for @locOutPickup.
+  ///
+  /// In ar, this message translates to:
+  /// **'تصفّح واستلم من المتجر'**
+  String get locOutPickup;
+
+  /// No description provided for @locOutCities.
+  ///
+  /// In ar, this message translates to:
+  /// **'المناطق المتاحة حاليًا: {cities}.'**
+  String locOutCities(String cities);
+
+  /// No description provided for @locOutChecking.
+  ///
+  /// In ar, this message translates to:
+  /// **'نتحقق من تغطية موقعك…'**
+  String get locOutChecking;
+
+  /// No description provided for @locOutErrorTitle.
+  ///
+  /// In ar, this message translates to:
+  /// **'تعذّر التحقق من التغطية'**
+  String get locOutErrorTitle;
+
+  /// No description provided for @locOutErrorBody.
+  ///
+  /// In ar, this message translates to:
+  /// **'حدث خطأ أثناء التحقق من موقعك. حاول مرة أخرى.'**
+  String get locOutErrorBody;
+
+  /// No description provided for @locHomeOutOfCoverage.
+  ///
+  /// In ar, this message translates to:
+  /// **'خارج نطاق التوصيل: تصفّح واطلب الاستلام من المتجر.'**
+  String get locHomeOutOfCoverage;
+
+  /// No description provided for @locChoose.
+  ///
+  /// In ar, this message translates to:
+  /// **'اختر موقعك'**
+  String get locChoose;
+
+  /// No description provided for @listSeparator.
+  ///
+  /// In ar, this message translates to:
+  /// **'، '**
+  String get listSeparator;
 }
 
 class _AppLocalizationsDelegate extends LocalizationsDelegate<AppLocalizations> {

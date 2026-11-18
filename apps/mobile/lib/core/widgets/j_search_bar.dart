@@ -7,7 +7,6 @@ import 'package:jazlah/core/widgets/j_icons.dart';
 class JSearchBar extends StatefulWidget {
   const JSearchBar({
     required this.placeholder,
-    required this.filterLabel,
     required this.clearLabel,
     super.key,
     this.controller,
@@ -16,12 +15,14 @@ class JSearchBar extends StatefulWidget {
     this.onChanged,
     this.onSubmitted,
     this.onFilter,
+    this.filterLabel,
   });
 
   final String placeholder;
 
   /// Semantics labels of the icon-only buttons.
-  final String filterLabel;
+  /// Null hides the filter button (the map search has none).
+  final String? filterLabel;
   final String clearLabel;
   final TextEditingController? controller;
   final FocusNode? focusNode;
@@ -118,23 +119,25 @@ class _JSearchBarState extends State<JSearchBar> {
               ),
             ),
           ],
-          const SizedBox(width: JSpace.s12),
-          Semantics(
-            button: true,
-            label: widget.filterLabel,
-            excludeSemantics: true,
-            child: GestureDetector(
-              behavior: HitTestBehavior.opaque,
-              onTap: widget.onFilter,
-              child: Container(
-                width: 36,
-                height: 36,
-                alignment: Alignment.center,
-                decoration: BoxDecoration(color: JColors.brand, borderRadius: BorderRadius.circular(JRadius.sm)),
-                child: const Icon(JIcons.slidersHorizontal, size: 20, color: JColors.paper),
+          if (widget.filterLabel != null) ...[
+            const SizedBox(width: JSpace.s12),
+            Semantics(
+              button: true,
+              label: widget.filterLabel,
+              excludeSemantics: true,
+              child: GestureDetector(
+                behavior: HitTestBehavior.opaque,
+                onTap: widget.onFilter,
+                child: Container(
+                  width: 36,
+                  height: 36,
+                  alignment: Alignment.center,
+                  decoration: BoxDecoration(color: JColors.brand, borderRadius: BorderRadius.circular(JRadius.sm)),
+                  child: const Icon(JIcons.slidersHorizontal, size: 20, color: JColors.paper),
+                ),
               ),
             ),
-          ),
+          ],
         ],
       ),
     );

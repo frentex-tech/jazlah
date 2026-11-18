@@ -22,9 +22,11 @@ class Prefs {
   Future<void> setString(String key, String value) => _p.setString(key, value);
   Future<void> remove(String key) => _p.remove(key);
 
-  /// Keeps the language. Signing out keeps the onboarding as seen; deleting the account shows it again.
+  /// Keeps the language and the selected location (they belong to the device). Signing out keeps the onboarding as seen; deleting the account shows it again.
   Future<void> clearAccountData({bool keepOnboarding = true}) async {
-    for (final key in _p.getKeys().where((k) => k != 'locale' && (!keepOnboarding || k != 'onboardingSeen'))) {
+    for (final key in _p.getKeys().where(
+      (k) => k != 'locale' && !k.startsWith('location.') && (!keepOnboarding || k != 'onboardingSeen'),
+    )) {
       await _p.remove(key);
     }
   }

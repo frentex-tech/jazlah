@@ -17,7 +17,9 @@ flutter run --flavor staging -t lib/main_staging.dart --dart-define-from-file=co
 
 Without a backend, set `"USE_MOCKS": "true"` in the config file. Outside prod, the widget gallery is at `/gallery`.
 
-iOS uses Swift Package Manager for plugins (no CocoaPods). The flavors' Xcode configurations and schemes were created by `scripts/setup_ios_flavors.rb`.
+iOS uses Swift Package Manager where plugins support it and **CocoaPods** for the rest (`google_maps_flutter` has no SPM package yet), so install CocoaPods (`pod --version`). The flavors' Xcode configurations and schemes were created by `scripts/setup_ios_flavors.rb`; the Podfile maps them.
+
+Maps: without a key the map picker uses a mock map; see `config/README.md` for the three places the key goes.
 
 ## Layout (`docs/architecture.md` §4)
 
