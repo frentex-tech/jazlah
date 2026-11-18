@@ -991,6 +991,82 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/v1/admin/coverage-zones": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * The coverage zones, newest first
+         * @description Admin dashboard, the coverage zones map and list. Every zone, active and inactive, with its polygon, newest first. Keyset paging: send `nextCursor` back as `cursor` until it is null; no total count.
+         */
+        get: operations["adminListCoverageZones"];
+        put?: never;
+        /**
+         * Add a coverage zone
+         * @description Admin dashboard, the zone editor: the admin draws the boundary on the map. Active at once unless `isActive` is false; `color` (`#RRGGBB`, the map colour) defaults to #6A1A20; the coverage check uses it from the next request. INVALID_POLYGON: the boundary is not a valid polygon (a ring not closed or with fewer than four positions, a position out of range, edges that cross); nothing was saved, let the admin redraw it.
+         */
+        post: operations["adminCreateCoverageZone"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/admin/coverage-zones/{id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * One coverage zone
+         * @description Admin dashboard, the zone editor. NOT_FOUND for an unknown id.
+         */
+        get: operations["adminGetCoverageZone"];
+        put?: never;
+        post?: never;
+        /**
+         * Delete a coverage zone
+         * @description Admin dashboard, the zone editor. Deletes the zone for good; addresses in it stop being covered from the next request. To pause a zone instead, set `isActive` to false. NOT_FOUND for an unknown id, also when already deleted.
+         */
+        delete: operations["adminDeleteCoverageZone"];
+        options?: never;
+        head?: never;
+        /**
+         * Edit a zone, redraw it, or switch it on or off
+         * @description Admin dashboard, the zone editor. Changes only the fields sent (name, city, polygon, isActive, color); applies to the coverage check from the next request. NOT_FOUND for an unknown id. INVALID_POLYGON: the new boundary is not a valid polygon; nothing was saved.
+         */
+        patch: operations["adminUpdateCoverageZone"];
+        trace?: never;
+    };
+    "/v1/public/coverage/check": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Do we deliver to this point?
+         * @description Customer app, the map pin (before or after sign-in): whether an active coverage zone covers the point, and which. Public: no token needed.
+         *
+         *     Inactive zones never count. Saved addresses also carry `isCovered` (GET /v1/customer/addresses).
+         *
+         *     VALIDATION_FAILED for a missing or out-of-range lat or lng.
+         */
+        get: operations["publicCheckCoverage"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/v1/health": {
         parameters: {
             query?: never;
@@ -1623,7 +1699,7 @@ export interface components {
          * @description Stable error code. Clients branch on it; it is never renamed or reused.
          * @enum {string}
          */
-        ErrorCode: "VALIDATION_FAILED" | "BAD_REQUEST" | "NOT_FOUND" | "METHOD_NOT_ALLOWED" | "UNAUTHORIZED" | "FORBIDDEN" | "CONFLICT" | "PAYLOAD_TOO_LARGE" | "UNSUPPORTED_MEDIA_TYPE" | "RATE_LIMITED" | "TRANSACTION_CONFLICT" | "SERVICE_UNAVAILABLE" | "INTERNAL_ERROR" | "MEDIA_CONTENT_TYPE_NOT_ALLOWED" | "MEDIA_NOT_FOUND" | "MEDIA_UPLOAD_EXPIRED" | "MEDIA_UPLOAD_REJECTED" | "MEDIA_NOT_READY" | "OTP_INVALID" | "OTP_EXPIRED" | "REFRESH_TOKEN_INVALID" | "ACCESS_TOKEN_EXPIRED" | "ACCOUNT_DISABLED" | "VENDOR_APPLICATION_ALREADY_PENDING" | "VENDOR_APPLICATION_NOT_PENDING" | "VENDOR_SUSPENDED" | "VENDOR_ACCESS_ALREADY_HELD" | "PRODUCT_NOT_EDITABLE" | "PRODUCT_NOT_SUBMITTABLE" | "PRODUCT_CHANGE_REQUEST_SUPERSEDED" | "ADDRESS_LIMIT_REACHED" | "ACCOUNT_HAS_STAFF_ACCESS" | "RECENT_SIGN_IN_REQUIRED";
+        ErrorCode: "VALIDATION_FAILED" | "BAD_REQUEST" | "NOT_FOUND" | "METHOD_NOT_ALLOWED" | "UNAUTHORIZED" | "FORBIDDEN" | "CONFLICT" | "PAYLOAD_TOO_LARGE" | "UNSUPPORTED_MEDIA_TYPE" | "RATE_LIMITED" | "TRANSACTION_CONFLICT" | "SERVICE_UNAVAILABLE" | "INTERNAL_ERROR" | "MEDIA_CONTENT_TYPE_NOT_ALLOWED" | "MEDIA_NOT_FOUND" | "MEDIA_UPLOAD_EXPIRED" | "MEDIA_UPLOAD_REJECTED" | "MEDIA_NOT_READY" | "OTP_INVALID" | "OTP_EXPIRED" | "REFRESH_TOKEN_INVALID" | "ACCESS_TOKEN_EXPIRED" | "ACCOUNT_DISABLED" | "VENDOR_APPLICATION_ALREADY_PENDING" | "VENDOR_APPLICATION_NOT_PENDING" | "VENDOR_SUSPENDED" | "VENDOR_ACCESS_ALREADY_HELD" | "PRODUCT_NOT_EDITABLE" | "PRODUCT_NOT_SUBMITTABLE" | "PRODUCT_CHANGE_REQUEST_SUPERSEDED" | "ADDRESS_LIMIT_REACHED" | "ACCOUNT_HAS_STAFF_ACCESS" | "RECENT_SIGN_IN_REQUIRED" | "INVALID_POLYGON";
         ErrorResponseDto: {
             /**
              * @description Stable error code. Clients branch on it; it is never renamed or reused.
@@ -2726,6 +2802,11 @@ export interface components {
              */
             isDefault: boolean;
             /**
+             * @description Whether we deliver to this address now: an active coverage zone covers its point. Worked out on every read, so it changes when admins change the zones. The same check as GET /v1/public/coverage/check.
+             * @example true
+             */
+            isCovered: boolean;
+            /**
              * Format: date-time
              * @description When the address was saved, UTC (ISO 8601).
              * @example 2026-11-15T10:00:00.000Z
@@ -2825,6 +2906,158 @@ export interface components {
             label?: string;
             /** @description A new point on the map, in degrees (JSON numbers). Left out keeps the current one; null is VALIDATION_FAILED (an address always has a location). */
             location?: components["schemas"]["GeoPointDto"];
+        };
+        GeoJsonPolygonDto: {
+            /**
+             * @description Always `Polygon`.
+             * @example Polygon
+             * @enum {string}
+             */
+            type: "Polygon";
+            /**
+             * @description The rings, as GeoJSON: the outer boundary first, then any holes. Each ring is a list of at least four `[longitude, latitude]` positions in degrees (WGS 84; longitude first), the last repeating the first. Edges must not cross (INVALID_POLYGON otherwise).
+             * @example [
+             *       [
+             *         [
+             *           46.6,
+             *           24.6
+             *         ],
+             *         [
+             *           46.8,
+             *           24.6
+             *         ],
+             *         [
+             *           46.8,
+             *           24.8
+             *         ],
+             *         [
+             *           46.6,
+             *           24.8
+             *         ],
+             *         [
+             *           46.6,
+             *           24.6
+             *         ]
+             *       ]
+             *     ]
+             */
+            coordinates: number[][][];
+        };
+        CoverageZoneResponseDto: {
+            /**
+             * Format: uuid
+             * @description The zone id (UUID), for the `{id}` of /v1/admin/coverage-zones/{id}.
+             * @example 7f3a2c1e-0b9d-4e5f-8a6b-1c2d3e4f5a6b
+             */
+            id: string;
+            /** @description The zone name in Arabic and English. */
+            name: components["schemas"]["LocalizedTextResponseDto"];
+            /**
+             * @description The city, as written.
+             * @example الرياض
+             */
+            city: string;
+            /** @description The boundary, a GeoJSON polygon (coordinates rounded to 9 decimal places). */
+            polygon: components["schemas"]["GeoJsonPolygonDto"];
+            /**
+             * @description Whether the zone counts in the coverage check.
+             * @example true
+             */
+            isActive: boolean;
+            /**
+             * @description The zone colour on the dashboard map, `#RRGGBB`.
+             * @example #6A1A20
+             */
+            color: string;
+            /**
+             * Format: date-time
+             * @description When the zone was created, UTC (ISO 8601).
+             * @example 2026-11-18T10:00:00.000Z
+             */
+            createdAt: string;
+            /**
+             * Format: date-time
+             * @description When the zone last changed, UTC (ISO 8601).
+             * @example 2026-11-18T10:00:00.000Z
+             */
+            updatedAt: string;
+        };
+        CoverageZonePageResponseDto: {
+            /** @description The zones of this page, newest first; empty when none exist. */
+            items: components["schemas"]["CoverageZoneResponseDto"][];
+            /**
+             * @description Send as `cursor` for the next page; null on the last page.
+             * @example null
+             */
+            nextCursor: string | null;
+        };
+        CreateCoverageZoneDto: {
+            /** @description The zone name in Arabic and English (a district or area name). */
+            name: components["schemas"]["LocalizedNameDto"];
+            /**
+             * @description The city the zone is in, as written (Arabic expected): 2 to 50 characters after invisible format characters are removed and spaces trimmed.
+             * @example الرياض
+             */
+            city: string;
+            /** @description The zone boundary, a GeoJSON polygon. */
+            polygon: components["schemas"]["GeoJsonPolygonDto"];
+            /**
+             * @description Whether the zone counts in the coverage check at once; true when left out.
+             * @default true
+             * @example true
+             */
+            isActive: boolean;
+            /**
+             * @description The zone colour on the dashboard map, `#RRGGBB` (either case); `#6A1A20` when left out.
+             * @default #6A1A20
+             * @example #6A1A20
+             */
+            color: string;
+        };
+        UpdateCoverageZoneDto: {
+            /** @description The new name in Arabic and English, both together; left out: unchanged. */
+            name?: components["schemas"]["LocalizedNameDto"];
+            /**
+             * @description The city, 2 to 50 characters; left out: unchanged.
+             * @example الرياض
+             */
+            city?: string;
+            /** @description The new boundary, a GeoJSON polygon; left out: unchanged. */
+            polygon?: components["schemas"]["GeoJsonPolygonDto"];
+            /**
+             * @description `false`: the zone stops counting in the coverage check at once (addresses in it show as not covered); `true`: it counts again. Left out: unchanged.
+             * @example false
+             */
+            isActive?: boolean;
+            /**
+             * @description The new map colour, `#RRGGBB`; left out: unchanged.
+             * @example #6A1A20
+             */
+            color?: string;
+        };
+        CoveringZoneResponseDto: {
+            /**
+             * Format: uuid
+             * @description The zone id (UUID).
+             * @example 7f3a2c1e-0b9d-4e5f-8a6b-1c2d3e4f5a6b
+             */
+            id: string;
+            /** @description The zone name in Arabic and English. */
+            name: components["schemas"]["LocalizedTextResponseDto"];
+            /**
+             * @description The city, as written.
+             * @example الرياض
+             */
+            city: string;
+        };
+        CoverageCheckResponseDto: {
+            /**
+             * @description Whether an active coverage zone covers the point.
+             * @example true
+             */
+            covered: boolean;
+            /** @description The zone covering the point; null when `covered` is false. */
+            zone: components["schemas"]["CoveringZoneResponseDto"] | null;
         };
         LivenessResponseDto: {
             /**
@@ -7190,6 +7423,529 @@ export interface operations {
             };
             /** @description Error. code: TRANSACTION_CONFLICT. */
             409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponseDto"];
+                };
+            };
+            /** @description Error. code: RATE_LIMITED. */
+            429: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponseDto"];
+                };
+            };
+            /** @description Error. code: INTERNAL_ERROR. */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponseDto"];
+                };
+            };
+            /** @description Error. code: SERVICE_UNAVAILABLE. */
+            503: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponseDto"];
+                };
+            };
+        };
+    };
+    adminListCoverageZones: {
+        parameters: {
+            query?: {
+                /** @description The `nextCursor` of the previous page; omit it for the first page. Opaque: never build or change it. */
+                cursor?: string;
+                /** @description How many items to return, 1 to 50. */
+                limit?: number;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description One page of zones. */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CoverageZonePageResponseDto"];
+                };
+            };
+            /** @description Error. code: VALIDATION_FAILED. */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponseDto"];
+                };
+            };
+            /** @description Error. code: UNAUTHORIZED, ACCESS_TOKEN_EXPIRED. */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponseDto"];
+                };
+            };
+            /** @description Error. code: FORBIDDEN. */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponseDto"];
+                };
+            };
+            /** @description Error. code: RATE_LIMITED. */
+            429: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponseDto"];
+                };
+            };
+            /** @description Error. code: INTERNAL_ERROR. */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponseDto"];
+                };
+            };
+            /** @description Error. code: SERVICE_UNAVAILABLE. */
+            503: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponseDto"];
+                };
+            };
+        };
+    };
+    adminCreateCoverageZone: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["CreateCoverageZoneDto"];
+            };
+        };
+        responses: {
+            /** @description The new zone. */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CoverageZoneResponseDto"];
+                };
+            };
+            /** @description Error. code: VALIDATION_FAILED. */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponseDto"];
+                };
+            };
+            /** @description Error. code: UNAUTHORIZED, ACCESS_TOKEN_EXPIRED. */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponseDto"];
+                };
+            };
+            /** @description Error. code: FORBIDDEN. */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponseDto"];
+                };
+            };
+            /** @description Error. code: TRANSACTION_CONFLICT. */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponseDto"];
+                };
+            };
+            /** @description Error. code: INVALID_POLYGON. */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponseDto"];
+                };
+            };
+            /** @description Error. code: RATE_LIMITED. */
+            429: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponseDto"];
+                };
+            };
+            /** @description Error. code: INTERNAL_ERROR. */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponseDto"];
+                };
+            };
+            /** @description Error. code: SERVICE_UNAVAILABLE. */
+            503: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponseDto"];
+                };
+            };
+        };
+    };
+    adminGetCoverageZone: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description The id (a UUID) of the item the path names; another value is VALIDATION_FAILED on `id`. */
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description The zone. */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CoverageZoneResponseDto"];
+                };
+            };
+            /** @description Error. code: VALIDATION_FAILED. */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponseDto"];
+                };
+            };
+            /** @description Error. code: UNAUTHORIZED, ACCESS_TOKEN_EXPIRED. */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponseDto"];
+                };
+            };
+            /** @description Error. code: FORBIDDEN. */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponseDto"];
+                };
+            };
+            /** @description Error. code: NOT_FOUND. */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponseDto"];
+                };
+            };
+            /** @description Error. code: RATE_LIMITED. */
+            429: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponseDto"];
+                };
+            };
+            /** @description Error. code: INTERNAL_ERROR. */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponseDto"];
+                };
+            };
+            /** @description Error. code: SERVICE_UNAVAILABLE. */
+            503: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponseDto"];
+                };
+            };
+        };
+    };
+    adminDeleteCoverageZone: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description The id (a UUID) of the item the path names; another value is VALIDATION_FAILED on `id`. */
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Deleted. No body. */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Error. code: VALIDATION_FAILED. */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponseDto"];
+                };
+            };
+            /** @description Error. code: UNAUTHORIZED, ACCESS_TOKEN_EXPIRED. */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponseDto"];
+                };
+            };
+            /** @description Error. code: FORBIDDEN. */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponseDto"];
+                };
+            };
+            /** @description Error. code: NOT_FOUND. */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponseDto"];
+                };
+            };
+            /** @description Error. code: TRANSACTION_CONFLICT. */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponseDto"];
+                };
+            };
+            /** @description Error. code: RATE_LIMITED. */
+            429: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponseDto"];
+                };
+            };
+            /** @description Error. code: INTERNAL_ERROR. */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponseDto"];
+                };
+            };
+            /** @description Error. code: SERVICE_UNAVAILABLE. */
+            503: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponseDto"];
+                };
+            };
+        };
+    };
+    adminUpdateCoverageZone: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description The id (a UUID) of the item the path names; another value is VALIDATION_FAILED on `id`. */
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["UpdateCoverageZoneDto"];
+            };
+        };
+        responses: {
+            /** @description The zone as saved. */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CoverageZoneResponseDto"];
+                };
+            };
+            /** @description Error. code: VALIDATION_FAILED. */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponseDto"];
+                };
+            };
+            /** @description Error. code: UNAUTHORIZED, ACCESS_TOKEN_EXPIRED. */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponseDto"];
+                };
+            };
+            /** @description Error. code: FORBIDDEN. */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponseDto"];
+                };
+            };
+            /** @description Error. code: NOT_FOUND. */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponseDto"];
+                };
+            };
+            /** @description Error. code: TRANSACTION_CONFLICT. */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponseDto"];
+                };
+            };
+            /** @description Error. code: INVALID_POLYGON. */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponseDto"];
+                };
+            };
+            /** @description Error. code: RATE_LIMITED. */
+            429: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponseDto"];
+                };
+            };
+            /** @description Error. code: INTERNAL_ERROR. */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponseDto"];
+                };
+            };
+            /** @description Error. code: SERVICE_UNAVAILABLE. */
+            503: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponseDto"];
+                };
+            };
+        };
+    };
+    publicCheckCoverage: {
+        parameters: {
+            query: {
+                /** @description Latitude in decimal degrees (WGS 84), -90 to 90. */
+                lat: number;
+                /** @description Longitude in decimal degrees (WGS 84), -180 to 180. */
+                lng: number;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Whether the point is covered, and the zone when it is. */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CoverageCheckResponseDto"];
+                };
+            };
+            /** @description Error. code: VALIDATION_FAILED. */
+            400: {
                 headers: {
                     [name: string]: unknown;
                 };

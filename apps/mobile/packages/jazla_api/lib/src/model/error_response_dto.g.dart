@@ -72,5 +72,6 @@ const _$ErrorCodeEnumMap = {
   ErrorCode.ADDRESS_LIMIT_REACHED: 'ADDRESS_LIMIT_REACHED',
   ErrorCode.ACCOUNT_HAS_STAFF_ACCESS: 'ACCOUNT_HAS_STAFF_ACCESS',
   ErrorCode.RECENT_SIGN_IN_REQUIRED: 'RECENT_SIGN_IN_REQUIRED',
+  ErrorCode.INVALID_POLYGON: 'INVALID_POLYGON',
   ErrorCode.unknownDefaultOpenApi: 'unknown_default_open_api',
 };

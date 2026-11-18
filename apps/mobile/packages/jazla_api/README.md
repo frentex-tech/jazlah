@@ -77,6 +77,11 @@ Class | Method | HTTP request | Description
 [*AdminCatalogListsApi*](doc/AdminCatalogListsApi.md) | [**adminListCatalogListEntries**](doc/AdminCatalogListsApi.md#adminlistcataloglistentries) | **GET** /v1/admin/lists/{list} | The entries of a list, newest first
 [*AdminCatalogListsApi*](doc/AdminCatalogListsApi.md) | [**adminListCuttingPackagingIncompatibilities**](doc/AdminCatalogListsApi.md#adminlistcuttingpackagingincompatibilities) | **GET** /v1/admin/cutting-packaging-incompatibilities | The cutting and packaging rules, newest first
 [*AdminCatalogListsApi*](doc/AdminCatalogListsApi.md) | [**adminUpdateCatalogListEntry**](doc/AdminCatalogListsApi.md#adminupdatecataloglistentry) | **PATCH** /v1/admin/lists/{list}/{id} | Rename an entry, switch it on or off, or reorder a category
+[*AdminCoverageZonesApi*](doc/AdminCoverageZonesApi.md) | [**adminCreateCoverageZone**](doc/AdminCoverageZonesApi.md#admincreatecoveragezone) | **POST** /v1/admin/coverage-zones | Add a coverage zone
+[*AdminCoverageZonesApi*](doc/AdminCoverageZonesApi.md) | [**adminDeleteCoverageZone**](doc/AdminCoverageZonesApi.md#admindeletecoveragezone) | **DELETE** /v1/admin/coverage-zones/{id} | Delete a coverage zone
+[*AdminCoverageZonesApi*](doc/AdminCoverageZonesApi.md) | [**adminGetCoverageZone**](doc/AdminCoverageZonesApi.md#admingetcoveragezone) | **GET** /v1/admin/coverage-zones/{id} | One coverage zone
+[*AdminCoverageZonesApi*](doc/AdminCoverageZonesApi.md) | [**adminListCoverageZones**](doc/AdminCoverageZonesApi.md#adminlistcoveragezones) | **GET** /v1/admin/coverage-zones | The coverage zones, newest first
+[*AdminCoverageZonesApi*](doc/AdminCoverageZonesApi.md) | [**adminUpdateCoverageZone**](doc/AdminCoverageZonesApi.md#adminupdatecoveragezone) | **PATCH** /v1/admin/coverage-zones/{id} | Edit a zone, redraw it, or switch it on or off
 [*AdminMediaApi*](doc/AdminMediaApi.md) | [**adminConfirmMediaUpload**](doc/AdminMediaApi.md#adminconfirmmediaupload) | **POST** /v1/admin/media/{id}/confirm | Confirm an uploaded file
 [*AdminMediaApi*](doc/AdminMediaApi.md) | [**adminRequestMediaUpload**](doc/AdminMediaApi.md#adminrequestmediaupload) | **POST** /v1/admin/media/uploads | Get a ticket to upload one file
 [*AdminProductChangeRequestsApi*](doc/AdminProductChangeRequestsApi.md) | [**adminApproveProductChangeRequest**](doc/AdminProductChangeRequestsApi.md#adminapproveproductchangerequest) | **POST** /v1/admin/product-change-requests/{id}/approve | Approve a change request: it becomes the live product
@@ -129,6 +134,7 @@ Class | Method | HTTP request | Description
 [*PublicCatalogApi*](doc/PublicCatalogApi.md) | [**publicGetProduct**](doc/PublicCatalogApi.md#publicgetproduct) | **GET** /v1/public/products/{id} | One product with every option
 [*PublicCatalogApi*](doc/PublicCatalogApi.md) | [**publicListCategories**](doc/PublicCatalogApi.md#publiclistcategories) | **GET** /v1/public/categories | The active categories, in the order admins set
 [*PublicCatalogApi*](doc/PublicCatalogApi.md) | [**publicListProducts**](doc/PublicCatalogApi.md#publiclistproducts) | **GET** /v1/public/products | Products, newest first, with filters
+[*PublicCoverageApi*](doc/PublicCoverageApi.md) | [**publicCheckCoverage**](doc/PublicCoverageApi.md#publiccheckcoverage) | **GET** /v1/public/coverage/check | Do we deliver to this point?
 [*PublicVendorsApi*](doc/PublicVendorsApi.md) | [**publicGetVendor**](doc/PublicVendorsApi.md#publicgetvendor) | **GET** /v1/public/vendors/{id} | One active vendor
 [*PublicVendorsApi*](doc/PublicVendorsApi.md) | [**publicListVendors**](doc/PublicVendorsApi.md#publiclistvendors) | **GET** /v1/public/vendors | The active vendors, newest first
 [*VendorAccountApi*](doc/VendorAccountApi.md) | [**vendorGetMe**](doc/VendorAccountApi.md#vendorgetme) | **GET** /v1/vendor/me | Who is signed in
@@ -156,6 +162,11 @@ Class | Method | HTTP request | Description
  - [AuthTokensResponseDto](doc/AuthTokensResponseDto.md)
  - [ChangeProductPricesDto](doc/ChangeProductPricesDto.md)
  - [CommissionDto](doc/CommissionDto.md)
+ - [CoverageCheckResponseDto](doc/CoverageCheckResponseDto.md)
+ - [CoverageZonePageResponseDto](doc/CoverageZonePageResponseDto.md)
+ - [CoverageZoneResponseDto](doc/CoverageZoneResponseDto.md)
+ - [CoveringZoneResponseDto](doc/CoveringZoneResponseDto.md)
+ - [CreateCoverageZoneDto](doc/CreateCoverageZoneDto.md)
  - [CreateCustomerAddressDto](doc/CreateCustomerAddressDto.md)
  - [CreateCuttingPackagingIncompatibilityDto](doc/CreateCuttingPackagingIncompatibilityDto.md)
  - [CreateProductDto](doc/CreateProductDto.md)
@@ -171,6 +182,7 @@ Class | Method | HTTP request | Description
  - [ErrorResponseDto](doc/ErrorResponseDto.md)
  - [ErrorResponseDtoDetails](doc/ErrorResponseDtoDetails.md)
  - [FieldErrorDto](doc/FieldErrorDto.md)
+ - [GeoJsonPolygonDto](doc/GeoJsonPolygonDto.md)
  - [GeoPointDto](doc/GeoPointDto.md)
  - [LivenessResponseDto](doc/LivenessResponseDto.md)
  - [LocalizedDescriptionDto](doc/LocalizedDescriptionDto.md)
@@ -219,6 +231,7 @@ Class | Method | HTTP request | Description
  - [SignedInResponseDto](doc/SignedInResponseDto.md)
  - [SizePriceDto](doc/SizePriceDto.md)
  - [SubmitVendorApplicationDto](doc/SubmitVendorApplicationDto.md)
+ - [UpdateCoverageZoneDto](doc/UpdateCoverageZoneDto.md)
  - [UpdateCustomerAddressDto](doc/UpdateCustomerAddressDto.md)
  - [UpdateCustomerProfileDto](doc/UpdateCustomerProfileDto.md)
  - [UpdateReferenceItemDto](doc/UpdateReferenceItemDto.md)

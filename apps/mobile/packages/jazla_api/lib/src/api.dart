@@ -9,6 +9,7 @@ import 'package:jazla_api/src/auth/bearer_auth.dart';
 import 'package:jazla_api/src/auth/oauth.dart';
 import 'package:jazla_api/src/api/admin_account_api.dart';
 import 'package:jazla_api/src/api/admin_catalog_lists_api.dart';
+import 'package:jazla_api/src/api/admin_coverage_zones_api.dart';
 import 'package:jazla_api/src/api/admin_media_api.dart';
 import 'package:jazla_api/src/api/admin_product_change_requests_api.dart';
 import 'package:jazla_api/src/api/admin_products_api.dart';
@@ -23,6 +24,7 @@ import 'package:jazla_api/src/api/health_api.dart';
 import 'package:jazla_api/src/api/kitchen_account_api.dart';
 import 'package:jazla_api/src/api/public_auth_api.dart';
 import 'package:jazla_api/src/api/public_catalog_api.dart';
+import 'package:jazla_api/src/api/public_coverage_api.dart';
 import 'package:jazla_api/src/api/public_vendors_api.dart';
 import 'package:jazla_api/src/api/vendor_account_api.dart';
 import 'package:jazla_api/src/api/vendor_catalog_lists_api.dart';
@@ -91,6 +93,12 @@ class JazlaApi {
   /// by doing that all interceptors will not be executed
   AdminCatalogListsApi getAdminCatalogListsApi() {
     return AdminCatalogListsApi(dio);
+  }
+
+  /// Get AdminCoverageZonesApi instance, base route and serializer can be overridden by a given but be careful,
+  /// by doing that all interceptors will not be executed
+  AdminCoverageZonesApi getAdminCoverageZonesApi() {
+    return AdminCoverageZonesApi(dio);
   }
 
   /// Get AdminMediaApi instance, base route and serializer can be overridden by a given but be careful,
@@ -175,6 +183,12 @@ class JazlaApi {
   /// by doing that all interceptors will not be executed
   PublicCatalogApi getPublicCatalogApi() {
     return PublicCatalogApi(dio);
+  }
+
+  /// Get PublicCoverageApi instance, base route and serializer can be overridden by a given but be careful,
+  /// by doing that all interceptors will not be executed
+  PublicCoverageApi getPublicCoverageApi() {
+    return PublicCoverageApi(dio);
   }
 
   /// Get PublicVendorsApi instance, base route and serializer can be overridden by a given but be careful,

@@ -22,6 +22,7 @@ CustomerAddressResponseDto _$CustomerAddressResponseDtoFromJson(
       'shortNationalAddress',
       'driverInstructions',
       'isDefault',
+      'isCovered',
       'createdAt',
       'updatedAt',
     ],
@@ -46,6 +47,7 @@ CustomerAddressResponseDto _$CustomerAddressResponseDtoFromJson(
       (v) => v as String?,
     ),
     isDefault: $checkedConvert('isDefault', (v) => v as bool),
+    isCovered: $checkedConvert('isCovered', (v) => v as bool),
     createdAt: $checkedConvert('createdAt', (v) => DateTime.parse(v as String)),
     updatedAt: $checkedConvert('updatedAt', (v) => DateTime.parse(v as String)),
   );
@@ -65,6 +67,7 @@ Map<String, dynamic> _$CustomerAddressResponseDtoToJson(
   'shortNationalAddress': instance.shortNationalAddress,
   'driverInstructions': instance.driverInstructions,
   'isDefault': instance.isDefault,
+  'isCovered': instance.isCovered,
   'createdAt': instance.createdAt.toIso8601String(),
   'updatedAt': instance.updatedAt.toIso8601String(),
 };

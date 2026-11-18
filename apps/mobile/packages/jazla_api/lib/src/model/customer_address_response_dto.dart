@@ -39,6 +39,8 @@ class CustomerAddressResponseDto {
 
     required  this.isDefault,
 
+    required  this.isCovered,
+
     required  this.createdAt,
 
     required  this.updatedAt,
@@ -174,6 +176,19 @@ class CustomerAddressResponseDto {
 
 
 
+      /// Whether we deliver to this address now: an active coverage zone covers its point. Worked out on every read, so it changes when admins change the zones. The same check as GET /v1/public/coverage/check.
+  @JsonKey(
+    
+    name: r'isCovered',
+    required: true,
+    includeIfNull: false,
+  )
+
+
+  final bool isCovered;
+
+
+
       /// When the address was saved, UTC (ISO 8601).
   @JsonKey(
     
@@ -214,6 +229,7 @@ class CustomerAddressResponseDto {
       other.shortNationalAddress == shortNationalAddress &&
       other.driverInstructions == driverInstructions &&
       other.isDefault == isDefault &&
+      other.isCovered == isCovered &&
       other.createdAt == createdAt &&
       other.updatedAt == updatedAt;
 
@@ -229,6 +245,7 @@ class CustomerAddressResponseDto {
         (shortNationalAddress == null ? 0 : shortNationalAddress.hashCode) +
         (driverInstructions == null ? 0 : driverInstructions.hashCode) +
         isDefault.hashCode +
+        isCovered.hashCode +
         createdAt.hashCode +
         updatedAt.hashCode;
 
