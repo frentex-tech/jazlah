@@ -8,7 +8,6 @@ This is how the developers work. It's internal tooling: the board and issues onl
 |---|---|---|---|
 | Backend | `api-engineer` | `api` | `services/api` |
 | Mobile | `flutter-engineer` | `mobile` | `apps/mobile` |
-| Customer web | `web-engineer` | `web` | `apps/web` |
 | Dashboards | `dashboard-engineer` | `dashboard` | `apps/dashboard` |
 | DevOps / releases | `devops-engineer` | `infra` | root tooling, `infra`, `.github` |
 | QA | `qa-engineer` | `qa` + staging verification | tests, `docs/qa` |

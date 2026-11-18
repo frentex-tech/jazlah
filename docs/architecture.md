@@ -6,11 +6,12 @@ Accepted decisions: [ADR-0001 stack](adr/0001-tech-stack.md) · [ADR-0002 monore
 ## 1. System overview
 
 ```
-             ┌──────────────┐   ┌──────────────┐   ┌────────────────────────────┐
-             │ Flutter app  │   │ Next.js web  │   │ Next.js dashboard          │
-             │ apps/mobile  │   │ apps/web     │   │ apps/dashboard             │
-             │ (customer)   │   │ (customer)   │   │ /admin  /vendor  /kitchen  │
-             └──────┬───────┘   └──────┬───────┘   └─────────────┬──────────────┘
+             ┌──────────────┐                      ┌────────────────────────────┐
+             │ Flutter app  │                      │ Next.js dashboard          │
+             │ apps/mobile  │                      │ apps/dashboard             │
+             │ (customer)   │                      │ /admin  /vendor  /kitchen  │
+             │              │                      │ + public page, vendor apply│
+             └──────┬───────┘                      └─────────────┬──────────────┘
                     │ HTTPS REST /v1 + WebSocket (socket.io)     │
                     └────────────────────┬───────────────────────┘
                               ┌──────────▼──────────┐
@@ -27,12 +28,11 @@ Accepted decisions: [ADR-0001 stack](adr/0001-tech-stack.md) · [ADR-0002 monore
 ```
 apps/
   mobile/        Flutter customer app
-  web/           Next.js customer website
   dashboard/     Next.js admin + vendor + kitchen
 services/
   api/           NestJS API
 packages/
-  api-client/    TypeScript client generated from the API OpenAPI spec (used by web + dashboard)
+  api-client/    TypeScript client generated from the API OpenAPI spec (used by the dashboard)
   config/        shared eslint / tsconfig / prettier presets
 infra/
   docker/        docker-compose for local dev (postgres+postgis, redis, minio)
@@ -100,23 +100,17 @@ integration_test/ critical flows
 Features: `auth, profile, addresses, location, home, store, product, search, cart, checkout, payment, orders, tracking, wallet, complaints, ratings, notifications, occasions, visits, cooking, adha, feed, chat` (plus `loyalty, stories, charity` post-launch).
 State management: **Riverpod**. Navigation: **go_router** with deep links `jazlah://`. Push: `firebase_messaging`.
 
-## 5. Customer web (`apps/web`)
+## 5. No customer website
 
-```
-apps/web/src/
-  app/[locale]/(shop)/          home, stores/[slug], products/[slug], search, cart, checkout
-  app/[locale]/(account)/       orders, orders/[id], wallet, addresses, profile
-  app/[locale]/(services)/      occasions, visits, feed
-  components/   lib/api (wraps packages/api-client)   lib/auth
-  messages/ar.json  messages/en.json   (next-intl)
-```
-SSR/ISR for catalog pages (SEO), client components for cart and checkout. Styling: Tailwind with logical properties (`ms-`, `me-`) for RTL.
+Dropped by the owner on 2026-11-18: customers use the mobile app only. The removed tasks are in [delivery/archive/web-tasks-2026-11-18.md](delivery/archive/web-tasks-2026-11-18.md). The only public web surface is the dashboard app's public page and vendor application (section 6).
 
 ## 6. Dashboard (`apps/dashboard`)
 
 ```
 apps/dashboard/src/
-  app/[locale]/(auth)/login
+  app/[locale]/(public)/     public page: download the app, join as a vendor (CMS-DSH-2)
+  app/[locale]/(auth)/login  one staff login for all roles (OTP), then routed by role
+  app/[locale]/vendor/apply  vendor application, 5 steps after phone OTP; /vendor/application = status (VND-DSH-1)
   app/[locale]/admin/...     operations, catalog, orders, vendors, finance, marketing, customers, feed, kitchens, occasions, visits, settings, staff
   app/[locale]/vendor/...    orders, products, store, visits, earnings
   app/[locale]/kitchen/...   orders
@@ -129,7 +123,7 @@ Middleware routes each user by role. The admin sidebar shows only the items the 
 
 1. The **API task** merges into `develop` with DTOs and Swagger. That makes the contract official.
 2. CI regenerates `packages/api-client` (TS) and `apps/mobile/lib/core/api/generated` (Dart) from `/docs-json`, in the same PR or a follow-up `chore(api-client)` PR.
-3. **Client tasks** (mobile / web / dashboard) build on the generated client. A client task may start before its API task merges by using a Prism mock of the PR's spec, but it **merges only after** the API task.
+3. **Client tasks** (mobile / dashboard) build on the generated client. A client task may start before its API task merges by using a Prism mock of the PR's spec, but it **merges only after** the API task.
 
 Every task's `depends:` field encodes this order.
 

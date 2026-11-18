@@ -19,9 +19,9 @@ import backlog  # noqa: E402
 
 REPO = "frentex-tech/jazlah"
 MAP = json.loads((ROOT / "docs" / "delivery" / "issue-map.json").read_text())
-AGENT = {"api": "api-engineer", "mobile": "flutter-engineer", "web": "web-engineer", "dashboard": "dashboard-engineer",
+AGENT = {"api": "api-engineer", "mobile": "flutter-engineer", "dashboard": "dashboard-engineer",
          "design": "uiux-designer", "infra": "devops-engineer", "qa": "qa-engineer", "docs": None}
-PATH_AGENT = [("services/api", "api-engineer"), ("apps/mobile", "flutter-engineer"), ("apps/web", "web-engineer"),
+PATH_AGENT = [("services/api", "api-engineer"), ("apps/mobile", "flutter-engineer"),
               ("apps/dashboard", "dashboard-engineer"), ("infra", "devops-engineer"), (".github", "devops-engineer"),
               ("Figma", "uiux-designer")]
 

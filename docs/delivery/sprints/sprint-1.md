@@ -262,15 +262,15 @@ This task also covers:
 **What:** a staging environment that always runs the latest `develop`.
 
 **Output:**
-- Dockerfiles for `services/api`, `apps/web` and `apps/dashboard` (multi-stage, non-root)
-- Staging: managed Postgres+PostGIS, Redis, object storage bucket(s), API + web + dashboard services, HTTPS on `api.staging.<domain>`, `staging.<domain>`, `admin.staging.<domain>`
+- Dockerfiles for `services/api` and `apps/dashboard` (multi-stage, non-root)
+- Staging: managed Postgres+PostGIS, Redis, object storage bucket(s), API + dashboard services, HTTPS on `api.staging.<domain>` and `staging.<domain>` (dashboard, which also serves the public page)
 - `.github/workflows/deploy-staging.yml` on push to `develop` (per app, path filtered), running `prisma migrate deploy` before the API rollout
 - Secrets in GitHub Environments (`staging`) and the provider's secret manager. Nothing in the repo.
 - `infra/deploy/README.md`: how to deploy, roll back, read logs
 
 **How:** keep manifests in `infra/deploy/staging/`. Production mirrors this later (HRD-INF-1).
 
-**Where:** `infra/deploy/`, `services/api/Dockerfile`, `apps/web/Dockerfile`, `apps/dashboard/Dockerfile`, `.github/workflows/deploy-staging.yml`
+**Where:** `infra/deploy/`, `services/api/Dockerfile`, `apps/dashboard/Dockerfile`, `.github/workflows/deploy-staging.yml`
 
 **Acceptance:**
 - [ ] A merge to `develop` is live on staging within 15 minutes, without manual steps
@@ -347,7 +347,7 @@ This task also covers:
 
 **How:**
 - The preset reads `docs/design/tokens.json`, so a token change needs no component change.
-- Read the Thmanyah licence before bundling the font files (see `docs/design/signoff.md`).
+- Fonts: the build font from `docs/design/tokens.json` (`font.*.family`: Readex Pro and El Messiri for now). Do not bundle Thmanyah until its licence is checked (owner's decision, 2026-11-18).
 
 **Where:** `packages/config/`, `apps/dashboard/src/components/ui/`
 

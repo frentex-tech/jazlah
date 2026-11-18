@@ -6,7 +6,7 @@ Do not hand-write endpoint calls, request bodies or response types. Generate the
 
 **Regenerate whenever `openapi.json` changes.** That includes a pull from the main branch that touches it, and a backend release. Commit the generated code, or regenerate in your build: pick one per app and write it in your README. A change in `openapi.json` shows up as a diff in the generated code; read it, because it is exactly what changed in the API.
 
-The paths below assume the app lives in the same repository (`apps/mobile`, `apps/web`, `apps/dashboard`) and reads `../../services/api/openapi.json`. Adjust the relative path if yours differs.
+The paths below assume the app lives in the same repository (`apps/mobile`, `apps/dashboard`) and reads `../../services/api/openapi.json`. Adjust the relative path if yours differs.
 
 ## Dart (Flutter): `dart-dio`
 
@@ -62,7 +62,7 @@ Notes:
 `openapi-typescript` turns `openapi.json` into types, and `openapi-fetch` is a small typed `fetch` wrapper over them. No runtime code is generated, and the paths, bodies, query parameters and responses are all type-checked.
 
 ```bash
-# from apps/web or apps/dashboard
+# from apps/dashboard
 pnpm add openapi-fetch@0.17.0
 pnpm add -D openapi-typescript@7.13.0
 
