@@ -28,16 +28,18 @@ const home = (prefix: string, panels: Panel[]) => (panels.length === 1 ? `${pref
 export default async function middleware(req: NextRequest) {
   const { prefix, area, rest } = splitPath(req.nextUrl.pathname);
   const panels = parsePanels(req.cookies.get(PANELS_COOKIE)?.value);
+  // A panel counts as signed in only with its refresh token too, so a half-cleared session can't loop /login ⇄ /admin.
+  const live = panels.filter((p) => req.cookies.get(refreshCookie(p))?.value);
 
   // Start and sign-in pages: signed-in staff go straight to their panel.
   if (area === undefined || (area === 'login' && rest.length === 0)) {
     const asked = req.nextUrl.searchParams.get('panel');
-    if (isPanel(asked) && panels.includes(asked)) return redirectTo(req, `${prefix}/${asked}`);
-    if (!isPanel(asked) && panels.length > 0) return redirectTo(req, home(prefix, panels));
+    if (isPanel(asked) && live.includes(asked)) return redirectTo(req, `${prefix}/${asked}`);
+    if (!isPanel(asked) && live.length > 0) return redirectTo(req, home(prefix, live));
     if (area === undefined) return redirectTo(req, `${prefix}/login`);
   }
-  if (area === 'login' && rest[0] === 'choose' && panels.length < 2) {
-    return redirectTo(req, panels.length ? home(prefix, panels) : `${prefix}/login`);
+  if (area === 'login' && rest[0] === 'choose' && live.length < 2) {
+    return redirectTo(req, live.length ? home(prefix, live) : `${prefix}/login`);
   }
 
   // The vendor application accepts customer sessions and visitors (VND-DSH-1), so it is not guarded here.

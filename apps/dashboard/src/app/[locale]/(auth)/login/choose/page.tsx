@@ -3,7 +3,7 @@ import { getTranslations, setRequestLocale } from 'next-intl/server';
 import { cookies } from 'next/headers';
 import { CardTitle, LoginCard, LoginLayout } from '@/features/auth/login-layout';
 import { Link } from '@/i18n/navigation';
-import { PANELS, PANELS_COOKIE, parsePanels } from '@/lib/session';
+import { PANELS, PANELS_COOKIE, parsePanels, refreshCookie } from '@/lib/session';
 
 const icons = { admin: ChartLineUp, vendor: ListChecks, kitchen: CookingPot };
 
@@ -11,7 +11,8 @@ const icons = { admin: ChartLineUp, vendor: ListChecks, kitchen: CookingPot };
 export default async function ChoosePanel({ params }: { params: Promise<{ locale: string }> }) {
   setRequestLocale((await params).locale);
   const t = await getTranslations('login');
-  const signedIn = parsePanels((await cookies()).get(PANELS_COOKIE)?.value);
+  const jar = await cookies();
+  const signedIn = parsePanels(jar.get(PANELS_COOKIE)?.value).filter((p) => jar.get(refreshCookie(p))?.value);
   const others = PANELS.filter((p) => !signedIn.includes(p));
   return (
     <LoginLayout panel="admin">
