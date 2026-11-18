@@ -48,6 +48,8 @@ class _Server implements HttpClientAdapter {
       });
     }
     if (o.path.startsWith('/v1/public/')) return json(200, {'ok': true});
+    if (o.path == '/v1/customer/slow') await Future<void>.delayed(const Duration(milliseconds: 50));
+    if (o.path == '/v1/customer/deleted') return json(401, {'code': 'UNAUTHORIZED'});
     if (o.headers['Authorization'] != 'Bearer a2') return json(401, {'code': 'ACCESS_TOKEN_EXPIRED'});
     return json(200, {'ok': true});
   }
@@ -77,8 +79,8 @@ void main() {
     dio.interceptors.add(interceptor);
   });
 
-  Future<Response<dynamic>> protected() => dio.get<dynamic>(
-    '/v1/customer/me',
+  Future<Response<dynamic>> protected([String path = '/v1/customer/me']) => dio.get<dynamic>(
+    path,
     options: Options(
       extra: {
         'secure': [
@@ -106,5 +108,20 @@ void main() {
   test('public calls get no Authorization header', () async {
     final res = await dio.get<dynamic>('/v1/public/categories', options: Options(extra: {'secure': <Object>[]}));
     expect(res.requestOptions.headers.containsKey('Authorization'), isFalse);
+  });
+
+  test('UNAUTHORIZED on a protected call clears the tokens without refreshing', () async {
+    await expectLater(protected('/v1/customer/deleted'), throwsA(isA<DioException>()));
+    expect(tokens.tokens, isNull);
+    expect(sessionEnded, 1);
+    expect(server.refreshCalls, 0);
+  });
+
+  test('a late 401 after a finished refresh retries with the stored token, no second refresh', () async {
+    final call = protected('/v1/customer/slow'); // sent with a1
+    await Future<void>.delayed(const Duration(milliseconds: 10));
+    tokens.tokens = const AuthTokens(accessToken: 'a2', refreshToken: 'r2'); // another call refreshed meanwhile
+    expect((await call).statusCode, 200);
+    expect(server.refreshCalls, 0);
   });
 }

@@ -177,7 +177,7 @@ class _CircleButton extends StatelessWidget {
                   decoration: BoxDecoration(
                     color: JColors.ember,
                     shape: BoxShape.circle,
-                    border: Border.all(color: JColors.paper, width: 2),
+                    border: Border.all(color: JColors.paper, width: 2, strokeAlign: BorderSide.strokeAlignOutside),
                   ),
                   child: Text(
                     count > 9 ? '9+' : '$count',

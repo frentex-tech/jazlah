@@ -7,12 +7,14 @@ on:
     paths:
       - 'apps/mobile/**'
       - 'services/api/openapi.json'
+      - 'docs/design/tokens.json'
       - '.github/workflows/ci-mobile.yml'
   push:
     branches: [develop, main]
     paths:
       - 'apps/mobile/**'
       - 'services/api/openapi.json'
+      - 'docs/design/tokens.json'
       - '.github/workflows/ci-mobile.yml'
 
 permissions:
@@ -47,7 +49,8 @@ jobs:
       - name: Generated API client is up to date
         run: |
           ./scripts/gen-api-client.sh
-          git diff --exit-code -- packages/jazla_api
+          # status, not diff: a new generated file is untracked and diff would miss it.
+          test -z "$(git status --porcelain -- packages/jazla_api)" || { git status --porcelain -- packages/jazla_api; exit 1; }
 
       - run: flutter pub get
       - run: flutter gen-l10n

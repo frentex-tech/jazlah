@@ -35,7 +35,15 @@ class AuthInterceptor extends Interceptor {
     required this.languageCode,
     required this.onSessionEnded,
     Dio? refreshDio,
-  }) : _refreshDio = refreshDio ?? Dio(BaseOptions(baseUrl: dio.options.baseUrl));
+  }) : _refreshDio =
+           refreshDio ??
+           Dio(
+             BaseOptions(
+               baseUrl: dio.options.baseUrl,
+               connectTimeout: dio.options.connectTimeout,
+               receiveTimeout: dio.options.receiveTimeout,
+             ),
+           );
 
   final Dio dio;
 
@@ -55,7 +63,7 @@ class AuthInterceptor extends Interceptor {
   Future<void> onRequest(RequestOptions options, RequestInterceptorHandler handler) async {
     options.headers['Accept-Language'] = languageCode();
     if (_needsToken(options)) {
-      final t = await tokens.read();
+      final t = await _readTokens();
       if (t != null) options.headers['Authorization'] = 'Bearer ${t.accessToken}';
     }
     handler.next(options);
@@ -66,13 +74,19 @@ class AuthInterceptor extends Interceptor {
     final data = err.response?.data;
     final code = data is Map ? data['code'] : null;
     final options = err.requestOptions;
-    if (code != 'ACCESS_TOKEN_EXPIRED' || !_needsToken(options) || options.extra[_retried] == true) {
-      if (code == 'REFRESH_TOKEN_INVALID' || code == 'UNAUTHORIZED' || code == 'ACCOUNT_DISABLED') {
-        if (_needsToken(options)) onSessionEnded();
-      }
+    if (!_needsToken(options)) return handler.next(err);
+
+    // The token is unusable or the account is off: refreshing will not help (docs/frontend/auth.md).
+    if (code == 'UNAUTHORIZED' || code == 'ACCOUNT_DISABLED') {
+      await _endSession();
       return handler.next(err);
     }
-    final fresh = await refresh();
+    if (code != 'ACCESS_TOKEN_EXPIRED' || options.extra[_retried] == true) return handler.next(err);
+
+    // A refresh may have finished while this request was in flight: retry with the stored token instead.
+    final stored = await _readTokens();
+    final sentWith = options.headers['Authorization'];
+    final fresh = stored != null && sentWith != 'Bearer ${stored.accessToken}' ? stored : await refresh();
     if (fresh == null) return handler.next(err);
     options.extra[_retried] = true;
     options.headers['Authorization'] = 'Bearer ${fresh.accessToken}';
@@ -87,9 +101,9 @@ class AuthInterceptor extends Interceptor {
   Future<AuthTokens?> refresh() => _refreshing ??= _doRefresh().whenComplete(() => _refreshing = null);
 
   Future<AuthTokens?> _doRefresh() async {
-    final current = await tokens.read();
-    if (current == null) return null;
     try {
+      final current = await tokens.read();
+      if (current == null) return null;
       final res = await PublicAuthApi(_refreshDio).publicRefreshSession(
         refreshTokenDto: RefreshTokenDto(refreshToken: current.refreshToken),
         headers: {'Accept-Language': languageCode()},
@@ -98,11 +112,28 @@ class AuthInterceptor extends Interceptor {
       final next = AuthTokens(accessToken: body.accessToken, refreshToken: body.refreshToken);
       await tokens.write(next);
       return next;
-    } on DioException {
-      // Never retry a refresh whose answer was lost: sign in again.
-      await tokens.clear();
-      onSessionEnded();
+    } on Object {
+      // Refused, lost or not saved: never retry a refresh, sign in again.
+      await _endSession();
       return null;
     }
+  }
+
+  /// Interceptor futures are not awaited by Dio: nothing here may throw, or the request hangs.
+  Future<AuthTokens?> _readTokens() async {
+    try {
+      return await tokens.read();
+    } on Object {
+      return null;
+    }
+  }
+
+  Future<void> _endSession() async {
+    try {
+      await tokens.clear();
+    } on Object {
+      // The keychain refused; the session still ends in the app.
+    }
+    onSessionEnded();
   }
 }

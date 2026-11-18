@@ -9,6 +9,7 @@ import 'package:jazlah/core/widgets/j_digits.dart';
 /// Arabic digits are normalised to Latin. Clear it with `controller.clear()`.
 class JOtpField extends StatefulWidget {
   const JOtpField({
+    this.semanticLabel,
     super.key,
     this.length = 6,
     this.controller,
@@ -21,6 +22,9 @@ class JOtpField extends StatefulWidget {
   });
 
   final int length;
+
+  /// Read by screen readers (the field itself is invisible behind the boxes).
+  final String? semanticLabel;
   final TextEditingController? controller;
   final FocusNode? focusNode;
 
@@ -116,18 +120,23 @@ class _JOtpFieldState extends State<JOtpField> {
               Positioned.fill(
                 child: Opacity(
                   opacity: 0,
-                  child: TextField(
-                    controller: _controller,
-                    focusNode: _focus,
-                    autofocus: widget.autofocus,
-                    enabled: widget.enabled,
-                    keyboardType: TextInputType.number,
-                    autofillHints: const [AutofillHints.oneTimeCode],
-                    inputFormatters: [JDigitsFormatter(widget.length)],
-                    showCursor: false,
-                    onChanged: _onChanged,
-                    style: const TextStyle(color: Colors.transparent),
-                    decoration: const InputDecoration.collapsed(hintText: null),
+                  alwaysIncludeSemantics: true,
+                  child: Semantics(
+                    label: widget.semanticLabel,
+                    textField: true,
+                    child: TextField(
+                      controller: _controller,
+                      focusNode: _focus,
+                      autofocus: widget.autofocus,
+                      enabled: widget.enabled,
+                      keyboardType: TextInputType.number,
+                      autofillHints: const [AutofillHints.oneTimeCode],
+                      inputFormatters: [JDigitsFormatter(widget.length)],
+                      showCursor: false,
+                      onChanged: _onChanged,
+                      style: const TextStyle(color: Colors.transparent),
+                      decoration: const InputDecoration.collapsed(hintText: null),
+                    ),
                   ),
                 ),
               ),

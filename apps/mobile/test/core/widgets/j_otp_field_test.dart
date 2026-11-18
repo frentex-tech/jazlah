@@ -60,4 +60,14 @@ void main() {
     await tester.pumpApp(const JOtpField());
     expect(tester.widget<TextField>(input()).autofillHints, contains(AutofillHints.oneTimeCode));
   });
+
+  testWidgets('the invisible input stays reachable by screen readers', (tester) async {
+    final handle = tester.ensureSemantics();
+    await tester.pumpApp(const JOtpField(semanticLabel: 'رمز التحقق'));
+    // The text field's semantics node sits on its EditableText.
+    final node = tester.getSemantics(find.byType(EditableText));
+    expect(node.flagsCollection.isTextField, isTrue);
+    expect(find.bySemanticsLabel('رمز التحقق'), findsOneWidget);
+    handle.dispose();
+  });
 }
