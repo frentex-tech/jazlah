@@ -87,24 +87,16 @@ class _JOtpFieldState extends State<JOtpField> {
   Widget build(BuildContext context) {
     final code = _controller.text;
     final error = widget.errorText != null;
-    final boxes = LayoutBuilder(
-      builder: (context, constraints) {
-        // Figma: 56-wide cells, gap 12. When they don't fit (e.g. 6 cells on a phone), cells shrink
-        // equally and the gap shrinks with them down to 8.
-        final n = widget.length;
-        final scale = math.min(1, constraints.maxWidth / (n * 56 + (n - 1) * JSpace.s12));
-        final gap = math.max(JSpace.s8, JSpace.s12 * scale);
-        final cellWidth = math.min(56, (constraints.maxWidth - gap * (n - 1)) / n).toDouble();
-        return Row(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            for (var i = 0; i < n; i++) ...[
-              if (i > 0) SizedBox(width: gap),
-              _cell(i, code, error, cellWidth),
-            ],
-          ],
-        );
-      },
+    // Figma: 56-wide cells, gap 12. When they don't fit (6 cells on a phone) the cells shrink equally.
+    // Flexible, not LayoutBuilder, so screens can size this field intrinsically.
+    final boxes = Row(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        for (var i = 0; i < widget.length; i++) ...[
+          if (i > 0) const SizedBox(width: JSpace.s12),
+          Flexible(child: _cell(i, code, error, 56)),
+        ],
+      ],
     );
 
     return Column(

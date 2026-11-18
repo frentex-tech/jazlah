@@ -745,6 +745,552 @@ abstract class AppLocalizations {
   /// In ar, this message translates to:
   /// **'سيصلك إشعار عند تجهيز الطلب'**
   String get galleryToastInfo;
+
+  /// No description provided for @back.
+  ///
+  /// In ar, this message translates to:
+  /// **'رجوع'**
+  String get back;
+
+  /// No description provided for @onboardingTitle1.
+  ///
+  /// In ar, this message translates to:
+  /// **'لحوم طازجة من أفضل المتاجر'**
+  String get onboardingTitle1;
+
+  /// No description provided for @onboardingBody1.
+  ///
+  /// In ar, this message translates to:
+  /// **'اختر من متاجر موثّقة، واعرف وقت الذبح وجودة كل قطعة قبل أن تطلب.'**
+  String get onboardingBody1;
+
+  /// No description provided for @onboardingTitle2.
+  ///
+  /// In ar, this message translates to:
+  /// **'وصّل طلبك في يومك'**
+  String get onboardingTitle2;
+
+  /// No description provided for @onboardingBody2.
+  ///
+  /// In ar, this message translates to:
+  /// **'حدّد يوم التوصيل المناسب لك، وتابع طلبك لحظة بلحظة حتى باب البيت.'**
+  String get onboardingBody2;
+
+  /// No description provided for @onboardingTitle3.
+  ///
+  /// In ar, this message translates to:
+  /// **'لكل مناسبة ما يناسبها'**
+  String get onboardingTitle3;
+
+  /// No description provided for @onboardingBody3.
+  ///
+  /// In ar, this message translates to:
+  /// **'ولائم وعقائق وأضاحٍ وزيارات مزارع، ونطبخها لك إن أردت.'**
+  String get onboardingBody3;
+
+  /// No description provided for @onboardingNext.
+  ///
+  /// In ar, this message translates to:
+  /// **'التالي'**
+  String get onboardingNext;
+
+  /// No description provided for @onboardingSkip.
+  ///
+  /// In ar, this message translates to:
+  /// **'تخطي'**
+  String get onboardingSkip;
+
+  /// No description provided for @onboardingStart.
+  ///
+  /// In ar, this message translates to:
+  /// **'ابدأ الآن'**
+  String get onboardingStart;
+
+  /// No description provided for @phoneTitle.
+  ///
+  /// In ar, this message translates to:
+  /// **'أهلًا بك في جزلة'**
+  String get phoneTitle;
+
+  /// No description provided for @phoneSubtitle.
+  ///
+  /// In ar, this message translates to:
+  /// **'أدخل رقم جوالك وسنرسل لك رمز التحقق.'**
+  String get phoneSubtitle;
+
+  /// No description provided for @phoneLabel.
+  ///
+  /// In ar, this message translates to:
+  /// **'رقم الجوال'**
+  String get phoneLabel;
+
+  /// No description provided for @phoneHint.
+  ///
+  /// In ar, this message translates to:
+  /// **'سنرسل لك رمز التحقق'**
+  String get phoneHint;
+
+  /// No description provided for @phoneInvalid.
+  ///
+  /// In ar, this message translates to:
+  /// **'أدخل رقم جوال سعودي صحيح مكوّن من 9 أرقام'**
+  String get phoneInvalid;
+
+  /// No description provided for @trustVerified.
+  ///
+  /// In ar, this message translates to:
+  /// **'متاجر موثّقة'**
+  String get trustVerified;
+
+  /// No description provided for @trustFresh.
+  ///
+  /// In ar, this message translates to:
+  /// **'طازج يوم الذبح'**
+  String get trustFresh;
+
+  /// No description provided for @trustDelivery.
+  ///
+  /// In ar, this message translates to:
+  /// **'توصيل في يومك'**
+  String get trustDelivery;
+
+  /// No description provided for @termsNotice.
+  ///
+  /// In ar, this message translates to:
+  /// **'بالمتابعة فأنت توافق على الشروط وسياسة الخصوصية.'**
+  String get termsNotice;
+
+  /// No description provided for @sendCode.
+  ///
+  /// In ar, this message translates to:
+  /// **'إرسال الرمز'**
+  String get sendCode;
+
+  /// No description provided for @otpTitle.
+  ///
+  /// In ar, this message translates to:
+  /// **'أدخل رمز التحقق'**
+  String get otpTitle;
+
+  /// No description provided for @otpSubtitle.
+  ///
+  /// In ar, this message translates to:
+  /// **'أرسلنا رمزًا من {length} أرقام إلى {phone}'**
+  String otpSubtitle(int length, String phone);
+
+  /// No description provided for @otpFieldLabel.
+  ///
+  /// In ar, this message translates to:
+  /// **'رمز التحقق'**
+  String get otpFieldLabel;
+
+  /// No description provided for @otpResendIn.
+  ///
+  /// In ar, this message translates to:
+  /// **'إعادة الإرسال بعد {time}'**
+  String otpResendIn(String time);
+
+  /// No description provided for @otpResend.
+  ///
+  /// In ar, this message translates to:
+  /// **'إعادة إرسال الرمز'**
+  String get otpResend;
+
+  /// No description provided for @otpInvalid.
+  ///
+  /// In ar, this message translates to:
+  /// **'الرمز غير صحيح، حاول مرة أخرى'**
+  String get otpInvalid;
+
+  /// No description provided for @otpExpired.
+  ///
+  /// In ar, this message translates to:
+  /// **'انتهت صلاحية الرمز، اطلب رمزًا جديدًا'**
+  String get otpExpired;
+
+  /// No description provided for @otpReauthNotice.
+  ///
+  /// In ar, this message translates to:
+  /// **'لأمانك، أكّد أنه أنت قبل حذف الحساب'**
+  String get otpReauthNotice;
+
+  /// No description provided for @confirm.
+  ///
+  /// In ar, this message translates to:
+  /// **'تأكيد'**
+  String get confirm;
+
+  /// No description provided for @profileTitle.
+  ///
+  /// In ar, this message translates to:
+  /// **'أكمل ملفك'**
+  String get profileTitle;
+
+  /// No description provided for @profileSubtitle.
+  ///
+  /// In ar, this message translates to:
+  /// **'نحتاج اسمك لنُجهّز طلباتك ونتواصل معك.'**
+  String get profileSubtitle;
+
+  /// No description provided for @editProfileTitle.
+  ///
+  /// In ar, this message translates to:
+  /// **'تعديل الملف'**
+  String get editProfileTitle;
+
+  /// No description provided for @fullNameLabel.
+  ///
+  /// In ar, this message translates to:
+  /// **'الاسم الكامل'**
+  String get fullNameLabel;
+
+  /// No description provided for @fieldPlaceholder.
+  ///
+  /// In ar, this message translates to:
+  /// **'اكتب هنا'**
+  String get fieldPlaceholder;
+
+  /// No description provided for @nameRequired.
+  ///
+  /// In ar, this message translates to:
+  /// **'الاسم مطلوب'**
+  String get nameRequired;
+
+  /// No description provided for @nameLength.
+  ///
+  /// In ar, this message translates to:
+  /// **'الاسم من 2 إلى 60 حرفًا'**
+  String get nameLength;
+
+  /// No description provided for @emailLabel.
+  ///
+  /// In ar, this message translates to:
+  /// **'البريد الإلكتروني (اختياري)'**
+  String get emailLabel;
+
+  /// No description provided for @emailHint.
+  ///
+  /// In ar, this message translates to:
+  /// **'لن نرسل لك إلا إشعارات طلباتك'**
+  String get emailHint;
+
+  /// No description provided for @emailInvalid.
+  ///
+  /// In ar, this message translates to:
+  /// **'أدخل بريدًا إلكترونيًا صحيحًا'**
+  String get emailInvalid;
+
+  /// No description provided for @marketingConsent.
+  ///
+  /// In ar, this message translates to:
+  /// **'أوافق على استلام العروض والأخبار'**
+  String get marketingConsent;
+
+  /// No description provided for @saveAndContinue.
+  ///
+  /// In ar, this message translates to:
+  /// **'حفظ ومتابعة'**
+  String get saveAndContinue;
+
+  /// No description provided for @save.
+  ///
+  /// In ar, this message translates to:
+  /// **'حفظ'**
+  String get save;
+
+  /// No description provided for @tabHome.
+  ///
+  /// In ar, this message translates to:
+  /// **'الرئيسية'**
+  String get tabHome;
+
+  /// No description provided for @tabServices.
+  ///
+  /// In ar, this message translates to:
+  /// **'الخدمات'**
+  String get tabServices;
+
+  /// No description provided for @tabOrders.
+  ///
+  /// In ar, this message translates to:
+  /// **'الطلبات'**
+  String get tabOrders;
+
+  /// No description provided for @tabAccount.
+  ///
+  /// In ar, this message translates to:
+  /// **'حسابي'**
+  String get tabAccount;
+
+  /// No description provided for @cart.
+  ///
+  /// In ar, this message translates to:
+  /// **'السلة'**
+  String get cart;
+
+  /// No description provided for @accountTitle.
+  ///
+  /// In ar, this message translates to:
+  /// **'حسابي'**
+  String get accountTitle;
+
+  /// No description provided for @editProfile.
+  ///
+  /// In ar, this message translates to:
+  /// **'تعديل الملف'**
+  String get editProfile;
+
+  /// No description provided for @statOrders.
+  ///
+  /// In ar, this message translates to:
+  /// **'طلبًا'**
+  String get statOrders;
+
+  /// No description provided for @statAddresses.
+  ///
+  /// In ar, this message translates to:
+  /// **'عناوين'**
+  String get statAddresses;
+
+  /// No description provided for @statAnimals.
+  ///
+  /// In ar, this message translates to:
+  /// **'مواشٍ'**
+  String get statAnimals;
+
+  /// No description provided for @statListings.
+  ///
+  /// In ar, this message translates to:
+  /// **'إعلانات'**
+  String get statListings;
+
+  /// No description provided for @menuOrders.
+  ///
+  /// In ar, this message translates to:
+  /// **'طلباتي'**
+  String get menuOrders;
+
+  /// No description provided for @menuOrdersActive.
+  ///
+  /// In ar, this message translates to:
+  /// **'{count} طلب نشط'**
+  String menuOrdersActive(int count);
+
+  /// No description provided for @menuAddresses.
+  ///
+  /// In ar, this message translates to:
+  /// **'عناويني'**
+  String get menuAddresses;
+
+  /// No description provided for @menuAnimals.
+  ///
+  /// In ar, this message translates to:
+  /// **'مواشيّ'**
+  String get menuAnimals;
+
+  /// No description provided for @menuFeedListings.
+  ///
+  /// In ar, this message translates to:
+  /// **'إعلاناتي في سوق الأعلاف'**
+  String get menuFeedListings;
+
+  /// No description provided for @menuPoints.
+  ///
+  /// In ar, this message translates to:
+  /// **'نقاط جزلة'**
+  String get menuPoints;
+
+  /// No description provided for @menuPointsValue.
+  ///
+  /// In ar, this message translates to:
+  /// **'{points} نقطة'**
+  String menuPointsValue(int points);
+
+  /// No description provided for @menuStories.
+  ///
+  /// In ar, this message translates to:
+  /// **'قصص الاستلام'**
+  String get menuStories;
+
+  /// No description provided for @menuCharity.
+  ///
+  /// In ar, this message translates to:
+  /// **'صدقاتي · سهم الخير'**
+  String get menuCharity;
+
+  /// No description provided for @menuNotifications.
+  ///
+  /// In ar, this message translates to:
+  /// **'الإشعارات'**
+  String get menuNotifications;
+
+  /// No description provided for @menuSettings.
+  ///
+  /// In ar, this message translates to:
+  /// **'الإعدادات'**
+  String get menuSettings;
+
+  /// No description provided for @menuHelp.
+  ///
+  /// In ar, this message translates to:
+  /// **'المساعدة والدعم'**
+  String get menuHelp;
+
+  /// No description provided for @signOut.
+  ///
+  /// In ar, this message translates to:
+  /// **'تسجيل الخروج'**
+  String get signOut;
+
+  /// No description provided for @settingsTitle.
+  ///
+  /// In ar, this message translates to:
+  /// **'الإعدادات'**
+  String get settingsTitle;
+
+  /// No description provided for @settingsLanguage.
+  ///
+  /// In ar, this message translates to:
+  /// **'اللغة'**
+  String get settingsLanguage;
+
+  /// No description provided for @settingsNotifications.
+  ///
+  /// In ar, this message translates to:
+  /// **'الإشعارات'**
+  String get settingsNotifications;
+
+  /// No description provided for @settingsOrderNotifications.
+  ///
+  /// In ar, this message translates to:
+  /// **'إشعارات الطلبات'**
+  String get settingsOrderNotifications;
+
+  /// No description provided for @settingsOffers.
+  ///
+  /// In ar, this message translates to:
+  /// **'العروض والأخبار'**
+  String get settingsOffers;
+
+  /// No description provided for @settingsLoadError.
+  ///
+  /// In ar, this message translates to:
+  /// **'تعذّر تحميل الإعدادات'**
+  String get settingsLoadError;
+
+  /// No description provided for @checkConnection.
+  ///
+  /// In ar, this message translates to:
+  /// **'تحقق من اتصالك ثم حاول مرة أخرى.'**
+  String get checkConnection;
+
+  /// No description provided for @deleteAccount.
+  ///
+  /// In ar, this message translates to:
+  /// **'حذف الحساب'**
+  String get deleteAccount;
+
+  /// No description provided for @deleteAccountTitle.
+  ///
+  /// In ar, this message translates to:
+  /// **'حذف الحساب؟'**
+  String get deleteAccountTitle;
+
+  /// No description provided for @deleteAccountBody.
+  ///
+  /// In ar, this message translates to:
+  /// **'سيتم حذف حسابك وعناوينك وطلباتك السابقة نهائيًا، ولا يمكن التراجع عن ذلك.'**
+  String get deleteAccountBody;
+
+  /// No description provided for @cancel.
+  ///
+  /// In ar, this message translates to:
+  /// **'إلغاء'**
+  String get cancel;
+
+  /// No description provided for @deleteReasonTitle.
+  ///
+  /// In ar, this message translates to:
+  /// **'لماذا تريد حذف حسابك؟'**
+  String get deleteReasonTitle;
+
+  /// No description provided for @deleteReasonHint.
+  ///
+  /// In ar, this message translates to:
+  /// **'اختياري، يساعدنا على التحسّن.'**
+  String get deleteReasonHint;
+
+  /// No description provided for @deleteReasonNotUsing.
+  ///
+  /// In ar, this message translates to:
+  /// **'لم أعد أستخدم التطبيق'**
+  String get deleteReasonNotUsing;
+
+  /// No description provided for @deleteReasonPrivacy.
+  ///
+  /// In ar, this message translates to:
+  /// **'مخاوف تتعلق بالخصوصية'**
+  String get deleteReasonPrivacy;
+
+  /// No description provided for @deleteReasonBadExperience.
+  ///
+  /// In ar, this message translates to:
+  /// **'مررت بتجربة سيئة'**
+  String get deleteReasonBadExperience;
+
+  /// No description provided for @deleteReasonOtherAccount.
+  ///
+  /// In ar, this message translates to:
+  /// **'لدي حساب آخر'**
+  String get deleteReasonOtherAccount;
+
+  /// No description provided for @deleteReasonOther.
+  ///
+  /// In ar, this message translates to:
+  /// **'سبب آخر'**
+  String get deleteReasonOther;
+
+  /// No description provided for @deleteAccountForever.
+  ///
+  /// In ar, this message translates to:
+  /// **'حذف الحساب نهائيًا'**
+  String get deleteAccountForever;
+
+  /// No description provided for @accountDeleted.
+  ///
+  /// In ar, this message translates to:
+  /// **'تم حذف حسابك'**
+  String get accountDeleted;
+
+  /// No description provided for @guestTitle.
+  ///
+  /// In ar, this message translates to:
+  /// **'سجّل دخولك'**
+  String get guestTitle;
+
+  /// No description provided for @guestBody.
+  ///
+  /// In ar, this message translates to:
+  /// **'سجّل دخولك لتتابع طلباتك وعناوينك.'**
+  String get guestBody;
+
+  /// No description provided for @signIn.
+  ///
+  /// In ar, this message translates to:
+  /// **'تسجيل الدخول'**
+  String get signIn;
+
+  /// No description provided for @comingSoonTitle.
+  ///
+  /// In ar, this message translates to:
+  /// **'قريبًا'**
+  String get comingSoonTitle;
+
+  /// No description provided for @comingSoonBody.
+  ///
+  /// In ar, this message translates to:
+  /// **'هذا القسم قيد التجهيز.'**
+  String get comingSoonBody;
 }
 
 class _AppLocalizationsDelegate extends LocalizationsDelegate<AppLocalizations> {

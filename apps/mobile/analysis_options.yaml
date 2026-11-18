@@ -5,6 +5,7 @@ analyzer:
     - packages/**
     - lib/l10n/app_localizations*.dart
     - "**/*.g.dart"
+    - tool/screenshots/**
 
 linter:
   rules:

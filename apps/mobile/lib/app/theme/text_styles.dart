@@ -84,10 +84,14 @@ abstract final class JText {
     color: JColors.ink,
   );
 
-  /// Text in the specs without a named style (`size`/`font` only, line height auto).
+  /// Text in the specs without a named style (`size`/`font` only, Figma line height "auto").
+  /// Figma's auto line height for Thmanyah is 1.25 of the size (its text boxes: 14 → 18, 12 → 15, 16 → 20);
+  /// pinning it keeps rows at Figma's heights with the taller build fonts.
   static TextStyle raw(double size, FontWeight weight, {Color color = JColors.ink}) => TextStyle(
     fontFamily: bodyFamily,
     fontSize: size,
+    height: 1.25,
+    leadingDistribution: _even,
     fontWeight: weight,
     color: color,
   );
