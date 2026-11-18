@@ -1,37 +1,81 @@
 import createIntlMiddleware from 'next-intl/middleware';
 import { NextResponse, type NextRequest } from 'next/server';
 import { routing } from './i18n/routing';
-import { ROLES_COOKIE, isPanel, parsePanels } from './lib/session';
+import { authBackend } from './lib/auth/backend';
+import { clearPanel, writePanels, writeTokens } from './lib/auth/cookies';
+import { clientIp } from './lib/auth/request';
+import { PANELS_COOKIE, accessCookie, isPanel, parsePanels, refreshCookie, type Panel } from './lib/session';
 
 const intl = createIntlMiddleware(routing);
 
-/** "/en/admin/orders" → { prefix: "/en", area: "admin" } */
+/** "/en/admin/orders" → { prefix: "/en", area: "admin", rest: ["orders"] } */
 function splitPath(pathname: string) {
   const parts = pathname.split('/').filter(Boolean);
   const prefix = (routing.locales as readonly string[]).includes(parts[0] ?? '') ? `/${parts.shift()}` : '';
   return { prefix, area: parts[0], rest: parts.slice(1) };
 }
 
-export default function middleware(req: NextRequest) {
+function redirectTo(req: NextRequest, pathname: string, params: Record<string, string> = {}) {
+  const url = req.nextUrl.clone();
+  url.pathname = pathname;
+  url.search = new URLSearchParams(params).toString();
+  return NextResponse.redirect(url);
+}
+
+/** Where a signed-in user lands: their only panel, or the picker. */
+const home = (prefix: string, panels: Panel[]) => (panels.length === 1 ? `${prefix}/${panels[0]}` : `${prefix}/login/choose`);
+
+export default async function middleware(req: NextRequest) {
   const { prefix, area, rest } = splitPath(req.nextUrl.pathname);
+  const panels = parsePanels(req.cookies.get(PANELS_COOKIE)?.value);
+
+  // Start and sign-in pages: signed-in staff go straight to their panel.
+  if (area === undefined || (area === 'login' && rest.length === 0)) {
+    const asked = req.nextUrl.searchParams.get('panel');
+    if (isPanel(asked) && panels.includes(asked)) return redirectTo(req, `${prefix}/${asked}`);
+    if (!isPanel(asked) && panels.length > 0) return redirectTo(req, home(prefix, panels));
+    if (area === undefined) return redirectTo(req, `${prefix}/login`);
+  }
+  if (area === 'login' && rest[0] === 'choose' && panels.length < 2) {
+    return redirectTo(req, panels.length ? home(prefix, panels) : `${prefix}/login`);
+  }
 
   // The vendor application accepts customer sessions and visitors (VND-DSH-1), so it is not guarded here.
   const isVendorApplication = area === 'vendor' && (rest[0] === 'apply' || rest[0] === 'application');
+  if (!isPanel(area) || isVendorApplication) return intl(req);
 
-  if (isPanel(area) && !isVendorApplication) {
-    // shortcut: forgeable placeholder cookie, replaced by the real session check in ACC-DSH-1 before any page reads data.
-    const panels = parsePanels(req.cookies.get(ROLES_COOKIE)?.value);
-    if (!panels.includes(area)) {
-      const url = req.nextUrl.clone();
-      url.pathname = `${prefix}/login`;
-      url.search = '';
-      url.searchParams.set('panel', area);
-      url.searchParams.set('next', req.nextUrl.pathname);
-      return NextResponse.redirect(url);
+  const refreshToken = req.cookies.get(refreshCookie(area))?.value;
+  if (!panels.includes(area) || !refreshToken) {
+    const out = redirectTo(req, `${prefix}/login`, { panel: area, next: req.nextUrl.pathname });
+    // Idle timeout passed (jz_panels expired) while the refresh token is still here: end that API session too.
+    if (refreshToken) {
+      await authBackend().logout(refreshToken, clientIp(req));
+      clearPanel(out, area);
     }
+    return out;
   }
 
-  return intl(req);
+  const res = intl(req);
+  writePanels(res, panels); // slide the 12 h idle timeout
+
+  // Refresh an expired access token on page loads and in-app navigations, never on prefetches, so parallel prefetches
+  // don't spend the one-use refresh token twice.
+  // shortcut: no cross-tab lock; two tabs navigating in the same second could still race. Move to a server-side session
+  // store if that shows up. Server components of the same request still see the old cookies: forward the new token in
+  // request headers once pages fetch data.
+  const navigation =
+    req.headers.get('sec-fetch-dest') === 'document' || (req.headers.get('rsc') === '1' && !req.headers.get('next-router-prefetch'));
+  if (!req.cookies.get(accessCookie(area)) && navigation) {
+    const r = await authBackend().refresh(refreshToken, clientIp(req));
+    if (r.ok) writeTokens(res, area, r.data);
+    else if (r.code !== 'NETWORK') {
+      const out = redirectTo(req, `${prefix}/login`, { panel: area, next: req.nextUrl.pathname });
+      clearPanel(out, area);
+      writePanels(out, panels.filter((p) => p !== area));
+      return out;
+    }
+  }
+  return res;
 }
 
 export const config = {

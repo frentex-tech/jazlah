@@ -2,7 +2,7 @@ import { Bell, MagnifyingGlass } from '@phosphor-icons/react/dist/ssr';
 import { getTranslations } from 'next-intl/server';
 
 // Figma DS «Top bar» (16:1239): search on the start side, user and notifications on the end side.
-export async function TopBar({ userName }: { userName: string }) {
+export async function TopBar({ userName, initial }: { userName: string; initial: string }) {
   const t = await getTranslations('topBar');
   return (
     <header className="flex h-16 shrink-0 items-center justify-between gap-s16 bg-paper px-s24">
@@ -17,9 +17,9 @@ export async function TopBar({ userName }: { userName: string }) {
       </label>
       <div className="flex items-center gap-s12">
         <span aria-hidden className="flex size-9 items-center justify-center rounded-pill bg-brand text-label-m text-gold-light">
-          {userName.charAt(0)}
+          {initial}
         </span>
-        <span className="text-label-m text-ink">{userName}</span>
+        <bdi dir="ltr" className="text-label-m text-ink">{userName}</bdi>
         <button type="button" aria-label={t('notifications')} className="flex size-10 items-center justify-center rounded-pill bg-bg">
           <Bell size={20} className="text-ink" aria-hidden />
         </button>

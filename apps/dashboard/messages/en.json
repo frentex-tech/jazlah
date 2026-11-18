@@ -61,8 +61,7 @@
     "tableDemo": {
       "breadcrumb": "Admin / Table demo",
       "title": "Table demo"
-    },
-    "login": "Sign in"
+    }
   },
   "table": {
     "showing": "Showing {from} to {to} of {total}",
@@ -132,5 +131,84 @@
   },
   "form": {
     "required": "This field is required"
+  },
+  "panelInitial": {
+    "admin": "A",
+    "vendor": "V",
+    "kitchen": "K"
+  },
+  "login": {
+    "phoneLabel": "Mobile number",
+    "phonePlaceholder": "5X XXX XXXX",
+    "phoneHint": "We'll send you a verification code",
+    "send": "Send code",
+    "otpTitle": "Enter the verification code",
+    "otpSent": "We sent a {length}-digit code to {number}",
+    "otpLabel": "Verification code",
+    "confirm": "Confirm",
+    "resendIn": "Resend in {time}",
+    "resend": "Resend code",
+    "errors": {
+      "phoneInvalid": "Enter a valid Saudi mobile number starting with 5",
+      "otpInvalid": "The code is wrong, try again",
+      "noAccess": "If the code is right, this number has no access to the {panel}.",
+      "otpExpired": "The code has expired. Ask for a new one.",
+      "rateLimited": "Too many attempts. Try again in {seconds} seconds.",
+      "disabled": "This account is disabled. Contact the JAZLA team.",
+      "suspended": "Your store is suspended. Contact the JAZLA team.",
+      "unavailable": "We couldn't connect. Try again."
+    },
+    "choose": {
+      "title": "Choose a dashboard",
+      "body": "Your number has access to more than one dashboard. Choose the one to open.",
+      "open": "Open",
+      "addAnother": "Sign in to another dashboard"
+    },
+    "admin": {
+      "brand": "Staff dashboard",
+      "title": "Staff sign-in",
+      "subtitle": "Enter the mobile number registered with the admin team.",
+      "footer": "This dashboard is for authorised staff only.",
+      "panelName": "admin dashboard",
+      "heroTitle": "JAZLA dashboard",
+      "heroBody": "Orders, stores, delivery and finance in one place. Authorised staff only.",
+      "p1": "Live orders board",
+      "p1b": "Follow every order from receipt to delivery",
+      "p2": "Reports & finance",
+      "p2b": "Store sales and settlements in real time",
+      "p3": "Role-based access",
+      "p3b": "Admin · Vendor · Kitchen"
+    },
+    "vendor": {
+      "brand": "Vendor dashboard",
+      "title": "Vendor sign-in",
+      "subtitle": "Enter your business mobile number registered with JAZLA.",
+      "footer": "No vendor account yet?",
+      "apply": "Apply to join",
+      "panelName": "vendor dashboard",
+      "heroTitle": "Vendor dashboard",
+      "heroBody": "Receive your orders, set slaughter times and follow your earnings in one place.",
+      "p1": "Live orders",
+      "p1b": "Instant alert for every new order",
+      "p2": "Earnings & payouts",
+      "p2b": "Weekly settlement to your bank account",
+      "p3": "Products & stock",
+      "p3b": "Update prices and availability"
+    },
+    "kitchen": {
+      "brand": "Kitchen dashboard",
+      "title": "Kitchen sign-in",
+      "subtitle": "Enter the mobile number registered for your kitchen.",
+      "footer": "Kitchen accounts are created by the JAZLA team. Contact them if your number isn't registered.",
+      "panelName": "kitchen dashboard",
+      "heroTitle": "Kitchen dashboard",
+      "heroBody": "Receive cooking tasks, update their status and hand them over on time.",
+      "p1": "Today and upcoming",
+      "p1b": "Sound alert for every new task",
+      "p2": "Every dish in detail",
+      "p2b": "Number of guests and customer notes",
+      "p3": "On-time handover",
+      "p3b": "Call the courier when it's ready"
+    }
   }
 }

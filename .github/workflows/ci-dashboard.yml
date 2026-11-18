@@ -65,6 +65,9 @@ jobs:
       - name: Typecheck
         run: pnpm typecheck
 
+      - name: Unit self-checks
+        run: pnpm test:unit
+
       - name: Build
         run: pnpm build
 

@@ -1,7 +1,24 @@
-import { getTranslations } from 'next-intl/server';
+import { setRequestLocale } from 'next-intl/server';
+import { LoginCard, LoginLayout } from '@/features/auth/login-layout';
+import { LoginFlow } from '@/features/auth/login-flow';
+import { isPanel, safeNext } from '@/lib/session';
 
-// Staff sign-in. UI only in APP-DSH-1; built and wired in ACC-DSH-1.
-export default async function LoginPage() {
-  const t = await getTranslations('pages');
-  return <main className="flex min-h-screen items-center justify-center text-h2">{t('login')}</main>;
+// One sign-in screen for every panel: `?panel=vendor|kitchen` switches the photo panel and the texts (admin by default).
+export default async function LoginPage({
+  params,
+  searchParams,
+}: {
+  params: Promise<{ locale: string }>;
+  searchParams: Promise<{ panel?: string; next?: string }>;
+}) {
+  setRequestLocale((await params).locale);
+  const q = await searchParams;
+  const panel = isPanel(q.panel) ? q.panel : 'admin';
+  return (
+    <LoginLayout panel={panel}>
+      <LoginCard>
+        <LoginFlow panel={panel} next={safeNext(q.next) ?? undefined} otpLength={Math.min(8, Math.max(4, Number(process.env.OTP_LENGTH) || 6))} />
+      </LoginCard>
+    </LoginLayout>
+  );
 }

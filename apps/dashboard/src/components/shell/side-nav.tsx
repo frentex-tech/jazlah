@@ -1,7 +1,7 @@
 'use client';
 
 import { SignOut } from '@phosphor-icons/react';
-import { useTranslations } from 'next-intl';
+import { useLocale, useTranslations } from 'next-intl';
 import Image from 'next/image';
 import { Link, usePathname } from '@/i18n/navigation';
 import type { Panel } from '@/lib/session';
@@ -13,6 +13,7 @@ const itemClass = 'flex h-11 shrink-0 items-center gap-s12 rounded-sm px-s12 tex
 // Figma DS «Side nav» (16:1237), variants role=admin|vendor|kitchen.
 export function SideNav({ panel, badges = {} }: { panel: Panel; badges?: Record<string, number> }) {
   const t = useTranslations();
+  const locale = useLocale();
   const pathname = usePathname();
   const current = activeKey(panel, pathname);
 
@@ -50,6 +51,7 @@ export function SideNav({ panel, badges = {} }: { panel: Panel; badges?: Record<
       <div className="flex-1" />
 
       <form action="/api/auth/logout" method="post">
+        <input type="hidden" name="locale" value={locale} />
         <button type="submit" className={cn(itemClass, 'w-full text-sand hover:bg-brand-2/60')}>
           <SignOut size={22} className="shrink-0" aria-hidden />
           <span className="flex-1 text-start">{t('nav.signOut')}</span>
