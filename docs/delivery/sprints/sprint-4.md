@@ -25,13 +25,13 @@ Live gateway hookup in the clients once the client's gateway is integrated (PAY-
 ### PAY-MOB-2 — Mobile: live gateway SDK, Apple Pay certificates & device tests
 `type: Feature · area: mobile · size: M · prio: P0 · reqs: FR-PAY-01 · depends: PAY-API-2, PAY-MOB-1 · labels: needs-client`
 
-**What:** switch the app and website from the fake provider to the chosen gateway.
+**What:** switch the app from the fake provider to the chosen gateway.
 
-**Output:** gateway native SDK / hosted page in the Flutter payment step, Apple Pay merchant ID + certificate per flavor, Apple Pay on the web (domain association file, merchant validation), mada/card 3DS on the web form; real-device test report
+**Output:** gateway native SDK / hosted page in the Flutter payment step, Apple Pay merchant ID + certificate per flavor, mada/card 3DS; real-device test report
 
 **How:** keep the provider choice server-driven (payment-methods endpoint returns provider + method config). No client branching on provider names beyond the SDK adapter.
 
-**Where:** `apps/mobile/lib/features/payment/`, `apps/web/src/app/[locale]/(shop)/checkout/payment`, `apps/web/public/.well-known/`
+**Where:** `apps/mobile/lib/features/payment/`
 
 **Acceptance:**
 - [ ] Sandbox payments succeed on a real iPhone (Apple Pay) and an Android device (mada test card)

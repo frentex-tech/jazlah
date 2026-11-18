@@ -142,8 +142,8 @@ A simplified tax invoice for every order, compliant with ZATCA Phase 2 (Fatoora)
 
 **What:** customers get their invoice.
 
-**Output:** a "Download invoice" action on the order detail in the app (opens/shares the PDF) and on the web order page
-**Where:** `apps/mobile/lib/features/orders/`, `apps/web/src/app/[locale]/(account)/orders/[id]`
+**Output:** a "Download invoice" action on the order detail in the app (opens/shares the PDF)
+**Where:** `apps/mobile/lib/features/orders/`
 
 **Acceptance:**
 - [ ] The PDF opens on iOS and Android, and from the web page
@@ -167,11 +167,11 @@ Post-delivery ratings for the order, vendor and delivery, with averages and mode
 ### RAT-MOB-1 — Mobile: rate order, show ratings
 `type: Feature · area: mobile · size: M · prio: P1 · reqs: FR-RAT-01, FR-RAT-02 · depends: RAT-API-1, ORD-MOB-2`
 
-**What:** customers rate, and everyone sees averages. This covers both customer clients to keep it in one task.
+**What:** customers rate, and everyone sees averages. The mobile app is the only customer client.
 
-**Output:** mobile rating sheet (from the push and from the order detail), stars on product cards, store header and product detail, reviews list on the store page; the same rating form and display on the web order and store pages (`apps/web`)
+**Output:** mobile rating sheet (from the push and from the order detail), stars on product cards, store header and product detail, reviews list on the store page
 
-**Where:** `apps/mobile/lib/features/ratings/`, `apps/web/src/features/ratings/`
+**Where:** `apps/mobile/lib/features/ratings/`
 
 **Acceptance:**
 - [ ] The rating prompt doesn't appear again after rating or after dismissing twice
@@ -217,11 +217,11 @@ Banners, pop-ups and static pages (terms, privacy, FAQ) managed from the dashboa
 ### CMS-MOB-1 — Mobile: banners, pop-ups & static pages
 `type: Feature · area: mobile · size: S · prio: P0 · reqs: FR-ADM-09 · depends: CMS-API-1, STF-MOB-1`
 
-**What:** render managed content in both customer clients.
+**What:** render managed content in the customer app.
 
-**Output:** banner targets routed in the app and web, a pop-up with frequency stored locally, static pages screens (app) and `/[locale]/pages/[slug]` routes (web, SSR)
+**Output:** banner targets routed in the app, a pop-up with frequency stored locally, static pages screens
 
-**Where:** `apps/mobile/lib/features/cms/`, `apps/web/src/app/[locale]/pages/[slug]`
+**Where:** `apps/mobile/lib/features/cms/`
 
 **Acceptance:**
 - [ ] A "once" pop-up never shows twice on the same device

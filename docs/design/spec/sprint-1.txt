@@ -1,0 +1,104 @@
+# Sprint 1 screens and Design System components: <node-id> <platform> <task>
+199-28039 app ACC-MOB-1
+123-2588 app ACC-MOB-1
+123-2651 app ACC-MOB-1
+123-2712 app ACC-MOB-1
+123-2794 app ACC-MOB-1
+123-3110 app ACC-MOB-1
+123-2879 app ACC-MOB-1
+123-2994 app ACC-MOB-1
+123-3227 app ACC-MOB-1
+123-3316 app ACC-MOB-1
+123-3435 app ACC-MOB-1
+123-3555 app ACC-MOB-1
+123-3677 app ACC-MOB-1
+123-3754 app ACC-MOB-1
+123-3850 app ACC-MOB-1
+123-3946 app ACC-MOB-1
+227-44073 app ACC-MOB-1
+86-8608 app ACC-MOB-1
+86-8667 app ACC-MOB-1
+86-8735 app ACC-MOB-1
+86-8791 app ACC-MOB-1
+86-8871 app ACC-MOB-3
+86-8947 app ACC-MOB-3
+86-9041 app ACC-MOB-3
+86-9115 app ACC-MOB-3
+86-9219 app ACC-MOB-3
+86-9264 app ACC-MOB-3
+86-9334 app ACC-MOB-3
+86-3340 app LOC-MOB-1
+86-3383 app LOC-MOB-1
+86-3439 app LOC-MOB-1
+86-3490 app LOC-MOB-1
+86-3535 app LOC-MOB-1
+86-3583 app LOC-MOB-1
+86-3642 app LOC-MOB-1
+86-3701 app LOC-MOB-1
+86-3762 app LOC-MOB-1
+86-3823 app LOC-MOB-1
+86-3864 app LOC-MOB-1
+86-3907 app LOC-MOB-1
+118-5934 dashboard ACC-DSH-1
+118-5954 dashboard ACC-DSH-1
+118-5974 dashboard ACC-DSH-1
+118-6922 dashboard ACC-DSH-1
+118-6942 dashboard ACC-DSH-1
+118-6967 dashboard ACC-DSH-1
+352-59207 dashboard ACC-DSH-1
+352-59258 dashboard ACC-DSH-1
+410-38561 dashboard ACC-DSH-1
+410-38605 dashboard ACC-DSH-1
+410-38667 dashboard ACC-DSH-1
+410-38726 dashboard ACC-DSH-1
+410-38780 dashboard ACC-DSH-1
+410-38842 dashboard ACC-DSH-1
+410-38896 dashboard ACC-DSH-1
+410-38955 dashboard ACC-DSH-1
+410-39009 dashboard ACC-DSH-1
+410-39071 dashboard ACC-DSH-1
+135-46622 dashboard APP-DSH-1 admin-shell
+135-46807 dashboard APP-DSH-1 admin-shell
+135-46966 dashboard APP-DSH-1 admin-shell
+135-47170 dashboard APP-DSH-1 admin-shell
+135-47334 dashboard APP-DSH-1 admin-shell
+135-39184 dashboard APP-DSH-1 vendor-shell
+131-79506 dashboard APP-DSH-1 kitchen-shell
+352-38462 app APP-MOB-1 rtl-ltr-example
+352-38532 app APP-MOB-1 rtl-ltr-example
+16-215 ds component:Button
+16-294 ds component:Input
+16-320 ds component:Phone_input
+16-349 ds component:OTP_field
+16-359 ds component:Chip
+16-375 ds component:Radio
+16-393 ds component:Checkbox
+16-411 ds component:Switch
+16-437 ds component:Stepper
+16-471 ds component:Tabs
+16-541 ds component:Bottom_tab_bar
+16-561 ds component:Toast
+16-579 ds component:Dialog
+16-581 ds component:Bottom_sheet
+16-646 ds component:App_header
+16-671 ds component:Search_bar
+16-673 ds component:Section_header
+16-739 ds component:Badge
+16-749 ds component:Card
+16-793 ds component:Product_card
+16-795 ds component:Store_card
+16-805 ds component:Category_tile
+16-877 ds component:State_panel
+16-879 ds component:Skeleton_row
+16-923 ds component:Map_pin
+16-1116 ds component:Status_timeline
+16-1140 ds component:Nav_item
+16-1237 ds component:Side_nav
+16-1239 ds component:Top_bar
+16-1252 ds component:Page_header
+16-1276 ds component:KPI_card
+16-1564 ds component:Data_table
+16-1584 ds component:Select
+16-1645 ds component:Filters_bar
+16-1709 ds component:Form_section
+16-1711 ds component:Form_actions
