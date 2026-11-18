@@ -72,8 +72,8 @@ export const mockBackend: AuthBackend = {
   },
   async verifyOtp(phone, panel, code) {
     if (phone === MOCK_DISABLED) return { ok: false, code: 'ACCOUNT_DISABLED' };
-    if (/^0+$/.test(code)) return { ok: false, code: 'OTP_EXPIRED' };
-    if (!MOCK_ACCESS[phone]?.includes(panel) || !/^(\d)\1{3,7}$/.test(code) || code[0] !== phone.slice(-1) /* mock code: the phone's last digit, OTP_LENGTH times */) return { ok: false, code: 'OTP_INVALID' };
+    if (code === '000000') return { ok: false, code: 'OTP_EXPIRED' };
+    if (!MOCK_ACCESS[phone]?.includes(panel) || code !== phone.slice(-1).repeat(6)) return { ok: false, code: 'OTP_INVALID' };
     return {
       ok: true,
       data: {

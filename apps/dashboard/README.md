@@ -57,7 +57,7 @@ messages/ar.json, en.json       every UI string
 - **Staff display name:** `GET /v1/<panel>/me` returns only the principal, so the top bar shows the masked phone and a user icon in the avatar.
 - **Panels a phone or user can open:** the API does not list them, and tokens are per audience. So the panel picker (`/login/choose`) lists the panels with a live session, which means it appears after the second sign-in.
 - **Coverage zone color:** the editor stores a color per zone; LOC-API-1's model has no `color` field yet.
-- **Code length:** not in the OTP request response, so it is a dashboard setting (`OTP_LENGTH`). Jazlah uses 4 digits as in Figma (owner, 2026-11-18): the API runs with `AUTH_OTP_LENGTH=4`, the dashboard with `OTP_LENGTH=4`.
+- **Code length:** not in the OTP request response, so it is a dashboard setting (`OTP_LENGTH`). Jazlah uses 6 digits (owner, 2026-11-18); Figma's 4 cells are an accepted difference.
 
 ## Mocks (`DASHBOARD_API_MOCK=1`)
 - Auth (`src/lib/auth/backend.ts`), like the API's review accounts. The code is the last digit six times:
