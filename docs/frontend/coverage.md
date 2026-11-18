@@ -24,11 +24,13 @@ All under `/v1/admin/coverage-zones`, with an admin token. Every change is audit
 |---|---|
 | `GET /v1/admin/coverage-zones` | Every zone, active and inactive, newest first, paged by cursor (`{ items, nextCursor }`). |
 | `GET /v1/admin/coverage-zones/{id}` | One zone. |
-| `POST /v1/admin/coverage-zones` | Adds a zone: `{ name: { ar, en }, city, polygon, isActive? }`. `isActive` is `true` when left out. Answers 201 with the zone. |
-| `PATCH /v1/admin/coverage-zones/{id}` | Changes only the fields sent: the name (both languages together), `city`, `polygon`, `isActive`. |
+| `POST /v1/admin/coverage-zones` | Adds a zone: `{ name: { ar, en }, city, polygon, isActive?, color? }`. `isActive` is `true` and `color` is `#6A1A20` when left out. Answers 201 with the zone. |
+| `PATCH /v1/admin/coverage-zones/{id}` | Changes only the fields sent: the name (both languages together), `city`, `polygon`, `isActive`, `color`. |
 | `DELETE /v1/admin/coverage-zones/{id}` | Deletes the zone for good (204). To pause a zone, set `isActive` to `false` instead. |
 
-A zone is `{ id, name: { ar, en }, city, polygon, isActive, createdAt, updatedAt }`.
+A zone is `{ id, name: { ar, en }, city, polygon, isActive, color, createdAt, updatedAt }`.
+
+**`color`** is the zone's colour on the map, `#RRGGBB` (either case; returned as sent). Anything else gets `VALIDATION_FAILED` on the `color` field.
 
 **`polygon` is GeoJSON** (RFC 7946), in and out:
 

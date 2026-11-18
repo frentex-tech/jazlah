@@ -1,5 +1,6 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { LocalizedTextResponseDto } from '@common/dto/localized-text-response.dto';
+import { COVERAGE_ZONE_COLOR } from '../coverage-zone-color.constants';
 import { GeoJsonPolygonDto } from './geo-json-polygon.dto';
 
 /** A coverage zone as admins see it. */
@@ -33,6 +34,13 @@ export class CoverageZoneResponseDto {
     example: true,
   })
   isActive!: boolean;
+
+  @ApiProperty({
+    pattern: COVERAGE_ZONE_COLOR.pattern.source,
+    description: 'The zone colour on the dashboard map, `#RRGGBB`.',
+    example: COVERAGE_ZONE_COLOR.default,
+  })
+  color!: string;
 
   @ApiProperty({
     format: 'date-time',

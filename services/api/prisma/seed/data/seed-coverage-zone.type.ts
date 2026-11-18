@@ -9,4 +9,6 @@ export type SeedCoverageZone = Readonly<{
   city: string;
   polygon: GeoJsonPolygon;
   isActive: boolean;
+  /** `#RRGGBB`. */
+  color: string;
 }>;

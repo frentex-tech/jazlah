@@ -24,5 +24,6 @@ export const SEED_COVERAGE_ZONES: readonly SeedCoverageZone[] = [
       ],
     },
     isActive: true,
+    color: '#6A1A20',
   },
 ];

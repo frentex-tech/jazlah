@@ -567,7 +567,7 @@ Coverage polygons managed by the admin, location detection in the apps, and serv
 
 **Output:**
 - **Moved in 2026-11-17:** from FND-API-1, the geo helpers (`pointFromLatLng`, `isPointInPolygon`, `toGeoJSON`) with a unit test on a sample Riyadh polygon; from ACC-API-2, `isCovered` on every returned address.
-- `CoverageZone` model (nameAr, nameEn, city, polygon geometry(Polygon,4326) with GIST index, isActive)
+- `CoverageZone` model (nameAr, nameEn, city, polygon geometry(Polygon,4326) with GIST index, isActive, color `#RRGGBB` for the dashboard map, default `#6A1A20`)
 - Admin: `GET/POST/PATCH/DELETE /v1/admin/coverage-zones` (GeoJSON in/out), audited
 - Public: `GET /v1/public/coverage/check?lat=&lng=` → `{covered, zone?: {id, name, city}}`
 - `CoverageService.isCovered(point)` and `findZone(point)` exported for addresses, checkout and kitchen assignment

@@ -16,6 +16,7 @@ export function toCoverageZoneResponse(
       ),
     },
     isActive: zone.isActive,
+    color: zone.color,
     createdAt: zone.createdAt,
     updatedAt: zone.updatedAt,
   };

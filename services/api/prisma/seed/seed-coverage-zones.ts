@@ -15,9 +15,9 @@ export async function seedCoverageZones(context: SeedContext): Promise<void> {
   for (const [index, zone] of SEED_COVERAGE_ZONES.entries()) {
     const created = await db.client.$executeRaw`
       INSERT INTO "coverage_zones"
-        ("id", "name_ar", "name_en", "city", "polygon", "is_active", "created_at", "updated_at")
+        ("id", "name_ar", "name_en", "city", "polygon", "is_active", "color", "created_at", "updated_at")
       VALUES (${seedId(`coverage-zone:${zone.key}`)}::uuid, ${zone.nameAr}, ${zone.nameEn},
-        ${zone.city}, ${polygonFromGeoJSON(zone.polygon)}, ${zone.isActive},
+        ${zone.city}, ${polygonFromGeoJSON(zone.polygon)}, ${zone.isActive}, ${zone.color},
         ${seedTime(200 + index)}, ${seedTime(200 + index)})
       ON CONFLICT ("id") DO NOTHING`;
     tally.one('coverage zones', created === 1);

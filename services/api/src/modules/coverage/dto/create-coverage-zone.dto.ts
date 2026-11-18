@@ -5,12 +5,14 @@ import {
   IsDefined,
   IsOptional,
   IsString,
+  Matches,
   ValidateNested,
 } from 'class-validator';
 import { CharLength } from '@common/decorators/char-length.decorator';
 import { LocalizedNameDto } from '@common/dto/localized-name.dto';
 import { toCompactText } from '@common/dto/to-compact-text';
 import { COVERAGE_LIMITS } from '../coverage-limits.constants';
+import { COVERAGE_ZONE_COLOR } from '../coverage-zone-color.constants';
 import { GeoJsonPolygonDto } from './geo-json-polygon.dto';
 
 /** A new coverage zone. */
@@ -54,4 +56,15 @@ export class CreateCoverageZoneDto {
   @IsOptional()
   @IsBoolean()
   isActive?: boolean;
+
+  @ApiPropertyOptional({
+    pattern: COVERAGE_ZONE_COLOR.pattern.source,
+    default: COVERAGE_ZONE_COLOR.default,
+    description: `The zone colour on the dashboard map, \`#RRGGBB\` (either case); \`${COVERAGE_ZONE_COLOR.default}\` when left out.`,
+    example: COVERAGE_ZONE_COLOR.default,
+  })
+  @IsOptional()
+  @IsString()
+  @Matches(COVERAGE_ZONE_COLOR.pattern)
+  color?: string;
 }

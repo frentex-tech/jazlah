@@ -396,10 +396,11 @@ describe('the seed data', () => {
   });
 
   describe('coverage zones', () => {
-    it('has unique keys, GeoJSON polygons and cities of 2 to 50 characters', () => {
+    it('has unique keys, GeoJSON polygons, #RRGGBB colours and cities of 2 to 50 characters', () => {
       expect(unique(keysOf(SEED_COVERAGE_ZONES))).toBe(true);
       for (const zone of SEED_COVERAGE_ZONES) {
         expect(isGeoJsonPolygon(zone.polygon)).toBe(true);
+        expect(zone.color).toMatch(/^#[0-9A-Fa-f]{6}$/);
         expect(chars(zone.city)).toBeGreaterThanOrEqual(2);
         expect(chars(zone.city)).toBeLessThanOrEqual(50);
       }

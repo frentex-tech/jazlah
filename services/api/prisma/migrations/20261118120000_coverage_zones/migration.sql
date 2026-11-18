@@ -9,6 +9,7 @@ CREATE TABLE "coverage_zones" (
     "city" TEXT NOT NULL,
     "polygon" geometry(Polygon, 4326) NOT NULL,
     "is_active" BOOLEAN NOT NULL DEFAULT true,
+    "color" TEXT NOT NULL DEFAULT '#6A1A20',
     "created_at" TIMESTAMPTZ(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updated_at" TIMESTAMPTZ(3) NOT NULL,
 
@@ -25,3 +26,7 @@ CREATE INDEX "coverage_zones_created_at_id_idx" ON "coverage_zones"("created_at"
 -- The coverage module checks first and answers INVALID_POLYGON; this is the backstop.
 ALTER TABLE "coverage_zones" ADD CONSTRAINT "coverage_zones_polygon_check"
   CHECK (ST_IsValid("polygon"));
+
+-- Added by hand: the map colour is `#RRGGBB` (the API validates it first).
+ALTER TABLE "coverage_zones" ADD CONSTRAINT "coverage_zones_color_check"
+  CHECK ("color" ~ '^#[0-9A-Fa-f]{6}$');

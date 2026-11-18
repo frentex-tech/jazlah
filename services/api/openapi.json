@@ -4754,7 +4754,7 @@
         ]
       },
       "post": {
-        "description": "Admin dashboard, the zone editor: the admin draws the boundary on the map. Active at once unless `isActive` is false; the coverage check uses it from the next request. INVALID_POLYGON: the boundary is not a valid polygon (a ring not closed or with fewer than four positions, a position out of range, edges that cross); nothing was saved, let the admin redraw it.",
+        "description": "Admin dashboard, the zone editor: the admin draws the boundary on the map. Active at once unless `isActive` is false; `color` (`#RRGGBB`, the map colour) defaults to #6A1A20; the coverage check uses it from the next request. INVALID_POLYGON: the boundary is not a valid polygon (a ring not closed or with fewer than four positions, a position out of range, edges that cross); nothing was saved, let the admin redraw it.",
         "operationId": "adminCreateCoverageZone",
         "parameters": [],
         "requestBody": {
@@ -4980,7 +4980,7 @@
         ]
       },
       "patch": {
-        "description": "Admin dashboard, the zone editor. Changes only the fields sent; applies to the coverage check from the next request. NOT_FOUND for an unknown id. INVALID_POLYGON: the new boundary is not a valid polygon; nothing was saved.",
+        "description": "Admin dashboard, the zone editor. Changes only the fields sent (name, city, polygon, isActive, color); applies to the coverage check from the next request. NOT_FOUND for an unknown id. INVALID_POLYGON: the new boundary is not a valid polygon; nothing was saved.",
         "operationId": "adminUpdateCoverageZone",
         "parameters": [
           {
@@ -11595,6 +11595,12 @@
             "description": "Whether the zone counts in the coverage check.",
             "example": true
           },
+          "color": {
+            "type": "string",
+            "pattern": "^#[0-9A-Fa-f]{6}$",
+            "description": "The zone colour on the dashboard map, `#RRGGBB`.",
+            "example": "#6A1A20"
+          },
           "createdAt": {
             "format": "date-time",
             "type": "string",
@@ -11614,6 +11620,7 @@
           "city",
           "polygon",
           "isActive",
+          "color",
           "createdAt",
           "updatedAt"
         ]
@@ -11671,6 +11678,13 @@
             "default": true,
             "description": "Whether the zone counts in the coverage check at once; true when left out.",
             "example": true
+          },
+          "color": {
+            "type": "string",
+            "pattern": "^#[0-9A-Fa-f]{6}$",
+            "default": "#6A1A20",
+            "description": "The zone colour on the dashboard map, `#RRGGBB` (either case); `#6A1A20` when left out.",
+            "example": "#6A1A20"
           }
         },
         "required": [
@@ -11709,6 +11723,12 @@
             "type": "boolean",
             "description": "`false`: the zone stops counting in the coverage check at once (addresses in it show as not covered); `true`: it counts again. Left out: unchanged.",
             "example": false
+          },
+          "color": {
+            "type": "string",
+            "pattern": "^#[0-9A-Fa-f]{6}$",
+            "description": "The new map colour, `#RRGGBB`; left out: unchanged.",
+            "example": "#6A1A20"
           }
         }
       },

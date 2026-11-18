@@ -5,6 +5,7 @@
 /// read through the geo helpers of src/infra/database/ (the Prisma client cannot touch
 /// the column). Only active zones count in the coverage check. The polygon is valid
 /// (check constraint `coverage_zones_polygon_check`: ST_IsValid, so no self-intersection).
+/// Each has a colour for the admin's map.
 model CoverageZone {
   id        String                                 @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
   nameAr    String                                 @map("name_ar")
@@ -13,6 +14,9 @@ model CoverageZone {
   city      String
   polygon   Unsupported("geometry(Polygon, 4326)")
   isActive  Boolean                                @default(true) @map("is_active")
+  /// The zone's colour on the dashboard map, `#RRGGBB` (check constraint
+  /// `coverage_zones_color_check`).
+  color     String                                 @default("#6A1A20")
   createdAt DateTime                               @default(now()) @map("created_at") @db.Timestamptz(3)
   updatedAt DateTime                               @updatedAt @map("updated_at") @db.Timestamptz(3)
 

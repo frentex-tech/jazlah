@@ -20,6 +20,7 @@ type ZoneBody = {
   city: string;
   polygon: { type: 'Polygon'; coordinates: number[][][] };
   isActive: boolean;
+  color: string;
 };
 
 type CheckBody = {
@@ -264,6 +265,7 @@ describe('Coverage (e2e)', () => {
         city: 'الرياض',
         polygon: square(15),
         isActive: true,
+        color: '#6A1A20',
       });
       const path = `/v1/admin/coverage-zones/${created.id}`;
       expect(
@@ -285,13 +287,22 @@ describe('Coverage (e2e)', () => {
       const renamed = await http()
         .patch(path)
         .set(...bearer(user))
-        .send({ name: { ar: 'الغربية', en: 'Western' } })
+        .send({ name: { ar: 'الغربية', en: 'Western' }, color: '#1f7a4d' })
         .expect(200);
       expect(renamed.body).toMatchObject({
         name: { ar: 'الغربية', en: 'Western' },
         city: 'الرياض',
         polygon: square(15),
+        color: '#1f7a4d',
       });
+      expect(
+        (
+          await http()
+            .get(path)
+            .set(...bearer(user))
+            .expect(200)
+        ).body,
+      ).toMatchObject({ color: '#1f7a4d' });
 
       const audit = await prisma.auditLog.findMany({
         where: { entityId: created.id },
@@ -410,6 +421,49 @@ describe('Coverage (e2e)', () => {
 
       expect(errorOf(res).code).toBe('VALIDATION_FAILED');
     });
+
+    it('keeps the colour given at creation', async () => {
+      const user = await admin();
+
+      expect(
+        await createZone(user, { polygon: square(12.5), color: '#C9A227' }),
+      ).toMatchObject({ color: '#C9A227' });
+    });
+
+    it.each([
+      ['a colour name', 'red'],
+      ['three digits', '#abc'],
+      ['no hash', '6A1A20'],
+      ['a letter past F', '#6A1A2G'],
+      ['a number', 6969],
+    ])(
+      'refuses %s as the colour with VALIDATION_FAILED, on create and change',
+      async (_, color) => {
+        const user = await admin();
+        const zone = await createZone(user, { polygon: square(12.8) });
+
+        const created = await http()
+          .post('/v1/admin/coverage-zones')
+          .set(...bearer(user))
+          .send({
+            name: { ar: 'لون', en: 'Colour' },
+            city: 'الرياض',
+            polygon: square(12.8),
+            color,
+          })
+          .expect(400);
+        const changed = await http()
+          .patch(`/v1/admin/coverage-zones/${zone.id}`)
+          .set(...bearer(user))
+          .send({ color })
+          .expect(400);
+
+        for (const res of [created, changed]) {
+          expect(errorOf(res).code).toBe('VALIDATION_FAILED');
+          expect(JSON.stringify(errorOf(res).details)).toContain('color');
+        }
+      },
+    );
 
     it('answers NOT_FOUND for an unknown zone', async () => {
       const user = await admin();

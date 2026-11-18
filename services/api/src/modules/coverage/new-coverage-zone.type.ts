@@ -7,4 +7,6 @@ export type NewCoverageZone = Readonly<{
   city: string;
   polygon: GeoJsonPolygon;
   isActive: boolean;
+  /** `#RRGGBB`. */
+  color: string;
 }>;

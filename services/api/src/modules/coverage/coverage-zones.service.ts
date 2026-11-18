@@ -123,9 +123,9 @@ export class CoverageZonesService {
       const rows = await this.query(
         () => this.db.client.$queryRaw<{ id: string }[]>`
           INSERT INTO "coverage_zones"
-            ("name_ar", "name_en", "city", "polygon", "is_active", "updated_at")
+            ("name_ar", "name_en", "city", "polygon", "is_active", "color", "updated_at")
           VALUES (${zone.name.ar}, ${zone.name.en}, ${zone.city},
-            ${polygonFromGeoJSON(zone.polygon)}, ${zone.isActive}, CURRENT_TIMESTAMP)
+            ${polygonFromGeoJSON(zone.polygon)}, ${zone.isActive}, ${zone.color}, CURRENT_TIMESTAMP)
           RETURNING "id"`,
       );
       const created = rows[0].id;
@@ -150,7 +150,7 @@ export class CoverageZonesService {
     changes: CoverageZoneChanges,
     actorId: string,
   ): Promise<CoverageZone> {
-    const { name, city, isActive, polygon } = changes;
+    const { name, city, isActive, color, polygon } = changes;
     if (polygon !== undefined) {
       await this.assertValid(polygon);
     }
@@ -159,7 +159,13 @@ export class CoverageZonesService {
       await this.query(() =>
         this.db.client.coverageZone.update({
           where: { id },
-          data: { nameAr: name?.ar, nameEn: name?.en, city, isActive },
+          data: {
+            nameAr: name?.ar,
+            nameEn: name?.en,
+            city,
+            isActive,
+            color,
+          },
         }),
       );
       if (polygon !== undefined) {
@@ -256,6 +262,7 @@ export class CoverageZonesService {
               city: row.city,
               polygon,
               isActive: row.isActive,
+              color: row.color,
               createdAt: row.createdAt,
               updatedAt: row.updatedAt,
             },

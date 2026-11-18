@@ -9,6 +9,8 @@ export type CoverageZone = Readonly<{
   polygon: GeoJsonPolygon;
   /** Only active zones count in the coverage check. */
   isActive: boolean;
+  /** The colour on the dashboard map, `#RRGGBB`. */
+  color: string;
   createdAt: Date;
   updatedAt: Date;
 }>;

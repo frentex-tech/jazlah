@@ -29,6 +29,7 @@ import { ErrorCode } from '@common/errors/error-code.enum';
 import { toNextCursor } from '@common/pagination/to-next-cursor';
 import { toPageRequest } from '@common/pagination/to-page-request';
 import { API_TAGS } from '@infra/api-docs/api-tags.constants';
+import { COVERAGE_ZONE_COLOR } from '../coverage-zone-color.constants';
 import { CoverageZonesService } from '../coverage-zones.service';
 import { CoverageZonePageResponseDto } from '../dto/coverage-zone-page-response.dto';
 import { CoverageZoneResponseDto } from '../dto/coverage-zone-response.dto';
@@ -96,7 +97,7 @@ export class AdminCoverageController {
     operationId: 'adminCreateCoverageZone',
     summary: 'Add a coverage zone',
     description:
-      'Admin dashboard, the zone editor: the admin draws the boundary on the map. Active at once unless `isActive` is false; the coverage check uses it from the next request. ' +
+      `Admin dashboard, the zone editor: the admin draws the boundary on the map. Active at once unless \`isActive\` is false; \`color\` (\`#RRGGBB\`, the map colour) defaults to ${COVERAGE_ZONE_COLOR.default}; the coverage check uses it from the next request. ` +
       'INVALID_POLYGON: the boundary is not a valid polygon (a ring not closed or with fewer than four positions, a position out of range, edges that cross); nothing was saved, let the admin redraw it.',
   })
   @ApiCreatedResponse({
@@ -121,6 +122,7 @@ export class AdminCoverageController {
           city: body.city,
           polygon: toPolygon(body.polygon),
           isActive: body.isActive ?? true,
+          color: body.color ?? COVERAGE_ZONE_COLOR.default,
         },
         user.userId,
       ),
@@ -132,7 +134,7 @@ export class AdminCoverageController {
     operationId: 'adminUpdateCoverageZone',
     summary: 'Edit a zone, redraw it, or switch it on or off',
     description:
-      'Admin dashboard, the zone editor. Changes only the fields sent; applies to the coverage check from the next request. ' +
+      'Admin dashboard, the zone editor. Changes only the fields sent (name, city, polygon, isActive, color); applies to the coverage check from the next request. ' +
       'NOT_FOUND for an unknown id. INVALID_POLYGON: the new boundary is not a valid polygon; nothing was saved.',
   })
   @ApiOkResponse({
@@ -161,6 +163,7 @@ export class AdminCoverageController {
           polygon:
             body.polygon === undefined ? undefined : toPolygon(body.polygon),
           isActive: body.isActive,
+          color: body.color,
         },
         user.userId,
       ),
