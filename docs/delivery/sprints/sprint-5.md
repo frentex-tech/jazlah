@@ -15,7 +15,7 @@
 - MP-2: dashboard tasks (OCC-DSH-1, KIT-DSH-1, ADH-DSH-1) merge before their customer flows.
 - MP-4: REL-INF-5.
 
-**Parallel tracks:** Backend: OCC/KIT/ADH-API · Dashboard: OCC-DSH-1, KIT-DSH-1, ADH-DSH-1 · Mobile: OCC-MOB-1, KIT-MOB-1, ADH-MOB-1 · Web: SVC-WEB-1 · DevOps: HRD-INF-1 · QA: SVC-QA-1
+**Parallel tracks:** Backend: OCC/KIT/ADH-API · Dashboard: OCC-DSH-1, KIT-DSH-1, ADH-DSH-1 · Mobile: OCC-MOB-1, KIT-MOB-1, ADH-MOB-1 · DevOps: HRD-INF-1 · QA: SVC-QA-1
 
 ## EPIC OCC — Occasion sacrifices
 - reqs: FR-OCC-01, FR-OCC-02, FR-OCC-03, FR-OCC-04, FR-OCC-05, FR-ADM-08
@@ -126,7 +126,7 @@ Jazlah sells cooked dishes and a "cook it for me" option. Orders are assigned to
 
 **What:** admins manage kitchens; kitchens work their queue.
 
-**Output:** `/admin/kitchens` (CRUD, zones served, capacity, users, dishes), `/admin/cooking` (jobs by day and status, manual assign/reassign, meat sent action); `/kitchen` board: today's and upcoming jobs sorted by due time, dish, servings, notes, actions received → cooking → ready (requests courier), sound on new assignment
+**Output:** `/admin/kitchens` (CRUD, zones served, capacity, users, dishes), `/admin/cooking` (jobs by day and status, manual assign/reassign, meat sent action); `/kitchen` board: today's and upcoming jobs sorted by due time, dish, servings, notes, actions received → cooking → ready (requests courier), sound on new assignment; added with the design on 2026-11-18: a task-details panel opened from a card (servings, due time, meat arrival, customer notes, the same actions) and a «المنتهية» tab listing the kitchen's finished jobs of the last 30 days
 
 **Where:** `apps/dashboard/src/app/[locale]/admin/{kitchens,cooking}`, `apps/dashboard/src/app/[locale]/kitchen`
 
@@ -195,18 +195,6 @@ The admin opens the season for all vendors at once, with its own days, capacity,
 - reqs: FR-OCC-01, FR-VIS-01, FR-KIT-01, FR-ADH-01
 Website versions of the four services and an end-to-end test pass across them.
 
-### SVC-WEB-1 — Web: occasions, visits, cooked dishes & Adha
-`type: Feature · area: web · size: XL · prio: P0 · reqs: FR-OCC-01, FR-OCC-02, FR-OCC-03, FR-KIT-01, FR-KIT-02, FR-ADH-01, FR-ADH-03, FR-ADH-04 · depends: OCC-API-2, KIT-API-2, ADH-API-1, ORD-WEB-1`
-
-**What:** occasions, cooked dishes and Adha on the website, mirroring mobile behaviour. Visits on the web are VIS-WEB-1 (Sprint 6).
-
-**Output:** `/[locale]/occasions` (wizard, request detail, quote accept, deposit/balance payment), cooked dishes category and "cook it for me" on product pages, `/[locale]/adha` season landing with a day picker and prepayment; SEO landing content for occasions and Adha
-
-**Where:** `apps/web/src/app/[locale]/(services)/`, `apps/web/src/features/{occasions,visits,cooking,adha}/`
-
-**Acceptance:**
-- [ ] Playwright: occasion request + deposit and Adha booking on staging
-
 ### SVC-QA-1 — Special services test plan & e2e suite
 `type: Task · area: qa · size: M · prio: P0 · reqs: FR-OCC-03, FR-KIT-03, FR-ADH-02 · depends: OCC-API-2, KIT-API-2, ADH-API-1`
 
@@ -238,7 +226,7 @@ Production is provisioned early (this sprint) because the ZATCA production certi
 ## EPIC REL — Releases & merge points
 
 ### REL-INF-5 — Release v0.5.0 (Sprint 5 merge point)
-`type: Task · area: infra · size: XS · prio: P0 · depends: OCC-MOB-1, KIT-MOB-1, KIT-DSH-1, ADH-MOB-1, SVC-WEB-1, SVC-QA-1`
+`type: Task · area: infra · size: XS · prio: P0 · depends: OCC-MOB-1, KIT-MOB-1, KIT-DSH-1, ADH-MOB-1, SVC-QA-1`
 
 **What:** close Sprint 5.
 

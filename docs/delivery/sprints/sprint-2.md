@@ -15,7 +15,7 @@
 - MP-2: dashboard catalog (CAT-DSH-1) merges before the storefront client tasks so staging has real data.
 - MP-4: REL-INF-2.
 
-**Parallel tracks:** Backend: VND-API-*, CAT-API-* · Dashboard: VND-DSH-*, CAT-DSH-* · Mobile: STF-MOB-* · Web: STF-WEB-*
+**Parallel tracks:** Backend: VND-API-*, CAT-API-* · Dashboard: VND-DSH-*, CAT-DSH-* · Mobile: STF-MOB-*
 
 ## EPIC VND — Vendor onboarding & store profile
 - reqs: FR-VND-01, FR-VND-02, FR-ADM-04
@@ -304,46 +304,11 @@ This task also covers:
 **Acceptance:**
 - [ ] Filters and query persist when returning from a product page
 
-### STF-WEB-1 — Web: home, category & store pages (SSR + SEO)
-`type: Feature · area: web · size: L · prio: P0 · reqs: FR-CAT-01, FR-CAT-02 · depends: CAT-API-5, STF-DES-1, APP-WEB-1`
-
-**What:** indexable storefront pages.
-
-**Output:** `/[locale]` home, `/[locale]/categories/[slug]`, `/[locale]/stores/[slug]` with ISR (revalidate 300 s + on-demand revalidation webhook later), metadata AR/EN, `hreflang`, Open Graph, `sitemap.xml` and `robots.txt`
-
-**Where:** `apps/web/src/app/[locale]/(shop)/`
-
-**Acceptance:**
-- [ ] Lighthouse SEO ≥ 95 on home and a store page
-- [ ] Pages render meaningful HTML with JS disabled
-
-### STF-WEB-2 — Web: product page with customization + search page
-`type: Feature · area: web · size: L · prio: P0 · reqs: FR-PRD-01, FR-PRD-02, FR-PRD-03, FR-PRD-04, FR-PRD-05, FR-PRD-06, FR-PRD-07, FR-CAT-03 · depends: CAT-API-5, STF-DES-1`
-
-**What:** product configuration on the web.
-
-This task also covers:
-- **Web: search page:** search with filters on the web.
-
-**Output:**
-
-*Web: product page with customization*
-- `/[locale]/products/[slug]` (the API also accepts `GET /v1/public/products/by-slug/:slug`, added in CAT-API-5) (server-rendered details + client configurator with the same rules as mobile), schema.org `Product` JSON-LD, shared `lib/price.ts` with unit tests
-
-*Web: search page*
-- `/[locale]/search` with URL-synced query and filters (shareable links), facets, pagination
-
-**Where:** `apps/web/src/app/[locale]/(shop)/products/[slug]`, `apps/web/src/app/[locale]/(shop)/search`
-
-**Acceptance:**
-- [ ] Unit tests: price parity with the API seed combinations
-- [ ] Back/forward navigation restores filters
-
 ## EPIC REL — Releases & merge points
 Sprint-end merge points. Each task cuts a release branch, verifies the sprint's exit criteria on staging, merges to `main`, tags, back-merges to `develop` and updates STATUS.md.
 
 ### REL-INF-2 — Release v0.2.0 (Sprint 2 merge point)
-`type: Task · area: infra · size: XS · prio: P0 · depends: VND-DSH-2, VND-DSH-1, CAT-DSH-2, STF-MOB-1, STF-MOB-3, STF-MOB-4, STF-WEB-1, STF-WEB-2`
+`type: Task · area: infra · size: XS · prio: P0 · depends: VND-DSH-2, VND-DSH-1, CAT-DSH-2, STF-MOB-1, STF-MOB-3, STF-MOB-4`
 
 **What:** close Sprint 2.
 

@@ -15,7 +15,7 @@
 - MP-2: SCH-DSH-1 (operations settings) merges before the checkout client tasks. PAY-API-2 (real gateway, `needs-client`) is **not** a release gate: clients are built against the payment port, and the live SDK hookup is PAY-MOB-2 in Sprint 4.
 - MP-4: REL-INF-3.
 
-**Parallel tracks:** Backend: CRT/SCH/PAY/ORD/WAL-API · Mobile: CRT-MOB-1, SCH-MOB-1, ORD-MOB-*, PAY-MOB-1 · Web: CRT-WEB-1, SCH-WEB-1, ORD-WEB-* · Dashboard: CRT-DSH-1, SCH-DSH-1, ORD-DSH-1 · QA: SCH-QA-1
+**Parallel tracks:** Backend: CRT/SCH/PAY/ORD/WAL-API · Mobile: CRT-MOB-1, SCH-MOB-1, ORD-MOB-*, PAY-MOB-1 · Dashboard: CRT-DSH-1, SCH-DSH-1, ORD-DSH-1 · QA: SCH-QA-1
 
 ## EPIC CRT — Cart & coupons
 - reqs: FR-CRT-01, FR-CRT-02, FR-CRT-03, FR-CRT-04, FR-ADM-09
@@ -99,18 +99,6 @@ This task also covers:
 **Acceptance:**
 - [ ] Guest adds 2 items → logs in → items are in the server cart
 - [ ] Checkout button is disabled below the minimum order with the remaining amount shown
-
-### CRT-WEB-1 — Web: cart
-`type: Feature · area: web · size: M · prio: P0 · reqs: FR-CRT-01, FR-CRT-02, FR-CRT-03, FR-CRT-04 · depends: CRT-API-1, CRT-API-3, STF-WEB-2`
-
-**What:** the cart on the website.
-
-**Output:** cart drawer + `/[locale]/cart` page with the same behaviours as mobile, guest cart in `localStorage`, merge on login
-
-**Where:** `apps/web/src/app/[locale]/(shop)/cart`, `apps/web/src/features/cart/`
-
-**Acceptance:**
-- [ ] Playwright: add → vendor switch dialog → apply coupon
 
 ## EPIC SCH — Fulfilment, scheduling & operations settings
 - reqs: FR-SCH-01, FR-SCH-02, FR-SCH-03, FR-SCH-04, FR-SCH-05, FR-SCH-06, FR-SCH-07, FR-ADM-05
@@ -214,18 +202,6 @@ This task also covers:
 **Acceptance:**
 - [ ] Days are refetched when the method or address changes
 - [ ] Disabled days explain why
-
-### SCH-WEB-1 — Web: checkout step 1 (method, address, day)
-`type: Feature · area: web · size: M · prio: P0 · reqs: FR-SCH-01, FR-SCH-02, FR-SCH-05, FR-SCH-07 · depends: SCH-API-2, ACC-WEB-1, CRT-WEB-1, SCH-DES-1`
-
-**What:** the same step on the website.
-
-**Output:** `/[locale]/checkout` step 1 with the same behaviour as mobile
-
-**Where:** `apps/web/src/app/[locale]/(shop)/checkout`
-
-**Acceptance:**
-- [ ] Playwright: pick delivery + first available day
 
 ### SCH-QA-1 — Scheduling test plan & e2e suite
 `type: Task · area: qa · size: S · prio: P0 · reqs: FR-SCH-03, FR-SCH-05, FR-SCH-06, FR-SCH-07 · depends: SCH-API-2`
@@ -420,40 +396,6 @@ This task also covers:
 **Acceptance:**
 - [ ] A status change from the dashboard updates the open detail screen without refresh
 
-### ORD-WEB-1 — Web: review, place order & pay
-`type: Feature · area: web · size: L · prio: P0 · reqs: FR-ORD-01, FR-PAY-01, FR-PAY-02, FR-PAY-03 · depends: ORD-API-1, SCH-WEB-1, PAY-API-1`
-
-**What:** final checkout step on the website.
-
-This task also covers:
-- **Web: payment step:** pay on the website.
-
-**Output:**
-
-*Web: review & place order*
-- checkout review step with the same behaviour and error handling as mobile
-
-*Web: payment step*
-- payment step with the gateway's hosted fields/form, Apple Pay on Safari (domain association file served from `/.well-known/`), return URL page that polls the order status
-
-**Where:** `apps/web/src/app/[locale]/(shop)/checkout`, `apps/web/src/app/[locale]/(shop)/checkout/payment`, `apps/web/public/.well-known/`
-
-**Acceptance:**
-- [ ] Playwright: full checkout with COD on staging
-- [ ] Sandbox card payment works; refreshing on the return page is safe
-
-### ORD-WEB-2 — Web: my orders & order detail
-`type: Feature · area: web · size: M · prio: P0 · reqs: FR-ORD-03, FR-ORD-04 · depends: ORD-API-3`
-
-**What:** order history on the website.
-
-**Output:** `/[locale]/orders` and `/[locale]/orders/[id]` with a live timeline
-
-**Where:** `apps/web/src/app/[locale]/(account)/orders`
-
-**Acceptance:**
-- [ ] Live update works with the socket client
-
 ### ORD-DSH-1 — Dashboard: basic orders board (admin & vendor)
 `type: Feature · area: dashboard · size: M · prio: P0 · reqs: FR-ORD-02, FR-ORD-03 · depends: ORD-API-3`
 
@@ -497,7 +439,7 @@ This task also covers:
 Sprint-end merge points. Each task cuts a release branch, verifies the sprint's exit criteria on staging, merges to `main`, tags, back-merges to `develop` and updates STATUS.md.
 
 ### REL-INF-3 — Release v0.3.0 (Sprint 3 merge point, first end-to-end order demo)
-`type: Task · area: infra · size: XS · prio: P0 · depends: CRT-MOB-1, CRT-WEB-1, CRT-DSH-1, SCH-DSH-1, SCH-MOB-1, SCH-WEB-1, SCH-QA-1, PAY-MOB-1, ORD-WEB-1, ORD-MOB-2, ORD-WEB-2, ORD-DSH-1`
+`type: Task · area: infra · size: XS · prio: P0 · depends: CRT-MOB-1, CRT-DSH-1, SCH-DSH-1, SCH-MOB-1, SCH-QA-1, PAY-MOB-1, ORD-MOB-2, ORD-DSH-1`
 
 **What:** close Sprint 3 and demo a full order to the client.
 
