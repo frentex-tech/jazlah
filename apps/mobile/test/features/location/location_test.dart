@@ -113,7 +113,12 @@ void main() {
         ),
       ),
       overrides: _o(MockDeviceLocation()),
-      routes: [GoRoute(path: '/picker', builder: (_, _) => const MapPickerScreen(initial: GeoPoint(23.2, 45.1)))],
+      routes: [
+        GoRoute(
+          path: '/picker',
+          builder: (_, _) => const MapPickerScreen(initial: GeoPoint(23.2, 45.1)),
+        ),
+      ],
     );
     await t.tap(find.text('open'));
     await t.pumpAndSettle(const Duration(seconds: 1));

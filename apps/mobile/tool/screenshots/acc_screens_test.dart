@@ -91,7 +91,13 @@ void main() {
   testWidgets('phone', (t) async {
     final o = [authRepositoryProvider.overrideWithValue(_Auth())];
     await shoot(t, '123-2794', const PhoneScreen(), overrides: o);
-    await shoot(t, '123-3110', const PhoneScreen(), overrides: o, act: (t) => t.enterText(find.byType(TextField), '551234567'));
+    await shoot(
+      t,
+      '123-3110',
+      const PhoneScreen(),
+      overrides: o,
+      act: (t) => t.enterText(find.byType(TextField), '551234567'),
+    );
     await shoot(
       t,
       '123-2879',
@@ -116,7 +122,12 @@ void main() {
   });
 
   testWidgets('otp', (t) async {
-    await shoot(t, '123-3227', const OtpScreen(challenge: _challenge), overrides: [authRepositoryProvider.overrideWithValue(_Auth(hangAll: true))]);
+    await shoot(
+      t,
+      '123-3227',
+      const OtpScreen(challenge: _challenge),
+      overrides: [authRepositoryProvider.overrideWithValue(_Auth(hangAll: true))],
+    );
     await shoot(
       t,
       '123-3316',
@@ -187,9 +198,25 @@ void main() {
   });
 
   testWidgets('account and settings', (t) async {
-    await shoot(t, '227-44073', _tabs(const AccountScreen()), overrides: [...signedIn, profileRepositoryProvider.overrideWithValue(_Profile())]);
-    await shoot(t, '352-38532', _tabs(const AccountScreen()), lang: 'en', overrides: [...signedIn, profileRepositoryProvider.overrideWithValue(_Profile())]);
-    await shoot(t, '86-8608', _tabs(const SettingsScreen()), overrides: [...signedIn, profileRepositoryProvider.overrideWithValue(_Profile())]);
+    await shoot(
+      t,
+      '227-44073',
+      _tabs(const AccountScreen()),
+      overrides: [...signedIn, profileRepositoryProvider.overrideWithValue(_Profile())],
+    );
+    await shoot(
+      t,
+      '352-38532',
+      _tabs(const AccountScreen()),
+      lang: 'en',
+      overrides: [...signedIn, profileRepositoryProvider.overrideWithValue(_Profile())],
+    );
+    await shoot(
+      t,
+      '86-8608',
+      _tabs(const SettingsScreen()),
+      overrides: [...signedIn, profileRepositoryProvider.overrideWithValue(_Profile())],
+    );
     await shoot(
       t,
       '86-8667',
@@ -200,7 +227,23 @@ void main() {
         await t.pumpAndSettle();
       },
     );
-    await shoot(t, '86-8735', _tabs(const SettingsScreen()), overrides: [...signedIn, profileRepositoryProvider.overrideWithValue(_Profile(mode: 'hang'))]);
-    await shoot(t, '86-8791', _tabs(const SettingsScreen()), overrides: [...signedIn, profileRepositoryProvider.overrideWithValue(_Profile(mode: 'error'))]);
+    await shoot(
+      t,
+      '86-8735',
+      _tabs(const SettingsScreen()),
+      overrides: [
+        ...signedIn,
+        profileRepositoryProvider.overrideWithValue(_Profile(mode: 'hang')),
+      ],
+    );
+    await shoot(
+      t,
+      '86-8791',
+      _tabs(const SettingsScreen()),
+      overrides: [
+        ...signedIn,
+        profileRepositoryProvider.overrideWithValue(_Profile(mode: 'error')),
+      ],
+    );
   });
 }

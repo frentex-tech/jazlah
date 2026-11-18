@@ -63,7 +63,10 @@ void main() {
     await c.read(sessionProvider.notifier).signOut();
     expect(tokens.tokens, isNull);
     expect(c.read(onboardingSeenProvider), isTrue);
-    expect(authRedirect(uri: Uri.parse(Routes.account), session: SessionStatus.signedOut, onboardingSeen: true), Routes.phone);
+    expect(
+      authRedirect(uri: Uri.parse(Routes.account), session: SessionStatus.signedOut, onboardingSeen: true),
+      Routes.phone,
+    );
   });
 
   test('redirects', () {

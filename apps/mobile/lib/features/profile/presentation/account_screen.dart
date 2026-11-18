@@ -5,6 +5,7 @@ import 'package:go_router/go_router.dart';
 import 'package:jazlah/app/router/router.dart';
 import 'package:jazlah/app/theme/theme.dart';
 import 'package:jazlah/core/widgets/widgets.dart';
+import 'package:jazlah/features/addresses/presentation/address_providers.dart';
 import 'package:jazlah/features/auth/presentation/session_controller.dart';
 import 'package:jazlah/features/profile/domain/customer_profile.dart';
 import 'package:jazlah/features/profile/presentation/profile_providers.dart';
@@ -82,7 +83,7 @@ class _AccountBody extends ConsumerWidget {
           children: [
             _Stat(value: 0, label: l10n.statOrders),
             const SizedBox(width: 10),
-            _Stat(value: 0, label: l10n.statAddresses),
+            _Stat(value: ref.watch(addressesProvider).value?.length ?? 0, label: l10n.statAddresses),
             const SizedBox(width: 10),
             _Stat(value: 0, label: l10n.statAnimals),
             const SizedBox(width: 10),
@@ -93,7 +94,7 @@ class _AccountBody extends ConsumerWidget {
         _MenuGroup(
           items: [
             _MenuItem(icon: JIcons.receipt, label: l10n.menuOrders),
-            _MenuItem(icon: JIcons.mapPin, label: l10n.menuAddresses),
+            _MenuItem(icon: JIcons.mapPin, label: l10n.menuAddresses, onTap: () => context.go(Routes.addresses)),
             _MenuItem(icon: JIcons.pawPrint, label: l10n.menuAnimals),
             _MenuItem(icon: JIcons.storefront, label: l10n.menuFeedListings),
             _MenuItem(icon: JIcons.starFill, label: l10n.menuPoints, trailing: l10n.menuPointsValue(0)),

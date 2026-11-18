@@ -269,5 +269,43 @@
   "locOutErrorBody": "حدث خطأ أثناء التحقق من موقعك. حاول مرة أخرى.",
   "locHomeOutOfCoverage": "خارج نطاق التوصيل: تصفّح واطلب الاستلام من المتجر.",
   "locChoose": "اختر موقعك",
-  "listSeparator": "، "
+  "listSeparator": "، ",
+  "addrTitle": "عناويني",
+  "addrDefault": "افتراضي",
+  "addrOutOfCoverage": "خارج النطاق",
+  "addrAdd": "إضافة عنوان جديد",
+  "addrAddShort": "إضافة عنوان",
+  "addrEmptyTitle": "لا توجد عناوين بعد",
+  "addrEmptyBody": "أضف عنوانك لنعرف المتاجر القريبة منك ونوصّل إليك.",
+  "addrLoadError": "تعذّر تحميل العناوين",
+  "addrLoadErrorBody": "حدث خطأ أثناء جلب عناوينك. حاول مرة أخرى.",
+  "addrEdit": "تعديل العنوان",
+  "addrNewTitle": "عنوان جديد",
+  "addrLabel": "اسم العنوان",
+  "addrLabelRequired": "اسم العنوان مطلوب",
+  "addrCity": "المدينة",
+  "addrDistrict": "الحي",
+  "addrDistrictRequired": "الحي مطلوب",
+  "addrStreet": "الشارع وتفاصيل المبنى",
+  "addrDriverNotes": "ملاحظات للسائق (اختياري)",
+  "addrDriverNotesHint": "مثلًا: البوابة الخلفية، الدور الثاني",
+  "addrMakeDefault": "اجعله العنوان الافتراضي",
+  "addrChangeOnMap": "تغيير الموقع على الخريطة",
+  "addrSave": "حفظ التغييرات",
+  "addrSaveNew": "حفظ العنوان",
+  "addrDelete": "حذف العنوان",
+  "addrDeleteTitle": "حذف العنوان؟",
+  "addrDeleteBody": "لن تتمكن من استرجاع هذا العنوان بعد الحذف.",
+  "delete": "حذف",
+  "addrLockedNotice": "هذا العنوان مرتبط بطلب قيد التنفيذ، ولا يمكن تعديله أو حذفه حتى يكتمل الطلب.",
+  "addrLockedLabel": "عنوان مقفل",
+  "addrOutOfCoverageNotice": "هذا العنوان خارج نطاق التوصيل حاليًا. يمكنك حفظه، والاستلام من المتجر متاح.",
+  "addrLimitReached": "وصلت إلى الحد الأقصى من العناوين ({limit}). احذف عنوانًا لإضافة آخر.",
+  "@addrLimitReached": {
+    "placeholders": {
+      "limit": {
+        "type": "int"
+      }
+    }
+  }
 }
