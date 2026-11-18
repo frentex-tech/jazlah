@@ -16,6 +16,7 @@ extension PumpScreen on WidgetTester {
     Widget screen, {
     List<dynamic> overrides = const [],
     Map<String, Object> prefs = const {'locale': 'ar', 'onboardingSeen': true},
+    List<RouteBase> routes = const [],
   }) async {
     SharedPreferences.setMockInitialValues(prefs);
     final p = await Prefs.load();
@@ -34,6 +35,7 @@ extension PumpScreen on WidgetTester {
     final router = GoRouter(
       routes: [
         GoRoute(path: '/', builder: (_, _) => screen),
+        ...routes,
         GoRoute(path: '/:rest(.*)', builder: (_, s) => Text('route:${s.matchedLocation}')),
       ],
     );

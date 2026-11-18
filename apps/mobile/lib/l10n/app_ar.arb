@@ -230,5 +230,44 @@
   "guestBody": "سجّل دخولك لتتابع طلباتك وعناوينك.",
   "signIn": "تسجيل الدخول",
   "comingSoonTitle": "قريبًا",
-  "comingSoonBody": "هذا القسم قيد التجهيز."
+  "comingSoonBody": "هذا القسم قيد التجهيز.",
+  "clear": "مسح",
+  "locAddAddressTitle": "إضافة عنوان",
+  "locSearchHint": "ابحث عن حي أو شارع",
+  "locSearchActiveHint": "ابحث عن عنوان أو حي",
+  "locMoveHint": "حرّك الخريطة لضبط الدبوس على موقعك.",
+  "locConfirm": "تأكيد الموقع",
+  "locPinLabel": "موقع التوصيل",
+  "locOutOfCoverageBanner": "عذرًا، لا نوصّل إلى هذا الموقع حاليًا.",
+  "locGeocodeError": "تعذّر تحديد العنوان لهذا الموقع. حاول مرة أخرى.",
+  "locPermTitle": "السماح بالوصول إلى موقعك",
+  "locPermBody": "نستخدم موقعك لنعرض لك المتاجر القريبة ونحدد عنوان التوصيل بدقة.",
+  "locPermManual": "إدخال العنوان يدويًا",
+  "locPermAllow": "السماح أثناء الاستخدام",
+  "locPermDeniedTitle": "إذن الموقع متوقف",
+  "locPermDeniedBody": "فعّل إذن الموقع من إعدادات الجهاز، أو أدخل عنوانك يدويًا.",
+  "locPermOpenSettings": "فتح الإعدادات",
+  "locPermLoadingTitle": "نحدد موقعك",
+  "locPermLoadingBody": "لحظات ونجد موقعك الحالي…",
+  "locPermErrorTitle": "تعذّر تحديد موقعك",
+  "locPermErrorBody": "تأكد من تفعيل خدمة الموقع في جهازك ثم حاول مرة أخرى.",
+  "locOutScreenTitle": "الموقع",
+  "locOutTitle": "خارج نطاق التوصيل",
+  "locOutBody": "لا نوصّل إلى هذا الموقع حتى الآن. اختر موقعًا آخر داخل مناطق الخدمة.",
+  "locOutChange": "تغيير الموقع",
+  "locOutPickup": "تصفّح واستلم من المتجر",
+  "locOutCities": "المناطق المتاحة حاليًا: {cities}.",
+  "@locOutCities": {
+    "placeholders": {
+      "cities": {
+        "type": "String"
+      }
+    }
+  },
+  "locOutChecking": "نتحقق من تغطية موقعك…",
+  "locOutErrorTitle": "تعذّر التحقق من التغطية",
+  "locOutErrorBody": "حدث خطأ أثناء التحقق من موقعك. حاول مرة أخرى.",
+  "locHomeOutOfCoverage": "خارج نطاق التوصيل: تصفّح واطلب الاستلام من المتجر.",
+  "locChoose": "اختر موقعك",
+  "listSeparator": "، "
 }

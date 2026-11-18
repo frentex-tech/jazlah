@@ -615,4 +615,102 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get comingSoonBody => 'هذا القسم قيد التجهيز.';
+
+  @override
+  String get clear => 'مسح';
+
+  @override
+  String get locAddAddressTitle => 'إضافة عنوان';
+
+  @override
+  String get locSearchHint => 'ابحث عن حي أو شارع';
+
+  @override
+  String get locSearchActiveHint => 'ابحث عن عنوان أو حي';
+
+  @override
+  String get locMoveHint => 'حرّك الخريطة لضبط الدبوس على موقعك.';
+
+  @override
+  String get locConfirm => 'تأكيد الموقع';
+
+  @override
+  String get locPinLabel => 'موقع التوصيل';
+
+  @override
+  String get locOutOfCoverageBanner => 'عذرًا، لا نوصّل إلى هذا الموقع حاليًا.';
+
+  @override
+  String get locGeocodeError => 'تعذّر تحديد العنوان لهذا الموقع. حاول مرة أخرى.';
+
+  @override
+  String get locPermTitle => 'السماح بالوصول إلى موقعك';
+
+  @override
+  String get locPermBody => 'نستخدم موقعك لنعرض لك المتاجر القريبة ونحدد عنوان التوصيل بدقة.';
+
+  @override
+  String get locPermManual => 'إدخال العنوان يدويًا';
+
+  @override
+  String get locPermAllow => 'السماح أثناء الاستخدام';
+
+  @override
+  String get locPermDeniedTitle => 'إذن الموقع متوقف';
+
+  @override
+  String get locPermDeniedBody => 'فعّل إذن الموقع من إعدادات الجهاز، أو أدخل عنوانك يدويًا.';
+
+  @override
+  String get locPermOpenSettings => 'فتح الإعدادات';
+
+  @override
+  String get locPermLoadingTitle => 'نحدد موقعك';
+
+  @override
+  String get locPermLoadingBody => 'لحظات ونجد موقعك الحالي…';
+
+  @override
+  String get locPermErrorTitle => 'تعذّر تحديد موقعك';
+
+  @override
+  String get locPermErrorBody => 'تأكد من تفعيل خدمة الموقع في جهازك ثم حاول مرة أخرى.';
+
+  @override
+  String get locOutScreenTitle => 'الموقع';
+
+  @override
+  String get locOutTitle => 'خارج نطاق التوصيل';
+
+  @override
+  String get locOutBody => 'لا نوصّل إلى هذا الموقع حتى الآن. اختر موقعًا آخر داخل مناطق الخدمة.';
+
+  @override
+  String get locOutChange => 'تغيير الموقع';
+
+  @override
+  String get locOutPickup => 'تصفّح واستلم من المتجر';
+
+  @override
+  String locOutCities(String cities) {
+    return 'المناطق المتاحة حاليًا: $cities.';
+  }
+
+  @override
+  String get locOutChecking => 'نتحقق من تغطية موقعك…';
+
+  @override
+  String get locOutErrorTitle => 'تعذّر التحقق من التغطية';
+
+  @override
+  String get locOutErrorBody => 'حدث خطأ أثناء التحقق من موقعك. حاول مرة أخرى.';
+
+  @override
+  String get locHomeOutOfCoverage => 'خارج نطاق التوصيل: تصفّح واطلب الاستلام من المتجر.';
+
+  @override
+  String get locChoose => 'اختر موقعك';
+
+  @override
+  String get listSeparator => '، ';
 }

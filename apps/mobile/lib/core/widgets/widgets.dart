@@ -22,3 +22,4 @@ export 'j_status_timeline.dart';
 export 'j_switch.dart';
 export 'j_text_field.dart';
 export 'j_toast.dart';
+export 'map_picker.dart';

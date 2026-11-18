@@ -3,7 +3,9 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import 'package:jazlah/app/providers.dart';
+import 'package:jazlah/app/shell/home_tab.dart';
 import 'package:jazlah/app/shell/main_shell.dart';
+import 'package:jazlah/core/geo/geo_point.dart';
 import 'package:jazlah/core/widgets/gallery/gallery_screen.dart';
 import 'package:jazlah/features/auth/domain/otp_challenge.dart';
 import 'package:jazlah/features/auth/presentation/complete_profile_screen.dart';
@@ -12,6 +14,8 @@ import 'package:jazlah/features/auth/presentation/onboarding_screen.dart';
 import 'package:jazlah/features/auth/presentation/otp_screen.dart';
 import 'package:jazlah/features/auth/presentation/phone_screen.dart';
 import 'package:jazlah/features/auth/presentation/session_controller.dart';
+import 'package:jazlah/features/location/presentation/map_picker_screen.dart';
+import 'package:jazlah/features/location/presentation/out_of_coverage_screen.dart';
 import 'package:jazlah/features/profile/presentation/account_screen.dart';
 import 'package:jazlah/features/profile/presentation/settings_screen.dart';
 
@@ -28,6 +32,8 @@ abstract final class Routes {
   static const editProfile = '/account/edit';
   static const settings = '/account/settings';
   static const reauth = '/account/settings/verify';
+  static const pickLocation = '/location';
+  static const outOfCoverage = '/location/outside';
   static const gallery = '/gallery';
 }
 
@@ -68,13 +74,16 @@ final routerProvider = Provider<GoRouter>((ref) {
         redirect: (_, state) => state.extra is OtpChallenge ? null : Routes.settings,
         builder: (_, state) => OtpScreen(challenge: state.extra! as OtpChallenge, reauth: true),
       ),
+      GoRoute(path: Routes.pickLocation, builder: (_, _) => const MapPickerScreen()),
+      GoRoute(
+        path: Routes.outOfCoverage,
+        redirect: (_, state) => state.extra is GeoPoint ? null : Routes.pickLocation,
+        builder: (_, state) => OutOfCoverageScreen(point: state.extra! as GeoPoint),
+      ),
       ShellRoute(
         builder: (_, state, child) => MainShell(location: state.matchedLocation, child: child),
         routes: [
-          GoRoute(
-            path: Routes.home,
-            builder: (_, _) => const PlaceholderTab(tab: MainTab.home),
-          ),
+          GoRoute(path: Routes.home, builder: (_, _) => const HomeTab()),
           GoRoute(
             path: Routes.services,
             builder: (_, _) => const PlaceholderTab(tab: MainTab.services),

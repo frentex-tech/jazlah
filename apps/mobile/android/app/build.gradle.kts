@@ -1,3 +1,11 @@
+import java.util.Properties
+
+// Google Maps key from android/local.properties (git-ignored); empty → the app uses the mock map.
+val googleMapsApiKey: String = Properties().run {
+    rootProject.file("local.properties").takeIf { it.exists() }?.inputStream()?.use { load(it) }
+    getProperty("GOOGLE_MAPS_API_KEY", "")
+}
+
 plugins {
     id("com.android.application")
     // The Flutter Gradle Plugin must be applied after the Android and Kotlin Gradle plugins.
@@ -17,6 +25,7 @@ android {
     defaultConfig {
         applicationId = "sa.jazlah.app"
         minSdk = 26
+        manifestPlaceholders["googleMapsApiKey"] = googleMapsApiKey
         targetSdk = flutter.targetSdkVersion
         versionCode = flutter.versionCode
         versionName = flutter.versionName
