@@ -130,12 +130,8 @@
     "remove": "Remove"
   },
   "form": {
-    "required": "This field is required"
-  },
-  "panelInitial": {
-    "admin": "A",
-    "vendor": "V",
-    "kitchen": "K"
+    "required": "This field is required",
+    "save": "Save"
   },
   "login": {
     "phoneLabel": "Mobile number",
@@ -209,6 +205,66 @@
       "p2b": "Number of guests and customer notes",
       "p3": "On-time handover",
       "p3b": "Call the courier when it's ready"
+    }
+  },
+  "coverage": {
+    "breadcrumb": "Admin / Settings / Coverage zones",
+    "title": "Coverage zones",
+    "newZone": "New zone",
+    "mapLabel": "Coverage zones map",
+    "nameAr": "Arabic name",
+    "nameEn": "English name",
+    "city": "City",
+    "color": "Zone color",
+    "status": "Status",
+    "active": "Active",
+    "inactive": "Inactive",
+    "activeToggle": "Zone is active",
+    "selectZone": "Edit {zone}",
+    "cities": {
+      "riyadh": "Riyadh",
+      "jeddah": "Jeddah",
+      "dammam": "Dammam",
+      "makkah": "Makkah",
+      "madinah": "Madinah"
+    },
+    "hints": {
+      "draw": "Click the map to place the boundary points, then click the first point to close the zone.",
+      "edit": "Drag the points to change the boundary, or click a point to remove it.",
+      "test": "Click anywhere on the map to see whether it is covered."
+    },
+    "test": {
+      "start": "Test a point",
+      "stop": "Stop testing",
+      "covered": "Covered: {zone}",
+      "notCovered": "Not covered",
+      "loading": "Checking…"
+    },
+    "form": {
+      "newTitle": "New zone",
+      "editTitle": "Zone details",
+      "body": "Customers see the name when their address is checked. Inactive zones don't count as covered.",
+      "editShape": "Edit boundary",
+      "delete": "Delete zone"
+    },
+    "errors": {
+      "invalidPolygon": "The boundary isn't valid. Draw at least three points without crossing lines."
+    },
+    "empty": {
+      "title": "No coverage zones",
+      "body": "Draw the first zone on the map to start taking orders from it."
+    },
+    "deleteDialog": {
+      "title": "Delete the zone?",
+      "body": "Orders from “{zone}” won't be accepted after it is deleted."
+    },
+    "colors": {
+      "ember": "Ember",
+      "info": "Blue",
+      "success": "Green",
+      "warning": "Orange",
+      "gold-text": "Gold",
+      "brand": "Dark wine"
     }
   }
 }

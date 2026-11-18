@@ -8,7 +8,7 @@ One Next.js app with role-based areas:
 Commit scope: `dashboard`.
 
 ## Stack
-Next.js 15 (App Router) · React 19 · next-intl (`ar` default, `en`; `/admin` is Arabic, `/en/admin` English) · Tailwind 3 with the shared preset `packages/config/tailwind-preset.ts` · shadcn/ui conventions (`components.json`, RTL) · TanStack Table · react-hook-form + zod · `@phosphor-icons/react` · Playwright.
+Next.js 15 (App Router) · React 19 · MapLibre GL 5 + Terra Draw (coverage map; tiles from `NEXT_PUBLIC_MAP_TILES`, OSM by default) · next-intl (`ar` default, `en`; `/admin` is Arabic, `/en/admin` English) · Tailwind 3 with the shared preset `packages/config/tailwind-preset.ts` · shadcn/ui conventions (`components.json`, RTL) · TanStack Table · react-hook-form + zod · `@phosphor-icons/react` · Playwright.
 
 ## Package manager: pnpm
 pnpm 10, pinned in `package.json` `packageManager`. Enable it once with `corepack enable` (Node 22+, `.nvmrc` says 24). npm was not needed.
@@ -54,8 +54,9 @@ messages/ar.json, en.json       every UI string
 - The dashboard server forwards the user's address as `X-Forwarded-For`. Set the API's `TRUST_PROXY_HOPS` so its per-address code limits apply per user and not to the dashboard server as a whole.
 
 ## API gaps (worked around in the dashboard)
-- **Staff display name:** `GET /v1/<panel>/me` returns only the principal, so the top bar shows the masked phone and a panel initial.
+- **Staff display name:** `GET /v1/<panel>/me` returns only the principal, so the top bar shows the masked phone and a user icon in the avatar.
 - **Panels a phone or user can open:** the API does not list them, and tokens are per audience. So the panel picker (`/login/choose`) lists the panels with a live session, which means it appears after the second sign-in.
+- **Coverage zone color:** the editor stores a color per zone; LOC-API-1's model has no `color` field yet.
 - **Code length:** not in the OTP request response, so it is a dashboard setting (`OTP_LENGTH`). Figma draws 4 digits; the API default is 6.
 
 ## Mocks (`DASHBOARD_API_MOCK=1`)
@@ -69,3 +70,4 @@ messages/ar.json, en.json       every UI string
   - `0500000008` disabled
   - code `000000` = expired
 - `/api/mock/orders` + `/admin/table-demo`: the DataTable demo (`?fail=1` shows the error state).
+- Coverage zones (`src/features/coverage/backend.ts`): LOC-API-1 (#24) is not in `openapi.json` yet. The `CoverageBackend` interface has an in-memory mock (seeded with «شمال الرياض») behind the dashboard's own routes `/api/coverage/zones[/:id]` and `/api/coverage/check`. Without the mock these answer 501 `NOT_BUILT`. When the API lands, implement the interface with openapi-fetch.
