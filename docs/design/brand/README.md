@@ -16,6 +16,9 @@ Figma: [Logo section](https://www.figma.com/design/puWXbmOVpnQpjc7mUahTnw/Jazlah
 ## Update 2026-11-13
 The project owner chose a third mark instead of options A and B: the gold profile mark (ram head in side view, `docs/design/reference/prototype/img/mark-gold.png`). The Figma file uses it everywhere (app sign-in and onboarding, web header and footer, dashboard side menu, sign-in panels). Still to do: a vector redraw with lockups, and the client's written approval in `docs/design/signoff.md`.
 
+## Latin name (2026-11-18)
+The owner decided the Latin spelling is «JAZLA», as in the client's logo. Repo, package and file names still say «Jazlah» and were not renamed.
+
 ## Update 2026-11-13 (client logo)
 The client supplied the final logo: two gold horns above the Arabic wordmark «جزلة» with a red diamond dot, and «JAZLA» below. It replaces the gold profile mark and options A and B everywhere in the Figma file (365 placements: app sign-in and onboarding, dashboard side menu, sign-in panels, start page, prototype pages). The separate «جزلة» text next to the old mark was hidden, because the logo carries the name.
 

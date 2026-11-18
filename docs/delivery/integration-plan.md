@@ -8,7 +8,7 @@ How work from the API, mobile, web and dashboards meets, and when it merges.
 |---|---|---|---|
 | Backend endpoints, jobs, webhooks, realtime | `services/api` | API staging/prod | `api` |
 | Customer app (iOS/Android) | `apps/mobile` | Firebase App Distribution → TestFlight / Play | `mobile` |
-| Customer website | `apps/web` | Web staging/prod | `web` |
+| Customer website (dropped 2026-11-18, not built) | `apps/web` | — | `web` |
 | Admin / vendor / kitchen dashboards | `apps/dashboard` | Dashboard staging/prod | `dashboard` |
 | Generated TS client | `packages/api-client` | (library) | `api` |
 | Local env, CI, deploy | `infra`, `.github/workflows` | — | `infra` / `ci` |
