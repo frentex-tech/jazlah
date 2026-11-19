@@ -23,20 +23,22 @@ async function post<T>(url: string, body: unknown): Promise<T | ApiError> {
 const isError = (r: object): r is ApiError => 'code' in r;
 
 /** Phone → code. Each step follows the Figma states: default, loading (spinner in the button), error. */
-export function LoginFlow({ panel, next, otpLength }: { panel: Panel; next?: string; otpLength: number }) {
+export function LoginFlow({ panel, next, otpLength, reason }: { panel: Panel; next?: string; otpLength: number; reason?: 'disabled' | 'suspended' }) {
   const t = useTranslations('login');
   const locale = useLocale();
   const [step, setStep] = useState<'phone' | 'otp'>('phone');
   const [digits, setDigits] = useState('');
   const [code, setCode] = useState('');
-  const [error, setError] = useState<string>();
-  const [hint, setHint] = useState<string>(); // second line under the OTP error
+  // A session the middleware ended because the account is disabled or the store suspended (errors.md).
+  const [error, setError] = useState<string | undefined>(() => (reason ? t(`errors.${reason}`) : undefined));
   const [loading, setLoading] = useState(false);
   const [resendAt, setResendAt] = useState(0);
+  const [blockedUntil, setBlockedUntil] = useState(0); // RATE_LIMITED: no sending until Retry-After passed
   const now = useNow();
   const otpRef = useRef<HTMLInputElement>(null);
 
   const message = (e: ApiError) => {
+    if (e.code === 'RATE_LIMITED') setBlockedUntil(Date.now() + (e.retryAfter ?? 60) * 1000);
     switch (e.code) {
       case 'VALIDATION_FAILED': return t('errors.phoneInvalid');
       case 'OTP_INVALID': return t('errors.otpInvalid');
@@ -56,20 +58,17 @@ export function LoginFlow({ panel, next, otpLength }: { panel: Panel; next?: str
     if (isError(r)) return setError(message(r));
     setResendAt(Date.now() + r.resendAfterSeconds * 1000);
     setCode('');
-    setHint(undefined);
     setStep('otp');
   }
 
   async function verify() {
     setLoading(true);
     setError(undefined);
-    setHint(undefined);
     const r = await post<{ redirect: string }>('/api/auth/otp/verify', { phone: digits, panel, code, next, lang: locale });
     if (!isError(r)) return window.location.assign(r.redirect); // full load, so the middleware sees the new cookies
     setLoading(false);
+    // A staff sign-in without access fails like a wrong code (docs/frontend/auth.md), so otpInvalid says both.
     setError(message(r));
-    // A staff sign-in without access fails like a wrong code (docs/frontend/auth.md), so say both.
-    if (r.code === 'OTP_INVALID') setHint(t('errors.noAccess', { panel: t(`${panel}.panelName`) }));
     otpRef.current?.focus();
   }
 
@@ -77,6 +76,7 @@ export function LoginFlow({ panel, next, otpLength }: { panel: Panel; next?: str
     if (step === 'otp') otpRef.current?.focus();
   }, [step]);
 
+  const blocked = blockedUntil > now;
   if (step === 'phone') {
     const complete = /^5\d{8}$/.test(digits);
     return (
@@ -84,7 +84,7 @@ export function LoginFlow({ panel, next, otpLength }: { panel: Panel; next?: str
         className="contents"
         onSubmit={(e) => {
           e.preventDefault();
-          if (complete && !loading) void sendCode();
+          if (complete && !loading && !blocked) void sendCode();
         }}
       >
         <CardTitle title={t(`${panel}.title`)} subtitle={t(`${panel}.subtitle`)} />
@@ -96,11 +96,11 @@ export function LoginFlow({ panel, next, otpLength }: { panel: Panel; next?: str
           value={digits}
           onChange={(d) => {
             setDigits(d);
-            setError(undefined);
+            if (!blocked) setError(undefined);
           }}
           onBlur={() => digits && !complete && setError(t('errors.phoneInvalid'))}
         />
-        <Button type="submit" className="w-full" disabled={!complete} loading={loading}>
+        <Button type="submit" className="w-full" disabled={!complete || blocked} loading={loading}>
           {t('send')}
         </Button>
         <Footer panel={panel} />
@@ -114,7 +114,7 @@ export function LoginFlow({ panel, next, otpLength }: { panel: Panel; next?: str
       className="contents"
       onSubmit={(e) => {
         e.preventDefault();
-        if (code.length === otpLength && !loading) void verify();
+        if (code.length === otpLength && !loading && !blocked) void verify();
       }}
     >
       <CardTitle
@@ -130,16 +130,14 @@ export function LoginFlow({ panel, next, otpLength }: { panel: Panel; next?: str
           error={error}
           onChange={(v) => {
             setCode(v);
-            setError(undefined);
-            setHint(undefined);
+            if (!blocked) setError(undefined);
           }}
         />
-        {hint && <p className="max-w-[358px] text-center text-body-m text-ink-2">{hint}</p>}
       </div>
-      <Button variant="ghost" size="S" className="self-start" disabled={wait > 0 || loading} onClick={() => void sendCode()}>
+      <Button variant="ghost" size="S" className="self-start" disabled={wait > 0 || loading || blocked} onClick={() => void sendCode()}>
         {wait > 0 ? t('resendIn', { time: `${String(Math.floor(wait / 60)).padStart(2, '0')}:${String(wait % 60).padStart(2, '0')}` }) : t('resend')}
       </Button>
-      <Button type="submit" className="w-full" disabled={code.length !== otpLength} loading={loading}>
+      <Button type="submit" className="w-full" disabled={code.length !== otpLength || blocked} loading={loading}>
         {t('confirm')}
       </Button>
     </form>

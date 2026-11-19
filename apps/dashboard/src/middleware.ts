@@ -22,6 +22,10 @@ function redirectTo(req: NextRequest, pathname: string, params: Record<string, s
   return NextResponse.redirect(url);
 }
 
+/** A refresh refused because of the account itself: the sign-in page says why (docs/frontend/errors.md). */
+const reasonOf = (code: string): Record<string, string> =>
+  code === 'ACCOUNT_DISABLED' ? { reason: 'disabled' } : code === 'VENDOR_SUSPENDED' ? { reason: 'suspended' } : {};
+
 /** Where a signed-in user lands: their only panel, or the picker. */
 const home = (prefix: string, panels: Panel[]) => (panels.length === 1 ? `${prefix}/${panels[0]}` : `${prefix}/login/choose`);
 
@@ -62,16 +66,17 @@ export default async function middleware(req: NextRequest) {
 
   // Refresh an expired access token on page loads and in-app navigations, never on prefetches, so parallel prefetches
   // don't spend the one-use refresh token twice.
-  // shortcut: no cross-tab lock; two tabs navigating in the same second could still race. Move to a server-side session
-  // store if that shows up. Server components of the same request still see the old cookies: forward the new token in
-  // request headers once pages fetch data.
+  // shortcut: no cross-tab lock; two tabs (or a page and its API call) refreshing in the same second could spend the
+  // one-use refresh token twice and end the session. Server components of the same request still see the old cookies.
+  // Fix before the first page that fetches data on the server: forward the new token in request headers, and add a
+  // short-lived refresh lock or server-side session store (#145).
   const navigation =
     req.headers.get('sec-fetch-dest') === 'document' || (req.headers.get('rsc') === '1' && !req.headers.get('next-router-prefetch'));
   if (!req.cookies.get(accessCookie(area)) && navigation) {
     const r = await authBackend().refresh(refreshToken, clientIp(req));
     if (r.ok) writeTokens(res, area, r.data);
     else if (r.code !== 'NETWORK') {
-      const out = redirectTo(req, `${prefix}/login`, { panel: area, next: req.nextUrl.pathname });
+      const out = redirectTo(req, `${prefix}/login`, { panel: area, next: req.nextUrl.pathname, ...reasonOf(r.code) });
       clearPanel(out, area);
       writePanels(out, panels.filter((p) => p !== area));
       return out;

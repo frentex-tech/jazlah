@@ -27,16 +27,15 @@ test('an incomplete number shows the field error', async ({ page }) => {
   await page.goto('/login');
   await page.getByLabel('رقم الجوال').fill('50000');
   await page.getByLabel('رقم الجوال').blur();
-  await expect(page.getByRole('alert').filter({ hasText: 'أدخل رقم جوال سعودي صحيح' })).toBeVisible();
+  await expect(page.getByRole('alert').filter({ hasText: 'رقم الجوال غير مكتمل' })).toBeVisible();
 });
 
-test('a wrong code and a customer-only number both say there may be no access', async ({ page }) => {
+test('a wrong code and a customer-only number both say there may be no access, in the one error line', async ({ page }) => {
   await page.goto('/login');
   await enterPhone(page, '0500000001');
   await page.getByLabel('رمز التحقق').fill('111111');
   await page.getByRole('button', { name: 'تأكيد' }).click();
-  await expect(page.getByRole('alert').filter({ hasText: 'الرمز غير صحيح، حاول مرة أخرى' })).toBeVisible();
-  await expect(page.getByText('فهذا الرقم لا يملك صلاحية دخول لوحة الإدارة')).toBeVisible();
+  await expect(page.getByRole('alert').filter({ hasText: /\S/ })).toHaveText('الرمز غير صحيح أو الرقم غير مصرّح له، حاول مرة أخرى');
 });
 
 test('rate limiting is shown on the phone step', async ({ page }) => {
@@ -44,6 +43,10 @@ test('rate limiting is shown on the phone step', async ({ page }) => {
   await page.getByLabel('رقم الجوال').fill('0500000007');
   await page.getByRole('button', { name: 'إرسال الرمز' }).click();
   await expect(page.getByRole('alert').filter({ hasText: 'محاولات كثيرة. حاول بعد 42 ثانية.' })).toBeVisible();
+  // Sending stays off until Retry-After has passed, even after editing the number.
+  await expect(page.getByRole('button', { name: 'إرسال الرمز' })).toBeDisabled();
+  await page.getByLabel('رقم الجوال').fill('0500000004');
+  await expect(page.getByRole('button', { name: 'إرسال الرمز' })).toBeDisabled();
 });
 
 test('vendor sign-in has its own texts and the application link', async ({ page }) => {
@@ -65,11 +68,11 @@ test('kitchen sign-in has its own texts', async ({ page }) => {
 });
 
 test('the page asked for is opened after sign-in', async ({ page }) => {
-  await page.goto('/admin/table-demo');
+  await page.goto('/admin/settings/coverage');
   await enterPhone(page, '0500000004');
   await page.getByLabel('رمز التحقق').fill('444444');
   await page.getByRole('button', { name: 'تأكيد' }).click();
-  await expect(page).toHaveURL(/\/admin\/table-demo$/);
+  await expect(page).toHaveURL(/\/admin\/settings\/coverage$/);
 });
 
 test('a user with several panels gets the picker', async ({ page }) => {
@@ -110,4 +113,23 @@ test('auth calls from another site are refused (login CSRF)', async ({ request }
     data: JSON.stringify({ phone: '0500000004', panel: 'admin', code: '444444' }),
   });
   expect(res.status()).toBe(403);
+});
+
+test('an expired access token is refreshed on page load, and the refresh token rotated', async ({ page, context }) => {
+  await signInAs(context, ['admin']);
+  await context.clearCookies({ name: 'jz_at_admin' });
+  await page.goto('/admin');
+  await expect(page).toHaveURL(/\/admin$/);
+  const cookies = await context.cookies();
+  expect(cookies.find((c) => c.name === 'jz_at_admin')?.value).toBe('mock-at');
+  expect(cookies.find((c) => c.name === 'jz_rt_admin')?.value).not.toBe('mock-rt-admin-1');
+});
+
+test('a refresh refused because the account was disabled says so on the sign-in page', async ({ page, context }) => {
+  await signInAs(context, ['admin']);
+  await context.clearCookies({ name: 'jz_at_admin' });
+  await context.addCookies([{ name: 'jz_rt_admin', value: 'mock-rt-disabled', url: `http://localhost:${process.env.PORT ?? 3001}`, httpOnly: true }]);
+  await page.goto('/admin');
+  await expect(page).toHaveURL(/\/login\?panel=admin&next=%2Fadmin&reason=disabled$/);
+  await expect(page.getByRole('alert').filter({ hasText: /\S/ })).toHaveText('هذا الحساب موقوف. تواصل مع إدارة جزلة.');
 });

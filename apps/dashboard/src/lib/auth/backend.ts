@@ -88,6 +88,7 @@ export const mockBackend: AuthBackend = {
     };
   },
   async refresh(refreshToken) {
+    if (refreshToken === 'mock-rt-disabled') return { ok: false, code: 'ACCOUNT_DISABLED' }; // disabled since sign-in
     if (!refreshToken.startsWith('mock-rt-')) return { ok: false, code: 'REFRESH_TOKEN_INVALID' };
     return {
       ok: true,
