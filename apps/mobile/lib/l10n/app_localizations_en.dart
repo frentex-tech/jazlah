@@ -643,9 +643,6 @@ class AppLocalizationsEn extends AppLocalizations {
   String get locOutOfCoverageBanner => 'Sorry, we don\'t deliver to this location yet.';
 
   @override
-  String get locGeocodeError => 'We couldn\'t find the address for this spot. Try again.';
-
-  @override
   String get locPermTitle => 'Allow access to your location';
 
   @override

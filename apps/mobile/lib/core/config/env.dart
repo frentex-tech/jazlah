@@ -21,6 +21,9 @@ class Env {
   /// Both the Dart and the native key are set: only then is a Google map created.
   bool get hasMapsKey => googleMapsApiKey.isNotEmpty && nativeMapsKey;
 
+  /// Sample places (the mock geocoder) are only for mocks and dev; real builds never invent an address.
+  bool get allowsFakeGeocoding => useMocks || flavor == Flavor.dev;
+
   /// The debug-only widget gallery is reachable outside production.
   bool get showGallery => flavor != Flavor.prod;
 

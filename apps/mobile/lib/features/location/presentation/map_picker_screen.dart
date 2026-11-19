@@ -24,7 +24,7 @@ class PickedPlace {
 
 enum _Sheet { none, ask, denied, locating, failed }
 
-enum _Phase { moving, resolving, ready, outOfCoverage, geocodeFailed }
+enum _Phase { moving, resolving, ready, outOfCoverage, checkFailed }
 
 /// Add address on the map (Figma 86-3340 default, 86-3383 searching, 86-3439 outside coverage,
 /// 86-3490 loading, 86-3535 error) with the location permission sheet over it (86-3583 ask,
@@ -53,7 +53,6 @@ class _MapPickerScreenState extends ConsumerState<MapPickerScreen> with WidgetsB
   int _request = 0;
   int _searchId = 0;
 
-  /// Location services are off (not a permission refusal): the primary opens the location settings.
   Timer? _debounce;
 
   String get _lang => Localizations.localeOf(context).languageCode;
@@ -132,35 +131,35 @@ class _MapPickerScreenState extends ConsumerState<MapPickerScreen> with WidgetsB
     }
   }
 
-  /// Out of coverage: keep the point for browsing and pickup (always geocoded for this point).
+  /// No geocode result or a failed geocode is not a dead end: the customer types the address.
+  Future<PlaceAddress> _reverse(GeoPoint p) =>
+      ref.read(geocoderProvider).reverse(p, _lang).then((a) => a, onError: (Object _) => const PlaceAddress());
+
+  /// Out of coverage: keep the point for browsing and pickup.
   Future<void> _pickup(GeoPoint point, Coverage coverage) async {
-    try {
-      final address = await ref.read(geocoderProvider).reverse(point, _lang);
-      if (mounted) context.pop(PickedPlace(point: point, address: address, coverage: coverage));
-    } on Object {
-      if (mounted) setState(() => _phase = _Phase.geocodeFailed);
-    }
+    final address = await _reverse(point);
+    if (mounted) context.pop(PickedPlace(point: point, address: address, coverage: coverage));
   }
 
+  /// Coverage decides; only a failed coverage check offers "retry".
   Future<void> _resolve(GeoPoint p) async {
     final id = ++_request;
     setState(() {
       _point = p;
       _phase = _Phase.resolving;
     });
+    final address = _reverse(p);
     try {
-      final results = await Future.wait([
-        ref.read(geocoderProvider).reverse(p, _lang),
-        ref.read(coverageRepositoryProvider).check(p),
-      ]);
+      final coverage = await ref.read(coverageRepositoryProvider).check(p);
+      final place = await address;
       if (!mounted || id != _request) return;
       setState(() {
-        _address = results[0] as PlaceAddress;
-        _coverage = results[1] as Coverage;
-        _phase = _coverage.covered ? _Phase.ready : _Phase.outOfCoverage;
+        _address = place;
+        _coverage = coverage;
+        _phase = coverage.covered ? _Phase.ready : _Phase.outOfCoverage;
       });
     } on Object {
-      if (mounted && id == _request) setState(() => _phase = _Phase.geocodeFailed);
+      if (mounted && id == _request) setState(() => _phase = _Phase.checkFailed);
     }
   }
 
@@ -282,8 +281,8 @@ class _MapPickerScreenState extends ConsumerState<MapPickerScreen> with WidgetsB
         const _Line(width: 160, height: 12),
         JButton(label: l10n.locConfirm, onPressed: () {}, loading: true, expand: true),
       ],
-      _Phase.geocodeFailed => <Widget>[
-        LocationBanner(text: l10n.locGeocodeError),
+      _Phase.checkFailed => <Widget>[
+        LocationBanner(text: l10n.locOutErrorBody),
         JButton(label: l10n.retry, onPressed: () => _resolve(_point), expand: true),
       ],
       _ => <Widget>[
@@ -293,7 +292,11 @@ class _MapPickerScreenState extends ConsumerState<MapPickerScreen> with WidgetsB
             const SizedBox(width: JSpace.s8),
             Expanded(
               child: Text(
-                _address?.line(l10n.listSeparator) ?? '',
+                // No geocode result: the pin still counts; the address is typed on the next screen.
+                switch (_address?.line(l10n.listSeparator)) {
+                  final line? when line.isNotEmpty => line,
+                  _ => l10n.locPinLabel,
+                },
                 style: JText.labelM,
                 maxLines: 1,
                 overflow: TextOverflow.ellipsis,

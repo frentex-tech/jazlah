@@ -22,15 +22,28 @@ class HomeTab extends ConsumerStatefulWidget {
 /// The automatic prompt runs once per app session, not on every return to the tab.
 bool _askedThisSession = false;
 
-class _HomeTabState extends ConsumerState<HomeTab> {
+class _HomeTabState extends ConsumerState<HomeTab> with WidgetsBindingObserver {
   @override
   void initState() {
     super.initState();
+    WidgetsBinding.instance.addObserver(this);
     WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (mounted) unawaited(ref.read(selectedLocationProvider.notifier).recheck());
       if (!mounted || _askedThisSession || ref.read(selectedLocationProvider) != null) return;
       _askedThisSession = true;
       unawaited(chooseLocation(context, ref));
     });
+  }
+
+  @override
+  void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
+    super.dispose();
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    if (state == AppLifecycleState.resumed) unawaited(ref.read(selectedLocationProvider.notifier).recheck());
   }
 
   @override

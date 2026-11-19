@@ -208,7 +208,6 @@
   "locConfirm": "Confirm location",
   "locPinLabel": "Delivery location",
   "locOutOfCoverageBanner": "Sorry, we don't deliver to this location yet.",
-  "locGeocodeError": "We couldn't find the address for this spot. Try again.",
   "locPermTitle": "Allow access to your location",
   "locPermBody": "We use your location to show nearby stores and set your delivery address precisely.",
   "locPermManual": "Enter the address manually",

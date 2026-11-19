@@ -12,10 +12,15 @@ import 'package:jazlah/l10n/app_localizations.dart';
 Future<void> chooseLocation(BuildContext context, WidgetRef ref) async {
   final place = await context.push<PickedPlace>(Routes.pickLocation);
   if (place == null || !context.mounted) return;
-  final separator = AppLocalizations.of(context).listSeparator;
+  final l10n = AppLocalizations.of(context);
+  final line = place.address.line(l10n.listSeparator);
   await ref
       .read(selectedLocationProvider.notifier)
       .select(
-        SelectedLocation(point: place.point, line: place.address.line(separator), covered: place.coverage.covered),
+        SelectedLocation(
+          point: place.point,
+          line: line.isEmpty ? l10n.locPinLabel : line, // no geocode result: still a chosen point
+          covered: place.coverage.covered,
+        ),
       );
 }

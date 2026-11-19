@@ -75,11 +75,12 @@ class _OutOfCoverageScreenState extends ConsumerState<OutOfCoverageScreen> {
                         const Spacer(),
                         _panel(l10n),
                         const Spacer(),
-                        Text(
-                          l10n.locOutCities(snap.data!.join(l10n.listSeparator)),
-                          style: JText.bodyM.copyWith(color: JColors.ink2),
-                          textAlign: TextAlign.center,
-                        ),
+                        if (snap.data!.isNotEmpty)
+                          Text(
+                            l10n.locOutCities(snap.data!.join(l10n.listSeparator)),
+                            style: JText.bodyM.copyWith(color: JColors.ink2),
+                            textAlign: TextAlign.center,
+                          ),
                       ],
                     );
                   },
