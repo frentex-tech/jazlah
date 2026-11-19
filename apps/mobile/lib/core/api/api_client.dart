@@ -113,7 +113,8 @@ class AuthInterceptor extends Interceptor {
     try {
       fresh = stored != null && sentWith != 'Bearer ${stored.accessToken}' ? stored : await refresh();
     } on DioException catch (offline) {
-      return handler.next(offline); // the request fails as NETWORK; the session stays
+      // The request fails as NETWORK (reported on the original call); the session stays.
+      return handler.next(DioException(requestOptions: options, type: offline.type, error: offline.error));
     }
     if (fresh == null) return handler.next(err);
     options.extra[_retried] = true;

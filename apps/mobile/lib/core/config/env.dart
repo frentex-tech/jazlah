@@ -26,8 +26,8 @@ class Env {
     if (!_apiBaseUrl.startsWith('https://')) {
       throw StateError('API_BASE_URL must be an https URL for ${flavor.name} (config/${flavor.name}.json)');
     }
-    if (flavor == Flavor.prod && googleMapsApiKey.isEmpty) {
-      throw StateError('GOOGLE_MAPS_API_KEY is required for prod (config/prod.json)');
+    if (flavor == Flavor.prod && !hasMapsKey) {
+      throw StateError('GOOGLE_MAPS_API_KEY is required for prod (config/prod.json and the native key)');
     }
   }
 

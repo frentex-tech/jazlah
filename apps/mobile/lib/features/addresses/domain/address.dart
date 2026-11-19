@@ -26,7 +26,7 @@ class Address {
   final String? driverInstructions;
 
   /// Used by an order in progress: it cannot be edited or deleted until the order is done.
-  /// shortcut: API gap: no `isLocked` on addresses yet (planned in ACC-API-2; the real rule comes with
+  /// shortcut: API gap: no `isLocked` on addresses yet (planned in ACC-API-2, #18; the real rule comes with
   /// ORD-API-1, #81); always false from the API.
   final bool locked;
 
