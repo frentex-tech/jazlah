@@ -10,6 +10,12 @@ export type ErrorCode = S['ErrorCode'] | 'NETWORK';
 export type SignedIn = S['SignedInResponseDto'];
 export type Tokens = S['AuthTokensResponseDto'];
 export type OtpRequested = S['OtpRequestedResponseDto'];
+/**
+ * A refresh refused for one of these means the session is over: sign in again (docs/frontend/errors.md). Anything
+ * else (RATE_LIMITED, SERVICE_UNAVAILABLE, NETWORK …) is passing: keep the session and let the user retry.
+ */
+export const REFRESH_ENDS_SESSION = new Set<string>(['REFRESH_TOKEN_INVALID', 'UNAUTHORIZED', 'ACCOUNT_DISABLED', 'VENDOR_SUSPENDED']);
+
 export type Result<T> = { ok: true; data: T } | { ok: false; code: ErrorCode; retryAfter?: number };
 
 /** `clientIp` is forwarded as X-Forwarded-For, so the API's per-address limits see the user, not the dashboard server. */
@@ -89,6 +95,7 @@ export const mockBackend: AuthBackend = {
   },
   async refresh(refreshToken) {
     if (refreshToken === 'mock-rt-disabled') return { ok: false, code: 'ACCOUNT_DISABLED' }; // disabled since sign-in
+    if (refreshToken === 'mock-rt-busy') return { ok: false, code: 'SERVICE_UNAVAILABLE' }; // API briefly down
     if (!refreshToken.startsWith('mock-rt-')) return { ok: false, code: 'REFRESH_TOKEN_INVALID' };
     return {
       ok: true,

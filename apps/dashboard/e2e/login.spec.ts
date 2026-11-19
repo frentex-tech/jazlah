@@ -133,3 +133,12 @@ test('a refresh refused because the account was disabled says so on the sign-in 
   await expect(page).toHaveURL(/\/login\?panel=admin&next=%2Fadmin&reason=disabled$/);
   await expect(page.getByRole('alert').filter({ hasText: /\S/ })).toHaveText('هذا الحساب موقوف. تواصل مع إدارة جزلة.');
 });
+
+test('a refresh that fails for a passing reason keeps the session', async ({ page, context }) => {
+  await signInAs(context, ['admin']);
+  await context.clearCookies({ name: 'jz_at_admin' });
+  await context.addCookies([{ name: 'jz_rt_admin', value: 'mock-rt-busy', url: `http://localhost:${process.env.PORT ?? 3001}`, httpOnly: true }]);
+  await page.goto('/admin');
+  await expect(page).toHaveURL(/\/admin$/);
+  expect((await context.cookies()).find((c) => c.name === 'jz_rt_admin')?.value).toBe('mock-rt-busy');
+});

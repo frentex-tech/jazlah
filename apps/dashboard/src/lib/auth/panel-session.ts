@@ -1,8 +1,8 @@
 import { NextResponse, type NextRequest } from 'next/server';
 import { PANELS_COOKIE, accessCookie, parsePanels, refreshCookie, type Panel } from '../session';
-import { authBackend, type Tokens } from './backend';
+import { REFRESH_ENDS_SESSION, authBackend, type Tokens } from './backend';
 import { clearPanel, writePanels, writeTokens } from './cookies';
-import { clientIp, isSameOriginJson, sameOrigin } from './request';
+import { clientIp, isSameOriginJson, sameOrigin, statusOf } from './request';
 
 /** What a panel route's API call returns: data (null → 204), or the API's error code with its HTTP status. */
 export type ApiResult<T> =
@@ -61,7 +61,7 @@ export async function withPanelSession<T>(
   let fresh: Tokens | undefined;
   const refresh = async () => {
     const r = await refreshOnce(refreshToken, clientIp(req));
-    if (!r.ok) return r.code === 'NETWORK' ? NextResponse.json({ code: 'NETWORK' }, { status: 502 }) : signedOut(r.code);
+    if (!r.ok) return REFRESH_ENDS_SESSION.has(r.code) ? signedOut(r.code) : NextResponse.json({ code: r.code }, { status: statusOf(r.code) });
     fresh = r.data;
     token = r.data.accessToken;
     return null;

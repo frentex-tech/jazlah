@@ -30,4 +30,5 @@ export function clientIpFrom(headers: Headers, header: string | undefined): stri
 export const clientIp = (req: NextRequest) => clientIpFrom(req.headers, process.env.CLIENT_IP_HEADER);
 
 /** HTTP status for an API error code passed back to our pages. */
-export const statusOf = (code: string) => (code === 'RATE_LIMITED' ? 429 : code === 'NETWORK' ? 502 : 400);
+export const statusOf = (code: string) =>
+  code === 'RATE_LIMITED' ? 429 : code === 'NETWORK' ? 502 : code === 'SERVICE_UNAVAILABLE' || code === 'INTERNAL_ERROR' ? 503 : 400;

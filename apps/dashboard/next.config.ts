@@ -30,8 +30,8 @@ const securityHeaders = [
   { key: 'X-Content-Type-Options', value: 'nosniff' },
   { key: 'Referrer-Policy', value: 'strict-origin-when-cross-origin' },
   { key: 'Permissions-Policy', value: 'camera=(), microphone=(), geolocation=(), payment=()' },
-  // HSTS is also set at the edge; sending it here covers a deployment without one. Never on plain-http local dev.
-  ...(dev ? [] : [{ key: 'Strict-Transport-Security', value: 'max-age=31536000; includeSubDomains' }]),
+  // HSTS for this host only (subdomains are the edge team's call). Never on plain-http local dev.
+  ...(dev ? [] : [{ key: 'Strict-Transport-Security', value: 'max-age=31536000' }]),
 ];
 
 const config: NextConfig = {

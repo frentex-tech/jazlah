@@ -1,7 +1,7 @@
 import createIntlMiddleware from 'next-intl/middleware';
 import { NextResponse, type NextRequest } from 'next/server';
 import { routing } from './i18n/routing';
-import { authBackend } from './lib/auth/backend';
+import { REFRESH_ENDS_SESSION, authBackend } from './lib/auth/backend';
 import { clearPanel, writePanels, writeTokens } from './lib/auth/cookies';
 import { clientIp } from './lib/auth/request';
 import { PANELS_COOKIE, accessCookie, isPanel, parsePanels, refreshCookie, type Panel } from './lib/session';
@@ -75,7 +75,7 @@ export default async function middleware(req: NextRequest) {
   if (!req.cookies.get(accessCookie(area)) && navigation) {
     const r = await authBackend().refresh(refreshToken, clientIp(req));
     if (r.ok) writeTokens(res, area, r.data);
-    else if (r.code !== 'NETWORK') {
+    else if (REFRESH_ENDS_SESSION.has(r.code)) {
       const out = redirectTo(req, `${prefix}/login`, { panel: area, next: req.nextUrl.pathname, ...reasonOf(r.code) });
       clearPanel(out, area);
       writePanels(out, panels.filter((p) => p !== area));
