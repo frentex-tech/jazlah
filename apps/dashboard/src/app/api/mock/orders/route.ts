@@ -1,9 +1,10 @@
+import { mocksEnabled } from '@/lib/mock';
 import { NextResponse, type NextRequest } from 'next/server';
 import { queryDemoOrders } from '@/features/table-demo/mock-orders';
 
 // Mocked list endpoint for the DataTable demo. `?fail=1` answers 500 to show the error state.
 export function GET(req: NextRequest) {
-  if (process.env.DASHBOARD_API_MOCK !== '1') return new NextResponse(null, { status: 404 });
+  if (!mocksEnabled()) return new NextResponse(null, { status: 404 });
   const p = req.nextUrl.searchParams;
   if (p.get('fail')) return NextResponse.json({ code: 'INTERNAL_ERROR', message: 'demo failure' }, { status: 500 });
   const page = Math.max(1, Number(p.get('page')) || 1);

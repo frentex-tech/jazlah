@@ -84,3 +84,115 @@ jobs:
           name: playwright-report
           path: apps/dashboard/test-results
           retention-days: 7
+
+  # The acceptance checks that need the real API (e2e-api/): a seeded services/api with the review accounts, built
+  # and run here exactly as its own CI does. Only reads services/api; never changes it.
+  api-e2e:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    services:
+      postgres:
+        image: postgis/postgis:17-3.5
+        env:
+          POSTGRES_USER: jazla
+          POSTGRES_PASSWORD: jazla
+          POSTGRES_DB: jazla
+        ports:
+          - 5434:5432
+        options: >-
+          --health-cmd "pg_isready -U jazla -d jazla"
+          --health-interval 2s
+          --health-timeout 3s
+          --health-retries 30
+      redis:
+        image: redis:7-alpine
+        command: redis-server --appendonly yes --maxmemory-policy noeviction
+        ports:
+          - 6380:6379
+        options: >-
+          --health-cmd "redis-cli ping"
+          --health-interval 2s
+          --health-timeout 3s
+          --health-retries 30
+    env:
+      NEXT_TELEMETRY_DISABLED: '1'
+      NODE_ENV: development
+      PORT: '3000'
+      DATABASE_URL: postgresql://jazla:jazla@localhost:5434/jazla
+      REDIS_URL: redis://localhost:6380/0
+      STORAGE_ENDPOINT: http://localhost:9002
+      STORAGE_REGION: us-east-1
+      STORAGE_FORCE_PATH_STYLE: 'true'
+      STORAGE_ACCESS_KEY_ID: jazla
+      STORAGE_SECRET_ACCESS_KEY: jazla-local-storage
+      STORAGE_PUBLIC_BUCKET: jazla-public
+      STORAGE_PRIVATE_BUCKET: jazla-private
+      STORAGE_PUBLIC_BASE_URL: http://localhost:9002/jazla-public
+      SMS_PROVIDERS: log
+      AUTH_REVIEW_ACCOUNTS: '+966500000004:444444'
+      # Each test signs in again: no 60 s resend wait and no 3-per-10-minutes phone limit for this run.
+      AUTH_OTP_RESEND_WAIT_SECONDS: '1'
+      AUTH_OTP_PHONE_LIMIT: '100'
+      AUTH_OTP_PHONE_DAILY_LIMIT: '100'
+      API_URL: http://localhost:3000
+
+    steps:
+      - name: Check out
+        uses: actions/checkout@v7
+
+      - name: Set up pnpm (version from package.json "packageManager")
+        uses: pnpm/action-setup@v6
+        with:
+          package_json_file: apps/dashboard/package.json
+
+      - name: Set up Node for the API (services/api/.nvmrc)
+        uses: actions/setup-node@v7
+        with:
+          node-version-file: services/api/.nvmrc
+
+      - name: API, install, migrate, seed, build
+        working-directory: services/api
+        run: |
+          pnpm install --frozen-lockfile
+          docker compose up -d --wait minio
+          pnpm db:generate
+          pnpm db:deploy
+          pnpm db:seed
+          pnpm build
+
+      - name: API, start
+        working-directory: services/api
+        run: |
+          nohup node dist/main > "$RUNNER_TEMP/api.log" 2>&1 &
+          for i in $(seq 1 60); do curl -sf http://localhost:3000/v1/health >/dev/null && exit 0; sleep 1; done
+          cat "$RUNNER_TEMP/api.log"; exit 1
+
+      - name: Set up Node for the dashboard (apps/dashboard/.nvmrc)
+        uses: actions/setup-node@v7
+        with:
+          node-version-file: apps/dashboard/.nvmrc
+          cache: pnpm
+          cache-dependency-path: apps/dashboard/pnpm-lock.yaml
+
+      - name: Dashboard, install and build
+        working-directory: apps/dashboard
+        env:
+          NODE_ENV: production
+        run: |
+          pnpm install --frozen-lockfile
+          pnpm build
+
+      - name: Install Playwright Chromium
+        working-directory: apps/dashboard
+        run: pnpm exec playwright install --with-deps chromium
+
+      - name: Acceptance against the API
+        working-directory: apps/dashboard
+        env:
+          NODE_ENV: production
+          PORT: '3002'
+        run: pnpm test:e2e:api
+
+      - name: API log
+        if: failure()
+        run: tail -200 "$RUNNER_TEMP/api.log"

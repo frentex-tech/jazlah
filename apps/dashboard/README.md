@@ -19,7 +19,8 @@ pnpm dev            # http://localhost:3001
 pnpm lint           # ESLint, incl. the RTL rule: physical utilities (ml-, pr-, left-, text-right …) are errors
 pnpm typecheck
 pnpm build
-pnpm test:e2e       # Playwright smoke; starts `pnpm start`, so run `pnpm build` first
+pnpm test:e2e       # Playwright smoke on the mocks; starts `pnpm start`, so run `pnpm build` first
+pnpm test:e2e:api   # acceptance checks against a running, seeded API (API_URL); CI job "api-e2e"
 pnpm api:generate   # regenerate src/api/schema.d.ts from services/api/openapi.json
 ```
 
@@ -27,6 +28,8 @@ pnpm api:generate   # regenerate src/api/schema.d.ts from services/api/openapi.j
 Types are generated from `services/api/openapi.json` with `openapi-typescript` into `src/api/schema.d.ts`, and called with `openapi-fetch` (`src/api/client.ts`), as in `docs/frontend/client-generation.md`. **The generated file is committed**; CI regenerates it and fails on a difference, so run `pnpm api:generate` after a pull that changes `openapi.json`.
 
 API calls run on the server (route handlers, server components): the tokens live in HTTP-only cookies and never reach page scripts.
+
+Panel route handlers wrap their API call in `withPanelSession(req, panel, call)` (`src/lib/auth/panel-session.ts`): it refreshes a missing access token, retries once on `ACCESS_TOKEN_EXPIRED`, writes the new cookies, and refuses mutating calls that don't come from our own pages. When the session is over it answers 401 `{ code }`, and the page's `panelFetch` (`src/lib/panel-fetch.ts`) sends the user to `/login?panel=…&next=…`, after saving unsaved work if the page passes `beforeSignIn`.
 
 ## Layout
 ```
@@ -56,10 +59,10 @@ messages/ar.json, en.json       every UI string
 ## API gaps (worked around in the dashboard)
 - **Staff display name:** `GET /v1/<panel>/me` returns only the principal, so the top bar shows the masked phone and a user icon in the avatar.
 - **Panels a phone or user can open:** the API does not list them, and tokens are per audience. So the panel picker (`/login/choose`) lists the panels with a live session, which means it appears after the second sign-in.
-- **Coverage zone color:** the editor stores a color per zone; LOC-API-1's model has no `color` field yet.
 - **Code length:** not in the OTP request response, so it is a dashboard setting (`OTP_LENGTH`). Jazlah uses 6 digits (owner, 2026-11-18); Figma's 4 cells are an accepted difference.
 
 ## Mocks (`DASHBOARD_API_MOCK=1`)
+For local work and the Playwright smoke tests only. A production build ignores the flag unless `PLAYWRIGHT=1` is also set (the Playwright config does that).
 - Auth (`src/lib/auth/backend.ts`), like the API's review accounts. The code is the last digit six times:
   - `0500000004` admin
   - `0500000002` vendor
@@ -70,4 +73,4 @@ messages/ar.json, en.json       every UI string
   - `0500000008` disabled
   - code `000000` = expired
 - `/api/mock/orders` + `/admin/table-demo`: the DataTable demo (`?fail=1` shows the error state).
-- Coverage zones (`src/features/coverage/backend.ts`): LOC-API-1 (#24) is not in `openapi.json` yet. The `CoverageBackend` interface has an in-memory mock (seeded with «شمال الرياض») behind the dashboard's own routes `/api/coverage/zones[/:id]` and `/api/coverage/check`. Without the mock these answer 501 `NOT_BUILT`. When the API lands, implement the interface with openapi-fetch.
+- Coverage zones (`src/features/coverage/backend.ts`): the API (`/v1/admin/coverage-zones`, `/v1/public/coverage/check`) through openapi-fetch; the mock is an in-memory store with the API's shapes and rules (seeded with «شمال الرياض»), for the smoke tests.

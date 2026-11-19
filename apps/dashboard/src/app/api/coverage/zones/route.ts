@@ -1,18 +1,15 @@
-import { NextResponse, type NextRequest } from 'next/server';
+import type { NextRequest } from 'next/server';
 import { coverageBackend } from '@/features/coverage/backend';
-import { ZoneInputSchema, respond } from '@/features/coverage/schema';
-import { panelAuth } from '@/lib/auth/guard';
+import { CreateZoneSchema, invalidBody, langOf } from '@/features/coverage/schema';
+import { withPanelSession } from '@/lib/auth/panel-session';
 
-export async function GET(req: NextRequest) {
-  const auth = panelAuth(req, 'admin');
-  if (!auth) return NextResponse.json({ code: 'UNAUTHORIZED' }, { status: 401 });
-  return respond(await coverageBackend().list(auth));
+export function GET(req: NextRequest) {
+  return withPanelSession(req, 'admin', (token) => coverageBackend().list(token, langOf(req)));
 }
 
 export async function POST(req: NextRequest) {
-  const auth = panelAuth(req, 'admin');
-  if (!auth) return NextResponse.json({ code: 'UNAUTHORIZED' }, { status: 401 });
-  const parsed = ZoneInputSchema.safeParse(await req.json().catch(() => null));
-  if (!parsed.success) return NextResponse.json({ code: 'VALIDATION_FAILED' }, { status: 422 });
-  return respond(await coverageBackend().create(auth, parsed.data), 201);
+  const parsed = CreateZoneSchema.safeParse(await req.json().catch(() => null));
+  return withPanelSession(req, 'admin', async (token) =>
+    parsed.success ? coverageBackend().create(token, langOf(req), parsed.data) : invalidBody(parsed.error),
+  );
 }
