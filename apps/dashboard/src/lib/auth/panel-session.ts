@@ -49,7 +49,7 @@ export async function withPanelSession<T>(
     const res = NextResponse.json({ code }, { status: 401 });
     if (refreshToken) {
       // The API refused the access token, but the refresh token may still be live there: end that session too.
-      if (endApiSession) await authBackend().logout(refreshToken, clientIp(req));
+      if (endApiSession) await authBackend().logout(fresh?.refreshToken ?? refreshToken, clientIp(req)); // the newest token
       clearPanel(res, panel);
       writePanels(res, panels.filter((p) => p !== panel));
     }
