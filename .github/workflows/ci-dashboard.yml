@@ -72,7 +72,8 @@ jobs:
         run: pnpm build
 
       - name: Install Playwright Chromium
-        run: pnpm exec playwright install --with-deps chromium
+        # The Ubuntu mirrors fail now and then: retry before failing the job.
+        run: for i in 1 2 3; do pnpm exec playwright install --with-deps chromium && exit 0; sleep 15; done; exit 1
 
       - name: Playwright smoke
         run: pnpm test:e2e
@@ -184,7 +185,8 @@ jobs:
 
       - name: Install Playwright Chromium
         working-directory: apps/dashboard
-        run: pnpm exec playwright install --with-deps chromium
+        # The Ubuntu mirrors fail now and then: retry before failing the job.
+        run: for i in 1 2 3; do pnpm exec playwright install --with-deps chromium && exit 0; sleep 15; done; exit 1
 
       - name: Acceptance against the API
         working-directory: apps/dashboard
