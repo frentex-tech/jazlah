@@ -334,7 +334,7 @@ export function CoverageEditor() {
                 </Button>
               )}
             </div>
-            <div className="grid flex-1 grid-cols-2 gap-x-s24 gap-y-s20">
+            <div className="grid grid-cols-[342px_342px] gap-x-s24 gap-y-s20">
               <InputField label={t('nameAr')} {...form.register('nameAr')} error={err('nameAr')} />
               <InputField label={t('nameEn')} dir="ltr" {...form.register('nameEn')} error={err('nameEn')} />
               <InputField
@@ -406,11 +406,13 @@ export function CoverageEditor() {
       <DataTable
         columns={columns}
         data={pageRows}
-        total={zones.length}
-        page={page}
-        pageSize={PAGE_SIZE}
+        label={t('title')}
         status={status}
-        onPageChange={setPage}
+        hasPrev={page > 1}
+        hasNext={page * PAGE_SIZE < zones.length}
+        onPrev={() => setPage((p) => p - 1)}
+        onNext={() => setPage((p) => p + 1)}
+        loadingRows={PAGE_SIZE}
         onRetry={() => void load()}
         empty={
           <StatePanel kind="search" title={t('empty.title')} body={t('empty.body')} action={<Button variant="secondary" onClick={startDrawing}>{t('newZone')}</Button>} />

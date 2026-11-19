@@ -56,38 +56,16 @@
       "title": "Kitchen board · Today",
       "export": "Export",
       "print": "Print prep cards"
-    },
-    "placeholder": "This page's content is built in its own task.",
-    "tableDemo": {
-      "breadcrumb": "Admin / Table demo",
-      "title": "Table demo"
     }
   },
   "table": {
-    "showing": "Showing {from} to {to} of {total}",
+    "showing": "{count, plural, one {# row} other {# rows}} on this page",
     "prev": "Previous page",
     "next": "Next page",
-    "page": "Page {page}",
     "actions": "Actions",
     "filter": "Search",
-    "clearAll": "Clear all"
-  },
-  "demo": {
-    "orderNo": "Order no.",
-    "customer": "Customer",
-    "store": "Store",
-    "status": "Status",
-    "amount": "Amount",
-    "date": "Date",
-    "statusAll": "All statuses",
-    "statuses": {
-      "preparing": "Preparing",
-      "delivered": "Delivered",
-      "review": "In review",
-      "cancelled": "Cancelled",
-      "new": "New"
-    },
-    "currency": "SAR"
+    "clearAll": "Clear all",
+    "paging": "Pages"
   },
   "state": {
     "empty": {
@@ -115,7 +93,13 @@
       "body": "Ask your account manager for access.",
       "action": "Back"
     },
-    "loading": "Loading"
+    "loading": "Loading",
+    "notFound": {
+      "title": "Page not found",
+      "body": "The page may still be in the works, or its address changed.",
+      "action": "Back to home",
+      "home": "Go to sign-in"
+    }
   },
   "dialog": {
     "cancel": "Cancel",
@@ -160,7 +144,12 @@
       "title": "Choose a dashboard",
       "body": "Your number has access to more than one dashboard. Choose the one to open.",
       "open": "Open",
-      "addAnother": "Sign in to another dashboard"
+      "addAnother": "Sign in to another dashboard",
+      "desc": {
+        "admin": "Orders, stores, delivery, finance and settings",
+        "vendor": "Your store’s orders, products and earnings",
+        "kitchen": "Cooking jobs for today and the days ahead"
+      }
     },
     "admin": {
       "brand": "Staff dashboard",

@@ -79,5 +79,4 @@ For local work and the Playwright smoke tests only. A production build ignores t
   - `0500000007` rate limited
   - `0500000008` disabled
   - code `000000` = expired
-- `/api/mock/orders` + `/admin/table-demo`: the DataTable demo (`?fail=1` shows the error state).
 - Coverage zones (`src/features/coverage/backend.ts`): the API (`/v1/admin/coverage-zones`, `/v1/public/coverage/check`) through openapi-fetch; the mock is an in-memory store with the API's shapes and rules (seeded with «شمال الرياض»), for the smoke tests.

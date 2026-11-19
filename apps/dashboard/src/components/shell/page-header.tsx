@@ -1,7 +1,10 @@
-// Figma DS «Page header» (16:1252): breadcrumb + H1 on the start side, actions on the end side.
+import { cn } from '@/lib/utils';
+
+// Figma DS «Page header» (16:1252): breadcrumb + H1 on the start side, actions on the end side. Without actions the
+// titles sit on the end side, as in the vendor board frame (135:39184).
 export function PageHeader({ breadcrumb, title, actions }: { breadcrumb: string; title: string; actions?: React.ReactNode }) {
   return (
-    <div className="flex w-full items-center justify-between gap-s16">
+    <div className={cn('flex w-full items-center gap-s16', actions ? 'justify-between' : 'justify-end')}>
       <div className="flex flex-col gap-s4">
         <p className="text-body-m text-ink-2">{breadcrumb}</p>
         <h1 className="text-h1 text-ink">{title}</h1>

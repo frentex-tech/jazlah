@@ -30,11 +30,16 @@ export type TableStatus = 'ready' | 'loading' | 'error';
 type Props<T> = {
   columns: ColumnDef<T, unknown>[];
   data: T[];
-  total: number;
-  page: number; // 1-based
-  pageSize: number;
   status: TableStatus;
-  onPageChange: (page: number) => void;
+  /** Keyset paging (docs/frontend/conventions.md): the caller keeps the cursors; no page numbers, no total. */
+  hasPrev: boolean;
+  hasNext: boolean;
+  onPrev: () => void;
+  onNext: () => void;
+  /** Accessible name of the table, e.g. the page title. */
+  label: string;
+  /** Skeleton rows while loading (the page size). */
+  loadingRows?: number;
   sorting?: SortingState;
   onSortingChange?: (s: SortingState) => void;
   columnVisibility?: VisibilityState;
@@ -45,9 +50,9 @@ type Props<T> = {
   rowActions?: (row: T) => React.ReactNode;
 };
 
-// Figma DS «Data table» (16:1564): states default, loading, empty, error. Server pagination, sorting and filters are the caller's.
+// Figma DS «Data table» (16:1564): states default, loading, empty, error. Paging, sorting and filters are the caller's.
 export function DataTable<T>({
-  columns, data, total, page, pageSize, status, onPageChange, sorting = [], onSortingChange, columnVisibility, onRetry, empty, rowActions,
+  columns, data, status, label, hasPrev, hasNext, onPrev, onNext, loadingRows = 10, sorting = [], onSortingChange, columnVisibility, onRetry, empty, rowActions,
 }: Props<T>) {
   const t = useTranslations();
   const table = useReactTable({
@@ -57,19 +62,17 @@ export function DataTable<T>({
     manualPagination: true,
     manualSorting: true,
     manualFiltering: true,
-    pageCount: Math.max(1, Math.ceil(total / pageSize)),
     state: { sorting, columnVisibility },
     onSortingChange: (updater) => onSortingChange?.(typeof updater === 'function' ? updater(sorting) : updater),
   });
 
   const leafColumns = table.getVisibleLeafColumns();
-  const pageCount = table.getPageCount();
   const cell = 'flex shrink-0 items-center px-s8';
   const row = 'flex items-center px-s32';
 
   return (
     <div className="w-full overflow-hidden rounded-md border border-line bg-paper" aria-busy={status === 'loading'}>
-      <div role="table" aria-rowcount={total}>
+      <div role="table" aria-label={label}>
         <div role="row" className={cn(row, 'h-12 bg-sand')}>
           {table.getHeaderGroups()[0]!.headers.map((h) => {
             const sortable = h.column.getCanSort() && !!onSortingChange;
@@ -97,7 +100,7 @@ export function DataTable<T>({
         </div>
 
         {status === 'loading' &&
-          Array.from({ length: pageSize }, (_, i) => (
+          Array.from({ length: loadingRows }, (_, i) => (
             <div key={i} role="row" className={cn(row, 'h-14 border-b border-line')}>
               {leafColumns.map((c) => (
                 <div key={c.id} role="cell" className={cell} style={{ width: c.columnDef.meta?.width }}>
@@ -143,22 +146,13 @@ export function DataTable<T>({
       )}
 
       {(status === 'loading' || (status === 'ready' && data.length > 0)) && (
-        <nav className="flex h-14 items-center justify-between px-s32" aria-label={t('table.page', { page })}>
-          <p className="text-body-m text-ink-2">
-            {status === 'ready'
-              ? t('table.showing', { from: (page - 1) * pageSize + 1, to: (page - 1) * pageSize + data.length, total })
-              : ' '}
-          </p>
+        <nav className="flex h-14 items-center justify-between px-s32" aria-label={t('table.paging')}>
+          <p className="text-body-m text-ink-2">{status === 'ready' ? t('table.showing', { count: data.length }) : ' '}</p>
           <div className="flex items-center gap-s8">
-            <PageButton label={t('table.prev')} disabled={page <= 1} onClick={() => onPageChange(page - 1)}>
+            <PageButton label={t('table.prev')} disabled={!hasPrev || status !== 'ready'} onClick={onPrev}>
               <CaretLeft size={18} className="rtl:-scale-x-100" aria-hidden />
             </PageButton>
-            {pageWindow(page, pageCount).map((p) => (
-              <PageButton key={p} label={t('table.page', { page: p })} active={p === page} onClick={() => onPageChange(p)}>
-                {p}
-              </PageButton>
-            ))}
-            <PageButton label={t('table.next')} disabled={page >= pageCount} onClick={() => onPageChange(page + 1)}>
+            <PageButton label={t('table.next')} disabled={!hasNext || status !== 'ready'} onClick={onNext}>
               <CaretRight size={18} className="rtl:-scale-x-100" aria-hidden />
             </PageButton>
           </div>
@@ -177,22 +171,13 @@ export function RowActionsTrigger(props: React.ButtonHTMLAttributes<HTMLButtonEl
   );
 }
 
-/** Up to three page numbers around the current one. */
-export function pageWindow(page: number, count: number): number[] {
-  const start = Math.max(1, Math.min(page - 1, count - 2));
-  return Array.from({ length: Math.min(3, count) }, (_, i) => start + i);
-}
-
-function PageButton({ active, label, children, ...props }: React.ButtonHTMLAttributes<HTMLButtonElement> & { active?: boolean; label: string }) {
+// Disabled like the other DS controls: the line border stays, the icon turns muted-soft (no opacity fade).
+function PageButton({ label, children, ...props }: React.ButtonHTMLAttributes<HTMLButtonElement> & { label: string }) {
   return (
     <button
       type="button"
       aria-label={label}
-      aria-current={active ? 'page' : undefined}
-      className={cn(
-        'flex size-9 items-center justify-center rounded-sm border text-label-m disabled:opacity-40',
-        active ? 'border-ember bg-ember text-paper' : 'border-line text-ink',
-      )}
+      className="flex size-9 items-center justify-center rounded-sm border border-line text-ink disabled:text-muted-soft"
       {...props}
     >
       {children}
