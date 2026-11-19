@@ -10,7 +10,7 @@ import 'package:jazlah/features/location/presentation/location_providers.dart';
 import 'package:jazlah/features/location/presentation/map_picker_screen.dart';
 import 'package:jazlah/l10n/app_localizations.dart';
 
-/// shortcut: home until its task lands: the location header (LOC-MOB-1) over a "coming soon" panel.
+/// shortcut: home until STF-MOB-1 (#55) lands: the location header (LOC-MOB-1) over a "coming soon" panel.
 /// Asks for a location once per session while none is set.
 class HomeTab extends ConsumerStatefulWidget {
   const HomeTab({super.key});

@@ -28,7 +28,7 @@ class JSaudiPhoneFormatter extends TextInputFormatter {
   @override
   TextEditingValue formatEditUpdate(TextEditingValue oldValue, TextEditingValue newValue) {
     final text = format(newValue.text);
-    // shortcut: the caret always jumps to the end; fine for a 9-digit field, upgrade if mid-text edits matter.
+    // shortcut (no issue: UX note): the caret always jumps to the end; fine for a 9-digit field, upgrade if mid-text edits matter.
     return TextEditingValue(
       text: text,
       selection: TextSelection.collapsed(offset: text.length),

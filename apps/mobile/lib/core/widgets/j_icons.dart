@@ -2,7 +2,7 @@ import 'package:flutter/widgets.dart';
 
 /// Phosphor icons used by the design system (spec `ph/<name>`; `-fill` = `…Fill`).
 ///
-/// shortcut: phosphor_flutter 2.1.0's Dart classes no longer compile on Flutter 3.44 (`IconData` is final),
+/// shortcut (no issue: a package upgrade, not an API gap): phosphor_flutter 2.1.0's Dart classes no longer compile on Flutter 3.44 (`IconData` is final),
 /// so we point at the fonts that package still ships. Switch back to `PhosphorIconsRegular/Fill`
 /// once a phosphor_flutter release builds on our Flutter. Add icons here with their codepoint from
 /// phosphor_flutter's `phosphor_icons_regular.dart` / `phosphor_icons_fill.dart`.

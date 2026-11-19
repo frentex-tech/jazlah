@@ -37,7 +37,8 @@ class MainShell extends StatelessWidget {
   }
 }
 
-/// shortcut: a "coming soon" panel for tabs whose screens belong to later tasks (home, services, orders).
+/// shortcut: a "coming soon" panel for tabs whose screens belong to later tasks: home STF-MOB-1 (#55),
+/// services OCC-MOB-1 (#124), orders ORD-MOB-2 (#85).
 class PlaceholderTab extends StatelessWidget {
   const PlaceholderTab({required this.tab, super.key});
 

@@ -26,7 +26,8 @@ class Address {
   final String? driverInstructions;
 
   /// Used by an order in progress: it cannot be edited or deleted until the order is done.
-  /// shortcut: the API has no lock yet (it comes with checkout and orders); always false from the API.
+  /// shortcut: API gap: no `isLocked` on addresses yet (planned in ACC-API-2; the real rule comes with
+  /// ORD-API-1, #81); always false from the API.
   final bool locked;
 
   /// Inside an active delivery zone (`isCovered`, worked out by the API on every read).

@@ -88,7 +88,7 @@ services/api/
 apps/mobile/lib/
   main_dev.dart  main_staging.dart  main_prod.dart
   app/            router (go_router), theme (tokens from design system), l10n setup
-  core/           api/ (generated dart-dio client in core/api/generated), auth/, storage/, errors/, widgets/
+  core/           api/ (Dio interceptor; the generated dart-dio client is the package apps/mobile/packages/jazla_api), auth/, storage/, errors/, widgets/
   features/<feature>/
     data/         repositories, DTO mapping
     domain/       models
@@ -122,7 +122,7 @@ Middleware routes each user by role. The admin sidebar shows only the items the 
 ## 7. Contract-first flow between layers
 
 1. The **API task** merges into `develop` with DTOs and Swagger. That makes the contract official.
-2. CI regenerates `packages/api-client` (TS) and `apps/mobile/lib/core/api/generated` (Dart) from `/docs-json`, in the same PR or a follow-up `chore(api-client)` PR.
+2. CI regenerates `packages/api-client` (TS) and `apps/mobile/packages/jazla_api` (Dart) from `/docs-json`, in the same PR or a follow-up `chore(api-client)` PR.
 3. **Client tasks** (mobile / dashboard) build on the generated client. A client task may start before its API task merges by using a Prism mock of the PR's spec, but it **merges only after** the API task.
 
 Every task's `depends:` field encodes this order.

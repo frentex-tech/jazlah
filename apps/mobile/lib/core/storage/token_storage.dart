@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 
 class AuthTokens {
@@ -12,20 +14,22 @@ class TokenStorage {
   TokenStorage([FlutterSecureStorage? storage]) : _storage = storage ?? const FlutterSecureStorage();
 
   final FlutterSecureStorage _storage;
-  static const _access = 'auth.accessToken';
-  static const _refresh = 'auth.refreshToken';
+  // Both tokens in one value: a crash cannot leave a mismatched pair.
+  static const _key = 'auth.tokens';
 
   Future<AuthTokens?> read() async {
-    final access = await _storage.read(key: _access);
-    final refresh = await _storage.read(key: _refresh);
-    if (access == null || refresh == null) return null;
-    return AuthTokens(accessToken: access, refreshToken: refresh);
+    final raw = await _storage.read(key: _key);
+    if (raw == null) return null;
+    try {
+      final j = jsonDecode(raw) as Map<String, dynamic>;
+      return AuthTokens(accessToken: j['access'] as String, refreshToken: j['refresh'] as String);
+    } on Object {
+      return null;
+    }
   }
 
-  Future<void> write(AuthTokens tokens) async {
-    await _storage.write(key: _access, value: tokens.accessToken);
-    await _storage.write(key: _refresh, value: tokens.refreshToken);
-  }
+  Future<void> write(AuthTokens tokens) =>
+      _storage.write(key: _key, value: jsonEncode({'access': tokens.accessToken, 'refresh': tokens.refreshToken}));
 
   Future<void> clear() => _storage.deleteAll();
 }
