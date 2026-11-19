@@ -10,6 +10,19 @@ export type ApiResult<T> =
   | { ok: false; code: string; status: number; details?: unknown };
 
 /** Codes that mean the panel session is over: the page sends the user to sign in again (docs/frontend/errors.md). */
+// One refresh per refresh token at a time in this server process: the token is single-use, and presenting it twice
+// ends the whole session (auth.md). shortcut: per process only, so a page navigation refreshing in the edge middleware
+// at the same moment can still race; fix with a shared lock or server-side session store (#145).
+const inflight = new Map<string, ReturnType<ReturnType<typeof authBackend>['refresh']>>();
+function refreshOnce(refreshToken: string, ip: string | undefined) {
+  let p = inflight.get(refreshToken);
+  if (!p) {
+    p = authBackend().refresh(refreshToken, ip).finally(() => setTimeout(() => inflight.delete(refreshToken), 5000));
+    inflight.set(refreshToken, p);
+  }
+  return p;
+}
+
 const SIGNED_OUT = new Set(['UNAUTHORIZED', 'FORBIDDEN', 'REFRESH_TOKEN_INVALID', 'ACCESS_TOKEN_EXPIRED', 'ACCOUNT_DISABLED', 'VENDOR_SUSPENDED']);
 
 /**
@@ -32,9 +45,11 @@ export async function withPanelSession<T>(
 
   const panels = parsePanels(req.cookies.get(PANELS_COOKIE)?.value);
   const refreshToken = req.cookies.get(refreshCookie(panel))?.value;
-  const signedOut = (code: string) => {
+  const signedOut = async (code: string, endApiSession = false) => {
     const res = NextResponse.json({ code }, { status: 401 });
     if (refreshToken) {
+      // The API refused the access token, but the refresh token may still be live there: end that session too.
+      if (endApiSession) await authBackend().logout(refreshToken, clientIp(req));
       clearPanel(res, panel);
       writePanels(res, panels.filter((p) => p !== panel));
     }
@@ -45,7 +60,7 @@ export async function withPanelSession<T>(
   let token = req.cookies.get(accessCookie(panel))?.value;
   let fresh: Tokens | undefined;
   const refresh = async () => {
-    const r = await authBackend().refresh(refreshToken, clientIp(req));
+    const r = await refreshOnce(refreshToken, clientIp(req));
     if (!r.ok) return r.code === 'NETWORK' ? NextResponse.json({ code: 'NETWORK' }, { status: 502 }) : signedOut(r.code);
     fresh = r.data;
     token = r.data.accessToken;
@@ -63,12 +78,13 @@ export async function withPanelSession<T>(
     result = await call(token!);
   }
 
-  if (!result.ok && SIGNED_OUT.has(result.code)) return signedOut(result.code);
+  if (!result.ok && SIGNED_OUT.has(result.code)) return signedOut(result.code, result.code !== 'REFRESH_TOKEN_INVALID');
   const res = result.ok
     ? result.data === null
       ? new NextResponse(null, { status: 204 })
       : NextResponse.json(result.data, { status: result.status ?? 200 })
     : NextResponse.json({ code: result.code, details: result.details }, { status: result.status });
   if (fresh) writeTokens(res, panel, fresh);
+  writePanels(res, panels); // slide the 12 h idle timeout, as page loads do
   return res;
 }

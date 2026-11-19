@@ -1,5 +1,6 @@
 import { NextResponse, type NextRequest } from 'next/server';
 import { coverageBackend } from '@/features/coverage/backend';
+import { langOf } from '@/features/coverage/schema';
 
 // Passes through the public GET /v1/public/coverage/check?lat=&lng= (no session needed).
 export async function GET(req: NextRequest) {
@@ -11,6 +12,6 @@ export async function GET(req: NextRequest) {
   if (!latS || !lngS || !Number.isFinite(lat) || !Number.isFinite(lng) || Math.abs(lat) > 90 || Math.abs(lng) > 180) {
     return NextResponse.json({ code: 'VALIDATION_FAILED' }, { status: 400 });
   }
-  const r = await coverageBackend().check(lat, lng, req.headers.get('accept-language') === 'en' ? 'en' : 'ar');
+  const r = await coverageBackend().check(lat, lng, langOf(req));
   return r.ok ? NextResponse.json(r.data) : NextResponse.json({ code: r.code }, { status: r.status });
 }

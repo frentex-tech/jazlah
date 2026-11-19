@@ -130,6 +130,10 @@ jobs:
       STORAGE_PUBLIC_BASE_URL: http://localhost:9002/jazla-public
       SMS_PROVIDERS: log
       AUTH_REVIEW_ACCOUNTS: '+966500000004:444444'
+      # Each test signs in again: no 60 s resend wait and no 3-per-10-minutes phone limit for this run.
+      AUTH_OTP_RESEND_WAIT_SECONDS: '1'
+      AUTH_OTP_PHONE_LIMIT: '100'
+      AUTH_OTP_PHONE_DAILY_LIMIT: '100'
       API_URL: http://localhost:3000
 
     steps:

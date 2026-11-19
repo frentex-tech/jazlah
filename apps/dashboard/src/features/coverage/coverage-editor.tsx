@@ -92,7 +92,12 @@ export function CoverageEditor() {
       const raw = sessionStorage.getItem(DRAFT_KEY);
       if (raw) {
         sessionStorage.removeItem(DRAFT_KEY);
-        const draft = JSON.parse(raw) as Draft;
+        let draft: Draft;
+        try {
+          draft = JSON.parse(raw) as Draft;
+        } catch {
+          return; // a corrupt draft is dropped, the list still shows
+        }
         if (draft.selectedId && !list.some((z) => z.id === draft.selectedId)) return;
         setSelectedId(draft.selectedId);
         setShape(draft.shape);
@@ -141,6 +146,8 @@ export function CoverageEditor() {
       return setSaveError(t('errors.notFound'));
     }
     if (err.code === 'VALIDATION_FAILED' && Array.isArray(err.details)) {
+      const fields = (err.details as { field?: string }[]).map((d) => d.field ?? '');
+      if (fields.some((f) => f.startsWith('polygon'))) return setSaveError(t('errors.invalidPolygon'));
       for (const d of err.details as { field?: string }[]) {
         const field = FIELD_OF[d.field ?? ''];
         if (field) form.setError(field, { message: 'invalid' });
@@ -160,7 +167,7 @@ export function CoverageEditor() {
       body = {
         ...((name.ar !== selected.name.ar || name.en !== selected.name.en) && { name }),
         ...(body.city !== selected.city && { city: body.city }),
-        ...(v.color !== selected.color && { color: v.color }),
+        ...(v.color.toUpperCase() !== selected.color.toUpperCase() && { color: v.color }),
         ...(v.isActive !== selected.isActive && { isActive: v.isActive }),
         ...(shape && { polygon: shape }),
       };

@@ -58,10 +58,7 @@ test('a drawn and saved zone persists after reload, and can be deleted', async (
   await expect(page.getByRole('status').filter({ hasText: /التغطية/ })).toContainText(`داخل التغطية: ${name}`);
   await page.getByRole('button', { name: 'إنهاء الاختبار' }).click();
 
-  await page.getByRole('button', { name: `تعديل ${name}` }).click();
-  await page.getByRole('button', { name: 'حذف المنطقة' }).click();
-  await page.getByRole('dialog').getByRole('button', { name: 'حذف' }).click();
-  await expect(page.getByRole('cell', { name, exact: true })).toHaveCount(0);
+  await deleteZone(page, name);
 });
 
 test('saving needs both names', async ({ page }) => {
@@ -75,9 +72,17 @@ test('coverage API routes need an admin session', async ({ playwright, baseURL }
   const anon = await playwright.request.newContext({ baseURL });
   expect((await anon.get('/api/coverage/zones')).status()).toBe(401);
   expect((await anon.get('/api/coverage/check')).status()).toBe(400);
-  // Mutations must come from our own pages, even with a session cookie.
+  // Mutations must come from our own pages: refused before the session is even looked at.
   expect((await anon.delete('/api/coverage/zones/x', { headers: { 'sec-fetch-site': 'cross-site' } })).status()).toBe(403);
 });
+
+/** Deletes a zone through the UI, so overlapping test zones never pile up in the mock. */
+async function deleteZone(page: Page, name: string) {
+  await page.getByRole('button', { name: `تعديل ${name}` }).click();
+  await page.getByRole('button', { name: 'حذف المنطقة' }).click();
+  await page.getByRole('dialog').getByRole('button', { name: 'حذف' }).click();
+  await expect(page.getByRole('cell', { name, exact: true })).toHaveCount(0);
+}
 
 async function drawZone(page: Page, name: string) {
   await page.getByRole('button', { name: 'منطقة جديدة' }).first().click();
@@ -95,6 +100,7 @@ test('an expired access token is refreshed inside the API route, and the save go
   const cookies = await context.cookies();
   expect(cookies.find((c) => c.name === 'jz_at_admin')?.value).toBe('mock-at');
   expect(cookies.find((c) => c.name === 'jz_rt_admin')?.value).not.toBe('mock-rt-admin-1'); // the one-use token was rotated
+  await deleteZone(page, name);
 });
 
 test('when the session is over, saving goes to sign-in and the drawing comes back afterwards', async ({ page, context }) => {
@@ -105,8 +111,13 @@ test('when the session is over, saving goes to sign-in and the drawing comes bac
   await page.getByRole('button', { name: 'حفظ' }).click();
 
   await expect(page).toHaveURL(/\/login\?panel=admin&next=%2Fadmin%2Fsettings%2Fcoverage/);
-  await page.getByLabel('رقم الجوال').fill('0500000004');
-  await page.getByRole('button', { name: 'إرسال الرمز' }).click();
+  // The sign-in page was opened by location.assign: fill again until hydration keeps the value.
+  const send = page.getByRole('button', { name: 'إرسال الرمز' });
+  await expect(async () => {
+    await page.getByLabel('رقم الجوال').fill('0500000004');
+    await expect(send).toBeEnabled({ timeout: 1000 });
+  }).toPass();
+  await send.click();
   await page.getByLabel('رمز التحقق').fill('444444');
   await page.getByRole('button', { name: 'تأكيد' }).click();
 
@@ -115,4 +126,5 @@ test('when the session is over, saving goes to sign-in and the drawing comes bac
   await expect(page.getByLabel('الاسم بالعربية')).toHaveValue(name);
   await page.getByRole('button', { name: 'حفظ' }).click();
   await expect(page.getByRole('cell', { name, exact: true })).toBeVisible();
+  await deleteZone(page, name);
 });
