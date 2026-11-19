@@ -19,8 +19,10 @@ export async function panelFetch<T>(panel: Panel, url: string, init: RequestInit
   if (!res) throw new ApiError('NETWORK');
   if (res.status === 401) {
     beforeSignIn?.();
+    const code = ((await res.json().catch(() => null)) as { code?: string } | null)?.code;
+    const reason = code === 'ACCOUNT_DISABLED' ? 'disabled' : code === 'VENDOR_SUSPENDED' ? 'suspended' : undefined;
     const prefix = window.location.pathname.startsWith('/en/') ? '/en' : '';
-    const params = new URLSearchParams({ panel, next: window.location.pathname });
+    const params = new URLSearchParams({ panel, next: window.location.pathname, ...(reason && { reason }) });
     window.location.assign(`${prefix}/login?${params}`);
     return new Promise<T>(() => {}); // the page is leaving
   }

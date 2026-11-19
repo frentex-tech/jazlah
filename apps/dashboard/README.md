@@ -54,7 +54,14 @@ messages/ar.json, en.json       every UI string
 - The middleware refreshes an expired access token on page loads, and sends signed-in staff from `/login` to their panel (several panels: `/login/choose`).
 - Settings: `.env.example` (`API_URL`, `OTP_LENGTH`, `DASHBOARD_API_MOCK`). `OTP_LENGTH` must equal the API's `AUTH_OTP_LENGTH`.
 - Auth calls are refused unless they come from our own pages (`Sec-Fetch-Site: same-origin` and a JSON body), against login CSRF.
-- The dashboard server forwards the user's address as `X-Forwarded-For`. Set the API's `TRUST_PROXY_HOPS` so its per-address code limits apply per user and not to the dashboard server as a whole.
+- The user's address is forwarded to the API as `X-Forwarded-For`, so the API's per-address code limits apply per user. It is read **only** from the header named by `CLIENT_IP_HEADER`, never from the first `X-Forwarded-For` entry (the client writes that one). Server setup:
+  1. The edge proxy in front of the dashboard (ingress, nginx, ALB) must **set and overwrite** one header with the client address. With nginx, `proxy_set_header X-Real-IP $remote_addr;` and `CLIENT_IP_HEADER=x-real-ip`.
+  2. If the proxy can only append to `X-Forwarded-For` (ALB), set `CLIENT_IP_HEADER=x-forwarded-for`: the dashboard then takes the right-most entry, the one that proxy added. This holds only with exactly one proxy in front of the dashboard.
+  3. On the API, set `TRUST_PROXY_HOPS` so it trusts the dashboard server's `X-Forwarded-For` (one hop when the dashboard calls the API directly).
+  4. With `CLIENT_IP_HEADER` unset nothing is forwarded, and every staff sign-in counts against the dashboard server's address: one burst of attempts can then block sign-in for all staff.
+
+## Security headers
+`next.config.ts` sends a CSP (`frame-ancestors 'none'`, scripts and connections from our origin, images and connections also from the map tile host in `NEXT_PUBLIC_MAP_TILES`), `X-Frame-Options: DENY`, `nosniff`, `Referrer-Policy: strict-origin-when-cross-origin`, a `Permissions-Policy`, and HSTS in production builds. Set HSTS at the edge too. A change of tile provider changes the CSP at build time, so rebuild after changing `NEXT_PUBLIC_MAP_TILES`.
 
 ## API gaps (worked around in the dashboard)
 - **Staff display name:** `GET /v1/<panel>/me` returns only the principal, so the top bar shows the masked phone and a user icon in the avatar.

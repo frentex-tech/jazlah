@@ -9,7 +9,7 @@ export default async function LoginPage({
   searchParams,
 }: {
   params: Promise<{ locale: string }>;
-  searchParams: Promise<{ panel?: string; next?: string }>;
+  searchParams: Promise<{ panel?: string; next?: string; reason?: string }>;
 }) {
   setRequestLocale((await params).locale);
   const q = await searchParams;
@@ -17,7 +17,12 @@ export default async function LoginPage({
   return (
     <LoginLayout panel={panel}>
       <LoginCard>
-        <LoginFlow panel={panel} next={safeNext(q.next) ?? undefined} otpLength={Math.min(8, Math.max(4, Number(process.env.OTP_LENGTH) || 6))} />
+        <LoginFlow
+          panel={panel}
+          next={safeNext(q.next) ?? undefined}
+          otpLength={Math.min(8, Math.max(4, Number(process.env.OTP_LENGTH) || 6))}
+          reason={q.reason === 'disabled' || q.reason === 'suspended' ? q.reason : undefined}
+        />
       </LoginCard>
     </LoginLayout>
   );

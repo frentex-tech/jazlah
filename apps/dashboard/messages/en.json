@@ -148,9 +148,8 @@
     "resendIn": "Resend in {time}",
     "resend": "Resend code",
     "errors": {
-      "phoneInvalid": "Enter a valid Saudi mobile number starting with 5",
-      "otpInvalid": "The code is wrong, try again",
-      "noAccess": "If the code is right, this number has no access to the {panel}.",
+      "phoneInvalid": "The mobile number is incomplete",
+      "otpInvalid": "Wrong code, or this number has no access. Try again.",
       "otpExpired": "The code has expired. Ask for a new one.",
       "rateLimited": "Too many attempts. Try again in {seconds} seconds.",
       "disabled": "This account is disabled. Contact the JAZLA team.",
