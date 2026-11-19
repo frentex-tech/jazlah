@@ -131,7 +131,10 @@
   },
   "form": {
     "required": "This field is required",
-    "save": "Save"
+    "save": "Save",
+    "tooShort": "At least 2 characters",
+    "tooLong": "Too long",
+    "invalid": "Invalid value"
   },
   "login": {
     "phoneLabel": "Mobile number",
@@ -221,13 +224,6 @@
     "inactive": "Inactive",
     "activeToggle": "Zone is active",
     "selectZone": "Edit {zone}",
-    "cities": {
-      "riyadh": "Riyadh",
-      "jeddah": "Jeddah",
-      "dammam": "Dammam",
-      "makkah": "Makkah",
-      "madinah": "Madinah"
-    },
     "hints": {
       "draw": "Click the map to place the boundary points, then click the first point to close the zone.",
       "edit": "Drag the points to change the boundary, or click a point to remove it.",
@@ -248,7 +244,9 @@
       "delete": "Delete zone"
     },
     "errors": {
-      "invalidPolygon": "The boundary isn't valid. Draw at least three points without crossing lines."
+      "invalidPolygon": "The boundary isn't valid. Draw at least three points without crossing lines.",
+      "notFound": "This zone no longer exists, so we reloaded the list.",
+      "validation": "Check the highlighted fields."
     },
     "empty": {
       "title": "No coverage zones",
@@ -264,7 +262,10 @@
       "success": "Green",
       "warning": "Orange",
       "gold-text": "Gold",
-      "brand": "Dark wine"
-    }
+      "brand": "Dark wine",
+      "custom": "Custom color {hex}"
+    },
+    "cityHint": "Write the city name in Arabic, e.g. الرياض.",
+    "restored": "We restored what you drew before signing in. Check it, then save."
   }
 }

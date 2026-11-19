@@ -1,11 +1,12 @@
 // Geometry helpers for the coverage editor (GeoJSON order: [lng, lat]).
 
 export type Position = [number, number];
-export type Polygon = { type: 'Polygon'; coordinates: Position[][] };
+/** GeoJSON polygon as the API sends it; every position is [lng, lat]. */
+export type Polygon = { type: 'Polygon'; coordinates: number[][][] };
 
 /** Ray casting on the outer ring; holes are not used by coverage zones. Points on an edge count as inside. */
 export function pointInPolygon([x, y]: Position, polygon: Polygon): boolean {
-  const ring = polygon.coordinates[0] ?? [];
+  const ring = (polygon.coordinates[0] ?? []) as Position[];
   let inside = false;
   for (let i = 0, j = ring.length - 1; i < ring.length; j = i++) {
     const [xi, yi] = ring[i]!;
@@ -18,7 +19,7 @@ export function pointInPolygon([x, y]: Position, polygon: Polygon): boolean {
 
 /** A closed ring with at least 3 distinct corners, the shape the API accepts before its own ST_IsValid check. */
 export function isValidPolygon(polygon: Polygon): boolean {
-  const ring = polygon.coordinates[0] ?? [];
+  const ring = (polygon.coordinates[0] ?? []) as Position[];
   const first = ring[0];
   const last = ring[ring.length - 1];
   const closed = !!first && !!last && first[0] === last[0] && first[1] === last[1];

@@ -1,20 +1,19 @@
-import { NextResponse, type NextRequest } from 'next/server';
+import type { NextRequest } from 'next/server';
 import { coverageBackend } from '@/features/coverage/backend';
-import { ZoneInputSchema, respond } from '@/features/coverage/schema';
-import { panelAuth } from '@/lib/auth/guard';
+import { UpdateZoneSchema, invalidBody, langOf } from '@/features/coverage/schema';
+import { withPanelSession } from '@/lib/auth/panel-session';
 
 type Ctx = { params: Promise<{ id: string }> };
 
 export async function PATCH(req: NextRequest, { params }: Ctx) {
-  const auth = panelAuth(req, 'admin');
-  if (!auth) return NextResponse.json({ code: 'UNAUTHORIZED' }, { status: 401 });
-  const parsed = ZoneInputSchema.safeParse(await req.json().catch(() => null));
-  if (!parsed.success) return NextResponse.json({ code: 'VALIDATION_FAILED' }, { status: 422 });
-  return respond(await coverageBackend().update(auth, (await params).id, parsed.data));
+  const { id } = await params;
+  const parsed = UpdateZoneSchema.safeParse(await req.json().catch(() => null));
+  return withPanelSession(req, 'admin', async (token) =>
+    parsed.success ? coverageBackend().update(token, langOf(req), id, parsed.data) : invalidBody(parsed.error),
+  );
 }
 
 export async function DELETE(req: NextRequest, { params }: Ctx) {
-  const auth = panelAuth(req, 'admin');
-  if (!auth) return NextResponse.json({ code: 'UNAUTHORIZED' }, { status: 401 });
-  return respond(await coverageBackend().remove(auth, (await params).id));
+  const { id } = await params;
+  return withPanelSession(req, 'admin', (token) => coverageBackend().remove(token, langOf(req), id));
 }

@@ -1,20 +1,24 @@
-import { NextResponse } from 'next/server';
+import type { NextRequest } from 'next/server';
 import { z } from 'zod';
-import type { Result } from './backend';
-import { CITIES, ZONE_COLORS } from './types';
+import { COLOR_RE, type CreateZone, type UpdateZone } from './types';
 
+// The API's own limits (CreateCoverageZoneDto), checked at our route before the call; the API checks them again.
 const position = z.tuple([z.number().min(-180).max(180), z.number().min(-90).max(90)]);
+const polygon = z.object({ type: z.literal('Polygon'), coordinates: z.array(z.array(position).min(4).max(1000)).min(1) });
+const name = z.object({ ar: z.string().trim().min(2).max(100), en: z.string().trim().min(2).max(100) });
+const city = z.string().trim().min(2).max(50);
+const color = z.string().regex(COLOR_RE);
 
-/** Body of create and update, validated at the route handler before it reaches the API. */
-export const ZoneInputSchema = z.object({
-  nameAr: z.string().trim().min(1).max(80),
-  nameEn: z.string().trim().min(1).max(80),
-  city: z.enum(CITIES),
-  color: z.enum(ZONE_COLORS as [string, ...string[]]),
-  isActive: z.boolean(),
-  polygon: z.object({ type: z.literal('Polygon'), coordinates: z.array(z.array(position).min(4).max(500)).length(1) }),
+// The editor always sends isActive and color, so the API defaults never apply here.
+export const CreateZoneSchema = z.object({ name, city, polygon, isActive: z.boolean(), color }) satisfies z.ZodType<CreateZone>;
+export const UpdateZoneSchema = CreateZoneSchema.partial() satisfies z.ZodType<UpdateZone>;
+
+/** Language for the API's messages: the page sends its own locale (lib/panel-fetch.ts). */
+export const langOf = (req: NextRequest) => (req.headers.get('accept-language') === 'en' ? 'en' : 'ar');
+
+export const invalidBody = (error: z.ZodError) => ({
+  ok: false as const,
+  code: 'VALIDATION_FAILED',
+  status: 400,
+  details: error.issues.map((i) => ({ field: i.path.join('.'), constraints: [i.code] })),
 });
-
-export function respond<T>(r: Result<T>, okStatus = 200) {
-  return r.ok ? NextResponse.json(r.data, { status: okStatus }) : NextResponse.json({ code: r.code }, { status: r.status });
-}

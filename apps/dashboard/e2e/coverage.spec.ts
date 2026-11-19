@@ -74,5 +74,45 @@ test('saving needs both names', async ({ page }) => {
 test('coverage API routes need an admin session', async ({ playwright, baseURL }) => {
   const anon = await playwright.request.newContext({ baseURL });
   expect((await anon.get('/api/coverage/zones')).status()).toBe(401);
-  expect((await anon.get('/api/coverage/check')).status()).toBe(422);
+  expect((await anon.get('/api/coverage/check')).status()).toBe(400);
+  // Mutations must come from our own pages, even with a session cookie.
+  expect((await anon.delete('/api/coverage/zones/x', { headers: { 'sec-fetch-site': 'cross-site' } })).status()).toBe(403);
+});
+
+async function drawZone(page: Page, name: string) {
+  await page.getByRole('button', { name: 'منطقة جديدة' }).first().click();
+  for (const [x, y] of [[700, 200], [850, 200], [850, 320], [700, 320], [700, 200]]) await mapClick(page, x, y);
+  await page.getByLabel('الاسم بالعربية').fill(name);
+  await page.getByLabel('الاسم بالإنجليزية').fill('Test zone');
+}
+
+test('an expired access token is refreshed inside the API route, and the save goes through', async ({ page, context }) => {
+  await context.clearCookies({ name: 'jz_at_admin' });
+  const name = `منطقة تجديد ${Date.now()}`;
+  await drawZone(page, name);
+  await page.getByRole('button', { name: 'حفظ' }).click();
+  await expect(page.getByRole('cell', { name, exact: true })).toBeVisible();
+  const cookies = await context.cookies();
+  expect(cookies.find((c) => c.name === 'jz_at_admin')?.value).toBe('mock-at');
+  expect(cookies.find((c) => c.name === 'jz_rt_admin')?.value).not.toBe('mock-rt-admin-1'); // the one-use token was rotated
+});
+
+test('when the session is over, saving goes to sign-in and the drawing comes back afterwards', async ({ page, context }) => {
+  const name = `منطقة جلسة ${Date.now()}`;
+  await drawZone(page, name);
+  await context.clearCookies({ name: 'jz_at_admin' });
+  await context.addCookies([{ name: 'jz_rt_admin', value: 'revoked', url: `http://localhost:${process.env.PORT ?? 3001}`, httpOnly: true }]);
+  await page.getByRole('button', { name: 'حفظ' }).click();
+
+  await expect(page).toHaveURL(/\/login\?panel=admin&next=%2Fadmin%2Fsettings%2Fcoverage/);
+  await page.getByLabel('رقم الجوال').fill('0500000004');
+  await page.getByRole('button', { name: 'إرسال الرمز' }).click();
+  await page.getByLabel('رمز التحقق').fill('444444');
+  await page.getByRole('button', { name: 'تأكيد' }).click();
+
+  await expect(page).toHaveURL(/\/admin\/settings\/coverage$/);
+  await expect(page.getByText('استرجعنا ما رسمته قبل تسجيل الدخول')).toBeVisible();
+  await expect(page.getByLabel('الاسم بالعربية')).toHaveValue(name);
+  await page.getByRole('button', { name: 'حفظ' }).click();
+  await expect(page.getByRole('cell', { name, exact: true })).toBeVisible();
 });

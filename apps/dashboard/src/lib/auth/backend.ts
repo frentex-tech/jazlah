@@ -2,6 +2,7 @@
 // development and the Playwright smoke tests (DASHBOARD_API_MOCK=1). Edge-safe: fetch only.
 import createClient from 'openapi-fetch';
 import type { components, paths } from '@/api/schema';
+import { mocksEnabled } from '../mock';
 import type { Panel } from '../session';
 
 type S = components['schemas'];
@@ -97,5 +98,5 @@ export const mockBackend: AuthBackend = {
 };
 
 export function authBackend(): AuthBackend {
-  return process.env.DASHBOARD_API_MOCK === '1' ? mockBackend : realBackend(process.env.API_URL ?? 'http://localhost:3000');
+  return mocksEnabled() ? mockBackend : realBackend(process.env.API_URL ?? 'http://localhost:3000');
 }
