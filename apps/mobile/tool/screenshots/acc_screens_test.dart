@@ -91,6 +91,7 @@ void main() {
   testWidgets('phone', (t) async {
     final o = [authRepositoryProvider.overrideWithValue(_Auth())];
     await shoot(t, '123-2794', const PhoneScreen(), overrides: o);
+    await shoot(t, 'en-123-2794', const PhoneScreen(), overrides: o, lang: 'en');
     await shoot(
       t,
       '123-3110',

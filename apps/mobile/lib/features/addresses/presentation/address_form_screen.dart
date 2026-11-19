@@ -265,7 +265,8 @@ class _AddressFormScreenState extends ConsumerState<AddressFormScreen> {
                               variant: JButtonVariant.ghost,
                               expand: true,
                               loading: _deleting,
-                              onPressed: enabled ? _delete : null,
+                              // Figma keeps it ember while saving; taps are ignored then.
+                              onPressed: _locked ? null : (_saving || _deleting ? () {} : _delete),
                             ),
                           ],
                         ],

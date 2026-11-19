@@ -68,33 +68,6 @@ class JPhoneField extends StatefulWidget {
 }
 
 class _JPhoneFieldState extends State<JPhoneField> {
-  FocusNode? _ownFocus;
-  FocusNode get _focus => widget.focusNode ?? (_ownFocus ??= FocusNode());
-
-  @override
-  void initState() {
-    super.initState();
-    _focus.addListener(_onFocus);
-  }
-
-  @override
-  void didUpdateWidget(JPhoneField oldWidget) {
-    super.didUpdateWidget(oldWidget);
-    if (oldWidget.focusNode != widget.focusNode) {
-      (oldWidget.focusNode ?? _ownFocus)?.removeListener(_onFocus);
-      _focus.addListener(_onFocus);
-    }
-  }
-
-  @override
-  void dispose() {
-    _focus.removeListener(_onFocus);
-    _ownFocus?.dispose();
-    super.dispose();
-  }
-
-  void _onFocus() => setState(() {});
-
   @override
   Widget build(BuildContext context) {
     final enabled = widget.enabled;
@@ -125,8 +98,8 @@ class _JPhoneFieldState extends State<JPhoneField> {
               child: Container(
                 alignment: AlignmentDirectional.centerStart,
                 padding: const EdgeInsetsDirectional.symmetric(horizontal: JSpace.s16),
+                // The DS Phone input has no focused variant (default / error / disabled only).
                 decoration: jFieldDecoration(
-                  focused: _focus.hasFocus,
                   error: widget.errorText != null,
                   disabled: !enabled,
                 ),
@@ -135,7 +108,7 @@ class _JPhoneFieldState extends State<JPhoneField> {
                   textDirection: TextDirection.ltr,
                   child: TextField(
                     controller: widget.controller,
-                    focusNode: _focus,
+                    focusNode: widget.focusNode,
                     enabled: enabled,
                     keyboardType: TextInputType.phone,
                     textInputAction: TextInputAction.done,

@@ -54,7 +54,6 @@ class _MapPickerScreenState extends ConsumerState<MapPickerScreen> with WidgetsB
   int _searchId = 0;
 
   /// Location services are off (not a permission refusal): the primary opens the location settings.
-  bool _serviceOff = false;
   Timer? _debounce;
 
   String get _lang => Localizations.localeOf(context).languageCode;
@@ -92,7 +91,6 @@ class _MapPickerScreenState extends ConsumerState<MapPickerScreen> with WidgetsB
   Future<void> _bootstrap() async {
     final access = await ref.read(deviceLocationProvider).access();
     if (!mounted) return;
-    _serviceOff = access == LocationAccess.serviceOff;
     switch (access) {
       case LocationAccess.granted:
         await _locate();
@@ -357,14 +355,6 @@ class _MapPickerScreenState extends ConsumerState<MapPickerScreen> with WidgetsB
         false,
         l10n.locPermAllow,
         null,
-      ),
-      _Sheet.failed when _serviceOff => (
-        l10n.locPermErrorTitle,
-        l10n.locPermErrorBody,
-        JIcons.warning,
-        true,
-        l10n.locPermOpenSettings,
-        () => ref.read(deviceLocationProvider).openLocationSettings(),
       ),
       _Sheet.failed => (l10n.locPermErrorTitle, l10n.locPermErrorBody, JIcons.warning, true, l10n.retry, _bootstrap),
       _ => (l10n.locPermTitle, l10n.locPermBody, JIcons.mapPin, false, l10n.locPermAllow, _allow),

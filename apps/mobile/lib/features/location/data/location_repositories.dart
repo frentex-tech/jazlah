@@ -16,9 +16,6 @@ abstract interface class DeviceLocation {
   Future<GeoPoint> current();
 
   Future<void> openSettings();
-
-  /// The device's location services switch (when services are off).
-  Future<void> openLocationSettings();
 }
 
 class GeolocatorDeviceLocation implements DeviceLocation {
@@ -50,9 +47,6 @@ class GeolocatorDeviceLocation implements DeviceLocation {
 
   @override
   Future<void> openSettings() => Geolocator.openAppSettings();
-
-  @override
-  Future<void> openLocationSettings() => Geolocator.openLocationSettings();
 }
 
 /// Reverse geocoding (pin → district/street) and place search.
@@ -193,9 +187,6 @@ class MockDeviceLocation implements DeviceLocation {
 
   @override
   Future<void> openSettings() async {}
-
-  @override
-  Future<void> openLocationSettings() async {}
 }
 
 class MockGeocoder implements Geocoder {

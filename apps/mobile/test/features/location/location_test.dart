@@ -129,11 +129,12 @@ void main() {
     expect(picked!.point, const GeoPoint(23.2, 45.1));
   });
 
-  testWidgets('services off: the sheet opens the location settings instead of looping', (t) async {
+  testWidgets('services off: Figma retry, with manual entry as the way out', (t) async {
     await t.pumpScreen(const MapPickerScreen(), overrides: _o(MockDeviceLocation(state: LocationAccess.serviceOff)));
     await t.pump(const Duration(seconds: 1));
     expect(find.text('تعذّر تحديد موقعك'), findsOneWidget);
-    expect(find.text('فتح الإعدادات'), findsOneWidget);
+    expect(find.text('إعادة المحاولة'), findsOneWidget);
+    expect(find.text('إدخال العنوان يدويًا'), findsOneWidget);
   });
 
   testWidgets('current location outside every zone opens the out-of-coverage screen', (t) async {

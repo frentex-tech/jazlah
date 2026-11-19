@@ -35,6 +35,11 @@ List<dynamic> _o(MockAddressRepository repo) => [
   coverageRepositoryProvider.overrideWithValue(MockCoverageRepository()),
 ];
 
+class _Failing extends MockAddressRepository {
+  @override
+  Future<List<Address>> list() => Future.error(Exception('offline'));
+}
+
 JButton _button(WidgetTester t, String label) => t.widget<JButton>(find.widgetWithText(JButton, label));
 
 void main() {
@@ -62,6 +67,19 @@ void main() {
     expect(find.text('خارج النطاق'), findsOneWidget); // only the far one
     expect(find.byIcon(JIcons.lockSimple), findsOneWidget);
     expect(find.byIcon(JIcons.pencilSimple), findsNWidgets(2));
+  });
+
+  testWidgets('a failed load shows the error panel at once (no automatic retry)', (t) async {
+    await t.pumpScreen(
+      const AddressesScreen(),
+      overrides: [
+        addressRepositoryProvider.overrideWithValue(_Failing()),
+        coverageRepositoryProvider.overrideWithValue(MockCoverageRepository()),
+      ],
+    );
+    await t.pump();
+    await t.pump();
+    expect(find.text('تعذّر تحميل العناوين'), findsOneWidget);
   });
 
   testWidgets('a locked address opens with edit and delete disabled and an explanation', (t) async {
