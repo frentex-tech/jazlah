@@ -15,7 +15,7 @@ export const Select = forwardRef<HTMLSelectElement, React.SelectHTMLAttributes<H
         value={value}
         className={cn(
           'peer size-full appearance-none rounded-sm border bg-paper ps-s12 pe-[36px] text-body-m outline-none',
-          'focus:border-2 focus:border-ember disabled:border-line disabled:bg-sand disabled:text-muted-soft',
+          'focus:border-2 focus:border-ember focus:pe-[35px] focus:ps-[11px] disabled:border-line disabled:bg-sand disabled:text-muted-soft',
           filled ? 'border-ink-2 text-ink' : 'border-line text-ink-2',
         )}
         {...props}

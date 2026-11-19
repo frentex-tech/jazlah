@@ -53,6 +53,21 @@ None of these has an endpoint yet:
 | **Realtime** | Live updates (order status, new order alerts) | not built |
 | **Customer website extras** | Anything beyond what the customer app uses | not built |
 
+## Requested by the apps (dashboard)
+
+What a built dashboard screen needs and the API does not give yet. Until it lands, the screen uses the workaround in the last column. When one is built, delete its row in the same pull request.
+
+| Gap | Needed by | Today | Issue |
+|---|---|---|---|
+| Staff display name on `GET /v1/admin/me`, `GET /v1/vendor/me` and `GET /v1/kitchen/me` | Dashboard top bar (name and avatar initial) | The masked phone and a user icon (agreed difference, [signoff](../design/signoff.md#agreed-build-differences-dashboard-2026-11-19)) | none open yet |
+| Admin permissions on `GET /v1/admin/me` | Dashboard admin side menu: show only the allowed items; the denied screen | Every item shown; the API refuses what is not allowed | #111 (ADM-API-1) |
+| The panels a phone can open, after the code is verified | Dashboard panel picker | Lists only the panels with a live session, so it appears after the second sign-in | none open yet |
+| A defined client-address header on staging and production, with the API trusting the dashboard as one proxy hop | Per-address sign-in limits for staff ([dashboard README](../../apps/dashboard/README.md)) | Nothing forwarded until the deployment sets it | #8 (FND-INF-5) |
+
+The code length in the code request answer is asked for in the mobile section below; the dashboard needs it too (a dashboard setting today).
+
+The dashboard's in-process mocks (staff sign-in accounts, an in-memory coverage store) exist only for its smoke tests; they stand in for nothing missing.
+
 ## Requested by the apps (mobile)
 
 What the customer app needs from the API and does not have yet. Each row names the screen and what the app does until then. Rows marked **API gap** have no issue yet; the issue number goes here when one is opened.

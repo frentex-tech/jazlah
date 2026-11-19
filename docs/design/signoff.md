@@ -51,6 +51,21 @@ Done at the owner's request, directly in the file (no script), after a named ver
 - The file now holds 619 screens: `01 التطبيق` 310 (unchanged), `02 لوحات التحكم` 309 (73 main, 236 states).
 - Still open: the logo vector (needs the client's file), the client's written approval, 390-wide versions of application steps 2 to 5, build tasks for the public page and for the emails.
 
+## Agreed build differences, dashboard (2026-11-19)
+Agreed by the owner in the Sprint 1 fix round, after the design QA (`reviews/qa-design-dashboard-1.md`). Everything else on the dashboard follows Figma. Decided earlier and not repeated here: Readex Pro / El Messiri instead of Thmanyah, six code cells instead of four, OSM map tiles for development.
+
+| Screen (node) | Figma | Build | Why |
+|---|---|---|---|
+| Admin sign-in, phone error (118:5954) | «هذا الرقم غير مسجّل كموظف» | «رقم الجوال غير مكتمل», as on vendor (410:38667) and kitchen (410:38896) | The API sends a code to any number and only fails at the code step, so nobody can test which numbers are staff. The phone step cannot know it. |
+| Code error, all panels (118:6942, 410:38780, 410:39009) | «الرمز غير صحيح، حاول مرة أخرى» | «الرمز غير صحيح أو الرقم غير مصرّح له، حاول مرة أخرى», in the same single line; the card keeps the Figma height | The API answers a wrong code and a number without dashboard access the same way, and the task asks for a clear "no access" message. |
+| Panel picker, `/login/choose` | No frame | The sign-in card with one DS «Card» (16:749) per panel: name and a one-line description | A user with several panels needs to choose one; built only from DS parts and tokens. |
+| Page bodies not built yet: admin overview, vendor board, kitchen board (135:46622, 135:39184, 131:79506) | Their content | The empty frame (135:46966) without its «ابدأ أول طلب» button | The bodies are later tasks; a button with nowhere to go would mislead. |
+| Loading and error while a page loads (135:46807, 135:47170) | Under the page's own header | The same body, without the page header | One loading and one error screen serve every page, and they cannot know its title. |
+| Not-found, inside a panel and outside | No frame | The empty-state card (135:46966) with «الصفحة غير موجودة» and a way home | Unbuilt menu items and mistyped addresses must stay in Arabic and, in a panel, inside the shell. |
+| Select, open (16:1584) | `caret-up` icon | `caret-down` stays (the browser's own list opens) | A native select keeps keyboard, screen-reader and RTL behaviour for free; a custom list box is not worth it before a screen needs it. |
+| Panel picker card, hover | Card has no hover state | Hover and keyboard focus show the Card's selected state (ember border) | A link needs a visible focus; the selected state is the DS's own. |
+| Top bar, every shell (16:1239) | Staff name «عبدالرحمن», avatar with its initial «ع» | The masked phone, avatar with a user icon | The API has no staff name yet (not-built-yet.md, "Requested by the apps"). Switch to the name and initial when it does. |
+
 ## Checks run on the file (2026-11-13)
 - Script lint over all 587 screens after the last changes: no empty or "undefined" text, no text outside its screen, no missing icon.
 - Clipped layouts: a script found 110 auto-layout frames on web and dashboard screens whose content was cut off (among them the whole animal-registration form) and opened them up. 28 small ones remain (tab labels 7 to 9 px taller than their tab, and the Adha settings body).

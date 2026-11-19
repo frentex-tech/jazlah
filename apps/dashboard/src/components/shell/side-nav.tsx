@@ -8,7 +8,8 @@ import type { Panel } from '@/lib/session';
 import { cn } from '@/lib/utils';
 import { activeKey, NAV } from './nav';
 
-const itemClass = 'flex h-11 shrink-0 items-center gap-s12 rounded-sm px-s12 text-label-m';
+// Nav item (16:1140) has no hover variant, and the «signout» row has no radius.
+const itemClass = 'flex h-11 shrink-0 items-center gap-s12 px-s12 text-label-m';
 
 // Figma DS «Side nav» (16:1237), variants role=admin|vendor|kitchen.
 export function SideNav({ panel, badges = {} }: { panel: Panel; badges?: Record<string, number> }) {
@@ -32,7 +33,7 @@ export function SideNav({ panel, badges = {} }: { panel: Panel; badges?: Record<
             key={item.key}
             href={item.href}
             aria-current={active ? 'page' : undefined}
-            className={cn(itemClass, active ? 'bg-brand-2 text-paper' : 'text-sand hover:bg-brand-2/60')}
+            className={cn(itemClass, 'rounded-sm', active ? 'bg-brand-2 text-paper' : 'text-sand')}
           >
             <item.icon
               size={22}
@@ -52,7 +53,7 @@ export function SideNav({ panel, badges = {} }: { panel: Panel; badges?: Record<
 
       <form action="/api/auth/logout" method="post">
         <input type="hidden" name="locale" value={locale} />
-        <button type="submit" className={cn(itemClass, 'w-full text-sand hover:bg-brand-2/60')}>
+        <button type="submit" className={cn(itemClass, 'w-full text-sand')}>
           <SignOut size={22} className="shrink-0" aria-hidden />
           <span className="flex-1 text-start">{t('nav.signOut')}</span>
         </button>

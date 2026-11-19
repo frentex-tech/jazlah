@@ -14,12 +14,3 @@ export function Shell({ panel, userName, children }: { panel: Panel; userName: s
     </div>
   );
 }
-
-/** Content placeholder for pages whose body is built by a later task. */
-export function Placeholder({ text }: { text: string }) {
-  return (
-    <div className="flex min-h-[400px] w-full items-center justify-center rounded-md border border-dashed border-line bg-paper text-body-m text-muted">
-      {text}
-    </div>
-  );
-}

@@ -36,21 +36,32 @@ test('English mirrors the layout', async ({ page, context }) => {
   await expect(page.getByRole('heading', { level: 1 })).toHaveText('Overview');
 });
 
-test('DataTable demo paginates against the mocked endpoint', async ({ page, context }) => {
+test('a nav item without a page shows the localised not-found inside the shell', async ({ page, context }) => {
   await signInAs(context, ['admin']);
-  await page.goto('/admin/table-demo');
-  await expect(page.getByText('عرض 1 إلى 5 من 128')).toBeVisible();
-  await expect(page.getByRole('row')).toHaveCount(6);
-  await page.getByRole('button', { name: 'الصفحة التالية' }).click();
-  await expect(page.getByText('عرض 6 إلى 10 من 128')).toBeVisible();
-  await expect(page.getByRole('cell', { name: '#10477' })).toBeVisible();
+  await page.goto('/admin/orders');
+  await expect(page.getByRole('status').filter({ hasText: 'الصفحة غير موجودة' })).toBeVisible();
+  await expect(page.getByRole('navigation', { name: 'القائمة الرئيسية' })).toBeVisible();
+  await page.getByRole('link', { name: 'العودة للرئيسية' }).click();
+  await expect(page).toHaveURL(/\/admin$/);
 });
 
-test('DataTable filters and shows the error state', async ({ page, context }) => {
+test('settings opens the coverage zones, and unknown addresses outside the panels are localised', async ({ page, context }) => {
   await signInAs(context, ['admin']);
-  await page.goto('/admin/table-demo');
-  await page.getByRole('combobox', { name: 'الحالة' }).selectOption('cancelled');
-  await expect(page.getByText(/من 25$/)).toBeVisible();
-  await page.goto('/admin/table-demo?fail=1');
-  await expect(page.getByRole('alert').filter({ hasText: 'حدث خطأ غير متوقع' })).toBeVisible();
+  await page.goto('/admin/settings');
+  await expect(page).toHaveURL(/\/admin\/settings\/coverage$/);
+  await page.goto('/en/nowhere');
+  await expect(page.getByText('Page not found')).toBeVisible();
+});
+
+test('the denied screen follows the Figma frame', async ({ page, context }) => {
+  await signInAs(context, ['vendor']);
+  await page.goto('/vendor/denied');
+  await expect(page.getByRole('status').filter({ hasText: 'ليست لديك صلاحية' })).toContainText('تواصل مع مدير الحساب للحصول على الوصول.');
+  await expect(page.getByRole('button', { name: 'رجوع' })).toBeVisible();
+});
+
+test('the vendor application address stays outside the staff shell for visitors', async ({ page }) => {
+  await page.goto('/vendor/apply');
+  await expect(page.getByText('الصفحة غير موجودة')).toBeVisible();
+  await expect(page.getByRole('navigation', { name: 'القائمة الرئيسية' })).toHaveCount(0);
 });
