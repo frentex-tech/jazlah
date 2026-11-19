@@ -641,9 +641,6 @@ class AppLocalizationsAr extends AppLocalizations {
   String get locOutOfCoverageBanner => 'عذرًا، لا نوصّل إلى هذا الموقع حاليًا.';
 
   @override
-  String get locGeocodeError => 'تعذّر تحديد العنوان لهذا الموقع. حاول مرة أخرى.';
-
-  @override
   String get locPermTitle => 'السماح بالوصول إلى موقعك';
 
   @override

@@ -24,10 +24,9 @@ class PlaceSuggestion {
 
 /// Is a point inside a delivery zone (LOC-API-1)?
 class Coverage {
-  const Coverage({required this.covered, this.zoneName});
+  const Coverage({required this.covered});
 
   final bool covered;
-  final String? zoneName;
 }
 
 /// The location the app works with (from the first screen on), kept across restarts.

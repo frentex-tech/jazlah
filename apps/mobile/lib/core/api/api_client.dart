@@ -35,6 +35,7 @@ class AuthInterceptor extends Interceptor {
     required this.languageCode,
     required this.onSessionEnded,
     Dio? refreshDio,
+    this.retryPause = const Duration(milliseconds: 500),
   }) : _refreshDio =
            refreshDio ??
            Dio(
@@ -52,9 +53,20 @@ class AuthInterceptor extends Interceptor {
   final TokenStorage tokens;
   final String Function() languageCode;
   final void Function() onSessionEnded;
+  final Duration retryPause;
 
   Future<AuthTokens?>? _refreshing;
   static const _retried = 'jazlah.retried';
+  static const _autoRetried = 'jazlah.autoRetried';
+
+  /// errors.md "Retry": nothing was saved (any method), or a read that is safe to repeat.
+  static bool _retryable(DioException e, Object? code, RequestOptions o) =>
+      code == 'TRANSACTION_CONFLICT' ||
+      (o.method == 'GET' && (code == 'SERVICE_UNAVAILABLE' || e.type == DioExceptionType.connectionError));
+
+  /// The refresh request never reached the API (no network): the refresh token is still unused.
+  static bool _notSent(Object e) =>
+      e is DioException && (e.type == DioExceptionType.connectionError || e.type == DioExceptionType.connectionTimeout);
 
   /// Generated operations list their security schemes in `extra['secure']`; public ones list none.
   static bool _needsToken(RequestOptions o) => (o.extra['secure'] as List?)?.isNotEmpty ?? false;
@@ -74,10 +86,21 @@ class AuthInterceptor extends Interceptor {
     final data = err.response?.data;
     final code = data is Map ? data['code'] : null;
     final options = err.requestOptions;
+
+    // One automatic retry after a short pause, never more.
+    if (_retryable(err, code, options) && options.extra[_autoRetried] != true) {
+      options.extra[_autoRetried] = true;
+      await Future<void>.delayed(retryPause);
+      try {
+        return handler.resolve(await dio.fetch<dynamic>(options));
+      } on DioException catch (e) {
+        return handler.next(e);
+      }
+    }
     if (!_needsToken(options)) return handler.next(err);
 
     // The token is unusable or the account is off: refreshing will not help (docs/frontend/auth.md).
-    if (code == 'UNAUTHORIZED' || code == 'ACCOUNT_DISABLED') {
+    if (code == 'UNAUTHORIZED' || code == 'FORBIDDEN' || code == 'ACCOUNT_DISABLED') {
       await _endSession();
       return handler.next(err);
     }
@@ -86,7 +109,13 @@ class AuthInterceptor extends Interceptor {
     // A refresh may have finished while this request was in flight: retry with the stored token instead.
     final stored = await _readTokens();
     final sentWith = options.headers['Authorization'];
-    final fresh = stored != null && sentWith != 'Bearer ${stored.accessToken}' ? stored : await refresh();
+    final AuthTokens? fresh;
+    try {
+      fresh = stored != null && sentWith != 'Bearer ${stored.accessToken}' ? stored : await refresh();
+    } on DioException catch (offline) {
+      // The request fails as NETWORK (reported on the original call); the session stays.
+      return handler.next(DioException(requestOptions: options, type: offline.type, error: offline.error));
+    }
     if (fresh == null) return handler.next(err);
     options.extra[_retried] = true;
     options.headers['Authorization'] = 'Bearer ${fresh.accessToken}';
@@ -98,6 +127,7 @@ class AuthInterceptor extends Interceptor {
   }
 
   /// One refresh at a time: a refresh token works once, so parallel refreshes would end the session.
+  /// Throws the [DioException] when the refresh could not be sent (offline); the tokens are kept then.
   Future<AuthTokens?> refresh() => _refreshing ??= _doRefresh().whenComplete(() => _refreshing = null);
 
   Future<AuthTokens?> _doRefresh() async {
@@ -112,8 +142,10 @@ class AuthInterceptor extends Interceptor {
       final next = AuthTokens(accessToken: body.accessToken, refreshToken: body.refreshToken);
       await tokens.write(next);
       return next;
-    } on Object {
-      // Refused, lost or not saved: never retry a refresh, sign in again.
+    } on Object catch (e) {
+      // Never sent (offline): keep the session for the next try.
+      if (_notSent(e)) rethrow;
+      // Refused, answer lost or not saved: never retry a refresh, sign in again.
       await _endSession();
       return null;
     }

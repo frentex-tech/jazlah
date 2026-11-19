@@ -182,7 +182,7 @@ class _SettingsBodyState extends ConsumerState<_SettingsBody> {
                 ]),
                 const SizedBox(height: JSpace.s16),
                 group(l10n.settingsNotifications, [
-                  // shortcut: stored on the device until notification settings have an API (NOT-MOB-1).
+                  // shortcut: stored on the device until notification settings have an API: NOT-MOB-1 (#105), API gap.
                   JSwitch(
                     checked: orders,
                     label: l10n.settingsOrderNotifications,

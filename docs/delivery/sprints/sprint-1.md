@@ -206,7 +206,7 @@ This task also covers:
 
 *API client generation (TypeScript + Dart)*
 - `packages/api-client`: `openapi-typescript` types + `openapi-fetch` client factory (`createApiClient({baseUrl, getToken, locale})`)
-- `scripts/gen-api-client.sh`: boots the API in spec-only mode (or reads `services/api/openapi.json`) → regenerates TS and Dart (`openapi-generator dart-dio` into `apps/mobile/lib/core/api/generated`)
+- `scripts/gen-api-client.sh`: boots the API in spec-only mode (or reads `services/api/openapi.json`) → regenerates TS and Dart (`openapi-generator dart-dio` into the package `apps/mobile/packages/jazla_api`)
 - API build writes `services/api/openapi.json`, which is committed so diffs are reviewable
 - CI check: spec changed but clients not regenerated → fail
 

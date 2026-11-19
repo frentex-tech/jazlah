@@ -103,8 +103,9 @@ class _PhoneScreenState extends ConsumerState<PhoneScreen> {
                   onSubmitted: (_) => _submit(),
                 ),
                 const TrustRow(),
-                // Figma hides the terms line in the error and loading states.
-                if (!_invalid && !_loading) Text(l10n.termsNotice, style: JText.bodyM.copyWith(color: JColors.ink2)),
+                // Figma shows the terms line only in the empty default state.
+                if (_controller.text.isEmpty && !_invalid && !_loading)
+                  Text(l10n.termsNotice, style: JText.bodyM.copyWith(color: JColors.ink2)),
               ],
             ),
           ),

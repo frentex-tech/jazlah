@@ -5,12 +5,28 @@ import 'package:jazlah/core/storage/token_storage.dart';
 import 'package:jazlah/features/auth/data/auth_repository.dart';
 import 'package:jazlah/features/auth/presentation/session_controller.dart';
 import 'package:jazlah/features/profile/data/profile_repository.dart';
+import 'package:jazlah/features/profile/domain/customer_profile.dart';
 import 'package:jazlah/features/profile/presentation/settings_screen.dart';
 
 import '../../helpers/fakes.dart';
 import '../../helpers/pump_screen.dart';
 
+class _Failing extends MockProfileRepository {
+  @override
+  Future<CustomerProfile> me() => Future.error(Exception('offline'));
+}
+
 void main() {
+  testWidgets('a failed load shows the error panel at once (no automatic retry)', (t) async {
+    await t.pumpScreen(
+      const SettingsScreen(),
+      overrides: [profileRepositoryProvider.overrideWithValue(_Failing())],
+    );
+    await t.pump();
+    await t.pump();
+    expect(find.text('تعذّر تحميل الإعدادات'), findsOneWidget);
+  });
+
   testWidgets('delete account: confirm, pick a reason, then the session and storage are cleared', (t) async {
     final tokens = MemoryTokens(const AuthTokens(accessToken: 'a', refreshToken: 'r'));
     final container = await t.pumpScreen(

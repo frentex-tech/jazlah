@@ -77,17 +77,17 @@ class _AccountBody extends ConsumerWidget {
       children: [
         _ProfileCard(profile: p, onEdit: () => context.push(Routes.editProfile)),
         const SizedBox(height: JSpace.s16),
-        // shortcut: only the address count has an API today; orders, animals and listings show 0
-        // until their endpoints land (not-built-yet.md).
+        // shortcut: only the address count has an API today; orders (ORD-MOB-2, #85), animals and
+        // listings (FED-MOB-1, #152) show "—" until their counters exist (API gap, not-built-yet.md).
         Row(
           children: [
-            _Stat(value: 0, label: l10n.statOrders),
+            _Stat(value: null, label: l10n.statOrders),
             const SizedBox(width: 10),
-            _Stat(value: ref.watch(addressesProvider).value?.length ?? 0, label: l10n.statAddresses),
+            _Stat(value: ref.watch(addressesProvider).value?.length, label: l10n.statAddresses),
             const SizedBox(width: 10),
-            _Stat(value: 0, label: l10n.statAnimals),
+            _Stat(value: null, label: l10n.statAnimals),
             const SizedBox(width: 10),
-            _Stat(value: 0, label: l10n.statListings),
+            _Stat(value: null, label: l10n.statListings),
           ],
         ),
         const SizedBox(height: JSpace.s16),
@@ -97,7 +97,8 @@ class _AccountBody extends ConsumerWidget {
             _MenuItem(icon: JIcons.mapPin, label: l10n.menuAddresses, onTap: () => context.go(Routes.addresses)),
             _MenuItem(icon: JIcons.pawPrint, label: l10n.menuAnimals),
             _MenuItem(icon: JIcons.storefront, label: l10n.menuFeedListings),
-            _MenuItem(icon: JIcons.starFill, label: l10n.menuPoints, trailing: l10n.menuPointsValue(0)),
+            // No points balance until loyalty lands: no made-up "0".
+            _MenuItem(icon: JIcons.starFill, label: l10n.menuPoints),
             _MenuItem(icon: JIcons.camera, label: l10n.menuStories),
             _MenuItem(icon: JIcons.pawPrint, label: l10n.menuCharity),
           ],
@@ -225,7 +226,8 @@ class _ProfileCard extends StatelessWidget {
 class _Stat extends StatelessWidget {
   const _Stat({required this.value, required this.label});
 
-  final int value;
+  /// Null: not known yet (no API), shown as "—".
+  final int? value;
   final String label;
 
   @override
@@ -240,7 +242,7 @@ class _Stat extends StatelessWidget {
         ),
         child: Column(
           children: [
-            Text('$value', style: JText.raw(18, FontWeight.w700, color: JColors.ember)),
+            Text(value?.toString() ?? '—', style: JText.raw(18, FontWeight.w700, color: JColors.ember)),
             const SizedBox(height: 2),
             Text(label, style: JText.raw(11, FontWeight.w400, color: JColors.muted)),
           ],

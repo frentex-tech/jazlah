@@ -53,4 +53,20 @@ None of these has an endpoint yet:
 | **Realtime** | Live updates (order status, new order alerts) | not built |
 | **Customer website extras** | Anything beyond what the customer app uses | not built |
 
+## Requested by the apps (mobile)
+
+What the customer app needs from the API and does not have yet. Each row names the screen and what the app does until then. Rows marked **API gap** have no issue yet; the issue number goes here when one is opened.
+
+| Gap | Screen waiting on it | The app today | Issue |
+|---|---|---|---|
+| `isLocked` on addresses (an address used by an open order) | Addresses: lock state, edit and delete disabled | Always unlocked from the API; only the mock shows a locked address | API gap (planned in ACC-API-2 #18; real rule with ORD-API-1 #81) |
+| A public list of served cities (or of zones) | Location: out of coverage, "available areas" line | The line is hidden in real builds; the mock lists Riyadh, Jeddah, Dammam | API gap |
+| A geocoding and place-search proxy (`/v1/public/geocode`) | Location: map picker address line and search | The device calls Google Geocoding with the key from the app config. Until the proxy exists, use a **separate key restricted to the Geocoding API**, with daily quota caps and billing alerts, and keep the Maps SDK key app-restricted (owner action). In dev or with `USE_MOCKS` the app uses sample places; real builds without a key leave the fields empty for typing | API gap |
+| The app hash in the sign-in SMS, per flavor (Android SMS Retriever) | Sign-in: OTP autofill on Android (`sms_autofill`) | Keyboard suggestion only (`AutofillHints.oneTimeCode`) | API gap |
+| Account counters: orders, animals, listings | Account: the stats row | Shows "—" (addresses are real) | Orders with ORD-MOB-2 #85; animals and listings with FED-MOB-1 #152; counters: API gap |
+| Points balance | Account: "JAZLA points" row | No balance shown | LOY-MOB-1 #174 |
+| Notification settings | Settings: order notifications switch | Stored on the device | NOT-MOB-1 #105 (API gap) |
+| Support contact (public settings) | Sign-in errors `ACCOUNT_DISABLED`, `ACCOUNT_HAS_STAFF_ACCESS` | The message only, no "contact support" action | API gap |
+| OTP length in the `otp/request` response (optional) | Sign-in: OTP cells | The app reads `codeLength`, default 6 | API gap |
+
 When one of these lands, its endpoints appear in `openapi.json`, and this file and the module guides are updated in the same pull request.

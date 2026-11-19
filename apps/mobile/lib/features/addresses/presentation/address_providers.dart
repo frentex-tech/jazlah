@@ -12,4 +12,6 @@ final addressRepositoryProvider = Provider<AddressRepository>(
 /// The address book; each address carries `covered` from the API.
 final FutureProvider<List<Address>> addressesProvider = FutureProvider.autoDispose<List<Address>>(
   (ref) => ref.watch(addressRepositoryProvider).list(),
+  // No automatic retry: the error panel (with its own retry) shows at once.
+  retry: (_, _) => null,
 );

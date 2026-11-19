@@ -16,9 +16,6 @@ abstract interface class DeviceLocation {
   Future<GeoPoint> current();
 
   Future<void> openSettings();
-
-  /// The device's location services switch (when services are off).
-  Future<void> openLocationSettings();
 }
 
 class GeolocatorDeviceLocation implements DeviceLocation {
@@ -50,9 +47,6 @@ class GeolocatorDeviceLocation implements DeviceLocation {
 
   @override
   Future<void> openSettings() => Geolocator.openAppSettings();
-
-  @override
-  Future<void> openLocationSettings() => Geolocator.openLocationSettings();
 }
 
 /// Reverse geocoding (pin → district/street) and place search.
@@ -63,8 +57,9 @@ abstract interface class Geocoder {
 }
 
 /// Google Geocoding API with the Maps key.
-/// shortcut: called from the device with a key that cannot be app-restricted; move behind the API
-/// (a /v1/public geocoding route) when the backend offers one.
+/// shortcut: called from the device with a key that cannot be app-restricted (use a Geocoding-only key
+/// with quotas); move behind a /v1/public geocoding route when the backend has one (API gap, see
+/// docs/frontend/not-built-yet.md).
 class GoogleGeocoder implements Geocoder {
   GoogleGeocoder(this._key, [Dio? dio])
     : _dio = dio ?? Dio(BaseOptions(baseUrl: 'https://maps.googleapis.com/maps/api/geocode/'));
@@ -82,7 +77,8 @@ class GoogleGeocoder implements Geocoder {
   @override
   Future<PlaceAddress> reverse(GeoPoint point, String language) async {
     final results = await _get({'latlng': '${point.latitude},${point.longitude}', 'language': language});
-    if (results.isEmpty) throw StateError('geocoding: no address');
+    // New districts and istirahas often have no result: the customer types the address instead.
+    if (results.isEmpty) return const PlaceAddress();
     String? part(String type) {
       for (final r in results) {
         for (final c in (r as Map)['address_components'] as List) {
@@ -134,16 +130,25 @@ class ApiCoverageRepository implements CoverageRepository {
     try {
       final res = await _api.getPublicCoverageApi().publicCheckCoverage(lat: p.latitude, lng: p.longitude);
       final body = res.data!;
-      return Coverage(covered: body.covered, zoneName: body.zone?.name.ar);
+      return Coverage(covered: body.covered);
     } catch (e) {
       throw ApiError.from(e);
     }
   }
 
-  /// shortcut: the API has no public list of served cities; the out-of-coverage screen shows these
-  /// until one exists (ask the backend team for `GET /v1/public/coverage/cities` or similar).
+  /// shortcut: the API has no public list of served cities (API gap, see docs/frontend/not-built-yet.md),
+  /// so the real build lists none rather than claim cities that may not be served.
   @override
-  Future<List<String>> cities(String language) => MockCoverageRepository().cities(language);
+  Future<List<String>> cities(String language) async => const [];
+}
+
+/// Staging or production without a Maps key: no fake addresses, the customer types them.
+class NoKeyGeocoder implements Geocoder {
+  @override
+  Future<PlaceAddress> reverse(GeoPoint point, String language) async => const PlaceAddress();
+
+  @override
+  Future<List<PlaceSuggestion>> search(String query, String language) async => const [];
 }
 
 /// Rough boxes around Riyadh, Jeddah and Dammam: for USE_MOCKS and tests.
@@ -159,7 +164,7 @@ class MockCoverageRepository implements CoverageRepository {
     await Future<void>.delayed(const Duration(milliseconds: 300));
     for (final z in _zones) {
       if (p.latitude >= z.south && p.latitude <= z.north && p.longitude >= z.west && p.longitude <= z.east) {
-        return Coverage(covered: true, zoneName: z.ar);
+        return const Coverage(covered: true);
       }
     }
     return const Coverage(covered: false);
@@ -193,9 +198,6 @@ class MockDeviceLocation implements DeviceLocation {
 
   @override
   Future<void> openSettings() async {}
-
-  @override
-  Future<void> openLocationSettings() async {}
 }
 
 class MockGeocoder implements Geocoder {

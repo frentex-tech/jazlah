@@ -18,6 +18,10 @@ class Prefs {
   bool get guest => _p.getBool('guest') ?? false;
   Future<void> setGuest({required bool value}) => value ? _p.setBool('guest', true) : _p.remove('guest');
 
+  /// Set on the first run. The iOS keychain survives an uninstall, so a fresh install clears it.
+  bool get installed => _p.getBool('installed') ?? false;
+  Future<void> setInstalled() => _p.setBool('installed', true);
+
   String? getString(String key) => _p.getString(key);
   Future<void> setString(String key, String value) => _p.setString(key, value);
   Future<void> remove(String key) => _p.remove(key);
@@ -25,7 +29,8 @@ class Prefs {
   /// Keeps the language and the selected location (they belong to the device). Signing out keeps the onboarding as seen; deleting the account shows it again.
   Future<void> clearAccountData({bool keepOnboarding = true}) async {
     for (final key in _p.getKeys().where(
-      (k) => k != 'locale' && !k.startsWith('location.') && (!keepOnboarding || k != 'onboardingSeen'),
+      (k) =>
+          k != 'locale' && k != 'installed' && !k.startsWith('location.') && (!keepOnboarding || k != 'onboardingSeen'),
     )) {
       await _p.remove(key);
     }

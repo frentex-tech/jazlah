@@ -1340,12 +1340,6 @@ abstract class AppLocalizations {
   /// **'عذرًا، لا نوصّل إلى هذا الموقع حاليًا.'**
   String get locOutOfCoverageBanner;
 
-  /// No description provided for @locGeocodeError.
-  ///
-  /// In ar, this message translates to:
-  /// **'تعذّر تحديد العنوان لهذا الموقع. حاول مرة أخرى.'**
-  String get locGeocodeError;
-
   /// No description provided for @locPermTitle.
   ///
   /// In ar, this message translates to:

@@ -23,10 +23,20 @@ class _RefusingDevice extends MockDeviceLocation {
   Future<LocationAccess> request() async => state = LocationAccess.denied;
 }
 
-List<dynamic> _o(DeviceLocation device) => [
+class _FailingGeocoder extends MockGeocoder {
+  @override
+  Future<PlaceAddress> reverse(GeoPoint p, String language) => Future.error(StateError('geocoding: OVER_QUERY_LIMIT'));
+}
+
+class _FailingCoverage extends MockCoverageRepository {
+  @override
+  Future<Coverage> check(GeoPoint p) => Future.error(StateError('offline'));
+}
+
+List<dynamic> _o(DeviceLocation device, {Geocoder? geocoder, CoverageRepository? coverage}) => [
   deviceLocationProvider.overrideWithValue(device),
-  geocoderProvider.overrideWithValue(MockGeocoder()),
-  coverageRepositoryProvider.overrideWithValue(MockCoverageRepository()),
+  geocoderProvider.overrideWithValue(geocoder ?? MockGeocoder()),
+  coverageRepositoryProvider.overrideWithValue(coverage ?? MockCoverageRepository()),
 ];
 
 JButton _button(WidgetTester t, String label) => t.widget<JButton>(find.widgetWithText(JButton, label));
@@ -81,6 +91,52 @@ void main() {
     await t.pump();
     expect(find.text(outside.line), findsOneWidget);
     expect(find.text('خارج نطاق التوصيل: تصفّح واطلب الاستلام من المتجر.'), findsOneWidget);
+    await t.pump(const Duration(seconds: 1)); // the start-up re-check (still outside)
+    expect(find.text('خارج نطاق التوصيل: تصفّح واطلب الاستلام من المتجر.'), findsOneWidget);
+  });
+
+  testWidgets('home re-checks the saved location: a zone added since clears the banner', (t) async {
+    await t.pumpScreen(
+      const HomeTab(),
+      overrides: _o(MockDeviceLocation()),
+      prefs: {'locale': 'ar', 'location.selected': '{"lat":24.8,"lng":46.6,"line":"حي الملقا","covered":false}'},
+    );
+    await t.pump();
+    expect(find.text('خارج نطاق التوصيل: تصفّح واطلب الاستلام من المتجر.'), findsOneWidget);
+    await t.pump(const Duration(seconds: 1));
+    expect(find.text('خارج نطاق التوصيل: تصفّح واطلب الاستلام من المتجر.'), findsNothing);
+  });
+
+  testWidgets('no geocode result is not a dead end: the pin can be confirmed', (t) async {
+    await t.pumpScreen(
+      const MapPickerScreen(initial: GeoPoint(24.8, 46.6)),
+      overrides: _o(MockDeviceLocation(), geocoder: _FailingGeocoder()),
+    );
+    await t.pump(const Duration(seconds: 1));
+    expect(find.text('موقع التوصيل'), findsOneWidget);
+    expect(_button(t, 'تأكيد الموقع').onPressed, isNotNull);
+  });
+
+  testWidgets('a failed coverage check offers retry', (t) async {
+    await t.pumpScreen(
+      const MapPickerScreen(initial: GeoPoint(24.8, 46.6)),
+      overrides: _o(MockDeviceLocation(), coverage: _FailingCoverage()),
+    );
+    await t.pump(const Duration(seconds: 1));
+    expect(find.text('إعادة المحاولة'), findsOneWidget);
+    expect(find.text('تأكيد الموقع'), findsNothing);
+  });
+
+  test('sample addresses only in dev or with mocks; staging and prod without a key type them', () {
+    String geocoder(Flavor f) {
+      final c = ProviderContainer(overrides: [envProvider.overrideWithValue(Env(f))]);
+      addTearDown(c.dispose);
+      return c.read(geocoderProvider).runtimeType.toString();
+    }
+
+    expect(geocoder(Flavor.dev), 'MockGeocoder');
+    expect(geocoder(Flavor.staging), 'NoKeyGeocoder');
+    expect(geocoder(Flavor.prod), 'NoKeyGeocoder');
   });
 
   test('the selected location survives a restart and a sign-out', () async {
@@ -129,11 +185,12 @@ void main() {
     expect(picked!.point, const GeoPoint(23.2, 45.1));
   });
 
-  testWidgets('services off: the sheet opens the location settings instead of looping', (t) async {
+  testWidgets('services off: Figma retry, with manual entry as the way out', (t) async {
     await t.pumpScreen(const MapPickerScreen(), overrides: _o(MockDeviceLocation(state: LocationAccess.serviceOff)));
     await t.pump(const Duration(seconds: 1));
     expect(find.text('تعذّر تحديد موقعك'), findsOneWidget);
-    expect(find.text('فتح الإعدادات'), findsOneWidget);
+    expect(find.text('إعادة المحاولة'), findsOneWidget);
+    expect(find.text('إدخال العنوان يدويًا'), findsOneWidget);
   });
 
   testWidgets('current location outside every zone opens the out-of-coverage screen', (t) async {

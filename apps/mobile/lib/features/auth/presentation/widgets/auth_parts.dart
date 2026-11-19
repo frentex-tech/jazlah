@@ -162,26 +162,26 @@ class TrustRow extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
-    // Figma: 104-wide points spaced between. Readex Pro is wider than Thmanyah, so the points share the
-    // row equally (113 each on a 390 screen) and the label scales down rather than wrapping.
-    Widget point(IconData icon, String label) => Expanded(
-      child: Column(
-        children: [
-          Container(
-            width: 52,
-            height: 52,
-            decoration: const BoxDecoration(color: JColors.sand, shape: BoxShape.circle),
-            child: Icon(icon, size: 26, color: JColors.brand),
-          ),
-          const SizedBox(height: JSpace.s8),
-          FittedBox(
-            fit: BoxFit.scaleDown,
-            child: Text(label, style: JText.labelM, maxLines: 1),
-          ),
-        ],
+    // Figma: 104-wide points spaced between; a long label wraps to two lines at Label/M (never scales).
+    Widget point(IconData icon, String label) => Flexible(
+      child: ConstrainedBox(
+        constraints: const BoxConstraints(maxWidth: 104, minWidth: 104),
+        child: Column(
+          children: [
+            Container(
+              width: 52,
+              height: 52,
+              decoration: const BoxDecoration(color: JColors.sand, shape: BoxShape.circle),
+              child: Icon(icon, size: 26, color: JColors.brand),
+            ),
+            const SizedBox(height: JSpace.s8),
+            Text(label, style: JText.labelM, maxLines: 2, textAlign: TextAlign.center),
+          ],
+        ),
       ),
     );
     return Row(
+      mainAxisAlignment: MainAxisAlignment.spaceBetween,
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         point(JIcons.truck, l10n.trustDelivery),

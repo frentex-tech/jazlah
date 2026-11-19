@@ -53,5 +53,11 @@ Screens follow `docs/design/spec/app/<node-id>.json` (node ids per screen in `do
 ## Checks
 
 ```bash
-flutter analyze && flutter test
+dart format lib test integration_test && flutter analyze && flutter test
+```
+
+CI also fails when `flutter gen-l10n` changes `lib/l10n` or the code is not formatted. The sign-in and address-book flow runs on a simulator or device (not in CI, which has none):
+
+```bash
+flutter test integration_test --flavor dev --dart-define=USE_MOCKS=true -d <device>
 ```

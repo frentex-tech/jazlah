@@ -92,9 +92,12 @@ Future<bool?> showJDialog(
   return showDialog<bool>(
     context: context,
     barrierColor: JColors.scrim.withValues(alpha: 0.55),
+    useSafeArea: false,
     builder: (context) => Directionality(
       textDirection: direction,
-      child: Center(
+      // Figma: y 300 of 844 for a 208-high dialog, slightly above centre.
+      child: Align(
+        alignment: const Alignment(0, -0.06),
         child: JDialog(
           title: title,
           body: body,
