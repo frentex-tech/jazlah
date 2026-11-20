@@ -1,17 +1,22 @@
 import { NextResponse, type NextRequest } from 'next/server';
 import { adminCatalogBackend } from '@/features/catalog/backend';
-import { AvailabilitySchema, FulfilmentSchema, IdSchema, PricesSchema } from '@/features/catalog/schema';
+import { AvailabilitySchema, FulfilmentSchema, IdSchema, PricesSchema, ReasonSchema } from '@/features/catalog/schema';
 import type { Prices } from '@/features/catalog/types';
 import { withPanelSession } from '@/lib/auth/panel-session';
 import { invalidBody, langOf } from '@/lib/route';
 
 const notFound = () => NextResponse.json({ code: 'NOT_FOUND' }, { status: 404 });
 
-// Publish a JAZLA draft (POST …/publish).
+// Publish a JAZLA draft (POST …/publish); approve or reject (with a reason) a vendor product under review (CAT-DSH-2).
 export async function POST(req: NextRequest, { params }: { params: Promise<{ id: string; action: string }> }) {
   const { id, action } = await params;
-  if (action !== 'publish' || !IdSchema.safeParse(id).success) return notFound();
-  return withPanelSession(req, 'admin', (token) => adminCatalogBackend().publish(token, langOf(req), id));
+  if (!IdSchema.safeParse(id).success) return notFound();
+  const b = adminCatalogBackend();
+  if (action === 'publish') return withPanelSession(req, 'admin', (token) => b.publish(token, langOf(req), id));
+  if (action === 'approve') return withPanelSession(req, 'admin', (token) => b.approve(token, langOf(req), id));
+  if (action !== 'reject') return notFound();
+  const body = ReasonSchema.safeParse(await req.json().catch(() => null));
+  return withPanelSession(req, 'admin', async (token) => (body.success ? await b.reject(token, langOf(req), id, body.data.reason) : invalidBody(body.error)));
 }
 
 // The at-once changes of a JAZLA product: availability, fulfilment, prices (PATCH …/{action}).

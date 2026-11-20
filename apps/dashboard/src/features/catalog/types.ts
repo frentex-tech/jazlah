@@ -18,6 +18,10 @@ export type ProductStatus = Product['status'];
 export type Packaging = Schemas['ProductPackagingDto']['packaging'];
 export type UploadTicket = Schemas['UploadTicketResponseDto'];
 export type MediaFile = Schemas['MediaFileResponseDto'];
+export type ChangeRequest = Schemas['ProductChangeRequestResponseDto'];
+export type ProductContentResponse = Schemas['ProductContentResponseDto'];
+export type NamedRef = Schemas['NamedReferenceResponseDto'];
+export type VendorRule = Schemas['VendorIncompatibilityResponseDto'];
 export type Page<T> = { items: T[]; nextCursor: string | null };
 
 /** Categories in their public order (`sortOrder`, lower first), the older first on a tie. */
@@ -33,4 +37,6 @@ export const CATEGORY_IMAGE_MAX = 2 * 1024 * 1024;
 export const MAX_IMAGES = 10;
 
 export type ProductQuery = { status?: ProductStatus; vendorId?: string; cursor?: string; limit?: number };
+export type PageQuery = { cursor?: string; limit?: number };
+export type VendorList = 'meat-types' | 'cutting-styles' | 'exclusion-items';
 export type ListQuery = { cursor?: string; limit?: number; isActive?: 'true' | 'false' };

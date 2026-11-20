@@ -54,6 +54,9 @@ export const PricesSchema = z.object({
   cuttings: z.array(z.object({ cuttingStyleId: uuid, extraPriceHalalas: halalas(0) })).max(30).optional(),
   packagings: z.array(z.object({ packaging: z.enum(PACKAGINGS as [string, ...string[]]), extraPriceHalalas: halalas(0) })).max(4).optional(),
 });
+export const ReasonSchema = z.object({ reason: z.string().trim().min(1).max(500) });
+export const PageQuerySchema = z.object({ cursor: z.string().min(1).optional(), limit: z.coerce.number().int().min(1).max(50).optional() });
+export const VendorListSchema = z.enum(['meat-types', 'cutting-styles', 'exclusion-items']);
 export const UploadSchema = z.object({
   purpose: z.enum(['catalog.product-image', 'catalog.category-image']),
   contentType: z.enum(['image/jpeg', 'image/png', 'image/webp']),

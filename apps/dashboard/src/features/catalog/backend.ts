@@ -7,8 +7,8 @@ import { mocksEnabled } from '@/lib/mock';
 import { MOCK_PLATFORM as PLATFORM, mockVendors } from '@/features/admin-vendors/backend';
 import { mockMedia } from '@/features/vendor-onboarding/backend';
 import type {
-  CreateItem, CreateProduct, CreateRule, Fulfilment, ListName, ListQuery, MediaFile, Page, Prices, Product, ProductCard, ProductContent,
-  ProductQuery, RefItem, Rule, UpdateItem, UploadTicket,
+  ChangeRequest, CreateItem, CreateProduct, CreateRule, Fulfilment, ListName, ListQuery, MediaFile, Page, PageQuery, Prices, Product, ProductCard,
+  ProductContent, ProductQuery, RefItem, Rule, UpdateItem, UploadTicket,
 } from './types';
 
 export type UploadBody = { purpose: 'catalog.product-image' | 'catalog.category-image'; contentType: string; fileName?: string };
@@ -31,6 +31,12 @@ export interface AdminCatalogBackend {
   setPrices(token: string, lang: string, id: string, body: Prices): R<Product>;
   requestUpload(token: string, lang: string, body: UploadBody): R<UploadTicket>;
   confirmUpload(token: string, lang: string, id: string): R<MediaFile>;
+  // The review queue (CAT-DSH-2): new products (listProducts status=pending_review) and edits of published ones.
+  approve(token: string, lang: string, id: string): R<Product>;
+  reject(token: string, lang: string, id: string, reason: string): R<Product>;
+  listChangeRequests(token: string, lang: string, query: PageQuery): R<Page<ChangeRequest>>;
+  approveChange(token: string, lang: string, id: string): R<Product>;
+  rejectChange(token: string, lang: string, id: string, reason: string): R<null>;
 }
 
 function apiBackend(): AdminCatalogBackend {
@@ -56,6 +62,12 @@ function apiBackend(): AdminCatalogBackend {
     setPrices: (token, lang, x, body) => call(api.PATCH('/v1/admin/products/{id}/prices', { params: id(x), body, headers: headers(token, lang) })),
     requestUpload: (token, lang, body) => call(api.POST('/v1/admin/media/uploads', { body, headers: headers(token, lang) })),
     confirmUpload: (token, lang, x) => call(api.POST('/v1/admin/media/{id}/confirm', { params: id(x), headers: headers(token, lang) })),
+    approve: (token, lang, x) => call(api.POST('/v1/admin/products/{id}/approve', { params: id(x), headers: headers(token, lang) })),
+    reject: (token, lang, x, reason) => call(api.POST('/v1/admin/products/{id}/reject', { params: id(x), body: { reason }, headers: headers(token, lang) })),
+    listChangeRequests: (token, lang, query) => call(api.GET('/v1/admin/product-change-requests', { params: { query }, headers: headers(token, lang) })),
+    approveChange: (token, lang, x) => call(api.POST('/v1/admin/product-change-requests/{id}/approve', { params: id(x), headers: headers(token, lang) })),
+    rejectChange: (token, lang, x, reason) =>
+      call<null>(api.POST('/v1/admin/product-change-requests/{id}/reject', { params: id(x), body: { reason }, headers: headers(token, lang) }), true),
   };
 }
 
@@ -82,9 +94,11 @@ const item = (kind: string, i: number, [ar, en]: [string, string], ordered: bool
 });
 
 
-type MockState = { items: Record<ListName, RefItem[]>; rules: Rule[]; products: Map<string, Product>; seedImages: Map<string, string> };
+type MockState = { items: Record<ListName, RefItem[]>; rules: Rule[]; products: Map<string, Product>; seedImages: Map<string, string>; changeRequests: ChangeRequest[] };
 const g = globalThis as { __adminCatalog?: MockState };
-const mock: MockState = (g.__adminCatalog ??= seed());
+/** The catalog mock store, shared with the vendor catalog mock (vendor-backend.ts): a submitted product reaches the queue. */
+export const mock: MockState = (g.__adminCatalog ??= seed());
+mock.changeRequests ??= []; // a store kept across a dev reload from before CAT-DSH-2
 
 function seed(): MockState {
   const items: Record<ListName, RefItem[]> = {
@@ -116,6 +130,9 @@ function seed(): MockState {
     ['تي بون بقري', 'Beef T-bone', 'Al Falah Butchery', 1, 11800, 'rejected', true, 8],
     ['ضلوع غنم للمشاوي', 'Lamb ribs for grilling', 'JAZLA', 5, 11200, 'published', true, 7],
     ['لحم مفروم ناعم', 'Fine minced meat', 'JAZLA', 4, 7400, 'draft', true, 6],
+    // CAT-DSH-2: a vendor draft (131:25074) and a published product with an edit waiting for review (131:22954).
+    ['ستيك مخلّل بالثوم', 'Garlic marinated steak', 'Al Falah Butchery', 1, 9600, 'draft', true, 5],
+    ['كتف غنم للتحمير', 'Lamb shoulder for roasting', 'Riyadh Carcasses', 0, 13500, 'published', true, 4],
   ];
   rows.forEach(([ar, en, vendor, c, price, status, isAvailable, d], i) => {
     const imageId = sid('e1', i + 1);
@@ -137,16 +154,30 @@ function seed(): MockState {
     };
     products.set(p.id, p);
   });
-  return { items, rules, products, seedImages };
+  const shoulder = [...products.values()].find((p) => p.name.en === 'Lamb shoulder for roasting')!;
+  const changeRequests: ChangeRequest[] = [{
+    id: sid('g1', 1), productId: shoulder.id, status: 'pending', rejectionReason: null, createdAt: day(12), updatedAt: day(12), reviewedAt: null,
+    content: { ...contentResponse(shoulder), images: [...shoulder.images].reverse().concat({ mediaId: sid('e1', 1), url: PHOTO[0]! }) },
+  }];
+  shoulder.changeRequest = changeRequests[0]!;
+  return { items, rules, products, seedImages, changeRequests };
 }
 
-const notFound = { ok: false, code: 'NOT_FOUND', status: 404 } as const;
+/** A product's content as a change request holds it (ProductContentResponseDto). */
+export function contentResponse(p: Pick<Product, 'name' | 'description' | 'category' | 'meatType' | 'images' | 'sizes' | 'cuttings' | 'packagings' | 'exclusions'>): ChangeRequest['content'] {
+  return {
+    name: p.name, description: p.description, categoryId: p.category.id, meatTypeId: p.meatType?.id ?? null, images: p.images, sizes: p.sizes,
+    cuttings: p.cuttings, packagings: p.packagings, exclusionItemIds: p.exclusions.map((x) => x.id),
+  };
+}
+
+export const notFound = { ok: false, code: 'NOT_FOUND', status: 404 } as const;
 const forbidden = { ok: false, code: 'NOT_ALLOWED', status: 403 } as const;
-const invalid = (field: string, constraint: string) => ({ ok: false, code: 'VALIDATION_FAILED', status: 400, details: [{ field, constraints: [constraint] }] }) as const;
+export const invalid = (field: string, constraint: string) => ({ ok: false, code: 'VALIDATION_FAILED', status: 400, details: [{ field, constraints: [constraint] }] }) as const;
 const limited = (token: string) => token.endsWith('-limited');
 
 /** Newest first by createdAt, cursor = the offset as the API would write it (opaque to the page), limit 1..50 (default 20). */
-function page<T extends { createdAt: string }>(items: T[], cursor?: string, limit = 20): ApiResult<Page<T>> {
+export function page<T extends { createdAt: string }>(items: T[], cursor?: string, limit = 20): ApiResult<Page<T>> {
   const from = cursor === undefined ? 0 : Number(Buffer.from(cursor, 'base64url').toString());
   if (!Number.isInteger(from) || from < 0) return invalid('cursor', 'isCursor');
   const sorted = [...items].sort((a, b) => b.createdAt.localeCompare(a.createdAt));
@@ -154,7 +185,7 @@ function page<T extends { createdAt: string }>(items: T[], cursor?: string, limi
   return { ok: true, data: { items: sorted.slice(from, from + limit), nextCursor: next } };
 }
 
-const card = (p: Product): ProductCard => ({
+export const card = (p: Product): ProductCard => ({
   id: p.id, vendor: { id: p.vendorId, name: mockVendors.get(p.vendorId)?.name ?? null }, name: p.name, categoryId: p.category.id,
   meatTypeId: p.meatType?.id ?? null, status: p.status, isAvailable: p.isAvailable, minPriceHalalas: p.minPriceHalalas, coverUrl: p.images[0]?.url ?? null,
   createdAt: p.createdAt,
@@ -162,14 +193,8 @@ const card = (p: Product): ProductCard => ({
 const active = (list: ListName, id: string) => mock.items[list].find((x) => x.id === id && x.isActive);
 const ref = (x: RefItem) => ({ id: x.id, name: x.name });
 
-/** A JAZLA product of this mock, or the API's NOT_FOUND (admins act on other vendors' products only through review). */
-function own(id: string): Product | null {
-  const p = mock.products.get(id);
-  return p && p.vendorId === PLATFORM.id ? p : null;
-}
-
 /** The submission rules of publish and of an edit of a published product (PRODUCT_NOT_SUBMITTABLE). */
-function unsubmittable(p: Pick<Product, 'sizes' | 'images' | 'cuttings' | 'packagings'>): ApiResult<never> | null {
+export function unsubmittable(p: Pick<Product, 'sizes' | 'images' | 'cuttings' | 'packagings'>): ApiResult<never> | null {
   const pairs = p.cuttings.flatMap((c) =>
     p.packagings.filter((k) => mock.rules.some((r) => r.cuttingStyleId === c.cuttingStyleId && r.packaging === k.packaging)).map((k) => ({ cuttingStyleId: c.cuttingStyleId, packaging: k.packaging })),
   );
@@ -178,7 +203,7 @@ function unsubmittable(p: Pick<Product, 'sizes' | 'images' | 'cuttings' | 'packa
 }
 
 /** The content as the product holds it, with the API's reference and media checks; `live`: the edited product. */
-function contentOf(body: ProductContent, live: Product | null): ApiResult<Omit<Product, 'id' | 'vendorId' | 'status' | 'isAvailable' | 'fulfilment' | 'rejectionReason' | 'submittedAt' | 'reviewedAt' | 'publishedAt' | 'createdAt' | 'updatedAt' | 'changeRequest'>> {
+export function contentOf(body: ProductContent, live: Product | null): ApiResult<Omit<Product, 'id' | 'vendorId' | 'status' | 'isAvailable' | 'fulfilment' | 'rejectionReason' | 'submittedAt' | 'reviewedAt' | 'publishedAt' | 'createdAt' | 'updatedAt' | 'changeRequest'>> {
   const category = active('categories', body.categoryId);
   if (!category) return invalid('categoryId', 'isActiveCategory');
   const meat = body.meatTypeId ? active('meat-types', body.meatTypeId) : null;
@@ -231,9 +256,11 @@ function contentOf(body: ProductContent, live: Product | null): ApiResult<Omit<P
   };
 }
 
-function patchOwn(token: string, id: string, change: (p: Product) => ApiResult<Product> | Partial<Product>): ApiResult<Product> {
+/** A change of a product of `vendorId` (JAZLA's by default), refused while it is under review. */
+export function patchOwn(token: string, id: string, change: (p: Product) => ApiResult<Product> | Partial<Product>, vendorId = PLATFORM.id): ApiResult<Product> {
   if (limited(token)) return forbidden;
-  const p = own(id);
+  const found = mock.products.get(id);
+  const p = found?.vendorId === vendorId ? found : null;
   if (!p) return notFound;
   if (p.status === 'pending_review') return { ok: false, code: 'PRODUCT_NOT_EDITABLE', status: 409, details: { status: p.status } };
   const r = change(p);
@@ -348,27 +375,7 @@ export const mockAdminCatalog: AdminCatalogBackend = {
     return patchOwn(token, id, () => ({ fulfilment }));
   },
   async setPrices(token, _l, id, body) {
-    return patchOwn(token, id, (p) => {
-      const sizes = p.sizes.map((s) => ({ ...s }));
-      for (const [i, x] of (body.sizes ?? []).entries()) {
-        const s = sizes.find((y) => y.id === x.sizeId);
-        if (!s) return invalid(`sizes.${i}.sizeId`, 'isSizeOfProduct');
-        s.priceHalalas = x.priceHalalas;
-      }
-      const cuttings = p.cuttings.map((c) => ({ ...c }));
-      for (const [i, x] of (body.cuttings ?? []).entries()) {
-        const c = cuttings.find((y) => y.cuttingStyleId === x.cuttingStyleId);
-        if (!c) return invalid(`cuttings.${i}.cuttingStyleId`, 'isCuttingOfProduct');
-        c.extraPriceHalalas = x.extraPriceHalalas;
-      }
-      const packagings = p.packagings.map((k) => ({ ...k }));
-      for (const [i, x] of (body.packagings ?? []).entries()) {
-        const k = packagings.find((y) => y.packaging === x.packaging);
-        if (!k) return invalid(`packagings.${i}.packaging`, 'isPackagingOfProduct');
-        k.extraPriceHalalas = x.extraPriceHalalas;
-      }
-      return { sizes, cuttings, packagings, minPriceHalalas: sizes.length ? Math.min(...sizes.map((s) => s.priceHalalas)) : null };
-    });
+    return patchOwn(token, id, (p) => newPrices(p, body));
   },
   async requestUpload(token, _l, body) {
     if (limited(token)) return forbidden;
@@ -378,7 +385,96 @@ export const mockAdminCatalog: AdminCatalogBackend = {
     if (limited(token)) return forbidden;
     return mockMedia.confirm(id);
   },
+  async approve(token, _l, id) {
+    return decide(token, id, () => ({ status: 'published', rejectionReason: null, publishedAt: new Date().toISOString() }));
+  },
+  async reject(token, _l, id, reason) {
+    return decide(token, id, () => ({ status: 'rejected', rejectionReason: reason.trim() }));
+  },
+  async listChangeRequests(token, _l, { cursor, limit }) {
+    if (limited(token)) return forbidden;
+    return page(mock.changeRequests.filter((c) => c.status === 'pending'), cursor, limit);
+  },
+  async approveChange(token, _l, id) {
+    if (limited(token)) return forbidden;
+    const c = openChange(id);
+    if (!c.ok) return c;
+    const p = mock.products.get(c.data.productId)!;
+    if (p.status !== 'published') return { ok: false, code: 'PRODUCT_NOT_EDITABLE', status: 409, details: { status: p.status } };
+    const now = new Date().toISOString();
+    const cr: ChangeRequest = { ...c.data, status: 'approved', updatedAt: now, reviewedAt: now };
+    mock.changeRequests = mock.changeRequests.map((x) => (x.id === id ? cr : x));
+    const k = cr.content;
+    const live = <T,>(xs: T[], old: T[], same: (a: T, b: T) => boolean, price: (x: T) => Partial<T>) => xs.map((x) => { const o = old.find((y) => same(x, y)); return o ? { ...x, ...price(o) } : x; });
+    // Approval keeps the live prices of what the product already has; new sizes and options take the request's.
+    const sizes = live(k.sizes, p.sizes, (a, b) => a.id === b.id, (o) => ({ priceHalalas: o.priceHalalas }));
+    const category = mock.items.categories.find((x) => x.id === k.categoryId)!;
+    const meat = k.meatTypeId ? mock.items['meat-types'].find((x) => x.id === k.meatTypeId) : null;
+    const next: Product = {
+      ...p, name: k.name, description: k.description, category: ref(category), meatType: meat ? ref(meat) : null, images: k.images, sizes,
+      cuttings: live(k.cuttings, p.cuttings, (a, b) => a.cuttingStyleId === b.cuttingStyleId, (o) => ({ extraPriceHalalas: o.extraPriceHalalas })),
+      packagings: live(k.packagings, p.packagings, (a, b) => a.packaging === b.packaging, (o) => ({ extraPriceHalalas: o.extraPriceHalalas })),
+      exclusions: k.exclusionItemIds.map((x) => ref(mock.items['exclusion-items'].find((e) => e.id === x)!)),
+      minPriceHalalas: sizes.length ? Math.min(...sizes.map((s) => s.priceHalalas)) : null, changeRequest: cr, updatedAt: now,
+    };
+    mock.products.set(p.id, next);
+    return { ok: true, data: next };
+  },
+  async rejectChange(token, _l, id, reason) {
+    if (limited(token)) return forbidden;
+    const c = openChange(id);
+    if (!c.ok) return c;
+    const now = new Date().toISOString();
+    const cr: ChangeRequest = { ...c.data, status: 'rejected', rejectionReason: reason.trim(), updatedAt: now, reviewedAt: now };
+    mock.changeRequests = mock.changeRequests.map((x) => (x.id === id ? cr : x));
+    const p = mock.products.get(cr.productId)!;
+    mock.products.set(p.id, { ...p, changeRequest: cr });
+    return { ok: true, data: null, status: 204 };
+  },
 };
+
+/** An admin's decision on a product under review (approve, reject): PRODUCT_NOT_EDITABLE once decided. */
+function decide(token: string, id: string, change: () => Partial<Product>): ApiResult<Product> {
+  if (limited(token)) return forbidden;
+  const p = mock.products.get(id);
+  if (!p) return notFound;
+  if (p.status !== 'pending_review') return { ok: false, code: 'PRODUCT_NOT_EDITABLE', status: 409, details: { status: p.status } };
+  const now = new Date().toISOString();
+  const next: Product = { ...p, ...change(), reviewedAt: now, updatedAt: now };
+  mock.products.set(id, next);
+  return { ok: true, data: next };
+}
+
+/** A pending change request, or the API's refusal: superseded (the vendor edited again), or decided (NOT_FOUND). */
+function openChange(id: string): ApiResult<ChangeRequest> {
+  const c = mock.changeRequests.find((x) => x.id === id);
+  if (!c || c.status === 'approved' || c.status === 'rejected') return notFound;
+  if (c.status === 'superseded') return { ok: false, code: 'PRODUCT_CHANGE_REQUEST_SUPERSEDED', status: 409 };
+  return { ok: true, data: c };
+}
+
+/** PATCH …/prices on the mock: the named sizes, cuttings and packagings take their new prices. */
+export function newPrices(p: Product, body: Prices): ApiResult<Product> | Partial<Product> {
+  const sizes = p.sizes.map((s) => ({ ...s }));
+  for (const [i, x] of (body.sizes ?? []).entries()) {
+    const s = sizes.find((y) => y.id === x.sizeId);
+    if (!s) return invalid(`sizes.${i}.sizeId`, 'isSizeOfProduct');
+    s.priceHalalas = x.priceHalalas;
+  }
+  const cuttings = p.cuttings.map((c) => ({ ...c }));
+  for (const [i, x] of (body.cuttings ?? []).entries()) {
+    const c = cuttings.find((y) => y.cuttingStyleId === x.cuttingStyleId);
+    if (!c) return invalid(`cuttings.${i}.cuttingStyleId`, 'isCuttingOfProduct');
+    c.extraPriceHalalas = x.extraPriceHalalas;
+  }
+  const packagings = p.packagings.map((k) => ({ ...k }));
+  for (const [i, x] of (body.packagings ?? []).entries()) {
+    const k = packagings.find((y) => y.packaging === x.packaging);
+    if (!k) return invalid(`packagings.${i}.packaging`, 'isPackagingOfProduct');
+    k.extraPriceHalalas = x.extraPriceHalalas;
+  }
+  return { sizes, cuttings, packagings, minPriceHalalas: sizes.length ? Math.min(...sizes.map((s) => s.priceHalalas)) : null };
+}
 
 export function adminCatalogBackend(): AdminCatalogBackend {
   return mocksEnabled() ? mockAdminCatalog : apiBackend();
