@@ -999,6 +999,118 @@ class AppLocalizationsEn extends AppLocalizations {
   String get storePickupBadge => 'Store pickup';
 
   @override
+  String get searchRecent => 'Recent searches';
+
+  @override
+  String get searchPopular => 'Most searched';
+
+  @override
+  String searchResultsFor(int count, String query) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count results',
+      one: '1 result',
+    );
+    return '$_temp0 for “$query”';
+  }
+
+  @override
+  String searchResults(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count results',
+      one: '1 result',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String searchNoResultsFor(String query) {
+    return 'No results for “$query”';
+  }
+
+  @override
+  String get searchNoResults => 'No results';
+
+  @override
+  String get searchNoResultsBody => 'Try other words or change the filters.';
+
+  @override
+  String get searchClearFilters => 'Clear filters';
+
+  @override
+  String get searchErrorTitle => 'Search failed';
+
+  @override
+  String get searchErrorBody => 'Something went wrong while searching. Try again.';
+
+  @override
+  String searchFilterCount(int count) {
+    return 'Filters ($count)';
+  }
+
+  @override
+  String get searchFiltersTitle => 'Filter results';
+
+  @override
+  String get searchPrice => 'Price (SAR)';
+
+  @override
+  String searchPriceMin(String price) {
+    return 'From $price SAR';
+  }
+
+  @override
+  String searchPriceMax(String price) {
+    return 'To $price SAR';
+  }
+
+  @override
+  String searchPriceUpTo(String price) {
+    return 'Up to $price SAR';
+  }
+
+  @override
+  String searchPriceRange(String min, String max) {
+    return '$min–$max SAR';
+  }
+
+  @override
+  String get searchStore => 'Store';
+
+  @override
+  String get searchCategory => 'Category';
+
+  @override
+  String get searchSort => 'Sort by';
+
+  @override
+  String get searchAvailableOnly => 'Available now only';
+
+  @override
+  String get searchAvailable => 'Available now';
+
+  @override
+  String searchShowCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'Show $count results',
+      one: 'Show 1 result',
+      zero: 'No results',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get searchShowResults => 'Show results';
+
+  @override
+  String get searchReset => 'Reset';
+
+  @override
   String get productTitle => 'Product details';
 
   @override

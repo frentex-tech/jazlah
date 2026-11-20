@@ -41,7 +41,8 @@ class ApiCatalogRepository implements CatalogRepository {
   static Category _category(ReferenceItemResponseDto d) =>
       Category(id: d.id, name: _text(d.name), imageUrl: d.imageUrl);
 
-  static ProductCard _card(ProductCardResponseDto d) => ProductCard(
+  /// Shared with the search repository.
+  static ProductCard card(ProductCardResponseDto d) => ProductCard(
     id: d.id,
     vendorId: d.vendor.id,
     vendorName: d.vendor.name == null ? null : _text(d.vendor.name!),
@@ -97,7 +98,7 @@ class ApiCatalogRepository implements CatalogRepository {
       categoryId: query.categoryId,
       vendorId: query.vendorId,
     )).data!;
-    return CatalogPage([for (final d in res.items) _card(d)], res.nextCursor);
+    return CatalogPage([for (final d in res.items) card(d)], res.nextCursor);
   });
 
   @override

@@ -24,6 +24,7 @@ import 'package:jazlah/features/location/presentation/out_of_coverage_screen.dar
 import 'package:jazlah/features/product/presentation/product_screen.dart';
 import 'package:jazlah/features/profile/presentation/account_screen.dart';
 import 'package:jazlah/features/profile/presentation/settings_screen.dart';
+import 'package:jazlah/features/search/presentation/search_screen.dart';
 import 'package:jazlah/features/store/presentation/category_screen.dart';
 import 'package:jazlah/features/store/presentation/store_screen.dart';
 import 'package:jazlah/l10n/app_localizations.dart';
@@ -135,6 +136,8 @@ final routerProvider = Provider<GoRouter>((ref) {
         path: '/product/:id',
         builder: (_, state) => ProductScreen(id: state.pathParameters['id']!),
       ),
+      // Full screen like Figma (no tab bar).
+      GoRoute(path: Routes.search, builder: (_, _) => const SearchScreen()),
       ShellRoute(
         builder: (_, state, child) => MainShell(location: state.matchedLocation, child: child),
         routes: [
@@ -144,11 +147,6 @@ final routerProvider = Provider<GoRouter>((ref) {
           GoRoute(
             path: '/home/category/:id',
             builder: (_, state) => CategoryScreen(id: state.pathParameters['id']!, name: state.extra as String?),
-          ),
-          // shortcut: placeholder until STF-MOB-4 (#57) builds search.
-          GoRoute(
-            path: Routes.search,
-            builder: (context, _) => ComingSoonPage(title: AppLocalizations.of(context).searchTitle),
           ),
           GoRoute(
             path: Routes.services,

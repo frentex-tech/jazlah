@@ -995,6 +995,124 @@ class AppLocalizationsAr extends AppLocalizations {
   String get storePickupBadge => 'استلام من المتجر';
 
   @override
+  String get searchRecent => 'عمليات البحث الأخيرة';
+
+  @override
+  String get searchPopular => 'الأكثر بحثًا';
+
+  @override
+  String searchResultsFor(int count, String query) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count نتيجة',
+      few: '$count نتائج',
+      two: 'نتيجتان',
+      one: 'نتيجة واحدة',
+    );
+    return '$_temp0 لـ «$query»';
+  }
+
+  @override
+  String searchResults(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count نتيجة',
+      few: '$count نتائج',
+      two: 'نتيجتان',
+      one: 'نتيجة واحدة',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String searchNoResultsFor(String query) {
+    return 'لا توجد نتائج لـ «$query»';
+  }
+
+  @override
+  String get searchNoResults => 'لا توجد نتائج';
+
+  @override
+  String get searchNoResultsBody => 'جرّب كلمات أخرى أو غيّر عوامل التصفية.';
+
+  @override
+  String get searchClearFilters => 'مسح التصفية';
+
+  @override
+  String get searchErrorTitle => 'تعذّر تنفيذ البحث';
+
+  @override
+  String get searchErrorBody => 'حدث خطأ أثناء البحث. حاول مرة أخرى.';
+
+  @override
+  String searchFilterCount(int count) {
+    return 'تصفية ($count)';
+  }
+
+  @override
+  String get searchFiltersTitle => 'تصفية النتائج';
+
+  @override
+  String get searchPrice => 'السعر (ر.س)';
+
+  @override
+  String searchPriceMin(String price) {
+    return 'من $price ر.س';
+  }
+
+  @override
+  String searchPriceMax(String price) {
+    return 'إلى $price ر.س';
+  }
+
+  @override
+  String searchPriceUpTo(String price) {
+    return 'حتى $price ر.س';
+  }
+
+  @override
+  String searchPriceRange(String min, String max) {
+    return '$min–$max ر.س';
+  }
+
+  @override
+  String get searchStore => 'المتجر';
+
+  @override
+  String get searchCategory => 'القسم';
+
+  @override
+  String get searchSort => 'الترتيب';
+
+  @override
+  String get searchAvailableOnly => 'المتاح الآن فقط';
+
+  @override
+  String get searchAvailable => 'المتاح الآن';
+
+  @override
+  String searchShowCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'عرض $count نتيجة',
+      few: 'عرض $count نتائج',
+      two: 'عرض نتيجتين',
+      one: 'عرض نتيجة واحدة',
+      zero: 'لا توجد نتائج',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get searchShowResults => 'عرض النتائج';
+
+  @override
+  String get searchReset => 'إعادة ضبط';
+
+  @override
   String get productTitle => 'تفاصيل المنتج';
 
   @override

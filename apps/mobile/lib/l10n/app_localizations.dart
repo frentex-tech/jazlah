@@ -2012,6 +2012,156 @@ abstract class AppLocalizations {
   /// **'استلام من المتجر'**
   String get storePickupBadge;
 
+  /// No description provided for @searchRecent.
+  ///
+  /// In ar, this message translates to:
+  /// **'عمليات البحث الأخيرة'**
+  String get searchRecent;
+
+  /// No description provided for @searchPopular.
+  ///
+  /// In ar, this message translates to:
+  /// **'الأكثر بحثًا'**
+  String get searchPopular;
+
+  /// No description provided for @searchResultsFor.
+  ///
+  /// In ar, this message translates to:
+  /// **'{count, plural, =1{نتيجة واحدة} =2{نتيجتان} few{{count} نتائج} other{{count} نتيجة}} لـ «{query}»'**
+  String searchResultsFor(int count, String query);
+
+  /// No description provided for @searchResults.
+  ///
+  /// In ar, this message translates to:
+  /// **'{count, plural, =1{نتيجة واحدة} =2{نتيجتان} few{{count} نتائج} other{{count} نتيجة}}'**
+  String searchResults(int count);
+
+  /// No description provided for @searchNoResultsFor.
+  ///
+  /// In ar, this message translates to:
+  /// **'لا توجد نتائج لـ «{query}»'**
+  String searchNoResultsFor(String query);
+
+  /// No description provided for @searchNoResults.
+  ///
+  /// In ar, this message translates to:
+  /// **'لا توجد نتائج'**
+  String get searchNoResults;
+
+  /// No description provided for @searchNoResultsBody.
+  ///
+  /// In ar, this message translates to:
+  /// **'جرّب كلمات أخرى أو غيّر عوامل التصفية.'**
+  String get searchNoResultsBody;
+
+  /// No description provided for @searchClearFilters.
+  ///
+  /// In ar, this message translates to:
+  /// **'مسح التصفية'**
+  String get searchClearFilters;
+
+  /// No description provided for @searchErrorTitle.
+  ///
+  /// In ar, this message translates to:
+  /// **'تعذّر تنفيذ البحث'**
+  String get searchErrorTitle;
+
+  /// No description provided for @searchErrorBody.
+  ///
+  /// In ar, this message translates to:
+  /// **'حدث خطأ أثناء البحث. حاول مرة أخرى.'**
+  String get searchErrorBody;
+
+  /// No description provided for @searchFilterCount.
+  ///
+  /// In ar, this message translates to:
+  /// **'تصفية ({count})'**
+  String searchFilterCount(int count);
+
+  /// No description provided for @searchFiltersTitle.
+  ///
+  /// In ar, this message translates to:
+  /// **'تصفية النتائج'**
+  String get searchFiltersTitle;
+
+  /// No description provided for @searchPrice.
+  ///
+  /// In ar, this message translates to:
+  /// **'السعر (ر.س)'**
+  String get searchPrice;
+
+  /// No description provided for @searchPriceMin.
+  ///
+  /// In ar, this message translates to:
+  /// **'من {price} ر.س'**
+  String searchPriceMin(String price);
+
+  /// No description provided for @searchPriceMax.
+  ///
+  /// In ar, this message translates to:
+  /// **'إلى {price} ر.س'**
+  String searchPriceMax(String price);
+
+  /// No description provided for @searchPriceUpTo.
+  ///
+  /// In ar, this message translates to:
+  /// **'حتى {price} ر.س'**
+  String searchPriceUpTo(String price);
+
+  /// No description provided for @searchPriceRange.
+  ///
+  /// In ar, this message translates to:
+  /// **'{min}–{max} ر.س'**
+  String searchPriceRange(String min, String max);
+
+  /// No description provided for @searchStore.
+  ///
+  /// In ar, this message translates to:
+  /// **'المتجر'**
+  String get searchStore;
+
+  /// No description provided for @searchCategory.
+  ///
+  /// In ar, this message translates to:
+  /// **'القسم'**
+  String get searchCategory;
+
+  /// No description provided for @searchSort.
+  ///
+  /// In ar, this message translates to:
+  /// **'الترتيب'**
+  String get searchSort;
+
+  /// No description provided for @searchAvailableOnly.
+  ///
+  /// In ar, this message translates to:
+  /// **'المتاح الآن فقط'**
+  String get searchAvailableOnly;
+
+  /// No description provided for @searchAvailable.
+  ///
+  /// In ar, this message translates to:
+  /// **'المتاح الآن'**
+  String get searchAvailable;
+
+  /// No description provided for @searchShowCount.
+  ///
+  /// In ar, this message translates to:
+  /// **'{count, plural, =0{لا توجد نتائج} =1{عرض نتيجة واحدة} =2{عرض نتيجتين} few{عرض {count} نتائج} other{عرض {count} نتيجة}}'**
+  String searchShowCount(int count);
+
+  /// No description provided for @searchShowResults.
+  ///
+  /// In ar, this message translates to:
+  /// **'عرض النتائج'**
+  String get searchShowResults;
+
+  /// No description provided for @searchReset.
+  ///
+  /// In ar, this message translates to:
+  /// **'إعادة ضبط'**
+  String get searchReset;
+
   /// No description provided for @productTitle.
   ///
   /// In ar, this message translates to:
