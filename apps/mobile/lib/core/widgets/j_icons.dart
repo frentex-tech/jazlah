@@ -39,6 +39,8 @@ abstract final class JIcons {
   static const mapPin = IconData(0xe316, fontFamily: _regular, fontPackage: _package);
   static const sealCheck = IconData(0xe606, fontFamily: _regular, fontPackage: _package);
   static const thermometer = IconData(0xe5c6, fontFamily: _regular, fontPackage: _package);
+  static const clock = IconData(0xe19a, fontFamily: _regular, fontPackage: _package);
+  static const package = IconData(0xe390, fontFamily: _regular, fontPackage: _package);
   static const mapPinFill = IconData(0xe316, fontFamily: _fill, fontPackage: _package);
   static const storefrontFill = IconData(0xe470, fontFamily: _fill, fontPackage: _package);
   static const truckFill = IconData(0xe4b4, fontFamily: _fill, fontPackage: _package);

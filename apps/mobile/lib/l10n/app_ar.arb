@@ -306,5 +306,119 @@
         "type": "int"
       }
     }
-  }
+  },
+  "seeAll": "الكل",
+  "filters": "تصفية",
+  "currency": "ر.س",
+  "addToCart": "أضف إلى السلة",
+  "freshToday": "ذُبح اليوم",
+  "unavailableNow": "غير متاح حاليًا",
+  "offlineTitle": "لا يوجد اتصال بالإنترنت",
+  "offlineBody": "تحقق من اتصالك ثم أعد المحاولة.",
+  "loadMoreFailed": "تعذّر تحميل المزيد.",
+  "timeAm": "ص",
+  "timePm": "م",
+  "homeSearchHint": "ابحث عن لحوم أو متاجر",
+  "homeCategories": "الأقسام",
+  "homeBestSellers": "الأكثر مبيعًا",
+  "homePartnerStores": "متاجر شريكة",
+  "homeStoresPaused": "المتاجر القريبة منك متوقفة مؤقتًا. تصفّح الآن واطلب عند عودتها.",
+  "homeEmptyTitle": "لا توجد متاجر في منطقتك بعد",
+  "homeEmptyBody": "نعمل على الوصول إلى حيّك قريبًا. جرّب عنوانًا آخر.",
+  "homeChangeAddress": "تغيير العنوان",
+  "homeErrorTitle": "تعذّر تحميل الصفحة الرئيسية",
+  "homeErrorBody": "حدث خطأ أثناء جلب المتاجر والمنتجات. حاول مرة أخرى.",
+  "categoriesSubtitle": "اختر القسم الذي يناسب طلبك.",
+  "categoriesComing": "أقسام قادمة",
+  "categoriesEmptyTitle": "لا توجد أقسام متاحة",
+  "categoriesEmptyBody": "لا تتوفر أقسام في منطقتك حاليًا. تحقق مرة أخرى قريبًا.",
+  "backToHome": "العودة للرئيسية",
+  "categoriesErrorTitle": "تعذّر تحميل الأقسام",
+  "categoriesErrorBody": "حدث خطأ أثناء جلب الأقسام. حاول مرة أخرى.",
+  "categoryEmptyTitle": "لا توجد منتجات في هذا القسم بعد",
+  "categoryEmptyBody": "تصفّح الأقسام الأخرى أو عُد لاحقًا.",
+  "productsErrorTitle": "تعذّر تحميل المنتجات",
+  "productsErrorBody": "حدث خطأ أثناء جلب المنتجات. حاول مرة أخرى.",
+  "sortPopular": "الأكثر مبيعًا",
+  "sortPriceAsc": "الأقل سعرًا",
+  "sortPriceDesc": "الأعلى سعرًا",
+  "storeRating": "{rating} ({count} تقييم)",
+  "@storeRating": {
+    "placeholders": {
+      "rating": {
+        "type": "String"
+      },
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "storeOpenUntil": "مفتوح حتى {time}",
+  "@storeOpenUntil": {
+    "placeholders": {
+      "time": {
+        "type": "String"
+      }
+    }
+  },
+  "storeClosedNow": "مغلق الآن",
+  "storeDeliveryIn": "توصيل خلال {minutes} دقيقة",
+  "@storeDeliveryIn": {
+    "placeholders": {
+      "minutes": {
+        "type": "int"
+      }
+    }
+  },
+  "storeMinOrder": "الحد الأدنى للطلب {amount} ر.س",
+  "@storeMinOrder": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "storeClosedOpensTomorrow": "المتجر مغلق الآن ويفتح غدًا {time}. يمكنك تصفّح المنتجات والطلب عند فتحه.",
+  "@storeClosedOpensTomorrow": {
+    "placeholders": {
+      "time": {
+        "type": "String"
+      }
+    }
+  },
+  "storeClosedOpensAt": "المتجر مغلق الآن ويفتح {time}. يمكنك تصفّح المنتجات والطلب عند فتحه.",
+  "@storeClosedOpensAt": {
+    "placeholders": {
+      "time": {
+        "type": "String"
+      }
+    }
+  },
+  "storeClosedNotice": "المتجر مغلق الآن. يمكنك تصفّح المنتجات والطلب عند فتحه.",
+  "storeEmptyTitle": "لا توجد منتجات حاليًا",
+  "storeEmptyBody": "لم يضف هذا المتجر منتجات بعد. جرّب متجرًا آخر.",
+  "storeBrowseStores": "تصفّح المتاجر",
+  "storeErrorTitle": "تعذّر تحميل المتجر",
+  "storeErrorBody": "حدث خطأ أثناء جلب بيانات المتجر. حاول مرة أخرى.",
+  "storeInfo": "معلومات المتجر",
+  "storeHours": "ساعات العمل",
+  "storeHoursValue": "{opens} – {closes}",
+  "@storeHoursValue": {
+    "placeholders": {
+      "opens": {
+        "type": "String"
+      },
+      "closes": {
+        "type": "String"
+      }
+    }
+  },
+  "storeLocation": "الموقع",
+  "storePickup": "الاستلام من المتجر",
+  "storePickupYes": "متاح",
+  "storePickupNo": "غير متاح",
+  "storesTitle": "المتاجر",
+  "searchTitle": "البحث",
+  "productTitle": "المنتج",
+  "storePickupBadge": "استلام من المتجر"
 }

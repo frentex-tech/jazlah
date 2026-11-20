@@ -7,11 +7,14 @@ enum JBadgeSize { m, s }
 
 /// Figma `Badge`: a dot and a label on a tinted pill; type × size M/S.
 class JBadge extends StatelessWidget {
-  const JBadge({required this.label, super.key, this.type = JBadgeType.neutral, this.size = JBadgeSize.m});
+  const JBadge({required this.label, super.key, this.type = JBadgeType.neutral, this.size = JBadgeSize.m, this.icon});
 
   final String label;
   final JBadgeType type;
   final JBadgeSize size;
+
+  /// Replaces the dot (same colour).
+  final IconData? icon;
 
   @override
   Widget build(BuildContext context) {
@@ -31,11 +34,14 @@ class JBadge extends StatelessWidget {
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
-          Container(
-            width: 8,
-            height: 8,
-            decoration: BoxDecoration(color: dot, shape: BoxShape.circle),
-          ),
+          if (icon != null)
+            Icon(icon, size: m ? 16 : 14, color: dot)
+          else
+            Container(
+              width: 8,
+              height: 8,
+              decoration: BoxDecoration(color: dot, shape: BoxShape.circle),
+            ),
           const SizedBox(width: 6),
           Flexible(
             child: Text(

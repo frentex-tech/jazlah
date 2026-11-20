@@ -79,7 +79,8 @@ class JProductCard extends StatelessWidget {
                   const SizedBox(height: 6),
                   Text(
                     title,
-                    maxLines: 2,
+                    // One line as in Figma: grids give every card the same height.
+                    maxLines: 1,
                     overflow: TextOverflow.ellipsis,
                     style: JText.labelM.copyWith(color: strong),
                   ),

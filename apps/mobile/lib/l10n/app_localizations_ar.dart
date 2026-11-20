@@ -805,4 +805,195 @@ class AppLocalizationsAr extends AppLocalizations {
   String addrLimitReached(int limit) {
     return 'وصلت إلى الحد الأقصى من العناوين ($limit). احذف عنوانًا لإضافة آخر.';
   }
+
+  @override
+  String get seeAll => 'الكل';
+
+  @override
+  String get filters => 'تصفية';
+
+  @override
+  String get currency => 'ر.س';
+
+  @override
+  String get addToCart => 'أضف إلى السلة';
+
+  @override
+  String get freshToday => 'ذُبح اليوم';
+
+  @override
+  String get unavailableNow => 'غير متاح حاليًا';
+
+  @override
+  String get offlineTitle => 'لا يوجد اتصال بالإنترنت';
+
+  @override
+  String get offlineBody => 'تحقق من اتصالك ثم أعد المحاولة.';
+
+  @override
+  String get loadMoreFailed => 'تعذّر تحميل المزيد.';
+
+  @override
+  String get timeAm => 'ص';
+
+  @override
+  String get timePm => 'م';
+
+  @override
+  String get homeSearchHint => 'ابحث عن لحوم أو متاجر';
+
+  @override
+  String get homeCategories => 'الأقسام';
+
+  @override
+  String get homeBestSellers => 'الأكثر مبيعًا';
+
+  @override
+  String get homePartnerStores => 'متاجر شريكة';
+
+  @override
+  String get homeStoresPaused => 'المتاجر القريبة منك متوقفة مؤقتًا. تصفّح الآن واطلب عند عودتها.';
+
+  @override
+  String get homeEmptyTitle => 'لا توجد متاجر في منطقتك بعد';
+
+  @override
+  String get homeEmptyBody => 'نعمل على الوصول إلى حيّك قريبًا. جرّب عنوانًا آخر.';
+
+  @override
+  String get homeChangeAddress => 'تغيير العنوان';
+
+  @override
+  String get homeErrorTitle => 'تعذّر تحميل الصفحة الرئيسية';
+
+  @override
+  String get homeErrorBody => 'حدث خطأ أثناء جلب المتاجر والمنتجات. حاول مرة أخرى.';
+
+  @override
+  String get categoriesSubtitle => 'اختر القسم الذي يناسب طلبك.';
+
+  @override
+  String get categoriesComing => 'أقسام قادمة';
+
+  @override
+  String get categoriesEmptyTitle => 'لا توجد أقسام متاحة';
+
+  @override
+  String get categoriesEmptyBody => 'لا تتوفر أقسام في منطقتك حاليًا. تحقق مرة أخرى قريبًا.';
+
+  @override
+  String get backToHome => 'العودة للرئيسية';
+
+  @override
+  String get categoriesErrorTitle => 'تعذّر تحميل الأقسام';
+
+  @override
+  String get categoriesErrorBody => 'حدث خطأ أثناء جلب الأقسام. حاول مرة أخرى.';
+
+  @override
+  String get categoryEmptyTitle => 'لا توجد منتجات في هذا القسم بعد';
+
+  @override
+  String get categoryEmptyBody => 'تصفّح الأقسام الأخرى أو عُد لاحقًا.';
+
+  @override
+  String get productsErrorTitle => 'تعذّر تحميل المنتجات';
+
+  @override
+  String get productsErrorBody => 'حدث خطأ أثناء جلب المنتجات. حاول مرة أخرى.';
+
+  @override
+  String get sortPopular => 'الأكثر مبيعًا';
+
+  @override
+  String get sortPriceAsc => 'الأقل سعرًا';
+
+  @override
+  String get sortPriceDesc => 'الأعلى سعرًا';
+
+  @override
+  String storeRating(String rating, int count) {
+    return '$rating ($count تقييم)';
+  }
+
+  @override
+  String storeOpenUntil(String time) {
+    return 'مفتوح حتى $time';
+  }
+
+  @override
+  String get storeClosedNow => 'مغلق الآن';
+
+  @override
+  String storeDeliveryIn(int minutes) {
+    return 'توصيل خلال $minutes دقيقة';
+  }
+
+  @override
+  String storeMinOrder(String amount) {
+    return 'الحد الأدنى للطلب $amount ر.س';
+  }
+
+  @override
+  String storeClosedOpensTomorrow(String time) {
+    return 'المتجر مغلق الآن ويفتح غدًا $time. يمكنك تصفّح المنتجات والطلب عند فتحه.';
+  }
+
+  @override
+  String storeClosedOpensAt(String time) {
+    return 'المتجر مغلق الآن ويفتح $time. يمكنك تصفّح المنتجات والطلب عند فتحه.';
+  }
+
+  @override
+  String get storeClosedNotice => 'المتجر مغلق الآن. يمكنك تصفّح المنتجات والطلب عند فتحه.';
+
+  @override
+  String get storeEmptyTitle => 'لا توجد منتجات حاليًا';
+
+  @override
+  String get storeEmptyBody => 'لم يضف هذا المتجر منتجات بعد. جرّب متجرًا آخر.';
+
+  @override
+  String get storeBrowseStores => 'تصفّح المتاجر';
+
+  @override
+  String get storeErrorTitle => 'تعذّر تحميل المتجر';
+
+  @override
+  String get storeErrorBody => 'حدث خطأ أثناء جلب بيانات المتجر. حاول مرة أخرى.';
+
+  @override
+  String get storeInfo => 'معلومات المتجر';
+
+  @override
+  String get storeHours => 'ساعات العمل';
+
+  @override
+  String storeHoursValue(String opens, String closes) {
+    return '$opens – $closes';
+  }
+
+  @override
+  String get storeLocation => 'الموقع';
+
+  @override
+  String get storePickup => 'الاستلام من المتجر';
+
+  @override
+  String get storePickupYes => 'متاح';
+
+  @override
+  String get storePickupNo => 'غير متاح';
+
+  @override
+  String get storesTitle => 'المتاجر';
+
+  @override
+  String get searchTitle => 'البحث';
+
+  @override
+  String get productTitle => 'المنتج';
+
+  @override
+  String get storePickupBadge => 'استلام من المتجر';
 }

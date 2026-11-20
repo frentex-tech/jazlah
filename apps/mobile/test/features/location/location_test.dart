@@ -3,10 +3,13 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:go_router/go_router.dart';
 import 'package:jazlah/app/providers.dart';
-import 'package:jazlah/app/shell/home_tab.dart';
+import 'package:jazlah/app/shell/main_shell.dart';
 import 'package:jazlah/core/config/env.dart';
 import 'package:jazlah/core/storage/prefs.dart';
 import 'package:jazlah/core/widgets/widgets.dart';
+import 'package:jazlah/features/catalog/data/mock_catalog_repository.dart';
+import 'package:jazlah/features/catalog/presentation/catalog_providers.dart';
+import 'package:jazlah/features/home/presentation/home_screen.dart';
 import 'package:jazlah/features/location/data/location_repositories.dart';
 import 'package:jazlah/features/location/domain/location.dart';
 import 'package:jazlah/features/location/presentation/location_providers.dart';
@@ -37,6 +40,7 @@ List<dynamic> _o(DeviceLocation device, {Geocoder? geocoder, CoverageRepository?
   deviceLocationProvider.overrideWithValue(device),
   geocoderProvider.overrideWithValue(geocoder ?? MockGeocoder()),
   coverageRepositoryProvider.overrideWithValue(coverage ?? MockCoverageRepository()),
+  catalogRepositoryProvider.overrideWithValue(MockCatalogRepository()),
 ];
 
 JButton _button(WidgetTester t, String label) => t.widget<JButton>(find.widgetWithText(JButton, label));
@@ -84,7 +88,7 @@ void main() {
   testWidgets('an out-of-coverage location shows the pickup banner on home, browsing stays open', (t) async {
     const outside = SelectedLocation(point: GeoPoint(23.2, 45.1), line: 'حي بعيد', covered: false);
     await t.pumpScreen(
-      const HomeTab(),
+      const MainShell(location: '/home', child: HomeScreen()),
       overrides: _o(MockDeviceLocation()),
       prefs: {'locale': 'ar', 'location.selected': '{"lat":23.2,"lng":45.1,"line":"حي بعيد","covered":false}'},
     );
@@ -97,7 +101,7 @@ void main() {
 
   testWidgets('home re-checks the saved location: a zone added since clears the banner', (t) async {
     await t.pumpScreen(
-      const HomeTab(),
+      const MainShell(location: '/home', child: HomeScreen()),
       overrides: _o(MockDeviceLocation()),
       prefs: {'locale': 'ar', 'location.selected': '{"lat":24.8,"lng":46.6,"line":"حي الملقا","covered":false}'},
     );

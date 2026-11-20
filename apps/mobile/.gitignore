@@ -57,3 +57,6 @@ ios/Flutter/Secrets.xcconfig
 # Design QA renders (tool/screenshots)
 tool/screenshots/out/
 tool/screenshots/failures/
+
+# Golden test failure diffs
+test/**/failures/
