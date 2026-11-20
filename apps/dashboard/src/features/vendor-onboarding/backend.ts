@@ -130,11 +130,15 @@ export const mockStorage = {
     m.bytes = bytes;
     return true;
   },
-  get: (key: string) => {
+  /** `signed`: an admin's document link (features/admin-vendors), which may serve a private file. */
+  get: (key: string, signed = false) => {
     const m = state.media.get(key);
-    return m?.bytes && m.purpose !== 'vendor.document' ? m : null;
+    return m?.bytes && (signed || m.purpose !== 'vendor.document') ? m : null;
   },
 };
+
+/** The applications of this mock, shared with the admin review mock (features/admin-vendors/backend.ts). */
+export const mockApplications = state.applications;
 
 export const mockOnboarding: VendorOnboardingBackend = {
   async latestApplication(token) {

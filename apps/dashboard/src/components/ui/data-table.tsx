@@ -48,11 +48,13 @@ type Props<T> = {
   empty?: React.ReactNode;
   /** Row actions menu trigger (the ⋯ cell). Omit to hide the column. */
   rowActions?: (row: T) => React.ReactNode;
+  /** Page tables of the Sprint 2 frames (131:16744): 64px rows, 24px side padding. */
+  tall?: boolean;
 };
 
 // Figma DS «Data table» (16:1564): states default, loading, empty, error. Paging, sorting and filters are the caller's.
 export function DataTable<T>({
-  columns, data, status, label, hasPrev, hasNext, onPrev, onNext, loadingRows = 10, sorting = [], onSortingChange, columnVisibility, onRetry, empty, rowActions,
+  columns, data, status, label, hasPrev, hasNext, onPrev, onNext, loadingRows = 10, sorting = [], onSortingChange, columnVisibility, onRetry, empty, rowActions, tall,
 }: Props<T>) {
   const t = useTranslations();
   const table = useReactTable({
@@ -68,7 +70,8 @@ export function DataTable<T>({
 
   const leafColumns = table.getVisibleLeafColumns();
   const cell = 'flex shrink-0 items-center px-s8';
-  const row = 'flex items-center px-s32';
+  const row = cn('flex items-center', tall ? 'px-s24' : 'px-s32');
+  const rowH = tall ? 'h-16' : 'h-14';
 
   return (
     <div className="w-full overflow-hidden rounded-md border border-line bg-paper" aria-busy={status === 'loading'}>
@@ -101,7 +104,7 @@ export function DataTable<T>({
 
         {status === 'loading' &&
           Array.from({ length: loadingRows }, (_, i) => (
-            <div key={i} role="row" className={cn(row, 'h-14 border-b border-line')}>
+            <div key={i} role="row" className={cn(row, rowH, 'border-b border-line')}>
               {leafColumns.map((c) => (
                 <div key={c.id} role="cell" className={cell} style={{ width: c.columnDef.meta?.width }}>
                   <Skeleton style={{ width: c.columnDef.meta?.skeleton ?? 90 }} />
@@ -113,14 +116,14 @@ export function DataTable<T>({
 
         {status === 'ready' &&
           table.getRowModel().rows.map((r) => (
-            <div key={r.id} role="row" className={cn(row, 'h-14 border-b border-line text-body-m text-ink')}>
+            <div key={r.id} role="row" className={cn(row, rowH, 'border-b border-line text-body-m text-ink')}>
               {r.getVisibleCells().map((c) => (
-                <div key={c.id} role="cell" className={cn(cell, 'h-14')} style={{ width: c.column.columnDef.meta?.width }}>
+                <div key={c.id} role="cell" className={cn(cell, rowH)} style={{ width: c.column.columnDef.meta?.width }}>
                   {flexRender(c.column.columnDef.cell, c.getContext())}
                 </div>
               ))}
               {rowActions && (
-                <div role="cell" className={cn(cell, 'h-14 w-[52px]')}>
+                <div role="cell" className={cn(cell, rowH, 'w-[52px]')}>
                   {rowActions(r.original)}
                 </div>
               )}
@@ -146,7 +149,7 @@ export function DataTable<T>({
       )}
 
       {(status === 'loading' || (status === 'ready' && data.length > 0)) && (
-        <nav className="flex h-14 items-center justify-between px-s32" aria-label={t('table.paging')}>
+        <nav className={cn('flex h-14 items-center justify-between', tall ? 'px-s24' : 'px-s32')} aria-label={t('table.paging')}>
           <p className="text-body-m text-ink-2">{status === 'ready' ? t('table.showing', { count: data.length }) : ' '}</p>
           <div className="flex items-center gap-s8">
             <PageButton label={t('table.prev')} disabled={!hasPrev || status !== 'ready'} onClick={onPrev}>

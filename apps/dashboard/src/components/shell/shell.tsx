@@ -1,3 +1,4 @@
+import { Toaster } from '@/components/ui/toast';
 import type { Panel } from '@/lib/session';
 import { SideNav } from './side-nav';
 import { TopBar } from './top-bar';
@@ -11,6 +12,7 @@ export function Shell({ panel, userName, children }: { panel: Panel; userName: s
         <TopBar userName={userName} />
         <main className="flex flex-1 flex-col gap-s24 p-s24">{children}</main>
       </div>
+      <Toaster />
     </div>
   );
 }
