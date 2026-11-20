@@ -47,7 +47,7 @@ export function ProductsList() {
   // The filters' options: vendors (active ones, JAZLA included) and categories; a failure leaves a filter empty.
   useEffect(() => {
     loadAll<Vendor>('/api/admin/vendors?status=active').then(setVendors, () => {});
-    loadAll<RefItem>('/api/admin/catalog/lists/categories').then(setCategories, () => {});
+    loadAll<RefItem>('/api/admin/catalog/lists/categories').then((c) => setCategories(c.sort((a, b) => (a.sortOrder ?? 0) - (b.sortOrder ?? 0))), () => {});
   }, []);
   const platformId = vendors.find((v) => v.isPlatform)?.id;
 

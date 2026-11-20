@@ -77,7 +77,9 @@ test('products: filters by status, store and category, the empty state, and the 
 test('exit criteria: a JAZLA carcass with 3 sizes, cuts (one priced), packaging with an incompatible pair and exclusions', async ({ page, context }) => {
   await signInAs(context, ['admin']);
   await page.goto('/admin/catalog/products');
+  await expect(products(page).getByText('ريب آي بقري طازج')).toBeVisible(); // hydrated before the click
   await page.getByRole('link', { name: 'إضافة منتج' }).click();
+  await expect(page).toHaveURL(/\/admin\/catalog\/products\/new$/, { timeout: 15_000 });
   await expect(page.getByRole('heading', { level: 1, name: 'منتج جديد' })).toBeVisible();
 
   await page.getByLabel('اسم المنتج', { exact: true }).fill('ذبيحة نعيمي كاملة');
