@@ -2006,17 +2006,227 @@ abstract class AppLocalizations {
   /// **'البحث'**
   String get searchTitle;
 
-  /// No description provided for @productTitle.
-  ///
-  /// In ar, this message translates to:
-  /// **'المنتج'**
-  String get productTitle;
-
   /// No description provided for @storePickupBadge.
   ///
   /// In ar, this message translates to:
   /// **'استلام من المتجر'**
   String get storePickupBadge;
+
+  /// No description provided for @productTitle.
+  ///
+  /// In ar, this message translates to:
+  /// **'تفاصيل المنتج'**
+  String get productTitle;
+
+  /// No description provided for @productUnavailableNotice.
+  ///
+  /// In ar, this message translates to:
+  /// **'هذا المنتج غير متاح حاليًا.'**
+  String get productUnavailableNotice;
+
+  /// No description provided for @productSlaughteredAt.
+  ///
+  /// In ar, this message translates to:
+  /// **'ذُبح اليوم {time}'**
+  String productSlaughteredAt(String time);
+
+  /// No description provided for @productDeliveredWithin.
+  ///
+  /// In ar, this message translates to:
+  /// **'{hours, plural, =1{يُبرَّد ويُسلَّم طازجًا خلال ساعة} =2{يُبرَّد ويُسلَّم طازجًا خلال ساعتين} few{يُبرَّد ويُسلَّم طازجًا خلال {hours} ساعات} other{يُبرَّد ويُسلَّم طازجًا خلال {hours} ساعة}}'**
+  String productDeliveredWithin(int hours);
+
+  /// No description provided for @productSize.
+  ///
+  /// In ar, this message translates to:
+  /// **'الحجم'**
+  String get productSize;
+
+  /// No description provided for @productRequiredOne.
+  ///
+  /// In ar, this message translates to:
+  /// **'مطلوب · اختر واحدًا'**
+  String get productRequiredOne;
+
+  /// No description provided for @productCut.
+  ///
+  /// In ar, this message translates to:
+  /// **'التقطيع'**
+  String get productCut;
+
+  /// No description provided for @productPackaging.
+  ///
+  /// In ar, this message translates to:
+  /// **'التغليف'**
+  String get productPackaging;
+
+  /// No description provided for @productPackagingHint.
+  ///
+  /// In ar, this message translates to:
+  /// **'بعض الخيارات تتغيّر حسب التقطيع'**
+  String get productPackagingHint;
+
+  /// No description provided for @productExclusions.
+  ///
+  /// In ar, this message translates to:
+  /// **'الاستثناءات'**
+  String get productExclusions;
+
+  /// No description provided for @productExclusionsHint.
+  ///
+  /// In ar, this message translates to:
+  /// **'اختياري · نُزيلها لك أثناء التقطيع'**
+  String get productExclusionsHint;
+
+  /// No description provided for @productNotes.
+  ///
+  /// In ar, this message translates to:
+  /// **'ملاحظات للجزّار (اختياري)'**
+  String get productNotes;
+
+  /// No description provided for @productNotesPlaceholder.
+  ///
+  /// In ar, this message translates to:
+  /// **'اكتب هنا'**
+  String get productNotesPlaceholder;
+
+  /// No description provided for @productNotesExample.
+  ///
+  /// In ar, this message translates to:
+  /// **'مثال: شرائح رفيعة وبدون تتبيل'**
+  String get productNotesExample;
+
+  /// No description provided for @productQuantity.
+  ///
+  /// In ar, this message translates to:
+  /// **'الكمية'**
+  String get productQuantity;
+
+  /// No description provided for @productDecrease.
+  ///
+  /// In ar, this message translates to:
+  /// **'إنقاص الكمية'**
+  String get productDecrease;
+
+  /// No description provided for @productIncrease.
+  ///
+  /// In ar, this message translates to:
+  /// **'زيادة الكمية'**
+  String get productIncrease;
+
+  /// No description provided for @productFree.
+  ///
+  /// In ar, this message translates to:
+  /// **'مجاني'**
+  String get productFree;
+
+  /// No description provided for @productExtra.
+  ///
+  /// In ar, this message translates to:
+  /// **'+{amount} ر.س'**
+  String productExtra(String amount);
+
+  /// No description provided for @productPrice.
+  ///
+  /// In ar, this message translates to:
+  /// **'{amount} ر.س'**
+  String productPrice(String amount);
+
+  /// No description provided for @weightGrams.
+  ///
+  /// In ar, this message translates to:
+  /// **'{n} جم'**
+  String weightGrams(String n);
+
+  /// No description provided for @weightKg.
+  ///
+  /// In ar, this message translates to:
+  /// **'{n} كجم'**
+  String weightKg(String n);
+
+  /// No description provided for @productIncompatible.
+  ///
+  /// In ar, this message translates to:
+  /// **'غير متاح مع التقطيع المختار: {cut}'**
+  String productIncompatible(String cut);
+
+  /// No description provided for @productIncompatibleHelp.
+  ///
+  /// In ar, this message translates to:
+  /// **'غيّر التقطيع إلى {cuts} لاختيار هذا الخيار'**
+  String productIncompatibleHelp(String cuts);
+
+  /// No description provided for @productQuoted.
+  ///
+  /// In ar, this message translates to:
+  /// **'«{name}»'**
+  String productQuoted(String name);
+
+  /// No description provided for @productOr.
+  ///
+  /// In ar, this message translates to:
+  /// **' أو '**
+  String get productOr;
+
+  /// No description provided for @productTotal.
+  ///
+  /// In ar, this message translates to:
+  /// **'الإجمالي'**
+  String get productTotal;
+
+  /// No description provided for @productPriceDetails.
+  ///
+  /// In ar, this message translates to:
+  /// **'تفاصيل السعر'**
+  String get productPriceDetails;
+
+  /// No description provided for @productCutLine.
+  ///
+  /// In ar, this message translates to:
+  /// **'التقطيع ({cut})'**
+  String productCutLine(String cut);
+
+  /// No description provided for @productDelivery.
+  ///
+  /// In ar, this message translates to:
+  /// **'التوصيل'**
+  String get productDelivery;
+
+  /// No description provided for @productDeliveryAtCheckout.
+  ///
+  /// In ar, this message translates to:
+  /// **'يُحسب في الدفع'**
+  String get productDeliveryAtCheckout;
+
+  /// No description provided for @productUnavailable.
+  ///
+  /// In ar, this message translates to:
+  /// **'غير متاح'**
+  String get productUnavailable;
+
+  /// No description provided for @productChooseCut.
+  ///
+  /// In ar, this message translates to:
+  /// **'اختر طريقة التقطيع قبل الإضافة إلى السلة'**
+  String get productChooseCut;
+
+  /// No description provided for @productCartSoon.
+  ///
+  /// In ar, this message translates to:
+  /// **'السلة قادمة قريبًا، لم تُضَف القطعة بعد.'**
+  String get productCartSoon;
+
+  /// No description provided for @productErrorTitle.
+  ///
+  /// In ar, this message translates to:
+  /// **'تعذّر تحميل المنتج'**
+  String get productErrorTitle;
+
+  /// No description provided for @productErrorBody.
+  ///
+  /// In ar, this message translates to:
+  /// **'حدث خطأ أثناء جلب تفاصيل المنتج. حاول مرة أخرى.'**
+  String get productErrorBody;
 }
 
 class _AppLocalizationsDelegate extends LocalizationsDelegate<AppLocalizations> {

@@ -44,7 +44,7 @@ void main() {
       expect(find.text('الأغنام'), findsOneWidget);
       await _scrollTo(t, find.text('ريب آي بقري طازج'));
       expect(find.text('مجازر الفلاح'), findsWidgets); // vendor on the card
-      expect(find.text('89.00'), findsOneWidget);
+      expect(find.text('49.50'), findsOneWidget);
       expect(find.text('ذُبح اليوم'), findsWidgets);
       await _scrollTo(t, find.text('متاجر شريكة'));
       expect(find.byType(JStoreCard), findsNWidgets(3));

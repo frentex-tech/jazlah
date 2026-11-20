@@ -29,6 +29,10 @@ abstract final class JIcons {
   static const caretRight = IconData(0xe13a, fontFamily: _regular, fontPackage: _package);
   static const caretLeft = IconData(0xe138, fontFamily: _regular, fontPackage: _package);
   static const caretDown = IconData(0xe136, fontFamily: _regular, fontPackage: _package);
+  static const caretUp = IconData(0xe13c, fontFamily: _regular, fontPackage: _package);
+  static const info = IconData(0xe2ce, fontFamily: _regular, fontPackage: _package);
+  static const minus = IconData(0xe32a, fontFamily: _regular, fontPackage: _package);
+  static const prohibit = IconData(0xe3de, fontFamily: _regular, fontPackage: _package);
   static const bell = IconData(0xe0ce, fontFamily: _regular, fontPackage: _package);
   static const x = IconData(0xe4f6, fontFamily: _regular, fontPackage: _package);
   static const slidersHorizontal = IconData(0xe434, fontFamily: _regular, fontPackage: _package);

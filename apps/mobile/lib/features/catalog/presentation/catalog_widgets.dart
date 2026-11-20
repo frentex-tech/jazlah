@@ -254,11 +254,13 @@ class TileRows extends StatelessWidget {
   );
 }
 
-/// Warning notice with a clock: stores paused (home), store closed (store page).
+/// Warning notice with a clock: stores paused (home), store closed (store page); a warning sign:
+/// product unavailable.
 class CatalogNotice extends StatelessWidget {
-  const CatalogNotice(this.text, {super.key});
+  const CatalogNotice(this.text, {super.key, this.icon = JIcons.clock});
 
   final String text;
+  final IconData icon;
 
   @override
   Widget build(BuildContext context) => Container(
@@ -267,7 +269,7 @@ class CatalogNotice extends StatelessWidget {
     decoration: BoxDecoration(color: JColors.warningBg, borderRadius: BorderRadius.circular(JRadius.md)),
     child: Row(
       children: [
-        const Icon(JIcons.clock, size: 24, color: JColors.ink),
+        Icon(icon, size: 24, color: JColors.ink),
         const SizedBox(width: JSpace.s12),
         Expanded(child: Text(text, style: JText.bodyM)),
       ],
