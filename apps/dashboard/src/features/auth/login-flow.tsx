@@ -7,7 +7,7 @@ import { OtpField } from '@/components/ui/otp-field';
 import { PhoneInput } from '@/components/ui/phone-input';
 import { Link } from '@/i18n/navigation';
 import { formatNational } from '@/lib/phone';
-import type { Panel } from '@/lib/session';
+import type { Session } from '@/lib/session';
 import { CardTitle } from './login-layout';
 
 type ApiError = { code: string; retryAfter?: number };
@@ -22,8 +22,11 @@ async function post<T>(url: string, body: unknown): Promise<T | ApiError> {
 }
 const isError = (r: object): r is ApiError => 'code' in r;
 
-/** Phone → code. Each step follows the Figma states: default, loading (spinner in the button), error. */
-export function LoginFlow({ panel, next, otpLength, reason }: { panel: Panel; next?: string; otpLength: number; reason?: 'disabled' | 'suspended' }) {
+/**
+ * Phone → code. Each step follows the Figma states: default, loading (spinner in the button), error. `customer` is the
+ * vendor application's sign-in (410:40299, 410:40343): same steps, its own texts.
+ */
+export function LoginFlow({ panel, next, otpLength, reason }: { panel: Session; next?: string; otpLength: number; reason?: 'disabled' | 'suspended' }) {
   const t = useTranslations('login');
   const locale = useLocale();
   const [step, setStep] = useState<'phone' | 'otp'>('phone');
@@ -144,13 +147,13 @@ export function LoginFlow({ panel, next, otpLength, reason }: { panel: Panel; ne
   );
 }
 
-function Footer({ panel }: { panel: Panel }) {
+function Footer({ panel }: { panel: Session }) {
   const t = useTranslations(`login.${panel}`);
-  if (panel !== 'vendor') return <p className="text-body-m text-ink-2">{t('footer')}</p>;
+  if (panel !== 'vendor' && panel !== 'customer') return <p className="text-body-m text-ink-2">{t('footer')}</p>;
   return (
     <p className="text-body-m text-ink-2">
       {t('footer')}{' '}
-      <Link href="/vendor/apply" className="hover:underline">
+      <Link href={panel === 'vendor' ? '/vendor/apply' : '/login?panel=vendor'} className="hover:underline">
         {t('apply')}
       </Link>
     </p>

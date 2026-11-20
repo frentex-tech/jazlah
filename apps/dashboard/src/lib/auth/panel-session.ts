@@ -1,5 +1,5 @@
 import { NextResponse, type NextRequest } from 'next/server';
-import { PANELS_COOKIE, accessCookie, parsePanels, refreshCookie, type Panel } from '../session';
+import { PANELS_COOKIE, accessCookie, parseSessions, refreshCookie, type Session } from '../session';
 import { REFRESH_ENDS_SESSION, authBackend, type Tokens } from './backend';
 import { clearPanel, writePanels, writeTokens } from './cookies';
 import { clientIp, isSameOriginJson, sameOrigin, statusOf } from './request';
@@ -35,7 +35,7 @@ const SIGNED_OUT = new Set(['UNAUTHORIZED', 'FORBIDDEN', 'REFRESH_TOKEN_INVALID'
  */
 export async function withPanelSession<T>(
   req: NextRequest,
-  panel: Panel,
+  panel: Session, // a staff panel, or 'customer' for the vendor application
   call: (accessToken: string) => Promise<ApiResult<T>>,
 ): Promise<NextResponse> {
   if (req.method !== 'GET' && req.method !== 'HEAD') {
@@ -43,7 +43,7 @@ export async function withPanelSession<T>(
     if (!(hasBody ? isSameOriginJson(req) : sameOrigin(req))) return NextResponse.json({ code: 'FORBIDDEN' }, { status: 403 });
   }
 
-  const panels = parsePanels(req.cookies.get(PANELS_COOKIE)?.value);
+  const panels = parseSessions(req.cookies.get(PANELS_COOKIE)?.value);
   const refreshToken = req.cookies.get(refreshCookie(panel))?.value;
   const signedOut = async (code: string, endApiSession = false) => {
     const res = NextResponse.json({ code }, { status: 401 });
