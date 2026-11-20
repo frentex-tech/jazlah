@@ -56,6 +56,8 @@ export type ProductFormProps = {
   onChange?: (values: ProductFormValues) => void;
   /** Shown above the footer (e.g. the «will be re-reviewed» warning). */
   notice?: React.ReactNode;
+  /** Open on a published product's pending change request, not the live content (the vendor's proposed edit). */
+  preferPending?: boolean;
 };
 
 const SECTION_OF: [string, RegExp][] = [
@@ -85,11 +87,11 @@ export function ProductFormSkeleton({ label }: { label: string }) {
  * 131:35813 new, 131:36439 validation. It knows no endpoint: the page passes the options, the upload, the rules
  * editor and the submit. Errors from the API (VALIDATION_FAILED paths, PRODUCT_NOT_SUBMITTABLE) land on the fields.
  */
-export function ProductForm({ product, options, upload, setRule, actions, deleteLabel, onSubmit, readOnly, onChange, notice }: ProductFormProps) {
+export function ProductForm({ product, options, upload, setRule, actions, deleteLabel, onSubmit, readOnly, onChange, notice, preferPending }: ProductFormProps) {
   const t = useTranslations('catalog.form');
   const tg = useTranslations();
   const locale = useLocale();
-  const [s, setS] = useState<FormState>(() => stateOf(product));
+  const [s, setS] = useState<FormState>(() => stateOf(product, preferPending));
   const [errors, setErrors] = useState<Errors>({});
   const [busy, setBusy] = useState<string | null>(null);
   const [rules, setRules] = useState(options.rules);
@@ -117,7 +119,7 @@ export function ProductForm({ product, options, upload, setRule, actions, delete
     if (Object.keys(own).length) return;
     setBusy(intent);
     try {
-      setS(stateOf(await onSubmit(values, intent)));
+      setS(stateOf(await onSubmit(values, intent), preferPending));
     } catch (err) {
       const cause = err instanceof SubmitError ? err.cause : err;
       const saved = err instanceof SubmitError ? err.product : undefined;

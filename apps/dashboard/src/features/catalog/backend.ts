@@ -163,11 +163,11 @@ function seed(): MockState {
   return { items, rules, products, seedImages, changeRequests };
 }
 
-/** A product's content as a change request holds it (ProductContentResponseDto). */
+/** A product's content as a change request holds it (ProductContentResponseDto): its cuttings carry no names (null). */
 export function contentResponse(p: Pick<Product, 'name' | 'description' | 'category' | 'meatType' | 'images' | 'sizes' | 'cuttings' | 'packagings' | 'exclusions'>): ChangeRequest['content'] {
   return {
     name: p.name, description: p.description, categoryId: p.category.id, meatTypeId: p.meatType?.id ?? null, images: p.images, sizes: p.sizes,
-    cuttings: p.cuttings, packagings: p.packagings, exclusionItemIds: p.exclusions.map((x) => x.id),
+    cuttings: p.cuttings.map((c) => ({ ...c, name: null })), packagings: p.packagings, exclusionItemIds: p.exclusions.map((x) => x.id),
   };
 }
 
@@ -412,7 +412,8 @@ export const mockAdminCatalog: AdminCatalogBackend = {
     const meat = k.meatTypeId ? mock.items['meat-types'].find((x) => x.id === k.meatTypeId) : null;
     const next: Product = {
       ...p, name: k.name, description: k.description, category: ref(category), meatType: meat ? ref(meat) : null, images: k.images, sizes,
-      cuttings: live(k.cuttings, p.cuttings, (a, b) => a.cuttingStyleId === b.cuttingStyleId, (o) => ({ extraPriceHalalas: o.extraPriceHalalas })),
+      cuttings: live(k.cuttings, p.cuttings, (a, b) => a.cuttingStyleId === b.cuttingStyleId, (o) => ({ extraPriceHalalas: o.extraPriceHalalas }))
+        .map((c) => ({ ...c, name: mock.items['cutting-styles'].find((x) => x.id === c.cuttingStyleId)?.name ?? null })),
       packagings: live(k.packagings, p.packagings, (a, b) => a.packaging === b.packaging, (o) => ({ extraPriceHalalas: o.extraPriceHalalas })),
       exclusions: k.exclusionItemIds.map((x) => ref(mock.items['exclusion-items'].find((e) => e.id === x)!)),
       minPriceHalalas: sizes.length ? Math.min(...sizes.map((s) => s.priceHalalas)) : null, changeRequest: cr, updatedAt: now,

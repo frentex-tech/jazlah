@@ -12,6 +12,7 @@ import { StateCard } from '@/components/ui/state-card';
 import { Link } from '@/i18n/navigation';
 import { dayOf, timeOf } from '@/lib/date';
 import { sar } from '@/lib/money';
+import { cn } from '@/lib/utils';
 import { ApiError } from '@/lib/panel-fetch';
 import { productBadge } from './products-list';
 import type { Product } from './types';
@@ -110,7 +111,7 @@ export function ReviewNotes({ id }: { id: string }) {
                 <Link href={edit} className={buttonVariants({ variant: 'secondary', size: 'S' })}>{t('fix')}</Link>
               </div>
               <div className="flex gap-s12">
-                <Link href={edit} className={`${buttonVariants()} w-[224px]`}>{t('resubmit')}</Link>
+                <Link href={edit} className={cn(buttonVariants(), 'w-[224px]')}>{t('resubmit')}</Link>
                 {/* shortcut: API gap, products cannot be deleted (no DELETE endpoint); shown disabled. */}
                 <Button variant="ghost" className="w-[224px]" disabled>{t('delete')}</Button>
               </div>

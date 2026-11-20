@@ -18,7 +18,7 @@ export function SideNav({ panel, badges: given = {} }: { panel: Panel; badges?: 
   const locale = useLocale();
   const pathname = usePathname();
   const current = activeKey(panel, pathname);
-  const review = useReviewCount(panel === 'admin', pathname);
+  const review = useReviewCount(panel === 'admin');
   const badges = review ? { products: review, ...given } : given;
 
   return (
@@ -65,26 +65,33 @@ export function SideNav({ panel, badges: given = {} }: { panel: Panel; badges?: 
   );
 }
 
+/** The last review count and when it was read, for every mount of the side nav in this tab. */
+let reviewCache: { count: number; at: number } | null = null;
+const REVIEW_TTL = 60_000;
+
 /**
- * Admin: products waiting for review (new and edits, CAT-DSH-2) on «المنتجات», counted again on each page and when the
- * queue decides one (REVIEW_CHANGED in features/catalog/review-queue.tsx). A plain fetch: a refused count (no
- * permission, session over) only hides the badge; the page itself handles the session.
+ * Admin: products waiting for review (new and edits, CAT-DSH-2) on «المنتجات». Read on the first mount, then kept for a
+ * minute across pages, and read again when the queue decides one (REVIEW_CHANGED in features/catalog/review-queue.tsx).
+ * A plain fetch: a refused count (no permission, session over) only hides the badge; the page handles the session.
  */
-function useReviewCount(enabled: boolean, pathname: string) {
-  const [count, setCount] = useState(0);
+function useReviewCount(enabled: boolean) {
+  const [count, setCount] = useState(reviewCache?.count ?? 0);
   useEffect(() => {
     if (!enabled) return;
     let live = true;
     const load = () =>
       fetch('/api/admin/catalog/review-count')
         .then((r) => (r.ok ? (r.json() as Promise<{ count: number }>) : { count: 0 }))
-        .then((d) => live && setCount(d.count), () => {});
-    void load();
+        .then((d) => {
+          reviewCache = { count: d.count, at: Date.now() };
+          if (live) setCount(d.count);
+        }, () => {});
+    if (!reviewCache || Date.now() - reviewCache.at > REVIEW_TTL) void load();
     window.addEventListener('jazlah:review-changed', load);
     return () => {
       live = false;
       window.removeEventListener('jazlah:review-changed', load);
     };
-  }, [enabled, pathname]);
+  }, [enabled]);
   return count;
 }

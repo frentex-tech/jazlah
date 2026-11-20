@@ -3,7 +3,7 @@
 import * as Dialog from '@radix-ui/react-dialog';
 import type { ColumnDef } from '@tanstack/react-table';
 import { useLocale, useTranslations } from 'next-intl';
-import { useCallback, useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { PageHeader } from '@/components/shell/page-header';
 import { Badge } from '@/components/ui/badge';
 import { Button, buttonVariants } from '@/components/ui/button';
@@ -19,7 +19,7 @@ import { dayOf } from '@/lib/date';
 import { sar } from '@/lib/money';
 import { ApiError, panelFetch } from '@/lib/panel-fetch';
 import { loadAll } from './client';
-import { liveContent } from './product-form/values';
+import { editedContent, liveContent } from './product-form/values';
 import type { ChangeRequest, Product, ProductCard, ProductContentResponse, RefItem } from './types';
 
 const BASE = '/api/admin/catalog';
@@ -31,6 +31,13 @@ const PRESETS = ['image', 'description', 'price'] as const;
 
 /** One row: a new product under review, an edit (change request) of a published one, or a decided product. */
 type Item = { key: string; kind: 'new' | 'edit'; product: Product | null; card: ProductCard | null; request: ChangeRequest | null; vendor: string | null; sentAt: string };
+
+/** `f` over `xs`, five at a time; a failure is kept as a rejected result instead of failing the whole list. */
+async function settled<T, R>(xs: T[], f: (x: T) => Promise<R>): Promise<PromiseSettledResult<R>[]> {
+  const out: PromiseSettledResult<R>[] = [];
+  for (let i = 0; i < xs.length; i += 5) out.push(...(await Promise.allSettled(xs.slice(i, i + 5).map(f))));
+  return out;
+}
 
 /** Hours or days since `iso`, for «الانتظار». */
 export function waited(iso: string, now = Date.now()) {
@@ -64,35 +71,43 @@ export function ReviewQueue() {
   const locale = useLocale();
   const [tab, setTab] = useState<Tab>('pending');
   const [data, setData] = useState<Item[] | 'loading' | 'error' | 'denied'>('loading');
-  const [categories, setCategories] = useState<RefItem[]>([]);
+  const [lists, setLists] = useState<{ categories: RefItem[]; cuttingStyles: RefItem[] }>({ categories: [], cuttingStyles: [] });
   const [open, setOpen] = useState<Item | null>(null);
   const nameOf = useCallback((n: { ar: string; en: string } | null | undefined) => (n ? (locale === 'en' ? n.en : n.ar) : '—'), [locale]);
 
   useEffect(() => {
-    loadAll<RefItem>('admin', `${BASE}/lists/categories`).then(setCategories, () => {});
+    loadAll<RefItem>('admin', `${BASE}/lists/categories`).then((categories) => setLists((l) => ({ ...l, categories })), () => {});
+    loadAll<RefItem>('admin', `${BASE}/lists/cutting-styles`).then((cuttingStyles) => setLists((l) => ({ ...l, cuttingStyles })), () => {});
   }, []);
+  // The vendors (names of an edit's store, JAZLA's id), read once; a failure is not kept, so a retry reads again.
+  const vendorList = useRef<Vendor[] | null>(null);
+  const vendors = useCallback(async () => (vendorList.current ??= await loadAll<Vendor>('admin', '/api/admin/vendors')), []);
 
-  // shortcut: API gap (no combined queue, no submittedAt on cards): every page of both lists is loaded, then each
-  // product read for its submission date, vendor and preview. Fine for a review queue's size; page it if it grows.
+  // shortcut: API gap (no combined queue): every page of both lists is loaded; an edit's product is read for its
+  // store (five at a time). Fine for a review queue's size; page it if it grows.
   const load = useCallback(async () => {
     setData('loading');
     try {
-      const vendors = await loadAll<Vendor>('admin', '/api/admin/vendors').catch(() => [] as Vendor[]);
-      const vendorName = (id: string) => nameOf(vendors.find((v) => v.id === id)?.name);
       if (tab === 'pending') {
-        const [cards, requests] = await Promise.all([
+        const [cards, requests, known] = await Promise.all([
           loadAll<ProductCard>('admin', `${BASE}/products?status=pending_review`),
           loadAll<ChangeRequest>('admin', `${BASE}/change-requests`),
+          vendors().catch(() => [] as Vendor[]), // names only: the rows still show without them
         ]);
-        const read = (id: string) => panelFetch<Product>('admin', `${BASE}/products/${id}`);
-        const [fresh, live] = await Promise.all([Promise.all(cards.map((c) => read(c.id))), Promise.all(requests.map((r) => read(r.productId)))]);
+        // A product that cannot be read leaves its row without a store; the dialog reads it again.
+        const live = await settled(requests, (r) => panelFetch<Product>('admin', `${BASE}/products/${r.productId}`));
         const items: Item[] = [
-          ...fresh.map((p, i) => ({ key: p.id, kind: 'new' as const, product: p, card: cards[i]!, request: null, vendor: nameOf(cards[i]!.vendor.name), sentAt: p.submittedAt ?? p.createdAt })),
-          ...live.map((p, i) => ({ key: requests[i]!.id, kind: 'edit' as const, product: p, card: null, request: requests[i]!, vendor: vendorName(p.vendorId), sentAt: requests[i]!.createdAt })),
+          // The card has no submittedAt (API gap): a new product is dated by its creation; read when opened.
+          ...cards.map((c) => ({ key: c.id, kind: 'new' as const, product: null, card: c, request: null, vendor: nameOf(c.vendor.name), sentAt: c.createdAt })),
+          ...requests.map((r, i) => {
+            const res = live[i]!;
+            const p = res.status === 'fulfilled' ? res.value : null;
+            return { key: r.id, kind: 'edit' as const, product: p, card: null, request: r, vendor: p ? nameOf(known.find((v) => v.id === p.vendorId)?.name) : null, sentAt: r.createdAt };
+          }),
         ];
         setData(items.sort((a, b) => b.sentAt.localeCompare(a.sentAt)));
       } else {
-        const platform = vendors.find((v) => v.isPlatform)?.id;
+        const platform = (await vendors()).find((v) => v.isPlatform)?.id;
         const cards = await loadAll<ProductCard>('admin', `${BASE}/products?status=${tab === 'approved' ? 'published' : 'rejected'}`);
         // The decided lists are the vendors' products; JAZLA's own are published without review.
         setData(cards.filter((c) => c.vendor.id !== platform).map((c) => ({ key: c.id, kind: 'new', product: null, card: c, request: null, vendor: nameOf(c.vendor.name), sentAt: c.createdAt })));
@@ -100,7 +115,7 @@ export function ReviewQueue() {
     } catch (e) {
       setData(e instanceof ApiError && e.code === 'NOT_ALLOWED' ? 'denied' : 'error');
     }
-  }, [tab, nameOf]);
+  }, [tab, nameOf, vendors]);
   useEffect(() => void load(), [load]);
 
   const columns = useMemo<ColumnDef<Item, unknown>[]>(
@@ -195,16 +210,16 @@ export function ReviewQueue() {
           </div>
         </div>
       )}
-      <ReviewDialog item={open} pending={tab === 'pending'} categories={categories} onClose={() => setOpen(null)} onDecided={decided} onStale={stale} />
+      <ReviewDialog item={open} pending={tab === 'pending'} lists={lists} onClose={() => setOpen(null)} onDecided={decided} onStale={stale} />
     </>
   );
 }
 
 /** The review dialog (131:23859): the product as the customer would see it, then approve, or reject with a reason. */
-function ReviewDialog({ item, pending, categories, onClose, onDecided, onStale }: {
+function ReviewDialog({ item, pending, lists, onClose, onDecided, onStale }: {
   item: Item | null;
   pending: boolean;
-  categories: RefItem[];
+  lists: { categories: RefItem[]; cuttingStyles: RefItem[] };
   onClose: () => void;
   onDecided: (item: Item, message: string) => void;
   onStale: () => void;
@@ -222,13 +237,17 @@ function ReviewDialog({ item, pending, categories, onClose, onDecided, onStale }
     setReason('');
     setError(undefined);
     setProduct(item?.product ?? null);
-    // A decided product is read when opened (its list gives cards only).
-    if (item && !item.product && item.card) panelFetch<Product>('admin', `${BASE}/products/${item.card.id}`).then(setProduct, () => setProduct(null));
+    // Rows of new and decided products are cards, and an edit's product may have failed to load: read it when opened.
+    const id = item && !item.product ? (item.request?.productId ?? item.card?.id) : undefined;
+    if (id) panelFetch<Product>('admin', `${BASE}/products/${id}`).then(setProduct, () => setProduct(null));
   }, [item]);
 
-  const content = item?.request?.content ?? (product ? liveContent(product) : null);
-  const name = nameOf(content?.name ?? item?.card?.name);
-  const category = content && (categories.find((c) => c.id === content.categoryId)?.name ?? (product?.category.id === content.categoryId ? product.category.name : null));
+  // An edit previews what approval makes live: the proposed content with the live prices of existing items.
+  const content = product ? (item?.request ? editedContent({ ...product, changeRequest: item.request }) : liveContent(product)) : null;
+  const name = nameOf(content?.name ?? item?.request?.content.name ?? item?.card?.name);
+  const category = content && (lists.categories.find((c) => c.id === content.categoryId)?.name ?? (product?.category.id === content.categoryId ? product.category.name : null));
+  // A change request's cuttings have no names: from the cutting styles, or the product's own.
+  const cutName = (id: string) => lists.cuttingStyles.find((c) => c.id === id)?.name ?? product?.cuttings.find((c) => c.cuttingStyleId === id)?.name;
   const min = content?.sizes.length ? Math.min(...content.sizes.map((s) => s.priceHalalas)) : null;
   const list = (xs: string[]) => (xs.length ? xs.join(locale === 'en' ? ', ' : '، ') : '—');
 
@@ -265,7 +284,7 @@ function ReviewDialog({ item, pending, categories, onClose, onDecided, onStale }
               <Row label={t('category')} value={nameOf(category)} />
               <Row label={t('price')} value={min === null ? '—' : sar(min, locale)} />
               <Row label={t('sizes')} value={list(content?.sizes.map((s) => (s.tag ? nameOf(s.tag) : t('grams', { n: s.approxWeightGrams }))) ?? [])} />
-              <Row label={t('cuts')} value={list(content?.cuttings.map((c) => nameOf(c.name)) ?? [])} />
+              <Row label={t('cuts')} value={list(content?.cuttings.map((c) => nameOf(c.name ?? cutName(c.cuttingStyleId))) ?? [])} />
               <Row label={t('packs')} value={list(content?.packagings.map((k) => tf(`packaging.${k.packaging}`)) ?? [])} />
               {item?.request && <Row label={t('changes')} value={list(changes.map((c) => t(`part.${c}`)))} />}
               {!pending && product?.rejectionReason && product.status === 'rejected' && <Row label={t('reasonShown')} value={product.rejectionReason} />}

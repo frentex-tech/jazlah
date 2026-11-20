@@ -21,11 +21,14 @@ const json = (method: string, body?: unknown) => ({ method, ...(body !== undefin
 /** Vendor calls that show a suspended store (VENDOR_SUSPENDED, 131:26015) on the page instead of leaving for sign-in. */
 export const vendorFetch = <T,>(url: string, init?: RequestInit) => panelFetch<T>('vendor', url, { ...init, stayOn: ['VENDOR_SUSPENDED'] });
 
-/** The store-under-review frame (131:26015): the vendor routes answer VENDOR_SUSPENDED (see the PR / signoff). */
+/**
+ * The not-allowed frame (131:26015) with the suspended store's copy: the vendor routes answered VENDOR_SUSPENDED and the
+ * session is already over on the server, so the action is a new sign-in (which says why), as on the store profile.
+ */
 export function StoreBlocked() {
   const t = useTranslations('vendorProducts.blocked');
   return (
-    <StateCard kind="denied" className="h-[360px]" title={t('title')} body={t('body')} action={<Link href="/vendor/application" className={buttonVariants({ variant: 'secondary' })}>{t('action')}</Link>} />
+    <StateCard kind="denied" className="h-[360px]" title={t('title')} body={t('body')} action={<Link href="/login?panel=vendor&reason=suspended" className={buttonVariants({ variant: 'secondary' })}>{t('action')}</Link>} />
   );
 }
 
@@ -139,6 +142,7 @@ export function VendorProduct({ id }: { id?: string }) {
             options={state.options}
             upload={(file) => uploadImage('vendor', 'catalog.product-image', file)}
             readOnly={product?.status === 'pending_review'}
+            preferPending
             actions={
               product?.status === 'published'
                 ? [{ intent: 'save', label: t('save'), variant: 'primary' }]

@@ -75,14 +75,15 @@ export function differsForReview(p: Product, a: ProductContent, b: ProductConten
   return key(a) !== key(b);
 }
 
-export function stateOf(p: Product | null): FormState {
+/** The form's state of a product; `preferPending`: open on the pending change request's content (vendors). */
+export function stateOf(p: Product | null, preferPending = false): FormState {
   if (!p) {
     return {
       nameAr: '', nameEn: '', descAr: '', descEn: '', categoryId: '', meatTypeId: '', images: [], sizes: [], cuts: [], packs: [], exclusions: [],
       delivery: true, pickup: true, available: true,
     };
   }
-  const c = editedContent(p);
+  const c = preferPending ? editedContent(p) : liveContent(p);
   return {
     nameAr: c.name.ar, nameEn: c.name.en, descAr: c.description.ar ?? '', descEn: c.description.en ?? '', categoryId: c.categoryId, meatTypeId: c.meatTypeId ?? '',
     images: c.images.map((i) => ({ mediaId: i.mediaId, url: i.url })),

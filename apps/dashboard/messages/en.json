@@ -1003,9 +1003,9 @@
       "action": "Try again"
     },
     "blocked": {
-      "title": "Your store is under review",
-      "body": "You can add products as soon as the admin approves your store.",
-      "action": "View application status"
+      "title": "Your store is suspended",
+      "body": "The JAZLA team suspended your store, so products can't be managed now. Contact support to reactivate it, then sign in again.",
+      "action": "Sign in"
     },
     "done": {
       "submit": "{name} sent for review",

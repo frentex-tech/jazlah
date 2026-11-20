@@ -60,7 +60,8 @@ const proposed = { ...liveContent(pub), name: { ar: 'ريب آي مقترح', en
 const withEdit = { ...pub, changeRequest: { status: 'pending', content: proposed } } as unknown as Product;
 assert.equal(editedContent(withEdit).name.ar, 'ريب آي مقترح');
 assert.deepEqual(editedContent(withEdit).sizes, [{ id: 's1', approxWeightGrams: 600, priceHalalas: 4500, tag: null }]);
-assert.equal(stateOf(withEdit).nameAr, 'ريب آي مقترح');
-assert.equal(stateOf({ ...withEdit, changeRequest: { status: 'rejected', content: proposed } } as unknown as Product).nameAr, 'ريب آي');
-assert.equal(differsForReview(withEdit, bodyOf(editedContent(withEdit)), toValues(stateOf(withEdit)).values.content), false);
+assert.equal(stateOf(withEdit, true).nameAr, 'ريب آي مقترح');
+assert.equal(stateOf(withEdit).nameAr, 'ريب آي'); // opt-in: the admin form shows the live content
+assert.equal(stateOf({ ...withEdit, changeRequest: { status: 'rejected', content: proposed } } as unknown as Product, true).nameAr, 'ريب آي');
+assert.equal(differsForReview(withEdit, bodyOf(editedContent(withEdit)), toValues(stateOf(withEdit, true)).values.content), false);
 console.log('product-form values: ok');

@@ -47,10 +47,10 @@ function apiBackend(): VendorCatalogBackend {
 }
 
 // ---- Mock ----
-// The mock vendor session is «مجازر الفلاح» (the store profile mock). Its store suspended in the admin vendors mock,
-// or an access token ending in «-suspended», answers VENDOR_SUSPENDED as the API does (131:26015).
+// The mock vendor session is «مجازر الفلاح» (the store profile mock). An access token ending in «-suspended» answers
+// VENDOR_SUSPENDED as the API does for a suspended store (131:26015).
 const vendor = () => [...mockVendors.values()].find((v) => v.name.en === 'Al Falah Butchery')!;
-const suspended = (token: string) => token.endsWith('-suspended') || vendor().status === 'suspended';
+const suspended = (token: string) => token.endsWith('-suspended');
 const SUSPENDED = { ok: false, code: 'VENDOR_SUSPENDED', status: 403 } as const;
 const notEditable = (p: Product) => ({ ok: false, code: 'PRODUCT_NOT_EDITABLE', status: 409, details: { status: p.status } }) as const;
 
