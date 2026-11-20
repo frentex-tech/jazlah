@@ -38,6 +38,12 @@
 
 ## Log
 
+### 2026-11-20 — Frontend runs ahead of the API (owner)
+- **The client approved the full design** (DSN-DES-2 #204 closed).
+- **UI first, on mocks:** the app and dashboard build the screens of Sprints 2, 3, 4 … ahead of the API, one sprint at a time (build → design QA + lead review → fixes → next sprint). Kerolles builds the API in parallel. Mocks follow the shapes in the sprint file (or a merged `openapi.json` contract) and sit behind the repository/backend interface, listed in `docs/frontend/not-built-yet.md`.
+- A screen PR built on mocks says `Refs #N`; the issue closes with the PR that wires it to the real API.
+- Sprint 2 design specs exported: `docs/design/spec/sprint-2.txt` (102 screens and states).
+
 ### 2026-11-18 — Scope decisions by the owner (Abdulrhman)
 - **No customer website.** Customers use the mobile app only. The 13 `*-WEB-*` feature tasks were removed from the sprints and kept in `docs/delivery/archive/web-tasks-2026-11-18.md`; `APP-WEB-1` is now the Tailwind preset for the dashboard and `HRD-WEB-1` the dashboard and public-page readiness. `apps/web` is not to be built.
 - **One public page on the domain** (download the app, join as a vendor): `CMS-DSH-2`, Sprint 6, inside the dashboard app.
