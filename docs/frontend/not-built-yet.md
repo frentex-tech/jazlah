@@ -123,6 +123,8 @@ The product page reads one public product (images, sizes, cuts, packagings, excl
 | A default size | Product: the size picked when the page opens | The first size | API gap |
 | A gift box packaging | Product: packaging list (the design shows one) | The API knows trays, bags, vacuum and none; only the mock offers a gift box | API gap |
 | Server price for a product line (pricing route) | Product: total and price details | Computed on the device with the same formula, in one place to swap | CRT-API-1 #61 |
+| A design for the fulfilment badge (delivery, pickup or both) | Product: the badge the task Output asks for | The value is read from the product and kept, nothing is drawn until the badge is designed | Design gap |
+| "Notify me when back in stock" (stock alerts) | Product: out-of-stock notice | The notice says only that the product is unavailable; the design's "you can ask to be notified" sentence is left out until the feature exists | API gap |
 | The cart | Product: "Add to cart" | Shows a "cart coming soon" message; nothing is kept | CRT-MOB-1 #64 |
 
 When one of these lands, its endpoints appear in `openapi.json`, and this file and the module guides are updated in the same pull request.

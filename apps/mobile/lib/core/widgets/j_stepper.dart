@@ -3,20 +3,20 @@ import 'package:jazlah/app/theme/theme.dart';
 import 'package:jazlah/core/widgets/j_icons.dart';
 
 /// Figma `Stepper`: minus, count, plus; state default / min (minus off at [min]) / max.
-/// Minus stays on the left in both languages, as drawn.
+/// Minus stays on the left in both languages, as drawn. Disabled when [onChanged] is null.
 class JStepper extends StatelessWidget {
   const JStepper({
     required this.value,
     required this.onChanged,
     required this.decreaseLabel,
     required this.increaseLabel,
+    required this.max,
     super.key,
     this.min = 1,
-    this.max = 99,
   });
 
   final int value;
-  final ValueChanged<int> onChanged;
+  final ValueChanged<int>? onChanged;
   final String decreaseLabel;
   final String increaseLabel;
   final int min;
@@ -25,7 +25,7 @@ class JStepper extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     Widget button(IconData icon, String label, int? next) {
-      final enabled = next != null;
+      final enabled = next != null && onChanged != null;
       final plus = icon == JIcons.plus;
       return Semantics(
         button: true,
@@ -34,7 +34,7 @@ class JStepper extends StatelessWidget {
         excludeSemantics: true,
         child: GestureDetector(
           behavior: HitTestBehavior.opaque,
-          onTap: enabled ? () => onChanged(next) : null,
+          onTap: enabled ? () => onChanged!(next) : null,
           child: Container(
             width: 44,
             height: 44,
@@ -63,7 +63,11 @@ class JStepper extends StatelessWidget {
           const SizedBox(width: JSpace.s12),
           SizedBox(
             width: 40,
-            child: Text('$value', textAlign: TextAlign.center, style: JText.h2),
+            child: Text(
+              '$value',
+              textAlign: TextAlign.center,
+              style: JText.h2.copyWith(color: onChanged == null ? JColors.mutedSoft : null),
+            ),
           ),
           const SizedBox(width: JSpace.s12),
           button(JIcons.plus, increaseLabel, value < max ? value + 1 : null),

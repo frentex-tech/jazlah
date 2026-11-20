@@ -34,11 +34,17 @@ class ApiProductRepository implements ProductRepository {
       vendorName: d.vendor.name == null ? null : _text(d.vendor.name!),
       name: _text(d.name),
       description: ar == null ? null : LocalizedText(ar, en!),
+      fulfilment: switch (d.fulfilment) {
+        PublicProductResponseDtoFulfilmentEnum.delivery => Fulfilment.delivery,
+        PublicProductResponseDtoFulfilmentEnum.pickup => Fulfilment.pickup,
+        PublicProductResponseDtoFulfilmentEnum.both => Fulfilment.both,
+        PublicProductResponseDtoFulfilmentEnum.unknownDefaultOpenApi => null,
+      },
       images: [for (final i in d.images) ?i.url],
       sizes: [
         for (final (i, s) in d.sizes.indexed)
           ProductSize(
-            // The contract allows a size without id; its position stands in until the cart needs it.
+            // shortcut: size id is nullable in the contract, positional id until CRT-API-1 (#61) needs a real one, API gap
             id: s.id ?? 'size-$i',
             grams: s.approxWeightGrams.toInt(),
             priceHalalas: s.priceHalalas.toInt(),

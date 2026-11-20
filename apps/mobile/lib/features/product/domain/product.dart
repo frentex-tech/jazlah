@@ -5,6 +5,9 @@ library;
 
 import 'package:jazlah/features/catalog/domain/catalog.dart';
 
+/// How the product can be received.
+enum Fulfilment { delivery, pickup, both }
+
 class ProductSize {
   const ProductSize({
     required this.id,
@@ -47,6 +50,7 @@ class ProductDetail {
     this.packagings = const [],
     this.exclusions = const [],
     this.available = true,
+    this.fulfilment,
     this.vendorRating,
     this.slaughteredAt,
     this.deliveredWithinHours,
@@ -67,6 +71,10 @@ class ProductDetail {
 
   /// API gap: the detail has no availability flag (the card has).
   final bool available;
+
+  /// Delivery, pickup or both; null when the API sends a value the app does not know. Not drawn: the
+  /// Output's fulfilment badge has no design yet (not-built-yet.md).
+  final Fulfilment? fulfilment;
 
   /// API gap: the store's rating.
   final double? vendorRating;

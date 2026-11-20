@@ -1087,7 +1087,7 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String productIncompatibleHelp(String cuts) {
-    return 'غيّر التقطيع إلى $cuts لاختيار هذا الخيار.';
+    return 'غيّر التقطيع إلى $cuts لاختيار هذا الخيار';
   }
 
   @override

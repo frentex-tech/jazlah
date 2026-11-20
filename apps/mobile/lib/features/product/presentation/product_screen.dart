@@ -55,7 +55,7 @@ class _ProductScreenState extends ConsumerState<ProductScreen> {
       if (target != null) await Scrollable.ensureVisible(target, duration: const Duration(milliseconds: 300));
       return;
     }
-    // shortcut: the cart is CRT-MOB-1; until then the button only says so (selection and notes are not kept).
+    // shortcut: the cart is CRT-MOB-1 (#64); until then the button only says so (selection and notes are not kept).
     showJToast(context, message: AppLocalizations.of(context).productCartSoon, kind: JToastKind.info);
   }
 
@@ -68,7 +68,12 @@ class _ProductScreenState extends ConsumerState<ProductScreen> {
         bottom: false,
         child: Column(
           children: [
-            JAppHeader.page(title: l10n.productTitle, cartLabel: l10n.cart, onBack: () => popOrHome(context)),
+            JAppHeader.page(
+              title: l10n.productTitle,
+              cartLabel: l10n.cart,
+              onBack: () => popOrHome(context),
+              onCart: () => openCart(context),
+            ),
             Expanded(
               child: product.when(
                 loading: () => ListView(
@@ -109,6 +114,8 @@ class _ProductScreenState extends ConsumerState<ProductScreen> {
     final l10n = AppLocalizations.of(context);
     final lang = context.lang;
     final cut = p.cuts.where((c) => c.id == s.cutId).firstOrNull;
+    // Out of stock: every choice is shown muted and cannot change (Figma 118-9350).
+    final on = p.available;
     Widget gap(Widget child) => Padding(
       padding: const EdgeInsets.only(top: JSpace.s16),
       child: child,
@@ -163,7 +170,7 @@ class _ProductScreenState extends ConsumerState<ProductScreen> {
                   JChip(
                     label: [_weight(l10n, size.grams), ?size.tag?.of(lang)].join(' · '),
                     selected: size.id == s.sizeId,
-                    onTap: size.available ? () => _set(s.withSize(size.id)) : null,
+                    onTap: on && size.available ? () => _set(s.withSize(size.id)) : null,
                   ),
               ],
             ),
@@ -193,9 +200,10 @@ class _ProductScreenState extends ConsumerState<ProductScreen> {
                     radio: JRadio(
                       checked: c.id == s.cutId,
                       label: c.name.of(lang),
-                      onTap: () => _set(s.withCut(p, c.id)),
+                      onTap: on ? () => _set(s.withCut(p, c.id)) : null,
                     ),
                     price: _extra(l10n, c.extraHalalas),
+                    enabled: on,
                   ),
               ]),
             ),
@@ -210,9 +218,10 @@ class _ProductScreenState extends ConsumerState<ProductScreen> {
                       radio: JRadio(
                         checked: o.id == s.packagingId,
                         label: o.name.of(lang),
-                        onTap: () => _set(s.withPackaging(p, o.id)),
+                        onTap: on ? () => _set(s.withPackaging(p, o.id)) : null,
                       ),
                       price: _extra(l10n, o.extraHalalas),
+                      enabled: on,
                     )
                   else
                     _IncompatibleOption(
@@ -240,7 +249,7 @@ class _ProductScreenState extends ConsumerState<ProductScreen> {
                     child: JCheckbox(
                       checked: s.exclusionIds.contains(e.id),
                       label: e.name.of(lang),
-                      onChanged: (_) => _set(s.toggleExclusion(e.id)),
+                      onChanged: on ? (_) => _set(s.toggleExclusion(e.id)) : null,
                     ),
                   ),
               ]),
@@ -252,6 +261,7 @@ class _ProductScreenState extends ConsumerState<ProductScreen> {
               label: l10n.productNotes,
               placeholder: l10n.productNotesPlaceholder,
               helperText: l10n.productNotesExample,
+              enabled: on,
               inputFormatters: [LengthLimitingTextInputFormatter(200)],
             ),
           ),
@@ -262,9 +272,10 @@ class _ProductScreenState extends ConsumerState<ProductScreen> {
                 Text(l10n.productQuantity, style: JText.h3),
                 JStepper(
                   value: s.quantity,
+                  max: ProductSelection.maxQuantity,
                   decreaseLabel: l10n.productDecrease,
                   increaseLabel: l10n.productIncrease,
-                  onChanged: (q) => _set(s.withQuantity(q)),
+                  onChanged: on ? (q) => _set(s.withQuantity(q)) : null,
                 ),
               ],
             ),

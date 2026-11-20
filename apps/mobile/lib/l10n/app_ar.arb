@@ -492,7 +492,7 @@
       }
     }
   },
-  "productIncompatibleHelp": "غيّر التقطيع إلى {cuts} لاختيار هذا الخيار.",
+  "productIncompatibleHelp": "غيّر التقطيع إلى {cuts} لاختيار هذا الخيار",
   "@productIncompatibleHelp": {
     "placeholders": {
       "cuts": {

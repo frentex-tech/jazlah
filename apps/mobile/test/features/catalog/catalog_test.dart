@@ -34,7 +34,7 @@ void main() {
     expect(ids.length, 52);
     expect(ids.toSet().length, ids.length);
     expect(ids.take(4), ['p-falah-ribeye', 'p-nukhba-lamb-liver', 'p-falah-naimi-mince', 'p-waha-chicken-breast']);
-    expect(MockCatalogRepository.productList.first.minPriceHalalas, 8900);
+    expect(MockCatalogRepository.productList.first.minPriceHalalas, 4950);
   });
 
   test('infinite scroll walks every page by cursor without duplicates', () async {

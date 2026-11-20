@@ -63,7 +63,7 @@ void main() {
       'poultry boneless',
       poultry,
       const ProductSelection(sizeId: 'sz-500g', cutId: 'cut-boneless', exclusionIds: {'ex-skin'}),
-      3800 ~/ 2 + 500 + 300,
+      2400 + 300,
       2700,
     ),
     ('grill without a cut', kebab, const ProductSelection(sizeId: 'sz-1kg', packagingId: 'vacuum'), 6700, 6700),
@@ -151,6 +151,13 @@ void main() {
         expect(r.ok, isFalse);
         expect((r.unitPrice, r.lineTotal, r.breakdown.length), (0, 0, 0));
       });
+    }
+  });
+
+  test('every seeded card shows its cheapest size', () {
+    for (final card in MockCatalogRepository.productList) {
+      final sizes = MockProductRepository.detail(card).sizes.map((z) => z.priceHalalas);
+      expect(card.minPriceHalalas, sizes.reduce((a, b) => a < b ? a : b), reason: card.id);
     }
   });
 

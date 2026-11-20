@@ -2153,7 +2153,7 @@ abstract class AppLocalizations {
   /// No description provided for @productIncompatibleHelp.
   ///
   /// In ar, this message translates to:
-  /// **'غيّر التقطيع إلى {cuts} لاختيار هذا الخيار.'**
+  /// **'غيّر التقطيع إلى {cuts} لاختيار هذا الخيار'**
   String productIncompatibleHelp(String cuts);
 
   /// No description provided for @productQuoted.

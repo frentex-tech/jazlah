@@ -80,7 +80,7 @@ void main() {
     final gift = t.widget<JRadio>(find.widgetWithText(JRadio, 'صندوق هدية'));
     expect((gift.checked, gift.onTap), (false, null));
     expect(_total(t), '89.00');
-    expect(find.text('غيّر التقطيع إلى «قطعة كاملة» أو «مكعبات» لاختيار هذا الخيار.'), findsOneWidget);
+    expect(find.text('غيّر التقطيع إلى «قطعة كاملة» أو «مكعبات» لاختيار هذا الخيار'), findsOneWidget);
     await t.tap(find.text('صندوق هدية'));
     await t.pump();
     expect(find.textContaining('غيّر التقطيع'), findsNothing);
@@ -129,6 +129,21 @@ void main() {
     expect(find.text('هذا المنتج غير متاح حاليًا.'), findsOneWidget);
     expect(t.widget<JButton>(find.widgetWithText(JButton, 'غير متاح')).onPressed, isNull);
     expect(_total(t), '0.00');
+    // Every choice is muted and locked.
+    expect(t.widgetList<JChip>(find.byType(JChip, skipOffstage: false)).every((c) => c.onTap == null), isTrue);
+    expect(t.widgetList<JRadio>(find.byType(JRadio, skipOffstage: false)).every((r) => r.onTap == null), isTrue);
+    expect(
+      t.widgetList<JCheckbox>(find.byType(JCheckbox, skipOffstage: false)).every((c) => c.onChanged == null),
+      isTrue,
+    );
+    expect(t.widget<JStepper>(find.byType(JStepper, skipOffstage: false)).onChanged, isNull);
+  });
+
+  testWidgets('the header cart opens the cart placeholder', (t) async {
+    await _pump(t);
+    await t.tap(find.bySemanticsLabel('السلة'));
+    await t.pumpAndSettle();
+    expect(find.text('route:/cart'), findsOneWidget);
   });
 
   testWidgets('a sold-out size is disabled', (t) async {

@@ -343,7 +343,7 @@
   "weightGrams": "{n} g",
   "weightKg": "{n} kg",
   "productIncompatible": "Not available with the chosen cut: {cut}",
-  "productIncompatibleHelp": "Change the cut to {cuts} to choose this option.",
+  "productIncompatibleHelp": "Change the cut to {cuts} to choose this option",
   "productQuoted": "“{name}”",
   "productOr": " or ",
   "productTotal": "Total",

@@ -1089,7 +1089,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String productIncompatibleHelp(String cuts) {
-    return 'Change the cut to $cuts to choose this option.';
+    return 'Change the cut to $cuts to choose this option';
   }
 
   @override

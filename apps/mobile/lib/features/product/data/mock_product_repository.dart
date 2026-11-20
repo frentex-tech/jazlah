@@ -99,9 +99,10 @@ class MockProductRepository implements ProductRepository {
       exclusions = _carcassExclusions;
     } else {
       sizes = [
-        ProductSize(id: 'sz-500g', grams: 500, priceHalalas: p ~/ 2 + 500),
-        ProductSize(id: 'sz-1kg', grams: 1000, priceHalalas: p),
-        ProductSize(id: 'sz-2kg', grams: 2000, priceHalalas: 2 * p - 600),
+        // The card price is the cheapest size (500 g); larger sizes cost a little less per kilo.
+        ProductSize(id: 'sz-500g', grams: 500, priceHalalas: p),
+        ProductSize(id: 'sz-1kg', grams: 1000, priceHalalas: 2 * (p - 500)),
+        ProductSize(id: 'sz-2kg', grams: 2000, priceHalalas: 4 * (p - 500) - 600),
       ];
       defaultSize = 'sz-1kg';
       if (card.categoryId == 'c-grills') {
@@ -137,6 +138,9 @@ class MockProductRepository implements ProductRepository {
       packagings: packagings,
       exclusions: exclusions,
       available: card.isAvailable,
+      fulfilment: MockCatalogRepository.vendors.where((v) => v.id == card.vendorId).firstOrNull?.pickup ?? false
+          ? Fulfilment.both
+          : Fulfilment.delivery,
       vendorRating: MockCatalogRepository.vendors.where((v) => v.id == card.vendorId).firstOrNull?.rating,
       slaughteredAt: card.freshToday ? 6 * 60 + 30 : null,
       deliveredWithinHours: card.freshToday ? 3 : null,
