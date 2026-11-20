@@ -12,6 +12,7 @@ import 'package:jazlah/features/home/presentation/categories_screen.dart';
 import 'package:jazlah/features/home/presentation/home_screen.dart';
 import 'package:jazlah/features/home/presentation/stores_screen.dart';
 import 'package:jazlah/features/product/presentation/product_screen.dart';
+import 'package:jazlah/features/search/presentation/search_screen.dart';
 import 'package:jazlah/features/store/presentation/category_screen.dart';
 import 'package:jazlah/features/store/presentation/store_screen.dart';
 import 'package:jazlah/l10n/app_localizations.dart';
@@ -65,5 +66,8 @@ void main() {
     expect(find.text('مجازر الفلاح'), findsWidgets);
   });
   testWidgets('product page', (t) => open(t, Routes.product('p-falah-ribeye'), ProductScreen));
-  testWidgets('search placeholder until STF-MOB-4', (t) => open(t, Routes.search, ComingSoonPage));
+  testWidgets('search, full screen without the tab bar', (t) async {
+    await open(t, Routes.search, SearchScreen);
+    expect(find.byType(MainShell), findsNothing);
+  });
 }

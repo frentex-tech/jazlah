@@ -22,6 +22,10 @@ class Prefs {
   bool get installed => _p.getBool('installed') ?? false;
   Future<void> setInstalled() => _p.setBool('installed', true);
 
+  /// Newest first; cleared with the account data.
+  List<String> get recentSearches => _p.getStringList('recentSearches') ?? const [];
+  Future<void> setRecentSearches(List<String> value) => _p.setStringList('recentSearches', value);
+
   String? getString(String key) => _p.getString(key);
   Future<void> setString(String key, String value) => _p.setString(key, value);
   Future<void> remove(String key) => _p.remove(key);

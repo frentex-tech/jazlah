@@ -78,9 +78,12 @@ class StoreLogo extends StatelessWidget {
 /// A product in a grid: vendor, size line, fresh/unavailable badge, from-price. Tapping the card or
 /// its add button opens the product (a size must be chosen there).
 class ProductTile extends StatelessWidget {
-  const ProductTile(this.product, {super.key, this.storeClosed = false});
+  const ProductTile(this.product, {super.key, this.storeClosed = false, this.onOpen});
 
   final ProductCard product;
+
+  /// Called before the product opens (search keeps the words as a recent search).
+  final VoidCallback? onOpen;
 
   /// The store is closed: browse only, as unavailable.
   final bool storeClosed;
@@ -90,7 +93,12 @@ class ProductTile extends StatelessWidget {
     final l10n = AppLocalizations.of(context);
     final p = product;
     final available = p.isAvailable && !storeClosed;
-    void open() => context.push(Routes.product(p.id));
+    void push() => context.push(Routes.product(p.id));
+    void open() {
+      onOpen?.call();
+      push();
+    }
+
     return JProductCard(
       image: CatalogImage(p.coverUrl),
       vendor: p.vendorName?.of(context.lang) ?? '',

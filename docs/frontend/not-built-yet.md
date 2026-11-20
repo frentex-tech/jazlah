@@ -134,4 +134,18 @@ The product page reads one public product (images, sizes, cuts, packagings, excl
 | "Notify me when back in stock" (stock alerts) | Product: out-of-stock notice | The notice says only that the product is unavailable; the design's "you can ask to be notified" sentence is left out until the feature exists | API gap |
 | The cart | Product: "Add to cart" | Shows a "cart coming soon" message; nothing is kept | CRT-MOB-1 #64 |
 
+### Search and filters (STF-MOB-4 #57)
+
+Search reads the public product list with its words, category, store and price range, cursor-paged. Recent searches are kept on the device (8 at most, cleared on sign-out). With the mock switch on, the seeded catalog is searched on the device with the same Arabic folding as the planned server search (no tashkeel or tatweel; أ/إ/آ as ا; ى as ي; ة as ه; English names in any case), so «نعيمى» finds «نعيمي» and "naimi" finds the English name.
+
+| Gap | Screen waiting on it | The app today | Issue |
+|---|---|---|---|
+| A result count (and facets per category and store) | Search results: "24 results for …"; filters sheet: "Show 24 results" | No count text; the sheet button reads "Show results" | CAT-API-5 #50 |
+| Popular searches | Search start: "Most searched" | Section hidden | API gap |
+| Sorting search results | Filters sheet: sort chips (the design has no sort control; added as a chip group in the sheet) | Group hidden; the mock sorts | CAT-API-5 #50 |
+| An "available now only" filter | Filters sheet: switch and its chip | Switch hidden; the mock filters | API gap |
+| A public list of meat types | Filters sheet: meat type (not in the design) | Not shown; the product list already accepts a meat type, so it can be added once names can be listed | API gap |
+| Store names for any store id (or the whole store list in one call) | Search: store chips in the filters sheet and the active store chip | Only the first page of stores is offered; a chosen store outside it shows as a generic "Store" chip | API gap |
+| Arabic spelling folding on the server | Search results | The server search decides; only the mock folds on the device | CAT-API-5 #50 |
+
 When one of these lands, its endpoints appear in `openapi.json`, and this file and the module guides are updated in the same pull request.

@@ -36,6 +36,7 @@ abstract final class JIcons {
   static const bell = IconData(0xe0ce, fontFamily: _regular, fontPackage: _package);
   static const x = IconData(0xe4f6, fontFamily: _regular, fontPackage: _package);
   static const slidersHorizontal = IconData(0xe434, fontFamily: _regular, fontPackage: _package);
+  static const trendUp = IconData(0xe4ae, fontFamily: _regular, fontPackage: _package);
   static const house = IconData(0xe2c2, fontFamily: _regular, fontPackage: _package);
   static const squaresFour = IconData(0xe464, fontFamily: _regular, fontPackage: _package);
   static const user = IconData(0xe4c2, fontFamily: _regular, fontPackage: _package);
