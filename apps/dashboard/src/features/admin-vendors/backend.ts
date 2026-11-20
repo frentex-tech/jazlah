@@ -83,6 +83,13 @@ function seedApplication(s: Seed, i: number): Application {
   };
 }
 
+/** JAZLA's own vendor (isPlatform), listed with the others as the API does; the catalog mock sells its products. */
+export const MOCK_PLATFORM: Vendor = {
+  id: '9e000000-0000-4000-8000-000000000001', name: { ar: 'جزلة', en: 'JAZLA' }, description: { ar: null, en: null }, logoUrl: null, coverUrl: null, city: 'الرياض', commissionBasisPoints: 0,
+  commercialRegistrationNumber: null, vatNumber: null, contactPhone: null, contactEmail: null, ibanMasked: null, accountHolderName: null, location: null,
+  createdAt: '2026-08-01T08:00:00.000Z', isPlatform: true, status: 'active', suspendedAt: null, suspensionReason: null, applicationId: null,
+};
+
 type MockState = { vendors: Map<string, Vendor> };
 const g = globalThis as { __adminVendors?: MockState };
 const mock: MockState = (g.__adminVendors ??= (() => {
@@ -96,6 +103,7 @@ const mock: MockState = (g.__adminVendors ??= (() => {
     if (s.key === 'seed-rai') Object.assign(v, { status: 'suspended', suspendedAt: '2026-11-01T09:00:00.000Z', suspensionReason: 'تكرار شكاوى جودة التغليف خلال أكتوبر' });
     vendors.set(v.id, v);
   });
+  vendors.set(MOCK_PLATFORM.id, MOCK_PLATFORM);
   return { vendors };
 })());
 /** The vendors of this mock, shared with the admin catalog mock (features/catalog/backend.ts), which adds JAZLA's own. */

@@ -20,6 +20,9 @@ export type UploadTicket = Schemas['UploadTicketResponseDto'];
 export type MediaFile = Schemas['MediaFileResponseDto'];
 export type Page<T> = { items: T[]; nextCursor: string | null };
 
+/** Categories in their public order (`sortOrder`, lower first), the older first on a tie. */
+export const bySortOrder = (a: RefItem, b: RefItem) => (a.sortOrder ?? 0) - (b.sortOrder ?? 0) || a.createdAt.localeCompare(b.createdAt);
+
 /** The API's packagings, in the order the form lists them. */
 export const PACKAGINGS: Packaging[] = ['vacuum', 'trays', 'bags', 'none'];
 export const PRODUCT_STATUSES: ProductStatus[] = ['draft', 'pending_review', 'published', 'rejected'];

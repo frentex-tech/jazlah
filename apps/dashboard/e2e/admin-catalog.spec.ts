@@ -109,6 +109,9 @@ test('exit criteria: a JAZLA carcass with 3 sizes, cuts (one priced), packaging 
 
   // The incompatible combination: a whole piece cannot go in a chilled tray (a global rule, from the matrix).
   await page.getByRole('button', { name: 'قطعة كاملة مع علبة مبرّدة: متوافق' }).click();
+  const confirm = page.getByRole('dialog', { name: 'تغيير قاعدة التوافق لكل المنتجات؟' });
+  await expect(confirm.getByText('في كل منتجات المنصة')).toBeVisible();
+  await confirm.getByRole('button', { name: 'تغيير القاعدة' }).click();
   await expect(page.getByRole('button', { name: 'قطعة كاملة مع علبة مبرّدة: غير متوافق' })).toHaveAttribute('aria-pressed', 'false');
 
   await page.getByRole('button', { name: 'حفظ كمسودة' }).click();
@@ -128,6 +131,43 @@ test('exit criteria: a JAZLA carcass with 3 sizes, cuts (one priced), packaging 
   await page.goto('/admin/catalog/products');
   await expect(rowOf(page, products(page), 'ذبيحة نعيمي كاملة').getByText('مسودة')).toBeVisible();
   await expect(rowOf(page, products(page), 'ذبيحة نعيمي كاملة').getByText('950.00 ر.س')).toBeVisible();
+});
+
+test('a seeded draft: edit a price and the name, publish, then save the published product', async ({ page, context }) => {
+  await signInAs(context, ['admin']);
+  await page.goto('/admin/catalog/products/b1000000-0000-4000-8000-000000000006'); // لحم مفروم ناعم, JAZLA's draft
+  await expect(page.getByRole('heading', { level: 1, name: 'لحم مفروم ناعم' })).toBeVisible();
+  await page.getByLabel('اسم المنتج', { exact: true }).fill('لحم مفروم ناعم طازج');
+  await page.getByLabel('سعر الحجم 1').fill('79.50');
+  await page.getByRole('button', { name: 'حفظ كمسودة' }).click();
+  await expect(page.getByRole('status').getByText('تم حفظ لحم مفروم ناعم طازج')).toBeVisible();
+  await page.reload();
+  await expect(page.getByLabel('اسم المنتج', { exact: true })).toHaveValue('لحم مفروم ناعم طازج');
+  await expect(page.getByLabel('سعر الحجم 1')).toHaveValue('79.50');
+
+  await page.getByRole('button', { name: 'حفظ ونشر' }).click();
+  await expect(page.getByRole('status').getByText('تم نشر لحم مفروم ناعم طازج')).toBeVisible();
+  await expect(page.getByRole('button', { name: 'حفظ التعديلات' })).toBeVisible();
+
+  // A published JAZLA product changes at once: a new price (PATCH prices) and a new size (PUT).
+  await page.getByLabel('سعر الحجم 2').fill('150');
+  await page.getByRole('button', { name: 'إضافة حجم' }).click();
+  await page.getByLabel('وزن الحجم 3 بالجرام').fill('2000');
+  await page.getByLabel('سعر الحجم 3').fill('280');
+  await page.getByRole('button', { name: 'حفظ التعديلات' }).click();
+  await expect(page.getByRole('status').getByText('تم حفظ لحم مفروم ناعم طازج')).toBeVisible();
+  await page.reload();
+  await expect(page.getByLabel('سعر الحجم 2')).toHaveValue('150.00');
+  await expect(page.getByLabel('سعر الحجم 3')).toHaveValue('280.00');
+  await page.goto('/admin/catalog/products');
+  await expect(rowOf(page, products(page), 'لحم مفروم ناعم طازج').getByText('منشور')).toBeVisible();
+});
+
+test("another store's product by its address is not editable here", async ({ page, context }) => {
+  await signInAs(context, ['admin']);
+  await page.goto('/admin/catalog/products/b1000000-0000-4000-8000-000000000001'); // ريب آي, مجازر الفلاح
+  await expect(page.getByText('منتج متجر آخر')).toBeVisible();
+  await expect(page.getByRole('button', { name: 'حفظ التعديلات' })).toHaveCount(0);
 });
 
 test('validation: the form checks what the frame shows, and the API errors land on their fields', async ({ page, context }) => {

@@ -2,29 +2,30 @@
 
 import { uploadWithTicket } from '@/components/ui/file-upload';
 import { ApiError, panelFetch } from '@/lib/panel-fetch';
+import type { Session } from '@/lib/session';
 import type { Page, UploadTicket } from './types';
 
-/** Every page of a cursor-paged admin list (50 a page): the catalog lists and rules are short. */
-export async function loadAll<T>(url: string): Promise<T[]> {
+/** Every page of a cursor-paged list (50 a page) with the panel's session: the catalog lists and rules are short. */
+export async function loadAll<T>(panel: Session, url: string): Promise<T[]> {
   const out: T[] = [];
   let cursor: string | null = null;
   do {
     const q = new URLSearchParams({ limit: '50', ...(cursor && { cursor }) });
-    const p: Page<T> = await panelFetch<Page<T>>('admin', `${url}${url.includes('?') ? '&' : '?'}${q}`);
+    const p: Page<T> = await panelFetch<Page<T>>(panel, `${url}${url.includes('?') ? '&' : '?'}${q}`);
     out.push(...p.items);
     cursor = p.nextCursor;
   } while (cursor);
   return out;
 }
 
-/** Ticket, upload straight to storage, confirm (docs/frontend/uploads.md): the confirmed media id. */
-export async function uploadAdminImage(purpose: 'catalog.product-image' | 'catalog.category-image', file: File): Promise<string> {
-  const ticket = await panelFetch<UploadTicket>('admin', '/api/admin/media/uploads', {
+/** Ticket, upload straight to storage, confirm (docs/frontend/uploads.md) through `/api/{panel}/media/*`: the confirmed media id. */
+export async function uploadImage(panel: 'admin' | 'vendor', purpose: string, file: File): Promise<string> {
+  const ticket = await panelFetch<UploadTicket>(panel, `/api/${panel}/media/uploads`, {
     method: 'POST',
     body: JSON.stringify({ purpose, contentType: file.type, fileName: file.name.slice(0, 255) }),
   });
   await uploadWithTicket(file, ticket);
-  await panelFetch('admin', `/api/admin/media/${ticket.mediaId}/confirm`, { method: 'POST' });
+  await panelFetch(panel, `/api/${panel}/media/${ticket.mediaId}/confirm`, { method: 'POST' });
   return ticket.mediaId;
 }
 

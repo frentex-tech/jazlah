@@ -13,6 +13,7 @@ import { Select } from '@/components/ui/select';
 import { StateCard } from '@/components/ui/state-card';
 import { Tabs } from '@/components/ui/tabs';
 import { Link } from '@/i18n/navigation';
+import { dayOf } from '@/lib/date';
 import { ApiError, panelFetch } from '@/lib/panel-fetch';
 import { TABS, percentOf, type Application, type Page, type Tab, type Vendor } from './types';
 
@@ -25,10 +26,6 @@ const CITIES = [
 const cityName = (v: string, locale: string) => CITIES.find(([ar]) => ar === v)?.[locale === 'en' ? 1 : 0] ?? v;
 const DEFAULT_TAB: Tab = 'active'; // as in 131:16744
 type Row = { id: string; name: string; logoUrl: string | null; city: string | null; badge: BadgeType; status: string; date: string; commission: number | null };
-
-/** Formats a date as in the frames: «12 أكتوبر 2026», Gregorian with Latin digits, Riyadh time. */
-export const dayOf = (iso: string, locale: string) =>
-  new Intl.DateTimeFormat(locale === 'en' ? 'en-GB' : 'ar-SA-u-ca-gregory-nu-latn', { day: 'numeric', month: 'long', year: 'numeric', timeZone: 'Asia/Riyadh' }).format(new Date(iso));
 
 /**
  * VND-DSH-2: the admin stores list (131:16744 and its states). The «pending» tab lists vendor applications waiting for

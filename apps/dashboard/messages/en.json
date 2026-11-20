@@ -709,7 +709,7 @@
       "saveOrder": "Save order",
       "cancelOrder": "Cancel",
       "orderSaved": "Category order saved",
-      "orderFailed": "Could not save the order. Try again.",
+      "orderFailed": "The order was not fully saved; the table shows what was. Try again.",
       "denied": {
         "title": "You are not allowed to manage categories",
         "body": "Categories are managed by the catalog manager only.",
@@ -747,7 +747,8 @@
       "nameArHint": "Shown to customers",
       "nameEn": "English name",
       "nameEnHint": "Shown in the app in English",
-      "visibleSwitch": "Visible in the store"
+      "visibleSwitch": "Visible in the store",
+      "removeImage": "Remove image"
     },
     "products": {
       "breadcrumb": "Catalog / All products",
@@ -802,7 +803,8 @@
         "title": "You are not allowed to view products",
         "body": "Ask the platform manager for the catalog manager role.",
         "action": "Back to the dashboard"
-      }
+      },
+      "notJazla": "Only JAZLA products can be switched here."
     },
     "product": {
       "newTitle": "New product",
@@ -829,7 +831,12 @@
       "publish": "Save and publish",
       "saveDraft": "Save as draft",
       "save": "Save changes",
-      "delete": "Delete product"
+      "delete": "Delete product",
+      "editTitle": "Edit product",
+      "foreign": {
+        "title": "Another store's product",
+        "body": "Stores' products are reviewed from the review queue, not edited here."
+      }
     },
     "form": {
       "placeholder": "Type here",
@@ -903,7 +910,11 @@
         "compatible": "Compatible",
         "incompatible": "Incompatible",
         "legendIncompatible": "Incompatible: shown disabled to customers, with the reason",
-        "failed": "Could not change the rule. Try again."
+        "failed": "Could not change the rule. Try again.",
+        "confirmTitle": "Change the rule for every product?",
+        "confirmForbid": "{cut} with {packaging} becomes incompatible on every product of the platform, not only this one.",
+        "confirmAllow": "{cut} with {packaging} becomes compatible on every product of the platform, not only this one.",
+        "confirm": "Change the rule"
       },
       "fulfilment": {
         "title": "Preparation and delivery",

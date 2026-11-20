@@ -16,14 +16,14 @@ import { toast } from '@/components/ui/toast';
 import { Link } from '@/i18n/navigation';
 import { ApiError, panelFetch } from '@/lib/panel-fetch';
 import { cn } from '@/lib/utils';
-import { fieldErrors, loadAll, uploadAdminImage } from './client';
-import { CATEGORY_IMAGE_MAX, IMAGE_TYPES, type RefItem } from './types';
+import { fieldErrors, loadAll, uploadImage } from './client';
+import { CATEGORY_IMAGE_MAX, bySortOrder, IMAGE_TYPES, type RefItem } from './types';
 
 const URL_LIST = '/api/admin/catalog/lists/categories';
 // Column widths of 131:19875, start side first.
 const COLS = [320, 160, 110, 90, 130] as const;
-const byOrder = (a: RefItem, b: RefItem) => (a.sortOrder ?? 0) - (b.sortOrder ?? 0) || a.createdAt.localeCompare(b.createdAt);
-type Editing = { item: RefItem | null; ar: string; en: string; active: boolean; image: { mediaId: string; preview: string } | null };
+/** `image`: a new upload, `'remove'` to drop the current one, or null to keep it. */
+type Editing = { item: RefItem | null; ar: string; en: string; active: boolean; image: { mediaId: string; preview: string } | 'remove' | null };
 
 /**
  * CAT-DSH-1: «التصنيفات» (131:19875 and its states, 131:21038 the dialog). GET/POST/PATCH /v1/admin/lists/categories.
@@ -40,7 +40,7 @@ export function Categories() {
   const load = useCallback(async () => {
     setData('loading');
     try {
-      setData((await loadAll<RefItem>(URL_LIST)).sort(byOrder));
+      setData((await loadAll<RefItem>('admin', URL_LIST)).sort(bySortOrder));
     } catch (e) {
       setData(e instanceof ApiError && e.code === 'NOT_ALLOWED' ? 'denied' : 'error');
     }
@@ -62,10 +62,10 @@ export function Categories() {
         if (x.sortOrder !== i + 1) await panelFetch('admin', `${URL_LIST}/${x.id}`, { method: 'PATCH', body: JSON.stringify({ sortOrder: i + 1 }) });
       }
       toast('success', t('orderSaved'));
-      setOrder(null);
     } catch {
       toast('error', t('orderFailed'));
     } finally {
+      setOrder(null); // the table then shows the order as saved, also after a partial failure
       setSavingOrder(false);
       void load();
     }
@@ -105,7 +105,10 @@ export function Categories() {
         <CategoryDialog
           editing={editing}
           onChange={setEditing}
-          onClose={() => setEditing(null)}
+          onClose={() => {
+            setEditing(null);
+            void load(); // a failed save may have added the category already
+          }}
           onSaved={() => {
             setEditing(null);
             void load();
@@ -216,18 +219,20 @@ function CategoryDialog({
 }) {
   const t = useTranslations('catalog.categories');
   const tg = useTranslations();
+  const locale = useLocale();
   const input = useRef<HTMLInputElement>(null);
   const [errors, setErrors] = useState<{ ar?: string; en?: string; image?: string }>({});
   const [busy, setBusy] = useState<'upload' | 'save' | null>(null);
   const { item } = editing;
-  const preview = editing.image?.preview ?? item?.imageUrl;
-  useEffect(() => () => void (editing.image && URL.revokeObjectURL(editing.image.preview)), [editing.image]);
+  const fresh = editing.image && editing.image !== 'remove' ? editing.image : null;
+  const preview = editing.image === 'remove' ? null : (fresh?.preview ?? item?.imageUrl);
+  useEffect(() => () => void (fresh && URL.revokeObjectURL(fresh.preview)), [fresh]);
 
   async function upload(file: File) {
     if (!IMAGE_TYPES.includes(file.type) || file.size > CATEGORY_IMAGE_MAX) return setErrors({ ...errors, image: t('imageRule') });
     setBusy('upload');
     try {
-      const mediaId = await uploadAdminImage('catalog.category-image', file);
+      const mediaId = await uploadImage('admin', 'catalog.category-image', file);
       onChange({ ...editing, image: { mediaId, preview: URL.createObjectURL(file) } });
       setErrors({ ...errors, image: undefined });
     } catch {
@@ -249,15 +254,18 @@ function CategoryDialog({
       if (!item) {
         const created = await panelFetch<RefItem>('admin', URL_LIST, {
           method: 'POST',
-          body: JSON.stringify({ name, sortOrder: nextOrder, ...(editing.image && { imageMediaId: editing.image.mediaId }) }),
+          body: JSON.stringify({ name, sortOrder: nextOrder, ...(fresh && { imageMediaId: fresh.mediaId }) }),
         });
-        // A new entry starts active: hiding it is a second call.
+        // A new entry starts active: hiding it is a second call. From here the dialog edits the created entry, so a
+        // retry after a failed second call PATCHes it instead of adding it again.
+        onChange({ ...editing, item: created, image: null });
         if (!editing.active) await panelFetch('admin', `${URL_LIST}/${created.id}`, { method: 'PATCH', body: JSON.stringify({ isActive: false }) });
       } else {
         const body = {
           ...((ar !== item.name.ar || en !== item.name.en) && { name }),
           ...(editing.active !== item.isActive && { isActive: editing.active }),
-          ...(editing.image && { imageMediaId: editing.image.mediaId }),
+          ...(fresh && { imageMediaId: fresh.mediaId }),
+          ...(editing.image === 'remove' && item.imageUrl && { imageMediaId: null }),
         };
         if (Object.keys(body).length) await panelFetch('admin', `${URL_LIST}/${item.id}`, { method: 'PATCH', body: JSON.stringify(body) });
       }
@@ -278,7 +286,7 @@ function CategoryDialog({
       wide
       open
       onOpenChange={(o) => !o && onClose()}
-      title={item ? t('editTitle', { name: item.name.ar }) : t('addTitle')}
+      title={item ? t('editTitle', { name: locale === 'en' ? item.name.en : item.name.ar }) : t('addTitle')}
       confirmLabel={tg('form.save')}
       loading={busy === 'save'}
       onConfirm={() => void save()}
@@ -300,6 +308,11 @@ function CategoryDialog({
             <span className="absolute inset-0 flex items-center justify-center bg-paper/70 text-ember"><Spinner className="size-6" /></span>
           )}
         </button>
+        {preview && (
+          <button type="button" onClick={() => onChange({ ...editing, image: 'remove' })} className="self-start text-label-m text-ember">
+            {t('removeImage')}
+          </button>
+        )}
         {errors.image && <p role="alert" className="text-body-m text-danger">{errors.image}</p>}
         <input
           ref={input}

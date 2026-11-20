@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict';
 import type { Product } from '../types';
-import { emptySize, priceChanges, stateOf, toValues } from './values.ts';
+import { emptySize, priceChanges, priceField, stateOf, toValues } from './values.ts';
 
 // A new product: required fields are reported on the API's paths.
 const blank = stateOf(null);
@@ -31,6 +31,16 @@ const content = {
   cuttings: [{ cuttingStyleId: 'k1', extraPriceHalalas: 0 }],
   packagings: [{ packaging: 'trays' as const, extraPriceHalalas: 500 }],
 };
-assert.deepEqual(priceChanges(live, content), { sizes: [{ sizeId: 's1', priceHalalas: 5000 }], cuttings: [], packagings: [{ packaging: 'trays', extraPriceHalalas: 500 }] });
+assert.deepEqual(priceChanges(live, content), {
+  body: { sizes: [{ sizeId: 's1', priceHalalas: 5000 }], cuttings: [], packagings: [{ packaging: 'trays', extraPriceHalalas: 500 }] },
+  rows: { sizes: [0], cuttings: [], packagings: [0] },
+});
+// A refusal of the PATCH's first size lands on the form row it came from.
+assert.equal(priceField('sizes.0.priceHalalas', { sizes: [2], cuttings: [], packagings: [] }), 'sizes.2.priceHalalas');
+assert.equal(priceField('cuttings.0.cuttingStyleId', { sizes: [], cuttings: [3], packagings: [] }), 'cuttings.3.extraPriceHalalas');
+assert.equal(priceField('sizes', { sizes: [], cuttings: [], packagings: [] }), 'sizes');
+// Prices above the API's maximum are refused before the call.
+assert.equal(toValues({ ...blank, sizes: [{ ...emptySize(), grams: '1', price: '1000000.01' }] }).errors['sizes.0.priceHalalas'], 'invalid');
+assert.equal(toValues({ ...blank, cuts: [{ id: 'k', price: '1000000.01' }] }).errors['cuttings.0.extraPriceHalalas'], 'invalid');
 assert.equal(priceChanges(live, { ...content, sizes: [{ id: 's1', approxWeightGrams: 500, priceHalalas: 4500 }], packagings: [] }), null);
 console.log('product-form values: ok');

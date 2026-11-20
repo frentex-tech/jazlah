@@ -1,21 +1,23 @@
 'use client';
 
-import { CaretDown, Check, Minus, Plus, Trash, X } from '@phosphor-icons/react';
+import { CaretDown, Trash } from '@phosphor-icons/react';
 import { useLocale, useTranslations } from 'next-intl';
-import { useEffect, useRef, useState } from 'react';
+import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Chip } from '@/components/ui/chip';
 import { FormField, InputField, fieldClass } from '@/components/ui/form-field';
 import { FormSection } from '@/components/ui/form-section';
 import { Skeleton } from '@/components/ui/skeleton';
-import { Spinner } from '@/components/ui/spinner';
 import { Switch } from '@/components/ui/switch';
 import { toast } from '@/components/ui/toast';
 import { ApiError } from '@/lib/panel-fetch';
 import { cn } from '@/lib/utils';
 import { fieldErrors } from '../client';
-import { IMAGE_TYPES, MAX_IMAGES, PACKAGINGS, PRODUCT_IMAGE_MAX, type Packaging, type Product, type RefItem, type Rule } from '../types';
+import { MAX_IMAGES, PACKAGINGS, type Packaging, type Product, type RefItem, type Rule } from '../types';
+import { Gallery } from './gallery';
+import { Matrix } from './matrix';
+import { SmallInput } from './small-input';
 import { emptySize, stateOf, toValues, type Errors, type FormState, type ProductFormValues } from './values';
 
 export type { ProductFormValues } from './values';
@@ -23,7 +25,10 @@ export type { ProductFormValues } from './values';
 /** The pickers' entries and the global cutting × packaging rules, loaded by the page (admin or vendor endpoints). */
 export type FormOptions = { categories: RefItem[]; meatTypes: RefItem[]; cuttingStyles: RefItem[]; exclusionItems: RefItem[]; rules: Rule[] };
 
-/** A failed submit; `product` is set when part of it was saved (a draft created, then publishing refused). */
+/**
+ * A failed submit. `product` is set when the content itself was saved (the create or the content edit went through,
+ * a later step failed): its sizes are in the submitted order, so the form takes their new ids and a retry is an edit.
+ */
 export class SubmitError extends Error {
   constructor(
     readonly cause: unknown,
@@ -82,7 +87,6 @@ export function ProductForm({ product, options, upload, setRule, actions, delete
   const [errors, setErrors] = useState<Errors>({});
   const [busy, setBusy] = useState<string | null>(null);
   const [rules, setRules] = useState(options.rules);
-  const [ruleBusy, setRuleBusy] = useState<string | null>(null);
   const name = (n: { ar: string; en: string } | null | undefined) => (n ? (locale === 'en' ? n.en : n.ar) : '');
 
   const set = (patch: Partial<FormState>, clear: string[] = []) => {
@@ -95,7 +99,6 @@ export function ProductForm({ product, options, upload, setRule, actions, delete
   const exclusionItems = listed(options.exclusionItems, s.exclusions);
   const categories = listed(options.categories, [s.categoryId]);
   const meatTypes = listed(options.meatTypes, [s.meatTypeId]);
-  const incompatible = (cut: string, k: Packaging) => rules.find((r) => r.cuttingStyleId === cut && r.packaging === k);
 
   async function submit(intent: string) {
     const { values, errors: own } = toValues(s);
@@ -106,26 +109,14 @@ export function ProductForm({ product, options, upload, setRule, actions, delete
       setS(stateOf(await onSubmit(values, intent)));
     } catch (err) {
       const cause = err instanceof SubmitError ? err.cause : err;
-      if (err instanceof SubmitError && err.product) setS(stateOf(err.product));
+      const saved = err instanceof SubmitError ? err.product : undefined;
+      // Keep what was typed; only the new sizes take the ids the server gave them (by position).
+      if (saved) setS((old) => ({ ...old, sizes: old.sizes.map((r, i) => ({ ...r, id: saved.sizes[i]?.id ?? r.id })) }));
       const mapped = errorsOf(cause, values);
       if (mapped) setErrors(mapped);
       else toast('error', t('saveFailed'));
     } finally {
       setBusy(null);
-    }
-  }
-
-  async function toggleRule(cut: string, k: Packaging) {
-    if (!setRule) return;
-    const key = `${cut}|${k}`;
-    setRuleBusy(key);
-    try {
-      setRules(await setRule(cut, k, !incompatible(cut, k)));
-      setErrors(({ pairs: _, ...rest }) => rest);
-    } catch {
-      toast('error', t('matrix.failed'));
-    } finally {
-      setRuleBusy(null);
     }
   }
 
@@ -265,45 +256,18 @@ export function ProductForm({ product, options, upload, setRule, actions, delete
       </FormSection>
 
       <FormSection title={t('matrix.title')} body={t(setRule ? 'matrix.body' : 'matrix.bodyReadOnly', { cuts: cuttingStyles.length, packs: PACKAGINGS.length })} invalid={invalid('matrix')}>
-        <div role="table" aria-label={t('matrix.title')} className="flex flex-col gap-s8">
-          <div role="row" className="flex h-11 items-center">
-            <span role="columnheader" className="w-[172px] shrink-0" />
-            {PACKAGINGS.map((k) => (
-              <span key={k} role="columnheader" className="flex w-[150px] shrink-0 justify-center text-label-m text-ink">{t(`packaging.${k}`)}</span>
-            ))}
-          </div>
-          {cuttingStyles.map((c, ri) => (
-            <div key={c.id} role="row" className={cn('flex h-[52px] items-center rounded-sm', ri % 2 === 1 && 'bg-bg')}>
-              <span role="rowheader" className="flex w-[172px] shrink-0 px-s8 text-label-m text-ink">{name(c.name)}</span>
-              {PACKAGINGS.map((k) => {
-                const bad = !!incompatible(c.id, k);
-                // A pair this product offers although a rule forbids it: it blocks publishing (PRODUCT_NOT_SUBMITTABLE).
-                const offered = bad && s.cuts.some((x) => x.id === c.id) && s.packs.some((x) => x.packaging === k);
-                const label = t('matrix.cell', { cut: name(c.name), packaging: t(`packaging.${k}`), state: t(bad ? 'matrix.incompatible' : 'matrix.compatible') });
-                const box = cn(
-                  'flex size-11 items-center justify-center rounded-sm',
-                  bad ? 'border border-line bg-paper text-ink-2' : 'bg-ember text-paper',
-                  offered && 'border-2 border-danger',
-                );
-                const icon = ruleBusy === `${c.id}|${k}` ? <Spinner className="size-5" /> : bad ? <Minus size={22} aria-hidden /> : <Check size={22} aria-hidden />;
-                return (
-                  <span key={k} role="cell" className="flex w-[150px] shrink-0 justify-center">
-                    {setRule ? (
-                      <button type="button" aria-label={label} aria-pressed={!bad} disabled={ruleBusy !== null} onClick={() => void toggleRule(c.id, k)} className={box}>{icon}</button>
-                    ) : (
-                      <span role="img" aria-label={label} className={box}>{icon}</span>
-                    )}
-                  </span>
-                );
-              })}
-            </div>
-          ))}
-        </div>
+        <Matrix
+          cuttingStyles={cuttingStyles}
+          rules={rules}
+          onRules={(next) => {
+            setRules(next);
+            setErrors(({ pairs: _, ...rest }) => rest);
+          }}
+          setRule={setRule}
+          offered={(cut, k) => s.cuts.some((x) => x.id === cut) && s.packs.some((x) => x.packaging === k)}
+          name={name}
+        />
         {message('pairs') && <p role="alert" className="text-body-m text-danger">{message('pairs')}</p>}
-        <div className="flex items-center gap-s24 text-body-m text-ink-2">
-          <span className="flex items-center gap-s8"><span aria-hidden className="size-5 rounded-sm bg-ember" />{t('matrix.compatible')}</span>
-          <span className="flex items-center gap-s8"><span aria-hidden className="size-5 rounded-sm border border-line bg-paper" />{t('matrix.legendIncompatible')}</span>
-        </div>
       </FormSection>
 
       <FormSection title={t('fulfilment.title')} body={t('fulfilment.body')} invalid={invalid('fulfilment')}>
@@ -380,133 +344,3 @@ function SelectField({ label, hint, error, value, onChange, children }: { label:
     </FormField>
   );
 }
-
-/**
- * The 44px value boxes of the sizes rows (131:35405); an error shows as the danger border with the message in the box
- * when it is empty (131:36439), and is read out either way.
- */
-function SmallInput({
-  label, value, onChange, error, suffix, className, placeholder, ...rest
-}: { label: string; value: string; onChange: (v: string) => void; error?: string; suffix?: string } & Omit<React.InputHTMLAttributes<HTMLInputElement>, 'onChange' | 'value'>) {
-  return (
-    <label className={cn('flex h-11 shrink-0 items-center gap-s8 rounded-sm border px-s12', error ? 'border-danger' : 'border-line', 'bg-paper', className)}>
-      <span className="sr-only">{label}</span>
-      <input
-        value={value}
-        onChange={(e) => onChange(e.target.value)}
-        aria-invalid={!!error || undefined}
-        placeholder={error && !value ? error : placeholder}
-        className={cn('min-w-0 flex-1 bg-transparent text-body-m text-ink outline-none', error && !value ? 'placeholder:text-ink' : 'placeholder:text-muted')}
-        {...rest}
-      />
-      {suffix && <span className="text-body-m text-ink-2">{suffix}</span>}
-      {error && <span role="alert" className="sr-only">{`${label}: ${error}`}</span>}
-    </label>
-  );
-}
-
-/**
- * Images (131:35405): the cover, the others, then «add». Drag one onto another to reorder (the first is the cover),
- * or focus it and use the arrow keys; each new file is uploaded at once (ticket, storage, confirm).
- */
-function Gallery({ images, upload, error, onChange }: { images: FormState['images']; upload: (f: File) => Promise<string>; error?: string; onChange: (v: FormState['images']) => void }) {
-  const t = useTranslations('catalog.form.images');
-  const tg = useTranslations();
-  const input = useRef<HTMLInputElement>(null);
-  const dragged = useRef<number | null>(null);
-  const [pending, setPending] = useState(0);
-  const [failed, setFailed] = useState<string>();
-  const latest = useRef(images);
-  latest.current = images;
-  const blobs = useRef<string[]>([]);
-  useEffect(() => () => blobs.current.forEach((u) => URL.revokeObjectURL(u)), []);
-
-  const move = (from: number, to: number) => {
-    if (to < 0 || to >= images.length || from === to) return;
-    const next = [...images];
-    next.splice(to, 0, next.splice(from, 1)[0]!);
-    onChange(next);
-  };
-  async function add(files: File[]) {
-    setFailed(undefined);
-    const room = MAX_IMAGES - images.length - pending;
-    for (const file of files.slice(0, Math.max(0, room))) {
-      if (!IMAGE_TYPES.includes(file.type) || file.size > PRODUCT_IMAGE_MAX) {
-        setFailed(t('rule'));
-        continue;
-      }
-      setPending((n) => n + 1);
-      try {
-        const mediaId = await upload(file);
-        const url = URL.createObjectURL(file);
-        blobs.current.push(url);
-        onChange([...latest.current, { mediaId, url }]);
-      } catch {
-        setFailed(tg('upload.failed'));
-      } finally {
-        setPending((n) => n - 1);
-      }
-    }
-  }
-
-  const tile = (i: number, img: FormState['images'][number]) => (
-    <div
-      key={img.mediaId}
-      draggable
-      onDragStart={() => (dragged.current = i)}
-      onDragOver={(e) => e.preventDefault()}
-      onDrop={() => dragged.current !== null && move(dragged.current, i)}
-      className={cn('group relative shrink-0 overflow-hidden bg-sand', i === 0 ? 'h-[180px] w-[240px] rounded-md' : 'h-[84px] w-[114px] rounded-sm')}
-    >
-      <button
-        type="button"
-        aria-label={t(i === 0 ? 'cover' : 'image', { n: i + 1, count: images.length })}
-        onKeyDown={(e) => {
-          const rtl = document.documentElement.dir === 'rtl';
-          if (e.key === 'ArrowRight') move(i, rtl ? i - 1 : i + 1);
-          if (e.key === 'ArrowLeft') move(i, rtl ? i + 1 : i - 1);
-        }}
-        className="size-full cursor-grab"
-      >
-        {/* eslint-disable-next-line @next/next/no-img-element -- a CDN or blob: preview, shown as is */}
-        {img.url && <img src={img.url} alt="" className="size-full object-cover" />}
-      </button>
-      <button type="button" aria-label={t('remove', { n: i + 1 })} onClick={() => onChange(images.filter((x) => x.mediaId !== img.mediaId))} className="absolute end-s4 top-s4 flex size-7 items-center justify-center rounded-pill bg-paper/90 text-ink">
-        <X size={14} aria-hidden />
-      </button>
-    </div>
-  );
-
-  return (
-    <div className="flex flex-col gap-s8">
-      <div className="flex flex-wrap gap-s12">
-        {images[0] && tile(0, images[0])}
-        {images.length > 1 && <div className="grid grid-flow-col grid-rows-2 gap-s12">{images.slice(1).map((img, j) => tile(j + 1, img))}</div>}
-        {images.length + pending < MAX_IMAGES && (
-          <button
-            type="button"
-            onClick={() => input.current?.click()}
-            className={cn('flex h-[180px] items-center justify-center gap-s8 rounded-md border bg-bg text-label-m text-ink-2', images.length ? 'w-[240px]' : 'w-full', error || failed ? 'border-danger' : 'border-line')}
-          >
-            {pending ? <Spinner className="size-6 text-ember" /> : <Plus size={24} aria-hidden />}
-            {pending ? tg('upload.uploading') : t('add')}
-          </button>
-        )}
-      </div>
-      {(error || failed) && <p role="alert" className="text-body-m text-danger">{error ?? failed}</p>}
-      <input
-        ref={input}
-        type="file"
-        hidden
-        multiple
-        accept={IMAGE_TYPES.join(',')}
-        aria-label={t('add')}
-        onChange={(e) => {
-          void add([...(e.target.files ?? [])]);
-          e.target.value = '';
-        }}
-      />
-    </div>
-  );
-}
-

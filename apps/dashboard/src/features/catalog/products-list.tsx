@@ -5,7 +5,7 @@ import type { ColumnDef } from '@tanstack/react-table';
 import { useLocale, useTranslations } from 'next-intl';
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { PageHeader } from '@/components/shell/page-header';
-import { dayOf } from '@/features/admin-vendors/vendors-list';
+import { dayOf } from '@/lib/date';
 import type { Vendor } from '@/features/admin-vendors/types';
 import { Badge, type BadgeType } from '@/components/ui/badge';
 import { Button, buttonVariants } from '@/components/ui/button';
@@ -19,7 +19,7 @@ import { Link } from '@/i18n/navigation';
 import { sar } from '@/lib/money';
 import { ApiError, panelFetch } from '@/lib/panel-fetch';
 import { loadAll } from './client';
-import { PRODUCT_STATUSES, type Page, type ProductCard, type ProductStatus, type RefItem } from './types';
+import { PRODUCT_STATUSES, bySortOrder, type Page, type ProductCard, type ProductStatus, type RefItem } from './types';
 
 /** The badge of a product: its status, or «غير متاح» for a published product switched off (131:21286). */
 export function productBadge(p: Pick<ProductCard, 'status' | 'isAvailable'>): { key: string; type: BadgeType } {
@@ -38,7 +38,7 @@ export function ProductsList() {
   const [status, setStatus] = useState<ProductStatus | ''>('');
   const [vendorId, setVendorId] = useState('');
   const [categoryId, setCategoryId] = useState('');
-  const [vendors, setVendors] = useState<Vendor[]>([]);
+  const [vendors, setVendors] = useState<Vendor[] | 'failed'>([]);
   const [categories, setCategories] = useState<RefItem[]>([]);
   const [paging, setPaging] = useState<{ key: string; cursors: (string | undefined)[] }>({ key: '', cursors: [undefined] });
   const [data, setData] = useState<{ items: ProductCard[]; next: string | null } | 'loading' | 'error' | 'denied'>('loading');
@@ -46,10 +46,14 @@ export function ProductsList() {
 
   // The filters' options: vendors (active ones, JAZLA included) and categories; a failure leaves a filter empty.
   useEffect(() => {
-    loadAll<Vendor>('/api/admin/vendors?status=active').then(setVendors, () => {});
-    loadAll<RefItem>('/api/admin/catalog/lists/categories').then((c) => setCategories(c.sort((a, b) => (a.sortOrder ?? 0) - (b.sortOrder ?? 0))), () => {});
+    loadAll<Vendor>('admin', '/api/admin/vendors?status=active').then(setVendors, () => setVendors('failed'));
+    loadAll<RefItem>('admin', '/api/admin/catalog/lists/categories').then((c) => setCategories(c.sort(bySortOrder)), () => {});
   }, []);
-  const platformId = vendors.find((v) => v.isPlatform)?.id;
+  const vendorList = vendors === 'failed' ? [] : vendors;
+  const platformId = vendorList.find((v) => v.isPlatform)?.id;
+  // The card does not say which vendor is JAZLA's: without the vendors list, every row offers the form and the
+  // switch, and the API refuses another store's product (NOT_FOUND, shown as a toast).
+  const ownProduct = useCallback((p: ProductCard) => (vendors === 'failed' ? true : p.vendor.id === platformId), [vendors, platformId]);
 
   const key = `${status}|${vendorId}`;
   const cursors = paging.key === key ? paging.cursors : [undefined];
@@ -78,7 +82,7 @@ export function ProductsList() {
         setData((d) => (typeof d === 'object' ? { ...d, items: d.items.map((x) => (x.id === p.id ? { ...x, isAvailable } : x)) } : d));
         toast('success', t(isAvailable ? 'availableOn' : 'availableOff', { name: nameOf(p.name) }));
       } catch (e) {
-        toast('error', t(e instanceof ApiError && e.code === 'PRODUCT_NOT_EDITABLE' ? 'notEditable' : 'availabilityFailed'));
+        toast('error', t(e instanceof ApiError && e.code === 'PRODUCT_NOT_EDITABLE' ? 'notEditable' : e instanceof ApiError && e.code === 'NOT_FOUND' ? 'notJazla' : 'availabilityFailed'));
       } finally {
         setSwitching(null);
       }
@@ -105,7 +109,7 @@ export function ProductsList() {
             </>
           );
           // JAZLA's own products open in the form; other vendors' are reviewed (CAT-DSH-2).
-          return p.vendor.id === platformId ? (
+          return ownProduct(p) ? (
             <Link href={`/admin/catalog/products/${p.id}`} className="flex min-w-0 items-center gap-s12 text-label-m text-ink">{inner}</Link>
           ) : (
             <span className="flex min-w-0 items-center gap-s12 text-label-m text-ink">{inner}</span>
@@ -136,12 +140,12 @@ export function ProductsList() {
         header: t('cols.available'),
         meta: { width: 80, skeleton: 40 },
         cell: ({ row: { original: p } }) =>
-          p.vendor.id === platformId && p.status !== 'pending_review' ? (
+          ownProduct(p) && p.status !== 'pending_review' ? (
             <Switch hideLabel label={t('availableLabel', { name: nameOf(p.name) })} checked={p.isAvailable} disabled={switching === p.id} onChange={(v) => void toggle(p, v)} />
           ) : null,
       },
     ],
-    [t, locale, nameOf, categoryName, platformId, switching, toggle],
+    [t, locale, nameOf, categoryName, ownProduct, switching, toggle],
   );
 
   // shortcut: no search or category filter on GET /v1/admin/products, API gap: both apply to the loaded page only.
@@ -154,7 +158,7 @@ export function ProductsList() {
             (q.length < 2 || [p.name.ar, p.name.en, p.vendor.name?.ar ?? '', p.vendor.name?.en ?? ''].some((v) => v.toLowerCase().includes(q))),
         )
       : [];
-  const vendorName = nameOf(vendors.find((v) => v.id === vendorId)?.name);
+  const vendorName = nameOf(vendorList.find((v) => v.id === vendorId)?.name);
   const applied = [
     ...(status ? [{ key: 'status', label: t('chip.status', { value: t(`status.${status}`) }), onRemove: () => setStatus('') }] : []),
     ...(vendorId ? [{ key: 'vendor', label: t('chip.vendor', { value: vendorName }), onRemove: () => setVendorId('') }] : []),
@@ -188,7 +192,7 @@ export function ProductsList() {
         </Select>
         <Select aria-label={t('vendor')} value={vendorId} onChange={(e) => setVendorId(e.target.value)} className="flex-1">
           <option value="">{t('vendor')}</option>
-          {vendors.map((v) => <option key={v.id} value={v.id}>{nameOf(v.name)}</option>)}
+          {vendorList.map((v) => <option key={v.id} value={v.id}>{nameOf(v.name)}</option>)}
         </Select>
         <Select aria-label={t('statusFilter')} value={status} onChange={(e) => setStatus(e.target.value as ProductStatus | '')} className="flex-1">
           <option value="">{t('statusFilter')}</option>
@@ -226,7 +230,7 @@ export function ProductsList() {
           onPrev={() => setCursors(cursors.slice(0, -1))}
           onNext={() => data !== 'loading' && data.next && setCursors([...cursors, data.next])}
           rowActions={(p) =>
-            p.vendor.id === platformId ? (
+            ownProduct(p) ? (
               <Link href={`/admin/catalog/products/${p.id}`} aria-label={t('open', { name: nameOf(p.name) })} className="flex text-ink-2">
                 <DotsThree size={22} aria-hidden />
               </Link>

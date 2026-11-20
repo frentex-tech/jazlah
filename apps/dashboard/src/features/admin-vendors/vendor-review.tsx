@@ -17,7 +17,7 @@ import { toast } from '@/components/ui/toast';
 import { Link } from '@/i18n/navigation';
 import { ApiError, panelFetch } from '@/lib/panel-fetch';
 import { bpsOf, percentOf, type Application, type ApplicationDetail, type Review, type Vendor } from './types';
-import { dayOf } from './vendors-list';
+import { dayOf } from '@/lib/date';
 
 const PinMap = dynamic(() => import('@/features/vendor-onboarding/pin-map').then((m) => m.PinMap), { ssr: false });
 

@@ -122,6 +122,8 @@ Agreed by the owner in the Sprint 1 fix round, after the design QA (`reviews/qa-
 | 131:35405 | Cutting styles: under the chips, a row per chosen cut with its extra price | The API prices each cut; the frame has no field for it |
 | 131:35405 | Packaging: the API's vacuum bag, chilled tray, bags, no packaging, each with an editable extra price beside the checkbox (Figma: chilled carton, gift wrap, price in the label) | The API's packaging list |
 | 131:35405 | Matrix rows are every active cutting style (not only the product's); a cell toggles a global rule for all products (the body says so); a forbidden pair the product offers is outlined red | Rules are global in the API |
+| 131:35405 | A matrix click first asks for confirmation (DS Dialog) that the rule changes for every product | The rule is global in the API |
+| 131:21038 | «Remove image» link under the category picture | The API allows removing it (`imageMediaId: null`); no frame shows how |
 | 131:35405 | «Slaughtered on order», preparation time, minimum quantity, order days, daily quantity and pause date are disabled | API gaps |
 | 131:35405, 131:35813 | Footer for a draft: «save and publish» (primary), «save as draft»; for a published product: «save changes»; «delete product» disabled. The new-product title is «new product» | JAZLA products are published directly by admins, not sent to review; no delete endpoint |
 | 131:36439 | A size price error shows the message in the empty box (as drawn); other API errors show under their field | Same rule for every field |

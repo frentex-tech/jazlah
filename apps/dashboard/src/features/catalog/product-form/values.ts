@@ -23,6 +23,9 @@ export type ProductFormValues = { content: ProductContent; fulfilment: Fulfilmen
 /** Field errors keyed by the API's field paths (`name.ar`, `sizes.2.priceHalalas`, …), as VALIDATION_FAILED names them. */
 export type Errors = Record<string, string>;
 
+/** The API's highest price, in halalas (1,000,000.00 SAR). */
+const MAX_HALALAS = 100_000_000;
+
 let seq = 0;
 export const rowKey = () => `row-${++seq}`;
 export const emptySize = (): SizeRow => ({ key: rowKey(), id: null, tagAr: '', tagEn: '', grams: '', price: '' });
@@ -64,7 +67,7 @@ export function toValues(s: FormState): { values: ProductFormValues; errors: Err
     const price = halalasOf(r.price);
     const g = grams(r.grams);
     if (!r.price.trim()) errors[`sizes.${i}.priceHalalas`] = 'required';
-    else if (price === null || price < 1) errors[`sizes.${i}.priceHalalas`] = 'invalid';
+    else if (price === null || price < 1 || price > MAX_HALALAS) errors[`sizes.${i}.priceHalalas`] = 'invalid';
     if (!r.grams.trim()) errors[`sizes.${i}.approxWeightGrams`] = 'required';
     else if (g === null) errors[`sizes.${i}.approxWeightGrams`] = 'invalid';
     // A tag is both languages or none (the API's LocalizedNameDto).
@@ -78,7 +81,7 @@ export function toValues(s: FormState): { values: ProductFormValues; errors: Err
   });
   const extra = (price: string, key: string) => {
     const h = price.trim() ? halalasOf(price) : 0;
-    if (h === null) errors[key] = 'invalid';
+    if (h === null || h > MAX_HALALAS) errors[key] = 'invalid';
     return h ?? 0;
   };
   const content: ProductContent = {
@@ -98,20 +101,40 @@ export function toValues(s: FormState): { values: ProductFormValues; errors: Err
 
 /**
  * Price changes of what the product already has (PATCH …/prices), and the content with those new prices: a content
- * edit must carry the live prices (`isLivePrice`), so prices go first.
+ * edit must carry the live prices (`isLivePrice`), so prices go first. `rows` maps each PATCH item back to its index
+ * in the content (the form's row), so a refusal of `sizes.0` lands on the right row.
  */
 export function priceChanges(p: Product, c: ProductContent) {
-  const sizes = c.sizes.flatMap((s) => {
+  const rows = { sizes: [] as number[], cuttings: [] as number[], packagings: [] as number[] };
+  const sizes: { sizeId: string; priceHalalas: number }[] = [];
+  c.sizes.forEach((s, i) => {
     const old = s.id ? p.sizes.find((x) => x.id === s.id) : undefined;
-    return old && old.priceHalalas !== s.priceHalalas ? [{ sizeId: old.id!, priceHalalas: s.priceHalalas }] : [];
+    if (old && old.priceHalalas !== s.priceHalalas) {
+      sizes.push({ sizeId: old.id!, priceHalalas: s.priceHalalas });
+      rows.sizes.push(i);
+    }
   });
-  const cuttings = c.cuttings.filter((x) => {
+  const cuttings = c.cuttings.filter((x, i) => {
     const old = p.cuttings.find((y) => y.cuttingStyleId === x.cuttingStyleId);
-    return old && old.extraPriceHalalas !== x.extraPriceHalalas;
+    const changed = !!old && old.extraPriceHalalas !== x.extraPriceHalalas;
+    if (changed) rows.cuttings.push(i);
+    return changed;
   });
-  const packagings = c.packagings.filter((x) => {
+  const packagings = c.packagings.filter((x, i) => {
     const old = p.packagings.find((y) => y.packaging === x.packaging);
-    return old && old.extraPriceHalalas !== x.extraPriceHalalas;
+    const changed = !!old && old.extraPriceHalalas !== x.extraPriceHalalas;
+    if (changed) rows.packagings.push(i);
+    return changed;
   });
-  return sizes.length || cuttings.length || packagings.length ? { sizes, cuttings, packagings } : null;
+  return sizes.length || cuttings.length || packagings.length ? { body: { sizes, cuttings, packagings }, rows } : null;
+}
+
+/** A PATCH …/prices field (`sizes.0.priceHalalas`, `cuttings.1.cuttingStyleId`) as the form's field of that row. */
+export function priceField(field: string, rows: { sizes: number[]; cuttings: number[]; packagings: number[] }): string {
+  const m = /^(sizes|cuttings|packagings)\.(\d+)\.(.+)$/.exec(field);
+  if (!m) return field;
+  const [, list, j, leaf] = m as unknown as [string, keyof typeof rows, string, string];
+  const row = rows[list][Number(j)];
+  const price = list === 'sizes' ? 'priceHalalas' : 'extraPriceHalalas';
+  return row === undefined ? field : `${list}.${row}.${leaf === 'sizeId' || leaf === 'cuttingStyleId' || leaf === 'packaging' ? price : leaf}`;
 }

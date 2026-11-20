@@ -4,8 +4,7 @@
 import { apiCall as call, apiClient, apiHeaders as headers } from '@/api/client';
 import type { ApiResult } from '@/lib/auth/panel-session';
 import { mocksEnabled } from '@/lib/mock';
-import { mockVendors } from '@/features/admin-vendors/backend';
-import type { Vendor } from '@/features/admin-vendors/types';
+import { MOCK_PLATFORM as PLATFORM, mockVendors } from '@/features/admin-vendors/backend';
 import { mockMedia } from '@/features/vendor-onboarding/backend';
 import type {
   CreateItem, CreateProduct, CreateRule, Fulfilment, ListName, ListQuery, MediaFile, Page, Prices, Product, ProductCard, ProductContent,
@@ -82,11 +81,6 @@ const item = (kind: string, i: number, [ar, en]: [string, string], ordered: bool
   id: sid(kind, i + 1), name: named(ar, en), isActive, sortOrder: ordered ? i + 1 : null, imageUrl: ordered ? PHOTO[i % 2]! : null, createdAt: day(1 + i),
 });
 
-const PLATFORM: Vendor = {
-  id: sid('9e', 1), name: named('جزلة', 'JAZLA'), description: { ar: null, en: null }, logoUrl: null, coverUrl: null, city: 'الرياض', commissionBasisPoints: 0,
-  commercialRegistrationNumber: null, vatNumber: null, contactPhone: null, contactEmail: null, ibanMasked: null, accountHolderName: null, location: null,
-  createdAt: '2026-08-01T08:00:00.000Z', isPlatform: true, status: 'active', suspendedAt: null, suspensionReason: null, applicationId: null,
-};
 
 type MockState = { items: Record<ListName, RefItem[]>; rules: Rule[]; products: Map<string, Product>; seedImages: Map<string, string> };
 const g = globalThis as { __adminCatalog?: MockState };
@@ -145,8 +139,6 @@ function seed(): MockState {
   });
   return { items, rules, products, seedImages };
 }
-// JAZLA's own vendor, listed with the others as the API does (isPlatform); added again after a dev reload.
-if (!mockVendors.has(PLATFORM.id)) mockVendors.set(PLATFORM.id, PLATFORM);
 
 const notFound = { ok: false, code: 'NOT_FOUND', status: 404 } as const;
 const forbidden = { ok: false, code: 'NOT_ALLOWED', status: 403 } as const;
