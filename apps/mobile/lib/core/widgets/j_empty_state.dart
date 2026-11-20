@@ -3,7 +3,7 @@ import 'package:jazlah/app/theme/theme.dart';
 import 'package:jazlah/core/widgets/j_button.dart';
 import 'package:jazlah/core/widgets/j_icons.dart';
 
-enum JEmptyStateKind { cart, orders, search, error, offline, denied }
+enum JEmptyStateKind { cart, orders, search, error, offline, denied, location }
 
 /// Figma `State panel`: icon disc, title, body and an optional action, per [kind].
 /// Error and offline use a primary action, the others a secondary one (as in the spec).
@@ -32,6 +32,7 @@ class JEmptyState extends StatelessWidget {
       JEmptyStateKind.error => (JIcons.warningCircle, JColors.danger, JColors.dangerBg),
       JEmptyStateKind.offline => (JIcons.wifiSlash, JColors.warning, JColors.warningBg),
       JEmptyStateKind.denied => (JIcons.lockSimple, JColors.ink2, JColors.sand),
+      JEmptyStateKind.location => (JIcons.mapPin, JColors.ink2, JColors.sand),
     };
     final primary = kind == JEmptyStateKind.error || kind == JEmptyStateKind.offline;
     return Padding(

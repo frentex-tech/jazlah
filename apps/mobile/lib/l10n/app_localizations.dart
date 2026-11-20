@@ -1663,6 +1663,354 @@ abstract class AppLocalizations {
   /// In ar, this message translates to:
   /// **'وصلت إلى الحد الأقصى من العناوين ({limit}). احذف عنوانًا لإضافة آخر.'**
   String addrLimitReached(int limit);
+
+  /// No description provided for @seeAll.
+  ///
+  /// In ar, this message translates to:
+  /// **'الكل'**
+  String get seeAll;
+
+  /// No description provided for @filters.
+  ///
+  /// In ar, this message translates to:
+  /// **'تصفية'**
+  String get filters;
+
+  /// No description provided for @currency.
+  ///
+  /// In ar, this message translates to:
+  /// **'ر.س'**
+  String get currency;
+
+  /// No description provided for @addToCart.
+  ///
+  /// In ar, this message translates to:
+  /// **'أضف إلى السلة'**
+  String get addToCart;
+
+  /// No description provided for @freshToday.
+  ///
+  /// In ar, this message translates to:
+  /// **'ذُبح اليوم'**
+  String get freshToday;
+
+  /// No description provided for @unavailableNow.
+  ///
+  /// In ar, this message translates to:
+  /// **'غير متاح حاليًا'**
+  String get unavailableNow;
+
+  /// No description provided for @offlineTitle.
+  ///
+  /// In ar, this message translates to:
+  /// **'لا يوجد اتصال بالإنترنت'**
+  String get offlineTitle;
+
+  /// No description provided for @offlineBody.
+  ///
+  /// In ar, this message translates to:
+  /// **'تحقق من اتصالك ثم أعد المحاولة.'**
+  String get offlineBody;
+
+  /// No description provided for @loadMoreFailed.
+  ///
+  /// In ar, this message translates to:
+  /// **'تعذّر تحميل المزيد.'**
+  String get loadMoreFailed;
+
+  /// No description provided for @timeAm.
+  ///
+  /// In ar, this message translates to:
+  /// **'ص'**
+  String get timeAm;
+
+  /// No description provided for @timePm.
+  ///
+  /// In ar, this message translates to:
+  /// **'م'**
+  String get timePm;
+
+  /// No description provided for @homeSearchHint.
+  ///
+  /// In ar, this message translates to:
+  /// **'ابحث عن لحوم أو متاجر'**
+  String get homeSearchHint;
+
+  /// No description provided for @homeCategories.
+  ///
+  /// In ar, this message translates to:
+  /// **'الأقسام'**
+  String get homeCategories;
+
+  /// No description provided for @homeBestSellers.
+  ///
+  /// In ar, this message translates to:
+  /// **'الأكثر مبيعًا'**
+  String get homeBestSellers;
+
+  /// No description provided for @homePartnerStores.
+  ///
+  /// In ar, this message translates to:
+  /// **'متاجر شريكة'**
+  String get homePartnerStores;
+
+  /// No description provided for @homeStoresPaused.
+  ///
+  /// In ar, this message translates to:
+  /// **'المتاجر القريبة منك متوقفة مؤقتًا. تصفّح الآن واطلب عند عودتها.'**
+  String get homeStoresPaused;
+
+  /// No description provided for @homeEmptyTitle.
+  ///
+  /// In ar, this message translates to:
+  /// **'لا توجد متاجر في منطقتك بعد'**
+  String get homeEmptyTitle;
+
+  /// No description provided for @homeEmptyBody.
+  ///
+  /// In ar, this message translates to:
+  /// **'نعمل على الوصول إلى حيّك قريبًا. جرّب عنوانًا آخر.'**
+  String get homeEmptyBody;
+
+  /// No description provided for @homeChangeAddress.
+  ///
+  /// In ar, this message translates to:
+  /// **'تغيير العنوان'**
+  String get homeChangeAddress;
+
+  /// No description provided for @homeErrorTitle.
+  ///
+  /// In ar, this message translates to:
+  /// **'تعذّر تحميل الصفحة الرئيسية'**
+  String get homeErrorTitle;
+
+  /// No description provided for @homeErrorBody.
+  ///
+  /// In ar, this message translates to:
+  /// **'حدث خطأ أثناء جلب المتاجر والمنتجات. حاول مرة أخرى.'**
+  String get homeErrorBody;
+
+  /// No description provided for @categoriesSubtitle.
+  ///
+  /// In ar, this message translates to:
+  /// **'اختر القسم الذي يناسب طلبك.'**
+  String get categoriesSubtitle;
+
+  /// No description provided for @categoriesComing.
+  ///
+  /// In ar, this message translates to:
+  /// **'أقسام قادمة'**
+  String get categoriesComing;
+
+  /// No description provided for @categoriesEmptyTitle.
+  ///
+  /// In ar, this message translates to:
+  /// **'لا توجد أقسام متاحة'**
+  String get categoriesEmptyTitle;
+
+  /// No description provided for @categoriesEmptyBody.
+  ///
+  /// In ar, this message translates to:
+  /// **'لا تتوفر أقسام في منطقتك حاليًا. تحقق مرة أخرى قريبًا.'**
+  String get categoriesEmptyBody;
+
+  /// No description provided for @backToHome.
+  ///
+  /// In ar, this message translates to:
+  /// **'العودة للرئيسية'**
+  String get backToHome;
+
+  /// No description provided for @categoriesErrorTitle.
+  ///
+  /// In ar, this message translates to:
+  /// **'تعذّر تحميل الأقسام'**
+  String get categoriesErrorTitle;
+
+  /// No description provided for @categoriesErrorBody.
+  ///
+  /// In ar, this message translates to:
+  /// **'حدث خطأ أثناء جلب الأقسام. حاول مرة أخرى.'**
+  String get categoriesErrorBody;
+
+  /// No description provided for @categoryEmptyTitle.
+  ///
+  /// In ar, this message translates to:
+  /// **'لا توجد منتجات في هذا القسم بعد'**
+  String get categoryEmptyTitle;
+
+  /// No description provided for @categoryEmptyBody.
+  ///
+  /// In ar, this message translates to:
+  /// **'تصفّح الأقسام الأخرى أو عُد لاحقًا.'**
+  String get categoryEmptyBody;
+
+  /// No description provided for @productsErrorTitle.
+  ///
+  /// In ar, this message translates to:
+  /// **'تعذّر تحميل المنتجات'**
+  String get productsErrorTitle;
+
+  /// No description provided for @productsErrorBody.
+  ///
+  /// In ar, this message translates to:
+  /// **'حدث خطأ أثناء جلب المنتجات. حاول مرة أخرى.'**
+  String get productsErrorBody;
+
+  /// No description provided for @sortPopular.
+  ///
+  /// In ar, this message translates to:
+  /// **'الأكثر مبيعًا'**
+  String get sortPopular;
+
+  /// No description provided for @sortPriceAsc.
+  ///
+  /// In ar, this message translates to:
+  /// **'الأقل سعرًا'**
+  String get sortPriceAsc;
+
+  /// No description provided for @sortPriceDesc.
+  ///
+  /// In ar, this message translates to:
+  /// **'الأعلى سعرًا'**
+  String get sortPriceDesc;
+
+  /// No description provided for @storeRating.
+  ///
+  /// In ar, this message translates to:
+  /// **'{rating} ({count} تقييم)'**
+  String storeRating(String rating, int count);
+
+  /// No description provided for @storeOpenUntil.
+  ///
+  /// In ar, this message translates to:
+  /// **'مفتوح حتى {time}'**
+  String storeOpenUntil(String time);
+
+  /// No description provided for @storeClosedNow.
+  ///
+  /// In ar, this message translates to:
+  /// **'مغلق الآن'**
+  String get storeClosedNow;
+
+  /// No description provided for @storeDeliveryIn.
+  ///
+  /// In ar, this message translates to:
+  /// **'توصيل خلال {minutes} دقيقة'**
+  String storeDeliveryIn(int minutes);
+
+  /// No description provided for @storeMinOrder.
+  ///
+  /// In ar, this message translates to:
+  /// **'الحد الأدنى للطلب {amount} ر.س'**
+  String storeMinOrder(String amount);
+
+  /// No description provided for @storeClosedOpensTomorrow.
+  ///
+  /// In ar, this message translates to:
+  /// **'المتجر مغلق الآن ويفتح غدًا {time}. يمكنك تصفّح المنتجات والطلب عند فتحه.'**
+  String storeClosedOpensTomorrow(String time);
+
+  /// No description provided for @storeClosedOpensAt.
+  ///
+  /// In ar, this message translates to:
+  /// **'المتجر مغلق الآن ويفتح {time}. يمكنك تصفّح المنتجات والطلب عند فتحه.'**
+  String storeClosedOpensAt(String time);
+
+  /// No description provided for @storeClosedNotice.
+  ///
+  /// In ar, this message translates to:
+  /// **'المتجر مغلق الآن. يمكنك تصفّح المنتجات والطلب عند فتحه.'**
+  String get storeClosedNotice;
+
+  /// No description provided for @storeEmptyTitle.
+  ///
+  /// In ar, this message translates to:
+  /// **'لا توجد منتجات حاليًا'**
+  String get storeEmptyTitle;
+
+  /// No description provided for @storeEmptyBody.
+  ///
+  /// In ar, this message translates to:
+  /// **'لم يضف هذا المتجر منتجات بعد. جرّب متجرًا آخر.'**
+  String get storeEmptyBody;
+
+  /// No description provided for @storeBrowseStores.
+  ///
+  /// In ar, this message translates to:
+  /// **'تصفّح المتاجر'**
+  String get storeBrowseStores;
+
+  /// No description provided for @storeErrorTitle.
+  ///
+  /// In ar, this message translates to:
+  /// **'تعذّر تحميل المتجر'**
+  String get storeErrorTitle;
+
+  /// No description provided for @storeErrorBody.
+  ///
+  /// In ar, this message translates to:
+  /// **'حدث خطأ أثناء جلب بيانات المتجر. حاول مرة أخرى.'**
+  String get storeErrorBody;
+
+  /// No description provided for @storeInfo.
+  ///
+  /// In ar, this message translates to:
+  /// **'معلومات المتجر'**
+  String get storeInfo;
+
+  /// No description provided for @storeHours.
+  ///
+  /// In ar, this message translates to:
+  /// **'ساعات العمل'**
+  String get storeHours;
+
+  /// No description provided for @storeHoursValue.
+  ///
+  /// In ar, this message translates to:
+  /// **'{opens} – {closes}'**
+  String storeHoursValue(String opens, String closes);
+
+  /// No description provided for @storeLocation.
+  ///
+  /// In ar, this message translates to:
+  /// **'الموقع'**
+  String get storeLocation;
+
+  /// No description provided for @storePickup.
+  ///
+  /// In ar, this message translates to:
+  /// **'الاستلام من المتجر'**
+  String get storePickup;
+
+  /// No description provided for @storePickupYes.
+  ///
+  /// In ar, this message translates to:
+  /// **'متاح'**
+  String get storePickupYes;
+
+  /// No description provided for @storePickupNo.
+  ///
+  /// In ar, this message translates to:
+  /// **'غير متاح'**
+  String get storePickupNo;
+
+  /// No description provided for @storesTitle.
+  ///
+  /// In ar, this message translates to:
+  /// **'المتاجر'**
+  String get storesTitle;
+
+  /// No description provided for @searchTitle.
+  ///
+  /// In ar, this message translates to:
+  /// **'البحث'**
+  String get searchTitle;
+
+  /// No description provided for @productTitle.
+  ///
+  /// In ar, this message translates to:
+  /// **'المنتج'**
+  String get productTitle;
 }
 
 class _AppLocalizationsDelegate extends LocalizationsDelegate<AppLocalizations> {

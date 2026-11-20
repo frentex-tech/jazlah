@@ -84,4 +84,21 @@ What the customer app needs from the API and does not have yet. Each row names t
 | Support contact (public settings) | Sign-in errors `ACCOUNT_DISABLED`, `ACCOUNT_HAS_STAFF_ACCESS` | The message only, no "contact support" action | API gap |
 | OTP length in the `otp/request` response (optional) | Sign-in: OTP cells | The app reads `codeLength`, default 6 | API gap |
 
+### Catalog: home, category and store pages (STF-MOB-1 #55)
+
+The app reads the public catalog through one repository. Categories, product lists (by category or store, cursor-paged), the store list and a store come from the public catalog routes. With the mock switch on, a seeded catalog (4 stores, 13 categories, 52 products) fills everything below; without it, each gap is hidden or empty, never invented.
+
+| Gap | Screen waiting on it | The app today | Issue |
+|---|---|---|---|
+| A home feed (banners, best sellers, featured, partner stores in one call) | Home | Built from the category list, the first 4 products (not real best sellers) and the first 3 stores; no banners | CAT-API-5 #50; banners CMS-API-1 #162 |
+| A "stores near you are paused" flag | Home: closed state | Never shown from the API; the mock can show it | API gap |
+| Filtering home and lists by the customer's location | Home: empty state ("no stores in your area") | Shown only when the catalog has no products and no stores | CAT-API-5 #50 |
+| Sorting product lists (best selling, price up, price down) | Category page: sort chips | Chips hidden with the API; the mock sorts | CAT-API-5 #50 |
+| Store rating and rating count | Home store cards, store page | Hidden | API gap |
+| Store opening hours and open/closed now | Store page: open/closed badge, closed notice, info sheet; products shown unavailable while closed | Hidden; a store is treated as open | API gap |
+| Store delivery time and minimum order | Store page badges and minimum order line | Hidden | API gap |
+| Store pickup flag | Store info sheet | Hidden | API gap |
+| The categories a store sells | Store page: category chips | Taken from the store's products loaded so far | API gap |
+| The default size line and the "slaughtered today" tag on product cards | Product cards everywhere | Hidden (card shows vendor, name and the lowest price) | API gap |
+
 When one of these lands, its endpoints appear in `openapi.json`, and this file and the module guides are updated in the same pull request.

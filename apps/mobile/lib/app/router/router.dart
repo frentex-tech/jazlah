@@ -1,9 +1,8 @@
-import 'package:flutter/foundation.dart';
+import 'package:flutter/widgets.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import 'package:jazlah/app/providers.dart';
-import 'package:jazlah/app/shell/home_tab.dart';
 import 'package:jazlah/app/shell/main_shell.dart';
 import 'package:jazlah/core/geo/geo_point.dart';
 import 'package:jazlah/core/widgets/gallery/gallery_screen.dart';
@@ -17,10 +16,16 @@ import 'package:jazlah/features/auth/presentation/onboarding_screen.dart';
 import 'package:jazlah/features/auth/presentation/otp_screen.dart';
 import 'package:jazlah/features/auth/presentation/phone_screen.dart';
 import 'package:jazlah/features/auth/presentation/session_controller.dart';
+import 'package:jazlah/features/home/presentation/categories_screen.dart';
+import 'package:jazlah/features/home/presentation/category_screen.dart';
+import 'package:jazlah/features/home/presentation/home_screen.dart';
+import 'package:jazlah/features/home/presentation/stores_screen.dart';
 import 'package:jazlah/features/location/presentation/map_picker_screen.dart';
 import 'package:jazlah/features/location/presentation/out_of_coverage_screen.dart';
 import 'package:jazlah/features/profile/presentation/account_screen.dart';
 import 'package:jazlah/features/profile/presentation/settings_screen.dart';
+import 'package:jazlah/features/store/presentation/store_screen.dart';
+import 'package:jazlah/l10n/app_localizations.dart';
 
 abstract final class Routes {
   static const splash = '/splash';
@@ -29,6 +34,12 @@ abstract final class Routes {
   static const otp = '/login/otp';
   static const completeProfile = '/login/profile';
   static const home = '/home';
+  static const categories = '/home/categories';
+  static const stores = '/home/stores';
+  static String category(String id) => '/home/category/$id';
+  static String store(String id) => '/home/store/$id';
+  static String product(String id) => '/product/$id';
+  static const search = '/search';
   static const orders = '/orders';
   static const services = '/services';
   static const account = '/account';
@@ -102,10 +113,31 @@ final routerProvider = Provider<GoRouter>((ref) {
         redirect: (_, state) => state.extra is GeoPoint ? null : Routes.pickLocation,
         builder: (_, state) => OutOfCoverageScreen(point: state.extra! as GeoPoint),
       ),
+      // Full screen like Figma (no tab bar). The name, when the caller knows it, titles the loading state.
+      GoRoute(
+        path: '/home/store/:id',
+        builder: (_, state) => StoreScreen(id: state.pathParameters['id']!, name: state.extra as String?),
+      ),
+      // shortcut: placeholder until STF-MOB-3 (#56) builds the product page.
+      GoRoute(
+        path: '/product/:id',
+        builder: (context, _) => ComingSoonPage(title: AppLocalizations.of(context).productTitle),
+      ),
       ShellRoute(
         builder: (_, state, child) => MainShell(location: state.matchedLocation, child: child),
         routes: [
-          GoRoute(path: Routes.home, builder: (_, _) => const HomeTab()),
+          GoRoute(path: Routes.home, builder: (_, _) => const HomeScreen()),
+          GoRoute(path: Routes.categories, builder: (_, _) => const CategoriesScreen()),
+          GoRoute(path: Routes.stores, builder: (_, _) => const StoresScreen()),
+          GoRoute(
+            path: '/home/category/:id',
+            builder: (_, state) => CategoryScreen(id: state.pathParameters['id']!),
+          ),
+          // shortcut: placeholder until STF-MOB-4 (#57) builds search.
+          GoRoute(
+            path: Routes.search,
+            builder: (context, _) => ComingSoonPage(title: AppLocalizations.of(context).searchTitle),
+          ),
           GoRoute(
             path: Routes.services,
             builder: (_, _) => const PlaceholderTab(tab: MainTab.services),
@@ -123,6 +155,9 @@ final routerProvider = Provider<GoRouter>((ref) {
     ],
   );
 });
+
+/// Back to the previous page, or home when the page was opened by a link.
+void popOrHome(BuildContext context) => context.canPop() ? context.pop() : context.go(Routes.home);
 
 /// Only in-app paths may be a redirect target (no `//host` or scheme).
 String? safeNext(String? from) => from != null && from.startsWith('/') && !from.startsWith('//') ? from : null;

@@ -16,6 +16,7 @@ class JSearchBar extends StatefulWidget {
     this.onSubmitted,
     this.onFilter,
     this.filterLabel,
+    this.onTap,
   });
 
   final String placeholder;
@@ -30,6 +31,9 @@ class JSearchBar extends StatefulWidget {
   final ValueChanged<String>? onChanged;
   final ValueChanged<String>? onSubmitted;
   final VoidCallback? onFilter;
+
+  /// Set: the bar is a read-only entry point (home) and a tap opens the search screen.
+  final VoidCallback? onTap;
 
   @override
   State<JSearchBar> createState() => _JSearchBarState();
@@ -96,6 +100,10 @@ class _JSearchBarState extends State<JSearchBar> {
               controller: _controller,
               focusNode: _focus,
               autofocus: widget.autofocus,
+              readOnly: widget.onTap != null,
+              // An entry point never takes focus or opens the keyboard.
+              canRequestFocus: widget.onTap == null,
+              onTap: widget.onTap,
               textInputAction: TextInputAction.search,
               onChanged: widget.onChanged,
               onSubmitted: widget.onSubmitted,

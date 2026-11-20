@@ -809,4 +809,192 @@ class AppLocalizationsEn extends AppLocalizations {
   String addrLimitReached(int limit) {
     return 'You\'ve reached the maximum of $limit addresses. Delete one to add another.';
   }
+
+  @override
+  String get seeAll => 'All';
+
+  @override
+  String get filters => 'Filters';
+
+  @override
+  String get currency => 'SAR';
+
+  @override
+  String get addToCart => 'Add to cart';
+
+  @override
+  String get freshToday => 'Slaughtered today';
+
+  @override
+  String get unavailableNow => 'Unavailable now';
+
+  @override
+  String get offlineTitle => 'No internet connection';
+
+  @override
+  String get offlineBody => 'Check your connection and try again.';
+
+  @override
+  String get loadMoreFailed => 'Couldn\'t load more.';
+
+  @override
+  String get timeAm => 'AM';
+
+  @override
+  String get timePm => 'PM';
+
+  @override
+  String get homeSearchHint => 'Search for meat or stores';
+
+  @override
+  String get homeCategories => 'Categories';
+
+  @override
+  String get homeBestSellers => 'Best sellers';
+
+  @override
+  String get homePartnerStores => 'Partner stores';
+
+  @override
+  String get homeStoresPaused => 'Stores near you are paused for now. Browse now and order when they\'re back.';
+
+  @override
+  String get homeEmptyTitle => 'No stores in your area yet';
+
+  @override
+  String get homeEmptyBody => 'We\'re working on reaching your area. Try another address.';
+
+  @override
+  String get homeChangeAddress => 'Change address';
+
+  @override
+  String get homeErrorTitle => 'Couldn\'t load home';
+
+  @override
+  String get homeErrorBody => 'Something went wrong while loading stores and products. Try again.';
+
+  @override
+  String get categoriesSubtitle => 'Pick the category that suits your order.';
+
+  @override
+  String get categoriesComing => 'More coming';
+
+  @override
+  String get categoriesEmptyTitle => 'No categories available';
+
+  @override
+  String get categoriesEmptyBody => 'No categories in your area right now. Check back soon.';
+
+  @override
+  String get backToHome => 'Back to home';
+
+  @override
+  String get categoriesErrorTitle => 'Couldn\'t load categories';
+
+  @override
+  String get categoriesErrorBody => 'Something went wrong while loading categories. Try again.';
+
+  @override
+  String get categoryEmptyTitle => 'No products in this category yet';
+
+  @override
+  String get categoryEmptyBody => 'Browse other categories or come back later.';
+
+  @override
+  String get productsErrorTitle => 'Couldn\'t load products';
+
+  @override
+  String get productsErrorBody => 'Something went wrong while loading products. Try again.';
+
+  @override
+  String get sortPopular => 'Best selling';
+
+  @override
+  String get sortPriceAsc => 'Lowest price';
+
+  @override
+  String get sortPriceDesc => 'Highest price';
+
+  @override
+  String storeRating(String rating, int count) {
+    return '$rating ($count ratings)';
+  }
+
+  @override
+  String storeOpenUntil(String time) {
+    return 'Open until $time';
+  }
+
+  @override
+  String get storeClosedNow => 'Closed now';
+
+  @override
+  String storeDeliveryIn(int minutes) {
+    return 'Delivery in $minutes min';
+  }
+
+  @override
+  String storeMinOrder(String amount) {
+    return 'Minimum order SAR $amount';
+  }
+
+  @override
+  String storeClosedOpensTomorrow(String time) {
+    return 'The store is closed and opens tomorrow at $time. You can browse the products and order once it opens.';
+  }
+
+  @override
+  String storeClosedOpensAt(String time) {
+    return 'The store is closed and opens at $time. You can browse the products and order once it opens.';
+  }
+
+  @override
+  String get storeClosedNotice => 'The store is closed now. You can browse the products and order once it opens.';
+
+  @override
+  String get storeEmptyTitle => 'No products yet';
+
+  @override
+  String get storeEmptyBody => 'This store hasn\'t added products yet. Try another store.';
+
+  @override
+  String get storeBrowseStores => 'Browse stores';
+
+  @override
+  String get storeErrorTitle => 'Couldn\'t load the store';
+
+  @override
+  String get storeErrorBody => 'Something went wrong while loading the store. Try again.';
+
+  @override
+  String get storeInfo => 'Store info';
+
+  @override
+  String get storeHours => 'Opening hours';
+
+  @override
+  String storeHoursValue(String opens, String closes) {
+    return '$opens – $closes';
+  }
+
+  @override
+  String get storeLocation => 'Location';
+
+  @override
+  String get storePickup => 'Store pickup';
+
+  @override
+  String get storePickupYes => 'Available';
+
+  @override
+  String get storePickupNo => 'Not available';
+
+  @override
+  String get storesTitle => 'Stores';
+
+  @override
+  String get searchTitle => 'Search';
+
+  @override
+  String get productTitle => 'Product';
 }

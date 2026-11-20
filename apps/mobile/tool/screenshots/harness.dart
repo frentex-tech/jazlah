@@ -43,11 +43,12 @@ Future<void> shoot(
   List<dynamic> overrides = const [],
   String lang = 'ar',
   Future<void> Function(WidgetTester t)? act,
+  double height = 844,
 }) async {
   SharedPreferences.setMockInitialValues({'locale': lang, 'onboardingSeen': true});
   final prefs = await Prefs.load();
   tester.view
-    ..physicalSize = const Size(390, 844) * 3
+    ..physicalSize = Size(390, height) * 3
     ..devicePixelRatio = 3
     ..padding = FakeViewPadding(top: 44 * 3);
   addTearDown(tester.view.reset);
