@@ -96,6 +96,13 @@ test('a full application, from the phone to the pending status, survives a sessi
   // A pending application cannot be sent twice: the form sends back to the status.
   await page.goto('/vendor/apply');
   await expect(page).toHaveURL(/\/vendor\/application$/);
+  // The admin review (same mock store) lists it under «pending review»; its uploaded PDF opens from a signed link.
+  await signInAs(context, ['admin']);
+  await page.goto('/admin/vendors');
+  await page.getByRole('tab', { name: 'قيد المراجعة' }).click();
+  await page.getByRole('table', { name: 'المتاجر' }).getByRole('link', { name: 'ملحمة الاختبار', exact: true }).click();
+  await expect(page.getByRole('heading', { level: 1, name: 'مراجعة: ملحمة الاختبار' })).toBeVisible();
+  await expect(page.getByRole('link', { name: 'فتح الملف' })).toBeVisible();
 });
 
 test('a draft is never shown to another applicant on the same device', async ({ page, context }) => {
