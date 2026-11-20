@@ -510,5 +510,194 @@
       "retry": "Try again"
     },
     "suspended": "Your store is suspended by the JAZLA team and the details are read-only. Contact support to reactivate it."
+  },
+  "vendors": {
+    "breadcrumb": "Stores / All stores",
+    "title": "Stores",
+    "export": "Export",
+    "invite": "Invite vendor",
+    "search": "Search by store name or CR number",
+    "clear": "Clear all",
+    "category": "Category",
+    "city": "City",
+    "status": "Store status",
+    "appliedOn": "Applied on",
+    "tabsLabel": "Store status",
+    "tabs": {
+      "pending": "Pending review",
+      "active": "Active",
+      "suspended": "Suspended"
+    },
+    "chip": {
+      "status": "Status: {value}",
+      "city": "City: {value}"
+    },
+    "cols": {
+      "store": "Store",
+      "city": "City",
+      "status": "Status",
+      "applied": "Applied on",
+      "products": "Products",
+      "commission": "Commission"
+    },
+    "badges": {
+      "pending": "Pending review",
+      "approved": "Approved",
+      "rejected": "Rejected",
+      "active": "Active",
+      "suspended": "Suspended"
+    },
+    "noCommission": "Not set",
+    "unknown": "—",
+    "open": "Review {name}",
+    "empty": {
+      "title": "No matching stores",
+      "body": "No applications match these filters. Try clearing them.",
+      "action": "Clear filters",
+      "noneTitle": "No stores here yet",
+      "noneBody": "Stores with this status will show here."
+    },
+    "error": {
+      "title": "Couldn't load the stores",
+      "body": "Something went wrong while loading the list. Try again.",
+      "action": "Try again"
+    },
+    "denied": {
+      "title": "You can't manage stores",
+      "body": "This page is for the platform manager and onboarding officers only.",
+      "action": "Back to the overview"
+    }
+  },
+  "review": {
+    "breadcrumb": {
+      "application": "Stores / Applications / {name}",
+      "vendor": "Stores / All stores / {name}",
+      "loading": "Stores / Applications"
+    },
+    "title": "Review: {name}",
+    "titleLoading": "Store review",
+    "summary": {
+      "title": "Store details",
+      "store": "Store",
+      "cr": "Commercial registration",
+      "vat": "VAT number",
+      "holder": "Account holder",
+      "phone": "Phone",
+      "iban": "IBAN",
+      "none": "—"
+    },
+    "location": "Location",
+    "docs": {
+      "title": "Documents",
+      "kindsLabel": "Document type",
+      "zoomIn": "Zoom in",
+      "zoomOut": "Zoom out",
+      "rotate": "Rotate",
+      "download": "Download",
+      "match": "Document matches",
+      "matched": "Matched",
+      "reupload": "Ask for a new upload",
+      "cantShow": "This file can't be shown here",
+      "open": "Open the file",
+      "kinds": {
+        "commercial_registration": "Commercial registration",
+        "municipality_licence": "Municipality licence",
+        "health_certificate": "Health certificate",
+        "national_id": "National ID",
+        "facility_photo": "Facility photo"
+      }
+    },
+    "photos": "Store photos",
+    "decision": {
+      "title": "Review decision",
+      "cr": "Commercial registration is valid",
+      "docs": "Documents match",
+      "location": "Location matches the photos",
+      "approve": "Approve store",
+      "reject": "Reject application"
+    },
+    "active": {
+      "title": "Store is active",
+      "status": "Status",
+      "since": "Active since {date}",
+      "commission": "Commission",
+      "suspend": "Suspend store"
+    },
+    "suspended": {
+      "title": "Store is suspended",
+      "since": "Suspended since {date}",
+      "reason": "Reason",
+      "reinstate": "Reactivate store"
+    },
+    "rejected": {
+      "title": "Application rejected",
+      "on": "Rejected on {date}",
+      "reason": "Reason"
+    },
+    "approveDialog": {
+      "title": "Approve {name}",
+      "body": "Set the platform commission on every order of this store.",
+      "label": "Commission (%)",
+      "hint": "0 to 100 percent of the order value",
+      "invalid": "Enter a percentage from 0 to 100, with at most two decimals",
+      "confirm": "Approve and activate"
+    },
+    "rejectDialog": {
+      "title": "Reject application",
+      "body": "The vendor gets the reason and can edit the application and apply again.",
+      "presetsLabel": "Common reasons",
+      "presets": {
+        "expired": "Expired document",
+        "unclear": "Unclear photos",
+        "mismatch": "Details don't match"
+      },
+      "presetText": {
+        "expired": "One of the documents has expired. Upload a valid copy.",
+        "unclear": "Some photos are unclear. Upload clearer ones.",
+        "mismatch": "The details don't match the documents. Correct them and apply again."
+      },
+      "label": "Rejection reason",
+      "hint": "The vendor sees it as written",
+      "confirm": "Confirm rejection"
+    },
+    "suspendDialog": {
+      "title": "Suspend store",
+      "body": "The store and its products are hidden from customers; current orders carry on.",
+      "label": "Suspension reason",
+      "hint": "Kept in the audit log, seen by admins only",
+      "confirm": "Suspend store"
+    },
+    "reinstateDialog": {
+      "title": "Reactivate {name}",
+      "body": "The store shows to customers again and its team can sign in again.",
+      "confirm": "Reactivate"
+    },
+    "reasonRequired": "Write the reason",
+    "reasonTooLong": "500 characters at most",
+    "toast": {
+      "approved": "{name} is approved and active",
+      "rejected": "{name}'s application was rejected",
+      "suspended": "{name} is suspended",
+      "reinstated": "{name} is active again",
+      "notPending": "Another admin reviewed this application; this is where it stands now",
+      "accessHeld": "The applicant now works for another vendor; nothing changed",
+      "conflict": "The store's status changed; this is where it stands now",
+      "failed": "Couldn't complete that. Try again."
+    },
+    "error": {
+      "title": "Couldn't load the application",
+      "body": "Something went wrong while loading the store and its documents.",
+      "action": "Try again"
+    },
+    "denied": {
+      "title": "You can't review applications",
+      "body": "Ask the platform manager for the onboarding officer role.",
+      "action": "Back"
+    },
+    "notFound": {
+      "title": "Store not found",
+      "body": "The link may be wrong, or the application was removed.",
+      "action": "Back to stores"
+    }
   }
 }
