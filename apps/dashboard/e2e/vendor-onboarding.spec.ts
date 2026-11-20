@@ -58,8 +58,12 @@ test('a full application, from the phone to the pending status, survives a sessi
   await context.clearCookies();
   await page.reload();
   await signInAsApplicant(page, phone);
-  await expect(page.getByText('استعدنا ما كتبته سابقًا. راجعه ثم تابع.')).toBeVisible();
-  await expect(page.getByLabel('رقم الآيبان (IBAN)')).toHaveValue('SA03 8000 0000 6080 1016 7519');
+  await expect(page.getByText('استعدنا ما كتبته سابقًا، عدا رقم الآيبان الذي نطلبه مرة أخرى. راجعه ثم تابع.')).toBeVisible();
+  // The IBAN is never kept in a draft: it is asked for again.
+  await expect(page.getByLabel('اسم صاحب الحساب')).toHaveValue('مؤسسة الاختبار');
+  await expect(page.getByLabel('رقم الآيبان (IBAN)')).toHaveValue('');
+  expect(await page.evaluate(() => JSON.stringify({ ...sessionStorage }) + JSON.stringify({ ...localStorage }))).not.toContain('6080');
+  await page.getByLabel('رقم الآيبان (IBAN)').fill('SA0380000000608010167519');
   await page.getByRole('button', { name: 'السابق' }).click();
   await expect(page.getByText('cr.pdf · 1 كيلوبايت')).toBeVisible();
   await page.getByRole('button', { name: 'التالي' }).click();
@@ -92,6 +96,34 @@ test('a full application, from the phone to the pending status, survives a sessi
   // A pending application cannot be sent twice: the form sends back to the status.
   await page.goto('/vendor/apply');
   await expect(page).toHaveURL(/\/vendor\/application$/);
+});
+
+test('a draft is never shown to another applicant on the same device', async ({ page, context }) => {
+  const first = `05${String(Math.floor(Math.random() * 1e7)).padStart(7, '0')}6`;
+  await page.goto('/vendor/apply');
+  await signInAsApplicant(page, first);
+  await page.getByLabel('اسم المتجر بالعربية').fill('مسودة المتقدم الأول');
+  await page.getByRole('button', { name: 'حفظ والإكمال لاحقًا' }).click();
+
+  // The session ends, and someone else signs in on the same tab.
+  await context.clearCookies();
+  await page.reload();
+  await signInAsApplicant(page, `05${String(Math.floor(Math.random() * 1e7)).padStart(7, '0')}7`);
+  await expect(page.getByRole('heading', { level: 1, name: 'بيانات المنشأة' })).toBeVisible();
+  await expect(page.getByLabel('اسم المتجر بالعربية')).toHaveValue('');
+  await expect(page.getByText(/استعدنا ما كتبته/)).toHaveCount(0);
+  expect(await page.evaluate(() => JSON.stringify({ ...sessionStorage }) + JSON.stringify({ ...localStorage }))).not.toContain('مسودة المتقدم الأول');
+});
+
+test('signing out of the application clears the drafts on the device', async ({ page }) => {
+  const phone = `05${String(Math.floor(Math.random() * 1e7)).padStart(7, '0')}8`;
+  await page.goto('/vendor/apply');
+  await signInAsApplicant(page, phone);
+  await page.getByLabel('اسم المتجر بالعربية').fill('مسودة قبل الخروج');
+  await page.getByRole('button', { name: 'حفظ والإكمال لاحقًا' }).click();
+  await page.getByRole('button', { name: 'تسجيل الخروج' }).click();
+  await expect(page.getByRole('heading', { name: 'انضم كتاجر' })).toBeVisible();
+  expect(await page.evaluate(() => sessionStorage.length + localStorage.length)).toBe(0);
 });
 
 test('a rejected application shows the reason and can be sent again with the earlier details', async ({ page }) => {
@@ -145,4 +177,11 @@ test('store profile: validation, save, and the suspended store', async ({ page, 
   await expect(page.getByRole('alert').filter({ hasText: 'متجرك موقوف مؤقتًا' })).toBeVisible();
   await expect(page.getByLabel('وصف المتجر', { exact: true })).toBeDisabled();
   expect((await context.cookies()).find((c) => c.name === 'jz_rt_vendor')).toBeUndefined();
+});
+
+test('after the idle timeout, a customer refresh token left behind is ended and cleared', async ({ page, context }) => {
+  await context.addCookies([{ name: 'jz_rt_customer', value: 'mock-rt-customer-500000001-1', url: `http://localhost:${process.env.PORT ?? 3001}`, httpOnly: true }]);
+  await page.goto('/vendor/apply');
+  await expect(page.getByRole('heading', { name: 'انضم كتاجر' })).toBeVisible();
+  expect((await context.cookies()).find((c) => c.name === 'jz_rt_customer')).toBeUndefined();
 });

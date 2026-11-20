@@ -4,9 +4,13 @@ import Image from 'next/image';
 import { LoginCard, LoginLayout, otpLength } from '@/features/auth/login-layout';
 import { LoginFlow } from '@/features/auth/login-flow';
 import { Link } from '@/i18n/navigation';
+import { CustomerSignOut } from './sign-out';
 import { PANELS_COOKIE, parseSessions, phoneCookie, refreshCookie } from '@/lib/session';
 
-/** The applicant's customer session: the masked phone it signed in with, or null when there is none. */
+/**
+ * The applicant's customer session: the masked phone it signed in with, or null when there is none. A refresh token
+ * left after the idle timeout counts as none; the middleware has already ended it at the API and cleared the cookies.
+ */
 export async function customerSession(): Promise<{ phone: string } | null> {
   const jar = await cookies();
   const live = parseSessions(jar.get(PANELS_COOKIE)?.value).includes('customer') && !!jar.get(refreshCookie('customer'))?.value;
@@ -26,7 +30,7 @@ export function CustomerSignIn({ next, reason }: { next?: string; reason?: strin
 
 /**
  * The public frame of the application and status pages (410:39654 «public bar»): emblem and «Vendor sign-up» on the
- * start side, then the page's link (sign in to the vendor dashboard, or sign out of the customer session).
+ * start side, then the page's link: sign out of the customer session when there is one, else sign in to the vendor panel.
  */
 export async function PublicFrame({ signOut, children }: { signOut?: boolean; children: React.ReactNode }) {
   const t = await getTranslations('apply.bar');
@@ -40,13 +44,7 @@ export async function PublicFrame({ signOut, children }: { signOut?: boolean; ch
           <span className="text-[14px] text-muted max-md:hidden">{t('brand')}</span>
         </div>
         {signOut ? (
-          <form action="/api/auth/logout" method="post">
-            <input type="hidden" name="only" value="customer" />
-            <input type="hidden" name="locale" value={locale} />
-            <button type="submit" className={link}>
-              {t('signOut')}
-            </button>
-          </form>
+          <CustomerSignOut locale={locale} label={t('signOut')} className={link} />
         ) : (
           <Link href="/login?panel=vendor" className={link}>
             {t('signIn')}

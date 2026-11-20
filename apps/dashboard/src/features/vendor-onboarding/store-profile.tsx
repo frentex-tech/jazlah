@@ -45,7 +45,18 @@ export function StoreProfile() {
   const locale = useLocale();
   const [profile, setProfile] = useState<VendorProfile | 'loading' | 'error'>('loading');
   const [v, setV] = useState<Values>({ descAr: '', descEn: '', phone: '', email: '', vat: '' });
-  const [images, setImages] = useState<{ logo?: Image; cover?: Image }>({});
+  const [images, setImageState] = useState<{ logo?: Image; cover?: Image }>({});
+  // New logo and cover previews are object URLs: each is revoked once replaced, dropped or the page left.
+  const shown = useRef(images);
+  const setImages = useCallback((next: { logo?: Image; cover?: Image }) => {
+    for (const k of ['logo', 'cover'] as const) {
+      const old = shown.current[k]?.preview;
+      if (old && old !== next[k]?.preview) URL.revokeObjectURL(old);
+    }
+    shown.current = next;
+    setImageState(next);
+  }, []);
+  useEffect(() => () => Object.values(shown.current).forEach((img) => img && URL.revokeObjectURL(img.preview)), []);
   const [errors, setErrors] = useState<Partial<Record<Field, string>>>({});
   const [notice, setNotice] = useState<'saved' | 'failed'>();
   const [saving, setSaving] = useState(false);
@@ -59,7 +70,7 @@ export function StoreProfile() {
     setV(valuesOf(p));
     setImages({});
     setErrors({});
-  }, []);
+  }, [setImages]);
   const load = useCallback(async () => {
     setProfile('loading');
     try {
@@ -130,7 +141,7 @@ export function StoreProfile() {
         const id = (x.details as { mediaId?: string }).mediaId;
         const k = images.logo?.mediaId === id ? 'logo' : images.cover?.mediaId === id ? 'cover' : undefined;
         if (k) {
-          setImages(({ [k]: _, ...rest }) => rest);
+          setImages({ ...images, [k]: undefined });
           return setErrors({ [k]: 'uploadFailed' });
         }
       }
@@ -182,7 +193,7 @@ export function StoreProfile() {
                 call={call}
                 onSuspended={() => setSuspended(true)}
                 onUploaded={(img) => {
-                  setImages((i) => ({ ...i, [k]: img }));
+                  setImages({ ...shown.current, [k]: img });
                   setErrors(({ [k]: _, ...rest }) => rest);
                 }}
               />
@@ -314,13 +325,18 @@ function ImageSlot({
         aria-label={t('change', { name: label })}
         onClick={() => input.current?.click()}
         className={cn(
-          'relative flex h-24 items-center justify-center overflow-hidden border border-line bg-bg bg-cover bg-center text-ink-2 disabled:cursor-default',
+          'relative flex h-24 items-center justify-center overflow-hidden border border-line bg-bg text-ink-2 disabled:cursor-default',
           kind === 'logo' ? 'w-24 shrink-0 rounded-pill' : 'w-full rounded-md',
           failed && 'border-danger',
         )}
-        style={url ? { backgroundImage: `url("${url}")` } : undefined}
       >
-        {!url && <Plus size={24} aria-hidden />}
+        {url ? (
+          // A remote CDN or blob: preview, shown as is: next/image would need every CDN host configured.
+          // eslint-disable-next-line @next/next/no-img-element
+          <img src={url} alt="" className="size-full object-cover" />
+        ) : (
+          <Plus size={24} aria-hidden />
+        )}
         {busy && (
           <span className="absolute inset-0 flex items-center justify-center bg-paper/70 text-ember">
             <Spinner className="size-6" />

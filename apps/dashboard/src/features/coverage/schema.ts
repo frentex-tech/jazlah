@@ -12,4 +12,3 @@ const color = z.string().regex(COLOR_RE);
 export const CreateZoneSchema = z.object({ name, city, polygon, isActive: z.boolean(), color }) satisfies z.ZodType<CreateZone>;
 export const UpdateZoneSchema = CreateZoneSchema.partial() satisfies z.ZodType<UpdateZone>;
 
-export { invalidBody, langOf } from '@/lib/route';

@@ -19,7 +19,7 @@ export default async function Apply({
   const session = await customerSession();
   if (!session) return <CustomerSignIn reason={q.reason} />;
   return (
-    <PublicFrame>
+    <PublicFrame signOut>
       <ApplyWizard phone={session.phone} reapply={q.reapply === '1'} />
     </PublicFrame>
   );

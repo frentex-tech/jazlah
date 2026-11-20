@@ -48,8 +48,19 @@ export default async function middleware(req: NextRequest) {
   }
 
   // The vendor application is for visitors and customer sessions (VND-DSH-1): its pages check the customer session.
+  // Here, as for the staff panels: the idle timeout slides, or, when it passed, the API session is ended too.
   const isVendorApplication = area === 'vendor' && (rest[0] === 'apply' || rest[0] === 'application');
-  if (!isPanel(area) || isVendorApplication) return intl(req);
+  if (isVendorApplication) {
+    const res = intl(req);
+    const customerToken = req.cookies.get(refreshCookie('customer'))?.value;
+    if (customerToken && sessions.includes('customer')) writePanels(res, sessions);
+    else if (customerToken) {
+      await authBackend().logout(customerToken, clientIp(req));
+      clearPanel(res, 'customer');
+    }
+    return res;
+  }
+  if (!isPanel(area)) return intl(req);
 
   const refreshToken = req.cookies.get(refreshCookie(area))?.value;
   if (!sessions.includes(area) || !refreshToken) {

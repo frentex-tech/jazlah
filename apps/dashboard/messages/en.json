@@ -292,7 +292,7 @@
     "submit": "Submit application",
     "saveLater": "Save and finish later",
     "savedLater": "Your details are saved on this device, except the IBAN. Finish the application any time.",
-    "restored": "We restored what you typed before. Check it, then continue.",
+    "restored": "We restored what you typed before, except the IBAN, which we ask for again. Check it, then continue.",
     "fix": "{count, plural, one {Fix the field highlighted in red, then continue.} other {Fix the fields highlighted in red, then continue.}}",
     "loading": "Loading the application",
     "business": {
@@ -397,7 +397,8 @@
       "location": "Move the pin to the facility",
       "documents": "Upload the three required documents",
       "alreadyHeld": "Your number already works for a JAZLA store. Sign in to the vendor dashboard.",
-      "submit": "The application could not be sent. Try again."
+      "submit": "The application could not be sent. Try again.",
+      "rateLimited": "Too many attempts. Wait a little, then send the application again."
     }
   },
   "application": {

@@ -19,7 +19,7 @@ pnpm dev            # http://localhost:3001
 pnpm lint           # ESLint, incl. the RTL rule: physical utilities (ml-, pr-, left-, text-right …) are errors
 pnpm typecheck
 pnpm build
-pnpm test:e2e       # Playwright smoke on the mocks; starts `pnpm start`, so run `pnpm build` first
+pnpm test:e2e       # Playwright smoke on the mocks; starts `pnpm start`, so run `PLAYWRIGHT=1 pnpm build` first
 pnpm test:e2e:api   # acceptance checks against a running, seeded API (API_URL); CI job "api-e2e"
 pnpm api:generate   # regenerate src/api/schema.d.ts from services/api/openapi.json
 ```
@@ -53,7 +53,8 @@ messages/ar.json, en.json       every UI string
 - `jz_panels` lists the panels with a live session and lives 12 h, renewed on every page load: that is the idle timeout.
 - The middleware refreshes an expired access token on page loads, and sends signed-in staff from `/login` to their panel (several panels: `/login/choose`).
 - **Customer session (vendor application, VND-DSH-1):** `/vendor/apply` and `/vendor/application` sit outside the staff shell. A visitor signs in there with `audience: customer` (same phone and code screens); the cookies are `jz_rt_customer`, `jz_at_customer`, `jz_ph_customer`, listed in `jz_panels` with the same 12 h idle timeout. Route handlers use `withPanelSession(req, 'customer', …)`. Panel guards read only their own panel's cookies, so a customer session never opens a staff panel. After approval the applicant signs in to `/login?panel=vendor` as staff. Sign-out on the status page ends the customer session only.
-- Settings: `.env.example` (`API_URL`, `OTP_LENGTH`, `DASHBOARD_API_MOCK`, `MEDIA_ORIGINS`). `OTP_LENGTH` must equal the API's `AUTH_OTP_LENGTH`.
+- Settings: `.env.example` (`API_URL`, `OTP_LENGTH`, `DASHBOARD_API_MOCK`, `MEDIA_ORIGINS`). A production build fails without `MEDIA_ORIGINS` (the CSP would block uploads and logos), unless `PLAYWRIGHT=1` (test builds on the mock storage). `OTP_LENGTH` must equal the API's `AUTH_OTP_LENGTH`.
+- Application drafts (sessionStorage, and localStorage for «save and finish later») are tagged with the applicant's masked phone, dropped for anyone else, cleared on sign-out, and never hold the IBAN.
 - Auth calls are refused unless they come from our own pages (`Sec-Fetch-Site: same-origin` and a JSON body), against login CSRF.
 - The user's address is forwarded to the API as `X-Forwarded-For`, so the API's per-address code limits apply per user. It is read **only** from the header named by `CLIENT_IP_HEADER`, never from the first `X-Forwarded-For` entry (the client writes that one). Server setup:
   1. The edge proxy in front of the dashboard (ingress, nginx, ALB) must **set and overwrite** one header with the client address. With nginx, `proxy_set_header X-Real-IP $remote_addr;` and `CLIENT_IP_HEADER=x-real-ip`.

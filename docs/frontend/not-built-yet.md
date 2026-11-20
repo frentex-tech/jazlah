@@ -70,6 +70,7 @@ What a built dashboard screen needs and the API does not give yet. Until it land
 | A duplicate commercial registration error code | Vendor application, business details | None: the API has no such check or code; other VALIDATION_FAILED fields are mapped to their step | none open yet (API gap) |
 | Store tagline, street address, working hours (weekly editor), pickup and visits toggles in the vendor profile | Store profile (131:24074) | Tagline, address (shows the city) and the hours switches shown disabled; pickup and visits not shown (no frame) | none open yet (API gap) |
 | Store name change by the vendor | Store profile, validation frame (131:24427) | Read-only: only an admin changes the name (API rule), so the name error of the frame cannot occur | by design |
+| A public store page URL to link to (`GET /v1/public/vendors/{id}` exists, but there is no customer website: the store is seen in the customer app) | Store profile «preview the public store page» (VND-DSH-1 output) | No preview link | none open yet (no web target) |
 | Vendor support contact (phone, email or chat) | Application status «contact vendor support», store bank and suspended notes | Plain text, no link | none open yet |
 
 The code length in the code request answer is asked for in the mobile section below; the dashboard needs it too (a dashboard setting today).

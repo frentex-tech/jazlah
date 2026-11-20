@@ -83,6 +83,9 @@ Agreed by the owner in the Sprint 1 fix round, after the design QA (`reviews/qa-
 | 131:24427 | The store name is read-only, so only the contact errors of the frame occur | Only an admin changes the name |
 | 131:24863 | Reached when a save or upload answers VENDOR_SUSPENDED: the fields keep their values but use the disabled style. A suspended vendor opening the page is signed out with the reason (API rule) | The API refuses every vendor call when suspended |
 | 131:24717 | Uses the shared error panel copy for the body | Same as the frame text |
+| 410:39654 and the other steps | The public bar shows «sign out» (customer session only, and the drafts on the device) instead of «already a vendor? sign in» | The applicant is signed in on these steps; signing out must be possible (review of #275) |
+| 410:39936, restore | A restored draft asks for the IBAN again | The IBAN is never kept on the device |
+| 131:24074 | No «preview the public store page» link (asked by the sprint task, not in the frame) | No public store page URL: no customer website, the store is seen in the app |
 
 ## Checks run on the file (2026-11-13)
 - Script lint over all 587 screens after the last changes: no empty or "undefined" text, no text outside its screen, no missing icon.

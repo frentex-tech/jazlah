@@ -1,4 +1,5 @@
 import type { NextConfig } from 'next';
+import { PHASE_PRODUCTION_BUILD } from 'next/constants';
 import createNextIntlPlugin from 'next-intl/plugin';
 
 const withNextIntl = createNextIntlPlugin('./src/i18n/request.ts');
@@ -45,4 +46,11 @@ const config: NextConfig = {
   },
 };
 
-export default withNextIntl(config);
+// Without MEDIA_ORIGINS the CSP blocks every upload and every logo or cover: a production build refuses to go on,
+// except for the Playwright builds (PLAYWRIGHT=1), which use the mock storage on our own origin.
+export default function nextConfig(phase: string) {
+  if (phase === PHASE_PRODUCTION_BUILD && !media && process.env.PLAYWRIGHT !== '1') {
+    throw new Error('MEDIA_ORIGINS is empty: set the storage and CDN origins (see .env.example), or PLAYWRIGHT=1 for a test build.');
+  }
+  return withNextIntl(config);
+}

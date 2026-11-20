@@ -13,6 +13,7 @@ import { StatePanel } from '@/components/ui/state-panel';
 import { useRouter } from '@/i18n/navigation';
 import { ApiError, panelFetch } from '@/lib/panel-fetch';
 import { cn } from '@/lib/utils';
+import { clearDrafts, readDraft, writeDraft } from './drafts';
 import type { GeoPoint } from './pin-map';
 import {
   DOC_KINDS, DOC_MAX_BYTES, DOC_TYPES, REQUIRED_DOCS, type DocKind, type SubmitApplication, type UploadTicket, type VendorApplication,
@@ -23,10 +24,6 @@ const PinMap = dynamic(() => import('./pin-map').then((m) => m.PinMap), { ssr: f
 
 const STEPS = ['business', 'documents', 'bank', 'location', 'review'] as const;
 const TYPES = ['butchery', 'slaughterhouse', 'farm'] as const;
-// The draft follows the tab (step back/forward, a session that ends mid-way); «save and finish later» also keeps it on
-// this device, without the IBAN.
-const DRAFT_KEY = 'jz:vendor-application';
-const LATER_KEY = 'jz:vendor-application-later';
 
 type Doc = { mediaId: string; name?: string; size?: number }; // no name: a file of the previous application
 type Values = {
@@ -96,23 +93,6 @@ const fromApplication = (a: VendorApplication): Values => ({
   docs: Object.fromEntries(a.documents.map((d) => [d.kind, { mediaId: d.mediaId }])),
 });
 
-function readDraft(): { step: number; values: Values } | null {
-  for (const raw of [sessionStorage.getItem(DRAFT_KEY), localStorage.getItem(LATER_KEY)]) {
-    if (!raw) continue;
-    try {
-      const d = JSON.parse(raw) as { step: number; values: Values };
-      return { step: Math.min(4, Math.max(0, d.step | 0)), values: { ...blank, ...d.values } };
-    } catch {
-      // a corrupt draft is dropped
-    }
-  }
-  return null;
-}
-const clearDrafts = () => {
-  sessionStorage.removeItem(DRAFT_KEY);
-  localStorage.removeItem(LATER_KEY);
-};
-
 /**
  * VND-DSH-1: the five steps of the vendor application, with the applicant's customer session. Frames 410:39654 (and
  * 410:40547 at 390), 410:39774 (errors), 410:39867, 410:39936, 410:40011, 410:40094, 410:40179 (sending).
@@ -141,21 +121,22 @@ export function ApplyWizard({ phone, reapply }: { phone: string; reapply: boolea
     } catch (e) {
       if (!(e instanceof ApiError && e.code === 'NOT_FOUND')) return setStatus('error');
     }
-    const draft = readDraft();
-    // A pending or approved application has its status page; a rejected one too, unless the user chose to apply again.
-    if (latest && (latest.status !== 'rejected' || (!reapply && !draft))) return router.replace('/vendor/application');
+    // A pending or approved application has its status page; a rejected one too, unless the user chose to apply again
+    // (a draft never hides the status).
+    if (latest && (latest.status !== 'rejected' || !reapply)) return router.replace('/vendor/application');
+    const draft = readDraft<Values>(phone);
     if (draft) {
-      setV(draft.values);
+      setV({ ...blank, ...draft.values, iban: '' });
       setStep(draft.step);
       setNotice('restored');
     } else if (latest) setV(fromApplication(latest));
     setStatus('ready');
-  }, [call, reapply, router]);
+  }, [call, phone, reapply, router]);
   useEffect(() => void load(), [load]);
 
   useEffect(() => {
-    if (status === 'ready') sessionStorage.setItem(DRAFT_KEY, JSON.stringify({ step, values: v }));
-  }, [status, step, v]);
+    if (status === 'ready') writeDraft('tab', phone, step, v);
+  }, [phone, status, step, v]);
 
   // After a failed step, focus the first field to fix.
   useEffect(() => {
@@ -231,12 +212,12 @@ export function ApplyWizard({ phone, reapply }: { phone: string; reapply: boolea
         }
         if (Object.keys(mapped).length) return showErrors(mapped);
       }
-      setSubmitError(e.code === 'RATE_LIMITED' ? tt('login.errors.rateLimited', { seconds: 60 }) : t('errors.submit'));
+      setSubmitError(e.code === 'RATE_LIMITED' ? t('errors.rateLimited') : t('errors.submit'));
     }
   }
 
   function saveLater() {
-    localStorage.setItem(LATER_KEY, JSON.stringify({ step, values: { ...v, iban: '' } }));
+    writeDraft('later', phone, step, v);
     setNotice('savedLater');
   }
 
