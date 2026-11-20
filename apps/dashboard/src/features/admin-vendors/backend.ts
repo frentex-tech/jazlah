@@ -98,6 +98,9 @@ const mock: MockState = (g.__adminVendors ??= (() => {
   });
   return { vendors };
 })());
+/** The vendors of this mock, shared with the admin catalog mock (features/catalog/backend.ts), which adds JAZLA's own. */
+export const mockVendors = mock.vendors;
+
 // The seed links live outside the global state; rebuild them after a dev reload.
 if (seedUrls.size === 0) SEEDS.forEach((s, i) => seedApplication(s, i));
 
