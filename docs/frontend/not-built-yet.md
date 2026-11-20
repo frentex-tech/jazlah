@@ -79,10 +79,19 @@ What a built dashboard screen needs and the API does not give yet. Until it land
 | Business activity, responsible person and street address of an application | Vendor review, store details and location (131:18512) | Activity left out; the account holder shown as the person; the city under the map | none open yet (API gap) |
 | Document content type (and page count) on the document links | Vendor review viewer «page 1 of 2» (131:18512) | Shown as an image; a file the browser cannot show (PDF) offers «open the file»; no page count | none open yet (API gap) |
 | Admin permissions (onboarding officer) | Not-allowed states of the stores list and review (131:17922, 131:18972) | Only on the mock (an admin access token ending in `-limited` is answered NOT_ALLOWED); the API's FORBIDDEN ends the session as `errors.md` says. The real trigger comes with ADM-API-1 | #111 (ADM-API-1) |
+| Per-product cut × packaging compatibility. Today the rules are global (`/v1/admin/cutting-packaging-incompatibilities`), and a product offering a forbidden pair cannot be published (PRODUCT_NOT_SUBMITTABLE `INCOMPATIBLE_CUTTING_PACKAGING`), while the sprint exit criteria want a published product with one incompatible pair that the app blocks at selection | Product form, compatibility matrix (131:35405); Sprint 2 exit criteria | The matrix edits the global rules (admin) and marks in red a forbidden pair the product offers; such a product saves as a draft, and publishing shows the API's refusal | none open yet (API decision needed) |
+| Product count per category on `GET /v1/admin/lists/{list}` (categories) | Categories table, «products» column (131:19875) | A dash | none open yet (API gap) |
+| A category slug | Categories table and dialog, «link» (131:19875, 131:21038) | The English name is shown and edited in its place | none open yet (API gap) |
+| Deleting a category or a product | Categories CRUD; product form «delete product» (131:35405) | Categories are switched off instead (API rule: entries are never deleted); «delete product» shown disabled | by design (lists); none open yet (products) |
+| A bulk reorder of categories | Categories «reorder» | One `PATCH …/categories/{id}` with `sortOrder` per moved category | none open yet (works as is) |
+| Search, category and date filters on `GET /v1/admin/products`, and `updatedAt` on the product card | Products list (131:21286, 131:22654) | Search and category apply to the loaded page only; the date filter is disabled; the date column shows the creation date («added on») | none open yet (API gap) |
+| Product SKU, order type («slaughtered on order»), minimum quantity, preparation time, order days, daily quantity, pause-until date and «featured» | Product form, basics, fulfilment and availability (131:35405); CAT-DSH-1 output (orderType, featured) | SKU left out (the meat type takes its place); the others shown disabled; «featured» not shown (no frame) | none open yet (API gap) |
+| Packagings «chilled carton» and «gift wrap» of the frame | Product form, packaging (131:35405) | The API's four: vacuum bag, chilled tray, bags, no packaging | none open yet (API decision) |
+| Admin permissions (catalog manager) | Not-allowed states of categories, products and the product form (131:20824, 131:22394, 131:37786) | Only on the mock (an access token ending in `-limited` is answered NOT_ALLOWED) | #111 (ADM-API-1) |
 
 The code length in the code request answer is asked for in the mobile section below; the dashboard needs it too (a dashboard setting today).
 
-The dashboard's in-process mocks (staff and customer sign-in accounts, an in-memory coverage store, vendor applications and their admin review, store profile and a mock upload storage) exist only for its smoke tests; they stand in for nothing missing.
+The dashboard's in-process mocks (staff and customer sign-in accounts, an in-memory coverage store, vendor applications and their admin review, store profile, the admin catalog and a mock upload storage) exist only for its smoke tests; they stand in for nothing missing.
 
 ## Requested by the apps (mobile)
 

@@ -699,5 +699,280 @@
       "body": "The link may be wrong, or the application was removed.",
       "action": "Back to stores"
     }
+  },
+  "catalog": {
+    "categories": {
+      "breadcrumb": "Catalog / Categories",
+      "title": "Categories",
+      "add": "Add category",
+      "reorder": "Reorder categories",
+      "saveOrder": "Save order",
+      "cancelOrder": "Cancel",
+      "orderSaved": "Category order saved",
+      "orderFailed": "The order was not fully saved; the table shows what was. Try again.",
+      "denied": {
+        "title": "You are not allowed to manage categories",
+        "body": "Categories are managed by the catalog manager only.",
+        "action": "Back to the dashboard"
+      },
+      "error": {
+        "title": "Could not load the categories",
+        "body": "Something went wrong while loading. Try again.",
+        "action": "Try again"
+      },
+      "empty": {
+        "title": "No categories yet",
+        "body": "Create the first category so vendors can file their products under it."
+      },
+      "cols": {
+        "category": "Category",
+        "slug": "English name",
+        "products": "Products",
+        "order": "Order",
+        "status": "Status",
+        "actions": "Actions"
+      },
+      "visible": "Visible",
+      "hidden": "Hidden",
+      "moveUp": "Move {name} up",
+      "moveDown": "Move {name} down",
+      "edit": "Edit {name}",
+      "imageRule": "A JPEG, PNG or WebP image up to 2 MB",
+      "saved": "Category {name} saved",
+      "saveFailed": "Could not save the category. Try again.",
+      "editTitle": "Edit category {name}",
+      "addTitle": "Add category",
+      "image": "Category image",
+      "nameAr": "Category name (Arabic)",
+      "nameArHint": "Shown to customers",
+      "nameEn": "English name",
+      "nameEnHint": "Shown in the app in English",
+      "visibleSwitch": "Visible in the store",
+      "removeImage": "Remove image"
+    },
+    "products": {
+      "breadcrumb": "Catalog / All products",
+      "title": "Products",
+      "add": "Add product",
+      "categories": "Categories",
+      "search": "Search by product or store",
+      "clear": "Clear all",
+      "category": "Category",
+      "vendor": "Store",
+      "statusFilter": "Product status",
+      "status": {
+        "draft": "Draft",
+        "pending_review": "In review",
+        "published": "Published",
+        "rejected": "Rejected",
+        "unavailable": "Unavailable"
+      },
+      "chip": {
+        "status": "Status: {value}",
+        "vendor": "Store: {value}",
+        "category": "Category: {value}"
+      },
+      "cols": {
+        "product": "Product",
+        "vendor": "Store",
+        "category": "Category",
+        "price": "From",
+        "status": "Status",
+        "date": "Added on",
+        "available": "Available"
+      },
+      "availableLabel": "{name} can be ordered",
+      "availableOn": "{name} can be ordered now",
+      "availableOff": "{name} switched off",
+      "notEditable": "A product under review cannot be changed.",
+      "availabilityFailed": "Could not change availability. Try again.",
+      "open": "Open {name}",
+      "empty": {
+        "title": "No matching products",
+        "body": "No product matches these filters. Try clearing them.",
+        "action": "Clear filters",
+        "noneTitle": "No products yet",
+        "noneBody": "JAZLA's and the stores' products will show here."
+      },
+      "error": {
+        "title": "Could not load the products",
+        "body": "Something went wrong while loading. Try again.",
+        "action": "Try again"
+      },
+      "denied": {
+        "title": "You are not allowed to view products",
+        "body": "Ask the platform manager for the catalog manager role.",
+        "action": "Back to the dashboard"
+      },
+      "notJazla": "Only JAZLA products can be switched here."
+    },
+    "product": {
+      "newTitle": "New product",
+      "breadcrumbEdit": "Catalog / Edit product",
+      "breadcrumbNew": "Catalog / New product",
+      "loading": "Loading the product",
+      "published": "{name} published",
+      "saved": "{name} saved",
+      "denied": {
+        "title": "You are not allowed to manage products",
+        "body": "Ask the platform manager for the catalog manager role.",
+        "action": "Back to the dashboard"
+      },
+      "missing": {
+        "title": "Product not found",
+        "body": "The link may be wrong, or the product belongs to another store.",
+        "action": "Back to products"
+      },
+      "error": {
+        "title": "Could not load the product",
+        "body": "Check your connection and try again.",
+        "action": "Try again"
+      },
+      "publish": "Save and publish",
+      "saveDraft": "Save as draft",
+      "save": "Save changes",
+      "delete": "Delete product",
+      "editTitle": "Edit product",
+      "foreign": {
+        "title": "Another store's product",
+        "body": "Stores' products are reviewed from the review queue, not edited here."
+      }
+    },
+    "form": {
+      "placeholder": "Type here",
+      "choose": "Choose",
+      "none": "None",
+      "sar": "SAR",
+      "free": "Free",
+      "saveFailed": "Could not save the product. Try again.",
+      "basics": {
+        "title": "Basic information",
+        "body": "The product's name and description as customers see them.",
+        "nameAr": "Product name (Arabic)",
+        "nameEn": "Product name (English)",
+        "nameHint": "2 to 100 characters",
+        "descAr": "Description (Arabic)",
+        "descEn": "Description (English)",
+        "descHint": "Up to 1000 characters",
+        "category": "Category",
+        "categoryHint": "Decides where the product shows",
+        "meatType": "Meat type",
+        "meatTypeHint": "Optional"
+      },
+      "images": {
+        "title": "Images",
+        "body": "The first image is the cover. Add up to {max} high-quality images and drag them to reorder.",
+        "add": "Add image",
+        "rule": "A JPEG, PNG or WebP image up to 5 MB",
+        "cover": "Cover image, 1 of {count}",
+        "image": "Image {n} of {count}",
+        "remove": "Remove image {n}"
+      },
+      "sizes": {
+        "title": "Sizes and prices",
+        "body": "Each size has its own price in Saudi riyals.",
+        "tagAr": "Size {n} label (Arabic)",
+        "tagArPlaceholder": "صغير",
+        "tagEn": "Size {n} label (English)",
+        "tagEnPlaceholder": "e.g. Small",
+        "grams": "Size {n} weight in grams",
+        "gramsPlaceholder": "Weight",
+        "gramsUnit": "g",
+        "price": "Size {n} price",
+        "remove": "Remove size {n}",
+        "add": "Add size"
+      },
+      "cuts": {
+        "title": "Cutting styles",
+        "body": "Choose the cutting styles offered for this product, and their extra price if any.",
+        "extra": "Extra price for {name}"
+      },
+      "packs": {
+        "title": "Packaging",
+        "body": "Packaging options and their price over the base price.",
+        "extra": "Extra price for {name}"
+      },
+      "packaging": {
+        "vacuum": "Vacuum bag",
+        "trays": "Chilled tray",
+        "bags": "Bags",
+        "none": "No packaging"
+      },
+      "exclusions": {
+        "title": "Exclusions",
+        "body": "What a customer may ask to leave out."
+      },
+      "matrix": {
+        "title": "Compatibility matrix",
+        "body": "Set which cutting style suits which packaging. {cuts} cutting styles × {packs} packagings; a rule applies to every product.",
+        "bodyReadOnly": "Which cutting style suits which packaging, as JAZLA sets it. {cuts} cutting styles × {packs} packagings.",
+        "cell": "{cut} with {packaging}: {state}",
+        "compatible": "Compatible",
+        "incompatible": "Incompatible",
+        "legendIncompatible": "Incompatible: shown disabled to customers, with the reason",
+        "failed": "Could not change the rule. Try again.",
+        "confirmTitle": "Change the rule for every product?",
+        "confirmForbid": "{cut} with {packaging} becomes incompatible on every product of the platform, not only this one.",
+        "confirmAllow": "{cut} with {packaging} becomes compatible on every product of the platform, not only this one.",
+        "confirm": "Change the rule"
+      },
+      "fulfilment": {
+        "title": "Preparation and delivery",
+        "body": "How this product reaches the customer.",
+        "delivery": "Delivery available",
+        "pickup": "Store pickup",
+        "onOrder": "Slaughtered on order",
+        "prep": "Preparation time",
+        "prepHint": "From order confirmation",
+        "minQty": "Minimum quantity",
+        "minQtyHint": "In the size's unit"
+      },
+      "availability": {
+        "title": "Availability",
+        "body": "Days the product can be ordered, and the daily quantity.",
+        "available": "Can be ordered",
+        "days": {
+          "sun": "Sun",
+          "mon": "Mon",
+          "tue": "Tue",
+          "wed": "Wed",
+          "thu": "Thu",
+          "fri": "Fri",
+          "sat": "Sat"
+        },
+        "daily": "Daily quantity",
+        "dailyHint": "Orders stop when it runs out",
+        "pause": "Paused until",
+        "pauseHint": "Leave empty if not needed"
+      },
+      "required": {
+        "name": {
+          "ar": "The product name is required",
+          "en": "The English name is required"
+        },
+        "categoryId": "Choose a category",
+        "fulfilment": "Turn on delivery or pickup",
+        "priceHalalas": "Price required",
+        "approxWeightGrams": "Weight required",
+        "tag": "Write the label in both languages"
+      },
+      "constraint": {
+        "too_small": "Below the minimum",
+        "too_big": "The value is too large",
+        "minLength": "At least 2 characters",
+        "maxLength": "The text is too long",
+        "isLivePrice": "The current price changed; reload the page",
+        "isActiveCategory": "This category is no longer available",
+        "isActiveMeatType": "This meat type is no longer available",
+        "isActiveCuttingStyle": "This cutting style is no longer available",
+        "isActiveExclusionItem": "This exclusion is no longer available",
+        "isNotRepeated": "Repeated",
+        "isSizeOfProduct": "This size is no longer on the product; reload the page",
+        "NO_SIZE": "Add at least one size before publishing",
+        "NO_IMAGE": "Add at least one image before publishing",
+        "INCOMPATIBLE_CUTTING_PACKAGING": "The product offers a cutting style with a packaging it cannot be combined with (marked red). Remove one or change the rule before publishing.",
+        "MEDIA_NOT_READY": "An image did not finish uploading; upload it again"
+      }
+    }
   }
 }

@@ -137,6 +137,17 @@ export const mockStorage = {
   },
 };
 
+/** The mock's uploads, shared with the admin catalog mock (features/catalog/backend.ts): same tickets, storage and checks. */
+export const mockMedia = {
+  ticket: mockTicket,
+  confirm: mockConfirm,
+  /** A confirmed public file's purpose and URL (mock storage), or null. */
+  ready: (id: string) => {
+    const m = state.media.get(id);
+    return m?.bytes ? { purpose: m.purpose, url: `/api/mock-storage?key=${id}` } : m ? { purpose: m.purpose, url: null } : null;
+  },
+};
+
 /** The applications of this mock, shared with the admin review mock (features/admin-vendors/backend.ts). */
 export const mockApplications = state.applications;
 

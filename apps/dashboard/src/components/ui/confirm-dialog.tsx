@@ -6,7 +6,7 @@ import { cn } from '@/lib/utils';
 import { Button } from './button';
 
 // Figma DS «Dialog» (16:579): default and destructive. `children` (a form field) go between the text and the buttons;
-// `wide` makes it 520, as in the review dialogs with a field (131:19351).
+// `wide` makes it 520, as in the review dialogs with a field (131:19351); the category dialog (131:21038) has no body.
 export function ConfirmDialog({
   open,
   onOpenChange,
@@ -22,7 +22,7 @@ export function ConfirmDialog({
   open: boolean;
   onOpenChange: (open: boolean) => void;
   title: string;
-  body: string;
+  body?: string;
   confirmLabel?: string;
   destructive?: boolean;
   loading?: boolean;
@@ -35,9 +35,9 @@ export function ConfirmDialog({
     <Dialog.Root open={open} onOpenChange={onOpenChange}>
       <Dialog.Portal>
         <Dialog.Overlay className="fixed inset-0 bg-scrim/55" />
-        <Dialog.Content className={cn('fixed start-1/2 top-1/2 flex -translate-y-1/2 flex-col gap-s16 rounded-lg border border-line bg-paper p-s24 shadow-card ltr:-translate-x-1/2 rtl:translate-x-1/2', wide ? 'w-[520px]' : 'w-[320px]')}>
+        <Dialog.Content {...(!body && { 'aria-describedby': undefined })} className={cn('fixed start-1/2 top-1/2 flex -translate-y-1/2 flex-col gap-s16 rounded-lg border border-line bg-paper p-s24 shadow-card ltr:-translate-x-1/2 rtl:translate-x-1/2', wide ? 'w-[520px]' : 'w-[320px]')}>
           <Dialog.Title className="text-h2 text-ink">{title}</Dialog.Title>
-          <Dialog.Description className="text-body-m text-ink-2">{body}</Dialog.Description>
+          {body && <Dialog.Description className="text-body-m text-ink-2">{body}</Dialog.Description>}
           {children}
           <div className="flex gap-s12">
             <Button variant={destructive ? 'danger' : 'primary'} className="flex-1" loading={loading} onClick={onConfirm}>
