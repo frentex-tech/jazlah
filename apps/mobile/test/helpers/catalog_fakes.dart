@@ -7,6 +7,8 @@ import 'package:jazlah/features/catalog/presentation/catalog_providers.dart';
 import 'package:jazlah/features/location/data/location_repositories.dart';
 import 'package:jazlah/features/location/domain/location.dart';
 import 'package:jazlah/features/location/presentation/location_providers.dart';
+import 'package:jazlah/features/product/data/mock_product_repository.dart';
+import 'package:jazlah/features/product/presentation/product_providers.dart';
 
 enum Mode { ok, hang, error, offline }
 
@@ -60,4 +62,5 @@ List<dynamic> catalogOverrides(FakeCatalog repo) => [
   catalogRepositoryProvider.overrideWithValue(repo),
   selectedLocationProvider.overrideWith(_Located.new),
   coverageRepositoryProvider.overrideWithValue(MockCoverageRepository()),
+  productRepositoryProvider.overrideWithValue(MockProductRepository(delay: Duration.zero)),
 ];

@@ -110,4 +110,19 @@ The app reads the public catalog through one repository. Categories, product lis
 | The categories a store sells | Store page: category chips | Taken from the store's products loaded so far | API gap |
 | The default size line and the "slaughtered today" tag on product cards | Product cards everywhere | Hidden (card shows vendor, name and the lowest price) | API gap |
 
+### Product detail and customization (STF-MOB-3 #56)
+
+The product page reads one public product (images, sizes, cuts, packagings, exclusions, description). The displayed total is computed on the device by one pure function with the CAT-API-1 formula (size + cut extra + packaging extra, times quantity, VAT included, exclusions free) and returns the same shape and error codes as the server pricing; the server stays authoritative in the cart. With the mock switch on, every seeded product has options (the Al Falah ribeye matches the design option for option, one product per store is out of stock, one carcass has a sold-out size).
+
+| Gap | Screen waiting on it | The app today | Issue |
+|---|---|---|---|
+| Cut and packaging incompatibility rules in the public product | Product: disabled packaging with its reason and explanation | No rule from the API: every packaging can be chosen; the server refuses a bad pair when the cart prices the line | API gap (rules exist in the admin lists, CAT-API-1 #48) |
+| Product availability and stock per size in the public product | Product: out-of-stock notice, disabled button, total 0.00; disabled size chips | Shown as available from the API (the product card already has an availability flag) | API gap |
+| Slaughter time and chilled delivery window | Product: freshness card | Hidden | API gap |
+| Store rating in the product | Product: rating next to the store name | Hidden | API gap |
+| A default size | Product: the size picked when the page opens | The first size | API gap |
+| A gift box packaging | Product: packaging list (the design shows one) | The API knows trays, bags, vacuum and none; only the mock offers a gift box | API gap |
+| Server price for a product line (pricing route) | Product: total and price details | Computed on the device with the same formula, in one place to swap | CRT-API-1 #61 |
+| The cart | Product: "Add to cart" | Shows a "cart coming soon" message; nothing is kept | CRT-MOB-1 #64 |
+
 When one of these lands, its endpoints appear in `openapi.json`, and this file and the module guides are updated in the same pull request.

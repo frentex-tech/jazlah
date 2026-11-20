@@ -21,6 +21,7 @@ export 'j_search_bar.dart';
 export 'j_section_header.dart';
 export 'j_skeleton_row.dart';
 export 'j_status_timeline.dart';
+export 'j_stepper.dart';
 export 'j_store_card.dart';
 export 'j_switch.dart';
 export 'j_text_field.dart';

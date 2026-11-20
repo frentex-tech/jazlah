@@ -17,7 +17,8 @@ import 'harness.dart';
 
 class _Located extends SelectedLocationController {
   @override
-  SelectedLocation? build() => const SelectedLocation(point: GeoPoint(24.8168, 46.6195), line: 'التوصيل إلى الملقا، الرياض', covered: true);
+  SelectedLocation? build() =>
+      const SelectedLocation(point: GeoPoint(24.8168, 46.6195), line: 'التوصيل إلى الملقا، الرياض', covered: true);
 }
 
 /// mode: ok, hang, error, offline.

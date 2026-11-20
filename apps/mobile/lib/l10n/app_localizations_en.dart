@@ -996,8 +996,139 @@ class AppLocalizationsEn extends AppLocalizations {
   String get searchTitle => 'Search';
 
   @override
-  String get productTitle => 'Product';
+  String get storePickupBadge => 'Store pickup';
 
   @override
-  String get storePickupBadge => 'Store pickup';
+  String get productTitle => 'Product details';
+
+  @override
+  String get productUnavailableNotice => 'This product is unavailable right now.';
+
+  @override
+  String productSlaughteredAt(String time) {
+    return 'Slaughtered today $time';
+  }
+
+  @override
+  String productDeliveredWithin(int hours) {
+    String _temp0 = intl.Intl.pluralLogic(
+      hours,
+      locale: localeName,
+      other: 'Chilled and delivered fresh within $hours hours',
+      one: 'Chilled and delivered fresh within an hour',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get productSize => 'Size';
+
+  @override
+  String get productRequiredOne => 'Required · choose one';
+
+  @override
+  String get productCut => 'Cutting';
+
+  @override
+  String get productPackaging => 'Packaging';
+
+  @override
+  String get productPackagingHint => 'Some options depend on the cut';
+
+  @override
+  String get productExclusions => 'Exclusions';
+
+  @override
+  String get productExclusionsHint => 'Optional · removed for you while cutting';
+
+  @override
+  String get productNotes => 'Notes for the butcher (optional)';
+
+  @override
+  String get productNotesPlaceholder => 'Write here';
+
+  @override
+  String get productNotesExample => 'E.g. thin slices, no seasoning';
+
+  @override
+  String get productQuantity => 'Quantity';
+
+  @override
+  String get productDecrease => 'Decrease quantity';
+
+  @override
+  String get productIncrease => 'Increase quantity';
+
+  @override
+  String get productFree => 'Free';
+
+  @override
+  String productExtra(String amount) {
+    return '+$amount SAR';
+  }
+
+  @override
+  String productPrice(String amount) {
+    return '$amount SAR';
+  }
+
+  @override
+  String weightGrams(String n) {
+    return '$n g';
+  }
+
+  @override
+  String weightKg(String n) {
+    return '$n kg';
+  }
+
+  @override
+  String productIncompatible(String cut) {
+    return 'Not available with the chosen cut: $cut';
+  }
+
+  @override
+  String productIncompatibleHelp(String cuts) {
+    return 'Change the cut to $cuts to choose this option.';
+  }
+
+  @override
+  String productQuoted(String name) {
+    return '“$name”';
+  }
+
+  @override
+  String get productOr => ' or ';
+
+  @override
+  String get productTotal => 'Total';
+
+  @override
+  String get productPriceDetails => 'Price details';
+
+  @override
+  String productCutLine(String cut) {
+    return 'Cutting ($cut)';
+  }
+
+  @override
+  String get productDelivery => 'Delivery';
+
+  @override
+  String get productDeliveryAtCheckout => 'Calculated at checkout';
+
+  @override
+  String get productUnavailable => 'Unavailable';
+
+  @override
+  String get productChooseCut => 'Choose a cut before adding to the cart';
+
+  @override
+  String get productCartSoon => 'The cart is coming soon; nothing was added yet.';
+
+  @override
+  String get productErrorTitle => 'Couldn\'t load the product';
+
+  @override
+  String get productErrorBody => 'Something went wrong while loading the product. Try again.';
 }

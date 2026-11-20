@@ -992,8 +992,141 @@ class AppLocalizationsAr extends AppLocalizations {
   String get searchTitle => 'البحث';
 
   @override
-  String get productTitle => 'المنتج';
+  String get storePickupBadge => 'استلام من المتجر';
 
   @override
-  String get storePickupBadge => 'استلام من المتجر';
+  String get productTitle => 'تفاصيل المنتج';
+
+  @override
+  String get productUnavailableNotice => 'هذا المنتج غير متاح حاليًا.';
+
+  @override
+  String productSlaughteredAt(String time) {
+    return 'ذُبح اليوم $time';
+  }
+
+  @override
+  String productDeliveredWithin(int hours) {
+    String _temp0 = intl.Intl.pluralLogic(
+      hours,
+      locale: localeName,
+      other: 'يُبرَّد ويُسلَّم طازجًا خلال $hours ساعة',
+      few: 'يُبرَّد ويُسلَّم طازجًا خلال $hours ساعات',
+      two: 'يُبرَّد ويُسلَّم طازجًا خلال ساعتين',
+      one: 'يُبرَّد ويُسلَّم طازجًا خلال ساعة',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get productSize => 'الحجم';
+
+  @override
+  String get productRequiredOne => 'مطلوب · اختر واحدًا';
+
+  @override
+  String get productCut => 'التقطيع';
+
+  @override
+  String get productPackaging => 'التغليف';
+
+  @override
+  String get productPackagingHint => 'بعض الخيارات تتغيّر حسب التقطيع';
+
+  @override
+  String get productExclusions => 'الاستثناءات';
+
+  @override
+  String get productExclusionsHint => 'اختياري · نُزيلها لك أثناء التقطيع';
+
+  @override
+  String get productNotes => 'ملاحظات للجزّار (اختياري)';
+
+  @override
+  String get productNotesPlaceholder => 'اكتب هنا';
+
+  @override
+  String get productNotesExample => 'مثال: شرائح رفيعة وبدون تتبيل';
+
+  @override
+  String get productQuantity => 'الكمية';
+
+  @override
+  String get productDecrease => 'إنقاص الكمية';
+
+  @override
+  String get productIncrease => 'زيادة الكمية';
+
+  @override
+  String get productFree => 'مجاني';
+
+  @override
+  String productExtra(String amount) {
+    return '+$amount ر.س';
+  }
+
+  @override
+  String productPrice(String amount) {
+    return '$amount ر.س';
+  }
+
+  @override
+  String weightGrams(String n) {
+    return '$n جم';
+  }
+
+  @override
+  String weightKg(String n) {
+    return '$n كجم';
+  }
+
+  @override
+  String productIncompatible(String cut) {
+    return 'غير متاح مع التقطيع المختار: $cut';
+  }
+
+  @override
+  String productIncompatibleHelp(String cuts) {
+    return 'غيّر التقطيع إلى $cuts لاختيار هذا الخيار.';
+  }
+
+  @override
+  String productQuoted(String name) {
+    return '«$name»';
+  }
+
+  @override
+  String get productOr => ' أو ';
+
+  @override
+  String get productTotal => 'الإجمالي';
+
+  @override
+  String get productPriceDetails => 'تفاصيل السعر';
+
+  @override
+  String productCutLine(String cut) {
+    return 'التقطيع ($cut)';
+  }
+
+  @override
+  String get productDelivery => 'التوصيل';
+
+  @override
+  String get productDeliveryAtCheckout => 'يُحسب في الدفع';
+
+  @override
+  String get productUnavailable => 'غير متاح';
+
+  @override
+  String get productChooseCut => 'اختر طريقة التقطيع قبل الإضافة إلى السلة';
+
+  @override
+  String get productCartSoon => 'السلة قادمة قريبًا، لم تُضَف القطعة بعد.';
+
+  @override
+  String get productErrorTitle => 'تعذّر تحميل المنتج';
+
+  @override
+  String get productErrorBody => 'حدث خطأ أثناء جلب تفاصيل المنتج. حاول مرة أخرى.';
 }

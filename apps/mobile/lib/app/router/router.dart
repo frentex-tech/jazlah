@@ -21,6 +21,7 @@ import 'package:jazlah/features/home/presentation/home_screen.dart';
 import 'package:jazlah/features/home/presentation/stores_screen.dart';
 import 'package:jazlah/features/location/presentation/map_picker_screen.dart';
 import 'package:jazlah/features/location/presentation/out_of_coverage_screen.dart';
+import 'package:jazlah/features/product/presentation/product_screen.dart';
 import 'package:jazlah/features/profile/presentation/account_screen.dart';
 import 'package:jazlah/features/profile/presentation/settings_screen.dart';
 import 'package:jazlah/features/store/presentation/category_screen.dart';
@@ -130,10 +131,9 @@ final routerProvider = Provider<GoRouter>((ref) {
         path: Routes.cart,
         builder: (context, _) => ComingSoonPage(title: AppLocalizations.of(context).cart),
       ),
-      // shortcut: placeholder until STF-MOB-3 (#56) builds the product page.
       GoRoute(
         path: '/product/:id',
-        builder: (context, _) => ComingSoonPage(title: AppLocalizations.of(context).productTitle),
+        builder: (_, state) => ProductScreen(id: state.pathParameters['id']!),
       ),
       ShellRoute(
         builder: (_, state, child) => MainShell(location: state.matchedLocation, child: child),
