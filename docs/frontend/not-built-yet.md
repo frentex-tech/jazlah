@@ -63,10 +63,18 @@ What a built dashboard screen needs and the API does not give yet. Until it land
 | Admin permissions on `GET /v1/admin/me` | Dashboard admin side menu: show only the allowed items; the denied screen | Every item shown; the API refuses what is not allowed | #111 (ADM-API-1) |
 | The panels a phone can open, after the code is verified | Dashboard panel picker | Lists only the panels with a live session, so it appears after the second sign-in | none open yet |
 | A defined client-address header on staging and production, with the API trusting the dashboard as one proxy hop | Per-address sign-in limits for staff ([dashboard README](../../apps/dashboard/README.md)) | Nothing forwarded until the deployment sets it | #8 (FND-INF-5) |
+| Business type (butchery, slaughterhouse, farm), contact email, district and address details in `SubmitVendorApplicationDto` | Vendor application, business details and location steps (410:39654, 410:40011) | Business type chosen on the page only, never sent; email, district and address shown disabled | none open yet (API gap) |
+| Logo and cover in the vendor application | Vendor application, photos and review step (410:40094) | Shown disabled; the vendor adds them in the store profile after approval | none open yet (API gap) |
+| Commission in `GET /v1/customer/vendor-applications/latest` (approved) | Application status, approved (410:40259) | Commission row left out; only the payout row shows | none open yet (API gap) |
+| Applicant email in the application answer | Application status, pending text «we send the result to your email» (410:40216) | Generic text without the email | none open yet (API gap) |
+| A duplicate commercial registration error code | Vendor application, business details | None: the API has no such check or code; other VALIDATION_FAILED fields are mapped to their step | none open yet (API gap) |
+| Store tagline, street address, working hours (weekly editor), pickup and visits toggles in the vendor profile | Store profile (131:24074) | Tagline, address (shows the city) and the hours switches shown disabled; pickup and visits not shown (no frame) | none open yet (API gap) |
+| Store name change by the vendor | Store profile, validation frame (131:24427) | Read-only: only an admin changes the name (API rule), so the name error of the frame cannot occur | by design |
+| Vendor support contact (phone, email or chat) | Application status «contact vendor support», store bank and suspended notes | Plain text, no link | none open yet |
 
 The code length in the code request answer is asked for in the mobile section below; the dashboard needs it too (a dashboard setting today).
 
-The dashboard's in-process mocks (staff sign-in accounts, an in-memory coverage store) exist only for its smoke tests; they stand in for nothing missing.
+The dashboard's in-process mocks (staff and customer sign-in accounts, an in-memory coverage store, vendor applications, store profile and a mock upload storage) exist only for its smoke tests; they stand in for nothing missing.
 
 ## Requested by the apps (mobile)
 

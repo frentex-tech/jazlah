@@ -66,6 +66,24 @@ Agreed by the owner in the Sprint 1 fix round, after the design QA (`reviews/qa-
 | Panel picker card, hover | Card has no hover state | Hover and keyboard focus show the Card's selected state (ember border) | A link needs a visible focus; the selected state is the DS's own. |
 | Top bar, every shell (16:1239) | Staff name «عبدالرحمن», avatar with its initial «ع» | The masked phone, avatar with a user icon | The API has no staff name yet (not-built-yet.md, "Requested by the apps"). Switch to the name and initial when it does. |
 
+## Build differences, Sprint 2 dashboard: VND-DSH-1 vendor application and store profile (pending owner sign-off, not agreed)
+| Frame | Difference | Why |
+|---|---|---|
+| 410:39654, 410:40011, 410:40094 | Email, district, address details, logo and cover are shown disabled; the business type is chosen but not sent | Not in the application API (not-built-yet.md) |
+| 410:39654 | The phone field shows the masked number of the sign-in answer (`+966 5•• ••• 567`) | The dashboard never holds the full number |
+| 410:39774 | The banner counts the fields to fix (one, two or more) instead of «the two fields»; email cannot be in error (disabled) | Generic for any field; email is an API gap |
+| 410:39936 | The bank field is read-only, filled from the IBAN bank code, instead of a list | The API takes no bank; the code in the IBAN names it |
+| 410:40011 | A real map (OSM tiles) instead of the illustration; the pin is set by dragging, clicking or Enter | Needed for real coordinates |
+| 410:40094 | Summary has no email row; the location row shows the city | API gaps |
+| 410:40216, 410:40644 | Pending text without the email; application number is `VA-` + the first 8 characters of its id | No email or short number in the API |
+| 410:40259 | No commission row | Not in the application answer |
+| All status frames | «Contact vendor support» is plain text | No support contact defined |
+| 131:24074 | A second description field (English) and a VAT number field are added; tagline, address and working hours are disabled; hours switches are off | The API has AR/EN descriptions and VAT; the rest are API gaps |
+| 131:24074 | Description hint says up to 1000 characters (Figma 200) | Mirrors the API limit |
+| 131:24427 | The store name is read-only, so only the contact errors of the frame occur | Only an admin changes the name |
+| 131:24863 | Reached when a save or upload answers VENDOR_SUSPENDED: the fields keep their values but use the disabled style. A suspended vendor opening the page is signed out with the reason (API rule) | The API refuses every vendor call when suspended |
+| 131:24717 | Uses the shared error panel copy for the body | Same as the frame text |
+
 ## Checks run on the file (2026-11-13)
 - Script lint over all 587 screens after the last changes: no empty or "undefined" text, no text outside its screen, no missing icon.
 - Clipped layouts: a script found 110 auto-layout frames on web and dashboard screens whose content was cut off (among them the whole animal-registration form) and opened them up. 28 small ones remain (tab labels 7 to 9 px taller than their tab, and the Adha settings body).
