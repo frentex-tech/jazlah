@@ -4,8 +4,10 @@ import createNextIntlPlugin from 'next-intl/plugin';
 const withNextIntl = createNextIntlPlugin('./src/i18n/request.ts');
 
 const dev = process.env.NODE_ENV !== 'production';
-// The map tile host is the only third-party origin the pages load (coverage map).
+// Third-party origins the pages load: the map tile host (maps), and the media hosts in MEDIA_ORIGINS (space-separated:
+// the storage that presigned uploads POST to, and the public CDN of logos and covers).
 const tiles = new URL((process.env.NEXT_PUBLIC_MAP_TILES ?? 'https://tile.openstreetmap.org/{z}/{x}/{y}.png').replace(/[{}]/g, '')).origin;
+const media = (process.env.MEDIA_ORIGINS ?? '').split(/\s+/).filter(Boolean).map((o) => new URL(o).origin).join(' ');
 
 // Staff panel: never framed (clickjacking on approvals, deletes, payouts), no third-party scripts.
 // shortcut: script-src allows 'unsafe-inline' because Next's bootstrap scripts are inline; move to per-request nonces
@@ -14,8 +16,8 @@ const csp = [
   "default-src 'self'",
   `script-src 'self' 'unsafe-inline'${dev ? " 'unsafe-eval'" : ''}`,
   "style-src 'self' 'unsafe-inline'",
-  `img-src 'self' data: blob: ${tiles}`,
-  `connect-src 'self' ${tiles}${dev ? ' ws:' : ''}`,
+  `img-src 'self' data: blob: ${tiles} ${media}`.trim(),
+  `connect-src 'self' ${tiles} ${media}${dev ? ' ws:' : ''}`.replace(/\s+/g, ' '),
   "font-src 'self'",
   "worker-src 'self' blob:",
   "object-src 'none'",

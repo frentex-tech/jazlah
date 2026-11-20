@@ -1,7 +1,6 @@
 // Coverage zones behind one interface: the API (/v1/admin/coverage-zones, openapi-fetch) or, for the Playwright smoke
 // tests and local work without an API, an in-memory mock (DASHBOARD_API_MOCK=1).
-import createClient from 'openapi-fetch';
-import type { components, paths } from '@/api/schema';
+import { apiCall as call, apiClient, apiHeaders as headers } from '@/api/client';
 import type { ApiResult } from '@/lib/auth/panel-session';
 import { mocksEnabled } from '@/lib/mock';
 import { isValidPolygon, pointInPolygon } from './geo';
@@ -16,22 +15,10 @@ export interface CoverageBackend {
   check(lat: number, lng: number, lang: string): Promise<ApiResult<CoverageCheck>>;
 }
 
-const TIMEOUT_MS = 5000;
 const MAX_PAGES = 20; // 1000 zones: far beyond any real list, stops a cursor loop
 
-function apiBackend(baseUrl: string): CoverageBackend {
-  const api = createClient<paths>({ baseUrl, fetch: (r: Request) => fetch(r, { signal: AbortSignal.timeout(TIMEOUT_MS) }) });
-  const headers = (token: string | null, lang: string) => ({ 'Accept-Language': lang, ...(token ? { Authorization: `Bearer ${token}` } : {}) });
-  const call = async <T,>(p: Promise<{ data?: T; error?: unknown; response: Response }>, empty = false): Promise<ApiResult<T>> => {
-    try {
-      const { data, error, response } = await p;
-      if (!error && (empty || data !== undefined)) return { ok: true, data: (empty ? null : data) as T, status: response.status };
-      const e = error as components['schemas']['ErrorResponseDto'] | undefined;
-      return { ok: false, code: e?.code ?? 'NETWORK', status: e?.code ? response.status : 502, details: e?.details };
-    } catch {
-      return { ok: false, code: 'NETWORK', status: 502 };
-    }
-  };
+function apiBackend(): CoverageBackend {
+  const api = apiClient();
   return {
     async list(token, lang) {
       const items: CoverageZone[] = [];
@@ -105,5 +92,5 @@ export const mockCoverage: CoverageBackend = {
 };
 
 export function coverageBackend(): CoverageBackend {
-  return mocksEnabled() ? mockCoverage : apiBackend(process.env.API_URL ?? 'http://localhost:3000');
+  return mocksEnabled() ? mockCoverage : apiBackend();
 }

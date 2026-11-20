@@ -1,4 +1,3 @@
-import type { NextRequest } from 'next/server';
 import { z } from 'zod';
 import { COLOR_RE, type CreateZone, type UpdateZone } from './types';
 
@@ -13,12 +12,4 @@ const color = z.string().regex(COLOR_RE);
 export const CreateZoneSchema = z.object({ name, city, polygon, isActive: z.boolean(), color }) satisfies z.ZodType<CreateZone>;
 export const UpdateZoneSchema = CreateZoneSchema.partial() satisfies z.ZodType<UpdateZone>;
 
-/** Language for the API's messages: the page sends its own locale (lib/panel-fetch.ts). */
-export const langOf = (req: NextRequest) => (req.headers.get('accept-language') === 'en' ? 'en' : 'ar');
-
-export const invalidBody = (error: z.ZodError) => ({
-  ok: false as const,
-  code: 'VALIDATION_FAILED',
-  status: 400,
-  details: error.issues.map((i) => ({ field: i.path.join('.'), constraints: [i.code] })),
-});
+export { invalidBody, langOf } from '@/lib/route';
