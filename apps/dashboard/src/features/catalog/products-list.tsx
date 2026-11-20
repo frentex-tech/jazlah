@@ -182,6 +182,7 @@ export function ProductsList() {
           <>
             <Link href="/admin/catalog/products/new" className={buttonVariants()}>{t('add')}</Link>
             <Link href="/admin/catalog/categories" className={buttonVariants({ variant: 'secondary' })}>{t('categories')}</Link>
+            <Link href="/admin/catalog/review" className={buttonVariants({ variant: 'secondary' })}>{t('review')}</Link>
           </>
         }
       />

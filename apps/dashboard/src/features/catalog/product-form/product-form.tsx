@@ -2,7 +2,7 @@
 
 import { CaretDown, Trash } from '@phosphor-icons/react';
 import { useLocale, useTranslations } from 'next-intl';
-import { useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Chip } from '@/components/ui/chip';
@@ -50,6 +50,14 @@ export type ProductFormProps = {
   deleteLabel?: string;
   /** Saves; resolves to the product as saved, or throws (ApiError, SubmitError) for the form to show on its fields. */
   onSubmit: (values: ProductFormValues, intent: string) => Promise<Product>;
+  /** Nothing can be changed (a vendor product under review): fields disabled, no footer. */
+  readOnly?: boolean;
+  /** Each change of the fields, as the values a submit would send (e.g. to warn that an edit will be re-reviewed). */
+  onChange?: (values: ProductFormValues) => void;
+  /** Shown above the footer (e.g. the «will be re-reviewed» warning). */
+  notice?: React.ReactNode;
+  /** Open on a published product's pending change request, not the live content (the vendor's proposed edit). */
+  preferPending?: boolean;
 };
 
 const SECTION_OF: [string, RegExp][] = [
@@ -79,15 +87,20 @@ export function ProductFormSkeleton({ label }: { label: string }) {
  * 131:35813 new, 131:36439 validation. It knows no endpoint: the page passes the options, the upload, the rules
  * editor and the submit. Errors from the API (VALIDATION_FAILED paths, PRODUCT_NOT_SUBMITTABLE) land on the fields.
  */
-export function ProductForm({ product, options, upload, setRule, actions, deleteLabel, onSubmit }: ProductFormProps) {
+export function ProductForm({ product, options, upload, setRule, actions, deleteLabel, onSubmit, readOnly, onChange, notice, preferPending }: ProductFormProps) {
   const t = useTranslations('catalog.form');
   const tg = useTranslations();
   const locale = useLocale();
-  const [s, setS] = useState<FormState>(() => stateOf(product));
+  const [s, setS] = useState<FormState>(() => stateOf(product, preferPending));
   const [errors, setErrors] = useState<Errors>({});
   const [busy, setBusy] = useState<string | null>(null);
   const [rules, setRules] = useState(options.rules);
   const name = (n: { ar: string; en: string } | null | undefined) => (n ? (locale === 'en' ? n.en : n.ar) : '');
+  const changed = useRef(onChange);
+  changed.current = onChange;
+  useEffect(() => {
+    changed.current?.(toValues(s).values);
+  }, [s]);
 
   const set = (patch: Partial<FormState>, clear: string[] = []) => {
     setS((old) => ({ ...old, ...patch }));
@@ -106,7 +119,7 @@ export function ProductForm({ product, options, upload, setRule, actions, delete
     if (Object.keys(own).length) return;
     setBusy(intent);
     try {
-      setS(stateOf(await onSubmit(values, intent)));
+      setS(stateOf(await onSubmit(values, intent), preferPending));
     } catch (err) {
       const cause = err instanceof SubmitError ? err.cause : err;
       const saved = err instanceof SubmitError ? err.product : undefined;
@@ -137,9 +150,11 @@ export function ProductForm({ product, options, upload, setRule, actions, delete
       className="flex w-full flex-col gap-s24"
       onSubmit={(e) => {
         e.preventDefault();
-        if (!busy) void submit(actions.find((a) => a.variant === 'primary')?.intent ?? actions[0]!.intent);
+        const intent = actions.find((a) => a.variant === 'primary')?.intent ?? actions[0]?.intent;
+        if (!busy && !readOnly && intent) void submit(intent);
       }}
     >
+      <fieldset disabled={readOnly} className="contents">
       <FormSection title={t('basics.title')} body={t('basics.body')} invalid={invalid('basics')}>
         <div className="grid grid-cols-2 gap-s24">
           <InputField label={t('basics.nameAr')} hint={t('basics.nameHint')} placeholder={t('placeholder')} maxLength={100} value={s.nameAr} error={message('name.ar')} onChange={(e) => set({ nameAr: e.target.value }, ['name.ar'])} />
@@ -294,17 +309,21 @@ export function ProductForm({ product, options, upload, setRule, actions, delete
         </div>
       </FormSection>
 
-      <div className="flex items-center justify-between gap-s12 rounded-md border border-line bg-paper px-s24 py-s16">
-        <div className="flex gap-s12">
-          {actions.map((a) => (
-            <Button key={a.intent} type={a.variant === 'primary' ? 'submit' : 'button'} variant={a.variant} loading={busy === a.intent} disabled={busy !== null && busy !== a.intent} onClick={a.variant === 'primary' ? undefined : () => !busy && void submit(a.intent)}>
-              {a.label}
-            </Button>
-          ))}
+      </fieldset>
+      {notice}
+      {!readOnly && (
+        <div className="flex items-center justify-between gap-s12 rounded-md border border-line bg-paper px-s24 py-s16">
+          <div className="flex gap-s12">
+            {actions.map((a) => (
+              <Button key={a.intent} type={a.variant === 'primary' ? 'submit' : 'button'} variant={a.variant} loading={busy === a.intent} disabled={busy !== null && busy !== a.intent} onClick={a.variant === 'primary' ? undefined : () => !busy && void submit(a.intent)}>
+                {a.label}
+              </Button>
+            ))}
+          </div>
+          {/* shortcut: API gap, products cannot be deleted (no DELETE endpoint); shown disabled. */}
+          {deleteLabel && <Button variant="danger" disabled>{deleteLabel}</Button>}
         </div>
-        {/* shortcut: API gap, products cannot be deleted (no DELETE endpoint); shown disabled. */}
-        {deleteLabel && <Button variant="danger" disabled>{deleteLabel}</Button>}
-      </div>
+      )}
     </form>
   );
 }

@@ -804,7 +804,8 @@
         "body": "Ask the platform manager for the catalog manager role.",
         "action": "Back to the dashboard"
       },
-      "notJazla": "Only JAZLA products can be switched here."
+      "notJazla": "Only JAZLA products can be switched here.",
+      "review": "Review requests"
     },
     "product": {
       "newTitle": "New product",
@@ -973,6 +974,207 @@
         "INCOMPATIBLE_CUTTING_PACKAGING": "The product offers a cutting style with a packaging it cannot be combined with (marked red). Remove one or change the rule before publishing.",
         "MEDIA_NOT_READY": "An image did not finish uploading; upload it again"
       }
+    }
+  },
+  "vendorProducts": {
+    "breadcrumb": "Products / All products",
+    "title": "My products",
+    "add": "Add product",
+    "search": "Search by product name",
+    "cols": {
+      "availability": "Availability",
+      "date": "Last update"
+    },
+    "availability": {
+      "available": "Available",
+      "hidden": "Not listed",
+      "out": "Out of stock"
+    },
+    "chip": "Availability: {value}",
+    "rejectedNotice": "{count, plural, one {# rejected product is} other {# rejected products are}} waiting for your edits. Open the product to read the review notes.",
+    "empty": {
+      "title": "No products yet",
+      "body": "Add your first product with its sizes and cuts; customers see it after review.",
+      "action": "Add your first product"
+    },
+    "error": {
+      "title": "Couldn't load your products",
+      "body": "Something went wrong while loading the list. Try again.",
+      "action": "Try again"
+    },
+    "blocked": {
+      "title": "Your store is suspended",
+      "body": "The JAZLA team suspended your store, so products can't be managed now. Contact support to reactivate it, then sign in again.",
+      "action": "Sign in"
+    },
+    "done": {
+      "submit": "{name} sent for review",
+      "on": "{name} can be ordered now",
+      "off": "Orders of {name} paused"
+    },
+    "failed": {
+      "incomplete": "Complete the product before sending it: at least one size and one image, and no cut with a packaging it can't be combined with.",
+      "notEditable": "A product under review can't be changed.",
+      "other": "Couldn't do that. Try again."
+    },
+    "menu": {
+      "label": "Actions for {name}",
+      "edit": "Edit",
+      "view": "View",
+      "notes": "Review notes",
+      "submit": "Send for review",
+      "on": "Make available",
+      "off": "Pause orders"
+    },
+    "product": {
+      "newTitle": "New product",
+      "editTitle": "Edit product",
+      "breadcrumbEdit": "My products / Edit product",
+      "breadcrumbNew": "My products / New product",
+      "loading": "Loading the product",
+      "missing": {
+        "title": "Product not found",
+        "body": "The link may be gone, or the product belongs to another store.",
+        "action": "Back to my products"
+      },
+      "error": {
+        "title": "Couldn't load the product",
+        "body": "Check your connection and try again.",
+        "action": "Try again"
+      },
+      "submit": "Send for review",
+      "saveDraft": "Save as draft",
+      "save": "Save changes",
+      "delete": "Delete product",
+      "submitted": "{name} sent for review",
+      "sentForReview": "Your edit of {name} was sent for review; the live product stays as it is until approved",
+      "saved": "{name} saved",
+      "underReview": "The product is under review and can't be edited until a decision. We'll let you know within one working day.",
+      "rejected": "The product was rejected. Read the review notes, edit it, then send it again.",
+      "notes": "Review notes",
+      "editPending": "Your edit sent on {date} is waiting for review and is shown here. The live product stays as it is until approved.",
+      "editRejected": "Your last edit was rejected: {reason}",
+      "reReview": "This will be re-reviewed: changes to the name, description, images, category or options go to the JAZLA team, and the live product stays as it is until approved. Prices, availability and fulfilment apply at once."
+    },
+    "notes": {
+      "breadcrumb": "My products / {name} / Notes",
+      "heading": "Review notes",
+      "title": "Review team notes",
+      "product": "Product",
+      "name": "Name",
+      "category": "Category",
+      "loading": "Loading the review notes",
+      "by": "JAZLA team · {date} · {time}",
+      "team": "JAZLA team",
+      "intro": "We couldn't publish the product because of the notes below. Fix them and send it again; we review within one working day.",
+      "reason": "Review team note",
+      "fix": "Edit product",
+      "resubmit": "Edit and resend",
+      "delete": "Delete product",
+      "state": {
+        "pending": "The product was sent for review after your edits. We'll let you know the decision within one working day.",
+        "approved": "Approved and published in the store.",
+        "draft": "The product hasn't been sent for review yet."
+      },
+      "missing": {
+        "title": "Product not found",
+        "body": "The link may be gone, or the product belongs to another store.",
+        "action": "Back to my products"
+      },
+      "error": {
+        "title": "Couldn't load the review notes",
+        "body": "Check your connection and try again.",
+        "action": "Try again"
+      }
+    }
+  },
+  "reviewQueue": {
+    "breadcrumb": "Catalog / Review requests",
+    "title": "Product review",
+    "tabs": {
+      "pending": "In review",
+      "approved": "Approved",
+      "rejected": "Rejected"
+    },
+    "cols": {
+      "product": "Product",
+      "vendor": "Store",
+      "type": "Request",
+      "sent": "Sent",
+      "waiting": "Waiting"
+    },
+    "type": {
+      "new": "New product",
+      "edit": "Product edit"
+    },
+    "waited": {
+      "hours": "{n, plural, =0 {Under an hour} one {# hour} other {# hours}}",
+      "days": "{n, plural, one {# day} other {# days}}"
+    },
+    "open": "Review",
+    "view": "View",
+    "openLabel": "Review {name}",
+    "stale": "The request changed since you opened it (another admin decided or the vendor edited again). The list was reloaded.",
+    "empty": {
+      "pending": "No products waiting for review",
+      "body": "Every submitted product has been reviewed. We'll let you know when a new request arrives.",
+      "action": "View approved products",
+      "approved": "No approved products yet",
+      "rejected": "No rejected products",
+      "decidedBody": "Stores' products show here once reviewed."
+    },
+    "error": {
+      "title": "Couldn't load the review queue",
+      "body": "Something went wrong while loading. Try again.",
+      "action": "Try again"
+    },
+    "denied": {
+      "title": "You don't have permission to review products",
+      "body": "Product review is available to catalog supervisors.",
+      "action": "Back to overview"
+    },
+    "dialog": {
+      "title": "Review: {name}",
+      "vendor": "Store",
+      "category": "Category",
+      "price": "Price from",
+      "sizes": "Sizes",
+      "cuts": "Cuts",
+      "packs": "Packaging",
+      "changes": "Changes",
+      "reasonShown": "Rejection reason",
+      "grams": "{n} g",
+      "part": {
+        "details": "Name and description",
+        "category": "Category",
+        "images": "Images",
+        "sizes": "Sizes",
+        "cuts": "Cuts",
+        "packs": "Packaging",
+        "exclusions": "“Without” options"
+      },
+      "presets": "Ready reasons",
+      "preset": {
+        "image": "Unclear image",
+        "description": "Incomplete description",
+        "price": "Unrealistic price"
+      },
+      "presetText": {
+        "image": "The product image is unclear; take a photo in better light",
+        "description": "The description is incomplete; add the weight, the origin and the cut",
+        "price": "The price doesn't match the weight; check the size prices"
+      },
+      "reason": "Rejection reason (shown to the vendor)",
+      "hint": "One clear sentence is enough",
+      "required": "Write the reason for the vendor to read.",
+      "tooLong": "The reason is longer than 500 characters.",
+      "approve": "Approve and publish",
+      "reject": "Reject with reason",
+      "close": "Close",
+      "approved": "{name} approved and published",
+      "rejected": "{name} rejected; the reason was sent to the vendor",
+      "notSubmittable": "The product can't be approved: it has no size or no image.",
+      "failed": "Couldn't save the decision. Try again."
     }
   }
 }

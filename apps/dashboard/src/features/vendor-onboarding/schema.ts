@@ -33,7 +33,7 @@ export const UpdateProfileSchema = z.object({
 const fileName = z.string().max(255).optional();
 export const DocumentUploadSchema = z.object({ contentType: z.enum(DOC_TYPES as [string, ...string[]]), fileName });
 export const ImageUploadSchema = z.object({
-  purpose: z.enum(['vendor.logo', 'vendor.cover']),
+  purpose: z.enum(['vendor.logo', 'vendor.cover', 'catalog.product-image']),
   contentType: z.enum(IMAGE_TYPES as [string, ...string[]]),
   fileName,
 });

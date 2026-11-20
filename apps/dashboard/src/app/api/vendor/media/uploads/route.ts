@@ -4,7 +4,7 @@ import { ImageUploadSchema } from '@/features/vendor-onboarding/schema';
 import { withPanelSession } from '@/lib/auth/panel-session';
 import { invalidBody, langOf } from '@/lib/route';
 
-// Upload ticket for the store logo or cover photo; docs/frontend/uploads.md.
+// Upload ticket for the store logo, cover photo or a product image; docs/frontend/uploads.md.
 export async function POST(req: NextRequest) {
   const parsed = ImageUploadSchema.safeParse(await req.json().catch(() => null));
   return withPanelSession(req, 'vendor', async (token) =>
