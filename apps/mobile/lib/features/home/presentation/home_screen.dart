@@ -103,6 +103,8 @@ class _HomeScreenState extends ConsumerState<HomeScreen> with WidgetsBindingObse
             notificationsLabel: l10n.menuNotifications,
             cartLabel: l10n.cart,
             onLocationTap: () => chooseLocation(context, ref),
+            onNotifications: () => context.push(Routes.notifications),
+            onCart: () => openCart(context),
           ),
           Expanded(
             child: RefreshIndicator(
@@ -196,7 +198,13 @@ class _HomeScreenState extends ConsumerState<HomeScreen> with WidgetsBindingObse
         ),
         Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [for (final s in f.partnerStores.take(3)) StoreCardTile(s)],
+          // Flexible: the 104 cards shrink on phones narrower than 344.
+          children: [
+            for (final (i, s) in f.partnerStores.take(3).indexed) ...[
+              if (i > 0) const SizedBox(width: JSpace.s8),
+              Flexible(child: StoreCardTile(s)),
+            ],
+          ],
         ),
       ],
     ];
@@ -215,7 +223,7 @@ class _CategoryPhoto extends StatelessWidget {
       button: true,
       child: GestureDetector(
         behavior: HitTestBehavior.opaque,
-        onTap: () => context.push(Routes.category(category.id)),
+        onTap: () => context.push(Routes.category(category.id), extra: category.name.of(context.lang)),
         child: Container(
           height: 96,
           clipBehavior: Clip.antiAlias,

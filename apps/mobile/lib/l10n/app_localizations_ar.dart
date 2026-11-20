@@ -993,4 +993,7 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get productTitle => 'المنتج';
+
+  @override
+  String get storePickupBadge => 'استلام من المتجر';
 }

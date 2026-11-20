@@ -72,7 +72,13 @@ void main() {
     expect(list.items.length, 20);
     expect(list.moreError, isNotNull);
     repo.productsMode = Mode.ok;
+    // Scrolling after a failure does not ask again by itself (no retry loop)…
     await c.read(productPagesProvider(_all).notifier).loadMore();
+    expect(repo.productCursors, [null, '20']);
+    expect(c.read(productPagesProvider(_all)).value!.moreError, isNotNull);
+    // …only the footer's retry does.
+    await c.read(productPagesProvider(_all).notifier).loadMore(retry: true);
+    expect(repo.productCursors, [null, '20', '20']);
     list = c.read(productPagesProvider(_all)).value!;
     expect(list.items.length, 40);
     expect(list.moreError, isNull);
@@ -92,6 +98,8 @@ void main() {
     final l10n = AppLocalizationsAr();
     expect(formatHalalas(8900), '89.00');
     expect(formatHalalas(5), '0.05');
+    expect(formatHalalas(-1250), '-12.50');
+    expect(formatHalalas(165000), '1650.00');
     expect(formatMinutes(l10n, 23 * 60), '11:00 م');
     expect(formatMinutes(l10n, 8 * 60), '8:00 ص');
     expect(formatMinutes(l10n, 12 * 60 + 30), '12:30 م');

@@ -2011,6 +2011,12 @@ abstract class AppLocalizations {
   /// In ar, this message translates to:
   /// **'المنتج'**
   String get productTitle;
+
+  /// No description provided for @storePickupBadge.
+  ///
+  /// In ar, this message translates to:
+  /// **'استلام من المتجر'**
+  String get storePickupBadge;
 }
 
 class _AppLocalizationsDelegate extends LocalizationsDelegate<AppLocalizations> {

@@ -16,7 +16,10 @@ extension CatalogContext on BuildContext {
 }
 
 /// `8900` → `89.00` (prices include VAT).
-String formatHalalas(int halalas) => (halalas / 100).toStringAsFixed(2);
+String formatHalalas(int halalas) {
+  final h = halalas.abs();
+  return '${halalas < 0 ? '-' : ''}${h ~/ 100}.${(h % 100).toString().padLeft(2, '0')}';
+}
 
 /// `23 * 60` → `11:00 م` / `11:00 PM`.
 String formatMinutes(AppLocalizations l10n, int minutes) {
@@ -339,15 +342,26 @@ class LoadMoreListener extends StatelessWidget {
   final Widget child;
 
   @override
-  Widget build(BuildContext context) => NotificationListener<ScrollNotification>(
+  Widget build(BuildContext context) => NotificationListener<Notification>(
     onNotification: (n) {
-      // shortcut: a first page too short to scroll never asks for more; pages are 20 cards, far taller
-      // than a screen, so upgrade only if page sizes shrink.
-      if (n is ScrollUpdateNotification && n.metrics.axis == Axis.vertical && n.metrics.extentAfter < 600) onEnd();
+      if (n is ScrollUpdateNotification) _check(n.metrics);
+      // A page too short to scroll sends no updates: check after its layout. The notification itself can
+      // describe the previous frame (the skeleton), so read the position once the next frame is laid out.
+      if (n is ScrollMetricsNotification) {
+        final context = n.context;
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          final position = context.mounted ? Scrollable.maybeOf(context)?.position : null;
+          if (position != null && position.hasContentDimensions) _check(position);
+        });
+      }
       return false;
     },
     child: child,
   );
+
+  void _check(ScrollMetrics m) {
+    if (m.axis == Axis.vertical && m.extentAfter < 600) onEnd();
+  }
 }
 
 /// Pull-to-refresh wants a future that does not throw: a failed refresh shows the error panel instead.
@@ -394,7 +408,7 @@ List<Widget> productSlivers(
             SliverToBoxAdapter(
               child: PagedFooter(
                 list: list,
-                onRetry: () => ref.read(productPagesProvider(query).notifier).loadMore(),
+                onRetry: () => ref.read(productPagesProvider(query).notifier).loadMore(retry: true),
               ),
             ),
           ],

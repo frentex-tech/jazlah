@@ -19,6 +19,7 @@ class FakeCatalog extends MockCatalogRepository {
   Mode productsMode;
   final bool sortable;
   final List<String?> productCursors = [];
+  int homeCalls = 0;
 
   @override
   bool get canSort => sortable;
@@ -31,7 +32,10 @@ class FakeCatalog extends MockCatalogRepository {
   };
 
   @override
-  Future<HomeFeed> home() => _gate(mode, super.home);
+  Future<HomeFeed> home() {
+    homeCalls++;
+    return _gate(mode, super.home);
+  }
 
   @override
   Future<List<Category>> categories() => _gate(mode, super.categories);

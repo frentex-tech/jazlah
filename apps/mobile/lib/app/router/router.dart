@@ -17,13 +17,13 @@ import 'package:jazlah/features/auth/presentation/otp_screen.dart';
 import 'package:jazlah/features/auth/presentation/phone_screen.dart';
 import 'package:jazlah/features/auth/presentation/session_controller.dart';
 import 'package:jazlah/features/home/presentation/categories_screen.dart';
-import 'package:jazlah/features/home/presentation/category_screen.dart';
 import 'package:jazlah/features/home/presentation/home_screen.dart';
 import 'package:jazlah/features/home/presentation/stores_screen.dart';
 import 'package:jazlah/features/location/presentation/map_picker_screen.dart';
 import 'package:jazlah/features/location/presentation/out_of_coverage_screen.dart';
 import 'package:jazlah/features/profile/presentation/account_screen.dart';
 import 'package:jazlah/features/profile/presentation/settings_screen.dart';
+import 'package:jazlah/features/store/presentation/category_screen.dart';
 import 'package:jazlah/features/store/presentation/store_screen.dart';
 import 'package:jazlah/l10n/app_localizations.dart';
 
@@ -40,6 +40,8 @@ abstract final class Routes {
   static String store(String id) => '/home/store/$id';
   static String product(String id) => '/product/$id';
   static const search = '/search';
+  static const notifications = '/notifications';
+  static const cart = '/cart';
   static const orders = '/orders';
   static const services = '/services';
   static const account = '/account';
@@ -118,6 +120,16 @@ final routerProvider = Provider<GoRouter>((ref) {
         path: '/home/store/:id',
         builder: (_, state) => StoreScreen(id: state.pathParameters['id']!, name: state.extra as String?),
       ),
+      // shortcut: placeholder until NOT-MOB-1 (#105) builds the notification center.
+      GoRoute(
+        path: Routes.notifications,
+        builder: (context, _) => ComingSoonPage(title: AppLocalizations.of(context).menuNotifications),
+      ),
+      // shortcut: placeholder until CRT-MOB-1 (#64) builds the cart.
+      GoRoute(
+        path: Routes.cart,
+        builder: (context, _) => ComingSoonPage(title: AppLocalizations.of(context).cart),
+      ),
       // shortcut: placeholder until STF-MOB-3 (#56) builds the product page.
       GoRoute(
         path: '/product/:id',
@@ -131,7 +143,7 @@ final routerProvider = Provider<GoRouter>((ref) {
           GoRoute(path: Routes.stores, builder: (_, _) => const StoresScreen()),
           GoRoute(
             path: '/home/category/:id',
-            builder: (_, state) => CategoryScreen(id: state.pathParameters['id']!),
+            builder: (_, state) => CategoryScreen(id: state.pathParameters['id']!, name: state.extra as String?),
           ),
           // shortcut: placeholder until STF-MOB-4 (#57) builds search.
           GoRoute(
@@ -155,6 +167,9 @@ final routerProvider = Provider<GoRouter>((ref) {
     ],
   );
 });
+
+/// The header cart button (cart count stays 0 until CRT-MOB-1 #64).
+void openCart(BuildContext context) => context.push(Routes.cart);
 
 /// Back to the previous page, or home when the page was opened by a link.
 void popOrHome(BuildContext context) => context.canPop() ? context.pop() : context.go(Routes.home);

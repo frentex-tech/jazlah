@@ -997,4 +997,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get productTitle => 'Product';
+
+  @override
+  String get storePickupBadge => 'Store pickup';
 }

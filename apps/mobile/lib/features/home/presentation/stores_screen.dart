@@ -58,7 +58,10 @@ class StoresScreen extends ConsumerWidget {
                 ),
               ),
               SliverToBoxAdapter(
-                child: PagedFooter(list: list, onRetry: () => ref.read(storePagesProvider.notifier).loadMore()),
+                child: PagedFooter(
+                  list: list,
+                  onRetry: () => ref.read(storePagesProvider.notifier).loadMore(retry: true),
+                ),
               ),
             ],
     );
@@ -66,7 +69,12 @@ class StoresScreen extends ConsumerWidget {
       bottom: false,
       child: Column(
         children: [
-          JAppHeader.page(title: l10n.storesTitle, cartLabel: l10n.cart, onBack: () => popOrHome(context)),
+          JAppHeader.page(
+            title: l10n.storesTitle,
+            cartLabel: l10n.cart,
+            onCart: () => openCart(context),
+            onBack: () => popOrHome(context),
+          ),
           Expanded(
             child: LoadMoreListener(
               onEnd: () => ref.read(storePagesProvider.notifier).loadMore(),

@@ -54,7 +54,7 @@ class CategoriesScreen extends ConsumerWidget {
                     JCategoryTile(
                       image: CatalogImage(c.imageUrl),
                       label: c.name.of(context.lang),
-                      onTap: () => context.push(Routes.category(c.id)),
+                      onTap: () => context.push(Routes.category(c.id), extra: c.name.of(context.lang)),
                     ),
                   const _ComingTile(),
                 ],
@@ -65,7 +65,12 @@ class CategoriesScreen extends ConsumerWidget {
       bottom: false,
       child: Column(
         children: [
-          JAppHeader.page(title: l10n.homeCategories, cartLabel: l10n.cart, onBack: () => popOrHome(context)),
+          JAppHeader.page(
+            title: l10n.homeCategories,
+            cartLabel: l10n.cart,
+            onCart: () => openCart(context),
+            onBack: () => popOrHome(context),
+          ),
           Expanded(
             child: RefreshIndicator(
               color: JColors.ember,

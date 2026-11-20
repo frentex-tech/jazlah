@@ -319,5 +319,6 @@
   "storePickupNo": "Not available",
   "storesTitle": "Stores",
   "searchTitle": "Search",
-  "productTitle": "Product"
+  "productTitle": "Product",
+  "storePickupBadge": "Store pickup"
 }

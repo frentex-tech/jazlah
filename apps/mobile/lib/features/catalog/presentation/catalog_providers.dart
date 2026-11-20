@@ -6,6 +6,7 @@ import 'package:jazlah/core/config/env.dart';
 import 'package:jazlah/features/catalog/data/catalog_repository.dart';
 import 'package:jazlah/features/catalog/data/mock_catalog_repository.dart';
 import 'package:jazlah/features/catalog/domain/catalog.dart';
+import 'package:jazlah/features/location/presentation/location_providers.dart';
 
 final catalogRepositoryProvider = Provider<CatalogRepository>(
   (ref) => Env.useMocks ? MockCatalogRepository() : ApiCatalogRepository(ref.watch(apiProvider)),
@@ -14,7 +15,11 @@ final catalogRepositoryProvider = Provider<CatalogRepository>(
 // No automatic retry anywhere here: the error panel (with its own retry) shows at once.
 
 final FutureProvider<HomeFeed> homeFeedProvider = FutureProvider.autoDispose<HomeFeed>(
-  (ref) => ref.watch(catalogRepositoryProvider).home(),
+  (ref) {
+    // A new address reloads the feed.
+    ref.watch(selectedLocationProvider.select((l) => l?.point));
+    return ref.watch(catalogRepositoryProvider).home();
+  },
   retry: (_, _) => null,
 );
 
@@ -71,9 +76,11 @@ abstract class PagedNotifier<T> extends AsyncNotifier<PagedList<T>> {
     return [...shown, ...next.where((i) => seen.add(idOf(i)))];
   }
 
-  Future<void> loadMore() async {
+  /// After a failed page only an explicit [retry] (the footer button) asks again, not every scroll.
+  Future<void> loadMore({bool retry = false}) async {
     final current = state.value;
     if (current == null || !current.hasMore || current.loadingMore || state.isLoading) return;
+    if (current.moreError != null && !retry) return;
     final loading = PagedList(current.items, current.nextCursor, loadingMore: true);
     state = AsyncData(loading);
     try {

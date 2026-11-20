@@ -13,9 +13,12 @@ import 'package:jazlah/l10n/app_localizations.dart';
 /// One category's products: paged grid with sort. Figma has no screen for it; built from the store
 /// page's grid, chips and states.
 class CategoryScreen extends ConsumerStatefulWidget {
-  const CategoryScreen({required this.id, super.key});
+  const CategoryScreen({required this.id, super.key, this.name});
 
   final String id;
+
+  /// Known by the caller: titles the page while it loads.
+  final String? name;
 
   @override
   ConsumerState<CategoryScreen> createState() => _CategoryScreenState();
@@ -39,8 +42,9 @@ class _CategoryScreenState extends ConsumerState<CategoryScreen> {
       child: Column(
         children: [
           JAppHeader.page(
-            title: category?.name.of(context.lang) ?? '',
+            title: category?.name.of(context.lang) ?? widget.name ?? '',
             cartLabel: l10n.cart,
+            onCart: () => openCart(context),
             onBack: () => popOrHome(context),
           ),
           Expanded(

@@ -419,5 +419,6 @@
   "storePickupNo": "غير متاح",
   "storesTitle": "المتاجر",
   "searchTitle": "البحث",
-  "productTitle": "المنتج"
+  "productTitle": "المنتج",
+  "storePickupBadge": "استلام من المتجر"
 }

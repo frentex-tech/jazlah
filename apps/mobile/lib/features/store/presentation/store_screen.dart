@@ -40,7 +40,12 @@ class _StoreScreenState extends ConsumerState<StoreScreen> {
         bottom: false,
         child: Column(
           children: [
-            JAppHeader.page(title: title, cartLabel: l10n.cart, onBack: () => popOrHome(context)),
+            JAppHeader.page(
+              title: title,
+              cartLabel: l10n.cart,
+              onCart: () => openCart(context),
+              onBack: () => popOrHome(context),
+            ),
             Expanded(
               child: store.when(
                 loading: () => ListView(
@@ -101,7 +106,7 @@ class _StoreScreenState extends ConsumerState<StoreScreen> {
         child: ClipRRect(borderRadius: BorderRadius.circular(JRadius.lg), child: CatalogImage(s.coverUrl)),
       ),
       _VendorRow(s),
-      if ((s.isOpen ?? false) && s.closesAt != null || s.closed || s.deliveryMinutes != null)
+      if ((s.isOpen ?? false) && s.closesAt != null || s.closed || s.deliveryMinutes != null || (s.pickup ?? false))
         Wrap(
           spacing: JSpace.s8,
           runSpacing: JSpace.s8,
@@ -115,6 +120,7 @@ class _StoreScreenState extends ConsumerState<StoreScreen> {
             if (s.closed) JBadge(label: l10n.storeClosedNow, type: JBadgeType.danger, size: JBadgeSize.s),
             if (s.deliveryMinutes != null)
               JBadge(label: l10n.storeDeliveryIn(s.deliveryMinutes!), type: JBadgeType.info, size: JBadgeSize.s),
+            if (s.pickup ?? false) JBadge(label: l10n.storePickupBadge, icon: JIcons.storefront, size: JBadgeSize.s),
           ],
         ),
       if (s.minOrderHalalas != null)
@@ -155,7 +161,12 @@ class _StoreScreenState extends ConsumerState<StoreScreen> {
       child: RefreshIndicator(
         color: JColors.ember,
         onRefresh: () => quietly(
-          Future.wait([ref.refresh(storeProvider(s.id).future), ref.refresh(productPagesProvider(query).future)]),
+          Future.wait([
+            ref.refresh(storeProvider(s.id).future),
+            ref.refresh(productPagesProvider(query).future),
+            // The "all" list names the chips: refresh it too when a chip is selected.
+            if (_categoryId != null) ref.refresh(productPagesProvider(all).future),
+          ]),
         ),
         child: CustomScrollView(
           physics: const AlwaysScrollableScrollPhysics(),

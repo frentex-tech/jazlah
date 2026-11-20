@@ -1,14 +1,24 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:jazlah/app/router/router.dart';
 import 'package:jazlah/app/shell/main_shell.dart';
 import 'package:jazlah/core/widgets/widgets.dart';
+import 'package:jazlah/features/catalog/domain/catalog.dart';
 import 'package:jazlah/features/home/presentation/categories_screen.dart';
-import 'package:jazlah/features/home/presentation/category_screen.dart';
 import 'package:jazlah/features/home/presentation/home_screen.dart';
+import 'package:jazlah/features/location/domain/location.dart';
+import 'package:jazlah/features/location/presentation/location_providers.dart';
+import 'package:jazlah/features/store/presentation/category_screen.dart';
 
 import '../../helpers/catalog_fakes.dart';
 import '../../helpers/pump_screen.dart';
+
+class _TinyPages extends FakeCatalog {
+  @override
+  Future<CatalogPage<ProductCard>> products(ProductQuery query, {String? cursor, int limit = 20}) =>
+      super.products(query, cursor: cursor, limit: 2);
+}
 
 const _home = MainShell(location: Routes.home, child: HomeScreen());
 
@@ -88,6 +98,28 @@ void main() {
     });
   });
 
+  testWidgets('a new address reloads the feed', (t) async {
+    final repo = FakeCatalog();
+    await t.pumpScreen(_home, overrides: catalogOverrides(repo));
+    await t.pump(const Duration(seconds: 1));
+    expect(repo.homeCalls, 1);
+    final c = ProviderScope.containerOf(t.element(find.byType(HomeScreen)));
+    await c
+        .read(selectedLocationProvider.notifier)
+        .select(const SelectedLocation(point: GeoPoint(21.5, 39.2), line: 'جدة', covered: true));
+    await t.pump(const Duration(seconds: 1));
+    expect(repo.homeCalls, 2);
+  });
+
+  testWidgets('partner store cards fit a 320 wide phone', (t) async {
+    await _pumpHome(t, FakeCatalog());
+    t.view.physicalSize = const Size(320, 844);
+    await t.pump();
+    await _scrollTo(t, find.text('متاجر شريكة'));
+    expect(find.byType(JStoreCard), findsNWidgets(3));
+    expect(t.takeException(), isNull);
+  });
+
   group('home routing', () {
     Future<void> tapAndExpect(WidgetTester t, Finder f, String route) async {
       await _pumpHome(t, FakeCatalog());
@@ -97,6 +129,11 @@ void main() {
       expect(find.text('route:$route'), findsOneWidget);
     }
 
+    testWidgets(
+      'bell → notifications',
+      (t) => tapAndExpect(t, find.bySemanticsLabel('الإشعارات'), Routes.notifications),
+    );
+    testWidgets('bag → cart', (t) => tapAndExpect(t, find.bySemanticsLabel('السلة'), Routes.cart));
     testWidgets('search bar → search', (t) => tapAndExpect(t, find.byType(JSearchBar), Routes.search));
     testWidgets('category tile → its category', (t) => tapAndExpect(t, find.text('الإبل'), '/home/category/c-camel'));
     testWidgets(
@@ -187,6 +224,16 @@ void main() {
       expect(repo.productCursors, [null, '20']); // the last page was not asked again
     });
 
+    testWidgets('a first page too short to scroll loads the next one by itself', (t) async {
+      final repo = _TinyPages();
+      await pump(t, repo, id: 'c-camel'); // 6 camel products, 2 per page
+      await t.pump(const Duration(seconds: 1));
+      await t.pump(const Duration(seconds: 1));
+      expect(repo.productCursors.first, isNull);
+      expect(repo.productCursors.length, greaterThan(1));
+      expect(repo.productCursors.toSet().length, repo.productCursors.length); // each page once
+    });
+
     testWidgets('sort chips re-query the list', (t) async {
       final repo = FakeCatalog();
       await pump(t, repo);
@@ -204,6 +251,18 @@ void main() {
       await pump(t, FakeCatalog(sortable: false));
       expect(find.text('الأكثر مبيعًا', skipOffstage: false), findsNothing);
       expect(find.byType(JProductCard), findsWidgets);
+    });
+
+    testWidgets('the title the caller passed shows while categories load', (t) async {
+      await t.pumpScreen(
+        const MainShell(
+          location: '/home/category/c-sheep',
+          child: CategoryScreen(id: 'c-sheep', name: 'الأغنام'),
+        ),
+        overrides: catalogOverrides(FakeCatalog(mode: Mode.hang)),
+      );
+      await t.pump(const Duration(seconds: 1));
+      expect(find.text('الأغنام'), findsOneWidget);
     });
 
     testWidgets('empty', (t) async {

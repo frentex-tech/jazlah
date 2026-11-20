@@ -30,6 +30,7 @@ void main() {
     expect(find.text('مفتوح حتى 11:00 م'), findsOneWidget);
     expect(find.text('توصيل خلال 35 دقيقة'), findsOneWidget);
     expect(find.text('الحد الأدنى للطلب 50.00 ر.س'), findsOneWidget);
+    expect(find.widgetWithText(JBadge, 'استلام من المتجر'), findsOneWidget);
     expect(find.text('ف'), findsOneWidget); // monogram
     final cards = t.widgetList<JProductCard>(find.byType(JProductCard));
     expect(cards, isNotEmpty);
@@ -74,6 +75,14 @@ void main() {
     await t.tap(find.text('تصفّح المتاجر'));
     await t.pumpAndSettle();
     expect(find.text('route:${Routes.stores}'), findsOneWidget);
+  });
+
+  testWidgets('no pickup badge for a delivery-only store; the bag opens the cart', (t) async {
+    await _pump(t, FakeCatalog(), id: 'v-waha');
+    expect(find.widgetWithText(JBadge, 'استلام من المتجر'), findsNothing);
+    await t.tap(find.bySemanticsLabel('السلة'));
+    await t.pumpAndSettle();
+    expect(find.text('route:${Routes.cart}'), findsOneWidget);
   });
 
   testWidgets('error offers retry', (t) async {
