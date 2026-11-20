@@ -78,7 +78,7 @@ What a built dashboard screen needs and the API does not give yet. Until it land
 | «Ask for a new upload» of one document, and a per-document «matches» record | Vendor review documents viewer (131:18512) | «New upload» disabled (reject with a reason instead); «matches» is a mark on the page only, not saved; the review checklist is not saved either | none open yet (API gap) |
 | Business activity, responsible person and street address of an application | Vendor review, store details and location (131:18512) | Activity left out; the account holder shown as the person; the city under the map | none open yet (API gap) |
 | Document content type (and page count) on the document links | Vendor review viewer «page 1 of 2» (131:18512) | Shown as an image; a file the browser cannot show (PDF) offers «open the file»; no page count | none open yet (API gap) |
-| Admin permissions (onboarding officer) | Not-allowed states of the stores list and review (131:17922, 131:18972) | Shown when the API answers FORBIDDEN; the mock refuses an access token ending in `-limited` | #111 (ADM-API-1) |
+| Admin permissions (onboarding officer) | Not-allowed states of the stores list and review (131:17922, 131:18972) | Only on the mock (an admin access token ending in `-limited` is answered NOT_ALLOWED); the API's FORBIDDEN ends the session as `errors.md` says. The real trigger comes with ADM-API-1 | #111 (ADM-API-1) |
 
 The code length in the code request answer is asked for in the mobile section below; the dashboard needs it too (a dashboard setting today).
 

@@ -55,8 +55,24 @@ test('approve an application with a commission: the store becomes an active vend
   await expect(page.getByText('12.5%')).toBeVisible();
   await expect(page).not.toHaveURL(/5a000000-0000-4000-8000-000000000001/); // the vendor's own address now
 
-  // Back to the list (client navigation): the application left «pending», the vendor is in «active».
+  // The page now acts on the new vendor. Another admin suspends it first (second tab, at the vendor's address): our
+  // suspend answers CONFLICT, and the quiet reload shows the vendor suspended, not the old application.
+  const other = await context.newPage();
+  await other.goto(page.url());
+  await other.getByRole('button', { name: 'إيقاف المتجر' }).click();
+  await other.getByRole('dialog', { name: 'إيقاف المتجر' }).getByLabel('سبب الإيقاف').fill('مراجعة الجودة');
+  await other.getByRole('dialog', { name: 'إيقاف المتجر' }).getByRole('button', { name: 'إيقاف المتجر' }).click();
+  await expect(other.getByRole('heading', { name: 'المتجر موقوف' })).toBeVisible();
+  await other.close();
+  await page.getByRole('button', { name: 'إيقاف المتجر' }).click();
+  await page.getByRole('dialog', { name: 'إيقاف المتجر' }).getByLabel('سبب الإيقاف').fill('مراجعة الجودة');
+  await page.getByRole('dialog', { name: 'إيقاف المتجر' }).getByRole('button', { name: 'إيقاف المتجر' }).click();
+  await expect(page.getByRole('status').getByText('تغيّرت حالة المتجر، وهذه حالته الآن')).toBeVisible();
+  await expect(page.getByRole('heading', { name: 'المتجر موقوف' })).toBeVisible();
+
+  // Back to the list (client navigation): the application left «pending», the vendor is in «suspended».
   await page.getByRole('navigation', { name: 'القائمة الرئيسية' }).getByRole('link', { name: 'المتاجر' }).click();
+  await page.getByRole('tab', { name: 'موقوفة' }).click();
   await expect(table(page).getByRole('link', { name: 'ملحمة النخبة', exact: true })).toBeVisible();
   await expect(table(page).getByText('12.5%')).toBeVisible();
   await page.getByRole('tab', { name: 'قيد المراجعة' }).click();

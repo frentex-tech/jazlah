@@ -47,7 +47,9 @@ export function VendorsList() {
 
   // The API wants 2 to 100 characters: shorter searches list everything; typing settles for 300 ms first.
   useEffect(() => {
-    const id = setTimeout(() => setQ(search.trim().length >= 2 ? search.trim().slice(0, 100) : ''), 300);
+    // Arabic digits typed in a CR number search as Latin ones, as the API stores them.
+    const v = search.trim().replace(/[٠-٩]/g, (d) => String('٠١٢٣٤٥٦٧٨٩'.indexOf(d)));
+    const id = setTimeout(() => setQ(v.length >= 2 ? v.slice(0, 100) : ''), 300);
     return () => clearTimeout(id);
   }, [search]);
   const key = `${tab}|${q}|${city}`;
@@ -173,11 +175,11 @@ export function VendorsList() {
         />
       ) : (
         <>
-          <Tabs tabs={TABS.map((k) => ({ key: k, label: t(`tabs.${k}`) }))} value={tab} onChange={setTab} label={t('tabsLabel')} controls="vendors-table" />
-          <div id="vendors-table" role="tabpanel">
+          <Tabs tabs={TABS.map((k) => ({ key: k, label: t(`tabs.${k}`) }))} value={tab} onChange={setTab} label={t('tabsLabel')} controls="vendors-table" idPrefix="vendors-tab" />
+          <div id="vendors-table" role="tabpanel" aria-labelledby={`vendors-tab-${tab}`}>
             {data === 'error' ? (
               <StateCard kind="error" className={card} title={t('error.title')} body={t('error.body')} action={<Button onClick={() => void load()}>{t('error.action')}</Button>} />
-            ) : data !== 'loading' && data.rows.length === 0 && cursors.length === 1 ? (
+            ) : data !== 'loading' && data.rows.length === 0 && cursors.length === 1 && !data.next ? (
               <StateCard
                 kind="search"
                 className={card}

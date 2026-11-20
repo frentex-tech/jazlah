@@ -15,7 +15,8 @@ export async function POST(req: NextRequest) {
 }
 
 export function GET(req: NextRequest) {
-  // A document link of the admin review mock carries its expiry, as a presigned URL would (not checked further: mock).
+  // A document link of the admin review mock carries its expiry, as a presigned URL would. Like the real storage, it
+  // checks no session: the link itself is the permission (mock only, signature not checked).
   const signed = Number(req.nextUrl.searchParams.get('expires')) > Date.now();
   const m = mocksEnabled() ? mockStorage.get(req.nextUrl.searchParams.get('key') ?? '', signed) : null;
   return m?.bytes ? new NextResponse(m.bytes, { headers: { 'Content-Type': m.contentType } }) : new NextResponse(null, { status: 404 });

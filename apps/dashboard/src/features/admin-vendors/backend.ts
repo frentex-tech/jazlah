@@ -52,15 +52,10 @@ export async function loadReview(b: AdminVendorsBackend, token: string, lang: st
   return a.ok ? { ok: true, data: { vendor: null, application: a.data } } : a;
 }
 
-/**
- * The API's FORBIDDEN on these routes is the page's «not allowed» state (131:17922, 131:18972): the admin stays signed in.
- * withPanelSession would end the session on FORBIDDEN, so it travels as our own code.
- */
-export const allowed = <T,>(r: ApiResult<T>): ApiResult<T> => (!r.ok && r.code === 'FORBIDDEN' ? { ...r, code: 'NOT_ALLOWED' } : r);
-
 // ---- Mock ----
-// Seeds follow the rows of 131:16744. An admin whose mock access token ends in «-limited» is refused (FORBIDDEN), to
-// show the not-allowed state; real admin permissions arrive with ADM-API-1 (#111).
+// Seeds follow the rows of 131:16744. An admin whose mock access token ends in «-limited» is answered NOT_ALLOWED, to
+// show the not-allowed states (131:17922, 131:18972). The API's FORBIDDEN ends the session (errors.md); the real
+// per-permission refusal arrives with ADM-API-1 (#111).
 const ADMIN_ID = '9a1b2c3d-4e5f-4a6b-8c7d-0e1f2a3b4c5d';
 const PHOTO = ['/login/vendor.jpg', '/login/admin.jpg'];
 type Seed = { key: string; status: Application['status']; ar: string; en: string; city: string; cr: string; created: string; holder: string; lat: number; lng: number };
@@ -116,13 +111,12 @@ function vendorFrom(a: Application, commissionBasisPoints: number, createdAt: st
 }
 
 const notFound = { ok: false, code: 'NOT_FOUND', status: 404 } as const;
-const forbidden = { ok: false, code: 'FORBIDDEN', status: 403 } as const;
+const forbidden = { ok: false, code: 'NOT_ALLOWED', status: 403 } as const;
 const invalid = (field: string, constraint: string) => ({ ok: false, code: 'VALIDATION_FAILED', status: 400, details: [{ field, constraints: [constraint] }] }) as const;
 const limited = (token: string) => token.endsWith('-limited');
 const entry = (id: string) => [...mockApplications].find(([, a]) => a.id === id);
-const digits = (s: string) => s.replace(/[٠-٩]/g, (d) => String('٠١٢٣٤٥٦٧٨٩'.indexOf(d)));
 const matches = (x: { name: { ar: string; en: string }; commercialRegistrationNumber: string | null }, q?: string) =>
-  !q || [x.name.ar, x.name.en.toLowerCase(), x.commercialRegistrationNumber ?? ''].some((v) => v.includes(digits(q.trim()).toLowerCase()));
+  !q || [x.name.ar, x.name.en.toLowerCase(), x.commercialRegistrationNumber ?? ''].some((v) => v.includes(q.trim().toLowerCase()));
 
 /** Newest first, cursor = the offset as the API would write it (opaque to the page), limit 1..50 (default 20). */
 function page<T extends { createdAt: string }>(items: T[], cursor?: string, limit = 20): ApiResult<Page<T>> {

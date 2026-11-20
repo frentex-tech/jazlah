@@ -6,7 +6,7 @@ import { cn } from '@/lib/utils';
 import { Button } from './button';
 
 // Figma DS «Dialog» (16:579): default and destructive. `children` (a form field) go between the text and the buttons;
-// such dialogs are 520 wide, as in the review dialogs (131:19351).
+// `wide` makes it 520, as in the review dialogs with a field (131:19351).
 export function ConfirmDialog({
   open,
   onOpenChange,
@@ -17,6 +17,7 @@ export function ConfirmDialog({
   loading,
   onConfirm,
   children,
+  wide,
 }: {
   open: boolean;
   onOpenChange: (open: boolean) => void;
@@ -27,13 +28,14 @@ export function ConfirmDialog({
   loading?: boolean;
   onConfirm: () => void;
   children?: React.ReactNode;
+  wide?: boolean;
 }) {
   const t = useTranslations('dialog');
   return (
     <Dialog.Root open={open} onOpenChange={onOpenChange}>
       <Dialog.Portal>
         <Dialog.Overlay className="fixed inset-0 bg-scrim/55" />
-        <Dialog.Content className={cn('fixed start-1/2 top-1/2 flex -translate-y-1/2 flex-col gap-s16 rounded-lg border border-line bg-paper p-s24 shadow-card ltr:-translate-x-1/2 rtl:translate-x-1/2', children ? 'w-[520px]' : 'w-[320px]')}>
+        <Dialog.Content className={cn('fixed start-1/2 top-1/2 flex -translate-y-1/2 flex-col gap-s16 rounded-lg border border-line bg-paper p-s24 shadow-card ltr:-translate-x-1/2 rtl:translate-x-1/2', wide ? 'w-[520px]' : 'w-[320px]')}>
           <Dialog.Title className="text-h2 text-ink">{title}</Dialog.Title>
           <Dialog.Description className="text-body-m text-ink-2">{body}</Dialog.Description>
           {children}

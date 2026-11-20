@@ -3,7 +3,7 @@
 import { ArrowsClockwise, DownloadSimple, MagnifyingGlassMinus, MagnifyingGlassPlus } from '@phosphor-icons/react';
 import { useLocale, useTranslations } from 'next-intl';
 import dynamic from 'next/dynamic';
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { BackButton } from '@/components/shell/back-button';
 import { PageHeader } from '@/components/shell/page-header';
 import { Button, buttonVariants } from '@/components/ui/button';
@@ -32,9 +32,12 @@ const card = 'flex w-full flex-col gap-s16 rounded-md border border-line bg-pape
  * VND-DSH-2: one store under review (131:18512 and its states). The id is a pending application's or a vendor's: an
  * application is approved (commission %) or rejected (reason); a vendor is suspended (reason) or reactivated.
  */
-export function VendorReview({ id }: { id: string }) {
+export function VendorReview({ id: routeId }: { id: string }) {
   const t = useTranslations('review');
   const locale = useLocale();
+  // The store's current id: the application's until it is approved, then the new vendor's (as the address shows). A ref,
+  // so switching it after an approval does not reload the page.
+  const idRef = useRef(routeId);
   const [review, setReview] = useState<Review | 'loading' | 'error' | 'denied' | 'notFound'>('loading');
   const [dialog, setDialog] = useState<Dialog>(null);
   const [busy, setBusy] = useState(false);
@@ -45,13 +48,16 @@ export function VendorReview({ id }: { id: string }) {
   const fetchReview = useCallback(async (quiet = false) => {
     if (!quiet) setReview('loading');
     try {
-      setReview(await panelFetch<Review>('admin', `/api/admin/vendors/${id}`));
+      setReview(await panelFetch<Review>('admin', `/api/admin/vendors/${idRef.current}`));
     } catch (e) {
       const code = e instanceof ApiError ? e.code : 'NETWORK';
       setReview(code === 'NOT_ALLOWED' ? 'denied' : code === 'NOT_FOUND' ? 'notFound' : 'error');
     }
-  }, [id]);
-  useEffect(() => void fetchReview(), [fetchReview]);
+  }, []);
+  useEffect(() => {
+    idRef.current = routeId;
+    void fetchReview();
+  }, [routeId, fetchReview]);
 
   const r = typeof review === 'object' ? review : null;
   const name = r ? (locale === 'en' ? (r.vendor ?? r.application)!.name.en : (r.vendor ?? r.application)!.name.ar) : '';
@@ -141,6 +147,7 @@ export function VendorReview({ id }: { id: string }) {
         setReview({ vendor: v, application: { ...application, status: 'approved', reviewedAt: v.createdAt } });
         // The store is now a vendor: its own address, without reloading the page.
         window.history.replaceState(null, '', window.location.pathname.replace(application.id, v.id));
+        idRef.current = v.id;
       }, 'approved');
     } else if (dialog === 'reject' && application && reasonOk()) {
       void act<Application>(`/api/admin/vendor-applications/${application.id}/reject`, { reason: reason.trim() }, (a) => {
@@ -173,7 +180,12 @@ export function VendorReview({ id }: { id: string }) {
                 {photos.map((p) => (
                   <a key={p.mediaId} href={p.url} target="_blank" rel="noopener noreferrer" className="block h-[150px] overflow-hidden rounded-md bg-sand">
                     {/* eslint-disable-next-line @next/next/no-img-element -- a short-lived presigned URL, shown as is */}
-                    <img src={p.url} alt={t('docs.kinds.facility_photo')} className="size-full object-cover" />
+                    <img
+                      src={p.url}
+                      alt={t('docs.kinds.facility_photo')}
+                      onError={() => p.expiresAt && Date.parse(p.expiresAt) < Date.now() && void fetchReview(true)}
+                      className="size-full object-cover"
+                    />
                   </a>
                 ))}
               </div>
@@ -216,6 +228,7 @@ export function VendorReview({ id }: { id: string }) {
         confirmLabel={dialog ? t(`${dialog}Dialog.confirm`) : undefined}
         destructive={dialog === 'reject' || dialog === 'suspend'}
         loading={busy}
+        wide={dialog !== 'reinstate'}
         onConfirm={confirm}
       >
         {dialog === 'approve' && (

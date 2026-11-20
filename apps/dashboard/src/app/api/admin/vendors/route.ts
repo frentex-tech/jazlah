@@ -1,5 +1,5 @@
 import type { NextRequest } from 'next/server';
-import { adminVendorsBackend, allowed } from '@/features/admin-vendors/backend';
+import { adminVendorsBackend } from '@/features/admin-vendors/backend';
 import { VendorQuerySchema, queryOf } from '@/features/admin-vendors/schema';
 import { withPanelSession } from '@/lib/auth/panel-session';
 import { invalidBody, langOf } from '@/lib/route';
@@ -8,6 +8,6 @@ import { invalidBody, langOf } from '@/lib/route';
 export function GET(req: NextRequest) {
   const parsed = VendorQuerySchema.safeParse(queryOf(req.nextUrl));
   return withPanelSession(req, 'admin', async (token) =>
-    parsed.success ? allowed(await adminVendorsBackend().listVendors(token, langOf(req), parsed.data)) : invalidBody(parsed.error),
+    parsed.success ? await adminVendorsBackend().listVendors(token, langOf(req), parsed.data) : invalidBody(parsed.error),
   );
 }
