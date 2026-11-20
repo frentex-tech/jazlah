@@ -59,14 +59,6 @@ jobs:
       - name: Formatted
         run: dart format --output=none --set-exit-if-changed lib test integration_test
       - run: flutter analyze
-      # TEMPORARY: produce the Linux home goldens (removed in the next commit).
-      - name: Update home goldens (temporary)
-        run: flutter test --update-goldens test/features/home/home_golden_test.dart
-      - name: Upload home goldens (temporary)
-        uses: actions/upload-artifact@v4
-        with:
-          name: home-goldens
-          path: apps/mobile/test/features/home/goldens/
       - run: flutter test
 
       - name: Build Android debug (dev flavor)
