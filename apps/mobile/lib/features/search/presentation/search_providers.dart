@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/misc.dart';
 
 import 'package:jazlah/app/providers.dart';
 import 'package:jazlah/core/config/env.dart';
+import 'package:jazlah/features/auth/presentation/session_controller.dart';
 import 'package:jazlah/features/catalog/domain/catalog.dart';
 import 'package:jazlah/features/catalog/presentation/catalog_providers.dart';
 import 'package:jazlah/features/search/data/mock_search_repository.dart';
@@ -44,17 +45,22 @@ class SearchPages extends PagedNotifier<ProductCard> {
   String idOf(ProductCard item) => item.id;
 }
 
-/// The last searches on this device, newest first, without repeats.
+/// The last searches on this device, newest first, without repeats (spelling variants count as one).
 class RecentSearches extends Notifier<List<String>> {
   static const max = 8;
 
   @override
-  List<String> build() => ref.watch(prefsProvider).recentSearches;
+  List<String> build() {
+    // Signing out clears the prefs first; reading them again then drops the list held in memory.
+    ref.watch(sessionProvider.select((s) => s == SessionStatus.signedOut));
+    return ref.watch(prefsProvider).recentSearches;
+  }
 
   Future<void> add(String text) async {
     final t = text.trim();
     if (t.isEmpty) return;
-    state = [t, ...state.where((s) => s != t)].take(max).toList();
+    final key = normalizeSearch(t);
+    state = [t, ...state.where((s) => normalizeSearch(s) != key)].take(max).toList();
     await ref.read(prefsProvider).setRecentSearches(state);
   }
 

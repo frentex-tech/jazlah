@@ -1,12 +1,18 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:jazlah/app/providers.dart';
+import 'package:jazlah/core/config/env.dart';
 import 'package:jazlah/core/storage/prefs.dart';
+import 'package:jazlah/core/storage/token_storage.dart';
+import 'package:jazlah/features/auth/data/auth_repository.dart';
+import 'package:jazlah/features/auth/presentation/session_controller.dart';
 import 'package:jazlah/features/catalog/domain/catalog.dart';
 import 'package:jazlah/features/search/data/mock_search_repository.dart';
 import 'package:jazlah/features/search/domain/search.dart';
 import 'package:jazlah/features/search/presentation/search_providers.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+
+import '../../helpers/fakes.dart';
 
 void main() {
   group('normalizeSearch', () {
@@ -94,7 +100,15 @@ void main() {
     Future<ProviderContainer> container(Map<String, Object> values) async {
       SharedPreferences.setMockInitialValues(values);
       final prefs = await Prefs.load();
-      final c = ProviderContainer(overrides: [prefsProvider.overrideWithValue(prefs)]);
+      final tokens = MemoryTokens(const AuthTokens(accessToken: 'a', refreshToken: 'r'));
+      final c = ProviderContainer(
+        overrides: [
+          envProvider.overrideWithValue(const Env(Flavor.dev)),
+          prefsProvider.overrideWithValue(prefs),
+          tokenStorageProvider.overrideWithValue(tokens),
+          authRepositoryProvider.overrideWithValue(MockAuthRepository(tokens)),
+        ],
+      );
       addTearDown(c.dispose);
       return c;
     }
@@ -109,6 +123,32 @@ void main() {
       await recent.add('   ');
       expect(c.read(recentSearchesProvider), ['q5', 'q9', 'q8', 'q7', 'q6', 'q4', 'q3', 'q2']);
       expect(c.read(prefsProvider).recentSearches, c.read(recentSearchesProvider));
+    });
+
+    test('spelling variants count as one search', () async {
+      final c = await container({});
+      final recent = c.read(recentSearchesProvider.notifier);
+      await recent.add('نعيمي');
+      await recent.add('كبدة');
+      await recent.add('نعيمى');
+      expect(c.read(recentSearchesProvider), ['نعيمى', 'كبدة']);
+    });
+
+    test('signing out forgets them, and the next search does not bring them back', () async {
+      final c = await container({'onboardingSeen': true});
+      final prefs = c.read(prefsProvider);
+      c.listen(recentSearchesProvider, (_, _) {});
+      await Future<void>.delayed(Duration.zero); // the session restores
+      await c.read(recentSearchesProvider.notifier).add('ريب آي');
+      await c.read(recentSearchesProvider.notifier).add('كبدة');
+
+      await c.read(sessionProvider.notifier).signOut();
+      expect(c.read(recentSearchesProvider), isEmpty);
+      expect(prefs.recentSearches, isEmpty);
+
+      await c.read(recentSearchesProvider.notifier).add('حاشي');
+      expect(c.read(recentSearchesProvider), ['حاشي']);
+      expect(prefs.recentSearches, ['حاشي']);
     });
 
     test('loaded from the device and cleared', () async {

@@ -138,6 +138,7 @@ Search reads the public product list with its words, category, store and price r
 | Sorting search results | Filters sheet: sort chips (the design has no sort control; added as a chip group in the sheet) | Group hidden; the mock sorts | CAT-API-5 #50 |
 | An "available now only" filter | Filters sheet: switch and its chip | Switch hidden; the mock filters | API gap |
 | A public list of meat types | Filters sheet: meat type (not in the design) | Not shown; the product list already accepts a meat type, so it can be added once names can be listed | API gap |
+| Store names for any store id (or the whole store list in one call) | Search: store chips in the filters sheet and the active store chip | Only the first page of stores is offered; a chosen store outside it shows as a generic "Store" chip | API gap |
 | Arabic spelling folding on the server | Search results | The server search decides; only the mock folds on the device | CAT-API-5 #50 |
 
 When one of these lands, its endpoints appear in `openapi.json`, and this file and the module guides are updated in the same pull request.

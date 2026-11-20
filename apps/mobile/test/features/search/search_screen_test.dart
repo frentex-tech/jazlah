@@ -2,8 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:go_router/go_router.dart';
 import 'package:jazlah/core/widgets/widgets.dart';
+import 'package:jazlah/features/catalog/domain/catalog.dart';
 import 'package:jazlah/features/catalog/presentation/catalog_widgets.dart';
 import 'package:jazlah/features/search/domain/search.dart';
+import 'package:jazlah/features/search/presentation/filter_sheet.dart';
 import 'package:jazlah/features/search/presentation/search_providers.dart';
 import 'package:jazlah/features/search/presentation/search_screen.dart';
 
@@ -11,17 +13,24 @@ import '../../helpers/catalog_fakes.dart';
 import '../../helpers/pump_screen.dart';
 import '../../helpers/search_fakes.dart';
 
+/// The store list loads nothing, as if the chosen store were on a later page.
+class _NoStores extends FakeCatalog {
+  @override
+  Future<CatalogPage<Store>> stores({String? cursor, int limit = 20}) async => const CatalogPage([], null);
+}
+
 const _figma = SearchQuery(text: 'ريب آي', maxPriceHalalas: 10000, availableOnly: true);
 
 Future<void> _pump(
   WidgetTester t,
   FakeSearch repo, {
   SearchScreen screen = const SearchScreen(),
+  FakeCatalog? catalog,
   Map<String, Object> prefs = const {'locale': 'ar', 'onboardingSeen': true},
 }) async {
   await t.pumpScreen(
     screen,
-    overrides: [...catalogOverrides(FakeCatalog()), searchRepositoryProvider.overrideWithValue(repo)],
+    overrides: [...catalogOverrides(catalog ?? FakeCatalog()), searchRepositoryProvider.overrideWithValue(repo)],
     prefs: prefs,
     routes: [
       GoRoute(
@@ -247,5 +256,67 @@ void main() {
     expect(find.text('تصفية (1)'), findsOneWidget);
     expect(_chip('المتاح الآن'), findsOneWidget);
     expect(find.text('5 نتائج لـ «حاشي»'), findsOneWidget);
+  });
+
+  testWidgets('price slider: riyals to halalas; the top end and zero mean no bound', (t) async {
+    final repo = FakeSearch();
+    await _pump(
+      t,
+      repo,
+      screen: const SearchScreen(initial: SearchQuery(text: 'غنم', maxPriceHalalas: 10000)),
+    );
+    Future<void> slide(RangeValues v) async {
+      await t.tap(find.byType(JButton).first);
+      await t.pumpAndSettle();
+      final slider = t.widget<RangeSlider>(find.byType(RangeSlider));
+      if (v != slider.values) slider.onChanged!(v);
+      await t.pumpAndSettle();
+      await t.tap(find.textContaining('عرض'));
+      await t.pumpAndSettle();
+    }
+
+    // Opens on the query's range: 0 to 100 SAR.
+    await t.tap(find.text('تصفية (1)'));
+    await t.pumpAndSettle();
+    expect(t.widget<RangeSlider>(find.byType(RangeSlider)).values, const RangeValues(0, 100));
+    expect(find.text('من 0.00 ر.س'), findsOneWidget);
+    await t.tapAt(const Offset(10, 10)); // dismiss
+    await t.pumpAndSettle();
+
+    await slide(const RangeValues(10, 100));
+    expect(repo.queries.last.minPriceHalalas, 1000);
+    expect(repo.queries.last.maxPriceHalalas, 10000);
+
+    await slide(const RangeValues(0, FilterSheet.maxRiyals));
+    expect(repo.queries.last.minPriceHalalas, isNull);
+    expect(repo.queries.last.maxPriceHalalas, isNull);
+    expect(find.text('تصفية'), findsOneWidget);
+  });
+
+  testWidgets('a chosen store outside the loaded stores still shows as a chip', (t) async {
+    await _pump(
+      t,
+      FakeSearch(),
+      catalog: _NoStores(),
+      screen: const SearchScreen(
+        initial: SearchQuery(text: 'غنم', vendorId: 'v-falah'),
+      ),
+    );
+    expect(find.text('تصفية (1)'), findsOneWidget);
+    expect(_chip('المتجر'), findsOneWidget);
+  });
+
+  testWidgets('the same words again (a trailing space) do not flash the skeleton', (t) async {
+    final repo = FakeSearch();
+    await _pump(
+      t,
+      repo,
+      screen: const SearchScreen(initial: SearchQuery(text: 'حاشي')),
+    );
+    await t.enterText(find.byType(TextField), 'حاشي ');
+    await t.pump();
+    expect(find.byType(JSkeletonRow), findsNothing);
+    await t.pump(const Duration(milliseconds: 400));
+    expect(repo.queries, hasLength(1));
   });
 }

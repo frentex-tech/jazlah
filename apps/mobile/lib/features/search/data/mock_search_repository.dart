@@ -3,21 +3,6 @@ import 'package:jazlah/features/catalog/domain/catalog.dart';
 import 'package:jazlah/features/search/data/search_repository.dart';
 import 'package:jazlah/features/search/domain/search.dart';
 
-final _marks = RegExp('[ً-ٰٟـ]'); // tashkeel, dagger alif, tatweel
-final _alifs = RegExp('[أإآٱ]');
-final _spaces = RegExp(r'\s+');
-
-/// Folds spelling variants as the server's search does (CAT-API-5): no tashkeel or tatweel,
-/// أ/إ/آ → ا, ى → ي, ة → ه, Latin lower-cased. «نعيمى» and «نعيمي» fold to the same word.
-String normalizeSearch(String text) => text
-    .toLowerCase()
-    .replaceAll(_marks, '')
-    .replaceAll(_alifs, 'ا')
-    .replaceAll('ى', 'ي')
-    .replaceAll('ة', 'ه')
-    .replaceAll(_spaces, ' ')
-    .trim();
-
 /// Every word of [query] is in the product's Arabic or English name, or its store's name.
 bool matchesSearch(ProductCard p, String query) {
   final words = normalizeSearch(query).split(' ').where((w) => w.isNotEmpty);

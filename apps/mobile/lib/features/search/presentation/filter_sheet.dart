@@ -93,7 +93,10 @@ class _FilterSheetState extends State<FilterSheet> {
         final count = ref.watch(searchCountProvider(draft));
         // Keeps the last number while the next one loads, so the button does not flicker.
         if (count.hasValue) _count = count.value;
+        // shortcut: the first store page only, API gap (not-built-yet.md); a chosen store outside it
+        // keeps a generic selected chip.
         final stores = ref.watch(storePagesProvider).value?.items ?? const <Store>[];
+        final otherStore = _vendorId != null && !stores.any((s) => s.id == _vendorId);
         final categories = ref.watch(categoriesProvider).value ?? const <Category>[];
         final top = _price.end >= FilterSheet.maxRiyals;
         final sorts = {
@@ -173,6 +176,7 @@ class _FilterSheetState extends State<FilterSheet> {
                           selected: _vendorId == null,
                           onTap: () => setState(() => _vendorId = null),
                         ),
+                        if (otherStore) JChip(label: l10n.searchStore, selected: true, onTap: () {}),
                         for (final s in stores)
                           JChip(
                             label: s.name.of(context.lang),

@@ -58,3 +58,18 @@ class SearchQuery {
   @override
   int get hashCode => _key.hashCode;
 }
+
+final _marks = RegExp('[\u064B-\u065F\u0670\u0640]'); // tashkeel, dagger alif, tatweel
+final _alifs = RegExp('[أإآٱ]');
+final _spaces = RegExp(r'\s+');
+
+/// Folds spelling variants as the planned server search does (CAT-API-5; the server folds on its own):
+/// no tashkeel or tatweel, أ/إ/آ → ا, ى → ي, ة → ه, Latin lower-cased. «نعيمى» and «نعيمي» fold to the same word.
+String normalizeSearch(String text) => text
+    .toLowerCase()
+    .replaceAll(_marks, '')
+    .replaceAll(_alifs, 'ا')
+    .replaceAll('ى', 'ي')
+    .replaceAll('ة', 'ه')
+    .replaceAll(_spaces, ' ')
+    .trim();

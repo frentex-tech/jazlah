@@ -67,6 +67,11 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
       });
       return;
     }
+    // Same words (e.g. a trailing space): nothing to search again, no skeleton flash.
+    if (text == _query.text) {
+      if (_typing) setState(() => _typing = false);
+      return;
+    }
     setState(() => _typing = true);
     _debounce = Timer(widget.debounce, () {
       if (mounted) {
@@ -230,12 +235,16 @@ class _Results extends ConsumerWidget {
 
   List<String> _activeChips(AppLocalizations l10n, WidgetRef ref, String lang) {
     final q = query;
+    // shortcut: store names come from the first store page only, API gap (not-built-yet.md); a store
+    // not in it (or names still loading) shows as a generic chip, so the chips match the filter count.
     final store = q.vendorId == null
         ? null
-        : ref.watch(storePagesProvider).value?.items.where((s) => s.id == q.vendorId).firstOrNull;
+        : ref.watch(storePagesProvider).value?.items.where((s) => s.id == q.vendorId).firstOrNull?.name.of(lang) ??
+              l10n.searchStore;
     final category = q.categoryId == null
         ? null
-        : ref.watch(categoriesProvider).value?.where((c) => c.id == q.categoryId).firstOrNull;
+        : ref.watch(categoriesProvider).value?.where((c) => c.id == q.categoryId).firstOrNull?.name.of(lang) ??
+              l10n.searchCategory;
     return [
       if (q.minPriceHalalas != null && q.maxPriceHalalas != null)
         l10n.searchPriceRange(_riyals(q.minPriceHalalas!), _riyals(q.maxPriceHalalas!))
@@ -243,8 +252,8 @@ class _Results extends ConsumerWidget {
         l10n.searchPriceUpTo(_riyals(q.maxPriceHalalas!))
       else if (q.minPriceHalalas != null)
         l10n.searchPriceMin(_riyals(q.minPriceHalalas!)),
-      if (store != null) store.name.of(lang),
-      if (category != null) category.name.of(lang),
+      ?store,
+      ?category,
       if (q.availableOnly) l10n.searchAvailable,
     ];
   }
