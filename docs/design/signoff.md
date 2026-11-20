@@ -107,6 +107,26 @@ Agreed by the owner in the Sprint 1 fix round, after the design QA (`reviews/qa-
 | All dialogs | Centred vertically (Figma top 160) | The shared Dialog component |
 | Toasts | Built from DS «Toast» (16:561), bottom centre of the window for 4 s | No frame shows where toasts appear |
 
+## Build differences, Sprint 2 dashboard: CAT-DSH-1 categories and JAZLA products (pending owner sign-off, not agreed)
+| Frame | Difference | Why |
+|---|---|---|
+| 131:19875 | «Link» column shows the English name; «products» shows a dash; no paging footer is needed (all categories are loaded) | No slug or product count in the API |
+| 131:19875 | «Reorder categories» switches the table to a reorder mode: drag a row, or use the up/down buttons; «save order» / «cancel» replace the header buttons | The frame shows the entry button only |
+| 131:21038 | Dialog fields «category name» and «English name» (Figma «link», «in English without spaces»); the same dialog adds a category | The API has `{ar, en}` names and no slug |
+| 131:21286 | Header has «add product» and «categories» (the frame's actions slot is empty); an «available» switch column (80) for JAZLA products, the product column 250 instead of 300; the date column is «added on»; a paging footer | Routes to the form and to categories; the availability quick toggle of the task; the card has no update date; cursor paging |
+| 131:21286 | Rows of other vendors open nothing (they are reviewed in CAT-DSH-2); the «...» opens JAZLA products only | Admins edit only the platform vendor's products (API rule) |
+| 131:22654 | Search and category filter act on the loaded page; the date filter is disabled | API gaps |
+| 131:35405 | Name and description in Arabic and English side by side; meat type instead of SKU; hints say 2 to 100 and up to 1000 characters (Figma 60 and 300) | The API's fields and limits |
+| 131:35405 | Up to 10 images (Figma 6); more than four thumbnails wrap; each has a remove button | The API allows 10 |
+| 131:35405 | Size rows: Arabic label, English label, weight in grams, price, remove; no «enabled» badge | A size tag is `{ar, en}`; sizes have no on/off in the API |
+| 131:35405 | Cutting styles: under the chips, a row per chosen cut with its extra price | The API prices each cut; the frame has no field for it |
+| 131:35405 | Packaging: the API's vacuum bag, chilled tray, bags, no packaging, each with an editable extra price beside the checkbox (Figma: chilled carton, gift wrap, price in the label) | The API's packaging list |
+| 131:35405 | Matrix rows are every active cutting style (not only the product's); a cell toggles a global rule for all products (the body says so); a forbidden pair the product offers is outlined red | Rules are global in the API |
+| 131:35405 | «Slaughtered on order», preparation time, minimum quantity, order days, daily quantity and pause date are disabled | API gaps |
+| 131:35405, 131:35813 | Footer for a draft: «save and publish» (primary), «save as draft»; for a published product: «save changes»; «delete product» disabled. The new-product title is «new product» | JAZLA products are published directly by admins, not sent to review; no delete endpoint |
+| 131:36439 | A size price error shows the message in the empty box (as drawn); other API errors show under their field | Same rule for every field |
+| 131:37786 | Admin copy: «not allowed to manage products» with «back to the dashboard» (the frame's copy is the suspended vendor's) | This is the admin side; CAT-DSH-2 uses the vendor copy |
+
 ## Checks run on the file (2026-11-13)
 - Script lint over all 587 screens after the last changes: no empty or "undefined" text, no text outside its screen, no missing icon.
 - Clipped layouts: a script found 110 auto-layout frames on web and dashboard screens whose content was cut off (among them the whole animal-registration form) and opened them up. 28 small ones remain (tab labels 7 to 9 px taller than their tab, and the Adha settings body).
