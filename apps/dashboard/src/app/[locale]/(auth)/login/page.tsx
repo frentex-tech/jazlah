@@ -1,5 +1,5 @@
 import { setRequestLocale } from 'next-intl/server';
-import { LoginCard, LoginLayout } from '@/features/auth/login-layout';
+import { LoginCard, LoginLayout, otpLength } from '@/features/auth/login-layout';
 import { LoginFlow } from '@/features/auth/login-flow';
 import { isPanel, safeNext } from '@/lib/session';
 
@@ -20,7 +20,7 @@ export default async function LoginPage({
         <LoginFlow
           panel={panel}
           next={safeNext(q.next) ?? undefined}
-          otpLength={Math.min(8, Math.max(4, Number(process.env.OTP_LENGTH) || 6))}
+          otpLength={otpLength()}
           reason={q.reason === 'disabled' || q.reason === 'suspended' ? q.reason : undefined}
         />
       </LoginCard>

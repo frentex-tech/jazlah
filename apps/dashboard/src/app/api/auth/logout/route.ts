@@ -1,19 +1,26 @@
 import { NextResponse, type NextRequest } from 'next/server';
 import { authBackend } from '@/lib/auth/backend';
-import { clearAll } from '@/lib/auth/cookies';
+import { clearAll, clearPanel, writePanels } from '@/lib/auth/cookies';
 import { clientIp, sameOrigin } from '@/lib/auth/request';
-import { PANELS, refreshCookie } from '@/lib/session';
+import { PANELS_COOKIE, SESSIONS, parseSessions, refreshCookie, type Session } from '@/lib/session';
 
-// Sign out of every panel: end each API session (always 204), then clear the cookies whatever happened.
+// Sign out of every session: end each API session (always 204), then clear the cookies whatever happened.
+// `only=customer` (the vendor application's sign-out) ends the customer session alone and goes back to the application.
 export async function POST(req: NextRequest) {
   if (!sameOrigin(req)) return NextResponse.json({ code: 'FORBIDDEN' }, { status: 403 });
+  const form = await req.formData().catch(() => null);
+  const customerOnly = form?.get('only') === 'customer';
+  const ended: readonly Session[] = customerOnly ? ['customer'] : SESSIONS;
   const backend = authBackend();
   const ip = clientIp(req);
   await Promise.all(
-    PANELS.map((p) => req.cookies.get(refreshCookie(p))?.value).filter((t): t is string => !!t).map((t) => backend.logout(t, ip)),
+    ended.map((p) => req.cookies.get(refreshCookie(p))?.value).filter((t): t is string => !!t).map((t) => backend.logout(t, ip)),
   );
-  const locale = (await req.formData().catch(() => null))?.get('locale');
-  const res = NextResponse.redirect(new URL(locale === 'en' ? '/en/login' : '/login', req.url), 303);
-  clearAll(res);
+  const prefix = form?.get('locale') === 'en' ? '/en' : '';
+  const res = NextResponse.redirect(new URL(`${prefix}${customerOnly ? '/vendor/apply' : '/login'}`, req.url), 303);
+  if (customerOnly) {
+    clearPanel(res, 'customer');
+    writePanels(res, parseSessions(req.cookies.get(PANELS_COOKIE)?.value).filter((p) => p !== 'customer'));
+  } else clearAll(res);
   return res;
 }

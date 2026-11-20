@@ -3,9 +3,9 @@ import { z } from 'zod';
 import { authBackend } from '@/lib/auth/backend';
 import { clientIp, isSameOriginJson, statusOf } from '@/lib/auth/request';
 import { toE164 } from '@/lib/phone';
-import { PANELS } from '@/lib/session';
+import { SESSIONS } from '@/lib/session';
 
-const Body = z.object({ phone: z.string().max(32), panel: z.enum(PANELS), lang: z.enum(['ar', 'en']).default('ar') });
+const Body = z.object({ phone: z.string().max(32), panel: z.enum(SESSIONS), lang: z.enum(['ar', 'en']).default('ar') });
 
 // Step 1: ask the API to send a code. Answers { resendAfterSeconds } or { code } (an API error code).
 export async function POST(req: NextRequest) {

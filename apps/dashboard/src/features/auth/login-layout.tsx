@@ -1,13 +1,13 @@
 import { ChartLineUp, ListChecks, LockSimple } from '@phosphor-icons/react/dist/ssr';
 import { getTranslations } from 'next-intl/server';
 import Image from 'next/image';
-import type { Panel } from '@/lib/session';
+import type { Session } from '@/lib/session';
 
-const photo: Record<Panel, string> = { admin: '/login/admin.jpg', vendor: '/login/vendor.jpg', kitchen: '/login/vendor.jpg' };
+const photo: Record<Session, string> = { admin: '/login/admin.jpg', vendor: '/login/vendor.jpg', kitchen: '/login/vendor.jpg', customer: '/login/vendor.jpg' };
 
 // Sign-in frame from Figma 118:5934 (admin), 352:59207 (vendor), 410:38561 (kitchen): form on the start side,
-// photo panel with the panel's pitch on the end side.
-export async function LoginLayout({ panel, children }: { panel: Panel; children: React.ReactNode }) {
+// photo panel with the panel's pitch on the end side. `customer`: the vendor application's sign-in (410:40299).
+export async function LoginLayout({ panel, children }: { panel: Session; children: React.ReactNode }) {
   const t = await getTranslations(`login.${panel}`);
   const points = [
     { icon: ListChecks, weight: 'fill' as const, title: t('p1'), body: t('p1b') },
@@ -53,6 +53,9 @@ export async function LoginLayout({ panel, children }: { panel: Panel; children:
     </div>
   );
 }
+
+/** Digits in a code: the API's AUTH_OTP_LENGTH, mirrored by the OTP_LENGTH setting (4 to 8, 6 by default). */
+export const otpLength = () => Math.min(8, Math.max(4, Number(process.env.OTP_LENGTH) || 6));
 
 /** The 422px white card that holds each step. */
 export function LoginCard({ children }: { children: React.ReactNode }) {

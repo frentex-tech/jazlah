@@ -1,6 +1,7 @@
 import type { NextRequest } from 'next/server';
 import { coverageBackend } from '@/features/coverage/backend';
-import { UpdateZoneSchema, invalidBody, langOf } from '@/features/coverage/schema';
+import { UpdateZoneSchema } from '@/features/coverage/schema';
+import { invalidBody, langOf } from '@/lib/route';
 import { withPanelSession } from '@/lib/auth/panel-session';
 
 type Ctx = { params: Promise<{ id: string }> };

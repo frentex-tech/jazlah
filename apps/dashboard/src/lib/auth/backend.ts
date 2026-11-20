@@ -3,7 +3,7 @@
 import createClient from 'openapi-fetch';
 import type { components, paths } from '@/api/schema';
 import { mocksEnabled } from '../mock';
-import type { Panel } from '../session';
+import type { Session } from '../session';
 
 type S = components['schemas'];
 export type ErrorCode = S['ErrorCode'] | 'NETWORK';
@@ -20,8 +20,8 @@ export type Result<T> = { ok: true; data: T } | { ok: false; code: ErrorCode; re
 
 /** `clientIp` is forwarded as X-Forwarded-For, so the API's per-address limits see the user, not the dashboard server. */
 export interface AuthBackend {
-  requestOtp(phone: string, panel: Panel, lang: string, clientIp?: string): Promise<Result<OtpRequested>>;
-  verifyOtp(phone: string, panel: Panel, code: string, clientIp?: string): Promise<Result<SignedIn>>;
+  requestOtp(phone: string, panel: Session, lang: string, clientIp?: string): Promise<Result<OtpRequested>>;
+  verifyOtp(phone: string, panel: Session, code: string, clientIp?: string): Promise<Result<SignedIn>>;
   refresh(refreshToken: string, clientIp?: string): Promise<Result<Tokens>>;
   logout(refreshToken: string, clientIp?: string): Promise<void>;
 }
@@ -63,13 +63,15 @@ function realBackend(baseUrl: string): AuthBackend {
 }
 
 // Mock accounts, like the API's review accounts (docs/frontend/auth.md): the code is the last digit six times.
-const MOCK_ACCESS: Record<string, Panel[]> = {
+const MOCK_ACCESS: Record<string, Session[]> = {
   '+966500000002': ['vendor'],
   '+966500000003': ['kitchen'],
   '+966500000004': ['admin'],
   '+966500000009': ['admin', 'vendor', 'kitchen'], // several roles: shows the panel picker
   // +966500000001 is a customer only: every staff sign-in fails like a wrong code
 };
+// Any phone may sign in as a customer (the API creates the account). The token carries the phone, so the mock
+// vendor applications (features/vendor-onboarding/backend.ts) are per applicant: «mock-at-customer-500000001».
 const MOCK_DISABLED = '+966500000008';
 
 export const mockBackend: AuthBackend = {
@@ -80,16 +82,18 @@ export const mockBackend: AuthBackend = {
   async verifyOtp(phone, panel, code) {
     if (phone === MOCK_DISABLED) return { ok: false, code: 'ACCOUNT_DISABLED' };
     if (code === '000000') return { ok: false, code: 'OTP_EXPIRED' };
-    if (!MOCK_ACCESS[phone]?.includes(panel) || code !== phone.slice(-1).repeat(6)) return { ok: false, code: 'OTP_INVALID' };
+    const allowed = panel === 'customer' || MOCK_ACCESS[phone]?.includes(panel);
+    if (!allowed || code !== phone.slice(-1).repeat(6)) return { ok: false, code: 'OTP_INVALID' };
+    const id = panel === 'customer' ? `customer-${phone.slice(-9)}` : panel;
     return {
       ok: true,
       data: {
-        accessToken: `mock-at-${panel}`,
+        accessToken: `mock-at-${id}`,
         accessTokenExpiresInSeconds: 900,
-        refreshToken: `mock-rt-${panel}-${Date.now()}`,
+        refreshToken: `mock-rt-${id}-${Date.now()}`,
         refreshTokenExpiresInSeconds: 2_592_000,
         principal: { userId: 'mock-user', phone: `+966 5•• ••• ${phone.slice(-3)}`, audience: panel, organisationId: null, sessionId: 'mock' },
-        profileComplete: null,
+        profileComplete: panel === 'customer' ? false : null,
       },
     };
   },
@@ -97,9 +101,15 @@ export const mockBackend: AuthBackend = {
     if (refreshToken === 'mock-rt-disabled') return { ok: false, code: 'ACCOUNT_DISABLED' }; // disabled since sign-in
     if (refreshToken === 'mock-rt-busy') return { ok: false, code: 'SERVICE_UNAVAILABLE' }; // API briefly down
     if (!refreshToken.startsWith('mock-rt-')) return { ok: false, code: 'REFRESH_TOKEN_INVALID' };
+    const id = refreshToken.slice('mock-rt-'.length).replace(/-\d+$/, ''); // "admin", "customer-500000001"
     return {
       ok: true,
-      data: { accessToken: 'mock-at', accessTokenExpiresInSeconds: 900, refreshToken: `${refreshToken.split('-').slice(0, 3).join('-')}-${Date.now()}`, refreshTokenExpiresInSeconds: 2_592_000 },
+      data: {
+        accessToken: id.startsWith('customer') ? `mock-at-${id}` : 'mock-at',
+        accessTokenExpiresInSeconds: 900,
+        refreshToken: `mock-rt-${id}-${Date.now()}`,
+        refreshTokenExpiresInSeconds: 2_592_000,
+      },
     };
   },
   async logout() {},

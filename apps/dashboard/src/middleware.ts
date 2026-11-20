@@ -4,7 +4,7 @@ import { routing } from './i18n/routing';
 import { REFRESH_ENDS_SESSION, authBackend } from './lib/auth/backend';
 import { clearPanel, writePanels, writeTokens } from './lib/auth/cookies';
 import { clientIp } from './lib/auth/request';
-import { PANELS_COOKIE, accessCookie, isPanel, parsePanels, refreshCookie, type Panel } from './lib/session';
+import { PANELS_COOKIE, accessCookie, isPanel, parseSessions, refreshCookie, type Panel } from './lib/session';
 
 const intl = createIntlMiddleware(routing);
 
@@ -31,9 +31,10 @@ const home = (prefix: string, panels: Panel[]) => (panels.length === 1 ? `${pref
 
 export default async function middleware(req: NextRequest) {
   const { prefix, area, rest } = splitPath(req.nextUrl.pathname);
-  const panels = parsePanels(req.cookies.get(PANELS_COOKIE)?.value);
+  // Every live session, the customer one too: rewriting the cookie must keep it. Only staff panels open panels.
+  const sessions = parseSessions(req.cookies.get(PANELS_COOKIE)?.value);
   // A panel counts as signed in only with its refresh token too, so a half-cleared session can't loop /login ⇄ /admin.
-  const live = panels.filter((p) => req.cookies.get(refreshCookie(p))?.value);
+  const live = sessions.filter(isPanel).filter((p) => req.cookies.get(refreshCookie(p))?.value);
 
   // Start and sign-in pages: signed-in staff go straight to their panel.
   if (area === undefined || (area === 'login' && rest.length === 0)) {
@@ -46,12 +47,23 @@ export default async function middleware(req: NextRequest) {
     return redirectTo(req, live.length ? home(prefix, live) : `${prefix}/login`);
   }
 
-  // The vendor application accepts customer sessions and visitors (VND-DSH-1), so it is not guarded here.
+  // The vendor application is for visitors and customer sessions (VND-DSH-1): its pages check the customer session.
+  // Here, as for the staff panels: the idle timeout slides, or, when it passed, the API session is ended too.
   const isVendorApplication = area === 'vendor' && (rest[0] === 'apply' || rest[0] === 'application');
-  if (!isPanel(area) || isVendorApplication) return intl(req);
+  if (isVendorApplication) {
+    const res = intl(req);
+    const customerToken = req.cookies.get(refreshCookie('customer'))?.value;
+    if (customerToken && sessions.includes('customer')) writePanels(res, sessions);
+    else if (customerToken) {
+      await authBackend().logout(customerToken, clientIp(req));
+      clearPanel(res, 'customer');
+    }
+    return res;
+  }
+  if (!isPanel(area)) return intl(req);
 
   const refreshToken = req.cookies.get(refreshCookie(area))?.value;
-  if (!panels.includes(area) || !refreshToken) {
+  if (!sessions.includes(area) || !refreshToken) {
     const out = redirectTo(req, `${prefix}/login`, { panel: area, next: req.nextUrl.pathname });
     // Idle timeout passed (jz_panels expired) while the refresh token is still here: end that API session too.
     if (refreshToken) {
@@ -62,7 +74,7 @@ export default async function middleware(req: NextRequest) {
   }
 
   const res = intl(req);
-  writePanels(res, panels); // slide the 12 h idle timeout
+  writePanels(res, sessions); // slide the 12 h idle timeout
 
   // Refresh an expired access token on page loads and in-app navigations, never on prefetches, so parallel prefetches
   // don't spend the one-use refresh token twice.
@@ -78,7 +90,7 @@ export default async function middleware(req: NextRequest) {
     else if (REFRESH_ENDS_SESSION.has(r.code)) {
       const out = redirectTo(req, `${prefix}/login`, { panel: area, next: req.nextUrl.pathname, ...reasonOf(r.code) });
       clearPanel(out, area);
-      writePanels(out, panels.filter((p) => p !== area));
+      writePanels(out, sessions.filter((p) => p !== area));
       return out;
     }
   }

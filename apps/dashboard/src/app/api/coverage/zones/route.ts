@@ -1,6 +1,7 @@
 import type { NextRequest } from 'next/server';
 import { coverageBackend } from '@/features/coverage/backend';
-import { CreateZoneSchema, invalidBody, langOf } from '@/features/coverage/schema';
+import { CreateZoneSchema } from '@/features/coverage/schema';
+import { invalidBody, langOf } from '@/lib/route';
 import { withPanelSession } from '@/lib/auth/panel-session';
 
 export function GET(req: NextRequest) {

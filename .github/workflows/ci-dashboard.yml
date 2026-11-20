@@ -69,6 +69,8 @@ jobs:
         run: pnpm test:unit
 
       - name: Build
+        env:
+          PLAYWRIGHT: '1' # mock smoke tests: uploads go to the mock storage, no MEDIA_ORIGINS needed
         run: pnpm build
 
       - name: Install Playwright Chromium
@@ -179,6 +181,7 @@ jobs:
         working-directory: apps/dashboard
         env:
           NODE_ENV: production
+          PLAYWRIGHT: '1' # test build: no media hosts (these checks upload nothing)
         run: |
           pnpm install --frozen-lockfile
           pnpm build

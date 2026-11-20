@@ -196,6 +196,21 @@
       "p2b": "Number of guests and customer notes",
       "p3": "On-time handover",
       "p3b": "Call the courier when it's ready"
+    },
+    "customer": {
+      "brand": "Sell on JAZLA",
+      "title": "Join as a vendor",
+      "subtitle": "We verify your mobile number first. You'll sign in to your dashboard with it once approved.",
+      "footer": "Already a vendor?",
+      "apply": "Sign in",
+      "heroTitle": "Sell on JAZLA",
+      "heroBody": "Join the butcheries, slaughterhouses and farms selling to JAZLA customers in Riyadh and Taif.",
+      "p1": "Your store in the app",
+      "p1b": "Shown to JAZLA customers once approved",
+      "p2": "Weekly payouts",
+      "p2b": "Weekly settlement to your bank account",
+      "p3": "Five steps",
+      "p3b": "Reviewed within 2 to 3 working days"
     }
   },
   "coverage": {
@@ -255,5 +270,245 @@
     },
     "cityHint": "Write the city name in Arabic, e.g. الرياض.",
     "restored": "We restored what you drew before signing in. Check it, then save."
+  },
+  "apply": {
+    "bar": {
+      "brand": "Vendor sign-up",
+      "signIn": "Already a vendor? Sign in",
+      "signOut": "Sign out"
+    },
+    "steps": {
+      "business": "Business details",
+      "documents": "Documents",
+      "bank": "Bank account",
+      "location": "Location",
+      "review": "Photos & review"
+    },
+    "stepsLabel": "Application steps",
+    "stepOf": "Step {n} of 5 · {name}",
+    "stepDone": "{name}, done",
+    "next": "Next",
+    "back": "Back",
+    "submit": "Submit application",
+    "saveLater": "Save and finish later",
+    "savedLater": "Your details are saved on this device, except the IBAN. Finish the application any time.",
+    "restored": "We restored what you typed before, except the IBAN, which we ask for again. Check it, then continue.",
+    "fix": "{count, plural, one {Fix the field highlighted in red, then continue.} other {Fix the fields highlighted in red, then continue.}}",
+    "loading": "Loading the application",
+    "business": {
+      "title": "Business details",
+      "body": "As on your commercial registration. You can change the store name and description later from your dashboard.",
+      "type": "Business type",
+      "types": {
+        "butchery": "Butchery",
+        "slaughterhouse": "Slaughterhouse",
+        "farm": "Farm"
+      },
+      "nameAr": "Store name in Arabic",
+      "nameArHint": "The name customers see",
+      "nameEn": "Store name in English",
+      "nameEnHint": "Shown in the English interface",
+      "cr": "Commercial registration number",
+      "crHint": "10 digits",
+      "vat": "VAT number (optional)",
+      "vatHint": "15 digits, starting and ending with 3",
+      "city": "City",
+      "cityHint": "Riyadh or Taif for now",
+      "email": "Email",
+      "emailHint": "We send the confirmation and the review result there",
+      "phone": "Mobile number",
+      "phoneHint": "Verified. You'll sign in to your dashboard with it once approved",
+      "description": "Short description (optional)",
+      "descriptionPlaceholder": "Fresh local meat every day",
+      "descriptionHint": "One line shown under the store name"
+    },
+    "documents": {
+      "title": "Documents",
+      "body": "Upload clear, valid copies. The first three are required to submit.",
+      "required": "Required",
+      "optional": "Optional",
+      "hint": "PDF or photo, up to 10 MB",
+      "upload": "Upload file",
+      "replace": "Replace",
+      "remove": "Remove",
+      "kinds": {
+        "commercial_registration": "Commercial registration",
+        "health_certificate": "Health certificate",
+        "facility_photo": "Photo of the facility from outside",
+        "municipality_licence": "Municipality licence",
+        "national_id": "Owner's national ID"
+      },
+      "previous": "File from your previous application",
+      "file": "{name} · {size}",
+      "mb": "{size} MB",
+      "kb": "{size} KB",
+      "missing": "Upload this document",
+      "tooLarge": "The file is larger than 10 MB",
+      "wrongType": "PDF, JPG or PNG only",
+      "failed": "The upload failed. Try again.",
+      "expired": "This file is no longer valid. Upload it again."
+    },
+    "bank": {
+      "title": "Bank account",
+      "body": "The account we pay your earnings into every week. It must be in the name of the business or its owner.",
+      "bank": "Bank",
+      "bankHint": "Read from the IBAN",
+      "holder": "Account holder name",
+      "holderHint": "As at the bank",
+      "iban": "IBAN",
+      "ibanHint": "SA followed by 22 characters",
+      "note": "The IBAN is stored encrypted; after saving only its last 4 digits are shown, to you and the JAZLA team."
+    },
+    "location": {
+      "title": "Facility location",
+      "body": "Couriers collect orders here, and delivery areas are measured from it.",
+      "mapLabel": "Facility location map",
+      "drag": "Drag the pin to the facility door",
+      "district": "District",
+      "address": "Address details",
+      "addressHint": "A landmark that helps the courier",
+      "pinRequired": "Move the pin to the facility door on the map"
+    },
+    "review": {
+      "title": "Photos & review",
+      "body": "Photos are optional and can be added later. After you submit, the JAZLA team reviews the application.",
+      "cover": "Cover photo (optional)",
+      "logo": "Store logo (optional)",
+      "addPhoto": "Add photo",
+      "summary": "Check your application before submitting",
+      "store": "Business",
+      "cr": "Commercial registration",
+      "docs": "Documents",
+      "docsValue": "{required} of 3 required, {optional} optional",
+      "bank": "Bank account",
+      "location": "Location",
+      "agree": "I confirm the details are correct and accept the JAZLA vendor terms",
+      "agreeRequired": "Accept the statement to submit"
+    },
+    "errors": {
+      "required": "This field is required",
+      "name": "Use 2 to 100 characters",
+      "cr": "The commercial registration has 10 digits",
+      "vat": "15 digits, starting and ending with 3",
+      "city": "Use 2 to 50 characters",
+      "holder": "The name as at the bank, 2 to 100 characters",
+      "iban": "Not a valid Saudi IBAN. It starts with SA followed by 22 characters",
+      "description": "Up to 1000 characters",
+      "location": "Move the pin to the facility",
+      "documents": "Upload the three required documents",
+      "alreadyHeld": "Your number already works for a JAZLA store. Sign in to the vendor dashboard.",
+      "submit": "The application could not be sent. Try again.",
+      "rateLimited": "Too many attempts. Wait a little, then send the application again."
+    }
+  },
+  "application": {
+    "number": "Application {number} · sent {date}",
+    "badges": {
+      "pending": "In review",
+      "approved": "Approved",
+      "rejected": "Not approved"
+    },
+    "pending": {
+      "title": "We received your application",
+      "body": "We review applications within 2 to 3 working days, and you'll get a text message once approved.",
+      "view": "View the application",
+      "hide": "Hide the application"
+    },
+    "approved": {
+      "title": "Your store is approved on JAZLA",
+      "body": "Your vendor dashboard is ready. Sign in with {phone}, then add your products and working hours so customers can see your store.",
+      "payout": "Payouts",
+      "payoutValue": "Weekly to {iban}",
+      "enter": "Go to the vendor dashboard"
+    },
+    "rejected": {
+      "title": "We couldn't approve the application",
+      "body": "You can fix the note and submit again. Your previous details are kept.",
+      "reason": "Review note",
+      "reapply": "Edit and submit again"
+    },
+    "timeline": {
+      "label": "Application progress",
+      "received": "Application received",
+      "review": "Document review",
+      "reviewing": "In progress",
+      "result": "Result",
+      "resultSoon": "Within 2 to 3 working days",
+      "resultDone": "{status} · {date}"
+    },
+    "support": "Contact vendor support",
+    "summary": {
+      "store": "Business",
+      "cr": "Commercial registration",
+      "vat": "VAT number",
+      "city": "City",
+      "docs": "Documents",
+      "docsValue": "{count} documents",
+      "bank": "Bank account",
+      "holder": "Account holder"
+    }
+  },
+  "store": {
+    "breadcrumb": "Settings / Store profile",
+    "title": "Store profile",
+    "placeholder": "Type here",
+    "identity": {
+      "title": "Store identity",
+      "body": "The name, description and photos as customers see them on the store page.",
+      "name": "Store name",
+      "nameHint": "As customers see it",
+      "tagline": "Short tagline",
+      "taglineHint": "Up to 40 characters",
+      "description": "Store description",
+      "descriptionEn": "Store description in English",
+      "descriptionHint": "Shown on the store page, up to 1000 characters",
+      "logo": "Store logo",
+      "cover": "Cover photo",
+      "change": "Change the {name}",
+      "imageTooLarge": "The image is larger than 2 MB",
+      "imageType": "JPG, PNG or WebP only"
+    },
+    "contact": {
+      "title": "Contact details",
+      "body": "Used by the JAZLA team to reach you; never shown to customers.",
+      "phone": "Mobile number",
+      "phoneHint": "The person handling orders",
+      "email": "Email",
+      "emailHint": "For order notifications",
+      "vat": "VAT number",
+      "vatHint": "15 digits, starting and ending with 3",
+      "phoneInvalid": "Not a valid Saudi mobile or landline number",
+      "emailInvalid": "The email format is not valid"
+    },
+    "location": {
+      "title": "Location",
+      "body": "The branch orders leave from and customers collect at.",
+      "mapLabel": "Store location map",
+      "address": "Address",
+      "addressHint": "Street, district and city"
+    },
+    "hours": {
+      "title": "Working hours",
+      "body": "When you receive and prepare orders.",
+      "weekdays": "Saturday to Thursday · 8:00 AM to 11:00 PM",
+      "friday": "Friday · 1:00 PM to 11:00 PM",
+      "holidays": "Public holidays"
+    },
+    "bank": {
+      "title": "Bank account",
+      "body": "Net earnings are paid here weekly. Contact support to change it.",
+      "iban": "IBAN",
+      "ibanHint": "Can't be changed here"
+    },
+    "save": "Save changes",
+    "discard": "Discard",
+    "saved": "Changes saved.",
+    "fix": "Fix the fields highlighted in red, then save.",
+    "error": {
+      "title": "We couldn't load the store profile",
+      "body": "Check your connection, then try again.",
+      "retry": "Try again"
+    },
+    "suspended": "Your store is suspended by the JAZLA team and the details are read-only. Contact support to reactivate it."
   }
 }

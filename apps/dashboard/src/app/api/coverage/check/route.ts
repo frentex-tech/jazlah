@@ -1,6 +1,6 @@
 import { NextResponse, type NextRequest } from 'next/server';
 import { coverageBackend } from '@/features/coverage/backend';
-import { langOf } from '@/features/coverage/schema';
+import { langOf } from '@/lib/route';
 
 // Passes through the public GET /v1/public/coverage/check?lat=&lng= (no session needed).
 export async function GET(req: NextRequest) {

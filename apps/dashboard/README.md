@@ -19,7 +19,7 @@ pnpm dev            # http://localhost:3001
 pnpm lint           # ESLint, incl. the RTL rule: physical utilities (ml-, pr-, left-, text-right …) are errors
 pnpm typecheck
 pnpm build
-pnpm test:e2e       # Playwright smoke on the mocks; starts `pnpm start`, so run `pnpm build` first
+pnpm test:e2e       # Playwright smoke on the mocks; starts `pnpm start`, so run `PLAYWRIGHT=1 pnpm build` first
 pnpm test:e2e:api   # acceptance checks against a running, seeded API (API_URL); CI job "api-e2e"
 pnpm api:generate   # regenerate src/api/schema.d.ts from services/api/openapi.json
 ```
@@ -52,7 +52,9 @@ messages/ar.json, en.json       every UI string
 - Route handlers `src/app/api/auth/*` call the API on the server and keep the tokens in HTTP-only cookies (`jz_rt_<panel>`, `jz_at_<panel>`); page scripts never see them.
 - `jz_panels` lists the panels with a live session and lives 12 h, renewed on every page load: that is the idle timeout.
 - The middleware refreshes an expired access token on page loads, and sends signed-in staff from `/login` to their panel (several panels: `/login/choose`).
-- Settings: `.env.example` (`API_URL`, `OTP_LENGTH`, `DASHBOARD_API_MOCK`). `OTP_LENGTH` must equal the API's `AUTH_OTP_LENGTH`.
+- **Customer session (vendor application, VND-DSH-1):** `/vendor/apply` and `/vendor/application` sit outside the staff shell. A visitor signs in there with `audience: customer` (same phone and code screens); the cookies are `jz_rt_customer`, `jz_at_customer`, `jz_ph_customer`, listed in `jz_panels` with the same 12 h idle timeout. Route handlers use `withPanelSession(req, 'customer', …)`. Panel guards read only their own panel's cookies, so a customer session never opens a staff panel. After approval the applicant signs in to `/login?panel=vendor` as staff. Sign-out on the status page ends the customer session only.
+- Settings: `.env.example` (`API_URL`, `OTP_LENGTH`, `DASHBOARD_API_MOCK`, `MEDIA_ORIGINS`). A production build fails without `MEDIA_ORIGINS` (the CSP would block uploads and logos), unless `PLAYWRIGHT=1` (test builds on the mock storage). `OTP_LENGTH` must equal the API's `AUTH_OTP_LENGTH`.
+- Application drafts (sessionStorage, and localStorage for «save and finish later») are tagged with the applicant's masked phone, dropped for anyone else, cleared on sign-out, and never hold the IBAN.
 - Auth calls are refused unless they come from our own pages (`Sec-Fetch-Site: same-origin` and a JSON body), against login CSRF.
 - The user's address is forwarded to the API as `X-Forwarded-For`, so the API's per-address code limits apply per user. It is read **only** from the header named by `CLIENT_IP_HEADER`, never from the first `X-Forwarded-For` entry (the client writes that one). Server setup:
   1. The edge proxy in front of the dashboard (ingress, nginx, ALB) must **set and overwrite** one header with the client address. With nginx, `proxy_set_header X-Real-IP $remote_addr;` and `CLIENT_IP_HEADER=x-real-ip`.
@@ -61,7 +63,7 @@ messages/ar.json, en.json       every UI string
   4. With `CLIENT_IP_HEADER` unset nothing is forwarded, and every staff sign-in counts against the dashboard server's address: one burst of attempts can then block sign-in for all staff.
 
 ## Security headers
-`next.config.ts` sends a CSP (`frame-ancestors 'none'`, scripts and connections from our origin, images and connections also from the map tile host in `NEXT_PUBLIC_MAP_TILES`), `X-Frame-Options: DENY`, `nosniff`, `Referrer-Policy: strict-origin-when-cross-origin`, a `Permissions-Policy`, and HSTS in production builds. Set HSTS at the edge too. A change of tile provider changes the CSP at build time, so rebuild after changing `NEXT_PUBLIC_MAP_TILES`.
+`next.config.ts` sends a CSP (`frame-ancestors 'none'`, scripts and connections from our origin, images and connections also from the map tile host in `NEXT_PUBLIC_MAP_TILES` and the media hosts in `MEDIA_ORIGINS`: the storage that presigned uploads POST to and the CDN of logos and covers), `X-Frame-Options: DENY`, `nosniff`, `Referrer-Policy: strict-origin-when-cross-origin`, a `Permissions-Policy`, and HSTS in production builds. Set HSTS at the edge too. A change of tile provider changes the CSP at build time, so rebuild after changing `NEXT_PUBLIC_MAP_TILES`.
 
 ## API gaps (worked around in the dashboard)
 - **Staff display name:** `GET /v1/<panel>/me` returns only the principal, so the top bar shows the masked phone and a user icon in the avatar.
@@ -79,4 +81,6 @@ For local work and the Playwright smoke tests only. A production build ignores t
   - `0500000007` rate limited
   - `0500000008` disabled
   - code `000000` = expired
+  - customer sign-in (vendor application): any number; `0500000005` has a rejected application, `0500000006` an approved one
+- Vendor application, store profile and uploads (`src/features/vendor-onboarding/backend.ts`): the API through the generated client (`/v1/customer/vendor-applications`, `/v1/customer/media/*`, `/v1/vendor/profile`, `/v1/vendor/media/*`); the mock keeps applications per applicant, one store profile, and stands in for the upload storage at `/api/mock-storage` (mocks only). Saving the store email `suspended@example.com` answers as a suspended store.
 - Coverage zones (`src/features/coverage/backend.ts`): the API (`/v1/admin/coverage-zones`, `/v1/public/coverage/check`) through openapi-fetch; the mock is an in-memory store with the API's shapes and rules (seeded with «شمال الرياض»), for the smoke tests.

@@ -62,6 +62,6 @@ test('the denied screen follows the Figma frame', async ({ page, context }) => {
 
 test('the vendor application address stays outside the staff shell for visitors', async ({ page }) => {
   await page.goto('/vendor/apply');
-  await expect(page.getByText('الصفحة غير موجودة')).toBeVisible();
+  await expect(page.getByRole('heading', { name: 'انضم كتاجر' })).toBeVisible();
   await expect(page.getByRole('navigation', { name: 'القائمة الرئيسية' })).toHaveCount(0);
 });
