@@ -105,7 +105,12 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
         bottom: false,
         child: Column(
           children: [
-            JAppHeader.page(title: l10n.searchTitle, cartLabel: l10n.cart, onBack: () => popOrHome(context)),
+            JAppHeader.page(
+              title: l10n.searchTitle,
+              cartLabel: l10n.cart,
+              onBack: () => popOrHome(context),
+              onCart: () => openCart(context),
+            ),
             Padding(
               padding: const EdgeInsets.fromLTRB(JSpace.s16, JSpace.s16, JSpace.s16, 0),
               child: JSearchBar(
@@ -304,7 +309,7 @@ class _Results extends ConsumerWidget {
               SliverToBoxAdapter(
                 child: PagedFooter(
                   list: list,
-                  onRetry: () => ref.read(searchPagesProvider(query).notifier).loadMore(),
+                  onRetry: () => ref.read(searchPagesProvider(query).notifier).loadMore(retry: true),
                 ),
               ),
             ],
