@@ -87,6 +87,26 @@ Agreed by the owner in the Sprint 1 fix round, after the design QA (`reviews/qa-
 | 410:39936, restore | A restored draft asks for the IBAN again | The IBAN is never kept on the device |
 | 131:24074 | No «preview the public store page» link (asked by the sprint task, not in the frame) | No public store page URL: no customer website, the store is seen in the app |
 
+## Build differences, Sprint 2 dashboard: VND-DSH-2 admin vendor list and review (pending owner sign-off, not agreed)
+| Frame | Difference | Why |
+|---|---|---|
+| 131:16744 | «Pending review» lists applications (no commission: «not set»); «active» and «suspended» list vendors, whose date is their approval date. The «awaiting documents» badge of the frame does not occur | The API has applications (pending/approved/rejected) and vendors (active/suspended), and no «awaiting documents» status |
+| 131:16744 | Products column shows a dash; category and date filters, «invite vendor» and «export» are disabled | API gaps (not-built-yet.md) |
+| 131:16744, 131:18192 | The status filter and the tabs are one choice: picking a status selects its tab and shows the chip; the default tab («active») shows no chip | One status at a time in the API |
+| 131:16744 | Search box keeps the shared Filters bar width (200) instead of filling the row | Shared DS component |
+| 131:17362 | Without any filter, an empty tab says «no stores here yet» without the clear button | The frame's copy is for filtered results |
+| 131:18512 | Store details have no «activity» row; «responsible» shows the account holder; the phone row shows only for a vendor with a contact phone; the IBAN is masked | Not in the application answer; the full IBAN is never sent |
+| 131:18512 | A real map (OSM tiles) with the city under it, instead of the illustration and street address | Real coordinates; no address in the API |
+| 131:18512 | Viewer bar shows the document kind without «page 1 of 2»; a PDF shows «open the file» instead of a preview | The links carry no content type or pages; the CSP allows no embedded objects |
+| 131:18512 | «Ask for a new upload» is disabled; «document matches» and the review checklist are marks on the page only, and approving does not require them | No API for either |
+| 131:18512 | Facility photos (a document kind) fill «store photos» in a three-column grid | The application has no other store photos |
+| 131:19123 | The approved state uses the review layout, with the vendor card; a suspended vendor shows its reason and «reactivate» (primary); a rejected application shows its reason without actions | States the API has and Figma does not draw |
+| 131:19351 | Commission hint says 0 to 100 percent (Figma 0 to 30), up to two decimals; it is sent in basis points | The API takes any whole number of basis points from 0 to 10000 |
+| 131:19527 | The three reason chips fill the reason field with a full sentence the applicant can act on | The reason is shown to the applicant as written |
+| 131:19710 | Suspension hint says it is seen by admins only (Figma: «reaches the vendor») | The API shows the suspension reason to admins only |
+| All dialogs | Centred vertically (Figma top 160) | The shared Dialog component |
+| Toasts | Built from DS «Toast» (16:561), bottom centre of the window for 4 s | No frame shows where toasts appear |
+
 ## Checks run on the file (2026-11-13)
 - Script lint over all 587 screens after the last changes: no empty or "undefined" text, no text outside its screen, no missing icon.
 - Clipped layouts: a script found 110 auto-layout frames on web and dashboard screens whose content was cut off (among them the whole animal-registration form) and opened them up. 28 small ones remain (tab labels 7 to 9 px taller than their tab, and the Adha settings body).

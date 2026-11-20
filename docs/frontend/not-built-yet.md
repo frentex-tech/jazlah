@@ -72,10 +72,17 @@ What a built dashboard screen needs and the API does not give yet. Until it land
 | Store name change by the vendor | Store profile, validation frame (131:24427) | Read-only: only an admin changes the name (API rule), so the name error of the frame cannot occur | by design |
 | A public store page URL to link to (`GET /v1/public/vendors/{id}` exists, but there is no customer website: the store is seen in the customer app) | Store profile «preview the public store page» (VND-DSH-1 output) | No preview link | none open yet (no web target) |
 | Vendor support contact (phone, email or chat) | Application status «contact vendor support», store bank and suspended notes | Plain text, no link | none open yet |
+| Product count per vendor in `GET /v1/admin/vendors` | Admin stores list, «products» column (131:16744) | A dash | none open yet (API gap) |
+| Category filter, application-date filter, export and «invite vendor» on the admin stores list | Admin stores list (131:16744) | Shown disabled | none open yet (API gap) |
+| A city filter on `GET /v1/admin/vendor-applications`, and a list of cities | Admin stores list, «pending» tab with the city filter (131:18192) | Applications: the city is filtered on the loaded page only; cities are a fixed list of 12 main cities on the page | none open yet (API gap) |
+| «Ask for a new upload» of one document, and a per-document «matches» record | Vendor review documents viewer (131:18512) | «New upload» disabled (reject with a reason instead); «matches» is a mark on the page only, not saved; the review checklist is not saved either | none open yet (API gap) |
+| Business activity, responsible person and street address of an application | Vendor review, store details and location (131:18512) | Activity left out; the account holder shown as the person; the city under the map | none open yet (API gap) |
+| Document content type (and page count) on the document links | Vendor review viewer «page 1 of 2» (131:18512) | Shown as an image; a file the browser cannot show (PDF) offers «open the file»; no page count | none open yet (API gap) |
+| Admin permissions (onboarding officer) | Not-allowed states of the stores list and review (131:17922, 131:18972) | Shown when the API answers FORBIDDEN; the mock refuses an access token ending in `-limited` | #111 (ADM-API-1) |
 
 The code length in the code request answer is asked for in the mobile section below; the dashboard needs it too (a dashboard setting today).
 
-The dashboard's in-process mocks (staff and customer sign-in accounts, an in-memory coverage store, vendor applications, store profile and a mock upload storage) exist only for its smoke tests; they stand in for nothing missing.
+The dashboard's in-process mocks (staff and customer sign-in accounts, an in-memory coverage store, vendor applications and their admin review, store profile and a mock upload storage) exist only for its smoke tests; they stand in for nothing missing.
 
 ## Requested by the apps (mobile)
 
