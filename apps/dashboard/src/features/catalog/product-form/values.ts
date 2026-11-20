@@ -1,5 +1,5 @@
 import { halalasOf, sarInput } from '../../../lib/money.ts'; // relative: the unit test runs under plain node
-import type { Fulfilment, Packaging, Product, ProductContent } from '../types';
+import type { Fulfilment, Packaging, Product, ProductContent, ProductContentResponse } from '../types';
 
 /** What the form edits; amounts as typed (SAR), turned into the API's content on submit. */
 export type SizeRow = { key: string; id: string | null; tagAr: string; tagEn: string; grams: string; price: string };
@@ -30,6 +30,51 @@ let seq = 0;
 export const rowKey = () => `row-${++seq}`;
 export const emptySize = (): SizeRow => ({ key: rowKey(), id: null, tagAr: '', tagEn: '', grams: '', price: '' });
 
+/** The live content of a product (or a draft's), as a change request holds it. */
+export const liveContent = (p: Product): ProductContentResponse => ({
+  name: p.name, description: p.description, categoryId: p.category.id, meatTypeId: p.meatType?.id ?? null, images: p.images, sizes: p.sizes,
+  cuttings: p.cuttings, packagings: p.packagings, exclusionItemIds: p.exclusions.map((x) => x.id),
+});
+
+/**
+ * What the form edits: on a published product with a pending change request, the vendor's proposed content (so a saved
+ * edit does not snap back to the live one), with the live prices of what the product already has (approval keeps them).
+ */
+export function editedContent(p: Product): ProductContentResponse {
+  const c = p.status === 'published' && p.changeRequest?.status === 'pending' ? p.changeRequest.content : null;
+  if (!c) return liveContent(p);
+  return {
+    ...c,
+    sizes: c.sizes.map((s) => ({ ...s, priceHalalas: p.sizes.find((x) => x.id === s.id)?.priceHalalas ?? s.priceHalalas })),
+    cuttings: c.cuttings.map((k) => ({ ...k, extraPriceHalalas: p.cuttings.find((x) => x.cuttingStyleId === k.cuttingStyleId)?.extraPriceHalalas ?? k.extraPriceHalalas })),
+    packagings: c.packagings.map((k) => ({ ...k, extraPriceHalalas: p.packagings.find((x) => x.packaging === k.packaging)?.extraPriceHalalas ?? k.extraPriceHalalas })),
+  };
+}
+
+/** A content as the API's body (ProductContentDto). */
+export const bodyOf = (c: ProductContentResponse): ProductContent => ({
+  name: c.name, description: c.description, categoryId: c.categoryId, meatTypeId: c.meatTypeId, imageMediaIds: c.images.map((i) => i.mediaId),
+  sizes: c.sizes.map((s) => ({ id: s.id, approxWeightGrams: s.approxWeightGrams, priceHalalas: s.priceHalalas, tag: s.tag })),
+  cuttings: c.cuttings.map((k) => ({ cuttingStyleId: k.cuttingStyleId, extraPriceHalalas: k.extraPriceHalalas })),
+  packagings: c.packagings.map((k) => ({ packaging: k.packaging, extraPriceHalalas: k.extraPriceHalalas })),
+  exclusionItemIds: c.exclusionItemIds,
+});
+
+/**
+ * Whether two contents differ in what a published product's review covers: everything but the prices of the sizes,
+ * cuttings and packagings `p` already has (those change at once through PATCH …/prices). New ones' prices count.
+ */
+export function differsForReview(p: Product, a: ProductContent, b: ProductContent): boolean {
+  const key = (c: ProductContent) =>
+    JSON.stringify([
+      c.name.ar, c.name.en, c.description?.ar || null, c.description?.en || null, c.categoryId, c.meatTypeId || null, c.imageMediaIds, c.exclusionItemIds,
+      c.sizes.map((s) => [s.id ?? null, s.approxWeightGrams, s.tag?.ar ?? null, s.tag?.en ?? null, s.id && p.sizes.some((x) => x.id === s.id) ? 0 : s.priceHalalas]),
+      c.cuttings.map((k) => [k.cuttingStyleId, p.cuttings.some((x) => x.cuttingStyleId === k.cuttingStyleId) ? 0 : k.extraPriceHalalas]),
+      c.packagings.map((k) => [k.packaging, p.packagings.some((x) => x.packaging === k.packaging) ? 0 : k.extraPriceHalalas]),
+    ]);
+  return key(a) !== key(b);
+}
+
 export function stateOf(p: Product | null): FormState {
   if (!p) {
     return {
@@ -37,13 +82,14 @@ export function stateOf(p: Product | null): FormState {
       delivery: true, pickup: true, available: true,
     };
   }
+  const c = editedContent(p);
   return {
-    nameAr: p.name.ar, nameEn: p.name.en, descAr: p.description.ar ?? '', descEn: p.description.en ?? '', categoryId: p.category.id, meatTypeId: p.meatType?.id ?? '',
-    images: p.images.map((i) => ({ mediaId: i.mediaId, url: i.url })),
-    sizes: p.sizes.map((s) => ({ key: rowKey(), id: s.id, tagAr: s.tag?.ar ?? '', tagEn: s.tag?.en ?? '', grams: String(s.approxWeightGrams), price: sarInput(s.priceHalalas) })),
-    cuts: p.cuttings.map((c) => ({ id: c.cuttingStyleId, price: sarInput(c.extraPriceHalalas) })),
-    packs: p.packagings.map((k) => ({ packaging: k.packaging, price: sarInput(k.extraPriceHalalas) })),
-    exclusions: p.exclusions.map((x) => x.id),
+    nameAr: c.name.ar, nameEn: c.name.en, descAr: c.description.ar ?? '', descEn: c.description.en ?? '', categoryId: c.categoryId, meatTypeId: c.meatTypeId ?? '',
+    images: c.images.map((i) => ({ mediaId: i.mediaId, url: i.url })),
+    sizes: c.sizes.map((s) => ({ key: rowKey(), id: s.id, tagAr: s.tag?.ar ?? '', tagEn: s.tag?.en ?? '', grams: String(s.approxWeightGrams), price: sarInput(s.priceHalalas) })),
+    cuts: c.cuttings.map((k) => ({ id: k.cuttingStyleId, price: sarInput(k.extraPriceHalalas) })),
+    packs: c.packagings.map((k) => ({ packaging: k.packaging, price: sarInput(k.extraPriceHalalas) })),
+    exclusions: c.exclusionItemIds,
     delivery: p.fulfilment !== 'pickup', pickup: p.fulfilment !== 'delivery', available: p.isAvailable,
   };
 }

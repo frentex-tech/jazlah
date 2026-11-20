@@ -4,7 +4,7 @@ import { cn } from '@/lib/utils';
 import { Spinner } from './spinner';
 
 // Figma DS «Button» (16:215): variant × state (default, pressed = :active, disabled, loading) × size L/S.
-export const buttonVariants = cva(
+const variants = cva(
   'inline-flex shrink-0 items-center justify-center gap-s8 whitespace-nowrap border border-transparent transition-colors disabled:pointer-events-none',
   {
     variants: {
@@ -22,6 +22,8 @@ export const buttonVariants = cva(
     defaultVariants: { variant: 'primary', size: 'L' },
   },
 );
+/** The classes merged (twMerge): without it, links styled as buttons kept `border-transparent` over the variant's border. */
+export const buttonVariants = (p?: VariantProps<typeof variants>) => cn(variants(p));
 
 type Props = React.ButtonHTMLAttributes<HTMLButtonElement> & VariantProps<typeof buttonVariants> & { loading?: boolean };
 

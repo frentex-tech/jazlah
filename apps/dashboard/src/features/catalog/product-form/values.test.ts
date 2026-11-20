@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict';
 import type { Product } from '../types';
-import { emptySize, priceChanges, priceField, stateOf, toValues } from './values.ts';
+import { bodyOf, differsForReview, editedContent, emptySize, liveContent, priceChanges, priceField, stateOf, toValues } from './values.ts';
 
 // A new product: required fields are reported on the API's paths.
 const blank = stateOf(null);
@@ -43,4 +43,24 @@ assert.equal(priceField('sizes', { sizes: [], cuttings: [], packagings: [] }), '
 assert.equal(toValues({ ...blank, sizes: [{ ...emptySize(), grams: '1', price: '1000000.01' }] }).errors['sizes.0.priceHalalas'], 'invalid');
 assert.equal(toValues({ ...blank, cuts: [{ id: 'k', price: '1000000.01' }] }).errors['cuttings.0.extraPriceHalalas'], 'invalid');
 assert.equal(priceChanges(live, { ...content, sizes: [{ id: 's1', approxWeightGrams: 500, priceHalalas: 4500 }], packagings: [] }), null);
+
+// Review-sensitive edits of a published product: a moved price of an existing size is not one; a new size, a name or an image is.
+const pub = {
+  ...live, status: 'published', name: { ar: 'ريب آي', en: 'Ribeye' }, description: { ar: null, en: null }, category: { id: 'c', name: null }, meatType: null,
+  images: [{ mediaId: 'm', url: 'u' }], exclusions: [], changeRequest: null,
+} as unknown as Product;
+const base = bodyOf(liveContent(pub));
+assert.equal(differsForReview(pub, base, { ...base, sizes: [{ ...base.sizes[0]!, priceHalalas: 9900 }] }), false);
+assert.equal(differsForReview(pub, base, { ...base, packagings: [{ packaging: 'trays', extraPriceHalalas: 0 }] }), false);
+assert.equal(differsForReview(pub, base, { ...base, name: { ar: 'ريب آي طازج', en: 'Ribeye' } }), true);
+assert.equal(differsForReview(pub, base, { ...base, imageMediaIds: [] }), true);
+assert.equal(differsForReview(pub, base, { ...base, sizes: [...base.sizes, { approxWeightGrams: 900, priceHalalas: 100 }] }), true);
+// The form opens on the pending edit, with the live prices of what the product has; the form's own body equals it.
+const proposed = { ...liveContent(pub), name: { ar: 'ريب آي مقترح', en: 'Ribeye' }, sizes: [{ id: 's1', approxWeightGrams: 600, priceHalalas: 1, tag: null }] };
+const withEdit = { ...pub, changeRequest: { status: 'pending', content: proposed } } as unknown as Product;
+assert.equal(editedContent(withEdit).name.ar, 'ريب آي مقترح');
+assert.deepEqual(editedContent(withEdit).sizes, [{ id: 's1', approxWeightGrams: 600, priceHalalas: 4500, tag: null }]);
+assert.equal(stateOf(withEdit).nameAr, 'ريب آي مقترح');
+assert.equal(stateOf({ ...withEdit, changeRequest: { status: 'rejected', content: proposed } } as unknown as Product).nameAr, 'ريب آي');
+assert.equal(differsForReview(withEdit, bodyOf(editedContent(withEdit)), toValues(stateOf(withEdit)).values.content), false);
 console.log('product-form values: ok');
