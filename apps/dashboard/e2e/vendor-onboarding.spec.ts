@@ -179,7 +179,7 @@ test('store profile: validation, save, and the suspended store', async ({ page, 
   expect((await context.cookies()).find((c) => c.name === 'jz_rt_vendor')).toBeUndefined();
 });
 
-test('after the idle timeout, a customer refresh token left behind is ended and cleared', async ({ page, context }) => {
+test('after the idle timeout, a remaining customer refresh token is ended and cleared', async ({ page, context }) => {
   await context.addCookies([{ name: 'jz_rt_customer', value: 'mock-rt-customer-500000001-1', url: `http://localhost:${process.env.PORT ?? 3001}`, httpOnly: true }]);
   await page.goto('/vendor/apply');
   await expect(page.getByRole('heading', { name: 'انضم كتاجر' })).toBeVisible();
