@@ -129,6 +129,22 @@ Agreed by the owner in the Sprint 1 fix round, after the design QA (`reviews/qa-
 | 131:36439 | A size price error shows the message in the empty box (as drawn); other API errors show under their field | Same rule for every field |
 | 131:37786 | Admin copy: «not allowed to manage products» with «back to the dashboard» (the frame's copy is the suspended vendor's) | This is the admin side; CAT-DSH-2 uses the vendor copy |
 
+## Build differences, Sprint 2 dashboard: CAT-DSH-2 vendor products and the product review queue (pending owner sign-off, not agreed)
+| Frame | Difference | Why |
+|---|---|---|
+| 131:25074 | «التوفر» badge: «متاح» for an available published product, «غير معروض» for an available draft, rejected or in-review product, «نفد المخزون» when switched off; the availability switch is in the row «⋯» menu (with edit, review notes, submit for review); the date column shows the creation date; a paging footer | The task's availability toggle and «submit for review» have no control in the frame; the card has no update date; cursor paging |
+| 131:25074 | The warning notice counts the rejected products (one, two, few, many) | Generic for any count |
+| 131:26222 | Search, category and availability filter the loaded page; the date filter is disabled | API gaps |
+| 131:26015 | Shown when the vendor routes answer VENDOR_SUSPENDED, with the frame's copy; «عرض حالة الطلب» opens `/vendor/application` | A vendor session exists only after approval; suspension is the only vendor-session refusal (copy for a suspended store is an owner decision) |
+| 131:38124 | One note card holding the admin's reason (Figma: three issues with titles and per-issue buttons); its button «تعديل المنتج» opens the form; «حذف المنتج» disabled; no «محاولات الإرسال» row | The API keeps one reason; no submission count; no delete endpoint |
+| 131:38124 | Also shows a rejected edit of a published product (reason of the change request) | State the API has and Figma does not draw |
+| 131:38367 | Approved text without «after editing the images and description» | The API does not say what changed |
+| 131:22954 | «نوع الطلب» is «منتج جديد» or «تعديل منتج» (Figma: also «تعديل صور», «تعديل سعر»); the dialog lists the changed parts; rows 64 high (Figma 72), with a paging footer; the action column has no header | No kind on a change request; prices never go to review; shared DS table |
+| 131:22954 | «معتمدة» and «مرفوضة» list the vendors' published and rejected products, with their creation date and a «عرض» button | No list of decided reviews in the API |
+| 131:22954 | The products list header gets a «طلبات المراجعة» button to reach the queue; the pending count is the badge on «المنتجات» | No side-nav item for the queue in the frame |
+| 131:23859 | Dialog rows: store, category, price from, sizes, cutting, packaging, and «التعديلات» for an edit; the preview is the proposed content for an edit; the chips fill a full sentence; centred vertically | The request's content is what will go live; shared dialog placement |
+| 131:35405 (vendor) | Footer: «إرسال للمراجعة» and «حفظ كمسودة» for a new, draft or rejected product, «حفظ التعديلات» for a published one; read-only (no footer) under review, with a notice; a warning above the footer when a review-sensitive field changes; a notice while an edit waits for review | Vendor products are reviewed (API rules); the task's «will be re-reviewed» warning has no frame |
+
 ## Checks run on the file (2026-11-13)
 - Script lint over all 587 screens after the last changes: no empty or "undefined" text, no text outside its screen, no missing icon.
 - Clipped layouts: a script found 110 auto-layout frames on web and dashboard screens whose content was cut off (among them the whole animal-registration form) and opened them up. 28 small ones remain (tab labels 7 to 9 px taller than their tab, and the Adha settings body).
