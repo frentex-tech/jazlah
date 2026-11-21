@@ -698,6 +698,11 @@
       "title": "Store not found",
       "body": "The link may be wrong, or the application was removed.",
       "action": "Back to stores"
+    },
+    "tabs": {
+      "label": "Store sections",
+      "details": "Store details",
+      "capacity": "Capacity"
     }
   },
   "catalog": {
@@ -1177,6 +1182,230 @@
       "rejected": "{name} rejected; the reason was sent to the vendor",
       "notSubmittable": "The product can't be approved: it has no size or no image.",
       "failed": "Couldn't save the decision. Try again."
+    }
+  },
+  "operations": {
+    "breadcrumb": "Settings / Operations",
+    "title": "Operations settings",
+    "loading": "Loading the operations settings",
+    "tabs": {
+      "label": "Settings pages",
+      "operations": "Operations",
+      "coverage": "Coverage zones"
+    },
+    "pause": {
+      "section": "Taking orders",
+      "badgeOpen": "Orders open",
+      "badgePaused": "Orders paused",
+      "titleOpen": "Taking orders",
+      "titlePaused": "Ordering is paused now",
+      "bodyOpen": "The store takes orders as usual. Pause at once when needed and customers will see a message.",
+      "bodyPaused": "Customers see the pause message and cannot complete an order. Switch it off to take orders again at once.",
+      "switch": "Pause orders",
+      "headerSwitch": "Pause all orders",
+      "messageAr": "Message customers see (Arabic)",
+      "messageEn": "Message in English",
+      "messageHint": "Shown at the top of checkout while paused (FR-SCH-07)",
+      "confirmTitle": "Pause orders?",
+      "confirmBody": "Customers will see the pause message at once and cannot complete an order until you resume.",
+      "confirm": "Pause now",
+      "resumeTitle": "Resume orders?",
+      "resumeBody": "The pause message goes away and customers can complete orders at once.",
+      "resume": "Resume now",
+      "pausedToast": "Orders are paused",
+      "resumedToast": "Orders resumed",
+      "banner": "Ordering is paused. Customers see: “{message}”",
+      "failed": "Could not change ordering. Try again.",
+      "denied": "You are not allowed to pause orders."
+    },
+    "hours": {
+      "title": "Working hours",
+      "body": "Set the days and hours delivery and pickup are taken.",
+      "open": "{day} · open",
+      "closed": "{day} · closed",
+      "from": "From",
+      "to": "To",
+      "startLabel": "{day}: from",
+      "endLabel": "{day}: to",
+      "days": {
+        "sat": "Saturday",
+        "sun": "Sunday",
+        "mon": "Monday",
+        "tue": "Tuesday",
+        "wed": "Wednesday",
+        "thu": "Thursday",
+        "fri": "Friday"
+      }
+    },
+    "capacity": {
+      "title": "Daily capacity and order cutoffs",
+      "body": "The most orders and carcasses a day, and the last time to order for each type.",
+      "orders": "Most orders a day",
+      "carcasses": "Most carcasses a day",
+      "hint": "The day closes on its own once reached",
+      "cutoff": "Order cutoff: {type}",
+      "lead": "Days ahead: {type}",
+      "leadHint": "0 = same-day orders allowed",
+      "timezone": "All times are Riyadh time (Asia/Riyadh, UTC+3) and computed on the server."
+    },
+    "types": {
+      "ready_meat": "Ready meat",
+      "carcass": "Carcass",
+      "cooked": "Cooking",
+      "occasion": "Occasion"
+    },
+    "riyadh": "Riyadh time",
+    "closed": {
+      "title": "Closed days",
+      "body": "Close given days for delivery and pickup (holidays, Eid, operations).",
+      "legend": "Legend",
+      "legendItems": {
+        "closed": "Closed: store holiday",
+        "full": "Full: no capacity left",
+        "cutoff": "Ordering time is over for this day"
+      },
+      "month": "Closed days this month",
+      "none": "No closed days this month",
+      "add": "Add closed day",
+      "prev": "Previous month",
+      "next": "Next month",
+      "remove": "Remove {day}",
+      "closeDay": "Close {day}",
+      "closedMark": "closed",
+      "scope": {
+        "delivery": "Delivery only",
+        "pickup": "Pickup only"
+      },
+      "scopes": {
+        "both": "Delivery and pickup",
+        "delivery": "Delivery only",
+        "pickup": "Pickup only"
+      },
+      "dialog": {
+        "title": "Add a closed day",
+        "date": "Date",
+        "scope": "What closes",
+        "reasonAr": "Reason in Arabic",
+        "reasonEn": "Reason in English",
+        "confirm": "Add",
+        "taken": "This day is closed already"
+      }
+    },
+    "delivery": {
+      "title": "Delivery windows",
+      "body": "One daily delivery window, and how many days ahead customers can book.",
+      "start": "Delivery window start",
+      "end": "Delivery window end",
+      "horizon": "Days open for booking",
+      "horizonHint": "Shown to the customer in the days strip",
+      "preview": "What the customer sees",
+      "previewText": "Arrives between {from} and {to} {period, select, am {AM} other {PM}}"
+    },
+    "fees": {
+      "title": "Minimum order and delivery fee",
+      "body": "Shown to the customer in the cart and at checkout, VAT included.",
+      "minOrder": "Minimum order (SAR)",
+      "minOrderHint": "An order below it cannot be completed",
+      "fee": "Delivery fee (SAR)",
+      "feeHint": "Added only when delivery is chosen"
+    },
+    "cod": {
+      "title": "Cash on delivery",
+      "body": "When the customer may pay cash on delivery.",
+      "enabled": "Allow cash on delivery",
+      "max": "Largest order (SAR)",
+      "maxHint": "Leave empty for no limit",
+      "confirmation": "Order confirmation",
+      "confirmationHint": {
+        "auto": "The order is confirmed on its own",
+        "review": "The team reviews the order before confirming it"
+      },
+      "auto": "Automatic",
+      "review": "Team review",
+      "types": "Order types allowed"
+    },
+    "complaints": {
+      "title": "Complaint window",
+      "body": "How long after an order the customer can file a complaint.",
+      "hours": "Complaint window (hours)",
+      "hint": "Counted from delivery"
+    },
+    "save": "Save changes",
+    "cancel": "Cancel",
+    "saved": "Operations settings saved",
+    "failed": "Could not save the settings. Try again.",
+    "invalid": "Check the fields marked in red.",
+    "error": {
+      "title": "Could not load the operations settings",
+      "body": "The data could not be loaded. Try again.",
+      "action": "Try again"
+    },
+    "denied": {
+      "title": "You are not allowed to edit the operations settings",
+      "body": "Contact the account manager for access.",
+      "action": "Back"
+    },
+    "errors": {
+      "time": "Enter a valid 24-hour time",
+      "endBeforeStart": "The end must be after the start",
+      "positive": "The limit must be more than zero",
+      "leadDays": "Enter 0 to 30 days",
+      "amount": "Enter a valid amount in SAR",
+      "horizon": "Enter 1 to 60 days",
+      "hours": "Enter 1 to 720 hours",
+      "message": "Write the message (200 characters at most)",
+      "reason": "Write the reason (100 characters at most)",
+      "notPast": "A past day cannot be chosen",
+      "closedDay": "Choose a valid date",
+      "invalid": "Invalid value"
+    }
+  },
+  "vendorCapacity": {
+    "loading": "Loading the store capacity",
+    "failed": "Could not save the capacity. Try again.",
+    "saved": "Store default capacity saved",
+    "daySaved": "Date capacity saved",
+    "dayRemoved": "Date removed",
+    "platformHint": "Leave empty to use the platform capacity ({n})",
+    "platformHintGeneric": "Leave empty to use the platform capacity",
+    "useDefault": "Default",
+    "date": "Date",
+    "ordersLimit": "Orders limit",
+    "carcassesLimit": "Carcasses limit",
+    "booked": "Booked",
+    "bookedValue": "{orders} orders · {carcasses} carcasses",
+    "default": {
+      "title": "Store default capacity",
+      "body": "Replaces the platform's daily capacity for this store.",
+      "ordersPerDay": "Most orders a day",
+      "carcassesPerDay": "Most carcasses a day",
+      "save": "Save capacity"
+    },
+    "days": {
+      "title": "Specific dates",
+      "body": "A different capacity for one day (occasion, Eid, maintenance). It comes before the default.",
+      "empty": "No specific dates",
+      "add": "Add date",
+      "remove": "Remove {date}"
+    },
+    "dialog": {
+      "title": "Capacity for a date",
+      "body": "Leave a limit empty to use the store's default capacity.",
+      "date": "Date",
+      "ordersLimit": "Orders limit",
+      "carcassesLimit": "Carcasses limit",
+      "limitHint": "Empty = default capacity",
+      "confirm": "Save"
+    },
+    "error": {
+      "title": "Could not load the store capacity",
+      "body": "The data could not be loaded. Try again.",
+      "action": "Try again"
+    },
+    "denied": {
+      "title": "You are not allowed to edit the store capacity",
+      "body": "Contact the account manager for access.",
+      "action": "Back"
     }
   }
 }

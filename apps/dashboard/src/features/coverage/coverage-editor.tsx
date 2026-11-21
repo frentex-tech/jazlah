@@ -8,6 +8,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { Controller, useForm } from 'react-hook-form';
 import { z } from 'zod';
 import { PageHeader } from '@/components/shell/page-header';
+import { SettingsTabs } from '@/features/operations/settings-tabs';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { ConfirmDialog } from '@/components/ui/confirm-dialog';
@@ -281,6 +282,7 @@ export function CoverageEditor() {
           </>
         }
       />
+      <SettingsTabs current="coverage" />
 
       <div className="relative h-[480px] w-full overflow-hidden rounded-md border border-line bg-sand">
         <ZoneMap
