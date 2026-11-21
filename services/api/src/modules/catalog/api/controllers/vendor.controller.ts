@@ -110,9 +110,9 @@ export class VendorCatalogController {
   @ApiTags(API_TAGS.vendorCatalogLists.name)
   @ApiOperation({
     operationId: 'vendorListCuttingPackagingIncompatibilities',
-    summary: 'The cutting and packaging pairs a product cannot offer',
+    summary: 'The cutting and packaging pairs a customer cannot choose',
     description:
-      'Vendor dashboard, product form. Every global rule whose cutting style is active: a product may offer both, but a customer cannot choose that cutting style with that packaging (refused at the cart with INCOMPATIBLE_CUTTING_PACKAGING; the public product lists the pairs that apply to it), so the form can show which choices customers will not get. Each pair carries the cutting style with its Arabic and English name; oldest rule first. The whole list in one answer, not paged. The rules are managed by admins.',
+      'Vendor dashboard, product form. Every global rule whose cutting style is active: a product may offer both, but a customer cannot choose that cutting style with that packaging (the public product lists the pairs that apply to it; the cart’s line price, CRT-API-1, will refuse them with INCOMPATIBLE_CUTTING_PACKAGING), so the form can show which choices customers will not get. Each pair carries the cutting style with its Arabic and English name; oldest rule first. The whole list in one answer, not paged. The rules are managed by admins.',
   })
   @ApiOkResponse({
     type: VendorIncompatibilityListResponseDto,

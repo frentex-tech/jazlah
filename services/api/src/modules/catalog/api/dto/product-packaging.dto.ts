@@ -10,7 +10,7 @@ export class ProductPackagingDto {
     enum: PRODUCT_PACKAGINGS,
     example: 'vacuum',
     description:
-      'The packaging: `trays`, `bags`, `vacuum`, `none`. A cutting style and a packaging an admin rule forbids together may both be offered: customers cannot choose the pair (INCOMPATIBLE_CUTTING_PACKAGING at the cart).',
+      'The packaging: `trays`, `bags`, `vacuum`, `none`. A cutting style and a packaging an admin rule forbids together may both be offered: customers cannot choose the pair (the cart’s line price, CRT-API-1, will refuse it with INCOMPATIBLE_CUTTING_PACKAGING).',
   })
   @IsIn(PRODUCT_PACKAGINGS)
   packaging!: ProductPackaging;

@@ -241,7 +241,7 @@ export class AdminCatalogController {
     operationId: 'adminCreateCuttingPackagingIncompatibility',
     summary: 'Forbid a cutting style with a packaging',
     description:
-      'Admin dashboard, catalog settings. Adds a global rule: customers may not choose this cutting style together with this packaging. Products keep offering both (publishing is not blocked); the public product lists the pairs that apply to it, and a cart line with the pair is refused (INCOMPATIBLE_CUTTING_PACKAGING), at once for every product. ' +
+      'Admin dashboard, catalog settings. Adds a global rule: customers may not choose this cutting style together with this packaging. Products keep offering both (publishing is not blocked); the public product lists the pairs that apply to it, and the cart’s line price (CRT-API-1) will refuse the pair (INCOMPATIBLE_CUTTING_PACKAGING), at once for every product. ' +
       'Errors: VALIDATION_FAILED `isActiveCuttingStyle` when the cutting style is not an active entry; CONFLICT when the same rule exists already.',
   })
   @ApiCreatedResponse({

@@ -19,6 +19,43 @@ import {
 const vendorScope = { kind: 'vendor', vendorId: VENDOR } as const;
 
 describe('UpdateProductContentUseCase', () => {
+  it('keeps a switched-off size switched off through a content save; a new size starts available', async () => {
+    const kit = buildCatalogUseCases();
+    seedCatalog(kit);
+    const draft = await vendorDraft(kit);
+    const sizeId = draft.product.sizes[0]?.id ?? '';
+    const switched = await kit.setAvailability.execute({
+      scope: vendorScope,
+      productId: draft.product.id,
+      isAvailable: true,
+      sizes: [{ sizeId, isAvailable: false }],
+    });
+    const live = Product.contentOf(switched.product);
+
+    const view = await kit.updateContent.execute({
+      scope: vendorScope,
+      actorId: VENDOR_USER,
+      productId: draft.product.id,
+      content: {
+        ...live,
+        sizes: [
+          ...live.sizes,
+          {
+            id: null,
+            approxWeightGrams: 12_000,
+            price: Money.of(120_000),
+            tag: null,
+          },
+        ],
+      },
+    });
+
+    expect(view.product.sizes.map((size) => size.isAvailable)).toEqual([
+      false,
+      true,
+    ]);
+  });
+
   it('saves a draft at once, keeping a size by id and the lowest price in step', async () => {
     const kit = buildCatalogUseCases();
     seedCatalog(kit);

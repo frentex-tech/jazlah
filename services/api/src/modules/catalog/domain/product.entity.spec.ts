@@ -75,7 +75,7 @@ const errorOf = (work: () => void): unknown => {
 describe('Product', () => {
   describe('assertSubmittable', () => {
     it('accepts a size and an image, whatever the cutting and packaging rules', () => {
-      // The rules constrain the customer's choice (priceLine), never the product.
+      // The rules constrain the customer's choice (the line price), never the product.
       expect(errorOf(() => Product.assertSubmittable(CONTENT))).toBeNull();
     });
 
