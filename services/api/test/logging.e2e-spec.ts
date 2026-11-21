@@ -96,14 +96,17 @@ describe('Secrets and personal data in request logs (e2e)', () => {
     });
 
     it('log the path of a request without its query string', async () => {
+      // Markers no port, request id or timing can contain by chance: a short number such
+      // as 4321 appeared in the ephemeral port of the Host header about once in 1,500 runs.
       const line = await loggedLine(
-        '/v1/health?token=SECRET-e2e-123&otp=4321',
+        '/v1/health?token=SECRET-e2e-123&otp=otp-e2e-secret',
         200,
       );
       show('query string', line);
-      expect(line).toMatchObject({ req: { url: '/v1/health' } });
+      expect(Reflect.get(Object(line.req), 'url')).toBe('/v1/health');
+      expect(Object(line.req)).not.toHaveProperty('query');
       expect(JSON.stringify(line)).not.toContain('SECRET-e2e-123');
-      expect(JSON.stringify(line)).not.toContain('4321');
+      expect(JSON.stringify(line)).not.toContain('otp-e2e-secret');
     });
 
     it('log the client address from req.ip and only allowlisted headers', async () => {
