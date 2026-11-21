@@ -885,6 +885,17 @@ describe('validateEnv', () => {
       expect(env.STORAGE_PROVIDER).toBe('disabled');
     });
 
+    it('keeps a storage value that is set, and fills an empty one, with storage disabled', () => {
+      const env = validateEnv({
+        ...STAGING,
+        STORAGE_PROVIDER: 'disabled',
+        STORAGE_PUBLIC_BUCKET: 'jazla-staging-public-x',
+        STORAGE_ACCESS_KEY_ID: '',
+      });
+      expect(env.STORAGE_PUBLIC_BUCKET).toBe('jazla-staging-public-x');
+      expect(env.STORAGE_ACCESS_KEY_ID).toBe('none');
+    });
+
     it('refuses disabled storage in production', () => {
       expect(
         problemsOf({ ...PRODUCTION, STORAGE_PROVIDER: 'disabled' }),
@@ -896,7 +907,9 @@ describe('validateEnv', () => {
     it('still requires every storage variable for s3', () => {
       expect(
         problemsOf({ ...STAGING, STORAGE_PUBLIC_BASE_URL: undefined }),
-      ).toHaveLength(1);
+      ).toEqual([
+        'STORAGE_PUBLIC_BASE_URL: required: expected an http:// or https:// URL with no query, fragment, credentials or trailing slash',
+      ]);
     });
 
     it('gives staging no SMS provider when SMS_PROVIDERS is unset, as production', () => {
