@@ -2851,6 +2851,174 @@ abstract class AppLocalizations {
   /// In ar, this message translates to:
   /// **'اكتمل هذا اليوم، اختر يومًا آخر.'**
   String get errDayFull;
+
+  /// No description provided for @reviewTitle.
+  ///
+  /// In ar, this message translates to:
+  /// **'الدفع والمراجعة'**
+  String get reviewTitle;
+
+  /// No description provided for @reviewItemsFrom.
+  ///
+  /// In ar, this message translates to:
+  /// **'{count, plural, =1{منتج واحد من {vendor}} =2{منتجان من {vendor}} few{{count} منتجات من {vendor}} many{{count} منتجًا من {vendor}} other{{count} منتج من {vendor}}}'**
+  String reviewItemsFrom(int count, String vendor);
+
+  /// No description provided for @reviewDeliveryTo.
+  ///
+  /// In ar, this message translates to:
+  /// **'توصيل إلى {place}'**
+  String reviewDeliveryTo(String place);
+
+  /// No description provided for @reviewPickupFrom.
+  ///
+  /// In ar, this message translates to:
+  /// **'استلام من {place}'**
+  String reviewPickupFrom(String place);
+
+  /// No description provided for @reviewPaymentMethod.
+  ///
+  /// In ar, this message translates to:
+  /// **'طريقة الدفع'**
+  String get reviewPaymentMethod;
+
+  /// No description provided for @reviewTerms.
+  ///
+  /// In ar, this message translates to:
+  /// **'بتأكيد الطلب فأنت توافق على الشروط والأحكام وسياسة الإلغاء.'**
+  String get reviewTerms;
+
+  /// No description provided for @reviewConfirm.
+  ///
+  /// In ar, this message translates to:
+  /// **'تأكيد الطلب'**
+  String get reviewConfirm;
+
+  /// No description provided for @payMadaCard.
+  ///
+  /// In ar, this message translates to:
+  /// **'بطاقة مدى'**
+  String get payMadaCard;
+
+  /// No description provided for @payMada.
+  ///
+  /// In ar, this message translates to:
+  /// **'مدى'**
+  String get payMada;
+
+  /// No description provided for @payCard.
+  ///
+  /// In ar, this message translates to:
+  /// **'بطاقة ائتمانية'**
+  String get payCard;
+
+  /// No description provided for @payApplePay.
+  ///
+  /// In ar, this message translates to:
+  /// **'Apple Pay'**
+  String get payApplePay;
+
+  /// No description provided for @payWallet.
+  ///
+  /// In ar, this message translates to:
+  /// **'محفظة جزلة'**
+  String get payWallet;
+
+  /// No description provided for @payCod.
+  ///
+  /// In ar, this message translates to:
+  /// **'الدفع عند الاستلام'**
+  String get payCod;
+
+  /// No description provided for @payEndingIn.
+  ///
+  /// In ar, this message translates to:
+  /// **'تنتهي بـ {last4}'**
+  String payEndingIn(String last4);
+
+  /// No description provided for @payReasonWalletInsufficient.
+  ///
+  /// In ar, this message translates to:
+  /// **'الرصيد غير كافٍ'**
+  String get payReasonWalletInsufficient;
+
+  /// No description provided for @payReasonUnavailable.
+  ///
+  /// In ar, this message translates to:
+  /// **'غير متاح لهذا الطلب'**
+  String get payReasonUnavailable;
+
+  /// No description provided for @errPriceChanged.
+  ///
+  /// In ar, this message translates to:
+  /// **'تغيّرت أسعار بعض المنتجات، راجع سلتك.'**
+  String get errPriceChanged;
+
+  /// No description provided for @errItemUnavailable.
+  ///
+  /// In ar, this message translates to:
+  /// **'بعض المنتجات لم تعد متوفرة، راجع سلتك.'**
+  String get errItemUnavailable;
+
+  /// No description provided for @errMinOrderNotMet.
+  ///
+  /// In ar, this message translates to:
+  /// **'سلتك أقل من الحد الأدنى للطلب.'**
+  String get errMinOrderNotMet;
+
+  /// No description provided for @placedTitle.
+  ///
+  /// In ar, this message translates to:
+  /// **'تم استلام طلبك'**
+  String get placedTitle;
+
+  /// No description provided for @placedNumber.
+  ///
+  /// In ar, this message translates to:
+  /// **'رقم الطلب {number}'**
+  String placedNumber(String number);
+
+  /// No description provided for @placedFresh.
+  ///
+  /// In ar, this message translates to:
+  /// **'ذبح وتجهيز طازج صباح {weekday}'**
+  String placedFresh(String weekday);
+
+  /// No description provided for @placedDateVendor.
+  ///
+  /// In ar, this message translates to:
+  /// **'{date} · بإشراف {vendor}'**
+  String placedDateVendor(String date, String vendor);
+
+  /// No description provided for @placedDeliveryWindow.
+  ///
+  /// In ar, this message translates to:
+  /// **'توصيل بين {start} و{end}'**
+  String placedDeliveryWindow(String start, String end);
+
+  /// No description provided for @placedPickupWindow.
+  ///
+  /// In ar, this message translates to:
+  /// **'استلام بين {start} و{end}'**
+  String placedPickupWindow(String start, String end);
+
+  /// No description provided for @placedTotal.
+  ///
+  /// In ar, this message translates to:
+  /// **'{amount} ر.س شامل الضريبة'**
+  String placedTotal(String amount);
+
+  /// No description provided for @placedTrack.
+  ///
+  /// In ar, this message translates to:
+  /// **'تتبع الطلب'**
+  String get placedTrack;
+
+  /// No description provided for @placedHome.
+  ///
+  /// In ar, this message translates to:
+  /// **'العودة للرئيسية'**
+  String get placedHome;
 }
 
 class _AppLocalizationsDelegate extends LocalizationsDelegate<AppLocalizations> {
