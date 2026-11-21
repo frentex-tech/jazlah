@@ -165,6 +165,20 @@ After the design QA (`reviews/qa-design-mobile-2.md`). Everything else follows F
 | Filters sheet: sort (86-13223) | No sort control | A «الترتيب» chip group in the sheet, shown with the mock only | The task asks for sort and Figma has none. **Figma needs a sort control.** |
 | Store page: name, rating and logo line (118-8184) | Placed at the left (x=17) | Aligned to the start (right in Arabic), as the minimum-order line below it | The frame is laid out left to right in an RTL screen. **Figma needs the frame fixed.** |
 
+## Build differences, Sprint 3 mobile: CRT-MOB-1 cart (pending owner sign-off, not agreed)
+Everything else follows the five cart frames (170-28564, 170-28643, 170-28708, 170-28782, 170-28847).
+
+| Screen (node) | Figma | Build | Why |
+|---|---|---|---|
+| Cart (170-28564, 170-28847) | «ستكسب 338 نقطة» points strip | Left out | Loyalty points are Sprint 6 (LOY-MOB-1 #174); a number with nothing behind it would mislead. |
+| Cart totals (170-28564, 170-28847) | «رسوم التوصيل» row (15.00) counted in the total | Shown and counted only once the fulfilment is delivery | CRT-API-1: the delivery fee is only shown once fulfilment = delivery, which is chosen at checkout (SCH-MOB-1 #71). |
+| Below the minimum (170-28847) | Two lines of text | The same lines plus a thin progress bar (warning on sand) | The task asks for a minimum-order progress bar and the frame has none. **Figma needs the bar or a decision to drop it.** |
+| «استبدال السلة؟» dialog | No frame | The design-system Dialog (title, body naming the current store, «استبدال» and «إلغاء») | No frame for the single-store rule. |
+| Removing a line | No control (the stepper stops at 1) | Swipe the line away (red bin behind it); screen readers get a «حذف» action; an unavailable line's banner has «حذف» | No remove control in the frame. |
+| Issue and merge banners | No frame | A warning (or info) banner above the lines with one action («موافق» takes the new price, «حذف» removes the line) | Price-changed and unavailable lines block checkout and need explaining. |
+| Coupon applied | No frame | The field shows the code, «تم تطبيق الرمز …» under it, the button reads «إزالة»; a «الخصم (CODE)» row in the totals | No applied or error state for the coupon field; errors use the field's error state. |
+| Add to cart success (product page) | No frame | The design-system success toast «أُضيفت القطعة إلى السلة» and the header badge count | No frame. |
+
 ## Checks run on the file (2026-11-13)
 - Script lint over all 587 screens after the last changes: no empty or "undefined" text, no text outside its screen, no missing icon.
 - Clipped layouts: a script found 110 auto-layout frames on web and dashboard screens whose content was cut off (among them the whole animal-registration form) and opened them up. 28 small ones remain (tab labels 7 to 9 px taller than their tab, and the Adha settings body).

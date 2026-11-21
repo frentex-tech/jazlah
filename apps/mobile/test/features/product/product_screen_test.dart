@@ -111,7 +111,7 @@ void main() {
     expect(find.text('94.00 ر.س'), findsOneWidget);
   });
 
-  testWidgets('add without a cut: red hint at the cut section; with one: the cart placeholder', (t) async {
+  testWidgets('add without a cut: red hint at the cut section; with one: added to the cart', (t) async {
     await _pump(t);
     await t.tap(find.text('أضف إلى السلة'));
     await t.pumpAndSettle();
@@ -122,7 +122,8 @@ void main() {
     expect(find.text('اختر طريقة التقطيع قبل الإضافة إلى السلة'), findsNothing);
     await t.tap(find.text('أضف إلى السلة'));
     await t.pump();
-    expect(find.byType(JToast), findsOneWidget);
+    await t.pump();
+    expect(find.text('أُضيفت القطعة إلى السلة'), findsOneWidget);
   });
 
   testWidgets('out of stock: notice, disabled "unavailable" button, total 0.00', (t) async {
@@ -140,7 +141,7 @@ void main() {
     expect(t.widget<JStepper>(find.byType(JStepper, skipOffstage: false)).onChanged, isNull);
   });
 
-  testWidgets('the header cart opens the cart placeholder', (t) async {
+  testWidgets('the header cart opens the cart', (t) async {
     await _pump(t);
     await t.tap(find.bySemanticsLabel('السلة'));
     await t.pumpAndSettle();

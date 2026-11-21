@@ -150,7 +150,20 @@ The product page reads one public product (images, sizes, cuts, packagings, excl
 | A name for every cut in the public product | Product: cut list | A cut without a name is left out rather than shown by its id | CAT-API-5 #50 |
 | A design for the fulfilment badge (delivery, pickup or both) | Product: the badge the task Output asks for | The value is read from the product and kept, nothing is drawn until the badge is designed | Design gap |
 | "Notify me when back in stock" (stock alerts) | Product: out-of-stock notice | The notice says only that the product is unavailable; the design's "you can ask to be notified" sentence is left out until the feature exists | API gap |
-| The cart | Product: "Add to cart" | Shows a "cart coming soon" message; nothing is kept | CRT-MOB-1 #64 |
+
+### Cart (CRT-MOB-1 #64)
+
+The cart follows the CRT-API-1 / CRT-API-3 shapes of sprint-3.md (lines with the unit price when added, totals subtotal, discount, delivery fee, total, VAT included, minimum order, minimum-order remaining, can-checkout and issues). Every line and total is priced with the app's one price function. A guest's cart is kept on the device and merged into the account cart after sign-in (merge route with the guest lines; same store or an empty account cart sums the same choices, another store is replaced and the user is told, lines that cannot be bought are skipped and counted). With the mock switch on, an in-memory account cart applies the server rules, re-prices against the mock catalog on every read, and uses a minimum order of 100.00 and a delivery fee of 15.00. Mock coupons: JAZLA10 (10%, valid), EID25 (expired), BIG50 (minimum order 300.00), FALAH15 (Al Falah only), WELCOME5 (limit reached); any other code is not found.
+
+| Gap | Screen waiting on it | The app today | Issue |
+|---|---|---|---|
+| The cart routes (read, add with replace, change, remove, clear, merge) | Cart; product «أضف إلى السلة»; header badge | Real builds keep everyone's cart on the device, priced from the public product; the mock switch uses the in-memory account cart | CRT-API-1 #61 |
+| The current store's name in the store-mismatch refusal (409) | «استبدال السلة؟» dialog | The API message is shown when it comes; otherwise the app names the store of the cart's products | CRT-API-1 #61 |
+| A name for the unavailable-line issue code, and the line fields of the cart answer (product name, image, size weight, cut name) | Cart lines and banners | The app's names (an unavailable line is flagged as item unavailable); line details come from the product | CRT-API-1 #61 |
+| How a price-changed issue is cleared | Cart: price banner «موافق» | The app changes the line with its same quantity and the mock then takes today's price | CRT-API-1 #61 |
+| Coupon routes and the five coupon error codes | Cart: coupon field | Mock only; the field is hidden for the device cart (guests and real builds) | CRT-API-3 #62 |
+| Minimum order and delivery fee (public client settings) | Cart: minimum-order line and bar, delivery fee, checkout | Hidden in real builds and checkout is not offered there («الدفع من التطبيق قادم قريبًا»); the mock uses 100.00 and 15.00 | SCH-API-1 #68 |
+| Fulfilment on the cart | Cart: the delivery fee row | Not shown until fulfilment is delivery (chosen at checkout) | SCH-API-2 #69, SCH-MOB-1 #71 |
 
 ### Search and filters (STF-MOB-4 #57)
 

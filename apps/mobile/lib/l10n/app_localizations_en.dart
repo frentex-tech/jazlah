@@ -1233,11 +1233,136 @@ class AppLocalizationsEn extends AppLocalizations {
   String get productChooseCut => 'Choose a cut before adding to the cart';
 
   @override
-  String get productCartSoon => 'The cart is coming soon; nothing was added yet.';
-
-  @override
   String get productErrorTitle => 'Couldn\'t load the product';
 
   @override
   String get productErrorBody => 'Something went wrong while loading the product. Try again.';
+
+  @override
+  String get productAdded => 'Added to your cart';
+
+  @override
+  String get checkoutTitle => 'Payment and review';
+
+  @override
+  String get cartReplaceTitle => 'Replace your cart?';
+
+  @override
+  String cartReplaceBody(String vendor) {
+    return 'Your cart has products from $vendor. A cart holds one store, so adding this product empties it and starts a new one.';
+  }
+
+  @override
+  String get cartAnotherStore => 'another store';
+
+  @override
+  String get cartReplace => 'Replace';
+
+  @override
+  String get cartEmptyTitle => 'Your cart is empty';
+
+  @override
+  String get cartEmptyBody => 'Add products from the stores and we\'ll prepare them fresh for you.';
+
+  @override
+  String get cartBrowse => 'Browse products';
+
+  @override
+  String get cartErrorTitle => 'Couldn\'t load your cart';
+
+  @override
+  String get cartErrorBody => 'Check your connection and try again.';
+
+  @override
+  String cartMinOrder(String amount) {
+    return 'Minimum order $amount SAR';
+  }
+
+  @override
+  String cartMinOrderRemaining(String amount) {
+    return 'Add $amount SAR more to complete your order.';
+  }
+
+  @override
+  String get cartCouponLabel => 'Discount code · optional';
+
+  @override
+  String get cartCouponPlaceholder => 'Enter a discount code';
+
+  @override
+  String get cartCouponApply => 'Apply';
+
+  @override
+  String get cartCouponRemove => 'Remove';
+
+  @override
+  String cartCouponApplied(String code) {
+    return 'Code $code applied';
+  }
+
+  @override
+  String get cartSubtotal => 'Subtotal';
+
+  @override
+  String get cartDiscount => 'Discount';
+
+  @override
+  String get cartDeliveryFee => 'Delivery fee';
+
+  @override
+  String get cartVat => 'Including 15% VAT';
+
+  @override
+  String get cartTotal => 'Total';
+
+  @override
+  String get cartCheckout => 'Continue to payment';
+
+  @override
+  String get cartCheckoutSoon => 'Checkout is coming soon; your cart is saved on this device.';
+
+  @override
+  String get cartRemove => 'Remove';
+
+  @override
+  String get cartUnavailable => 'Unavailable';
+
+  @override
+  String get cartItemGone => 'A product no longer available';
+
+  @override
+  String cartIssueUnavailable(String name) {
+    return '“$name” is no longer available. Remove it to complete your order.';
+  }
+
+  @override
+  String cartIssuePrice(String name, String old, String now) {
+    return 'The price of “$name” changed from $old to $now SAR.';
+  }
+
+  @override
+  String get cartIssueAccept => 'OK';
+
+  @override
+  String get cartMergeReplaced => 'Your previous cart was replaced by the products you added before signing in.';
+
+  @override
+  String cartMergeSkipped(int count) {
+    return '$count of your products were not moved because they are no longer available.';
+  }
+
+  @override
+  String get errCouponNotFound => 'This discount code is not valid.';
+
+  @override
+  String get errCouponExpired => 'This discount code has expired.';
+
+  @override
+  String get errCouponMinOrder => 'Your cart is below the minimum for this code.';
+
+  @override
+  String get errCouponNotApplicable => 'This code does not apply to the products in your cart.';
+
+  @override
+  String get errCouponLimitReached => 'This code has reached its usage limit.';
 }

@@ -616,7 +616,99 @@
   "productDeliveryAtCheckout": "يُحسب في الدفع",
   "productUnavailable": "غير متاح",
   "productChooseCut": "اختر طريقة التقطيع قبل الإضافة إلى السلة",
-  "productCartSoon": "السلة قادمة قريبًا، لم تُضَف القطعة بعد.",
   "productErrorTitle": "تعذّر تحميل المنتج",
-  "productErrorBody": "حدث خطأ أثناء جلب تفاصيل المنتج. حاول مرة أخرى."
+  "productErrorBody": "حدث خطأ أثناء جلب تفاصيل المنتج. حاول مرة أخرى.",
+  "productAdded": "أُضيفت القطعة إلى السلة",
+  "checkoutTitle": "الدفع والمراجعة",
+  "cartReplaceTitle": "استبدال السلة؟",
+  "cartReplaceBody": "سلتك فيها منتجات من {vendor}. السلة تجمع متجرًا واحدًا، فإضافة هذا المنتج تفرّغها وتبدأ سلة جديدة.",
+  "@cartReplaceBody": {
+    "placeholders": {
+      "vendor": {
+        "type": "String"
+      }
+    }
+  },
+  "cartAnotherStore": "متجر آخر",
+  "cartReplace": "استبدال",
+  "cartEmptyTitle": "سلتك فارغة",
+  "cartEmptyBody": "أضف منتجات من المتاجر وسنجهّزها لك طازجة.",
+  "cartBrowse": "تصفّح المنتجات",
+  "cartErrorTitle": "تعذّر تحميل السلة",
+  "cartErrorBody": "تحقق من اتصالك ثم حاول مرة أخرى.",
+  "cartMinOrder": "الحد الأدنى للطلب {amount} ر.س",
+  "@cartMinOrder": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "cartMinOrderRemaining": "أضف {amount} ر.س من المنتجات لإكمال طلبك.",
+  "@cartMinOrderRemaining": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "cartCouponLabel": "رمز الخصم · اختياري",
+  "cartCouponPlaceholder": "أدخل رمز الخصم",
+  "cartCouponApply": "تطبيق",
+  "cartCouponRemove": "إزالة",
+  "cartCouponApplied": "تم تطبيق الرمز {code}",
+  "@cartCouponApplied": {
+    "placeholders": {
+      "code": {
+        "type": "String"
+      }
+    }
+  },
+  "cartSubtotal": "المجموع الفرعي",
+  "cartDiscount": "الخصم",
+  "cartDeliveryFee": "رسوم التوصيل",
+  "cartVat": "منها ضريبة القيمة المضافة 15%",
+  "cartTotal": "الإجمالي",
+  "cartCheckout": "متابعة إلى الدفع",
+  "cartCheckoutSoon": "الدفع من التطبيق قادم قريبًا، وسلتك محفوظة على هذا الجهاز.",
+  "cartRemove": "حذف",
+  "cartUnavailable": "غير متوفر",
+  "cartItemGone": "منتج لم يعد متوفرًا",
+  "cartIssueUnavailable": "«{name}» لم يعد متوفرًا. احذفه لإكمال طلبك.",
+  "@cartIssueUnavailable": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "cartIssuePrice": "تغيّر سعر «{name}» من {old} إلى {now} ر.س.",
+  "@cartIssuePrice": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      },
+      "old": {
+        "type": "String"
+      },
+      "now": {
+        "type": "String"
+      }
+    }
+  },
+  "cartIssueAccept": "موافق",
+  "cartMergeReplaced": "استبدلنا سلتك السابقة بالمنتجات التي أضفتها قبل تسجيل الدخول.",
+  "cartMergeSkipped": "لم ننقل {count} من المنتجات لأنها لم تعد متوفرة.",
+  "@cartMergeSkipped": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "errCouponNotFound": "رمز الخصم غير صحيح.",
+  "errCouponExpired": "انتهت صلاحية رمز الخصم.",
+  "errCouponMinOrder": "قيمة سلتك أقل من الحد الأدنى لهذا الرمز.",
+  "errCouponNotApplicable": "هذا الرمز لا ينطبق على منتجات سلتك.",
+  "errCouponLimitReached": "وصل هذا الرمز إلى حد الاستخدام."
 }

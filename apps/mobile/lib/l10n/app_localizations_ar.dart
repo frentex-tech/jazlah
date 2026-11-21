@@ -1237,11 +1237,136 @@ class AppLocalizationsAr extends AppLocalizations {
   String get productChooseCut => 'اختر طريقة التقطيع قبل الإضافة إلى السلة';
 
   @override
-  String get productCartSoon => 'السلة قادمة قريبًا، لم تُضَف القطعة بعد.';
-
-  @override
   String get productErrorTitle => 'تعذّر تحميل المنتج';
 
   @override
   String get productErrorBody => 'حدث خطأ أثناء جلب تفاصيل المنتج. حاول مرة أخرى.';
+
+  @override
+  String get productAdded => 'أُضيفت القطعة إلى السلة';
+
+  @override
+  String get checkoutTitle => 'الدفع والمراجعة';
+
+  @override
+  String get cartReplaceTitle => 'استبدال السلة؟';
+
+  @override
+  String cartReplaceBody(String vendor) {
+    return 'سلتك فيها منتجات من $vendor. السلة تجمع متجرًا واحدًا، فإضافة هذا المنتج تفرّغها وتبدأ سلة جديدة.';
+  }
+
+  @override
+  String get cartAnotherStore => 'متجر آخر';
+
+  @override
+  String get cartReplace => 'استبدال';
+
+  @override
+  String get cartEmptyTitle => 'سلتك فارغة';
+
+  @override
+  String get cartEmptyBody => 'أضف منتجات من المتاجر وسنجهّزها لك طازجة.';
+
+  @override
+  String get cartBrowse => 'تصفّح المنتجات';
+
+  @override
+  String get cartErrorTitle => 'تعذّر تحميل السلة';
+
+  @override
+  String get cartErrorBody => 'تحقق من اتصالك ثم حاول مرة أخرى.';
+
+  @override
+  String cartMinOrder(String amount) {
+    return 'الحد الأدنى للطلب $amount ر.س';
+  }
+
+  @override
+  String cartMinOrderRemaining(String amount) {
+    return 'أضف $amount ر.س من المنتجات لإكمال طلبك.';
+  }
+
+  @override
+  String get cartCouponLabel => 'رمز الخصم · اختياري';
+
+  @override
+  String get cartCouponPlaceholder => 'أدخل رمز الخصم';
+
+  @override
+  String get cartCouponApply => 'تطبيق';
+
+  @override
+  String get cartCouponRemove => 'إزالة';
+
+  @override
+  String cartCouponApplied(String code) {
+    return 'تم تطبيق الرمز $code';
+  }
+
+  @override
+  String get cartSubtotal => 'المجموع الفرعي';
+
+  @override
+  String get cartDiscount => 'الخصم';
+
+  @override
+  String get cartDeliveryFee => 'رسوم التوصيل';
+
+  @override
+  String get cartVat => 'منها ضريبة القيمة المضافة 15%';
+
+  @override
+  String get cartTotal => 'الإجمالي';
+
+  @override
+  String get cartCheckout => 'متابعة إلى الدفع';
+
+  @override
+  String get cartCheckoutSoon => 'الدفع من التطبيق قادم قريبًا، وسلتك محفوظة على هذا الجهاز.';
+
+  @override
+  String get cartRemove => 'حذف';
+
+  @override
+  String get cartUnavailable => 'غير متوفر';
+
+  @override
+  String get cartItemGone => 'منتج لم يعد متوفرًا';
+
+  @override
+  String cartIssueUnavailable(String name) {
+    return '«$name» لم يعد متوفرًا. احذفه لإكمال طلبك.';
+  }
+
+  @override
+  String cartIssuePrice(String name, String old, String now) {
+    return 'تغيّر سعر «$name» من $old إلى $now ر.س.';
+  }
+
+  @override
+  String get cartIssueAccept => 'موافق';
+
+  @override
+  String get cartMergeReplaced => 'استبدلنا سلتك السابقة بالمنتجات التي أضفتها قبل تسجيل الدخول.';
+
+  @override
+  String cartMergeSkipped(int count) {
+    return 'لم ننقل $count من المنتجات لأنها لم تعد متوفرة.';
+  }
+
+  @override
+  String get errCouponNotFound => 'رمز الخصم غير صحيح.';
+
+  @override
+  String get errCouponExpired => 'انتهت صلاحية رمز الخصم.';
+
+  @override
+  String get errCouponMinOrder => 'قيمة سلتك أقل من الحد الأدنى لهذا الرمز.';
+
+  @override
+  String get errCouponNotApplicable => 'هذا الرمز لا ينطبق على منتجات سلتك.';
+
+  @override
+  String get errCouponLimitReached => 'وصل هذا الرمز إلى حد الاستخدام.';
 }
