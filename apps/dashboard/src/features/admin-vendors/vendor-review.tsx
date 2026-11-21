@@ -13,7 +13,9 @@ import { ConfirmDialog } from '@/components/ui/confirm-dialog';
 import { InputField } from '@/components/ui/form-field';
 import { Skeleton } from '@/components/ui/skeleton';
 import { StateCard } from '@/components/ui/state-card';
+import { Tabs } from '@/components/ui/tabs';
 import { toast } from '@/components/ui/toast';
+import { VendorCapacityTab } from '@/features/operations/vendor-capacity';
 import { Link } from '@/i18n/navigation';
 import { ApiError, panelFetch } from '@/lib/panel-fetch';
 import { bpsOf, percentOf, type Application, type ApplicationDetail, type Review, type Vendor } from './types';
@@ -44,6 +46,7 @@ export function VendorReview({ id: routeId }: { id: string }) {
   const [commission, setCommission] = useState('');
   const [reason, setReason] = useState('');
   const [fieldError, setFieldError] = useState<string>();
+  const [tab, setTab] = useState<'details' | 'capacity'>('details');
 
   const fetchReview = useCallback(async (quiet = false) => {
     if (!quiet) setReview('loading');
@@ -170,6 +173,22 @@ export function VendorReview({ id: routeId }: { id: string }) {
   return (
     <>
       {header}
+      {/* SCH-DSH-1: a vendor also has its capacity tab (no frame; built from the DS Tabs). */}
+      {vendor && (
+        <Tabs
+          label={t('tabs.label')}
+          value={tab}
+          onChange={setTab}
+          idPrefix="vendor-tab"
+          controls="vendor-tab-panel"
+          tabs={[{ key: 'details', label: t('tabs.details') }, { key: 'capacity', label: t('tabs.capacity') }]}
+        />
+      )}
+      {vendor && tab === 'capacity' ? (
+        <div id="vendor-tab-panel" role="tabpanel" aria-labelledby="vendor-tab-capacity" className="flex w-full flex-col gap-s24">
+          <VendorCapacityTab vendorId={vendor.id} />
+        </div>
+      ) : (
       <div className="flex w-full items-start gap-s24">
         <div className="flex min-w-0 flex-1 flex-col gap-s24">
           {papers.length > 0 && <DocumentViewer docs={papers} pending={pending} onExpired={() => void fetchReview(true)} />}
@@ -219,6 +238,7 @@ export function VendorReview({ id: routeId }: { id: string }) {
           <Decision review={r} name={name} onOpen={open} />
         </aside>
       </div>
+      )}
 
       <ConfirmDialog
         open={dialog !== null}
