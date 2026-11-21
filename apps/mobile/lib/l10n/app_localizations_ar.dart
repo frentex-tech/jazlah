@@ -1527,4 +1527,123 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get errDayFull => 'اكتمل هذا اليوم، اختر يومًا آخر.';
+
+  @override
+  String get reviewTitle => 'الدفع والمراجعة';
+
+  @override
+  String reviewItemsFrom(int count, String vendor) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count منتج من $vendor',
+      many: '$count منتجًا من $vendor',
+      few: '$count منتجات من $vendor',
+      two: 'منتجان من $vendor',
+      one: 'منتج واحد من $vendor',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String reviewDeliveryTo(String place) {
+    return 'توصيل إلى $place';
+  }
+
+  @override
+  String reviewPickupFrom(String place) {
+    return 'استلام من $place';
+  }
+
+  @override
+  String get reviewPaymentMethod => 'طريقة الدفع';
+
+  @override
+  String get reviewTerms => 'بتأكيد الطلب فأنت توافق على الشروط والأحكام وسياسة الإلغاء.';
+
+  @override
+  String get reviewConfirm => 'تأكيد الطلب';
+
+  @override
+  String get reviewMethodsError => 'تعذّر تحميل طرق الدفع.';
+
+  @override
+  String get payMadaCard => 'بطاقة مدى';
+
+  @override
+  String get payMada => 'مدى';
+
+  @override
+  String get payCard => 'بطاقة ائتمانية';
+
+  @override
+  String get payApplePay => 'Apple Pay';
+
+  @override
+  String get payWallet => 'محفظة جزلة';
+
+  @override
+  String get payCod => 'الدفع عند الاستلام';
+
+  @override
+  String payEndingIn(String last4) {
+    return 'تنتهي بـ $last4';
+  }
+
+  @override
+  String get payReasonWalletInsufficient => 'الرصيد غير كافٍ';
+
+  @override
+  String get payReasonCodAboveLimit => 'الطلب أعلى من الحد المسموح';
+
+  @override
+  String get payReasonUnavailable => 'غير متاح لهذا الطلب';
+
+  @override
+  String get errPriceChanged => 'تغيّرت أسعار بعض المنتجات، راجع سلتك.';
+
+  @override
+  String get errItemUnavailable => 'بعض المنتجات لم تعد متوفرة، راجع سلتك.';
+
+  @override
+  String get errMinOrderNotMet => 'سلتك أقل من الحد الأدنى للطلب.';
+
+  @override
+  String get placedTitle => 'تم استلام طلبك';
+
+  @override
+  String placedNumber(String number) {
+    return 'رقم الطلب $number';
+  }
+
+  @override
+  String placedFresh(String weekday) {
+    return 'ذبح وتجهيز طازج صباح $weekday';
+  }
+
+  @override
+  String placedDateVendor(String date, String vendor) {
+    return '$date · بإشراف $vendor';
+  }
+
+  @override
+  String placedDeliveryWindow(String start, String end) {
+    return 'توصيل بين $start و$end';
+  }
+
+  @override
+  String placedPickupWindow(String start, String end) {
+    return 'استلام بين $start و$end';
+  }
+
+  @override
+  String placedTotal(String amount) {
+    return '$amount ر.س شامل الضريبة';
+  }
+
+  @override
+  String get placedTrack => 'تتبع الطلب';
+
+  @override
+  String get placedHome => 'العودة للرئيسية';
 }

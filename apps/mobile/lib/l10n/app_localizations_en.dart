@@ -1520,4 +1520,121 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get errDayFull => 'This day is full. Choose another one.';
+
+  @override
+  String get reviewTitle => 'Payment and review';
+
+  @override
+  String reviewItemsFrom(int count, String vendor) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count products from $vendor',
+      one: '1 product from $vendor',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String reviewDeliveryTo(String place) {
+    return 'Delivery to $place';
+  }
+
+  @override
+  String reviewPickupFrom(String place) {
+    return 'Pickup from $place';
+  }
+
+  @override
+  String get reviewPaymentMethod => 'Payment method';
+
+  @override
+  String get reviewTerms =>
+      'By confirming the order, you agree to the terms and conditions and the cancellation policy.';
+
+  @override
+  String get reviewConfirm => 'Confirm order';
+
+  @override
+  String get reviewMethodsError => 'Payment methods could not be loaded.';
+
+  @override
+  String get payMadaCard => 'mada card';
+
+  @override
+  String get payMada => 'mada';
+
+  @override
+  String get payCard => 'Credit card';
+
+  @override
+  String get payApplePay => 'Apple Pay';
+
+  @override
+  String get payWallet => 'JAZLA wallet';
+
+  @override
+  String get payCod => 'Cash on delivery';
+
+  @override
+  String payEndingIn(String last4) {
+    return 'ending in $last4';
+  }
+
+  @override
+  String get payReasonWalletInsufficient => 'insufficient balance';
+
+  @override
+  String get payReasonCodAboveLimit => 'order above the allowed limit';
+
+  @override
+  String get payReasonUnavailable => 'not available for this order';
+
+  @override
+  String get errPriceChanged => 'Some prices have changed. Please review your cart.';
+
+  @override
+  String get errItemUnavailable => 'Some products are no longer available. Please review your cart.';
+
+  @override
+  String get errMinOrderNotMet => 'Your cart is below the minimum order.';
+
+  @override
+  String get placedTitle => 'We received your order';
+
+  @override
+  String placedNumber(String number) {
+    return 'Order number $number';
+  }
+
+  @override
+  String placedFresh(String weekday) {
+    return 'Freshly slaughtered and prepared on $weekday morning';
+  }
+
+  @override
+  String placedDateVendor(String date, String vendor) {
+    return '$date · prepared by $vendor';
+  }
+
+  @override
+  String placedDeliveryWindow(String start, String end) {
+    return 'Delivery between $start and $end';
+  }
+
+  @override
+  String placedPickupWindow(String start, String end) {
+    return 'Pickup between $start and $end';
+  }
+
+  @override
+  String placedTotal(String amount) {
+    return '$amount SAR incl. VAT';
+  }
+
+  @override
+  String get placedTrack => 'Track order';
+
+  @override
+  String get placedHome => 'Back to home';
 }

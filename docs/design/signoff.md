@@ -208,6 +208,20 @@ Everything else follows the ten frames (118-9638, 118-9741, 118-9829, 118-10052,
 | Default (118-9638) | Body scrolls to the button | The button stays at the bottom like the other nine frames | The other frames pin it. |
 | Disabled days | Tapping one outlines it and shows the reason card (118-10342 …) | The same, plus a tooltip on long press and the reason in the screen reader label | The task asks every disabled day to explain why. |
 
+## Build differences, Sprint 3 mobile: ORD-MOB-1 review and order placed (pending owner sign-off, not agreed)
+Everything else follows 170-28952, 170-29025 and 170-29472. The processing, payment failed and disabled states of the same screen (170-29134, 170-29244, 170-29357) are PAY-MOB-1 #78.
+
+| Screen (node) | Figma | Build | Why |
+|---|---|---|---|
+| Order placed (170-29472) | «رقم الطلب #10482» | «رقم الطلب JZ-261110-0001» | ORD-API-1 numbers orders JZ-YYMMDD-XXXX. **Figma needs the number format.** |
+| Order placed (170-29472) | «كسبت 338 نقطة بهذا الطلب» and «انشر قصة استلامك واكسب 50 نقطة» strips | Left out (the free space goes to the spacers) | Loyalty points and stories are Sprint 6 (LOY-MOB-1 #174, STY-MOB-1 #177); a number with nothing behind it would mislead. |
+| Order placed (170-29472) | Payment line «مدى · تنتهي بـ 4821» | The method the order was placed with | In this build only cash on delivery and wallet-only orders reach the screen; card orders go to the payment step (PAY-MOB-1 #78). |
+| Review (170-28952, 170-29025) | The two states draw the same picture (mada chosen) | The first method the order may use is chosen until the customer picks another | Figma shows a method chosen by default. |
+| Review (170-28952) | Window «4:00 – 6:00 م» | The day's window from the server (the default 16:00 to 22:00 reads «4:00 – 10:00 م») | Data, not design (SCH-API-1 default window). |
+| Review (170-28952) | No notes or coupon field, terms as one line | Same: no order notes field (each cart line has its notes), the coupon stays in the cart (the «الخصم (CODE)» row shows in the totals when one is applied), terms accepted by confirming | The task lists notes, coupon and terms acceptance; Figma covers them this way. |
+| Review (170-28952) | Terms line on one line | Wraps to two lines | Readex Pro is wider than Thmanyah. |
+| Review: refusals | No frame | The error toast, then back to checkout step 1 (day full, address not covered, paused) or to the cart (price changed, coupon) | ORD-MOB-1 acceptance: send the user back to the right step. |
+
 ## Checks run on the file (2026-11-13)
 - Script lint over all 587 screens after the last changes: no empty or "undefined" text, no text outside its screen, no missing icon.
 - Clipped layouts: a script found 110 auto-layout frames on web and dashboard screens whose content was cut off (among them the whole animal-registration form) and opened them up. 28 small ones remain (tab labels 7 to 9 px taller than their tab, and the Adha settings body).
