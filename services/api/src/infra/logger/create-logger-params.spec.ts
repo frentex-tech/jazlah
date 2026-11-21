@@ -10,7 +10,12 @@ function optionsFor(
   prettyInstalled = true,
 ): Options {
   const params = createLoggerParams(
-    { nodeEnv, port: 3000, shutdownDeadlineMs: 28_000 },
+    {
+      nodeEnv,
+      deploymentEnv: 'development',
+      port: 3000,
+      shutdownDeadlineMs: 28_000,
+    },
     { level: 'debug' },
     () => prettyInstalled,
   );
@@ -56,7 +61,12 @@ describe('createLoggerParams', () => {
 
   it('resolves pino-pretty by default when it is installed', () => {
     const params = createLoggerParams(
-      { nodeEnv: 'development', port: 3000, shutdownDeadlineMs: 28_000 },
+      {
+        nodeEnv: 'development',
+        deploymentEnv: 'development',
+        port: 3000,
+        shutdownDeadlineMs: 28_000,
+      },
       { level: 'info' },
     );
     expect((params.pinoHttp as Options).transport).toMatchObject({
@@ -94,7 +104,12 @@ describe('createLoggerParams', () => {
 
   it('is not silent in test when a destination captures the lines', () => {
     const params = createLoggerParams(
-      { nodeEnv: 'test', port: 3000, shutdownDeadlineMs: 28_000 },
+      {
+        nodeEnv: 'test',
+        deploymentEnv: 'development',
+        port: 3000,
+        shutdownDeadlineMs: 28_000,
+      },
       { level: 'info' },
       () => false,
       { write: () => undefined },

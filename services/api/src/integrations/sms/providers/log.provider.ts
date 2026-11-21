@@ -5,9 +5,10 @@ import type { SmsMessage, SmsSent } from '../sms.types';
 
 /**
  * Sends nothing: writes the whole message, number and text, to the log, so a developer
- * can read an OTP code locally. The only provider that logs a text. The environment
- * schema refuses it when NODE_ENV is production (SMS_PROVIDERS); the default outside
- * production. It never fails.
+ * can read an OTP code locally or on staging. The only provider that logs a text. The
+ * environment schema refuses it when DEPLOYMENT_ENV is production (SMS_PROVIDERS),
+ * allows it on staging when listed; the default outside NODE_ENV=production. It never
+ * fails.
  */
 export class LogSmsProvider implements SmsPort {
   readonly name = 'log';
@@ -17,7 +18,7 @@ export class LogSmsProvider implements SmsPort {
     const messageId = `log-${randomUUID()}`;
     this.logger.log(
       { messageId, to: message.to, text: message.text },
-      'SMS written to the log instead of sent (development only)',
+      'SMS written to the log instead of sent (development and staging only)',
     );
     return Promise.resolve({ provider: this.name, messageId });
   }

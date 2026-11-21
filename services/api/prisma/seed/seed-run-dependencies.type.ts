@@ -5,6 +5,8 @@ import type { Env } from '@config/env.type';
 export type SeedRunDependencies = Readonly<{
   /** The validated environment. Reading it connects to nothing. */
   loadEnv: () => Promise<Env>;
+  /** Whether the command line has `--allow-staging`: the confirmation a staging run needs. */
+  allowStaging: boolean;
   /** The application context: the step that connects to the database, Redis and storage. */
   createApp: () => Promise<INestApplicationContext>;
   write: (text: string) => void;

@@ -52,7 +52,7 @@ Always loaded: the registry index (imported at the end; its area files are not) 
 | Database | `pnpm db:migrate`, `pnpm db:deploy`, `pnpm db:generate`, `pnpm db:drift` (migrations against the schema; needs `SHADOW_DATABASE_URL`); `pnpm db:reset` drops data: only when the user asks |
 | Run | `pnpm infra:up`, `pnpm start:dev`, then `/v1/health`, `/v1/health/ready`, `/docs` |
 | First admin | `pnpm admin:create <phone>` (grants admin access; idempotent) |
-| Development data | `pnpm db:seed` (local only, refuses production; idempotent; prints the `AUTH_REVIEW_ACCOUNTS` line of the development accounts) |
+| Development data | `pnpm db:seed` (development; refuses production; idempotent; prints the `AUTH_REVIEW_ACCOUNTS` line of the development accounts); on staging only `pnpm db:seed --allow-staging` |
 
 Jest prints `ExperimentalWarning: VM Modules`: expected. If a check you need has no command here, report it under "Not verified"; do not invent one.
 

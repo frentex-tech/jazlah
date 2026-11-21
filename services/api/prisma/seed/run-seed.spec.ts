@@ -3,11 +3,14 @@ import { runSeed } from './run-seed';
 import type { SeedRunDependencies } from './seed-run-dependencies.type';
 
 /**
- * The seed's production refusal is checked before anything connects: `createApp` (the
- * Nest context, which opens the database, Redis and storage clients) is the only step
- * that connects, and under NODE_ENV=production it is never called.
+ * The seed's refusal is checked before anything connects: `createApp` (the Nest
+ * context, which opens the database, Redis and storage clients) is the only step that
+ * connects, and it is never called when the run is refused.
  */
-function dependencies(nodeEnv: Env['NODE_ENV']) {
+function dependencies(
+  deploymentEnv: Env['DEPLOYMENT_ENV'],
+  allowStaging: boolean,
+) {
   const errors: string[] = [];
   const createApp = jest.fn<ReturnType<SeedRunDependencies['createApp']>, []>(
     () => Promise.reject(new Error('createApp called: it would connect')),
@@ -15,7 +18,13 @@ function dependencies(nodeEnv: Env['NODE_ENV']) {
   const run: SeedRunDependencies = {
     // A unit test's partial double: only the fields runSeed reads before createApp.
     loadEnv: () =>
-      Promise.resolve({ NODE_ENV: nodeEnv, AUTH_OTP_LENGTH: 6 } as Env),
+      Promise.resolve({
+        NODE_ENV:
+          deploymentEnv === 'development' ? 'development' : 'production',
+        DEPLOYMENT_ENV: deploymentEnv,
+        AUTH_OTP_LENGTH: 6,
+      } as Env),
+    allowStaging,
     createApp,
     write: () => undefined,
     writeError: (text) => {
@@ -26,23 +35,49 @@ function dependencies(nodeEnv: Env['NODE_ENV']) {
 }
 
 describe('runSeed', () => {
-  it('refuses NODE_ENV=production with exit code 1, before anything connects', async () => {
-    const { run, createApp, errors } = dependencies('production');
+  it.each([false, true])(
+    'refuses DEPLOYMENT_ENV=production with exit code 1 before anything connects (--allow-staging: %p)',
+    async (allowStaging) => {
+      const { run, createApp, errors } = dependencies(
+        'production',
+        allowStaging,
+      );
+
+      await expect(runSeed(run)).resolves.toBe(1);
+
+      expect(createApp).not.toHaveBeenCalled();
+      expect(errors.join('')).toContain(
+        'pnpm db:seed refused: DEPLOYMENT_ENV is production',
+      );
+    },
+  );
+
+  it('refuses staging without --allow-staging with exit code 1, before anything connects', async () => {
+    const { run, createApp, errors } = dependencies('staging', false);
 
     await expect(runSeed(run)).resolves.toBe(1);
 
     expect(createApp).not.toHaveBeenCalled();
     expect(errors.join('')).toContain(
-      'pnpm db:seed refused: NODE_ENV is production',
+      'pnpm db:seed refused: DEPLOYMENT_ENV is staging',
     );
   });
 
-  it('starts the application, which connects, outside production', async () => {
-    const { run, createApp, errors } = dependencies('development');
+  it.each([
+    ['staging', true],
+    ['development', false],
+  ] as const)(
+    'starts the application, which connects, on %s (--allow-staging: %p)',
+    async (deploymentEnv, allowStaging) => {
+      const { run, createApp, errors } = dependencies(
+        deploymentEnv,
+        allowStaging,
+      );
 
-    await expect(runSeed(run)).rejects.toThrow('createApp called');
+      await expect(runSeed(run)).rejects.toThrow('createApp called');
 
-    expect(createApp).toHaveBeenCalledTimes(1);
-    expect(errors).toEqual([]);
-  });
+      expect(createApp).toHaveBeenCalledTimes(1);
+      expect(errors).toEqual([]);
+    },
+  );
 });

@@ -12,8 +12,10 @@ import { SeedModule } from './seed.module';
  * state, vendor applications in every status with their documents, customers with
  * profiles, addresses and consent, and one development account per audience.
  *
- * Refuses NODE_ENV=production before touching anything (exit code 1; runSeed, proven
- * by run-seed.spec.ts). Idempotent: it creates only what is missing and writes the same
+ * Refuses DEPLOYMENT_ENV=production before touching anything (exit code 1; runSeed,
+ * proven by run-seed.spec.ts), and staging unless confirmed on the command line:
+ * `pnpm db:seed --allow-staging` (pnpm passes the flag on to this script; with
+ * `prisma db seed`, `pnpm exec prisma db seed -- --allow-staging`). Idempotent: it creates only what is missing and writes the same
  * objects to the same keys, so a second run changes nothing. It deletes nothing, and
  * updates one thing only: re-granting the development admin re-activates that admin
  * access when it was deactivated (UsersService.grantAdminAccess). It never resets the
@@ -28,6 +30,7 @@ async function main(): Promise<number> {
       await ConfigModule.envVariablesLoaded;
       return loadEnv();
     },
+    allowStaging: process.argv.slice(2).includes('--allow-staging'),
     createApp: () =>
       NestFactory.createApplicationContext(SeedModule, {
         logger: false,
