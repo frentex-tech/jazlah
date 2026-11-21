@@ -96,14 +96,25 @@ describe('Secrets and personal data in request logs (e2e)', () => {
     });
 
     it('log the path of a request without its query string', async () => {
-      const line = await loggedLine(
-        '/v1/health?token=SECRET-e2e-123&otp=4321',
-        200,
-      );
+      // Markers no port, request id or timing can contain by chance: a short number such
+      // as 4321 appeared in the ephemeral port of the Host header about once in 1,500 runs.
+      // `page` is not a secret-like key, so redaction cannot hide a leak of its value.
+      // Found by request id, so a full URL in the line fails on `url`, not on a timeout.
+      const id = 'e2e-query-string-1';
+      const next = lineWithId(id);
+      await request(app.getHttpServer())
+        .get(
+          '/v1/health?token=SECRET-e2e-123&otp=otp-e2e-secret&page=qs-e2e-plain-7f3a',
+        )
+        .set('x-request-id', id)
+        .expect(200);
+      const line = await next;
       show('query string', line);
-      expect(line).toMatchObject({ req: { url: '/v1/health' } });
+      expect(Reflect.get(Object(line.req), 'url')).toBe('/v1/health');
+      expect(Object(line.req)).not.toHaveProperty('query');
       expect(JSON.stringify(line)).not.toContain('SECRET-e2e-123');
-      expect(JSON.stringify(line)).not.toContain('4321');
+      expect(JSON.stringify(line)).not.toContain('otp-e2e-secret');
+      expect(JSON.stringify(line)).not.toContain('qs-e2e-plain-7f3a');
     });
 
     it('log the client address from req.ip and only allowlisted headers', async () => {
