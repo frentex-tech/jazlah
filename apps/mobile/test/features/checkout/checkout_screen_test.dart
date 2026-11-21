@@ -47,7 +47,7 @@ const _farm = Address(
 );
 
 class _Addresses extends MockAddressRepository {
-  _Addresses(List<Address> seed, {this.hangs = false}) : super(seed: seed);
+  _Addresses(List<Address> seed, {this.hangs = false}) : super(seed: [...seed]);
 
   final bool hangs;
 
@@ -63,9 +63,13 @@ class _Checkout extends MockCheckoutRepository {
   ApiError? fail;
   final asked = <Fulfilment>[];
 
+  /// Holds the delivery answers back until completed (a slow response).
+  Completer<void>? deliveryGate;
+
   @override
-  Future<List<CheckoutDay>> days(Fulfilment method) {
+  Future<List<CheckoutDay>> days(Fulfilment method) async {
     asked.add(method);
+    if (method == Fulfilment.delivery) await deliveryGate?.future;
     return fail != null ? Future.error(fail!) : super.days(method);
   }
 }
@@ -81,11 +85,12 @@ Future<ProviderContainer> _pump(
   ApiError? fail,
   bool mocks = true,
   String lang = 'ar',
+  Completer<void>? deliveryGate,
 }) async {
   _cart = MockCartRepository(delay: Duration.zero);
   await _cart.add(kebab.withQuantity(3));
   final book = _Addresses(addresses, hangs: hangs);
-  _checkout = _Checkout(_cart, addresses: book, paused: paused, fail: fail);
+  _checkout = _Checkout(_cart, addresses: book, paused: paused, fail: fail)..deliveryGate = deliveryGate;
   final tokens = MemoryTokens(const AuthTokens(accessToken: 'a', refreshToken: 'r'));
   final c = await t.pumpScreen(
     const CheckoutScreen(),
@@ -157,6 +162,7 @@ void main() {
     await _pump(t, paused: true);
     expect(find.text('الطلبات متوقفة مؤقتًا، سنعود قريبًا'), findsOneWidget);
     expect(find.text(MockCheckoutRepository.pauseMessage.messageAr), findsOneWidget);
+    expect(find.text('دليل الأيام', skipOffstage: false), findsNothing);
     expect(_continue(t), isNull);
   });
 
@@ -223,6 +229,29 @@ void main() {
     await _settle(t);
     // Back to delivery (home), then the work address: each asks again.
     expect(_checkout.asked, [Fulfilment.delivery, Fulfilment.pickup, Fulfilment.delivery, Fulfilment.delivery]);
+  });
+
+  testWidgets('a late answer for the previous method does not replace the new days', (t) async {
+    final slow = Completer<void>();
+    await _pump(t, deliveryGate: slow);
+    await t.tap(find.text('استلام من المتجر'));
+    await _settle(t);
+    expect(find.text('جاهز للاستلام بين 4 و 10 مساءً'), findsOneWidget);
+    slow.complete(); // the delivery days arrive now
+    await _settle(t);
+    expect(find.text('جاهز للاستلام بين 4 و 10 مساءً'), findsOneWidget);
+    expect(find.text('يصل بين 4 و 10 مساءً'), findsNothing);
+  });
+
+  testWidgets('a save refused because the address is gone reloads the book', (t) async {
+    await _pump(t);
+    final deleted = _checkout.addresses.delete('a1'); // on another device
+    await t.pump(const Duration(milliseconds: 500));
+    await deleted;
+    await t.tap(find.text('متابعة إلى الدفع'));
+    await _settle(t);
+    expect(find.text('route:/checkout/review'), findsNothing);
+    expect(find.text('المنزل · حي الملقا'), findsNothing);
   });
 
   testWidgets('continue saves the fulfilment: the cart counts the delivery fee, then the review step', (t) async {

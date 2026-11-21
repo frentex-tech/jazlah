@@ -1420,7 +1420,7 @@ class AppLocalizationsAr extends AppLocalizations {
   String get checkoutNoCoveredTitle => 'لا يوجد عنوان داخل التغطية';
 
   @override
-  String get checkoutNoCoveredBody => 'أضف عنوانًا داخل نطاق التغطية لنوصل لك، أو اختر الاستلام من المتجر.';
+  String get checkoutNoCoveredBody => 'أضف عنوانًا داخل نطاق التغطية لنوصّل لك، أو اختر الاستلام من المتجر.';
 
   @override
   String get checkoutPickupPlace => 'موقع الاستلام';

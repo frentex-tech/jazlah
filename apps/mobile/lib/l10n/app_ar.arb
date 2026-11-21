@@ -762,7 +762,7 @@
   "checkoutDeliveryAddress": "عنوان التوصيل",
   "checkoutOutOfCoverage": "خارج نطاق التغطية",
   "checkoutNoCoveredTitle": "لا يوجد عنوان داخل التغطية",
-  "checkoutNoCoveredBody": "أضف عنوانًا داخل نطاق التغطية لنوصل لك، أو اختر الاستلام من المتجر.",
+  "checkoutNoCoveredBody": "أضف عنوانًا داخل نطاق التغطية لنوصّل لك، أو اختر الاستلام من المتجر.",
   "checkoutPickupPlace": "موقع الاستلام",
   "checkoutPickupHours": "الاستلام من {open} إلى {close}",
   "@checkoutPickupHours": {

@@ -52,8 +52,10 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen> {
       switch (ApiError.from(e).code) {
         case FulfilmentError.orderingPaused:
           ref.invalidate(orderingPauseProvider);
-        case FulfilmentError.addressNotCovered:
+        case FulfilmentError.addressNotCovered || 'NOT_FOUND':
+          // The address left coverage or was deleted: reload the book and choose again.
           ref.invalidate(addressesProvider);
+          if (mounted) setState(() => _addressId = null);
         case FulfilmentError.dayFull || FulfilmentError.notSupported || 'VALIDATION_FAILED':
           ref.invalidate(checkoutDaysProvider);
       }
@@ -71,7 +73,10 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen> {
     final pauseAsync = ref.watch(orderingPauseProvider);
     final pause = pauseAsync.value;
     final method = _method ?? cart.value?.fulfilment?.method ?? Fulfilment.delivery;
-    final loading = !cart.hasValue || (!addresses.hasValue && !addresses.hasError) || pauseAsync.isLoading;
+    final loading =
+        !cart.hasValue ||
+        (!addresses.hasValue && !addresses.hasError) ||
+        (!pauseAsync.hasValue && !pauseAsync.hasError);
 
     final covered = addresses.value?.where((a) => a.covered).toList() ?? const <Address>[];
     String? pick(String? id) => covered.any((a) => a.id == id) ? id : null;
@@ -164,7 +169,7 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen> {
               _ => [
                 _DayStrip(days: days, selected: date, onTap: (d) => setState(() => _date = d)),
                 if (day != null) day.available ? _WindowCard(day: day, method: method) : _ReasonCard(day: day),
-                if (day?.available ?? false) _Legend(days: days),
+                if ((day?.available ?? false) && !paused) _Legend(days: days),
               ],
             },
           ],
@@ -178,7 +183,10 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen> {
         child: Column(
           children: [
             JAppHeader.page(title: l10n.checkoutTitle, cartLabel: l10n.cart, onBack: () => popOrHome(context)),
-            Expanded(child: body),
+            // A save on its way freezes the choices it is saving.
+            Expanded(
+              child: AbsorbPointer(absorbing: _saving, child: body),
+            ),
             Padding(
               padding: EdgeInsets.fromLTRB(
                 JSpace.s16,
@@ -209,7 +217,15 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen> {
 
   List<Widget> _delivery(AsyncValue<List<Address>> addresses, List<Address> covered, String? selected) {
     final l10n = AppLocalizations.of(context);
-    Future<void> add() => addAddress(context, ref);
+    Future<void> add() async {
+      final before = {...?addresses.value?.map((a) => a.id)};
+      await addAddress(context, ref);
+      if (!mounted) return;
+      // A new covered address is the one the customer wants to use.
+      final added = (await ref.read(addressesProvider.future)).where((a) => a.covered && !before.contains(a.id));
+      if (added.isNotEmpty && mounted) setState(() => _addressId = added.first.id);
+    }
+
     if (addresses.hasError && !addresses.isLoading) {
       return [
         _ErrorCard(
@@ -680,7 +696,7 @@ class _DayCell extends StatelessWidget {
     return Semantics(
       button: true,
       selected: chosen,
-      label: [_dayText(context, d), if (!day.available) reasonText].join('، '),
+      label: [_dayText(context, d), if (!day.available) reasonText].join(context.lang == 'en' ? ', ' : '، '),
       excludeSemantics: true,
       child: day.available ? cell : Tooltip(message: reasonText, child: cell),
     );

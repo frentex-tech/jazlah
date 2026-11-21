@@ -2657,7 +2657,7 @@ abstract class AppLocalizations {
   /// No description provided for @checkoutNoCoveredBody.
   ///
   /// In ar, this message translates to:
-  /// **'أضف عنوانًا داخل نطاق التغطية لنوصل لك، أو اختر الاستلام من المتجر.'**
+  /// **'أضف عنوانًا داخل نطاق التغطية لنوصّل لك، أو اختر الاستلام من المتجر.'**
   String get checkoutNoCoveredBody;
 
   /// No description provided for @checkoutPickupPlace.
