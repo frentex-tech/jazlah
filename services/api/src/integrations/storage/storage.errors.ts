@@ -10,7 +10,7 @@ const RETRYABLE_REASONS: readonly StorageFailureReason[] = [
 /**
  * A storage call failed. `retryable` says whether trying the same call again later can
  * succeed (a job retries it; a client sees SERVICE_UNAVAILABLE and may resend). Clients
- * see SERVICE_UNAVAILABLE (503) when retryable, INTERNAL_ERROR (500) when not: neither
+ * see SERVICE_UNAVAILABLE (503) when retryable or `disabled`, INTERNAL_ERROR (500) otherwise: neither
  * is the client's fault. `reason` is for logs (it is in the message, which only the log
  * shows). Providers map every vendor error to one.
  */
@@ -21,7 +21,10 @@ export class StorageError extends AppError {
   constructor(reason: StorageFailureReason, options: { cause?: unknown } = {}) {
     const retryable = RETRYABLE_REASONS.includes(reason);
     super(
-      retryable ? ErrorCode.SERVICE_UNAVAILABLE : ErrorCode.INTERNAL_ERROR,
+      // `disabled` is not retryable, but it is not our error either: the service is off.
+      retryable || reason === 'disabled'
+        ? ErrorCode.SERVICE_UNAVAILABLE
+        : ErrorCode.INTERNAL_ERROR,
       { cause: options.cause },
     );
     this.reason = reason;

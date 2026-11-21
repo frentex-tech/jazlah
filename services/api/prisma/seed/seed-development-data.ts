@@ -2,6 +2,7 @@ import type { CreatePlatformVendorUseCase } from '@modules/vendors';
 import { SEED_PARTNER_VENDORS } from './data/partner-vendors.constants';
 import { SEED_VENDOR_APPLICATIONS } from './data/vendor-applications.constants';
 import { ensureUsers } from './ensure-users';
+import { grantAllPanelsAccess } from './grant-all-panels-access';
 import { grantDevelopmentStaffAccess } from './grant-development-staff-access';
 import { pickId } from './pick-id';
 import type { SeedContext } from './seed-context.type';
@@ -33,6 +34,7 @@ export async function seedDevelopmentData(
 
   const partners = await seedVendors(context, users, adminId);
   const vendorIds = new Map([['platform', platform.vendor.id], ...partners]);
+  await grantAllPanelsAccess(context, users, vendorIds);
   const ownerIds = new Map([
     // The platform's images and products are the admins' work.
     ['platform', adminId],
