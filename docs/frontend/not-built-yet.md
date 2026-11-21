@@ -122,9 +122,9 @@ The app reads the public catalog through one repository. Categories, product lis
 
 | Gap | Screen waiting on it | The app today | Issue |
 |---|---|---|---|
-| A home feed (banners, best sellers, featured, partner stores in one call) | Home | Built from the category list, the first 4 products (not real best sellers) and the first 3 stores; no banners | CAT-API-5 #50; banners CMS-API-1 #162 |
+| A home feed (banners, best sellers, featured, partner stores in one call) | Home | Built from the category list and the first 3 stores; the best sellers section is hidden (no true list yet) and there are no banners | CAT-API-5 #50; banners CMS-API-1 #162 |
 | A "stores near you are paused" flag | Home: closed state | Never shown from the API; the mock can show it | API gap |
-| Filtering home and lists by the customer's location | Home: empty state ("no stores in your area") | Shown only when the catalog has no products and no stores | CAT-API-5 #50 |
+| Filtering home and lists by the customer's location | Home: empty state ("no stores in your area") | Shown only when the catalog has no stores | CAT-API-5 #50 |
 | Sorting product lists (best selling, price up, price down) | Category page: sort chips | Chips hidden with the API; the mock sorts | CAT-API-5 #50 |
 | Store rating and rating count | Home store cards, store page | Hidden | API gap |
 | Store opening hours and open/closed now | Store page: open/closed badge, closed notice, info sheet; products shown unavailable while closed | Hidden; a store is treated as open | API gap |
@@ -145,23 +145,25 @@ The product page reads one public product (images, sizes, cuts, packagings, excl
 | Store rating in the product | Product: rating next to the store name | Hidden | API gap |
 | A default size | Product: the size picked when the page opens | The first size | API gap |
 | A gift box packaging | Product: packaging list (the design shows one) | The API knows trays, bags, vacuum and none; only the mock offers a gift box | API gap |
-| Server price for a product line (pricing route) | Product: total and price details | Computed on the device with the same formula, in one place to swap | CRT-API-1 #61 |
+| Server price for a product line (pricing route) | Product: total and price details | Computed on the device with the same formula, in one place to swap. Error names: the incompatible pair uses the API's INCOMPATIBLE_CUTTING_PACKAGING; product unavailable, size unavailable, option not in product and the missing required cut (OPTION_REQUIRED) are the app's names until the pricing route fixes them | CRT-API-1 #61 |
+| Whether a cut is required when a product offers cuts | Product: "choose a cut" error on add | The device price function treats a cut as required (OPTION_REQUIRED, the total still shows); the server rule is not decided | CRT-API-1 #61 |
+| A name for every cut in the public product | Product: cut list | A cut without a name is left out rather than shown by its id | CAT-API-5 #50 |
 | A design for the fulfilment badge (delivery, pickup or both) | Product: the badge the task Output asks for | The value is read from the product and kept, nothing is drawn until the badge is designed | Design gap |
 | "Notify me when back in stock" (stock alerts) | Product: out-of-stock notice | The notice says only that the product is unavailable; the design's "you can ask to be notified" sentence is left out until the feature exists | API gap |
 | The cart | Product: "Add to cart" | Shows a "cart coming soon" message; nothing is kept | CRT-MOB-1 #64 |
 
 ### Search and filters (STF-MOB-4 #57)
 
-Search reads the public product list with its words, category, store and price range, cursor-paged. Recent searches are kept on the device (8 at most, cleared on sign-out). With the mock switch on, the seeded catalog is searched on the device with the same Arabic folding as the planned server search (no tashkeel or tatweel; أ/إ/آ as ا; ى as ي; ة as ه; English names in any case), so «نعيمى» finds «نعيمي» and "naimi" finds the English name.
+Search reads the public product list with its words, category, store and price range, cursor-paged. Recent searches are kept on the device (8 at most, cleared on sign-out). With the mock switch on, the seeded catalog is searched on the device the way the server searches: the folded query as one phrase inside the folded Arabic and English product names (no tashkeel or tatweel; أ/إ/آ as ا; ى as ي; ة as ه; English in any case), so «نعيمى» finds «نعيمي» and "naimi" finds the English name. Like the server, store names are not searched, words must be in order, and the words are trimmed and searched only from 2 to 100 characters (shorter text shows the start screen). Recent searches drop repeats that fold to the same words.
 
 | Gap | Screen waiting on it | The app today | Issue |
 |---|---|---|---|
 | A result count (and facets per category and store) | Search results: "24 results for …"; filters sheet: "Show 24 results" | No count text; the sheet button reads "Show results" | CAT-API-5 #50 |
-| Popular searches | Search start: "Most searched" | Section hidden | API gap |
+| Popular searches | Search start: "Most searched" | Section hidden | API gap (CAT-API-5 #50) |
 | Sorting search results | Filters sheet: sort chips (the design has no sort control; added as a chip group in the sheet) | Group hidden; the mock sorts | CAT-API-5 #50 |
 | An "available now only" filter | Filters sheet: switch and its chip | Switch hidden; the mock filters | API gap |
 | A public list of meat types | Filters sheet: meat type (not in the design) | Not shown; the product list already accepts a meat type, so it can be added once names can be listed | API gap |
 | Store names for any store id (or the whole store list in one call) | Search: store chips in the filters sheet and the active store chip | Only the first page of stores is offered; a chosen store outside it shows as a generic "Store" chip | API gap |
-| Arabic spelling folding on the server | Search results | The server search decides; only the mock folds on the device | CAT-API-5 #50 |
+| Store names in search (and words in any order) | Search results | Not searched, as on the server; the mock matches the server | CAT-API-5 #50 |
 
 When one of these lands, its endpoints appear in `openapi.json`, and this file and the module guides are updated in the same pull request.

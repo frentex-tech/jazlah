@@ -146,6 +146,18 @@ Agreed by the owner in the Sprint 1 fix round, after the design QA (`reviews/qa-
 | 131:23859 | Dialog rows: store, category, price from, sizes, cutting, packaging, and «التعديلات» for an edit. For an edit the preview is what approval makes live: the proposed content with the live prices of the sizes and options the product already has (new ones at the request's prices), cut names from the cutting styles; the chips fill a full sentence; centred vertically | Approval keeps live prices (API rule) and a request's cuttings carry no names; shared dialog placement |
 | 131:35405 (vendor) | Footer: «إرسال للمراجعة» and «حفظ كمسودة» for a new, draft or rejected product, «حفظ التعديلات» for a published one; read-only (no footer) under review, with a notice; a warning above the footer when a review-sensitive field changes; a notice while an edit waits for review | Vendor products are reviewed (API rules); the task's «will be re-reviewed» warning has no frame |
 
+## Build differences, Sprint 2 mobile: STF-MOB-1, STF-MOB-3, STF-MOB-4 (owner, 2026-11-21)
+After the design QA (`reviews/qa-design-mobile-2.md`). Everything else follows Figma; the M1–M5 and M7 copy and layout findings were fixed in the build. The last two rows need a Figma update.
+
+| Screen (node) | Figma | Build | Why |
+|---|---|---|---|
+| Every price (cards, total bar, price sheet, filter labels) | The Saudi riyal symbol (Thmanyah draws «ر.س» as the glyph) | The letters «ر.س» | Readex Pro has no riyal glyph. Kept until the font decision (Thmanyah licence) at the end of the build. |
+| Home: stories row, points chip, delivery/pickup toggle, cart count (118-6999) | Drawn | Left out; the bell and cart buttons show with no count | Their features land in later sprints (stories and points Sprint 6, fulfilment choice Sprint 3, cart CRT-MOB-1); a control with nothing behind it would mislead. |
+| Product: out of stock (118-9350) | «يمكنك طلب إشعار عند توفره.» | The sentence is left out | There is no "notify me" feature. |
+| Product cards (118-7219) | «500 جم» with 89.00 | The card price is the cheapest size (49.50 for 500 g) | Figma's 89.00 is the 1 kg price; the card and the product page must agree (and the API's "from" price is the lowest size). |
+| Filters sheet: sort (86-13223) | No sort control | A «الترتيب» chip group in the sheet, shown with the mock only | The task asks for sort and Figma has none. **Figma needs a sort control.** |
+| Store page: name, rating and logo line (118-8184) | Placed at the left (x=17) | Aligned to the start (right in Arabic), as the minimum-order line below it | The frame is laid out left to right in an RTL screen. **Figma needs the frame fixed.** |
+
 ## Checks run on the file (2026-11-13)
 - Script lint over all 587 screens after the last changes: no empty or "undefined" text, no text outside its screen, no missing icon.
 - Clipped layouts: a script found 110 auto-layout frames on web and dashboard screens whose content was cut off (among them the whole animal-registration form) and opened them up. 28 small ones remain (tab labels 7 to 9 px taller than their tab, and the Adha settings body).

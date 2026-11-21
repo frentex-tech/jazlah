@@ -91,7 +91,7 @@ class _StoreScreenState extends ConsumerState<StoreScreen> {
     // The "all" list stays watched while a chip is selected: it names the store's categories.
     final allItems = ref.watch(productPagesProvider(all)).value?.items;
     // shortcut: the chips list the categories of the products loaded so far (no per-store category
-    // list, API gap); a store with more than one page may miss a category until it scrolls.
+    // list, API gap for CAT-API-5 #50); a store with more than one page may miss a category until it scrolls.
     final sold = {...?allItems?.map((p) => p.categoryId)};
     final categories = [...?ref.watch(categoriesProvider).value?.where((c) => sold.contains(c.id))];
     final noProducts = _categoryId == null && (allItems?.isEmpty ?? false);
@@ -120,7 +120,6 @@ class _StoreScreenState extends ConsumerState<StoreScreen> {
             if (s.closed) JBadge(label: l10n.storeClosedNow, type: JBadgeType.danger, size: JBadgeSize.s),
             if (s.deliveryMinutes != null)
               JBadge(label: l10n.storeDeliveryIn(s.deliveryMinutes!), type: JBadgeType.info, size: JBadgeSize.s),
-            if (s.pickup ?? false) JBadge(label: l10n.storePickupBadge, icon: JIcons.storefront, size: JBadgeSize.s),
           ],
         ),
       if (s.minOrderHalalas != null)

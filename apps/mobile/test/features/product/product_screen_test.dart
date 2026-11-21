@@ -75,12 +75,12 @@ void main() {
   testWidgets('an incompatible packaging cannot be selected; tapping it explains why', (t) async {
     await _pump(t);
     await _tap(t, 'شرائح');
-    expect(find.text('غير متاح مع التقطيع المختار: شرائح'), findsOneWidget);
+    expect(find.text('غير متاح مع التقطيع المختار: الشرائح'), findsOneWidget);
     await _tap(t, 'صندوق هدية');
     final gift = t.widget<JRadio>(find.widgetWithText(JRadio, 'صندوق هدية'));
     expect((gift.checked, gift.onTap), (false, null));
     expect(_total(t), '89.00');
-    expect(find.text('غيّر التقطيع إلى «قطعة كاملة» أو «مكعبات» لاختيار هذا الخيار'), findsOneWidget);
+    expect(find.text('غيّر التقطيع إلى «قطعة كاملة» أو «مكعبات» لاختيار هذا الخيار.'), findsOneWidget);
     await t.tap(find.text('صندوق هدية'));
     await t.pump();
     expect(find.textContaining('غيّر التقطيع'), findsNothing);
@@ -106,6 +106,7 @@ void main() {
     expect(find.text('تفاصيل السعر'), findsOneWidget);
     expect(find.text('1 كجم × 89.00 ر.س'), findsOneWidget);
     expect(find.text('التقطيع (شرائح)'), findsOneWidget);
+    expect(find.text('التغليف المفرغ'), findsOneWidget);
     expect(find.text('يُحسب في الدفع'), findsOneWidget);
     expect(find.text('94.00 ر.س'), findsOneWidget);
   });
@@ -179,5 +180,15 @@ void main() {
     await t.tap(find.text('مجازر الفلاح'));
     await t.pumpAndSettle();
     expect(find.text('route:/home/store/v-falah'), findsOneWidget);
+  });
+
+  test('definite Arabic names as in Figma; «بدون …», Latin and English left alone', () {
+    expect(definiteName('شرائح', 'ar'), 'الشرائح');
+    expect(definiteName('تغليف مفرغ', 'ar'), 'التغليف المفرغ');
+    expect(definiteName('بدون تغليف', 'ar'), 'بدون تغليف');
+    expect(definiteName('مكعبات بدون عظم', 'ar'), 'المكعبات بدون عظم');
+    expect(definiteName('الشرائح', 'ar'), 'الشرائح');
+    expect(definiteName('T-bone', 'ar'), 'T-bone');
+    expect(definiteName('Slices', 'en'), 'Slices');
   });
 }

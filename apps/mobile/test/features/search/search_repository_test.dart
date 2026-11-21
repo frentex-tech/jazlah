@@ -17,8 +17,8 @@ import '../../helpers/fakes.dart';
 void main() {
   group('normalizeSearch', () {
     test('ى → ي', () => expect(normalizeSearch('نعيمى'), normalizeSearch('نعيمي')));
-    test('أ إ آ ٱ → ا', () {
-      expect(normalizeSearch('أإآٱ'), 'اااا');
+    test('أ إ آ → ا (as the server; ٱ is not folded)', () {
+      expect(normalizeSearch('أإآ'), 'ااا');
       expect(normalizeSearch('ريب آي'), normalizeSearch('ريب أي'));
     });
     test('ة → ه', () => expect(normalizeSearch('كبدة'), 'كبده'));
@@ -58,10 +58,10 @@ void main() {
       expect(await names('RIBEYE'), {'ريب آي بقري طازج'});
     });
 
-    test('every word must match; store names match too', () async {
-      expect(await names('غنم مفروم'), {'لحم غنم نعيمي مفروم'});
-      final falah = await find(const SearchQuery(text: 'الفلاح'));
-      expect(falah.every((p) => p.vendorId == 'v-falah'), isTrue);
+    test('as the server: one phrase in the product names, store names not searched', () async {
+      expect(await names('غنم نعيمي مفروم'), {'لحم غنم نعيمي مفروم'});
+      expect(await names('مفروم غنم'), isEmpty); // words out of order
+      expect(await names('الفلاح'), isEmpty); // a store name only
       expect(await names('xyz'), isEmpty);
     });
 

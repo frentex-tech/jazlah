@@ -69,6 +69,20 @@ void main() {
     );
   });
 
+  test('a session the server ends forgets the account data (recent searches) like a sign-out', () async {
+    final tokens = MemoryTokens(const AuthTokens(accessToken: 'a', refreshToken: 'r'));
+    final c = await _container(tokens, {
+      'onboardingSeen': true,
+      'recentSearches': ['نعيمي'],
+    });
+    expect(await _settled(c), SessionStatus.signedIn);
+    c.read(sessionEndedProvider.notifier).fire();
+    await Future<void>.delayed(Duration.zero);
+    expect(c.read(sessionProvider), SessionStatus.signedOut);
+    expect(c.read(prefsProvider).recentSearches, isEmpty);
+    expect(c.read(onboardingSeenProvider), isTrue);
+  });
+
   test('redirects', () {
     String? r(String loc, SessionStatus s, {bool seen = true}) =>
         authRedirect(uri: Uri.parse(loc), session: s, onboardingSeen: seen);

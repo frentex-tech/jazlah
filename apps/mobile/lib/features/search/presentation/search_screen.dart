@@ -57,9 +57,15 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
     super.dispose();
   }
 
+  /// As the API (q is trimmed, 2 to 100 characters): shorter text searches nothing, longer is cut.
+  static String _words(String value) {
+    final t = value.trim();
+    return t.length < 2 ? '' : (t.length > 100 ? t.substring(0, 100).trim() : t);
+  }
+
   void _onChanged(String value) {
     _debounce?.cancel();
-    final text = value.trim();
+    final text = _words(value);
     if (text.isEmpty) {
       setState(() {
         _typing = false;
@@ -86,7 +92,8 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
   /// Searches at once and keeps the words as a recent search.
   void _search(String value) {
     _debounce?.cancel();
-    final text = value.trim();
+    final text = _words(value);
+    if (text.isEmpty) return;
     if (_controller.text != value) _controller.text = value;
     _focus.unfocus();
     setState(() {
@@ -235,7 +242,7 @@ class _Results extends ConsumerWidget {
 
   List<String> _activeChips(AppLocalizations l10n, WidgetRef ref, String lang) {
     final q = query;
-    // shortcut: store names come from the first store page only, API gap (not-built-yet.md); a store
+    // shortcut: store names come from the first store page only, API gap for CAT-API-5 #50 (not-built-yet.md); a store
     // not in it (or names still loading) shows as a generic chip, so the chips match the filter count.
     final store = q.vendorId == null
         ? null

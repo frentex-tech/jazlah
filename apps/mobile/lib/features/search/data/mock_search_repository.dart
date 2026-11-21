@@ -3,14 +3,10 @@ import 'package:jazlah/features/catalog/domain/catalog.dart';
 import 'package:jazlah/features/search/data/search_repository.dart';
 import 'package:jazlah/features/search/domain/search.dart';
 
-/// Every word of [query] is in the product's Arabic or English name, or its store's name.
-bool matchesSearch(ProductCard p, String query) {
-  final words = normalizeSearch(query).split(' ').where((w) => w.isNotEmpty);
-  final names = normalizeSearch(
-    [p.name.ar, p.name.en, p.vendorName?.ar ?? '', p.vendorName?.en ?? ''].join(' '),
-  );
-  return words.every(names.contains);
-}
+/// As the server (catalog_search_text): the folded query, as one phrase, inside the folded
+/// "Arabic name + space + English name". Store names are not searched.
+bool matchesSearch(ProductCard p, String query) =>
+    normalizeSearch('${p.name.ar} ${p.name.en}').contains(normalizeSearch(query));
 
 /// Search over the mock catalog for USE_MOCKS and tests, with the parts the API lacks filled.
 class MockSearchRepository implements SearchRepository {
@@ -36,8 +32,9 @@ class MockSearchRepository implements SearchRepository {
         if (matchesSearch(p, q.text) &&
             (q.categoryId == null || p.categoryId == q.categoryId) &&
             (q.vendorId == null || p.vendorId == q.vendorId) &&
-            (q.minPriceHalalas == null || (p.minPriceHalalas ?? 0) >= q.minPriceHalalas!) &&
-            (q.maxPriceHalalas == null || (p.minPriceHalalas ?? 0) <= q.maxPriceHalalas!) &&
+            // A card without a price never matches a price bound.
+            (q.minPriceHalalas == null || (p.minPriceHalalas ?? -1) >= q.minPriceHalalas!) &&
+            (q.maxPriceHalalas == null || (p.minPriceHalalas != null && p.minPriceHalalas! <= q.maxPriceHalalas!)) &&
             (!q.availableOnly || p.isAvailable))
           p,
     ];

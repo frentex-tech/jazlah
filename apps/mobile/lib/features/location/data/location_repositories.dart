@@ -58,7 +58,7 @@ abstract interface class Geocoder {
 
 /// Google Geocoding API with the Maps key.
 /// shortcut: called from the device with a key that cannot be app-restricted (use a Geocoding-only key
-/// with quotas); move behind a /v1/public geocoding route when the backend has one (API gap, see
+/// with quotas); move behind a /v1/public geocoding route when the backend has one (LOC-MOB-1 #26, API gap, see
 /// docs/frontend/not-built-yet.md).
 class GoogleGeocoder implements Geocoder {
   GoogleGeocoder(this._key, [Dio? dio])
@@ -136,7 +136,7 @@ class ApiCoverageRepository implements CoverageRepository {
     }
   }
 
-  /// shortcut: the API has no public list of served cities (API gap, see docs/frontend/not-built-yet.md),
+  /// shortcut: the API has no public list of served cities (LOC-API-1 #24, API gap, see docs/frontend/not-built-yet.md),
   /// so the real build lists none rather than claim cities that may not be served.
   @override
   Future<List<String>> cities(String language) async => const [];

@@ -28,7 +28,7 @@ class ApiSearchRepository implements SearchRepository {
 
   final JazlaApi _api;
 
-  // shortcut: no sort parameter and no availability filter on the public product list, API gap
+  // shortcut: no sort parameter and no availability filter on the public product list, API gap for CAT-API-5 #50
   // (not-built-yet.md); both controls are hidden.
   @override
   bool get canSort => false;
@@ -54,11 +54,11 @@ class ApiSearchRepository implements SearchRepository {
     }
   }
 
-  // shortcut: the list has no total or facets, API gap (not-built-yet.md); the count text is hidden.
+  // shortcut: the list has no total or facets, API gap for CAT-API-5 #50 (not-built-yet.md); the count text is hidden.
   @override
   Future<int?> count(SearchQuery query) async => null;
 
-  // shortcut: no popular searches route, API gap (not-built-yet.md); the section is hidden.
+  // shortcut: no popular searches route, API gap for CAT-API-5 #50 (not-built-yet.md); the section is hidden.
   @override
   Future<List<LocalizedText>> popular() async => const [];
 }

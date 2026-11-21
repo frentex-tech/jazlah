@@ -34,7 +34,14 @@ class SessionController extends Notifier<SessionStatus> {
   @override
   SessionStatus build() {
     // The API ended the session (refresh refused, account deleted or disabled elsewhere).
-    ref.listen(sessionEndedProvider, (_, _) => state = SessionStatus.signedOut);
+    ref.listen(sessionEndedProvider, (_, _) async {
+      // Like sign-out: the next person on this phone must not see this account's data (recent searches …).
+      try {
+        await ref.read(prefsProvider).clearAccountData();
+      } finally {
+        state = SessionStatus.signedOut; // even if clearing fails, the dead session ends
+      }
+    });
     unawaited(_restore());
     return SessionStatus.unknown;
   }

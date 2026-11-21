@@ -74,7 +74,8 @@ void main() {
     for (final (name, p, s, unit, line) in priced) {
       test(name, () {
         final r = priceLine(p, s);
-        expect(r.errors, isEmpty);
+        // A product with cuts and none chosen still prices what is chosen, flagged OPTION_REQUIRED.
+        expect(r.errors, p.cuts.isNotEmpty && s.cutId == null ? [PriceError.optionRequired] : isEmpty);
         expect(r.unitPrice, unit);
         expect(r.lineTotal, line);
         expect(r.breakdown.fold(0, (sum, c) => sum + c.halalas), unit);
@@ -153,6 +154,22 @@ void main() {
       });
     }
   });
+
+  test('a product with cuts needs one: OPTION_REQUIRED keeps the price, a cut clears it', () {
+    final none = priceLine(ribeye, const ProductSelection(sizeId: 'sz-1kg'));
+    expect(none.errors, [PriceError.optionRequired]);
+    expect((none.ok, none.onlyMissingChoice, none.lineTotal), (false, true, 8900));
+    expect(priceLine(ribeye, const ProductSelection(sizeId: 'sz-1kg', cutId: 'cut-whole')).ok, isTrue);
+    expect(priceLine(feed, const ProductSelection(sizeId: 'sz-unit')).ok, isTrue); // no cuts, none needed
+    // Another error wins: the line is refused and priced 0.
+    final sold = priceLine(soldOut, const ProductSelection(sizeId: 'sz-1kg'));
+    expect((sold.onlyMissingChoice, sold.lineTotal), (false, 0));
+  });
+
+  test(
+    'error codes are the API names',
+    () => expect(PriceError.cutPackagingIncompatible, 'INCOMPATIBLE_CUTTING_PACKAGING'),
+  );
 
   test('every seeded card shows its cheapest size', () {
     for (final card in MockCatalogRepository.productList) {

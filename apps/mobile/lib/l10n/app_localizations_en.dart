@@ -823,7 +823,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get addToCart => 'Add to cart';
 
   @override
-  String get freshToday => 'Slaughtered today';
+  String get freshToday => 'Fresh today';
 
   @override
   String get unavailableNow => 'Unavailable now';
@@ -994,9 +994,6 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get searchTitle => 'Search';
-
-  @override
-  String get storePickupBadge => 'Store pickup';
 
   @override
   String get searchRecent => 'Recent searches';
@@ -1201,7 +1198,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String productIncompatibleHelp(String cuts) {
-    return 'Change the cut to $cuts to choose this option';
+    return 'Change the cut to $cuts to choose this option.';
   }
 
   @override
