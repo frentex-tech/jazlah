@@ -21,6 +21,13 @@ String formatHalalas(int halalas) {
   return '${halalas < 0 ? '-' : ''}${h ~/ 100}.${(h % 100).toString().padLeft(2, '0')}';
 }
 
+/// `500` → "500 g", `1000` → "1 kg", `1500` → "1.5 kg".
+String formatWeight(AppLocalizations l10n, int grams) {
+  if (grams < 1000) return l10n.weightGrams('$grams');
+  final kg = grams / 1000;
+  return l10n.weightKg(kg == kg.truncateToDouble() ? '${kg.toInt()}' : '$kg');
+}
+
 /// `23 * 60` → `11:00 م` / `11:00 PM`.
 String formatMinutes(AppLocalizations l10n, int minutes) {
   final h = minutes ~/ 60 % 24;
