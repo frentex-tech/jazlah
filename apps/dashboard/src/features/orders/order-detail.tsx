@@ -31,11 +31,8 @@ const card = 'flex w-full flex-col gap-s16 rounded-md border border-line bg-pape
 type Dialog = 'cancel' | 'codReject' | 'reschedule' | null;
 type State = Order | 'loading' | 'error' | 'denied' | 'notFound';
 
-/** What a cancel gives back (PAY-API-1 / WAL-API-1): the wallet part always to the wallet, a captured payment as chosen. */
-export function refundOf(o: Order) {
-  if (o.payment.status !== 'captured' && o.payment.status !== 'authorized') return { paid: 0, wallet: 0 };
-  return { paid: o.payment.status === 'captured' ? o.totalHalalas - o.payment.walletHalalas : 0, wallet: o.payment.walletHalalas };
-}
+/** What a cancel gives back (PAY-API-1 / WAL-API-1), as the mock does: the wallet part always to the wallet, the gateway part only once captured. */
+export const refundOf = (o: Order) => ({ paid: o.payment.status === 'captured' ? o.totalHalalas - o.payment.walletHalalas : 0, wallet: o.payment.walletHalalas });
 
 /**
  * ORD-DSH-1: one order (135:49134 and its states) for admins and vendors: items with their options, payment and
@@ -291,15 +288,15 @@ export function OrderDetail({ panel, id }: { panel: OrdersPanel; id: string }) {
                 <>
                   <Notice tone="sand" role="status" text={t('cod.notice')} />
                   <div className="flex gap-s12">
-                    <Button size="S" className="flex-1" loading={busy === 'confirmed'} onClick={() => void move('confirmed')}>{t('cod.confirm')}</Button>
-                    <Button size="S" variant="secondary" className="flex-1" onClick={() => openDialog('codReject')}>{t('cod.reject')}</Button>
+                    <Button size="S" className="flex-1" loading={busy === 'confirmed'} disabled={!!busy} onClick={() => void move('confirmed')}>{t('cod.confirm')}</Button>
+                    <Button size="S" variant="secondary" className="flex-1" disabled={!!busy} onClick={() => openDialog('codReject')}>{t('cod.reject')}</Button>
                   </div>
                 </>
               )}
               {transitions.length > 0 && (
                 <div role="group" aria-label={t('status.actions')} className="flex flex-wrap gap-s12">
                   {transitions.map((s, i) => (
-                    <Button key={s} size="S" variant={i === 0 ? 'primary' : 'secondary'} className="flex-1" loading={busy === s} onClick={() => void move(s)}>
+                    <Button key={s} size="S" variant={i === 0 ? 'primary' : 'secondary'} className="flex-1" loading={busy === s} disabled={!!busy} onClick={() => void move(s)}>
                       {t(`next.${s}`)}
                     </Button>
                   ))}
@@ -435,7 +432,7 @@ function OrderLabel({ order: o, slot, onBack }: { order: Order; slot: string; on
           {grams > 0 && <Row label={t('weight')} value={t('kg', { value: Number((grams / 1000).toFixed(2)) })} />}
         </dl>
         {bars && (
-          <svg role="img" aria-label={t('barcode', { number: o.number })} viewBox={`0 0 ${bars.length} 56`} preserveAspectRatio="none" className="h-14 w-full text-ink">
+          <svg role="img" aria-label={t('barcode', { number: o.number })} viewBox={`0 0 ${bars.length} 56`} preserveAspectRatio="none" className="h-14 w-[168px] self-end text-ink">
             {[...bars].map((b, i) => (b === '1' ? <rect key={i} x={i} width={1} height={56} fill="currentColor" /> : null))}
           </svg>
         )}

@@ -58,15 +58,18 @@ export function OrdersList({ panel, live }: { panel: OrdersPanel; live: boolean 
   const cursors = paging.key === key ? paging.cursors : [undefined];
   const setCursors = (next: (string | undefined)[]) => setPaging({ key, cursors: next });
   const cursor = cursors[cursors.length - 1];
+  // Only the latest request may set the list: a quiet live reload under old filters must not overwrite newer results.
+  const latest = useRef(0);
   const load = useCallback(
     async (quiet = false) => {
+      const req = ++latest.current;
       if (!quiet) setData('loading');
       const query = new URLSearchParams({ ...(status && { status }), ...(method && { method }), ...(vendorId && { vendorId }), ...(date && { date }), ...(q && { q }), ...(cursor && { cursor }) });
       try {
         const p = await panelFetch<Page<OrderSummary>>(panel, `/api/${panel}/orders?${query}`);
-        setData({ rows: p.items, next: p.nextCursor });
+        if (req === latest.current) setData({ rows: p.items, next: p.nextCursor });
       } catch (e) {
-        if (!quiet) setData(e instanceof ApiError && e.code === 'NOT_ALLOWED' ? 'denied' : 'error');
+        if (!quiet && req === latest.current) setData(e instanceof ApiError && e.code === 'NOT_ALLOWED' ? 'denied' : 'error');
       }
     },
     [panel, status, method, vendorId, date, q, cursor],
@@ -148,14 +151,8 @@ export function OrdersList({ panel, live }: { panel: OrdersPanel; live: boolean 
         <StateCard kind="denied" title={ts('denied.title')} body={ts('denied.body')} action={<BackButton label={ts('denied.action')} panel={panel} />} />
       ) : data === 'error' ? (
         <StateCard kind="error" title={ts('error.title')} body={ts('error.body')} action={<Button onClick={() => void load()}>{ts('error.action')}</Button>} />
-      ) : empty ? (
-        // 135:48353 (over filters that found nothing, with «clear filters»), or no order at all yet.
-        <StateCard
-          kind="orders"
-          title={t(filtered ? 'empty.title' : 'empty.noneTitle')}
-          body={t(filtered ? 'empty.body' : 'empty.noneBody')}
-          action={filtered && <Button variant="secondary" onClick={clear}>{t('empty.action')}</Button>}
-        />
+      ) : empty && !filtered ? (
+        <StateCard kind="orders" title={t('empty.noneTitle')} body={t('empty.noneBody')} />
       ) : (
         <>
           <FiltersBar search={search} onSearch={setSearch} searchLabel={t('search')} clearLabel={t('clear')} applied={applied}>
@@ -191,7 +188,11 @@ export function OrdersList({ panel, live }: { panel: OrdersPanel; live: boolean 
               {!date && <span aria-hidden className="pointer-events-none absolute start-s12 top-1/2 -translate-y-1/2 text-body-m text-ink-2 peer-focus:hidden">{t('date')}</span>}
             </span>
           </FiltersBar>
-          <DataTable
+          {empty ? (
+            // 135:48353 under the filters, so a search that finds nothing keeps its field and chips.
+            <StateCard kind="orders" title={t('empty.title')} body={t('empty.body')} action={<Button variant="secondary" onClick={clear}>{t('empty.action')}</Button>} />
+          ) : (
+            <DataTable
               inset
               label={t('title')}
               columns={columns}
@@ -204,6 +205,7 @@ export function OrdersList({ panel, live }: { panel: OrdersPanel; live: boolean 
               onNext={() => typeof data === 'object' && data.next && setCursors([...cursors, data.next])}
               rowClassName={(o) => (fresh.has(o.id) ? 'row-new' : undefined)}
             />
+          )}
         </>
       )}
     </>

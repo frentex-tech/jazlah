@@ -45,10 +45,17 @@ test('the admin list filters by status, store, method and date, and shows the em
 
   await page.getByLabel('التاريخ', { exact: true }).fill('2026-01-01');
   await expect(page.getByText('لا توجد طلبات مطابقة')).toBeVisible();
+  // The bar stays: the date chip can be removed on its own.
+  await expect(page.getByRole('button', { name: /^مسح الكل: التاريخ/ })).toBeVisible();
   await page.getByRole('button', { name: 'مسح المرشحات' }).click();
   await expect(table(page).getByText('JZ-261110-0481')).toBeVisible();
 
-  await page.getByRole('searchbox', { name: 'بحث', exact: true }).fill('0479');
+  const search = page.getByRole('searchbox', { name: 'بحث', exact: true });
+  await search.fill('لا أحد بهذا الاسم');
+  await expect(page.getByText('لا توجد طلبات مطابقة')).toBeVisible();
+  await expect(search).toBeFocused();
+  await expect(search).toHaveValue('لا أحد بهذا الاسم');
+  await search.fill('0479');
   await expect(table(page).getByRole('row')).toHaveCount(2);
   await expect(table(page).getByText('منيرة الشمري')).toBeVisible();
 });
@@ -70,6 +77,19 @@ test('a new order appears live, tinted, without a refresh; a vendor only gets it
   await expect(table(page).getByText('طلب مباشر للرياض')).toBeVisible();
   await expect(table(vendorPage).getByText(mine.number)).toBeVisible();
   await expect(table(vendorPage).getByText(theirs.number)).toHaveCount(0);
+});
+
+test('a refused live stream falls back to polling, then reopens the stream', async ({ page, context, request }) => {
+  await signInAs(context, ['admin']);
+  // The first stream answers 401 (an expired access cookie on reconnect): the browser closes it for good.
+  let refused = 0;
+  await page.route('**/api/admin/orders/events', (r) => (refused++ === 0 ? r.fulfill({ status: 401, body: '{"code":"UNAUTHORIZED"}' }) : r.fallback()));
+  let streams = 0;
+  const reopened = page.waitForRequest((r) => r.url().endsWith('/api/admin/orders/events') && ++streams === 2);
+  await page.goto('/admin/orders');
+  await reopened; // after the first poll succeeds
+  const o = await place(request, { customer: 'بعد إعادة الاتصال' });
+  await expect(table(page).getByText(o.number)).toBeVisible();
 });
 
 test('the vendor opens an order and moves it to the next status', async ({ page, context, request }) => {
