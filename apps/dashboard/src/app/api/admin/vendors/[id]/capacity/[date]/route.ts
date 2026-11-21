@@ -1,12 +1,12 @@
 import { NextResponse, type NextRequest } from 'next/server';
 import { z } from 'zod';
 import { operationsBackend } from '@/features/operations/backend';
-import { DayLimitSchema } from '@/features/operations/schema';
+import { DayLimitSchema, isDate } from '@/features/operations/schema';
 import { withPanelSession } from '@/lib/auth/panel-session';
 import { invalidBody, langOf } from '@/lib/route';
 
 type Ctx = { params: Promise<{ id: string; date: string }> };
-const valid = (id: string, date: string) => z.string().uuid().safeParse(id).success && /^\d{4}-\d{2}-\d{2}$/.test(date);
+const valid = (id: string, date: string) => z.string().uuid().safeParse(id).success && isDate(date); // a real calendar day
 const notFound = () => NextResponse.json({ code: 'NOT_FOUND' }, { status: 404 });
 
 // One specific date of a vendor's capacity: set its limits, or remove it (back to the vendor's default).

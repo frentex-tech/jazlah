@@ -8,16 +8,18 @@ const toast = (page: Page, text: string) => expect(page.getByRole('status').getB
 const save = (page: Page) => page.getByRole('button', { name: 'حفظ التغييرات' }).click();
 const riyadh = (days = 0) => new Intl.DateTimeFormat('en-CA', { timeZone: 'Asia/Riyadh' }).format(new Date(Date.now() + days * 86_400_000));
 
+const banner = (page: Page) => page.getByRole('status').filter({ hasText: 'استقبال الطلبات متوقف. يرى العملاء' });
+const headerSwitch = (page: Page) => page.getByRole('banner').getByRole('switch', { name: 'إيقاف كل الطلبات' });
+
 async function open(page: Page) {
-  await page.goto('/admin/settings');
-  await expect(page).toHaveURL(/\/admin\/settings\/operations$/);
+  await page.goto('/admin/settings/operations');
   await expect(page.getByRole('heading', { level: 1, name: 'الإعدادات التشغيلية' })).toBeVisible();
 }
 
 test('every section edits, saves and reloads', async ({ page, context }) => {
   await signInAs(context, ['admin']);
   await open(page);
-  await expect(page.getByRole('tab', { name: 'التشغيل' })).toHaveAttribute('aria-selected', 'true');
+  await expect(page.getByRole('link', { name: 'التشغيل' })).toHaveAttribute('aria-current', 'page');
 
   // Working hours: Friday opens with its own hours.
   await page.getByRole('switch', { name: 'الجمعة · مغلق' }).click();
@@ -38,7 +40,6 @@ test('every section edits, saves and reloads', async ({ page, context }) => {
   await page.getByRole('checkbox', { name: 'طبخ' }).click();
   await page.getByLabel('تأكيد الطلب').selectOption('review');
   await page.getByLabel('مدة قبول الشكوى (ساعة)').fill('72');
-  await page.getByLabel('الرسالة بالإنجليزية').fill('Back on Sunday');
   await save(page);
   await toast(page, 'تم حفظ الإعدادات التشغيلية');
 
@@ -56,11 +57,12 @@ test('every section edits, saves and reloads', async ({ page, context }) => {
   await expect(page.getByRole('checkbox', { name: 'طبخ' })).toBeChecked();
   await expect(page.getByLabel('تأكيد الطلب')).toHaveValue('review');
   await expect(page.getByLabel('مدة قبول الشكوى (ساعة)')).toHaveValue('72');
-  await expect(page.getByLabel('الرسالة بالإنجليزية')).toHaveValue('Back on Sunday');
 
-  // The settings tabs reach the coverage zones.
-  await page.getByRole('tab', { name: 'مناطق التغطية' }).click();
+  // The settings tabs (links) reach the coverage zones and back.
+  await page.getByRole('link', { name: 'مناطق التغطية' }).click();
   await expect(page).toHaveURL(/\/admin\/settings\/coverage$/);
+  await page.getByRole('link', { name: 'التشغيل' }).click();
+  await expect(page).toHaveURL(/\/admin\/settings\/operations$/);
 });
 
 test('validation on the page and the API errors on their fields', async ({ page, context }) => {
@@ -130,7 +132,7 @@ test('pause from the header with a message: banner on every admin page, then res
   await signInAs(context, ['admin']);
   await page.goto('/admin/catalog/categories');
   const header = page.getByRole('banner');
-  await header.getByRole('switch', { name: 'إيقاف استقبال الطلبات' }).click();
+  await headerSwitch(page).click();
   const dialog = page.getByRole('dialog', { name: 'إيقاف استقبال الطلبات؟' });
   await dialog.getByLabel('الرسالة التي تظهر للعملاء').fill('');
   await dialog.getByRole('button', { name: 'إيقاف الآن' }).click();
@@ -139,13 +141,13 @@ test('pause from the header with a message: banner on every admin page, then res
   await dialog.getByLabel('الرسالة بالإنجليزية').fill('Closed for stock count until evening');
   await dialog.getByRole('button', { name: 'إيقاف الآن' }).click();
   await toast(page, 'تم إيقاف استقبال الطلبات');
-  await expect(page.getByRole('alert').filter({ hasText: 'استقبال الطلبات متوقف. يرى العملاء: «متوقفون للجرد حتى المساء»' })).toBeVisible();
+  await expect(banner(page)).toContainText('«متوقفون للجرد حتى المساء»');
 
   // Another admin page, loaded fresh: the switch, its badge and the banner.
   await page.goto('/admin/vendors');
-  await expect(header.getByRole('switch', { name: 'إيقاف استقبال الطلبات' })).toBeChecked();
+  await expect(headerSwitch(page)).toBeChecked();
   await expect(header.getByText('الطلبات متوقفة')).toBeVisible();
-  await expect(page.getByRole('alert').filter({ hasText: 'متوقفون للجرد حتى المساء' })).toBeVisible();
+  await expect(banner(page)).toContainText('متوقفون للجرد حتى المساء');
 
   // The operations page shows the paused card (118:11833) and resumes from its own switch.
   await page.goto('/admin/settings/operations');
@@ -156,16 +158,48 @@ test('pause from the header with a message: banner on every admin page, then res
   await page.getByRole('dialog', { name: 'استئناف استقبال الطلبات؟' }).getByRole('button', { name: 'استئناف الآن' }).click();
   await toast(page, 'تم استئناف استقبال الطلبات');
   await expect(card.getByRole('heading', { name: 'استقبال الطلبات', exact: true })).toBeVisible();
-  await expect(header.getByRole('switch', { name: 'إيقاف استقبال الطلبات' })).not.toBeChecked();
-  await expect(page.getByRole('alert').filter({ hasText: 'استقبال الطلبات متوقف' })).toHaveCount(0);
+  await expect(headerSwitch(page)).not.toBeChecked();
+  await expect(banner(page)).toHaveCount(0);
 
   // Pausing from the card (118:12270), then resuming from the header.
   await card.getByRole('switch', { name: 'إيقاف استقبال الطلبات' }).click();
   await page.getByRole('dialog', { name: 'إيقاف استقبال الطلبات؟' }).getByRole('button', { name: 'إيقاف الآن' }).click();
   await expect(header.getByText('الطلبات متوقفة')).toBeVisible();
-  await header.getByRole('switch', { name: 'إيقاف استقبال الطلبات' }).click();
+  await headerSwitch(page).click();
   await page.getByRole('dialog', { name: 'استئناف استقبال الطلبات؟' }).getByRole('button', { name: 'استئناف الآن' }).click();
   await expect(card.getByText('الطلبات مفتوحة')).toBeVisible();
+});
+
+test('a page save keeps the pause: paused from the header, another section saved, still paused with its message', async ({ page, context }) => {
+  await signInAs(context, ['admin']);
+  await open(page);
+  const card = page.getByRole('region', { name: 'استقبال الطلبات' });
+
+  // An empty card message is refused on the card itself, before any dialog.
+  await card.getByLabel('الرسالة التي تظهر للعملاء').fill('');
+  await card.getByRole('switch', { name: 'إيقاف استقبال الطلبات' }).click();
+  await expect(card.getByText('اكتب الرسالة (200 حرف على الأكثر)')).toBeVisible();
+  await expect(page.getByRole('dialog')).toHaveCount(0);
+
+  await headerSwitch(page).click();
+  const dialog = page.getByRole('dialog', { name: 'إيقاف استقبال الطلبات؟' });
+  await dialog.getByLabel('الرسالة التي تظهر للعملاء').fill('عطل في التبريد');
+  await dialog.getByLabel('الرسالة بالإنجليزية').fill('Cooling failure');
+  await dialog.getByRole('button', { name: 'إيقاف الآن' }).click();
+  await expect(card.getByLabel('الرسالة التي تظهر للعملاء')).toHaveValue('عطل في التبريد'); // follows the header
+  await expect(card.getByLabel('الرسالة التي تظهر للعملاء')).toBeDisabled();
+
+  await page.getByLabel('مدة قبول الشكوى (ساعة)').fill('36');
+  await save(page);
+  await toast(page, 'تم حفظ الإعدادات التشغيلية');
+  await page.reload();
+  await expect(page.getByLabel('مدة قبول الشكوى (ساعة)')).toHaveValue('36');
+  await expect(headerSwitch(page)).toBeChecked();
+  await expect(banner(page)).toContainText('عطل في التبريد');
+
+  await headerSwitch(page).click();
+  await page.getByRole('dialog', { name: 'استئناف استقبال الطلبات؟' }).getByRole('button', { name: 'استئناف الآن' }).click();
+  await expect(banner(page)).toHaveCount(0);
 });
 
 test('per-vendor capacity: default override and a specific date', async ({ page, context }) => {

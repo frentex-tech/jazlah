@@ -45,10 +45,10 @@ test('a nav item without a page shows the localised not-found inside the shell',
   await expect(page).toHaveURL(/\/admin$/);
 });
 
-test('settings opens the operations page, and unknown addresses outside the panels are localised', async ({ page, context }) => {
+test('settings opens the coverage zones, and unknown addresses outside the panels are localised', async ({ page, context }) => {
   await signInAs(context, ['admin']);
   await page.goto('/admin/settings');
-  await expect(page).toHaveURL(/\/admin\/settings\/operations$/);
+  await expect(page).toHaveURL(/\/admin\/settings\/coverage$/);
   await page.goto('/en/nowhere');
   await expect(page.getByText('Page not found')).toBeVisible();
 });

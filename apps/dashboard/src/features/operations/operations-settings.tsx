@@ -21,7 +21,7 @@ import { ApiError, panelFetch } from '@/lib/panel-fetch';
 import { cn } from '@/lib/utils';
 import { ClosedDays } from './closed-days';
 import { PauseDialog, pauseErrors, usePause } from './pause';
-import { errorKey, fromDraft, OperationsSchema, toDraft, zodErrors, type Draft, type FieldErrors } from './schema';
+import { errorKey, fromDraft, PageSchema, PausedSchema, toDraft, zodErrors, type Draft, type FieldErrors } from './schema';
 import { SettingsTabs } from './settings-tabs';
 import { ORDER_TYPES, type OperationsSettings, type Paused } from './types';
 
@@ -60,7 +60,15 @@ export function OperationsSettingsPage() {
   const [errors, setErrors] = useState<FieldErrors>({});
   const [saving, setSaving] = useState(false);
   const [confirming, setConfirming] = useState(false);
+  // The card's messages: what pausing from the card sends. They follow the shared pause state (header or page), and
+  // the page save never sends them: only the pause flow changes `paused`.
+  const [msg, setMsg] = useState({ messageAr: '', messageEn: '' });
   const { sync } = pause;
+  useEffect(() => {
+    if (!pause.paused) return;
+    setMsg({ messageAr: pause.paused.messageAr, messageEn: pause.paused.messageEn });
+    setErrors((e) => Object.fromEntries(Object.entries(e).filter(([k]) => !k.startsWith('paused.'))));
+  }, [pause.paused]);
 
   const load = useCallback(async () => {
     setState('loading');
@@ -105,8 +113,9 @@ export function OperationsSettingsPage() {
   const edit = (path: string, value: unknown) => {
     setDraft((o) => set(o!, path, value));
     // A change clears the field's error and its siblings' (an «end before start» belongs to both).
-    const parent = path.includes('.') ? path.slice(0, path.lastIndexOf('.') + 1) : path;
-    setErrors((e) => Object.fromEntries(Object.entries(e).filter(([k]) => !(k === path || (parent !== path && k.startsWith(parent))))));
+    // Removing a closed day shifts the indexes: every `closedDays.*` error goes.
+    const parent = path.includes('.') ? path.slice(0, path.lastIndexOf('.') + 1) : `${path}.`;
+    setErrors((e) => Object.fromEntries(Object.entries(e).filter(([k]) => !(k === path || k.startsWith(parent)))));
   };
   const text = (path: string, label: string, hint?: string, extra?: React.InputHTMLAttributes<HTMLInputElement>) => (
     <InputField label={label} hint={hint} error={err(path)} value={get(d, path) as string} onChange={(e) => edit(path, e.target.value)} {...extra} />
@@ -125,7 +134,7 @@ export function OperationsSettingsPage() {
   }
 
   async function save() {
-    const parsed = OperationsSchema.safeParse({ ...fromDraft(d), paused: { ...d.paused, isPaused: paused.isPaused } });
+    const parsed = PageSchema.safeParse(fromDraft(d));
     if (!parsed.success) {
       setErrors(zodErrors(parsed.error));
       return toast('error', t('invalid'));
@@ -165,13 +174,25 @@ export function OperationsSettingsPage() {
       >
         <PauseCard
           paused={paused}
-          draft={d.paused}
+          draft={msg}
           error={err}
           invalid={invalid('paused')}
-          onMessage={(k, v) => edit(`paused.${k}`, v)}
-          onToggle={() => setConfirming(true)}
+          onMessage={(k, v) => {
+            setMsg((m) => ({ ...m, [k]: v }));
+            setErrors(({ [`paused.${k}`]: _, ...rest }) => rest);
+          }}
+          onToggle={() => {
+            // Pausing sends the card's messages: refused ones show on the card before any dialog.
+            const check = PausedSchema.safeParse({ ...msg, isPaused: true });
+            if (!paused.isPaused && !check.success) {
+              const e = zodErrors(check.error);
+              return setErrors((o) => ({ ...o, ...Object.fromEntries(Object.entries(e).map(([k, v]) => [`paused.${k}`, v])) }));
+            }
+            setConfirming(true);
+          }}
         />
 
+        {d.workingHours && (
         <FormSection title={t('hours.title')} body={t('hours.body')} invalid={invalid('workingHours')}>
           {d.workingHours.map((h, i) => {
             const day = t(`hours.days.${h.day}`);
@@ -203,6 +224,7 @@ export function OperationsSettingsPage() {
             );
           })}
         </FormSection>
+        )}
 
         <FormSection title={t('capacity.title')} body={t('capacity.body')} invalid={invalid('capacity', 'cutoffs')}>
           <div className={grid}>
@@ -293,7 +315,8 @@ export function OperationsSettingsPage() {
       <PauseDialog
         open={confirming}
         onOpenChange={setConfirming}
-        current={{ ...paused, messageAr: d.paused.messageAr, messageEn: d.paused.messageEn }}
+        current={{ ...paused, ...msg }}
+        onInvalid={(e) => setErrors((o) => ({ ...o, ...e }))}
         onConfirm={async (p) => {
           try {
             const s = await pause.apply(p);
@@ -314,7 +337,7 @@ export function OperationsSettingsPage() {
 /** The pause card of 118:11181 (open, success badge, play icon) and 118:11833 (paused: warning card, pause icon). */
 function PauseCard({ paused, draft, error, invalid, onMessage, onToggle }: {
   paused: Paused;
-  draft: Paused;
+  draft: Pick<Paused, 'messageAr' | 'messageEn'>;
   error: (path: string) => string | undefined;
   invalid: boolean;
   onMessage: (k: 'messageAr' | 'messageEn', v: string) => void;
@@ -341,8 +364,8 @@ function PauseCard({ paused, draft, error, invalid, onMessage, onToggle }: {
         <Switch label={t('switch')} checked={on} onChange={onToggle} />
       </div>
       <div className="flex w-[374px] flex-col gap-s16 self-end rounded-md border border-line bg-paper p-s16">
-        <InputField label={t('messageAr')} hint={t('messageHint')} error={error('paused.messageAr')} maxLength={200} dir="rtl" value={draft.messageAr} onChange={(e) => onMessage('messageAr', e.target.value)} />
-        <InputField label={t('messageEn')} error={error('paused.messageEn')} maxLength={200} dir="ltr" value={draft.messageEn} onChange={(e) => onMessage('messageEn', e.target.value)} />
+        <InputField label={t('messageAr')} hint={t('messageHint')} error={error('paused.messageAr')} maxLength={200} dir="rtl" disabled={on} value={draft.messageAr} onChange={(e) => onMessage('messageAr', e.target.value)} />
+        <InputField label={t('messageEn')} error={error('paused.messageEn')} maxLength={200} dir="ltr" disabled={on} value={draft.messageEn} onChange={(e) => onMessage('messageEn', e.target.value)} />
       </div>
     </section>
   );

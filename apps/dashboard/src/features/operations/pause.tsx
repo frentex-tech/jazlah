@@ -2,7 +2,7 @@
 
 import { PauseCircle } from '@phosphor-icons/react';
 import { useLocale, useTranslations } from 'next-intl';
-import { createContext, useCallback, useContext, useState } from 'react';
+import { createContext, useCallback, useContext, useEffect, useState } from 'react';
 import { Badge } from '@/components/ui/badge';
 import { ConfirmDialog } from '@/components/ui/confirm-dialog';
 import { InputField } from '@/components/ui/form-field';
@@ -24,6 +24,18 @@ export const usePause = () => useContext(Ctx);
  */
 export function PauseProvider({ initial, children }: { initial: Paused | null; children: React.ReactNode }) {
   const [paused, sync] = useState(initial);
+  // A new server read (navigation, refresh) wins; when the server could not read it (e.g. its access token had just
+  // expired), the page asks once through our route, which refreshes the session. Plain fetch: no sign-in redirect here.
+  useEffect(() => {
+    if (initial) return sync(initial);
+    let live = true;
+    fetch('/api/admin/settings/operations')
+      .then((r) => (r.ok ? (r.json() as Promise<OperationsSettings>) : null))
+      .then((s) => live && s && sync(s.paused), () => {});
+    return () => {
+      live = false;
+    };
+  }, [initial]);
   const apply = useCallback(async (p: Paused) => {
     const s = await panelFetch<OperationsSettings>('admin', '/api/admin/settings/operations', { method: 'PUT', body: JSON.stringify({ paused: p }) });
     sync(s.paused);
@@ -33,13 +45,15 @@ export function PauseProvider({ initial, children }: { initial: Paused | null; c
 }
 
 /** The confirmation of 118:12270 (pause) and its resume twin; `withMessage` adds the AR/EN message (header switch). */
-export function PauseDialog({ open, onOpenChange, current, withMessage, onConfirm }: {
+export function PauseDialog({ open, onOpenChange, current, withMessage, onConfirm, onInvalid }: {
   open: boolean;
   onOpenChange: (o: boolean) => void;
   current: Paused;
   withMessage?: boolean;
   /** Called with the new state; resolves to field errors to show, or nothing when done. */
   onConfirm: (p: Paused) => Promise<FieldErrors | void>;
+  /** Without `withMessage` the messages are edited outside: refused ones go back there and the dialog closes. */
+  onInvalid?: (errors: FieldErrors) => void;
 }) {
   const t = useTranslations('operations.pause');
   const te = useTranslations('operations.errors');
@@ -52,7 +66,12 @@ export function PauseDialog({ open, onOpenChange, current, withMessage, onConfir
   async function confirm() {
     const next = { ...current, ...(withMessage && msg), isPaused: pausing };
     const parsed = PausedSchema.safeParse(next);
-    if (!parsed.success) return setErrors(Object.fromEntries(Object.entries(zodErrors(parsed.error)).map(([k, v]) => [`paused.${k}`, v])));
+    if (!parsed.success) {
+      const e = Object.fromEntries(Object.entries(zodErrors(parsed.error)).map(([k, v]) => [`paused.${k}`, v]));
+      if (withMessage) return setErrors(e);
+      onOpenChange(false);
+      return onInvalid?.(e);
+    }
     setBusy(true);
     const e = await onConfirm(parsed.data).finally(() => setBusy(false));
     if (e) setErrors(e);
@@ -101,7 +120,7 @@ export function PauseSwitch() {
   return (
     <div className="flex items-center gap-s12">
       {paused.isPaused && <Badge type="warning" size="M">{t('badgePaused')}</Badge>}
-      <Switch label={t('switch')} checked={paused.isPaused} onChange={() => setOpen(true)} />
+      <Switch label={t('headerSwitch')} checked={paused.isPaused} onChange={() => setOpen(true)} />
       <PauseDialog
         open={open}
         onOpenChange={setOpen}
@@ -129,5 +148,5 @@ export function PauseBanner() {
   const locale = useLocale();
   const { paused } = usePause();
   if (!paused?.isPaused) return null;
-  return <Notice icon={PauseCircle} text={t('banner', { message: locale === 'en' ? paused.messageEn : paused.messageAr })} />;
+  return <Notice role="status" icon={PauseCircle} text={t('banner', { message: locale === 'en' ? paused.messageEn : paused.messageAr })} />;
 }

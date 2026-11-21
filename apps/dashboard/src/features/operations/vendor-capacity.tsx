@@ -16,7 +16,7 @@ import { toast } from '@/components/ui/toast';
 import { fieldErrors } from '@/features/catalog/client';
 import { dayOf, riyadhToday } from '@/lib/date';
 import { ApiError, panelFetch } from '@/lib/panel-fetch';
-import { DayLimitSchema, errorKey, intOf, VendorDefaultSchema, zodErrors, type FieldErrors } from './schema';
+import { DayLimitSchema, errorKey, intOf, isDate, VendorDefaultSchema, zodErrors, type FieldErrors } from './schema';
 import type { DayCapacity, OperationsSettings, VendorCapacity } from './types';
 
 /** Empty → null (use the default), else a whole number (NaN when it is not one, refused by the schema). */
@@ -174,7 +174,7 @@ function AddDayDialog({ url, onClose, onSaved, onFailed }: { url: string; onClos
   async function confirm() {
     const parsed = DayLimitSchema.safeParse({ ordersLimit: limitOf(v.ordersLimit), carcassesLimit: limitOf(v.carcassesLimit) });
     const e: FieldErrors = parsed.success ? {} : zodErrors(parsed.error);
-    if (!/^\d{4}-\d{2}-\d{2}$/.test(v.date)) e.date = 'invalid';
+    if (!isDate(v.date)) e.date = 'invalid';
     else if (v.date < today) e.date = 'notPast';
     if (!parsed.success || Object.keys(e).length) return setErrors(e);
     setBusy(true);

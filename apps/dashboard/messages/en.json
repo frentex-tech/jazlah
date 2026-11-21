@@ -1202,6 +1202,7 @@
       "bodyOpen": "The store takes orders as usual. Pause at once when needed and customers will see a message.",
       "bodyPaused": "Customers see the pause message and cannot complete an order. Switch it off to take orders again at once.",
       "switch": "Pause orders",
+      "headerSwitch": "Pause all orders",
       "messageAr": "Message customers see (Arabic)",
       "messageEn": "Message in English",
       "messageHint": "Shown at the top of checkout while paused (FR-SCH-07)",

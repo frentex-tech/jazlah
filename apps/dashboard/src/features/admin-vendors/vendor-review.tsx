@@ -184,10 +184,10 @@ export function VendorReview({ id: routeId }: { id: string }) {
           tabs={[{ key: 'details', label: t('tabs.details') }, { key: 'capacity', label: t('tabs.capacity') }]}
         />
       )}
+      {/* One panel for both tabs, so the tabs' aria-controls always names it. */}
+      <div id="vendor-tab-panel" {...(vendor && { role: 'tabpanel', 'aria-labelledby': `vendor-tab-${tab}` })} className="flex w-full flex-col gap-s24">
       {vendor && tab === 'capacity' ? (
-        <div id="vendor-tab-panel" role="tabpanel" aria-labelledby="vendor-tab-capacity" className="flex w-full flex-col gap-s24">
-          <VendorCapacityTab vendorId={vendor.id} />
-        </div>
+        <VendorCapacityTab vendorId={vendor.id} />
       ) : (
       <div className="flex w-full items-start gap-s24">
         <div className="flex min-w-0 flex-1 flex-col gap-s24">
@@ -239,6 +239,7 @@ export function VendorReview({ id: routeId }: { id: string }) {
         </aside>
       </div>
       )}
+      </div>
 
       <ConfirmDialog
         open={dialog !== null}

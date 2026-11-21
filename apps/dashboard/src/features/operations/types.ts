@@ -15,8 +15,11 @@ export type Paused = { isPaused: boolean; messageAr: string; messageEn: string }
 
 export type OperationsSettings = {
   deliveryWindow: { start: string; end: string };
-  /** `occasion` has no time in the sprint file; the frame shows one («آخر وقت للطلب: مناسبة»), so it is kept. */
-  cutoffs: Record<OrderType, { time: string; leadDays: number }>;
+  /**
+   * `occasion` has no time in the sprint file (optional here; the frame shows one). Other keys (`adha`, `{…}` in the
+   * sprint file) are kept as received, so a save never drops them.
+   */
+  cutoffs: { [K in OrderType]: { time?: string; leadDays: number } } & Record<string, unknown>;
   bookingHorizonDays: number;
   closedDays: ClosedDay[];
   capacity: { ordersPerDay: number; carcassesPerDay: number };
@@ -25,8 +28,8 @@ export type OperationsSettings = {
   cod: { enabled: boolean; maxOrderHalalas: number | null; allowedOrderTypes: OrderType[]; confirmation: 'auto' | 'review' };
   paused: Paused;
   complaintWindowHours: number;
-  /** The frame's weekly hours (118:11181); not an `ops.*` key in the sprint file (API gap). */
-  workingHours: { day: Weekday; open: boolean; start: string; end: string }[];
+  /** The frame's weekly hours (118:11181); not an `ops.*` key in the sprint file (API gap): the section shows only when present. */
+  workingHours?: { day: Weekday; open: boolean; start: string; end: string }[];
 };
 
 /** A vendor's capacity: its default override (null = the platform default) and its specific dates. */
