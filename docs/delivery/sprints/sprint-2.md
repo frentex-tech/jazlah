@@ -129,9 +129,10 @@ This task also covers:
 
 **Output:**
 - **Re-scoped 2026-11-17:** the catalog model and money helpers built as issue #237 (PR #238) and #243. The authoritative `PricingService.priceLine` and its tests moved to CRT-API-1, the first task that prices a cart line.
+- **2026-11-21 (lead review B1, B2):** `PricingService.priceLine` built ahead of CRT-API-1, in `src/modules/catalog/` (pricing reads only the catalog's tables), with the shared cases in `docs/frontend/fixtures/pricing-cases.json` that the apps' tests read too. The cutting × packaging rules stay global but no longer block publishing: the public product lists the pairs that apply to it (`incompatiblePairs`) and `priceLine` refuses them, which is how the exit criterion is demoed.
 
 *Pricing service (authoritative line price)*
-- `PricingService.priceLine({productId, sizeId, cutId?, packagingId?, exclusionIds[], quantity})` → `{unitPrice, lineTotal, breakdown[], errors[]}`; error codes `PRODUCT_UNAVAILABLE`, `SIZE_UNAVAILABLE`, `CUT_PACKAGING_INCOMPATIBLE`, `OPTION_NOT_IN_PRODUCT`
+- `PricingService.priceLine({productId, sizeId, cutId?, packagingId?, exclusionIds[], quantity})` → `{unitPrice, lineTotal, breakdown[], errors[]}`; error codes `PRODUCT_UNAVAILABLE`, `SIZE_UNAVAILABLE`, `INCOMPATIBLE_CUTTING_PACKAGING` (the API's name; was `CUT_PACKAGING_INCOMPATIBLE`), `OPTION_NOT_IN_PRODUCT`, `OPTION_REQUIRED` (a product with cuts needs one chosen)
 
 **How:**
 

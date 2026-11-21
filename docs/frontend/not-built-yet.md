@@ -18,7 +18,7 @@ Everything in `openapi.json`, which is:
   - reference lists (categories with an image) and incompatibilities, and the vendor's read-only pickers;
   - vendor and admin products, review and change requests;
   - prices (sizes, cutting styles and packagings), availability and fulfilment;
-  - public browsing, with text search.
+  - public browsing, with text search; the product page with its availability (also when out of stock), each size's availability and id, the default size, every cut's name, and the incompatible pairs among its options.
 - **Uploads:** for every audience that has a purpose.
 - **Input:** a NUL character (`\u0000`) in any text field, query or path is refused as `VALIDATION_FAILED` (`hasNoNulCharacter`). Strip control characters from pasted text in the app anyway.
 
@@ -79,7 +79,7 @@ What a built dashboard screen needs and the API does not give yet. Until it land
 | Business activity, responsible person and street address of an application | Vendor review, store details and location (131:18512) | Activity left out; the account holder shown as the person; the city under the map | none open yet (API gap) |
 | Document content type (and page count) on the document links | Vendor review viewer «page 1 of 2» (131:18512) | Shown as an image; a file the browser cannot show (PDF) offers «open the file»; no page count | none open yet (API gap) |
 | Admin permissions (onboarding officer) | Not-allowed states of the stores list and review (131:17922, 131:18972) | Only on the mock (an admin access token ending in `-limited` is answered NOT_ALLOWED); the API's FORBIDDEN ends the session as `errors.md` says. The real trigger comes with ADM-API-1 | #111 (ADM-API-1) |
-| Per-product cut × packaging compatibility. Today the rules are global (`/v1/admin/cutting-packaging-incompatibilities`), and a product offering a forbidden pair cannot be published (PRODUCT_NOT_SUBMITTABLE `INCOMPATIBLE_CUTTING_PACKAGING`), while the sprint exit criteria want a published product with one incompatible pair that the app blocks at selection | Product form, compatibility matrix (131:35405); Sprint 2 exit criteria | The matrix edits the global rules (admin) and marks in red a forbidden pair the product offers; such a product saves as a draft, and publishing shows the API's refusal | none open yet (API decision needed) |
+| Per-product cut × packaging compatibility. The rules are global (`/v1/admin/cutting-packaging-incompatibilities`); since 2026-11-21 they limit what a customer may choose (the public product's `incompatiblePairs`, refused at the cart with INCOMPATIBLE_CUTTING_PACKAGING) and no longer block publishing, so the exit criterion works with global rules. A rule only one product follows is not built | Product form, compatibility matrix (131:35405) | The matrix edits the global rules (admin) and marks in red a forbidden pair the product offers | none open yet (decision for the owner: global rules or per-product) |
 | Product count per category on `GET /v1/admin/lists/{list}` (categories) | Categories table, «products» column (131:19875) | A dash | none open yet (API gap) |
 | A category slug | Categories table and dialog, «link» (131:19875, 131:21038) | The English name is shown and edited in its place | none open yet (API gap) |
 | Deleting a category or a product | Categories CRUD; product form «delete product» (131:35405) | Categories are switched off instead (API rule: entries are never deleted); «delete product» shown disabled | by design (lists); none open yet (products) |
@@ -139,15 +139,10 @@ The product page reads one public product (images, sizes, cuts, packagings, excl
 
 | Gap | Screen waiting on it | The app today | Issue |
 |---|---|---|---|
-| Cut and packaging incompatibility rules in the public product | Product: disabled packaging with its reason and explanation | No rule from the API: every packaging can be chosen; the server refuses a bad pair when the cart prices the line | API gap (rules exist in the admin lists, CAT-API-1 #48) |
-| Product availability and stock per size in the public product | Product: out-of-stock notice, disabled button, total 0.00; disabled size chips | Shown as available from the API (the product card already has an availability flag) | API gap |
 | Slaughter time and chilled delivery window | Product: freshness card | Hidden | API gap |
 | Store rating in the product | Product: rating next to the store name | Hidden | API gap |
-| A default size | Product: the size picked when the page opens | The first size | API gap |
 | A gift box packaging | Product: packaging list (the design shows one) | The API knows trays, bags, vacuum and none; only the mock offers a gift box | API gap |
-| Server price for a product line (pricing route) | Product: total and price details | Computed on the device with the same formula, in one place to swap. Error names: the incompatible pair uses the API's INCOMPATIBLE_CUTTING_PACKAGING; product unavailable, size unavailable, option not in product and the missing required cut (OPTION_REQUIRED) are the app's names until the pricing route fixes them | CRT-API-1 #61 |
-| Whether a cut is required when a product offers cuts | Product: "choose a cut" error on add | The device price function treats a cut as required (OPTION_REQUIRED, the total still shows); the server rule is not decided | CRT-API-1 #61 |
-| A name for every cut in the public product | Product: cut list | A cut without a name is left out rather than shown by its id | CAT-API-5 #50 |
+| Server price for a product line (pricing route) | Product: total and price details | Computed on the device with the same formula, in one place to swap. The server's function and its error names are fixed (`priceLine`: PRODUCT_UNAVAILABLE, SIZE_UNAVAILABLE, OPTION_NOT_IN_PRODUCT, INCOMPATIBLE_CUTTING_PACKAGING, OPTION_REQUIRED) and proven against [fixtures/pricing-cases.json](fixtures/pricing-cases.json), which the app's tests should read too; no route prices a single line: the cart (CRT-API-1) returns the server's prices | CRT-API-1 #61 |
 | A design for the fulfilment badge (delivery, pickup or both) | Product: the badge the task Output asks for | The value is read from the product and kept, nothing is drawn until the badge is designed | Design gap |
 | "Notify me when back in stock" (stock alerts) | Product: out-of-stock notice | The notice says only that the product is unavailable; the design's "you can ask to be notified" sentence is left out until the feature exists | API gap |
 | The cart | Product: "Add to cart" | Shows a "cart coming soon" message; nothing is kept | CRT-MOB-1 #64 |

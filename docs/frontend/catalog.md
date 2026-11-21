@@ -5,8 +5,8 @@
 | Piece | What it is | Who manages it |
 |---|---|---|
 | **Reference lists** | `categories` (ordered by `sortOrder`), `meat-types`, `cutting-styles`, `exclusion-items` (the "without" items: الرأس، الكرشة). Each entry has an `{ ar, en }` name and `isActive`. Entries are never deleted, only switched off. | admin |
-| **Incompatibilities** | Pairs of a cutting style and a packaging that a product may not offer together | admin |
-| **Product** | Belongs to one vendor. Holds: <ul><li>name and description;</li><li>category and an optional meat type;</li><li>up to 10 images (the first is the cover);</li><li>up to 20 **sizes**, each with an approximate weight in grams, a price in halalas and an optional `tag`;</li><li>up to 30 **cutting styles**, each with an extra price;</li><li>**packagings** (`trays`, `bags`, `vacuum`, `none`), each with an extra price;</li><li>"without" items;</li><li>**fulfilment** (`delivery`, `pickup`, `both`);</li><li>**availability** (`isAvailable`).</li></ul> | vendor (reviewed by admins), or admin for the platform vendor's products |
+| **Incompatibilities** | Pairs of a cutting style and a packaging that a customer may not choose together. A product may offer both; the pair is refused at the cart | admin |
+| **Product** | Belongs to one vendor. Holds: <ul><li>name and description;</li><li>category and an optional meat type;</li><li>up to 10 images (the first is the cover);</li><li>up to 20 **sizes**, each with an approximate weight in grams, a price in halalas, an optional `tag` and its own availability;</li><li>up to 30 **cutting styles**, each with an extra price;</li><li>**packagings** (`trays`, `bags`, `vacuum`, `none`), each with an extra price;</li><li>"without" items;</li><li>**fulfilment** (`delivery`, `pickup`, `both`);</li><li>**availability** (`isAvailable`).</li></ul> | vendor (reviewed by admins), or admin for the platform vendor's products |
 | **Change request** | A vendor's edit of a published product, waiting for an admin | vendor proposes, admin decides |
 
 All prices are **integer halalas with VAT included** (see [conventions.md](conventions.md#money-integer-halalas)). A product's `minPriceHalalas` is its lowest size price, the "from" price on cards.
@@ -74,13 +74,18 @@ No token is needed for any of these.
 
    Only products a customer can buy appear: published, available, of an active vendor, in an active category. An unknown filter id finds nothing; it is not an error. Each card has `name`, `vendor`, `minPriceHalalas` and `coverUrl`.
 3. **Product page:** `GET /v1/public/products/{id}`. It returns everything a customer chooses from:
-   - `sizes`: weight, price and an optional `tag` such as "يكفي لعقيقة";
-   - `cuttings`: name and extra price;
+   - `isAvailable`: `false` when the product is switched off (out of stock). Show the page with the out-of-stock notice and nothing to add;
+   - `sizes`: `id`, weight, price, an optional `tag` such as "يكفي لعقيقة", and `isAvailable` (a size switched off is shown disabled);
+   - `defaultSizeId`: the size to select when the page opens (the first available one), null when none is available;
+   - `cuttings`: name and extra price. With any cutting, the customer must choose one (`OPTION_REQUIRED`);
    - `packagings`: `[{ packaging, extraPriceHalalas }]`;
    - `exclusions`;
+   - `incompatiblePairs`: `[{ cuttingStyleId, packaging }]`, the pairs among this product's options that may not be chosen together. Disable the packaging once its cutting is chosen (and the other way round); the cart refuses the pair with `INCOMPATIBLE_CUTTING_PACKAGING`;
    - `fulfilment`.
 
-   `NOT_FOUND` also means the product is no longer for sale (switched off, vendor suspended, category off): show "no longer available".
+   `NOT_FOUND` means the product is no longer for sale (not published, vendor suspended, category off): show "no longer available". A product switched off is still returned, with `isAvailable: false`, but it is left out of the lists.
+
+   **The line price.** Show the total with the server's formula: unit = size price + the chosen cutting's extra + the chosen packaging's extra (VAT included), line = unit × quantity, "without" items free. A line that cannot be bought carries errors, each once, in this order: PRODUCT_UNAVAILABLE, OPTION_NOT_IN_PRODUCT, SIZE_UNAVAILABLE, INCOMPATIBLE_CUTTING_PACKAGING, and OPTION_REQUIRED (cuttings offered, none chosen; added only when nothing else is wrong). No route returns them yet: the cart route will document them. Every error but OPTION_REQUIRED makes the price 0; with OPTION_REQUIRED the total still shows and the add button asks for a cut. The cases are in [fixtures/pricing-cases.json](fixtures/pricing-cases.json): the API's tests run every one, and the app's price function must pass the same file. The cart (CRT-API-1) re-prices every line on the server, which stays authoritative.
 4. **A store's products:** `GET /v1/public/products?vendorId=<id>`, next to `GET /v1/public/vendors/{id}`.
 
 Adding to a cart is not built yet (see [not-built-yet.md](not-built-yet.md)).
@@ -103,9 +108,7 @@ Adding to a cart is not built yet (see [not-built-yet.md](not-built-yet.md)).
    > **Changed in #243:** `packagings` used to be a list of names (`["trays"]`). It is now a list of objects in requests and in every response, like `cuttings`. Regenerate your client.
 
    The result is a `draft`, available. A draft may be incomplete.
-3. **Submit:** `POST /v1/vendor/products/{id}/submit`. It needs at least one size and one image, and no cutting style offered with a packaging it cannot be combined with. Otherwise the answer is `PRODUCT_NOT_SUBMITTABLE`:
-   - `details.reasons` lists `NO_SIZE`, `NO_IMAGE` and `INCOMPATIBLE_CUTTING_PACKAGING`;
-   - `details.pairs` lists the incompatible pairs.
+3. **Submit:** `POST /v1/vendor/products/{id}/submit`. It needs at least one size and one image. Otherwise the answer is `PRODUCT_NOT_SUBMITTABLE`, and `details.reasons` lists `NO_SIZE` and `NO_IMAGE`. The incompatibility rules never block a submission: they limit what customers may choose together.
 
    Show all of them at once.
 
@@ -121,7 +124,7 @@ Adding to a cart is not built yet (see [not-built-yet.md](not-built-yet.md)).
 
 Only the entries sent change. Each must be one the product offers (`isSizeOfProduct`, `isCuttingOfProduct`, `isPackagingOfProduct`).
 
-**Availability:** `PATCH /v1/vendor/products/{id}/availability` with `{ "isAvailable": false }`. It is the "out of stock" switch: the product leaves the public catalog at once, and comes back when switched on.
+**Availability:** `PATCH /v1/vendor/products/{id}/availability` with `{ "isAvailable": false }`. It is the "out of stock" switch: the product leaves the public lists at once (its page shows it out of stock), and comes back when switched on. Add `"sizes": [{ "sizeId": "…", "isAvailable": false }]` to switch single sizes; the others keep theirs, and a new size starts available. A size not of the product, or named twice, is `VALIDATION_FAILED` (`isSizeOfProduct`, `isNotRepeated`).
 
 **Fulfilment:** `PATCH /v1/vendor/products/{id}/fulfilment` with `{ "fulfilment": "delivery" | "pickup" | "both" }`.
 
@@ -136,7 +139,7 @@ Only the entries sent change. Each must be one the product offers (`isSizeOfProd
 **The form's pickers:**
 - Categories: `GET /v1/public/categories`.
 - Meat types, cutting styles and "without" items: `GET /v1/vendor/lists/{list}` with `meat-types`, `cutting-styles` or `exclusion-items`. Active entries only, with both names, **not paged**, oldest first.
-- Incompatible pairs: `GET /v1/vendor/cutting-packaging-incompatibilities`, the pairs of active cutting styles with the cutting style's name, not paged. Use them to warn before submission.
+- Incompatible pairs: `GET /v1/vendor/cutting-packaging-incompatibilities`, the pairs of active cutting styles with the cutting style's name, not paged. Use them to show which pairs customers will not be able to choose.
 
 The admin list endpoints stay admin-only: a vendor token there is `FORBIDDEN`.
 
@@ -157,7 +160,7 @@ The admin list endpoints stay admin-only: a vendor token there is `FORBIDDEN`.
 | Action | Endpoint and rules |
 |---|---|
 | List | `GET /v1/admin/cutting-packaging-incompatibilities` (by id; the names come from the cutting styles list) |
-| Add | `POST /v1/admin/cutting-packaging-incompatibilities` with `{ cuttingStyleId, packaging }`. `CONFLICT` when the rule exists already. Published products keep their options; the rule applies to later submissions, publications and change requests. |
+| Add | `POST /v1/admin/cutting-packaging-incompatibilities` with `{ cuttingStyleId, packaging }`. `CONFLICT` when the rule exists already. Products keep their options; from now on customers cannot choose the pair on any product (it appears in the product's `incompatiblePairs`). |
 | Remove | `DELETE /v1/admin/cutting-packaging-incompatibilities/{id}` |
 
 ## Admin dashboard: products and review

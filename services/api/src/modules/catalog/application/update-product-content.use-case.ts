@@ -11,10 +11,6 @@ import {
   type CatalogVendors,
 } from '../domain/ports/catalog-vendors.port';
 import {
-  CUTTING_PACKAGING_INCOMPATIBILITY_REPOSITORY,
-  type CuttingPackagingIncompatibilityRepository,
-} from '../domain/ports/cutting-packaging-incompatibility.repository.port';
-import {
   PRODUCT_CHANGE_REQUEST_REPOSITORY,
   type ProductChangeRequestRepository,
 } from '../domain/ports/product-change-request.repository.port';
@@ -59,8 +55,6 @@ export class UpdateProductContentUseCase {
     private readonly changeRequests: ProductChangeRequestRepository,
     @Inject(REFERENCE_LIST_REPOSITORY)
     private readonly lists: ReferenceListRepository,
-    @Inject(CUTTING_PACKAGING_INCOMPATIBILITY_REPOSITORY)
-    private readonly rules: CuttingPackagingIncompatibilityRepository,
     @Inject(CATALOG_MEDIA) private readonly media: CatalogMedia,
     @Inject(CATALOG_VENDORS) private readonly vendors: CatalogVendors,
     @Inject(AuditLogWriter)
@@ -102,12 +96,7 @@ export class UpdateProductContentUseCase {
           changeRequest: await this.changeRequests.findLatestOf(live.id),
         };
       }
-      Product.assertSubmittable(
-        input.content,
-        await this.rules.findForCuttingStyles(
-          input.content.cuttings.map((cutting) => cutting.cuttingStyleId),
-        ),
-      );
+      Product.assertSubmittable(input.content);
       if (input.scope.kind === 'vendor') {
         const pending = await this.changeRequests.findPendingOf(live.id);
         if (pending !== null) {

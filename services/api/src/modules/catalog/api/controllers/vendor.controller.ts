@@ -110,9 +110,9 @@ export class VendorCatalogController {
   @ApiTags(API_TAGS.vendorCatalogLists.name)
   @ApiOperation({
     operationId: 'vendorListCuttingPackagingIncompatibilities',
-    summary: 'The cutting and packaging pairs a product cannot offer',
+    summary: 'The cutting and packaging pairs a customer cannot choose',
     description:
-      'Vendor dashboard, product form. Every global rule whose cutting style is active: a product offering that cutting style with that packaging cannot be submitted (PRODUCT_NOT_SUBMITTABLE, INCOMPATIBLE_CUTTING_PACKAGING), so the form can warn first. Each pair carries the cutting style with its Arabic and English name; oldest rule first. The whole list in one answer, not paged. The rules are managed by admins.',
+      'Vendor dashboard, product form. Every global rule whose cutting style is active: a product may offer both, but a customer cannot choose that cutting style with that packaging (the public product lists the pairs that apply to it; the cart’s line price, CRT-API-1, will refuse them with INCOMPATIBLE_CUTTING_PACKAGING), so the form can show which choices customers will not get. Each pair carries the cutting style with its Arabic and English name; oldest rule first. The whole list in one answer, not paged. The rules are managed by admins.',
   })
   @ApiOkResponse({
     type: VendorIncompatibilityListResponseDto,
@@ -238,7 +238,7 @@ export class VendorCatalogController {
       'Vendor dashboard, edit product form. Replaces the whole content (names, description, category, meat type, images, sizes, cutting styles, packagings, "without" items); send every field, lists in display order. Availability, fulfilment and prices have their own endpoints and are not changed here. ' +
       'By status: `draft` or `rejected`: saved at once (a rejected product stays rejected until submitted again). `published`: nothing changes on the live product; the edit becomes a new pending change request for admin review (any pending one is closed as `superseded`), returned in `changeRequest`, and it must meet the submission rules (at least one size and one image, no cutting style offered with a packaging it cannot be combined with). `pending_review`: refused with PRODUCT_NOT_EDITABLE until an admin decides. ' +
       'Keep an existing size by sending its `id`; a size left out is removed; a size without `id` is new. Existing sizes, cutting styles and packagings must carry their current prices (VALIDATION_FAILED `isLivePrice`): change prices with PATCH …/{id}/prices, which applies at once. New sizes, cutting styles and packagings take the prices sent (halalas, VAT included). ' +
-      'Errors: VALIDATION_FAILED also for an inactive reference, a size id not of this product (`isSizeOfProduct`) or a repeat (`isNotRepeated`); MEDIA_NOT_FOUND / MEDIA_NOT_READY for a new image not uploaded and confirmed by this user; PRODUCT_NOT_SUBMITTABLE (published only) with `details.reasons` (NO_SIZE, NO_IMAGE, INCOMPATIBLE_CUTTING_PACKAGING with `details.pairs`); NOT_FOUND for an unknown id or another vendor’s product.',
+      'Errors: VALIDATION_FAILED also for an inactive reference, a size id not of this product (`isSizeOfProduct`) or a repeat (`isNotRepeated`); MEDIA_NOT_FOUND / MEDIA_NOT_READY for a new image not uploaded and confirmed by this user; PRODUCT_NOT_SUBMITTABLE (published only) with `details.reasons` (NO_SIZE, NO_IMAGE); NOT_FOUND for an unknown id or another vendor’s product.',
   })
   @ApiOkResponse({
     type: ProductResponseDto,
@@ -277,7 +277,7 @@ export class VendorCatalogController {
     summary: 'Send a draft or rejected product to review',
     description:
       'Vendor dashboard, "submit for review" on a draft or rejected product. Moves it to `pending_review`, where admins approve it (it becomes `published`) or reject it with a reason (`rejected`, editable and submittable again). While under review the product cannot be edited. No body. ' +
-      'Errors: PRODUCT_NOT_SUBMITTABLE when the product has no size or no image, or offers a cutting style with a packaging it cannot be combined with: `details.reasons` lists every reason (NO_SIZE, NO_IMAGE, INCOMPATIBLE_CUTTING_PACKAGING) and `details.pairs` the incompatible pairs; PRODUCT_NOT_EDITABLE when the product is already under review or published (`details.status`); NOT_FOUND for an unknown id or another vendor’s product.',
+      'Errors: PRODUCT_NOT_SUBMITTABLE when the product has no size or no image: `details.reasons` lists every reason (NO_SIZE, NO_IMAGE); the cutting and packaging rules do not block a submission; PRODUCT_NOT_EDITABLE when the product is already under review or published (`details.status`); NOT_FOUND for an unknown id or another vendor’s product.',
   })
   @ApiOkResponse({
     type: ProductResponseDto,
@@ -310,8 +310,8 @@ export class VendorCatalogController {
     operationId: 'vendorSetProductAvailability',
     summary: 'Switch a product on or off',
     description:
-      'Vendor dashboard, the availability switch (out of stock, back in stock). Applies at once in every status but `pending_review`, also on a published product: no review. An unavailable published product leaves the public catalog at once and comes back when switched on. ' +
-      'Errors: PRODUCT_NOT_EDITABLE while the product is under review (`details.status`); NOT_FOUND for an unknown id or another vendor’s product.',
+      'Vendor dashboard, the availability switches (out of stock, back in stock): the product, and optionally some of its sizes. Applies at once in every status but `pending_review`, also on a published product: no review. An unavailable published product leaves the public list at once (its page shows it out of stock) and comes back when switched on; an unavailable size stays on the page, not orderable. ' +
+      'Errors: VALIDATION_FAILED for a size not of this product (`isSizeOfProduct`) or named twice (`isNotRepeated`); PRODUCT_NOT_EDITABLE while the product is under review (`details.status`); NOT_FOUND for an unknown id or another vendor’s product.',
   })
   @ApiOkResponse({
     type: ProductResponseDto,
@@ -335,6 +335,7 @@ export class VendorCatalogController {
         scope: { kind: 'vendor', vendorId: organisationOf(user) },
         productId: params.id,
         isAvailable: body.isAvailable,
+        sizes: body.sizes ?? [],
       }),
     );
   }

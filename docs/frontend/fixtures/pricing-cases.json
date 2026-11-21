@@ -1,0 +1,756 @@
+{
+  "about": "Shared cases of the one product line price (unit = size price + cutting extra + packaging extra, VAT included; line = unit x quantity; \"without\" items free). The API's priceLine (services/api/src/modules/catalog/domain/price-line.spec.ts) and the apps' price function run every case and must give exactly `expected`. Products use the public product's field names; amounts are integer halalas. `errors` are compared in order: PRODUCT_UNAVAILABLE, then OPTION_NOT_IN_PRODUCT (size), SIZE_UNAVAILABLE, OPTION_NOT_IN_PRODUCT (cutting, packaging, without items; each code once), INCOMPATIBLE_CUTTING_PACKAGING, and OPTION_REQUIRED only when nothing else is wrong. Any error but OPTION_REQUIRED zeroes the line and empties the breakdown. Add a case here, never in one client only.",
+  "products": {
+    "ribeye": {
+      "isAvailable": true,
+      "sizes": [
+        {
+          "id": "sz-500g",
+          "priceHalalas": 4950,
+          "isAvailable": true
+        },
+        {
+          "id": "sz-1kg",
+          "priceHalalas": 8900,
+          "isAvailable": true
+        },
+        {
+          "id": "sz-2kg",
+          "priceHalalas": 17200,
+          "isAvailable": false
+        }
+      ],
+      "cuttings": [
+        {
+          "cuttingStyleId": "cut-slices",
+          "extraPriceHalalas": 0
+        },
+        {
+          "cuttingStyleId": "cut-cubes",
+          "extraPriceHalalas": 200
+        },
+        {
+          "cuttingStyleId": "cut-mince",
+          "extraPriceHalalas": 300
+        }
+      ],
+      "packagings": [
+        {
+          "packaging": "trays",
+          "extraPriceHalalas": 0
+        },
+        {
+          "packaging": "vacuum",
+          "extraPriceHalalas": 500
+        },
+        {
+          "packaging": "bags",
+          "extraPriceHalalas": 1500
+        }
+      ],
+      "exclusions": [
+        {
+          "id": "ex-fat"
+        },
+        {
+          "id": "ex-bone"
+        },
+        {
+          "id": "ex-sinew"
+        }
+      ],
+      "incompatiblePairs": [
+        {
+          "cuttingStyleId": "cut-mince",
+          "packaging": "trays"
+        }
+      ]
+    },
+    "carcass": {
+      "isAvailable": true,
+      "sizes": [
+        {
+          "id": "sz-medium",
+          "priceHalalas": 145000,
+          "isAvailable": true
+        },
+        {
+          "id": "sz-large",
+          "priceHalalas": 165000,
+          "isAvailable": true
+        }
+      ],
+      "cuttings": [
+        {
+          "cuttingStyleId": "cut-hadrami",
+          "extraPriceHalalas": 15000
+        },
+        {
+          "cuttingStyleId": "cut-quarters",
+          "extraPriceHalalas": 0
+        }
+      ],
+      "packagings": [
+        {
+          "packaging": "trays",
+          "extraPriceHalalas": 2000
+        },
+        {
+          "packaging": "none",
+          "extraPriceHalalas": 0
+        }
+      ],
+      "exclusions": [
+        {
+          "id": "ex-head"
+        },
+        {
+          "id": "ex-trotters"
+        }
+      ],
+      "incompatiblePairs": []
+    },
+    "feed": {
+      "isAvailable": true,
+      "sizes": [
+        {
+          "id": "sz-unit",
+          "priceHalalas": 6000,
+          "isAvailable": true
+        }
+      ],
+      "cuttings": [],
+      "packagings": [
+        {
+          "packaging": "bags",
+          "extraPriceHalalas": 250
+        }
+      ],
+      "exclusions": [],
+      "incompatiblePairs": []
+    },
+    "soldOut": {
+      "isAvailable": false,
+      "sizes": [
+        {
+          "id": "sz-1kg",
+          "priceHalalas": 12000,
+          "isAvailable": false
+        }
+      ],
+      "cuttings": [
+        {
+          "cuttingStyleId": "cut-slices",
+          "extraPriceHalalas": 0
+        }
+      ],
+      "packagings": [
+        {
+          "packaging": "trays",
+          "extraPriceHalalas": 0
+        }
+      ],
+      "exclusions": [],
+      "incompatiblePairs": [
+        {
+          "cuttingStyleId": "cut-slices",
+          "packaging": "trays"
+        }
+      ]
+    }
+  },
+  "cases": [
+    {
+      "name": "a size alone, product without cuttings",
+      "product": "feed",
+      "selection": {
+        "sizeId": "sz-unit",
+        "cuttingStyleId": null,
+        "packaging": null,
+        "exclusionItemIds": [],
+        "quantity": 1
+      },
+      "expected": {
+        "unitPriceHalalas": 6000,
+        "lineTotalHalalas": 6000,
+        "breakdown": [
+          {
+            "kind": "size",
+            "optionId": "sz-unit",
+            "halalas": 6000
+          }
+        ],
+        "errors": []
+      }
+    },
+    {
+      "name": "quantity multiplies the unit price",
+      "product": "feed",
+      "selection": {
+        "sizeId": "sz-unit",
+        "cuttingStyleId": null,
+        "packaging": null,
+        "exclusionItemIds": [],
+        "quantity": 4
+      },
+      "expected": {
+        "unitPriceHalalas": 6000,
+        "lineTotalHalalas": 24000,
+        "breakdown": [
+          {
+            "kind": "size",
+            "optionId": "sz-unit",
+            "halalas": 6000
+          }
+        ],
+        "errors": []
+      }
+    },
+    {
+      "name": "a packaging without a cutting, product without cuttings",
+      "product": "feed",
+      "selection": {
+        "sizeId": "sz-unit",
+        "cuttingStyleId": null,
+        "packaging": "bags",
+        "exclusionItemIds": [],
+        "quantity": 2
+      },
+      "expected": {
+        "unitPriceHalalas": 6250,
+        "lineTotalHalalas": 12500,
+        "breakdown": [
+          {
+            "kind": "size",
+            "optionId": "sz-unit",
+            "halalas": 6000
+          },
+          {
+            "kind": "packaging",
+            "optionId": "bags",
+            "halalas": 250
+          }
+        ],
+        "errors": []
+      }
+    },
+    {
+      "name": "cuttings offered and none chosen: priced, OPTION_REQUIRED",
+      "product": "ribeye",
+      "selection": {
+        "sizeId": "sz-1kg",
+        "cuttingStyleId": null,
+        "packaging": null,
+        "exclusionItemIds": [],
+        "quantity": 1
+      },
+      "expected": {
+        "unitPriceHalalas": 8900,
+        "lineTotalHalalas": 8900,
+        "breakdown": [
+          {
+            "kind": "size",
+            "optionId": "sz-1kg",
+            "halalas": 8900
+          }
+        ],
+        "errors": [
+          "OPTION_REQUIRED"
+        ]
+      }
+    },
+    {
+      "name": "OPTION_REQUIRED keeps the packaging price too",
+      "product": "ribeye",
+      "selection": {
+        "sizeId": "sz-1kg",
+        "cuttingStyleId": null,
+        "packaging": "vacuum",
+        "exclusionItemIds": [],
+        "quantity": 2
+      },
+      "expected": {
+        "unitPriceHalalas": 9400,
+        "lineTotalHalalas": 18800,
+        "breakdown": [
+          {
+            "kind": "size",
+            "optionId": "sz-1kg",
+            "halalas": 8900
+          },
+          {
+            "kind": "packaging",
+            "optionId": "vacuum",
+            "halalas": 500
+          }
+        ],
+        "errors": [
+          "OPTION_REQUIRED"
+        ]
+      }
+    },
+    {
+      "name": "a free cutting",
+      "product": "ribeye",
+      "selection": {
+        "sizeId": "sz-1kg",
+        "cuttingStyleId": "cut-slices",
+        "packaging": null,
+        "exclusionItemIds": [],
+        "quantity": 1
+      },
+      "expected": {
+        "unitPriceHalalas": 8900,
+        "lineTotalHalalas": 8900,
+        "breakdown": [
+          {
+            "kind": "size",
+            "optionId": "sz-1kg",
+            "halalas": 8900
+          },
+          {
+            "kind": "cutting",
+            "optionId": "cut-slices",
+            "halalas": 0
+          }
+        ],
+        "errors": []
+      }
+    },
+    {
+      "name": "a paid cutting",
+      "product": "ribeye",
+      "selection": {
+        "sizeId": "sz-1kg",
+        "cuttingStyleId": "cut-cubes",
+        "packaging": null,
+        "exclusionItemIds": [],
+        "quantity": 1
+      },
+      "expected": {
+        "unitPriceHalalas": 9100,
+        "lineTotalHalalas": 9100,
+        "breakdown": [
+          {
+            "kind": "size",
+            "optionId": "sz-1kg",
+            "halalas": 8900
+          },
+          {
+            "kind": "cutting",
+            "optionId": "cut-cubes",
+            "halalas": 200
+          }
+        ],
+        "errors": []
+      }
+    },
+    {
+      "name": "a free packaging still appears in the breakdown",
+      "product": "ribeye",
+      "selection": {
+        "sizeId": "sz-500g",
+        "cuttingStyleId": "cut-slices",
+        "packaging": "trays",
+        "exclusionItemIds": [],
+        "quantity": 1
+      },
+      "expected": {
+        "unitPriceHalalas": 4950,
+        "lineTotalHalalas": 4950,
+        "breakdown": [
+          {
+            "kind": "size",
+            "optionId": "sz-500g",
+            "halalas": 4950
+          },
+          {
+            "kind": "cutting",
+            "optionId": "cut-slices",
+            "halalas": 0
+          },
+          {
+            "kind": "packaging",
+            "optionId": "trays",
+            "halalas": 0
+          }
+        ],
+        "errors": []
+      }
+    },
+    {
+      "name": "a paid cutting and a paid packaging",
+      "product": "ribeye",
+      "selection": {
+        "sizeId": "sz-1kg",
+        "cuttingStyleId": "cut-cubes",
+        "packaging": "bags",
+        "exclusionItemIds": [],
+        "quantity": 1
+      },
+      "expected": {
+        "unitPriceHalalas": 10600,
+        "lineTotalHalalas": 10600,
+        "breakdown": [
+          {
+            "kind": "size",
+            "optionId": "sz-1kg",
+            "halalas": 8900
+          },
+          {
+            "kind": "cutting",
+            "optionId": "cut-cubes",
+            "halalas": 200
+          },
+          {
+            "kind": "packaging",
+            "optionId": "bags",
+            "halalas": 1500
+          }
+        ],
+        "errors": []
+      }
+    },
+    {
+      "name": "the incompatible cutting allowed with another packaging, x3",
+      "product": "ribeye",
+      "selection": {
+        "sizeId": "sz-500g",
+        "cuttingStyleId": "cut-mince",
+        "packaging": "vacuum",
+        "exclusionItemIds": [],
+        "quantity": 3
+      },
+      "expected": {
+        "unitPriceHalalas": 5750,
+        "lineTotalHalalas": 17250,
+        "breakdown": [
+          {
+            "kind": "size",
+            "optionId": "sz-500g",
+            "halalas": 4950
+          },
+          {
+            "kind": "cutting",
+            "optionId": "cut-mince",
+            "halalas": 300
+          },
+          {
+            "kind": "packaging",
+            "optionId": "vacuum",
+            "halalas": 500
+          }
+        ],
+        "errors": []
+      }
+    },
+    {
+      "name": "exclusions are free",
+      "product": "ribeye",
+      "selection": {
+        "sizeId": "sz-1kg",
+        "cuttingStyleId": "cut-slices",
+        "packaging": null,
+        "exclusionItemIds": [
+          "ex-fat",
+          "ex-bone",
+          "ex-sinew"
+        ],
+        "quantity": 1
+      },
+      "expected": {
+        "unitPriceHalalas": 8900,
+        "lineTotalHalalas": 8900,
+        "breakdown": [
+          {
+            "kind": "size",
+            "optionId": "sz-1kg",
+            "halalas": 8900
+          },
+          {
+            "kind": "cutting",
+            "optionId": "cut-slices",
+            "halalas": 0
+          }
+        ],
+        "errors": []
+      }
+    },
+    {
+      "name": "a carcass, Hadrami cut, trays, x2",
+      "product": "carcass",
+      "selection": {
+        "sizeId": "sz-large",
+        "cuttingStyleId": "cut-hadrami",
+        "packaging": "trays",
+        "exclusionItemIds": [
+          "ex-head"
+        ],
+        "quantity": 2
+      },
+      "expected": {
+        "unitPriceHalalas": 182000,
+        "lineTotalHalalas": 364000,
+        "breakdown": [
+          {
+            "kind": "size",
+            "optionId": "sz-large",
+            "halalas": 165000
+          },
+          {
+            "kind": "cutting",
+            "optionId": "cut-hadrami",
+            "halalas": 15000
+          },
+          {
+            "kind": "packaging",
+            "optionId": "trays",
+            "halalas": 2000
+          }
+        ],
+        "errors": []
+      }
+    },
+    {
+      "name": "an incompatible pair: zeroed",
+      "product": "ribeye",
+      "selection": {
+        "sizeId": "sz-1kg",
+        "cuttingStyleId": "cut-mince",
+        "packaging": "trays",
+        "exclusionItemIds": [],
+        "quantity": 1
+      },
+      "expected": {
+        "unitPriceHalalas": 0,
+        "lineTotalHalalas": 0,
+        "breakdown": [],
+        "errors": [
+          "INCOMPATIBLE_CUTTING_PACKAGING"
+        ]
+      }
+    },
+    {
+      "name": "an unavailable size: zeroed",
+      "product": "ribeye",
+      "selection": {
+        "sizeId": "sz-2kg",
+        "cuttingStyleId": "cut-slices",
+        "packaging": null,
+        "exclusionItemIds": [],
+        "quantity": 1
+      },
+      "expected": {
+        "unitPriceHalalas": 0,
+        "lineTotalHalalas": 0,
+        "breakdown": [],
+        "errors": [
+          "SIZE_UNAVAILABLE"
+        ]
+      }
+    },
+    {
+      "name": "a size not of the product",
+      "product": "ribeye",
+      "selection": {
+        "sizeId": "sz-9kg",
+        "cuttingStyleId": "cut-slices",
+        "packaging": null,
+        "exclusionItemIds": [],
+        "quantity": 1
+      },
+      "expected": {
+        "unitPriceHalalas": 0,
+        "lineTotalHalalas": 0,
+        "breakdown": [],
+        "errors": [
+          "OPTION_NOT_IN_PRODUCT"
+        ]
+      }
+    },
+    {
+      "name": "a cutting not of the product",
+      "product": "ribeye",
+      "selection": {
+        "sizeId": "sz-1kg",
+        "cuttingStyleId": "cut-hadrami",
+        "packaging": null,
+        "exclusionItemIds": [],
+        "quantity": 1
+      },
+      "expected": {
+        "unitPriceHalalas": 0,
+        "lineTotalHalalas": 0,
+        "breakdown": [],
+        "errors": [
+          "OPTION_NOT_IN_PRODUCT"
+        ]
+      }
+    },
+    {
+      "name": "a packaging not of the product",
+      "product": "ribeye",
+      "selection": {
+        "sizeId": "sz-1kg",
+        "cuttingStyleId": "cut-slices",
+        "packaging": "none",
+        "exclusionItemIds": [],
+        "quantity": 1
+      },
+      "expected": {
+        "unitPriceHalalas": 0,
+        "lineTotalHalalas": 0,
+        "breakdown": [],
+        "errors": [
+          "OPTION_NOT_IN_PRODUCT"
+        ]
+      }
+    },
+    {
+      "name": "a \"without\" item not of the product",
+      "product": "ribeye",
+      "selection": {
+        "sizeId": "sz-1kg",
+        "cuttingStyleId": "cut-slices",
+        "packaging": null,
+        "exclusionItemIds": [
+          "ex-fat",
+          "ex-head"
+        ],
+        "quantity": 1
+      },
+      "expected": {
+        "unitPriceHalalas": 0,
+        "lineTotalHalalas": 0,
+        "breakdown": [],
+        "errors": [
+          "OPTION_NOT_IN_PRODUCT"
+        ]
+      }
+    },
+    {
+      "name": "several unknown options: one OPTION_NOT_IN_PRODUCT",
+      "product": "carcass",
+      "selection": {
+        "sizeId": "sz-large",
+        "cuttingStyleId": "cut-slices",
+        "packaging": "vacuum",
+        "exclusionItemIds": [
+          "ex-fat"
+        ],
+        "quantity": 1
+      },
+      "expected": {
+        "unitPriceHalalas": 0,
+        "lineTotalHalalas": 0,
+        "breakdown": [],
+        "errors": [
+          "OPTION_NOT_IN_PRODUCT"
+        ]
+      }
+    },
+    {
+      "name": "an unknown option and no cutting: no OPTION_REQUIRED",
+      "product": "ribeye",
+      "selection": {
+        "sizeId": "sz-1kg",
+        "cuttingStyleId": null,
+        "packaging": "none",
+        "exclusionItemIds": [],
+        "quantity": 1
+      },
+      "expected": {
+        "unitPriceHalalas": 0,
+        "lineTotalHalalas": 0,
+        "breakdown": [],
+        "errors": [
+          "OPTION_NOT_IN_PRODUCT"
+        ]
+      }
+    },
+    {
+      "name": "an unavailable size with an unknown cutting: in order",
+      "product": "ribeye",
+      "selection": {
+        "sizeId": "sz-2kg",
+        "cuttingStyleId": "cut-hadrami",
+        "packaging": null,
+        "exclusionItemIds": [],
+        "quantity": 1
+      },
+      "expected": {
+        "unitPriceHalalas": 0,
+        "lineTotalHalalas": 0,
+        "breakdown": [],
+        "errors": [
+          "SIZE_UNAVAILABLE",
+          "OPTION_NOT_IN_PRODUCT"
+        ]
+      }
+    },
+    {
+      "name": "an unavailable product: zeroed",
+      "product": "soldOut",
+      "selection": {
+        "sizeId": "sz-1kg",
+        "cuttingStyleId": "cut-slices",
+        "packaging": null,
+        "exclusionItemIds": [],
+        "quantity": 1
+      },
+      "expected": {
+        "unitPriceHalalas": 0,
+        "lineTotalHalalas": 0,
+        "breakdown": [],
+        "errors": [
+          "PRODUCT_UNAVAILABLE",
+          "SIZE_UNAVAILABLE"
+        ]
+      }
+    },
+    {
+      "name": "an unavailable product with no cutting: no OPTION_REQUIRED",
+      "product": "soldOut",
+      "selection": {
+        "sizeId": "sz-1kg",
+        "cuttingStyleId": null,
+        "packaging": null,
+        "exclusionItemIds": [],
+        "quantity": 1
+      },
+      "expected": {
+        "unitPriceHalalas": 0,
+        "lineTotalHalalas": 0,
+        "breakdown": [],
+        "errors": [
+          "PRODUCT_UNAVAILABLE",
+          "SIZE_UNAVAILABLE"
+        ]
+      }
+    },
+    {
+      "name": "every error at once, in order",
+      "product": "soldOut",
+      "selection": {
+        "sizeId": "sz-1kg",
+        "cuttingStyleId": "cut-slices",
+        "packaging": "trays",
+        "exclusionItemIds": [
+          "ex-fat"
+        ],
+        "quantity": 1
+      },
+      "expected": {
+        "unitPriceHalalas": 0,
+        "lineTotalHalalas": 0,
+        "breakdown": [],
+        "errors": [
+          "PRODUCT_UNAVAILABLE",
+          "SIZE_UNAVAILABLE",
+          "OPTION_NOT_IN_PRODUCT",
+          "INCOMPATIBLE_CUTTING_PACKAGING"
+        ]
+      }
+    }
+  ]
+}

@@ -85,8 +85,8 @@ export class PublicCatalogController {
     operationId: 'publicGetProduct',
     summary: 'One product with every option',
     description:
-      'Customer app and web, product page; public, no sign-in needed. The product with what a customer chooses from: sizes (approximate weight and price), cutting styles (extra price), packagings, "without" items, and how it is fulfilled (delivery, pickup or both). Prices are integer halalas, VAT included. ' +
-      'NOT_FOUND for an unknown id and also for any product customers cannot buy now (not published, switched off, its vendor suspended or its category inactive): show it as no longer available.',
+      'Customer app and web, product page; public, no sign-in needed. The product with what a customer chooses from: sizes (approximate weight, price, availability, the default one), cutting styles (extra price), packagings, "without" items, the cutting and packaging pairs that may not be chosen together, and how it is fulfilled (delivery, pickup or both). Prices are integer halalas, VAT included. ' +
+      'A product switched off (out of stock) is returned with `isAvailable` false: show it out of stock. NOT_FOUND for an unknown id and also for a product not published, of a suspended vendor or in an inactive category: show it as no longer available.',
   })
   @ApiOkResponse({
     type: PublicProductResponseDto,
