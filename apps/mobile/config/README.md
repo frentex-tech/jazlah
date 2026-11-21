@@ -16,6 +16,20 @@ flutter run --flavor staging -t lib/main_staging.dart --dart-define-from-file=co
 
 Never commit the filled files. Staging and production keys come from the team's secret store, not from this folder.
 
+## Staging (Render)
+
+`config/staging.json` points the app at the staging API on Render (`docs/deploy/render-staging.md`):
+
+```json
+{ "API_BASE_URL": "https://jazla-api-staging-xxxx.onrender.com", "USE_MOCKS": "false" }
+```
+
+- Copy `staging.example.json`, set `API_BASE_URL` to the API address the owner sends (step 4 of the guide), with no `/v1` and no trailing slash, and leave the other keys empty.
+- It is git-ignored like `dev.json`.
+- Sign in with a review account (the guide, step 2) or read the code from the API's Render logs: no SMS is sent on staging.
+- The free API sleeps after 15 idle minutes, so the first request can take about a minute.
+- Uploads answer 503 until the staging S3 buckets exist.
+
 ## Start-up check
 
 Staging and prod builds stop at start-up when `API_BASE_URL` is not an `https://` URL, and prod also when `GOOGLE_MAPS_API_KEY` is empty or `USE_MOCKS` is true (`Env.validate`). Dev builds and staging builds with `USE_MOCKS` skip it.
