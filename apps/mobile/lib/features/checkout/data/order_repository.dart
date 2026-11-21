@@ -232,6 +232,7 @@ class MockOrderRepository implements OrderRepository {
     final o = _order(orderId);
     return OrderPayment(
       order: o,
+      paymentId: _payments[orderId]?.lastOrNull?.id,
       paymentStatus: _payments[orderId]?.lastOrNull?.status,
       walletRestored: _restored[orderId] ?? 0,
     );

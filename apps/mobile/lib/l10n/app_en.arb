@@ -501,5 +501,6 @@
   "payWalletPart": "{amount} SAR is paid from your wallet.",
   "payWalletRestored": "{amount} SAR was returned to your wallet.",
   "placedUnderReview": "We will review and confirm your order shortly.",
-  "placedConfirmed": "Your order is confirmed."
+  "placedConfirmed": "Your order is confirmed.",
+  "payStillProcessing": "The payment is still processing. We will update your order as soon as the result arrives."
 }

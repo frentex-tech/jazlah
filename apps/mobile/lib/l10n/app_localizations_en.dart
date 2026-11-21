@@ -1683,4 +1683,8 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get placedConfirmed => 'Your order is confirmed.';
+
+  @override
+  String get payStillProcessing =>
+      'The payment is still processing. We will update your order as soon as the result arrives.';
 }

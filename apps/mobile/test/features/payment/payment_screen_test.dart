@@ -1,10 +1,14 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:go_router/go_router.dart';
 import 'package:jazlah/app/providers.dart';
 import 'package:jazlah/app/router/router.dart';
+import 'package:jazlah/core/errors/api_error.dart';
 import 'package:jazlah/core/geo/geo_point.dart';
+import 'package:jazlah/core/storage/prefs.dart';
 import 'package:jazlah/core/storage/token_storage.dart';
 import 'package:jazlah/core/widgets/widgets.dart';
 import 'package:jazlah/features/addresses/data/address_repository.dart';
@@ -29,6 +33,7 @@ import 'package:jazlah/features/payment/presentation/payment_screen.dart';
 import 'package:jazlah/features/product/data/mock_product_repository.dart';
 import 'package:jazlah/features/product/domain/product.dart';
 import 'package:jazlah/features/product/presentation/product_providers.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 import '../../helpers/cart_fakes.dart';
 import '../../helpers/fakes.dart';
@@ -54,6 +59,13 @@ class _Payments extends MockPaymentRepository {
   /// No method can be used (Figma 170-29357).
   final bool none;
   int retries = 0;
+  final keys = <String>[];
+
+  /// The next retry fails with a network error (no answer).
+  bool failNetworkOnce = false;
+
+  /// Holds the retry's answer back until completed.
+  Completer<void>? gate;
 
   @override
   Future<PaymentMethods> methods({String? orderId}) async => none
@@ -69,10 +81,50 @@ class _Payments extends MockPaymentRepository {
       : super.methods(orderId: orderId);
 
   @override
-  Future<PlacedOrder> retry({required String orderId, required String method, required String idempotencyKey}) {
+  Future<PlacedOrder> retry({required String orderId, required String method, required String idempotencyKey}) async {
     retries++;
+    keys.add(idempotencyKey);
+    await gate?.future;
+    if (failNetworkOnce) {
+      failNetworkOnce = false;
+      throw const ApiError(code: ApiError.network);
+    }
     return super.retry(orderId: orderId, method: method, idempotencyKey: idempotencyKey);
   }
+}
+
+/// The gateway step ends but the provider has not decided yet (a slow bank).
+class _Silent implements PaymentGateway {
+  @override
+  Future<GatewayResult> startPayment(BuildContext context, PaymentAction action) async => GatewayResult.finished;
+}
+
+/// The app's start: the gate redirects a signed-in user like the router does.
+class _ColdStart extends StatefulWidget {
+  const _ColdStart();
+
+  @override
+  State<_ColdStart> createState() => _ColdStartState();
+}
+
+class _ColdStartState extends State<_ColdStart> {
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) async {
+      final prefs = ProviderScope.containerOf(context, listen: false).read(prefsProvider);
+      final to = authRedirect(
+        uri: Uri.parse(Routes.splash),
+        session: SessionStatus.signedIn,
+        onboardingSeen: true,
+        pendingPayment: prefs.pendingPayment,
+      );
+      if (mounted) context.go(to!);
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) => const SizedBox();
 }
 
 /// An order placed with mada (and [walletAmount] from the wallet), its payment screen opened with the placement's
@@ -83,6 +135,8 @@ Future<ProviderContainer> _pump(
   bool reopen = false,
   bool none = false,
   String lang = 'ar',
+  bool coldStart = false,
+  PaymentGateway? gateway,
 }) async {
   _clock = DateTime.utc(2026, 11, 10, 10);
   final cart = MockCartRepository(delay: Duration.zero);
@@ -97,10 +151,15 @@ Future<ProviderContainer> _pump(
     () => _orders.place(idempotencyKey: 'k', paymentMethod: PaymentMethodCode.mada, walletAmount: walletAmount),
   ))!;
   final tokens = MemoryTokens(const AuthTokens(accessToken: 'a', refreshToken: 'r'));
+  if (coldStart) _orders.decide('pay-o-1-1', approve: true); // captured while the app was dead
   final c = await t.pumpScreen(
-    PaymentScreen(orderId: placed.order.id, placed: reopen ? null : placed),
-    prefs: {'locale': lang, 'onboardingSeen': true},
+    coldStart ? const _ColdStart() : PaymentScreen(orderId: placed.order.id, placed: reopen ? null : placed),
+    prefs: {'locale': lang, 'onboardingSeen': true, if (coldStart) 'payment.pending': placed.order.id},
     routes: [
+      GoRoute(
+        path: '/checkout/pay/:orderId',
+        builder: (_, s) => PaymentScreen(orderId: s.pathParameters['orderId']!),
+      ),
       // With a Scaffold, so the cancelled order's toast can show.
       GoRoute(
         path: Routes.cart,
@@ -121,7 +180,7 @@ Future<ProviderContainer> _pump(
       checkoutRepositoryProvider.overrideWithValue(checkout),
       orderRepositoryProvider.overrideWithValue(_orders),
       paymentRepositoryProvider.overrideWithValue(_payments),
-      paymentGatewayProvider.overrideWithValue(FakePaymentGateway(_orders.decide)),
+      paymentGatewayProvider.overrideWithValue(gateway ?? FakePaymentGateway(_orders.decide)),
     ],
   );
   await t.pump(const Duration(milliseconds: 100));
@@ -280,5 +339,87 @@ void main() {
     expect(find.text('تم استلام طلبك'), findsOneWidget);
     expect(find.text('سنراجع طلبك ونؤكده قريبًا.'), findsOneWidget);
     expect(_orders.orders.single.status, OrderStatus.created);
+  });
+
+  testWidgets('the order is kept while paying, so a cold start comes back', (t) async {
+    final c = await _pump(t);
+    expect(c.read(prefsProvider).pendingPayment, 'o-1');
+  });
+
+  testWidgets('cold start with a saved payment: the payment step opens and shows the final state', (t) async {
+    final c = await _pump(t, coldStart: true);
+    await _settle(t);
+    expect(find.text('تم استلام طلبك'), findsOneWidget);
+    expect(c.read(prefsProvider).pendingPayment, isNull);
+  });
+
+  test('signing out clears the saved payment (account data)', () async {
+    SharedPreferences.setMockInitialValues({'payment.pending': 'o-1', 'locale': 'ar'});
+    final prefs = await Prefs.load();
+    await prefs.clearAccountData();
+    expect(prefs.pendingPayment, isNull);
+    expect(prefs.languageCode, 'ar');
+  });
+
+  testWidgets('a resume while a retry is being asked for does not show the old decline again', (t) async {
+    await _pump(t);
+    await t.tap(find.text('رفض'));
+    await _settle(t);
+    await t.pump(const Duration(seconds: 5)); // the toast goes
+    final payments = _payments as _Payments..gate = Completer<void>();
+    await t.tap(find.text('إعادة المحاولة'));
+    await t.pump();
+    await _resume(t);
+    expect(find.text(_declined), findsNothing);
+    expect(t.widget<JButton>(find.byType(JButton).last).loading, isTrue);
+    payments.gate!.complete();
+    await _settle(t);
+    expect(find.text(_sheet), findsOneWidget);
+  });
+
+  testWidgets('no answer for about 60 s: stop waiting, say so; resume later reads the outcome', (t) async {
+    await _pump(t, gateway: _Silent());
+    await t.pump(const Duration(seconds: 30));
+    expect(_button(t).loading, isTrue);
+    await t.pump(const Duration(seconds: 32));
+    await t.pump();
+    expect(find.text('لا يزال الدفع قيد المعالجة، سنحدّث حالة طلبك فور وصول النتيجة.'), findsOneWidget);
+    expect(_button(t).loading, isFalse);
+    _orders.decide('pay-o-1-1', approve: true);
+    await _resume(t);
+    expect(find.text('تم استلام طلبك'), findsOneWidget);
+  });
+
+  testWidgets('a retry after a network error sends the same payment key; after an answer a new one', (t) async {
+    await _pump(t);
+    await t.tap(find.text('رفض'));
+    await _settle(t);
+    await t.pump(const Duration(seconds: 5));
+    final payments = _payments as _Payments..failNetworkOnce = true;
+    await t.tap(find.text('إعادة المحاولة'));
+    await _settle(t);
+    await t.pump(const Duration(seconds: 5));
+    await t.tap(find.byType(JButton).last);
+    await _settle(t);
+    expect(payments.keys, hasLength(2));
+    expect(payments.keys[0], payments.keys[1]);
+    await t.tap(find.text('رفض'));
+    await _settle(t);
+    await t.pump(const Duration(seconds: 5));
+    await t.tap(find.text('إعادة المحاولة'));
+    await _settle(t);
+    expect(payments.keys, hasLength(3));
+    expect(payments.keys[2], isNot(payments.keys[1]));
+  });
+
+  testWidgets('a resume after a decline does not show the toast again', (t) async {
+    await _pump(t);
+    await t.tap(find.text('رفض'));
+    await _settle(t);
+    await t.pump(const Duration(seconds: 5));
+    expect(find.text(_declined), findsNothing);
+    await _resume(t);
+    expect(find.text(_declined), findsNothing);
+    expect(find.text('إعادة المحاولة'), findsOneWidget);
   });
 }

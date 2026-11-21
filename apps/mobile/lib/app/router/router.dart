@@ -87,6 +87,7 @@ final routerProvider = Provider<GoRouter>((ref) {
       uri: state.uri,
       session: ref.read(sessionProvider),
       onboardingSeen: ref.read(onboardingSeenProvider),
+      pendingPayment: ref.read(prefsProvider).pendingPayment,
     ),
     routes: [
       GoRoute(path: '/', redirect: (_, _) => Routes.home),
@@ -205,7 +206,12 @@ String? safeNext(String? from) => from != null && from.startsWith('/') && !from.
 /// Where a location goes for a session state; null keeps it. A deep link opened while the session is
 /// loading or signed out travels in `?from=` and is opened once the user may see it.
 @visibleForTesting
-String? authRedirect({required Uri uri, required SessionStatus session, required bool onboardingSeen}) {
+String? authRedirect({
+  required Uri uri,
+  required SessionStatus session,
+  required bool onboardingSeen,
+  String? pendingPayment,
+}) {
   final location = uri.path;
   if (location == Routes.gallery) return null;
   final from = safeNext(uri.queryParameters['from']);
@@ -228,7 +234,13 @@ String? authRedirect({required Uri uri, required SessionStatus session, required
           : location.startsWith('${Routes.account}/')
           ? Routes.account
           : null,
-    SessionStatus.signedIn => inLogin || gate ? (from ?? Routes.home) : null,
+    // A payment left mid-way (the app was killed during 3DS) reopens at start: its screen reads the outcome.
+    SessionStatus.signedIn =>
+      gate && from == null && pendingPayment != null
+          ? Routes.payment(pendingPayment)
+          : inLogin || gate
+          ? (from ?? Routes.home)
+          : null,
     SessionStatus.unknown => null,
   };
 }

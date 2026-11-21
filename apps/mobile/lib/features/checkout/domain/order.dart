@@ -167,9 +167,12 @@ class PlacedOrder {
 /// An order and its latest payment, as the server knows them (the only source of a payment's outcome).
 @immutable
 class OrderPayment {
-  const OrderPayment({required this.order, this.paymentStatus, this.walletRestored = 0});
+  const OrderPayment({required this.order, this.paymentId, this.paymentStatus, this.walletRestored = 0});
 
   final Order order;
+
+  /// The latest payment; null when the order has no gateway payment.
+  final String? paymentId;
 
   /// One of [PaymentStatus]; null when the order has no gateway payment.
   final String? paymentStatus;

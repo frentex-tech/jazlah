@@ -3103,6 +3103,12 @@ abstract class AppLocalizations {
   /// In ar, this message translates to:
   /// **'تم تأكيد طلبك.'**
   String get placedConfirmed;
+
+  /// No description provided for @payStillProcessing.
+  ///
+  /// In ar, this message translates to:
+  /// **'لا يزال الدفع قيد المعالجة، سنحدّث حالة طلبك فور وصول النتيجة.'**
+  String get payStillProcessing;
 }
 
 class _AppLocalizationsDelegate extends LocalizationsDelegate<AppLocalizations> {

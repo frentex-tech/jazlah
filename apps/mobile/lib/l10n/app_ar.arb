@@ -997,5 +997,6 @@
     }
   },
   "placedUnderReview": "سنراجع طلبك ونؤكده قريبًا.",
-  "placedConfirmed": "تم تأكيد طلبك."
+  "placedConfirmed": "تم تأكيد طلبك.",
+  "payStillProcessing": "لا يزال الدفع قيد المعالجة، سنحدّث حالة طلبك فور وصول النتيجة."
 }

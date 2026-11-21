@@ -1692,4 +1692,7 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get placedConfirmed => 'تم تأكيد طلبك.';
+
+  @override
+  String get payStillProcessing => 'لا يزال الدفع قيد المعالجة، سنحدّث حالة طلبك فور وصول النتيجة.';
 }

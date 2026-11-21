@@ -3,10 +3,12 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:jazlah/app/providers.dart';
 import 'package:jazlah/app/router/router.dart';
 import 'package:jazlah/app/theme/theme.dart';
 import 'package:jazlah/core/errors/api_error.dart';
 import 'package:jazlah/core/errors/error_text.dart';
+import 'package:jazlah/core/storage/prefs.dart';
 import 'package:jazlah/core/widgets/widgets.dart';
 import 'package:jazlah/features/cart/presentation/cart_screen.dart';
 import 'package:jazlah/features/catalog/presentation/catalog_widgets.dart';
@@ -16,6 +18,7 @@ import 'package:jazlah/features/checkout/domain/order.dart';
 import 'package:jazlah/features/checkout/presentation/checkout_screen.dart';
 import 'package:jazlah/features/checkout/presentation/review_screen.dart';
 import 'package:jazlah/features/payment/data/payment_gateway.dart';
+import 'package:jazlah/features/payment/data/payment_repository.dart';
 import 'package:jazlah/features/payment/domain/payment_method.dart';
 import 'package:jazlah/features/payment/presentation/payment_providers.dart';
 import 'package:jazlah/features/payment/presentation/payment_widgets.dart';
@@ -56,6 +59,20 @@ class _PaymentScreenState extends ConsumerState<PaymentScreen> {
   /// Bumped when a flow ends, so a late gateway result or poll of an older flow does nothing.
   int _flow = 0;
 
+  /// The payment in flight; a status about another (an older, failed one) is not its outcome. Empty while a
+  /// new payment is being asked for; null when opened again (any outcome is the order's).
+  String? _paymentId;
+
+  /// The new payment's idempotency key, kept until the server answers it (a network error keeps it).
+  String? _payKey;
+
+  /// Polls before the screen stops waiting (about 60 s) and lets the customer leave.
+  static const _maxPolls = 30;
+
+  late final Prefs _prefs = ref.read(prefsProvider);
+
+  PaymentRepository? get _repo => ref.read(paymentRepositoryProvider);
+
   @override
   void initState() {
     super.initState();
@@ -64,6 +81,9 @@ class _PaymentScreenState extends ConsumerState<PaymentScreen> {
     final placed = widget.placed;
     _order = placed?.order;
     _method = placed?.order.paymentMethod;
+    _paymentId = placed?.nextAction?.paymentId;
+    // Kept until the outcome is known, so a cold start after the app was killed mid-payment comes back here.
+    unawaited(_prefs.setPendingPayment(widget.orderId));
     if (placed?.nextAction case final action?) {
       _phase = _Phase.processing;
       WidgetsBinding.instance.addPostFrameCallback((_) => unawaited(_run(action)));
@@ -74,6 +94,8 @@ class _PaymentScreenState extends ConsumerState<PaymentScreen> {
 
   @override
   void dispose() {
+    // Left with nothing in flight (after a decline, or before paying): nothing to come back to.
+    if (_phase == _Phase.failed || _phase == _Phase.ready) unawaited(_prefs.setPendingPayment(null));
     _life.dispose();
     _toastTimer?.cancel();
     super.dispose();
@@ -87,6 +109,7 @@ class _PaymentScreenState extends ConsumerState<PaymentScreen> {
 
   Future<void> _run(PaymentAction action) async {
     final flow = _flow;
+    _paymentId = action.paymentId;
     setState(() => _phase = _Phase.processing);
     final result = await ref.read(paymentGatewayProvider)!.startPayment(context, action);
     if (!mounted || flow != _flow) return;
@@ -96,10 +119,19 @@ class _PaymentScreenState extends ConsumerState<PaymentScreen> {
   /// Reads the status until the payment ends; [once] (the gateway step was closed) reads it a single time.
   Future<void> _follow(int flow, {bool once = false}) async {
     final l10n = AppLocalizations.of(context);
-    while (mounted && flow == _flow) {
+    final repo = _repo;
+    if (repo == null) return;
+    for (var polls = 0; mounted && flow == _flow; polls++) {
+      if (polls == _maxPolls) {
+        // Still open at the gateway: stop holding the customer; resume or reopening reads it again.
+        _flow++;
+        setState(() => _phase = _Phase.ready);
+        _showToast(l10n.payStillProcessing);
+        return;
+      }
       final OrderPayment s;
       try {
-        s = await ref.read(paymentRepositoryProvider)!.status(widget.orderId);
+        s = await repo.status(widget.orderId);
       } on Object catch (e) {
         if (!mounted || flow != _flow) return;
         _flow++;
@@ -121,8 +153,10 @@ class _PaymentScreenState extends ConsumerState<PaymentScreen> {
   /// One read of the status: on resume, or when the screen is opened again.
   Future<void> _check() async {
     final flow = _flow;
+    final repo = _repo;
+    if (repo == null) return;
     try {
-      final s = await ref.read(paymentRepositoryProvider)!.status(widget.orderId);
+      final s = await repo.status(widget.orderId);
       if (!mounted || flow != _flow || _settle(s)) return;
       // Still unpaid with nothing in flight here (opened again): the customer pays or retries.
       if (_phase == _Phase.loading) setState(() => _phase = _Phase.ready);
@@ -140,18 +174,23 @@ class _PaymentScreenState extends ConsumerState<PaymentScreen> {
     _order = o;
     _restored = s.walletRestored;
     final paid = o.status != OrderStatus.pendingPayment && o.status != OrderStatus.cancelled;
-    final failed = o.status == OrderStatus.pendingPayment && s.paymentStatus == PaymentStatus.failed;
+    final failed =
+        o.status == OrderStatus.pendingPayment &&
+        s.paymentStatus == PaymentStatus.failed &&
+        (_paymentId == null || s.paymentId == _paymentId);
     if (!paid && !failed && o.status != OrderStatus.cancelled) {
       setState(() {});
       return false;
     }
     _flow++;
+    if (!failed) unawaited(_prefs.setPendingPayment(null));
     // The gateway's page may still be open (resumed after 3DS): the outcome replaces it.
     Navigator.of(context).popUntil((r) => r is! PopupRoute);
     if (paid) {
       final options = ref.read(paymentMethodsProvider(widget.orderId)).value?.options ?? const [];
       context.go(Routes.orderPlaced, extra: placedArgs(o, options));
     } else if (failed) {
+      if (_phase == _Phase.failed) return true; // already shown
       setState(() => _phase = _Phase.failed);
       _showToast(l10n.payDeclined);
     } else {
@@ -164,13 +203,16 @@ class _PaymentScreenState extends ConsumerState<PaymentScreen> {
 
   /// A new payment on the same order with the chosen method; one per tap (the button is busy meanwhile).
   Future<void> _pay(PaymentMethodOption method) async {
-    if (_phase == _Phase.processing) return;
+    final repo = _repo;
+    if (_phase == _Phase.processing || repo == null) return;
     final flow = _flow;
+    _paymentId = ''; // the old payment's failure is not this attempt's
+    final key = _payKey ??= newIdempotencyKey();
     setState(() => _phase = _Phase.processing);
+    unawaited(_prefs.setPendingPayment(widget.orderId));
     try {
-      final placed = await ref
-          .read(paymentRepositoryProvider)!
-          .retry(orderId: widget.orderId, method: method.method, idempotencyKey: newIdempotencyKey());
+      final placed = await repo.retry(orderId: widget.orderId, method: method.method, idempotencyKey: key);
+      _payKey = null; // answered: the next attempt is a new payment
       if (!mounted || flow != _flow) return;
       if (placed.nextAction case final action?) {
         await _run(action);
@@ -178,8 +220,11 @@ class _PaymentScreenState extends ConsumerState<PaymentScreen> {
         await _follow(flow); // COD or wallet: settled at once
       }
     } on Object catch (e) {
+      final code = ApiError.from(e).code;
+      // A refusal with a code is a definite answer; without one the payment may exist: same key next time.
+      if (code != ApiError.network && code != ApiError.unknown) _payKey = null;
       if (!mounted || flow != _flow) return;
-      if (ApiError.from(e).code == PaymentError.orderNotPayable) return _check();
+      if (code == PaymentError.orderNotPayable) return _check();
       setState(() => _phase = _Phase.ready);
       _showToast(errorText(context, e));
     }
