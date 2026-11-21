@@ -57,9 +57,15 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
     super.dispose();
   }
 
+  /// As the API (q is trimmed, 2 to 100 characters): shorter text searches nothing, longer is cut.
+  static String _words(String value) {
+    final t = value.trim();
+    return t.length < 2 ? '' : (t.length > 100 ? t.substring(0, 100).trim() : t);
+  }
+
   void _onChanged(String value) {
     _debounce?.cancel();
-    final text = value.trim();
+    final text = _words(value);
     if (text.isEmpty) {
       setState(() {
         _typing = false;
@@ -86,7 +92,8 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
   /// Searches at once and keeps the words as a recent search.
   void _search(String value) {
     _debounce?.cancel();
-    final text = value.trim();
+    final text = _words(value);
+    if (text.isEmpty) return;
     if (_controller.text != value) _controller.text = value;
     _focus.unfocus();
     setState(() {

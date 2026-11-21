@@ -96,6 +96,21 @@ void main() {
     expect(find.text('الأكثر بحثًا'), findsOneWidget);
   });
 
+  testWidgets('as the API: one letter searches nothing; long text is cut to 100 characters', (t) async {
+    final repo = FakeSearch();
+    await _pump(t, repo);
+    await t.enterText(find.byType(TextField), ' ن ');
+    await t.pump(const Duration(milliseconds: 400));
+    await t.testTextInput.receiveAction(TextInputAction.search);
+    await t.pump();
+    expect(repo.queries, isEmpty);
+    expect(find.text('الأكثر بحثًا'), findsOneWidget);
+    await t.enterText(find.byType(TextField), 'ل' * 120);
+    await t.pump(const Duration(milliseconds: 400));
+    await t.pump();
+    expect(repo.queries.single.text.length, 100);
+  });
+
   testWidgets('results: count, filter button with the active count, active filter chips', (t) async {
     await _pump(t, FakeSearch(), screen: const SearchScreen(initial: _figma));
     expect(find.text('3 نتائج لـ «ريب آي»'), findsOneWidget);

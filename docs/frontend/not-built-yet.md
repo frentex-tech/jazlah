@@ -124,7 +124,7 @@ The app reads the public catalog through one repository. Categories, product lis
 |---|---|---|---|
 | A home feed (banners, best sellers, featured, partner stores in one call) | Home | Built from the category list and the first 3 stores; the best sellers section is hidden (no true list yet) and there are no banners | CAT-API-5 #50; banners CMS-API-1 #162 |
 | A "stores near you are paused" flag | Home: closed state | Never shown from the API; the mock can show it | API gap |
-| Filtering home and lists by the customer's location | Home: empty state ("no stores in your area") | Shown only when the catalog has no products and no stores | CAT-API-5 #50 |
+| Filtering home and lists by the customer's location | Home: empty state ("no stores in your area") | Shown only when the catalog has no stores | CAT-API-5 #50 |
 | Sorting product lists (best selling, price up, price down) | Category page: sort chips | Chips hidden with the API; the mock sorts | CAT-API-5 #50 |
 | Store rating and rating count | Home store cards, store page | Hidden | API gap |
 | Store opening hours and open/closed now | Store page: open/closed badge, closed notice, info sheet; products shown unavailable while closed | Hidden; a store is treated as open | API gap |
@@ -154,7 +154,7 @@ The product page reads one public product (images, sizes, cuts, packagings, excl
 
 ### Search and filters (STF-MOB-4 #57)
 
-Search reads the public product list with its words, category, store and price range, cursor-paged. Recent searches are kept on the device (8 at most, cleared on sign-out). With the mock switch on, the seeded catalog is searched on the device the way the server searches: the folded query as one phrase inside the folded Arabic and English product names (no tashkeel or tatweel; أ/إ/آ as ا; ى as ي; ة as ه; English in any case), so «نعيمى» finds «نعيمي» and "naimi" finds the English name. Like the server, store names are not searched and words must be in order. Recent searches drop repeats that fold to the same words.
+Search reads the public product list with its words, category, store and price range, cursor-paged. Recent searches are kept on the device (8 at most, cleared on sign-out). With the mock switch on, the seeded catalog is searched on the device the way the server searches: the folded query as one phrase inside the folded Arabic and English product names (no tashkeel or tatweel; أ/إ/آ as ا; ى as ي; ة as ه; English in any case), so «نعيمى» finds «نعيمي» and "naimi" finds the English name. Like the server, store names are not searched, words must be in order, and the words are trimmed and searched only from 2 to 100 characters (shorter text shows the start screen). Recent searches drop repeats that fold to the same words.
 
 | Gap | Screen waiting on it | The app today | Issue |
 |---|---|---|---|

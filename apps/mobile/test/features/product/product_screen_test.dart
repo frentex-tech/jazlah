@@ -106,6 +106,7 @@ void main() {
     expect(find.text('تفاصيل السعر'), findsOneWidget);
     expect(find.text('1 كجم × 89.00 ر.س'), findsOneWidget);
     expect(find.text('التقطيع (شرائح)'), findsOneWidget);
+    expect(find.text('التغليف المفرغ'), findsOneWidget);
     expect(find.text('يُحسب في الدفع'), findsOneWidget);
     expect(find.text('94.00 ر.س'), findsOneWidget);
   });
@@ -179,5 +180,15 @@ void main() {
     await t.tap(find.text('مجازر الفلاح'));
     await t.pumpAndSettle();
     expect(find.text('route:/home/store/v-falah'), findsOneWidget);
+  });
+
+  test('definite Arabic names as in Figma; «بدون …», Latin and English left alone', () {
+    expect(definiteName('شرائح', 'ar'), 'الشرائح');
+    expect(definiteName('تغليف مفرغ', 'ar'), 'التغليف المفرغ');
+    expect(definiteName('بدون تغليف', 'ar'), 'بدون تغليف');
+    expect(definiteName('مكعبات بدون عظم', 'ar'), 'المكعبات بدون عظم');
+    expect(definiteName('الشرائح', 'ar'), 'الشرائح');
+    expect(definiteName('T-bone', 'ar'), 'T-bone');
+    expect(definiteName('Slices', 'en'), 'Slices');
   });
 }

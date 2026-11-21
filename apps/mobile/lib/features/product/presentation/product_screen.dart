@@ -481,14 +481,24 @@ class _ProductScreenState extends ConsumerState<ProductScreen> {
   }
 }
 
-/// `500` → "500 g", `1000` → "1 kg", `1500` → "1.5 kg".
 /// Arabic option names read as definite in a sentence (Figma: «الشرائح», «التغليف المفرغ»): "ال" on each
-/// word not already carrying it. shortcut: wrong for a construct like «صندوق هدية» (→ «الصندوق الهدية»),
-/// API gap: ask CAT-API-5 (#50) for the definite name if more such options appear.
+/// Arabic word not already carrying it, up to «بدون» («بدون تغليف» stays as it is). shortcut: wrong for a
+/// construct like «صندوق هدية» (mock only), API gap: ask CAT-API-5 (#50) for definite names if needed.
 @visibleForTesting
-String definiteName(String name, String lang) =>
-    lang != 'ar' ? name : name.split(' ').map((w) => w.isEmpty || w.startsWith('ال') ? w : 'ال$w').join(' ');
+String definiteName(String name, String lang) {
+  if (lang != 'ar') return name;
+  var plain = false;
+  return name
+      .split(' ')
+      .map((w) {
+        if (w == 'بدون') plain = true;
+        final arabic = w.isNotEmpty && RegExp('^[\u0621-\u064A]').hasMatch(w);
+        return plain || !arabic || w.startsWith('ال') ? w : 'ال$w';
+      })
+      .join(' ');
+}
 
+/// `500` → "500 g", `1000` → "1 kg", `1500` → "1.5 kg".
 String _weight(AppLocalizations l10n, int grams) {
   if (grams < 1000) return l10n.weightGrams('$grams');
   final kg = grams / 1000;
