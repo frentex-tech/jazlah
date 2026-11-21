@@ -4,11 +4,10 @@ on:
     - cron: "0 */6 * * *"   # every 6 hours
   issues:
     types: [closed, reopened, assigned, unassigned, labeled, unlabeled]
-  pull_request:
-    types: [opened, closed]
+  # Every merge lands as a push to develop. No pull_request trigger: the github-pages
+  # environment only accepts develop, so a PR run's deploy job always failed.
   push:
     branches: [develop]
-    paths: ["docs/delivery/**", "tools/backlog/**"]
   workflow_dispatch:
 permissions:
   contents: read
