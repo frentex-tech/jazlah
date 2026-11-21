@@ -237,7 +237,7 @@ class _CartScreenState extends ConsumerState<CartScreen> {
                     action: l10n.cartRemove,
                     onAction: () => _remove(cart.lines.firstWhere((l) => l.id == issue.lineId)),
                   ),
-        _Card(
+        CartCard(
           gap: JSpace.s16,
           children: [
             for (final (i, line) in lines.indexed) ...[
@@ -275,7 +275,7 @@ class _CartScreenState extends ConsumerState<CartScreen> {
         ],
         if (!cart.onDevice) ...[const SizedBox(height: JSpace.s12), _couponRow(cart)],
         const SizedBox(height: JSpace.s12),
-        _totals(cart),
+        CartTotals(cart: cart),
       ],
     );
   }
@@ -321,31 +321,6 @@ class _CartScreenState extends ConsumerState<CartScreen> {
     );
   }
 
-  Widget _totals(Cart cart) {
-    final l10n = AppLocalizations.of(context);
-    Widget row(String label, int halalas, {bool total = false}) {
-      final style = total ? JText.h3 : JText.bodyM.copyWith(color: JColors.ink2);
-      return Row(
-        children: [
-          Expanded(child: Text(label, style: style)),
-          Text(l10n.productPrice(formatHalalas(halalas)), style: style),
-        ],
-      );
-    }
-
-    return _Card(
-      gap: 6,
-      children: [
-        row(l10n.cartSubtotal, cart.subtotal),
-        if (cart.discount > 0) row(l10n.cartDiscountCode(cart.couponCode ?? ''), -cart.discount),
-        // Only once fulfilment = delivery (SCH-MOB-1 #71 chooses it).
-        if (cart.delivery) row(l10n.cartDeliveryFee, cart.deliveryFee),
-        row(l10n.cartVat, cart.vatIncluded),
-        row(l10n.cartTotal, cart.total, total: true),
-      ],
-    );
-  }
-
   /// The checkout button; [cart] is null while loading.
   Widget _bottom(Cart? cart) {
     final l10n = AppLocalizations.of(context);
@@ -376,15 +351,17 @@ class _CartScreenState extends ConsumerState<CartScreen> {
   }
 }
 
-class _Card extends StatelessWidget {
-  const _Card({required this.children, required this.gap});
+/// The cart's paper card (also the checkout review's).
+class CartCard extends StatelessWidget {
+  const CartCard({required this.children, required this.gap, super.key, this.padding = JSpace.s12});
 
   final List<Widget> children;
   final double gap;
+  final double padding;
 
   @override
   Widget build(BuildContext context) => Container(
-    padding: const EdgeInsets.all(JSpace.s12),
+    padding: EdgeInsets.all(padding),
     decoration: BoxDecoration(
       color: JColors.paper,
       borderRadius: BorderRadius.circular(JRadius.md),
@@ -534,4 +511,37 @@ class _Skeleton extends StatelessWidget {
       ),
     ],
   );
+}
+
+/// Subtotal, discount, delivery fee (once fulfilment is delivery), VAT and total.
+class CartTotals extends StatelessWidget {
+  const CartTotals({required this.cart, super.key});
+
+  final Cart cart;
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
+    Widget row(String label, int halalas, {bool total = false}) {
+      final style = total ? JText.h3 : JText.bodyM.copyWith(color: JColors.ink2);
+      return Row(
+        children: [
+          Expanded(child: Text(label, style: style)),
+          Text(l10n.productPrice(formatHalalas(halalas)), style: style),
+        ],
+      );
+    }
+
+    return CartCard(
+      gap: 6,
+      children: [
+        row(l10n.cartSubtotal, cart.subtotal),
+        if (cart.discount > 0) row(l10n.cartDiscountCode(cart.couponCode ?? ''), -cart.discount),
+        // Only once fulfilment = delivery (SCH-MOB-1 #71 chooses it).
+        if (cart.delivery) row(l10n.cartDeliveryFee, cart.deliveryFee),
+        row(l10n.cartVat, cart.vatIncluded),
+        row(l10n.cartTotal, cart.total, total: true),
+      ],
+    );
+  }
 }

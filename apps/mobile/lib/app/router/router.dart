@@ -18,6 +18,8 @@ import 'package:jazlah/features/auth/presentation/phone_screen.dart';
 import 'package:jazlah/features/auth/presentation/session_controller.dart';
 import 'package:jazlah/features/cart/presentation/cart_screen.dart';
 import 'package:jazlah/features/checkout/presentation/checkout_screen.dart';
+import 'package:jazlah/features/checkout/presentation/order_placed_screen.dart';
+import 'package:jazlah/features/checkout/presentation/review_screen.dart';
 import 'package:jazlah/features/home/presentation/categories_screen.dart';
 import 'package:jazlah/features/home/presentation/home_screen.dart';
 import 'package:jazlah/features/home/presentation/stores_screen.dart';
@@ -48,6 +50,9 @@ abstract final class Routes {
   static const cart = '/cart';
   static const checkout = '/checkout';
   static const checkoutReview = '/checkout/review';
+  static const orderPlaced = '/checkout/placed';
+  static String payment(String orderId) => '/checkout/pay/$orderId';
+  static String order(String id) => '/orders/$id';
   static const orders = '/orders';
   static const services = '/services';
   static const account = '/account';
@@ -133,10 +138,21 @@ final routerProvider = Provider<GoRouter>((ref) {
       ),
       GoRoute(path: Routes.cart, builder: (_, _) => const CartScreen()),
       GoRoute(path: Routes.checkout, builder: (_, _) => const CheckoutScreen()),
-      // shortcut: placeholder until ORD-MOB-1 #84 builds the review step.
+      GoRoute(path: Routes.checkoutReview, builder: (_, _) => const ReviewScreen()),
       GoRoute(
-        path: Routes.checkoutReview,
-        builder: (context, _) => ComingSoonPage(title: AppLocalizations.of(context).checkoutTitle),
+        path: Routes.orderPlaced,
+        redirect: (_, state) => state.extra is OrderPlacedArgs ? null : Routes.home,
+        builder: (_, state) => OrderPlacedScreen(args: state.extra! as OrderPlacedArgs),
+      ),
+      // shortcut: placeholder until PAY-MOB-1 #78 builds the payment step (extra: the PlacedOrder).
+      GoRoute(
+        path: '/checkout/pay/:orderId',
+        builder: (context, _) => ComingSoonPage(title: AppLocalizations.of(context).reviewTitle),
+      ),
+      // shortcut: placeholder until ORD-MOB-2 #85 builds the order detail.
+      GoRoute(
+        path: '/orders/:id',
+        builder: (context, _) => ComingSoonPage(title: AppLocalizations.of(context).menuOrders),
       ),
       GoRoute(
         path: '/product/:id',
@@ -177,6 +193,9 @@ void openCart(BuildContext context) => context.push(Routes.cart);
 
 /// Back to the previous page, or home when the page was opened by a link.
 void popOrHome(BuildContext context) => context.canPop() ? context.pop() : context.go(Routes.home);
+
+/// Back to the previous page (the cart, below checkout), or the cart when the page was opened by a link.
+void popOrCart(BuildContext context) => context.canPop() ? context.pop() : context.go(Routes.cart);
 
 /// Only in-app paths may be a redirect target (no `//host` or scheme).
 String? safeNext(String? from) => from != null && from.startsWith('/') && !from.startsWith('//') ? from : null;

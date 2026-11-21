@@ -19,6 +19,9 @@ String errorText(BuildContext context, Object error) {
         'FULFILMENT_NOT_SUPPORTED' => l10n.errFulfilmentNotSupported,
         'ADDRESS_NOT_COVERED' => l10n.errAddressNotCovered,
         'DAY_FULL' => l10n.errDayFull,
+        'PRICE_CHANGED' => l10n.errPriceChanged,
+        'ITEM_UNAVAILABLE' => l10n.errItemUnavailable,
+        'MIN_ORDER_NOT_MET' => l10n.errMinOrderNotMet,
         _ => l10n.errorGeneric,
       };
 }

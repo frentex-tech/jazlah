@@ -19,6 +19,7 @@ import 'package:jazlah/features/cart/presentation/cart_providers.dart';
 import 'package:jazlah/features/catalog/presentation/catalog_widgets.dart';
 import 'package:jazlah/features/checkout/domain/fulfilment.dart';
 import 'package:jazlah/features/checkout/presentation/checkout_providers.dart';
+import 'package:jazlah/features/checkout/presentation/review_screen.dart';
 import 'package:jazlah/features/product/domain/product.dart';
 import 'package:jazlah/l10n/app_localizations.dart';
 
@@ -46,22 +47,38 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen> {
       await ref.read(checkoutRepositoryProvider)!.save(choice);
       // The cart now carries the fulfilment (and the delivery fee for delivery).
       ref.invalidate(cartProvider);
-      if (mounted) unawaited(context.push(Routes.checkoutReview));
+      if (mounted) unawaited(_review());
     } on Object catch (e) {
-      // Whatever the server refused may have changed under the screen: ask again.
-      switch (ApiError.from(e).code) {
-        case FulfilmentError.orderingPaused:
-          ref.invalidate(orderingPauseProvider);
-        case FulfilmentError.addressNotCovered || 'NOT_FOUND':
-          // The address left coverage or was deleted: reload the book and choose again.
-          ref.invalidate(addressesProvider);
-          if (mounted) setState(() => _addressId = null);
-        case FulfilmentError.dayFull || FulfilmentError.notSupported || 'VALIDATION_FAILED':
-          ref.invalidate(checkoutDaysProvider);
-      }
+      _refused(ApiError.from(e).code);
       if (mounted) showJToast(context, message: errorText(context, e), kind: JToastKind.error);
     } finally {
       if (mounted) setState(() => _saving = false);
+    }
+  }
+
+  /// The review step; placing the order may send the customer back here, or on to the cart, with the code.
+  Future<void> _review() async {
+    final code = await context.push<String>(Routes.checkoutReview);
+    if (code == null || !mounted) return;
+    if (reviewExit(code) == ReviewExit.cart) {
+      ref.invalidate(cartProvider); // re-read: the price or coupon banner shows why
+      popOrCart(context);
+    } else {
+      _refused(code);
+    }
+  }
+
+  /// Whatever the server refused may have changed under the screen: ask again.
+  void _refused(String code) {
+    switch (code) {
+      case FulfilmentError.orderingPaused:
+        ref.invalidate(orderingPauseProvider);
+      case FulfilmentError.addressNotCovered || 'NOT_FOUND':
+        // The address left coverage or was deleted: reload the book and choose again.
+        ref.invalidate(addressesProvider);
+        if (mounted) setState(() => _addressId = null);
+      case FulfilmentError.dayFull || FulfilmentError.notSupported || 'VALIDATION_FAILED':
+        ref.invalidate(checkoutDaysProvider);
     }
   }
 
@@ -255,23 +272,25 @@ List<Widget> _gap(List<Widget> children) => [
   for (final (i, c) in children.indexed) ...[if (i > 0) const SizedBox(height: JSpace.s12), c],
 ];
 
-/// «الخطوة 1 من 3: …» and the three bars (the checkout steps share it).
+/// «الخطوة 1 من 3: …» and the three bars (the checkout steps share it); only the bars without [name].
 class CheckoutSteps extends StatelessWidget {
-  const CheckoutSteps({required this.step, required this.name, super.key});
+  const CheckoutSteps({required this.step, this.name, super.key});
 
   static const total = 3;
   final int step;
-  final String name;
+  final String? name;
 
   @override
   Widget build(BuildContext context) => Column(
     crossAxisAlignment: CrossAxisAlignment.stretch,
     children: [
-      Text(
-        AppLocalizations.of(context).checkoutStep(step, total, name),
-        style: JText.labelM.copyWith(color: JColors.ink2),
-      ),
-      const SizedBox(height: JSpace.s8),
+      if (name != null) ...[
+        Text(
+          AppLocalizations.of(context).checkoutStep(step, total, name!),
+          style: JText.labelM.copyWith(color: JColors.ink2),
+        ),
+        const SizedBox(height: JSpace.s8),
+      ],
       Row(
         children: [
           for (var i = 1; i <= total; i++) ...[
@@ -567,7 +586,7 @@ String clockText(AppLocalizations l10n, String hhmm, {bool period = true, bool s
 }
 
 /// «الأربعاء 11 نوفمبر».
-String _dayText(BuildContext context, DateTime d) {
+String dayText(BuildContext context, DateTime d) {
   final lang = context.lang;
   return '${DateFormat('EEEE', lang).format(d)} ${d.day} ${DateFormat('MMMM', lang).format(d)}';
 }
@@ -696,7 +715,7 @@ class _DayCell extends StatelessWidget {
     return Semantics(
       button: true,
       selected: chosen,
-      label: [_dayText(context, d), if (!day.available) reasonText].join(context.lang == 'en' ? ', ' : '، '),
+      label: [dayText(context, d), if (!day.available) reasonText].join(context.lang == 'en' ? ', ' : '، '),
       excludeSemantics: true,
       child: day.available ? cell : Tooltip(message: reasonText, child: cell),
     );
@@ -723,7 +742,7 @@ class _WindowCard extends StatelessWidget {
           ? l10n.checkoutDeliveryWindow(start, end)
           : l10n.checkoutPickupWindow(start, end),
       titleStyle: JText.bodyL,
-      body: l10n.checkoutRiyadhTime(_dayText(context, day.day)),
+      body: l10n.checkoutRiyadhTime(dayText(context, day.day)),
     );
   }
 }
@@ -743,7 +762,7 @@ class _ReasonCard extends StatelessWidget {
       iconColor: JColors.warning,
       title: text,
       titleStyle: JText.labelM.copyWith(color: JColors.warning),
-      body: l10n.checkoutPickAnother(_dayText(context, day.day)),
+      body: l10n.checkoutPickAnother(dayText(context, day.day)),
       background: JColors.warningBg,
     );
   }

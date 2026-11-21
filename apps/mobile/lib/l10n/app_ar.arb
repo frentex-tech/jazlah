@@ -838,5 +838,115 @@
   "errOrderingPaused": "الطلبات متوقفة مؤقتًا، حاول لاحقًا.",
   "errFulfilmentNotSupported": "بعض منتجات سلتك لا تتوفر بطريقة الاستلام هذه.",
   "errAddressNotCovered": "هذا العنوان خارج نطاق التوصيل.",
-  "errDayFull": "اكتمل هذا اليوم، اختر يومًا آخر."
+  "errDayFull": "اكتمل هذا اليوم، اختر يومًا آخر.",
+  "reviewTitle": "الدفع والمراجعة",
+  "reviewItemsFrom": "{count, plural, =1{منتج واحد من {vendor}} =2{منتجان من {vendor}} few{{count} منتجات من {vendor}} many{{count} منتجًا من {vendor}} other{{count} منتج من {vendor}}}",
+  "@reviewItemsFrom": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      },
+      "vendor": {
+        "type": "String"
+      }
+    }
+  },
+  "reviewDeliveryTo": "توصيل إلى {place}",
+  "@reviewDeliveryTo": {
+    "placeholders": {
+      "place": {
+        "type": "String"
+      }
+    }
+  },
+  "reviewPickupFrom": "استلام من {place}",
+  "@reviewPickupFrom": {
+    "placeholders": {
+      "place": {
+        "type": "String"
+      }
+    }
+  },
+  "reviewPaymentMethod": "طريقة الدفع",
+  "reviewTerms": "بتأكيد الطلب فأنت توافق على الشروط والأحكام وسياسة الإلغاء.",
+  "reviewConfirm": "تأكيد الطلب",
+  "payMadaCard": "بطاقة مدى",
+  "payMada": "مدى",
+  "payCard": "بطاقة ائتمانية",
+  "payApplePay": "Apple Pay",
+  "payWallet": "محفظة جزلة",
+  "payCod": "الدفع عند الاستلام",
+  "payEndingIn": "تنتهي بـ {last4}",
+  "@payEndingIn": {
+    "placeholders": {
+      "last4": {
+        "type": "String"
+      }
+    }
+  },
+  "payReasonWalletInsufficient": "الرصيد غير كافٍ",
+  "payReasonUnavailable": "غير متاح لهذا الطلب",
+  "errPriceChanged": "تغيّرت أسعار بعض المنتجات، راجع سلتك.",
+  "errItemUnavailable": "بعض المنتجات لم تعد متوفرة، راجع سلتك.",
+  "errMinOrderNotMet": "سلتك أقل من الحد الأدنى للطلب.",
+  "placedTitle": "تم استلام طلبك",
+  "placedNumber": "رقم الطلب {number}",
+  "@placedNumber": {
+    "placeholders": {
+      "number": {
+        "type": "String"
+      }
+    }
+  },
+  "placedFresh": "ذبح وتجهيز طازج صباح {weekday}",
+  "@placedFresh": {
+    "placeholders": {
+      "weekday": {
+        "type": "String"
+      }
+    }
+  },
+  "placedDateVendor": "{date} · بإشراف {vendor}",
+  "@placedDateVendor": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      },
+      "vendor": {
+        "type": "String"
+      }
+    }
+  },
+  "placedDeliveryWindow": "توصيل بين {start} و{end}",
+  "@placedDeliveryWindow": {
+    "placeholders": {
+      "start": {
+        "type": "String"
+      },
+      "end": {
+        "type": "String"
+      }
+    }
+  },
+  "placedPickupWindow": "استلام بين {start} و{end}",
+  "@placedPickupWindow": {
+    "placeholders": {
+      "start": {
+        "type": "String"
+      },
+      "end": {
+        "type": "String"
+      }
+    }
+  },
+  "placedTotal": "{amount} ر.س شامل الضريبة",
+  "@placedTotal": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "placedTrack": "تتبع الطلب",
+  "placedHome": "العودة للرئيسية"
 }

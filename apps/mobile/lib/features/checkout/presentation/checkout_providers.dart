@@ -6,6 +6,7 @@ import 'package:jazlah/features/addresses/presentation/address_providers.dart';
 import 'package:jazlah/features/cart/data/cart_repository.dart';
 import 'package:jazlah/features/cart/presentation/cart_providers.dart';
 import 'package:jazlah/features/checkout/data/checkout_repository.dart';
+import 'package:jazlah/features/checkout/data/order_repository.dart';
 import 'package:jazlah/features/checkout/domain/fulfilment.dart';
 import 'package:jazlah/features/product/domain/product.dart';
 
@@ -36,3 +37,13 @@ final FutureProviderFamily<List<CheckoutDay>, DaysQuery> checkoutDaysProvider = 
       if (repo == null) throw const ApiError(code: ApiError.unknown);
       return repo.days(q.method);
     }, retry: (_, _) => null);
+
+/// Null in real builds: no order route yet, and never an invented order (checkout is not reached there).
+// shortcut: mock orders on the mock cart and scheduler until ORD-API-1 #81 lands (not-built-yet.md).
+final orderRepositoryProvider = Provider<OrderRepository?>((ref) {
+  final cart = ref.watch(cartRepositoryProvider);
+  final checkout = ref.watch(checkoutRepositoryProvider);
+  return cart is MockCartRepository && checkout is MockCheckoutRepository
+      ? MockOrderRepository(cart, checkout, addresses: ref.watch(addressRepositoryProvider))
+      : null;
+});

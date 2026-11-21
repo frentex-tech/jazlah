@@ -43,10 +43,13 @@ class CheckoutDay {
   final TimeWindow window;
 
   /// The calendar date to show, at UTC midnight so no device zone can move it to another day.
-  DateTime get day {
-    final [y, m, d] = [for (final p in date.split('-')) int.parse(p)];
-    return DateTime.utc(y, m, d);
-  }
+  DateTime get day => calendarDate(date);
+}
+
+/// A Riyadh `yyyy-MM-dd` as a date to show, at UTC midnight so no device zone can move it to another day.
+DateTime calendarDate(String date) {
+  final [y, m, d] = [for (final p in date.split('-')) int.parse(p)];
+  return DateTime.utc(y, m, d);
 }
 
 /// `ops.paused` of the public client settings: when paused, checkout is blocked with the admin's message.
