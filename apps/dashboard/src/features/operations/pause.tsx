@@ -77,7 +77,7 @@ export function PauseDialog({ open, onOpenChange, current, withMessage, onConfir
     >
       {withMessage && pausing && (
         <>
-          <InputField label={t('messageAr')} error={err('messageAr')} maxLength={200} value={msg.messageAr} onChange={(e) => setMsg((m) => ({ ...m, messageAr: e.target.value }))} />
+          <InputField label={t('messageAr')} error={err('messageAr')} maxLength={200} dir="rtl" value={msg.messageAr} onChange={(e) => setMsg((m) => ({ ...m, messageAr: e.target.value }))} />
           <InputField label={t('messageEn')} error={err('messageEn')} maxLength={200} dir="ltr" value={msg.messageEn} onChange={(e) => setMsg((m) => ({ ...m, messageEn: e.target.value }))} />
         </>
       )}

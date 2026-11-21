@@ -168,7 +168,7 @@ function AddDialog({ date, today, taken, onClose, onAdd }: { date: string; today
           </Select>
         )}
       </FormField>
-      <InputField label={t('reasonAr')} error={err('reasonAr')} maxLength={100} value={v.reasonAr} onChange={(e) => set('reasonAr', e.target.value)} />
+      <InputField label={t('reasonAr')} error={err('reasonAr')} maxLength={100} dir="rtl" value={v.reasonAr} onChange={(e) => set('reasonAr', e.target.value)} />
       <InputField label={t('reasonEn')} error={err('reasonEn')} maxLength={100} dir="ltr" value={v.reasonEn} onChange={(e) => set('reasonEn', e.target.value)} />
     </ConfirmDialog>
   );

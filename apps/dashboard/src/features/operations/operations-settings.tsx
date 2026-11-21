@@ -341,7 +341,7 @@ function PauseCard({ paused, draft, error, invalid, onMessage, onToggle }: {
         <Switch label={t('switch')} checked={on} onChange={onToggle} />
       </div>
       <div className="flex w-[374px] flex-col gap-s16 self-end rounded-md border border-line bg-paper p-s16">
-        <InputField label={t('messageAr')} hint={t('messageHint')} error={error('paused.messageAr')} maxLength={200} value={draft.messageAr} onChange={(e) => onMessage('messageAr', e.target.value)} />
+        <InputField label={t('messageAr')} hint={t('messageHint')} error={error('paused.messageAr')} maxLength={200} dir="rtl" value={draft.messageAr} onChange={(e) => onMessage('messageAr', e.target.value)} />
         <InputField label={t('messageEn')} error={error('paused.messageEn')} maxLength={200} dir="ltr" value={draft.messageEn} onChange={(e) => onMessage('messageEn', e.target.value)} />
       </div>
     </section>
