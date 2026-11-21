@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:jazlah/app/router/router.dart';
 import 'package:jazlah/app/theme/theme.dart';
 import 'package:jazlah/core/widgets/widgets.dart';
+import 'package:jazlah/features/cart/presentation/cart_providers.dart';
 import 'package:jazlah/features/catalog/presentation/catalog_providers.dart';
 import 'package:jazlah/features/catalog/presentation/catalog_widgets.dart';
 import 'package:jazlah/l10n/app_localizations.dart';
@@ -73,6 +74,7 @@ class StoresScreen extends ConsumerWidget {
             title: l10n.storesTitle,
             cartLabel: l10n.cart,
             onCart: () => openCart(context),
+            cartCount: ref.watch(cartCountProvider),
             onBack: () => popOrHome(context),
           ),
           Expanded(

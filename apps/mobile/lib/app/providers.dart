@@ -25,6 +25,17 @@ class SessionEnded extends Notifier<int> {
   void fire() => state++;
 }
 
+/// Bumped once the account data on this device is cleared (sign-out, session ended, account deleted), so
+/// what was built from it (the device cart) is read again.
+final accountDataClearedProvider = NotifierProvider<AccountDataCleared, int>(AccountDataCleared.new);
+
+class AccountDataCleared extends Notifier<int> {
+  @override
+  int build() => 0;
+
+  void fire() => state++;
+}
+
 final apiProvider = Provider<JazlaApi>((ref) {
   return buildApi(
     baseUrl: ref.watch(envProvider).apiBaseUrl,
