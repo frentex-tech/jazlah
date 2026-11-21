@@ -6,6 +6,8 @@ export const appConfig = registerAs('app', () => {
   const env = loadEnv();
   return {
     nodeEnv: env.NODE_ENV,
+    /** development, staging or production: where this process is deployed. */
+    deploymentEnv: env.DEPLOYMENT_ENV,
     port: env.PORT,
     shutdownDeadlineMs: env.SHUTDOWN_DEADLINE_MS,
   };

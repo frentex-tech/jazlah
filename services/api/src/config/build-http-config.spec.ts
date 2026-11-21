@@ -37,6 +37,7 @@ describe('buildHttpConfig', () => {
     (nodeEnv, flag, expected) => {
       const env = envWith({
         NODE_ENV: nodeEnv,
+        ...(nodeEnv === 'production' ? { DEPLOYMENT_ENV: 'production' } : {}),
         ...(flag === undefined ? {} : { API_DOCS_ENABLED: flag }),
       });
       expect(buildHttpConfig(env).apiDocsEnabled).toBe(expected);

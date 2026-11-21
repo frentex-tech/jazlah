@@ -24,6 +24,7 @@ describe('Startup (e2e)', () => {
   it('refuses a wildcard CORS origin in production with the clean message', () => {
     const result = startApi(
       'NODE_ENV=production',
+      'DEPLOYMENT_ENV=production',
       'TRUST_PROXY_HOPS=1',
       'QUEUE_WORKERS_ENABLED=false',
       ...AUTH_SECRETS,
@@ -41,6 +42,7 @@ describe('Startup (e2e)', () => {
   it('refuses to start in production without the authentication secrets, naming them and no value', () => {
     const result = startApi(
       'NODE_ENV=production',
+      'DEPLOYMENT_ENV=production',
       'TRUST_PROXY_HOPS=1',
       'QUEUE_WORKERS_ENABLED=false',
       'AUTH_ACCESS_TOKEN_SECRET=',
@@ -54,5 +56,44 @@ describe('Startup (e2e)', () => {
     );
     expect(result.status).toBe(1);
     expect(result.stdout).toBe('');
+  }, 60_000);
+
+  it('refuses the log SMS provider when DEPLOYMENT_ENV is production', () => {
+    const result = startApi(
+      'NODE_ENV=production',
+      'DEPLOYMENT_ENV=production',
+      'TRUST_PROXY_HOPS=1',
+      'QUEUE_WORKERS_ENABLED=false',
+      ...AUTH_SECRETS,
+      VENDORS_IBAN_KEY,
+      'SMS_PROVIDERS=log',
+    );
+    expect(result.stderr).toBe(
+      'Invalid environment configuration:\n' +
+        '  - SMS_PROVIDERS: the log provider writes message text (OTP codes) to the log: not allowed when DEPLOYMENT_ENV is production\n',
+    );
+    expect(result.status).toBe(1);
+    expect(result.stdout).toBe('');
+  }, 60_000);
+
+  it('accepts staging with the log SMS provider (only an unrelated PORT is refused)', () => {
+    // PORT=0 is the one invalid variable, so the process stops at the environment
+    // check instead of starting: the only problem reported is PORT, which proves that
+    // DEPLOYMENT_ENV=staging with SMS_PROVIDERS=log was accepted.
+    const result = startApi(
+      'NODE_ENV=production',
+      'DEPLOYMENT_ENV=staging',
+      'TRUST_PROXY_HOPS=1',
+      'QUEUE_WORKERS_ENABLED=false',
+      ...AUTH_SECRETS,
+      VENDORS_IBAN_KEY,
+      'SMS_PROVIDERS=log',
+      'PORT=0',
+    );
+    expect(result.stderr).toBe(
+      'Invalid environment configuration:\n' +
+        '  - PORT: expected an integer from 1 to 65535\n',
+    );
+    expect(result.status).toBe(1);
   }, 60_000);
 });

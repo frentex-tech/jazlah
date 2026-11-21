@@ -37,11 +37,13 @@ const WITHOUT_AUTH_SECRETS = {
 const PRODUCTION = {
   ...VALID,
   NODE_ENV: 'production',
+  DEPLOYMENT_ENV: 'production',
   TRUST_PROXY_HOPS: '1',
   QUEUE_WORKERS_ENABLED: 'false',
 };
 /** The defaults of the HTTP and rate limit variables. */
 const HTTP_DEFAULTS = {
+  DEPLOYMENT_ENV: 'development',
   VENDORS_IBAN_KEY,
   VENDORS_IBAN_KEY_ID: '1',
   SHUTDOWN_DEADLINE_MS: 28_000,
@@ -129,6 +131,7 @@ describe('validateEnv', () => {
       validateEnv({
         ...VALID,
         NODE_ENV: 'production',
+        DEPLOYMENT_ENV: 'production',
         TRUST_PROXY_HOPS: '0',
         QUEUE_WORKERS_ENABLED: 'true',
         PORT: '8080',
@@ -141,6 +144,7 @@ describe('validateEnv', () => {
       DATABASE_URL,
       REDIS_URL,
       ...HTTP_DEFAULTS,
+      DEPLOYMENT_ENV: 'production',
       SMS_PROVIDERS: [],
     });
   });
@@ -337,6 +341,7 @@ describe('validateEnv', () => {
         messageOf({
           ...VALID,
           NODE_ENV: 'production',
+          DEPLOYMENT_ENV: 'production',
           TRUST_PROXY_HOPS: '1',
           QUEUE_WORKERS_ENABLED: 'false',
           CORS_ORIGINS: '*',
@@ -351,6 +356,7 @@ describe('validateEnv', () => {
       const production = {
         ...VALID,
         NODE_ENV: 'production',
+        DEPLOYMENT_ENV: 'production',
         QUEUE_WORKERS_ENABLED: 'false',
       };
       expect(problemsOf(production)).toEqual([
@@ -368,6 +374,7 @@ describe('validateEnv', () => {
       const production = {
         ...VALID,
         NODE_ENV: 'production',
+        DEPLOYMENT_ENV: 'production',
         TRUST_PROXY_HOPS: '1',
       };
       expect(problemsOf(production)).toEqual([
@@ -601,6 +608,7 @@ describe('validateEnv', () => {
         problemsOf({
           ...WITHOUT_AUTH_SECRETS,
           NODE_ENV: 'production',
+          DEPLOYMENT_ENV: 'production',
           TRUST_PROXY_HOPS: '1',
           QUEUE_WORKERS_ENABLED: 'false',
         }),
@@ -777,6 +785,7 @@ describe('validateEnv', () => {
         validateEnv({
           ...VALID,
           NODE_ENV: 'production',
+          DEPLOYMENT_ENV: 'production',
           TRUST_PROXY_HOPS: '1',
           QUEUE_WORKERS_ENABLED: 'false',
         }).SMS_PROVIDERS,
@@ -827,12 +836,13 @@ describe('validateEnv', () => {
         problemsOf({
           ...VALID,
           NODE_ENV: 'production',
+          DEPLOYMENT_ENV: 'production',
           TRUST_PROXY_HOPS: '1',
           QUEUE_WORKERS_ENABLED: 'false',
           SMS_PROVIDERS: 'log',
         }),
       ).toEqual([
-        'SMS_PROVIDERS: the log provider writes message text (OTP codes) to the log: not allowed when NODE_ENV is production',
+        'SMS_PROVIDERS: the log provider writes message text (OTP codes) to the log: not allowed when DEPLOYMENT_ENV is production',
       ]);
     });
 
@@ -846,5 +856,87 @@ describe('validateEnv', () => {
         ]);
       },
     );
+  });
+
+  describe('deployment environment (issue #245)', () => {
+    const STAGING = { ...PRODUCTION, DEPLOYMENT_ENV: 'staging' };
+
+    it('starts staging with the log provider', () => {
+      const env = validateEnv({ ...STAGING, SMS_PROVIDERS: 'log' });
+      expect(env.DEPLOYMENT_ENV).toBe('staging');
+      expect(env.NODE_ENV).toBe('production');
+      expect(env.SMS_PROVIDERS).toEqual(['log']);
+    });
+
+    it('refuses the log provider in production', () => {
+      expect(problemsOf({ ...PRODUCTION, SMS_PROVIDERS: 'log' })).toEqual([
+        'SMS_PROVIDERS: the log provider writes message text (OTP codes) to the log: not allowed when DEPLOYMENT_ENV is production',
+      ]);
+    });
+
+    it('gives staging no SMS provider when SMS_PROVIDERS is unset, as production', () => {
+      expect(validateEnv(STAGING).SMS_PROVIDERS).toEqual([]);
+    });
+
+    it.each([undefined, '', 'development'])(
+      'refuses NODE_ENV=production with DEPLOYMENT_ENV %p',
+      (value) => {
+        expect(problemsOf({ ...PRODUCTION, DEPLOYMENT_ENV: value })).toEqual([
+          'DEPLOYMENT_ENV: required when NODE_ENV is production: staging or production',
+        ]);
+      },
+    );
+
+    it.each([
+      ['development', 'staging'],
+      ['development', 'production'],
+      ['test', 'staging'],
+      ['test', 'production'],
+    ])('refuses NODE_ENV=%s with DEPLOYMENT_ENV=%s', (nodeEnv, value) => {
+      expect(
+        problemsOf({ ...VALID, NODE_ENV: nodeEnv, DEPLOYMENT_ENV: value }),
+      ).toEqual([
+        'DEPLOYMENT_ENV: only development is allowed when NODE_ENV is not production',
+      ]);
+    });
+
+    it('defaults to development outside NODE_ENV=production', () => {
+      expect(validateEnv(VALID).DEPLOYMENT_ENV).toBe('development');
+      expect(
+        validateEnv({ ...VALID, DEPLOYMENT_ENV: 'development' }).DEPLOYMENT_ENV,
+      ).toBe('development');
+    });
+
+    it('refuses an unknown value', () => {
+      expect(problemsOf({ ...STAGING, DEPLOYMENT_ENV: 'preview' })).toEqual([
+        'DEPLOYMENT_ENV: expected one of development, staging, production',
+      ]);
+    });
+
+    it.each([
+      [
+        'the authentication secrets',
+        { AUTH_ACCESS_TOKEN_SECRET: undefined, AUTH_OTP_SECRET: undefined },
+        ['AUTH_ACCESS_TOKEN_SECRET', 'AUTH_OTP_SECRET'],
+      ],
+      ['the IBAN key', { VENDORS_IBAN_KEY: undefined }, ['VENDORS_IBAN_KEY']],
+      [
+        'TRUST_PROXY_HOPS',
+        { TRUST_PROXY_HOPS: undefined },
+        ['TRUST_PROXY_HOPS'],
+      ],
+      [
+        'QUEUE_WORKERS_ENABLED',
+        { QUEUE_WORKERS_ENABLED: undefined },
+        ['QUEUE_WORKERS_ENABLED'],
+      ],
+      ['no wildcard CORS origin', { CORS_ORIGINS: '*' }, ['CORS_ORIGINS']],
+    ])('holds staging to production: %s', (_rule, change, variables) => {
+      expect(
+        problemsOf({ ...STAGING, SMS_PROVIDERS: 'log', ...change }).map(
+          (problem) => problem.split(':')[0],
+        ),
+      ).toEqual(variables);
+    });
   });
 });

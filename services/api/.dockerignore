@@ -1,0 +1,13 @@
+# Kept out of the Docker build context (Dockerfile): local state, secrets, outputs.
+node_modules
+dist
+dist-seed
+coverage
+.env
+.env.*
+!.env.example
+.git
+.claude
+.husky/_
+src/infra/database/generated
+*.log
