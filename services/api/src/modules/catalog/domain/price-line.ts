@@ -10,9 +10,10 @@ import type { PricedLine } from './priced-line.type';
  * cutting style's extra + the chosen packaging's extra, VAT included; line = unit ×
  * quantity; "without" items are free. Pure: the caller loads the product and its rules.
  *
- * Errors, each once, in this order: PRODUCT_UNAVAILABLE; OPTION_NOT_IN_PRODUCT for a
- * size, cutting style, packaging or "without" item the product does not offer;
- * SIZE_UNAVAILABLE; INCOMPATIBLE_CUTTING_PACKAGING; and, only when nothing else is
+ * Errors, each once, in the order found: PRODUCT_UNAVAILABLE; OPTION_NOT_IN_PRODUCT for a
+ * size the product does not offer; SIZE_UNAVAILABLE; OPTION_NOT_IN_PRODUCT for a cutting
+ * style, packaging or "without" item it does not offer (not repeated when the size
+ * already added it); INCOMPATIBLE_CUTTING_PACKAGING; and, only when nothing else is
  * wrong, OPTION_REQUIRED for a product with cutting styles and none chosen. Any error
  * but OPTION_REQUIRED zeroes the line. The apps' price function follows the same
  * cases, proven by the shared fixture docs/frontend/fixtures/pricing-cases.json.
