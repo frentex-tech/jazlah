@@ -112,10 +112,11 @@ test('a draft is never shown to another applicant on the same device', async ({ 
   await page.getByLabel('اسم المتجر بالعربية').fill('مسودة المتقدم الأول');
   await page.getByRole('button', { name: 'حفظ والإكمال لاحقًا' }).click();
 
-  // The session ends, and someone else signs in on the same tab.
+  // The session ends, and someone else signs in on the same tab, with a phone that masks the same (+966 5•• ••• xyz):
+  // drafts belong to the user id, not to the shown phone.
   await context.clearCookies();
   await page.reload();
-  await signInAsApplicant(page, `05${String(Math.floor(Math.random() * 1e7)).padStart(7, '0')}7`);
+  await signInAsApplicant(page, `05${String(Math.floor(Math.random() * 1e5)).padStart(5, '0')}${first.slice(-3)}`);
   await expect(page.getByRole('heading', { level: 1, name: 'بيانات المنشأة' })).toBeVisible();
   await expect(page.getByLabel('اسم المتجر بالعربية')).toHaveValue('');
   await expect(page.getByText(/استعدنا ما كتبته/)).toHaveCount(0);

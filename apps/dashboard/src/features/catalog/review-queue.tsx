@@ -20,7 +20,7 @@ import { sar } from '@/lib/money';
 import { ApiError, panelFetch } from '@/lib/panel-fetch';
 import { loadAll } from './client';
 import { editedContent, liveContent } from './product-form/values';
-import type { ChangeRequest, Product, ProductCard, ProductContentResponse, RefItem } from './types';
+import type { ChangeRequest, Page, Product, ProductCard, ProductContentResponse, RefItem } from './types';
 
 const BASE = '/api/admin/catalog';
 /** Tells the side nav to count the queue again (lib: components/shell/side-nav.tsx). */
@@ -31,6 +31,17 @@ const PRESETS = ['image', 'description', 'price'] as const;
 
 /** One row: a new product under review, an edit (change request) of a published one, or a decided product. */
 type Item = { key: string; kind: 'new' | 'edit'; product: Product | null; card: ProductCard | null; request: ChangeRequest | null; vendor: string | null; sentAt: string };
+
+/** Where each list's next page starts; `null`: that list has no more pages; absent: its first page. */
+type Cursor = { products?: string | null; edits?: string | null };
+const PAGE = 20;
+
+/** One page of a cursor-paged list; an ended list (`null`) answers an empty page without a call. */
+async function pageOf<T>(url: string, cursor: string | null | undefined): Promise<Page<T>> {
+  if (cursor === null) return { items: [], nextCursor: null };
+  const q = new URLSearchParams({ limit: String(PAGE), ...(cursor && { cursor }) });
+  return panelFetch<Page<T>>('admin', `${url}${url.includes('?') ? '&' : '?'}${q}`);
+}
 
 /** `f` over `xs`, five at a time; a failure is kept as a rejected result instead of failing the whole list. */
 async function settled<T, R>(xs: T[], f: (x: T) => Promise<R>): Promise<PromiseSettledResult<R>[]> {
@@ -83,23 +94,33 @@ export function ReviewQueue() {
   const vendorList = useRef<Vendor[] | null>(null);
   const vendors = useCallback(async () => (vendorList.current ??= await loadAll<Vendor>('admin', '/api/admin/vendors')), []);
 
-  // shortcut: API gap (no combined queue): every page of both lists is loaded; an edit's product is read for its
-  // store (five at a time). Fine for a review queue's size; page it if it grows.
+  // Page by page: a page is up to 20 of each list (new products, edits); the cursors of the pages seen are kept for «previous».
+  // shortcut: API gap, no combined review queue (B6, the review-queue endpoint of CAT-API-3 #49): a pending page merges
+  // one page of each list newest first, and reads each edit's product (five at a time, at most 20) for its store; the
+  // decided tabs drop JAZLA's own products on the client, so a page can show fewer than 20. Use the queue endpoint when it exists.
+  const [cursors, setCursors] = useState<Cursor[]>([{}]);
+  const [next, setNext] = useState<Cursor | null>(null);
+  const cursor = cursors.at(-1)!;
+  const pick = (k: Tab) => {
+    setTab(k);
+    setCursors([{}]);
+  };
   const load = useCallback(async () => {
     setData('loading');
     try {
       if (tab === 'pending') {
         const [cards, requests, known] = await Promise.all([
-          loadAll<ProductCard>('admin', `${BASE}/products?status=pending_review`),
-          loadAll<ChangeRequest>('admin', `${BASE}/change-requests`),
+          pageOf<ProductCard>(`${BASE}/products?status=pending_review`, cursor.products),
+          pageOf<ChangeRequest>(`${BASE}/change-requests`, cursor.edits),
           vendors().catch(() => [] as Vendor[]), // names only: the rows still show without them
         ]);
+        setNext(cards.nextCursor || requests.nextCursor ? { products: cards.nextCursor, edits: requests.nextCursor } : null);
         // A product that cannot be read leaves its row without a store; the dialog reads it again.
-        const live = await settled(requests, (r) => panelFetch<Product>('admin', `${BASE}/products/${r.productId}`));
+        const live = await settled(requests.items, (r) => panelFetch<Product>('admin', `${BASE}/products/${r.productId}`));
         const items: Item[] = [
           // The card has no submittedAt (API gap): a new product is dated by its creation; read when opened.
-          ...cards.map((c) => ({ key: c.id, kind: 'new' as const, product: null, card: c, request: null, vendor: nameOf(c.vendor.name), sentAt: c.createdAt })),
-          ...requests.map((r, i) => {
+          ...cards.items.map((c) => ({ key: c.id, kind: 'new' as const, product: null, card: c, request: null, vendor: nameOf(c.vendor.name), sentAt: c.createdAt })),
+          ...requests.items.map((r, i) => {
             const res = live[i]!;
             const p = res.status === 'fulfilled' ? res.value : null;
             return { key: r.id, kind: 'edit' as const, product: p, card: null, request: r, vendor: p ? nameOf(known.find((v) => v.id === p.vendorId)?.name) : null, sentAt: r.createdAt };
@@ -107,15 +128,19 @@ export function ReviewQueue() {
         ];
         setData(items.sort((a, b) => b.sentAt.localeCompare(a.sentAt)));
       } else {
-        const platform = (await vendors()).find((v) => v.isPlatform)?.id;
-        const cards = await loadAll<ProductCard>('admin', `${BASE}/products?status=${tab === 'approved' ? 'published' : 'rejected'}`);
+        const [known, cards] = await Promise.all([
+          vendors(),
+          pageOf<ProductCard>(`${BASE}/products?status=${tab === 'approved' ? 'published' : 'rejected'}`, cursor.products),
+        ]);
+        const platform = known.find((v) => v.isPlatform)?.id;
+        setNext(cards.nextCursor ? { products: cards.nextCursor } : null);
         // The decided lists are the vendors' products; JAZLA's own are published without review.
-        setData(cards.filter((c) => c.vendor.id !== platform).map((c) => ({ key: c.id, kind: 'new', product: null, card: c, request: null, vendor: nameOf(c.vendor.name), sentAt: c.createdAt })));
+        setData(cards.items.filter((c) => c.vendor.id !== platform).map((c) => ({ key: c.id, kind: 'new', product: null, card: c, request: null, vendor: nameOf(c.vendor.name), sentAt: c.createdAt })));
       }
     } catch (e) {
       setData(e instanceof ApiError && e.code === 'NOT_ALLOWED' ? 'denied' : 'error');
     }
-  }, [tab, nameOf, vendors]);
+  }, [tab, cursor, nameOf, vendors]);
   useEffect(() => void load(), [load]);
 
   const columns = useMemo<ColumnDef<Item, unknown>[]>(
@@ -194,18 +219,29 @@ export function ReviewQueue() {
         <StateCard kind="error" className={card} title={t('error.title')} body={t('error.body')} action={<Button onClick={() => void load()}>{t('error.action')}</Button>} />
       ) : (
         <div className="flex flex-col gap-s24">
-          <Tabs tabs={TABS.map((k) => ({ key: k, label: t(`tabs.${k}`) }))} value={tab} onChange={setTab} label={t('title')} controls="review-panel" idPrefix="review-tab" />
+          <Tabs tabs={TABS.map((k) => ({ key: k, label: t(`tabs.${k}`) }))} value={tab} onChange={pick} label={t('title')} controls="review-panel" idPrefix="review-tab" />
           <div id="review-panel" role="tabpanel" aria-labelledby={`review-tab-${tab}`}>
-            {data !== 'loading' && data.length === 0 ? (
+            {data !== 'loading' && data.length === 0 && cursors.length === 1 && !next ? (
               <StateCard
-                kind="search"
+                kind="orders"
                 className={card}
                 title={t(`empty.${tab}`)}
                 body={t(tab === 'pending' ? 'empty.body' : 'empty.decidedBody')}
-                action={tab === 'pending' && <Button variant="secondary" onClick={() => setTab('approved')}>{t('empty.action')}</Button>}
+                action={tab === 'pending' && <Button variant="secondary" onClick={() => pick('approved')}>{t('empty.action')}</Button>}
               />
             ) : (
-              <DataTable tall label={t(`tabs.${tab}`)} columns={columns} data={data === 'loading' ? [] : data} status={data === 'loading' ? 'loading' : 'ready'} loadingRows={4} hasPrev={false} hasNext={false} onPrev={() => {}} onNext={() => {}} />
+              <DataTable
+                tall
+                label={t(`tabs.${tab}`)}
+                columns={columns}
+                data={data === 'loading' ? [] : data}
+                status={data === 'loading' ? 'loading' : 'ready'}
+                loadingRows={4}
+                hasPrev={cursors.length > 1}
+                hasNext={!!next}
+                onPrev={() => setCursors(cursors.slice(0, -1))}
+                onNext={() => next && setCursors([...cursors, next])}
+              />
             )}
           </div>
         </div>

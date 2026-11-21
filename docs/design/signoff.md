@@ -70,7 +70,7 @@ Agreed by the owner in the Sprint 1 fix round, after the design QA (`reviews/qa-
 | Frame | Difference | Why |
 |---|---|---|
 | 410:39654, 410:40011, 410:40094 | Email, district, address details, logo and cover are shown disabled; the business type is chosen but not sent | Not in the application API (not-built-yet.md) |
-| 410:39654 | The phone field shows the masked number of the sign-in answer (`+966 5•• ••• 567`) | The dashboard never holds the full number |
+| 410:39654, 410:40259 | The phone field, and the approved status body, show the masked number of the sign-in answer (`+966 5•• ••• 567`) | The dashboard never holds the full number |
 | 410:39774 | The banner counts the fields to fix (one, two or more) instead of «the two fields»; email cannot be in error (disabled) | Generic for any field; email is an API gap |
 | 410:39936 | The bank field is read-only, filled from the IBAN bank code, instead of a list | The API takes no bank; the code in the IBAN names it |
 | 410:40011 | A real map (OSM tiles) instead of the illustration; the pin is set by dragging, clicking or Enter | Needed for real coordinates |
@@ -81,7 +81,7 @@ Agreed by the owner in the Sprint 1 fix round, after the design QA (`reviews/qa-
 | 131:24074 | A second description field (English) and a VAT number field are added; tagline, address and working hours are disabled; hours switches are off | The API has AR/EN descriptions and VAT; the rest are API gaps |
 | 131:24074 | Description hint says up to 1000 characters (Figma 200) | Mirrors the API limit |
 | 131:24427 | The store name is read-only, so only the contact errors of the frame occur | Only an admin changes the name |
-| 131:24863 | Reached when a save or upload answers VENDOR_SUSPENDED: the fields keep their values but use the disabled style. A suspended vendor opening the page is signed out with the reason (API rule) | The API refuses every vendor call when suspended |
+| 131:24863 | Reached when a save or upload answers VENDOR_SUSPENDED: the fields keep their values but use the disabled style, and «حفظ التغييرات» is disabled (Figma: normal fields, save enabled). A suspended vendor opening the page is signed out with the reason (API rule) | Kept after the Sprint 2 design QA: the API has already ended the session and refuses every vendor call, so an enabled save could never work and would lose the edits on the next click |
 | 131:24717 | Uses the shared error panel copy for the body | Same as the frame text |
 | 410:39654 and the other steps | The public bar shows «sign out» (customer session only, and the drafts on the device) instead of «already a vendor? sign in» | The applicant is signed in on these steps; signing out must be possible (review of #275) |
 | 410:39936, restore | A restored draft asks for the IBAN again | The IBAN is never kept on the device |
@@ -94,6 +94,8 @@ Agreed by the owner in the Sprint 1 fix round, after the design QA (`reviews/qa-
 | 131:16744 | Products column shows a dash; category and date filters, «invite vendor» and «export» are disabled | API gaps (not-built-yet.md) |
 | 131:16744, 131:18192 | The status filter and the tabs are one choice: picking a status selects its tab and shows the chip; the default tab («active») shows no chip | One status at a time in the API |
 | 131:16744 | Search box keeps the shared Filters bar width (200) instead of filling the row | Shared DS component |
+| 131:16744, 131:18192 | A paging footer («n صفوف في هذه الصفحة», previous / next) under the vendors table | Cursor paging (the list can be long); no loading frame shows a footer, so none shows while loading |
+| Every list frame (vendors, products, my products) | The Filters bar is 76 high, the fields row 44 (Figma 134, 178 with chips) | The extra height in Figma is an empty 8×100 `sp` frame inside the DS «Filters bar» (16:1645), most likely an accident; kept at 76 by the owner until the designer fixes the DS |
 | 131:17362 | Without any filter, an empty tab says «no stores here yet» without the clear button | The frame's copy is for filtered results |
 | 131:18512 | Store details have no «activity» row; «responsible» shows the account holder; the phone row shows only for a vendor with a contact phone; the IBAN is masked | Not in the application answer; the full IBAN is never sent |
 | 131:18512 | A real map (OSM tiles) with the city under it, instead of the illustration and street address | Real coordinates; no address in the API |
@@ -116,6 +118,7 @@ Agreed by the owner in the Sprint 1 fix round, after the design QA (`reviews/qa-
 | 131:21286 | Header has «add product» and «categories» (the frame's actions slot is empty); an «available» switch column (80) for JAZLA products, the product column 250 instead of 300; the date column is «added on»; a paging footer | Routes to the form and to categories; the availability quick toggle of the task; the card has no update date; cursor paging |
 | 131:21286 | Rows of other vendors open nothing (they are reviewed in CAT-DSH-2); the «...» opens JAZLA products only | Admins edit only the platform vendor's products (API rule) |
 | 131:22654 | Search and category filter act on the loaded page; the date filter is disabled | API gaps |
+| 131:21874 | Without any filter, an empty products list says «لا توجد منتجات بعد» / «ستظهر هنا منتجات جزلة والمتاجر.» without a button; with filters it is the frame («لا توجد منتجات مطابقة», «مسح التصفية») | The frame's copy is for filtered results (same as the vendors list, 131:17362) |
 | 131:35405 | Name and description in Arabic and English side by side; meat type instead of SKU; hints say 2 to 100 and up to 1000 characters (Figma 60 and 300) | The API's fields and limits |
 | 131:35405 | Up to 10 images (Figma 6); more than four thumbnails wrap; each has a remove button | The API allows 10 |
 | 131:35405 | Size rows: Arabic label, English label, weight in grams, price, remove; no «enabled» badge | A size tag is `{ar, en}`; sizes have no on/off in the API |
@@ -138,9 +141,13 @@ Agreed by the owner in the Sprint 1 fix round, after the design QA (`reviews/qa-
 | 131:26015 | The frame's layout with a suspended store's copy («متجرك موقوف مؤقتًا», contact support) and «تسجيل الدخول» (sign-in with the suspension reason) instead of «store under review» / «view application status»; shown when the vendor routes answer VENDOR_SUSPENDED | A vendor session exists only after approval, so «under review» cannot occur; suspension is the only vendor-session refusal and it ends the session (as on the store profile) |
 | 131:38124 | One note card holding the admin's reason (Figma: three issues with titles and per-issue buttons); its button «تعديل المنتج» opens the form; «حذف المنتج» disabled; no «محاولات الإرسال» row | The API keeps one reason; no submission count; no delete endpoint |
 | 131:38124 | Also shows a rejected edit of a published product (reason of the change request) | State the API has and Figma does not draw |
+| 131:38124 (English) | The admin's reason shows as written, usually in Arabic | The reason is free text, sent once |
+| 131:37786 (vendor) | The frame's title and body («لا يمكنك تعديل المنتجات الآن», «متجرك موقوف مؤقتًا. تواصل مع الدعم لإعادة التفعيل.»), with «تسجيل الدخول» as the button instead of «تواصل مع الدعم» | No vendor support contact is defined yet (#103); the session is already over, and the sign-in page says why |
 | 131:38367 | Approved text without «after editing the images and description» | The API does not say what changed |
 | 131:22954 | «نوع الطلب» is «منتج جديد» or «تعديل منتج» (Figma: also «تعديل صور», «تعديل سعر»); the dialog lists the changed parts; rows 64 high (Figma 72), with a paging footer; the action column has no header | No kind on a change request; prices never go to review; shared DS table |
 | 131:22954 | «أُرسل» and «الانتظار» of a new product count from its creation date; an edit's row has no store if its product cannot be read | The card has no `submittedAt`; one unreadable product must not fail the queue |
+| 131:22954 (English) | At 1440 the «Sent» date wraps to two lines («12 November / 2026») | English month names are longer than the 140 column of the frame |
+| 131:22954 | A page holds up to 20 new products and 20 edits, merged newest first; previous / next move both lists; the «المنتجات» badge counts up to 50 («50+» beyond) and is read again after five minutes or a decision | No review-queue endpoint or count in the API (B6, #49) |
 | 131:22954 | «معتمدة» and «مرفوضة» list the vendors' published and rejected products, with their creation date and a «عرض» button | No list of decided reviews in the API |
 | 131:22954 | The products list header gets a «طلبات المراجعة» button to reach the queue; the pending count is the badge on «المنتجات» | No side-nav item for the queue in the frame |
 | 131:23859 | Dialog rows: store, category, price from, sizes, cutting, packaging, and «التعديلات» for an edit. For an edit the preview is what approval makes live: the proposed content with the live prices of the sizes and options the product already has (new ones at the request's prices), cut names from the cutting styles; the chips fill a full sentence; centred vertically | Approval keeps live prices (API rule) and a request's cuttings carry no names; shared dialog placement |

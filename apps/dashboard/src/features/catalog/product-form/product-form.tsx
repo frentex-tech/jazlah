@@ -44,7 +44,7 @@ export type ProductFormProps = {
   /** Uploads one image (ticket, storage, confirm) with the page's session; resolves to the confirmed media id. */
   upload: (file: File) => Promise<string>;
   /** Admins edit the global rules from the matrix; without it the matrix is read-only (vendors). Resolves to the new rules. */
-  setRule?: (cuttingStyleId: string, packaging: Packaging, incompatible: boolean) => Promise<Rule[]>;
+  setRule?: (rules: Rule[], cuttingStyleId: string, packaging: Packaging, incompatible: boolean) => Promise<Rule[]>;
   /** The footer's buttons: each submits with its intent (e.g. «draft», «publish»). */
   actions: { intent: string; label: string; variant: 'primary' | 'secondary' }[];
   deleteLabel?: string;
@@ -76,8 +76,8 @@ const sectionOf = (key: string) => SECTION_OF.find(([, re]) => re.test(key))?.[0
 export function ProductFormSkeleton({ label }: { label: string }) {
   return (
     <div role="status" aria-label={label} className="flex w-full flex-col gap-s24">
-      <Skeleton className="h-[120px] rounded-md" />
-      {[0, 1, 2, 3, 4].map((i) => <Skeleton key={i} className="h-14 rounded-md" />)}
+      <Skeleton className="h-[120px]" />
+      {[0, 1, 2, 3, 4].map((i) => <Skeleton key={i} className="h-14" />)}
     </div>
   );
 }
@@ -289,7 +289,7 @@ export function ProductForm({ product, options, upload, setRule, actions, delete
         <Switch label={t('fulfilment.delivery')} checked={s.delivery} onChange={(delivery) => set({ delivery }, ['fulfilment'])} />
         <Switch label={t('fulfilment.pickup')} checked={s.pickup} onChange={(pickup) => set({ pickup }, ['fulfilment'])} />
         {message('fulfilment') && <p role="alert" className="text-body-m text-danger">{message('fulfilment')}</p>}
-        {/* shortcut: API gap, no order type (slaughtered on order), minimum quantity or preparation time on a product; shown disabled. */}
+        {/* shortcut: API gap, no order type (slaughtered on order), minimum quantity or preparation time on a product; shown disabled (#69). */}
         <Switch label={t('fulfilment.onOrder')} checked={false} onChange={() => {}} disabled />
         <div className="grid grid-cols-2 gap-s24">
           <InputField label={t('fulfilment.prep')} hint={t('fulfilment.prepHint')} placeholder={t('placeholder')} disabled />
@@ -299,7 +299,7 @@ export function ProductForm({ product, options, upload, setRule, actions, delete
 
       <FormSection title={t('availability.title')} body={t('availability.body')}>
         <Switch label={t('availability.available')} checked={s.available} onChange={(available) => set({ available })} />
-        {/* shortcut: API gap, no order days, daily quantity or pause date on a product; shown disabled. */}
+        {/* shortcut: API gap, no order days, daily quantity or pause date on a product; shown disabled (#69). */}
         <div className="flex flex-wrap gap-s8">
           {(['sun', 'mon', 'tue', 'wed', 'thu', 'fri', 'sat'] as const).map((d) => <Chip key={d} disabled>{t(`availability.days.${d}`)}</Chip>)}
         </div>
@@ -320,7 +320,7 @@ export function ProductForm({ product, options, upload, setRule, actions, delete
               </Button>
             ))}
           </div>
-          {/* shortcut: API gap, products cannot be deleted (no DELETE endpoint); shown disabled. */}
+          {/* shortcut: API gap, products cannot be deleted (no DELETE endpoint); shown disabled (#49). */}
           {deleteLabel && <Button variant="danger" disabled>{deleteLabel}</Button>}
         </div>
       )}

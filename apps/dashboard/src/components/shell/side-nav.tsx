@@ -13,7 +13,7 @@ import { activeKey, NAV } from './nav';
 const itemClass = 'flex h-11 shrink-0 items-center gap-s12 px-s12 text-label-m';
 
 // Figma DS «Side nav» (16:1237), variants role=admin|vendor|kitchen.
-export function SideNav({ panel, badges: given = {} }: { panel: Panel; badges?: Record<string, number> }) {
+export function SideNav({ panel, badges: given = {} }: { panel: Panel; badges?: Record<string, number | string> }) {
   const t = useTranslations();
   const locale = useLocale();
   const pathname = usePathname();
@@ -46,7 +46,7 @@ export function SideNav({ panel, badges: given = {} }: { panel: Panel; badges?: 
             />
             <span className="min-w-0 flex-1 truncate">{t(`nav.${panel}.${item.key}`)}</span>
             {count ? (
-              <span className="flex h-5 w-6 shrink-0 items-center justify-center rounded-pill bg-gold-light text-caption text-brand">{count}</span>
+              <span className="flex h-5 min-w-6 shrink-0 items-center justify-center rounded-pill bg-gold-light px-1 text-caption text-brand">{count}</span>
             ) : null}
           </Link>
         );
@@ -66,25 +66,26 @@ export function SideNav({ panel, badges: given = {} }: { panel: Panel; badges?: 
 }
 
 /** The last review count and when it was read, for every mount of the side nav in this tab. */
-let reviewCache: { count: number; at: number } | null = null;
-const REVIEW_TTL = 60_000;
+let reviewCache: { count: number | string; at: number } | null = null;
+const REVIEW_TTL = 5 * 60_000;
 
 /**
- * Admin: products waiting for review (new and edits, CAT-DSH-2) on «المنتجات». Read on the first mount, then kept for a
- * minute across pages, and read again when the queue decides one (REVIEW_CHANGED in features/catalog/review-queue.tsx).
+ * Admin: products waiting for review (new and edits, CAT-DSH-2) on «المنتجات». Read on the first mount, then kept for
+ * five minutes across pages, and read again when the queue decides one (REVIEW_CHANGED in features/catalog/review-queue.tsx).
  * A plain fetch: a refused count (no permission, session over) only hides the badge; the page handles the session.
  */
 function useReviewCount(enabled: boolean) {
-  const [count, setCount] = useState(reviewCache?.count ?? 0);
+  const [count, setCount] = useState<number | string>(reviewCache?.count ?? 0);
   useEffect(() => {
     if (!enabled) return;
     let live = true;
     const load = () =>
       fetch('/api/admin/catalog/review-count')
-        .then((r) => (r.ok ? (r.json() as Promise<{ count: number }>) : { count: 0 }))
+        .then((r) => (r.ok ? (r.json() as Promise<{ count: number; more?: boolean }>) : { count: 0 }))
         .then((d) => {
-          reviewCache = { count: d.count, at: Date.now() };
-          if (live) setCount(d.count);
+          const shown = 'more' in d && d.more ? `${d.count}+` : d.count; // capped at 50 (review-count route)
+          reviewCache = { count: shown, at: Date.now() };
+          if (live) setCount(shown);
         }, () => {});
     if (!reviewCache || Date.now() - reviewCache.at > REVIEW_TTL) void load();
     window.addEventListener('jazlah:review-changed', load);

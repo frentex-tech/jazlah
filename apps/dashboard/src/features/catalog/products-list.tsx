@@ -148,7 +148,7 @@ export function ProductsList() {
     [t, locale, nameOf, categoryName, ownProduct, switching, toggle],
   );
 
-  // shortcut: no search or category filter on GET /v1/admin/products, API gap: both apply to the loaded page only.
+  // shortcut: no search or category filter on GET /v1/admin/products, API gap: both apply to the loaded page only (#49).
   const q = search.trim().toLowerCase();
   const rows =
     typeof data === 'object'
@@ -199,7 +199,7 @@ export function ProductsList() {
           <option value="">{t('statusFilter')}</option>
           {PRODUCT_STATUSES.map((s) => <option key={s} value={s}>{t(`status.${s}`)}</option>)}
         </Select>
-        {/* shortcut: no date filter on GET /v1/admin/products, API gap: shown disabled. */}
+        {/* shortcut: no date filter on GET /v1/admin/products, API gap: shown disabled (#49). */}
         <span aria-disabled className="flex h-11 w-[160px] shrink-0 items-center justify-between gap-s8 rounded-sm border border-line bg-paper px-s12 text-body-m text-muted-soft">
           {t('cols.date')}
           <CalendarBlank size={18} aria-hidden />

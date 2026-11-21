@@ -64,7 +64,7 @@ export function VendorProducts() {
   }, [status, cursor]);
   useEffect(() => void load(), [load]);
 
-  // The rejected count of the notice (first 50; shortcut: API gap, no count) and the category names; failures stay quiet.
+  // The rejected count of the notice (first 50; shortcut: API gap, no count, #49) and the category names; failures stay quiet.
   const loadRejected = useCallback(() => {
     vendorFetch<Page<ProductCard>>(`${BASE}?status=rejected&limit=50`).then((p) => setRejected(p.items.length), () => {});
   }, []);
@@ -142,7 +142,7 @@ export function VendorProducts() {
     [t, tp, locale, nameOf, categoryName],
   );
 
-  // shortcut: API gap, no search, category or availability filter on GET /v1/vendor/products: they apply to the loaded page.
+  // shortcut: API gap, no search, category or availability filter on GET /v1/vendor/products: they apply to the loaded page (#49).
   const q = search.trim().toLowerCase();
   const rows =
     typeof data === 'object'
@@ -174,11 +174,12 @@ export function VendorProducts() {
       {data === 'blocked' ? (
         <StoreBlocked />
       ) : data !== 'error' && data !== 'loading' && !filtered && data.items.length === 0 && cursors.length === 1 ? (
-        <StateCard kind="search" className={card} title={t('empty.title')} body={t('empty.body')} action={<Link href="/vendor/products/new" className={buttonVariants({ variant: 'secondary' })}>{t('empty.action')}</Link>} />
+        <StateCard kind="orders" className={card} title={t('empty.title')} body={t('empty.body')} action={<Link href="/vendor/products/new" className={buttonVariants({ variant: 'secondary' })}>{t('empty.action')}</Link>} />
       ) : (
         <>
           {rejected > 0 && data !== 'error' && <Notice text={t('rejectedNotice', { count: rejected })} />}
-          <FiltersBar search={search} onSearch={setSearch} searchLabel={t('search')} clearLabel={tp('clear')} applied={applied}>
+          {/* The error frame (131:25808) has no filters bar. */}
+          {data !== 'error' && <FiltersBar search={search} onSearch={setSearch} searchLabel={t('search')} clearLabel={tp('clear')} applied={applied}>
             <Select aria-label={t('cols.availability')} value={availability} onChange={(e) => setAvailability(e.target.value as Availability | '')} className="flex-1">
               <option value="">{t('cols.availability')}</option>
               {(['available', 'hidden', 'out'] as const).map((a) => <option key={a} value={a}>{t(`availability.${a}`)}</option>)}
@@ -191,12 +192,12 @@ export function VendorProducts() {
               <option value="">{tp('statusFilter')}</option>
               {PRODUCT_STATUSES.map((s) => <option key={s} value={s}>{tp(`status.${s}`)}</option>)}
             </Select>
-            {/* shortcut: API gap, no date filter on GET /v1/vendor/products: shown disabled. */}
+            {/* shortcut: API gap, no date filter on GET /v1/vendor/products: shown disabled (#49). */}
             <span aria-disabled className="flex h-11 w-[160px] shrink-0 items-center justify-between gap-s8 rounded-sm border border-line bg-paper px-s12 text-body-m text-muted-soft">
               {t('cols.date')}
               <CalendarBlank size={18} aria-hidden />
             </span>
-          </FiltersBar>
+          </FiltersBar>}
           {data === 'error' ? (
             <StateCard kind="error" className={card} title={t('error.title')} body={t('error.body')} action={<Button onClick={() => void load()}>{t('error.action')}</Button>} />
           ) : data !== 'loading' && rows.length === 0 && cursors.length === 1 && !data.next ? (

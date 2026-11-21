@@ -1,6 +1,6 @@
 import type { NextResponse } from 'next/server';
 import {
-  IDLE_SECONDS, PANELS_COOKIE, SESSIONS, accessCookie, cookieBase, phoneCookie, refreshCookie, type Session,
+  IDLE_SECONDS, OWNER_COOKIE, PANELS_COOKIE, SESSIONS, accessCookie, cookieBase, phoneCookie, refreshCookie, type Session,
 } from '../session';
 import type { Tokens } from './backend';
 
@@ -15,14 +15,16 @@ export function writePanels(res: NextResponse, panels: Session[]) {
   res.cookies.set(PANELS_COOKIE, panels.join(','), { ...cookieBase, maxAge: IDLE_SECONDS });
 }
 
-export function writeSignIn(res: NextResponse, panel: Session, t: Tokens, phone: string, current: Session[]) {
+export function writeSignIn(res: NextResponse, panel: Session, t: Tokens, principal: { phone: string; userId: string }, current: Session[]) {
   writeTokens(res, panel, t);
-  res.cookies.set(phoneCookie(panel), phone, { ...cookieBase, maxAge: t.refreshTokenExpiresInSeconds });
+  res.cookies.set(phoneCookie(panel), principal.phone, { ...cookieBase, maxAge: t.refreshTokenExpiresInSeconds });
+  if (panel === 'customer') res.cookies.set(OWNER_COOKIE, principal.userId, { ...cookieBase, maxAge: t.refreshTokenExpiresInSeconds });
   writePanels(res, [...new Set([...current, panel])]);
 }
 
 export function clearPanel(res: NextResponse, panel: Session) {
   for (const name of [accessCookie(panel), refreshCookie(panel), phoneCookie(panel)]) res.cookies.delete(name);
+  if (panel === 'customer') res.cookies.delete(OWNER_COOKIE);
 }
 
 export function clearAll(res: NextResponse) {

@@ -24,11 +24,12 @@ export const vendorFetch = <T,>(url: string, init?: RequestInit) => panelFetch<T
 /**
  * The not-allowed frame (131:26015) with the suspended store's copy: the vendor routes answered VENDOR_SUSPENDED and the
  * session is already over on the server, so the action is a new sign-in (which says why), as on the store profile.
+ * `form`: the product form's own copy (131:37786); the sign-in stays its action, since support has no destination yet.
  */
-export function StoreBlocked() {
+export function StoreBlocked({ form }: { form?: boolean }) {
   const t = useTranslations('vendorProducts.blocked');
   return (
-    <StateCard kind="denied" className="h-[360px]" title={t('title')} body={t('body')} action={<Link href="/login?panel=vendor&reason=suspended" className={buttonVariants({ variant: 'secondary' })}>{t('action')}</Link>} />
+    <StateCard kind="denied" className="h-[360px]" title={t(form ? 'formTitle' : 'title')} body={t(form ? 'formBody' : 'body')} action={<Link href="/login?panel=vendor&reason=suspended" className={buttonVariants({ variant: 'secondary' })}>{t('action')}</Link>} />
   );
 }
 
@@ -118,7 +119,7 @@ export function VendorProduct({ id }: { id?: string }) {
       {state === 'loading' ? (
         <ProductFormSkeleton label={t('loading')} />
       ) : state === 'blocked' ? (
-        <StoreBlocked />
+        <StoreBlocked form />
       ) : state === 'missing' ? (
         <StateCard kind="search" className={card} title={t('missing.title')} body={t('missing.body')} action={<Link href="/vendor/products" className={buttonVariants({ variant: 'secondary' })}>{t('missing.action')}</Link>} />
       ) : state === 'error' ? (

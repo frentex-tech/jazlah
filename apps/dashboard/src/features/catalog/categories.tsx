@@ -86,8 +86,9 @@ export function Categories() {
             </>
           ) : (
             <>
-              <Button disabled={!ready} onClick={() => open(null)}>{t('add')}</Button>
-              <Button variant="secondary" disabled={!ready || items.length < 2} onClick={() => setOrder(items)}>{t('reorder')}</Button>
+              {/* Drawn enabled in the loading, error and denied frames too (131:20094, 20610, 20824): clicks wait for the list. */}
+              <Button onClick={() => ready && open(null)}>{t('add')}</Button>
+              <Button variant="secondary" disabled={ready && items.length < 2} onClick={() => ready && setOrder(items)}>{t('reorder')}</Button>
             </>
           )
         }
@@ -139,13 +140,14 @@ function CategoryTable({
   };
   const cell = 'flex shrink-0 items-center px-s8';
   const row = 'flex h-16 items-center border-b border-line px-s24';
+  const col = (i: number) => ({ width: COLS[i], flexGrow: i === 0 ? 1 : 0 }); // the name column takes the spare width
   const heads = [t('cols.category'), t('cols.slug'), t('cols.products'), t('cols.order'), t('cols.status')];
   return (
     <div className="w-full overflow-hidden rounded-md border border-line bg-paper" aria-busy={!rows}>
       <div role="table" aria-label={t('title')}>
         <div role="row" className="flex h-12 items-center bg-sand px-s24">
           {heads.map((h, i) => (
-            <div key={h} role="columnheader" className={cn(cell, 'text-label-m text-ink')} style={{ width: COLS[i] }}>{h}</div>
+            <div key={h} role="columnheader" className={cn(cell, 'text-label-m text-ink')} style={col(i)}>{h}</div>
           ))}
           <div role="columnheader" aria-label={t('cols.actions')} className={cn(cell, 'w-[52px]')} />
         </div>
@@ -153,8 +155,9 @@ function CategoryTable({
           ? Array.from({ length: 7 }, (_, i) => (
               <div key={i} role="row" className={row}>
                 {[70, 87, 86, 66, 106].map((w, j) => (
-                  <div key={j} role="cell" className={cell} style={{ width: COLS[j] }}><Skeleton style={{ width: w }} /></div>
+                  <div key={j} role="cell" className={cell} style={col(j)}><Skeleton style={{ width: w }} /></div>
                 ))}
+                <div role="cell" className={cn(cell, 'w-[52px]')} />
               </div>
             ))
           : rows.map((x, i) => (
@@ -167,7 +170,7 @@ function CategoryTable({
                 onDrop={() => dragged.current !== null && move(dragged.current, i)}
                 className={cn(row, 'text-body-m text-ink', reorder && 'cursor-grab bg-paper')}
               >
-                <div role="cell" className={cn(cell, 'gap-s12 text-label-m')} style={{ width: COLS[0] }}>
+                <div role="cell" className={cn(cell, 'gap-s12 text-label-m')} style={col(0)}>
                   {reorder && <DotsSixVertical size={20} aria-hidden className="text-ink-2" />}
                   {x.imageUrl ? (
                     // eslint-disable-next-line @next/next/no-img-element -- the API's public CDN URL, shown as is
@@ -177,11 +180,11 @@ function CategoryTable({
                   )}
                   {nameOf(x)}
                 </div>
-                <div role="cell" className={cell} style={{ width: COLS[1] }} dir="ltr">{x.name.en}</div>
-                {/* shortcut: no product count on a list entry, API gap: shown as a dash. */}
-                <div role="cell" className={cell} style={{ width: COLS[2] }}>—</div>
-                <div role="cell" className={cell} style={{ width: COLS[3] }}>{reorder ? i + 1 : x.sortOrder}</div>
-                <div role="cell" className={cell} style={{ width: COLS[4] }}>
+                <div role="cell" className={cell} style={col(1)} dir="ltr">{x.name.en}</div>
+                {/* shortcut: no product count on a list entry, API gap: shown as a dash (#49). */}
+                <div role="cell" className={cell} style={col(2)}>—</div>
+                <div role="cell" className={cell} style={col(3)}>{reorder ? i + 1 : x.sortOrder}</div>
+                <div role="cell" className={cell} style={col(4)}>
                   <Badge type={x.isActive ? 'success' : 'neutral'}>{t(x.isActive ? 'visible' : 'hidden')}</Badge>
                 </div>
                 <div role="cell" className={cn(cell, 'w-[52px] gap-s4')}>

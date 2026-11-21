@@ -74,8 +74,8 @@ export function VendorReview({ id: routeId }: { id: string }) {
       <>
         {header}
         <div role="status" aria-label={t('titleLoading')} className="flex w-full flex-col gap-s24">
-          <Skeleton className="h-[120px] rounded-md" />
-          {[0, 1, 2, 3].map((i) => <Skeleton key={i} className="h-14 rounded-md" />)}
+          <Skeleton className="h-[120px]" />
+          {[0, 1, 2, 3].map((i) => <Skeleton key={i} className="h-14" />)}
         </div>
       </>
     );
@@ -383,22 +383,23 @@ function DocumentViewer({ docs, pending, onExpired }: { docs: Doc[]; pending: bo
           />
         )}
       </div>
+      {/* 131:18512: tools on the start side (zoom in first), the document label on the end side. */}
       <div className="flex items-center justify-between gap-s16">
-        <p className="text-body-m text-ink-2">{t(`kinds.${doc.kind}`)}</p>
         <div className="flex gap-s16">
-          <a href={doc.url} target="_blank" rel="noopener noreferrer" download aria-label={t('download')} className={tool}>
-            <DownloadSimple size={24} aria-hidden />
-          </a>
-          <button type="button" aria-label={t('rotate')} className={tool} onClick={() => setTurn((x) => (x + 90) % 360)}>
-            <ArrowsClockwise size={24} aria-hidden />
+          <button type="button" aria-label={t('zoomIn')} className={tool} disabled={zoom >= 3} onClick={() => setZoom((z) => Math.min(3, z + 0.5))}>
+            <MagnifyingGlassPlus size={24} aria-hidden />
           </button>
           <button type="button" aria-label={t('zoomOut')} className={tool} disabled={zoom <= 1} onClick={() => setZoom((z) => Math.max(1, z - 0.5))}>
             <MagnifyingGlassMinus size={24} aria-hidden />
           </button>
-          <button type="button" aria-label={t('zoomIn')} className={tool} disabled={zoom >= 3} onClick={() => setZoom((z) => Math.min(3, z + 0.5))}>
-            <MagnifyingGlassPlus size={24} aria-hidden />
+          <button type="button" aria-label={t('rotate')} className={tool} onClick={() => setTurn((x) => (x + 90) % 360)}>
+            <ArrowsClockwise size={24} aria-hidden />
           </button>
+          <a href={doc.url} target="_blank" rel="noopener noreferrer" download aria-label={t('download')} className={tool}>
+            <DownloadSimple size={24} aria-hidden />
+          </a>
         </div>
+        <p className="text-body-m text-ink-2">{t(`kinds.${doc.kind}`)}</p>
       </div>
       <div className="flex w-[400px] max-w-full gap-s12">
         {/* «Matches» is the reviewer's own mark on this page; asking for a new upload has no API (API gap). */}

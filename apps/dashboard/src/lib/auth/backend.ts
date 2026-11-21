@@ -92,7 +92,7 @@ export const mockBackend: AuthBackend = {
         accessTokenExpiresInSeconds: 900,
         refreshToken: `mock-rt-${id}-${Date.now()}`,
         refreshTokenExpiresInSeconds: 2_592_000,
-        principal: { userId: 'mock-user', phone: `+966 5•• ••• ${phone.slice(-3)}`, audience: panel, organisationId: null, sessionId: 'mock' },
+        principal: { userId: `mock-${id}`, phone: `+966 5•• ••• ${phone.slice(-3)}`, audience: panel, organisationId: null, sessionId: 'mock' },
         profileComplete: panel === 'customer' ? false : null,
       },
     };
@@ -116,5 +116,7 @@ export const mockBackend: AuthBackend = {
 };
 
 export function authBackend(): AuthBackend {
-  return mocksEnabled() ? mockBackend : realBackend(process.env.API_URL ?? 'http://localhost:3000');
+  // The build-time test first (lib/mock.ts): a production build folds it to false and drops the mock sign-in.
+  const mock = (process.env.NODE_ENV !== 'production' || process.env.DASHBOARD_TEST_BUILD === '1') && mocksEnabled();
+  return mock ? mockBackend : realBackend(process.env.API_URL ?? 'http://localhost:3000');
 }

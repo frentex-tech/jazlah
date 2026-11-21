@@ -52,10 +52,13 @@ export function ApplicationStatus({ phone }: { phone: string }) {
   }
 
   // Gregorian calendar and Latin digits in Arabic too, Riyadh time, as in the frames: «18 نوفمبر، 10:24 ص».
-  const date = (iso: string, time = true) =>
-    new Intl.DateTimeFormat(locale === 'en' ? 'en-GB' : 'ar-SA-u-ca-gregory-nu-latn', {
-      day: 'numeric', month: 'long', ...(time && { hour: 'numeric', minute: '2-digit' }), timeZone: 'Asia/Riyadh',
-    }).format(new Date(iso));
+  // Day and time formatted apart and joined with a comma: Intl's own joiner is «في» / "at".
+  const date = (iso: string, time = true) => {
+    const part = (o: Intl.DateTimeFormatOptions) =>
+      new Intl.DateTimeFormat(locale === 'en' ? 'en-GB' : 'ar-SA-u-ca-gregory-nu-latn', { ...o, timeZone: 'Asia/Riyadh' }).format(new Date(iso));
+    const day = part({ day: 'numeric', month: 'long' });
+    return time ? `${day}${locale === 'en' ? ', ' : '، '}${part({ hour: 'numeric', minute: '2-digit' })}` : day;
+  };
   const s = app.status;
   const reviewed = app.reviewedAt ? date(app.reviewedAt) : '';
   const steps = [
@@ -88,7 +91,7 @@ export function ApplicationStatus({ phone }: { phone: string }) {
         </div>
       )}
       {s === 'approved' && (
-        // shortcut: API gap, the application answer has no commission, so the commission row of 410:40259 is left out.
+        // shortcut: API gap, the application answer has no commission, so the commission row of 410:40259 is left out (#44).
         <dl className="flex flex-col rounded-[14px] bg-bg px-s20 py-s12">
           <Row label={t('approved.payout')} value={t('approved.payoutValue', { iban: ltr(`SA•• •••• ${last4}`) })} />
         </dl>
@@ -134,7 +137,7 @@ export function ApplicationStatus({ phone }: { phone: string }) {
             {t('rejected.reapply')}
           </Link>
         )}
-        {/* shortcut: API gap, no vendor support contact (phone, email or chat) is defined yet, so this is plain text. */}
+        {/* shortcut: API gap, no vendor support contact (phone, email or chat) is defined yet, so this is plain text (#103). */}
         <span className="text-[14px] font-medium text-ember">{t('support')}</span>
       </div>
     </section>

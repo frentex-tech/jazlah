@@ -28,9 +28,11 @@ async function loadOptions(): Promise<FormOptions> {
   return { categories: categories.sort(bySortOrder), meatTypes: old(meatTypes), cuttingStyles: old(cuttingStyles), exclusionItems: old(exclusionItems), rules };
 }
 
-/** Admins edit the global rules from the matrix: add the pair, or delete its rule; then the rules as they stand. */
-async function setRule(cuttingStyleId: string, packaging: Packaging, incompatible: boolean): Promise<Rule[]> {
-  const rules = await loadAll<Rule>('admin', RULES);
+/**
+ * Admins edit the global rules from the matrix: add the pair, or delete its rule (found in the rules the form shows),
+ * then read the rules once, as they stand.
+ */
+async function setRule(rules: Rule[], cuttingStyleId: string, packaging: Packaging, incompatible: boolean): Promise<Rule[]> {
   const existing = rules.find((r) => r.cuttingStyleId === cuttingStyleId && r.packaging === packaging);
   if (incompatible && !existing) await panelFetch('admin', RULES, json('POST', { cuttingStyleId, packaging }));
   if (!incompatible && existing) await panelFetch('admin', `${RULES}/${existing.id}`, json('DELETE'));

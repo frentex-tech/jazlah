@@ -20,7 +20,7 @@ export function Matrix({
   cuttingStyles: RefItem[];
   rules: Rule[];
   onRules: (rules: Rule[]) => void;
-  setRule?: (cuttingStyleId: string, packaging: Packaging, incompatible: boolean) => Promise<Rule[]>;
+  setRule?: (rules: Rule[], cuttingStyleId: string, packaging: Packaging, incompatible: boolean) => Promise<Rule[]>;
   offered: (cut: string, k: Packaging) => boolean;
   name: (n: { ar: string; en: string } | null | undefined) => string;
 }) {
@@ -35,7 +35,7 @@ export function Matrix({
     setAsking(null);
     setBusy(`${cut.id}|${k}`);
     try {
-      onRules(await setRule(cut.id, k, asking.incompatible));
+      onRules(await setRule(rules, cut.id, k, asking.incompatible));
     } catch {
       toast('error', t('matrix.failed'));
     } finally {

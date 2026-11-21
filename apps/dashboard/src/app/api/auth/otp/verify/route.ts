@@ -38,6 +38,6 @@ export async function POST(req: NextRequest) {
       : next && panelOfPath(next) === panel ? next : sessions.filter(isPanel).length > 1 ? `${prefix}/login/choose` : `${prefix}/${panel}`;
 
   const res = NextResponse.json({ redirect });
-  writeSignIn(res, panel, r.data, r.data.principal.phone, sessions);
+  writeSignIn(res, panel, r.data, r.data.principal, sessions);
   return res;
 }
