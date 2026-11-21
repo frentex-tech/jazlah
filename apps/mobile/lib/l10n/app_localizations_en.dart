@@ -1556,9 +1556,6 @@ class AppLocalizationsEn extends AppLocalizations {
   String get reviewConfirm => 'Confirm order';
 
   @override
-  String get reviewMethodsError => 'Payment methods could not be loaded.';
-
-  @override
   String get payMadaCard => 'mada card';
 
   @override
@@ -1583,9 +1580,6 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get payReasonWalletInsufficient => 'insufficient balance';
-
-  @override
-  String get payReasonCodAboveLimit => 'order above the allowed limit';
 
   @override
   String get payReasonUnavailable => 'not available for this order';

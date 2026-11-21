@@ -20,8 +20,6 @@ abstract final class PaymentMethodCode {
 // shortcut: the app's names until PAY-API-1 #76 fixes the reason codes (not-built-yet.md).
 abstract final class PaymentMethodReason {
   static const walletInsufficient = 'WALLET_INSUFFICIENT';
-  static const codAboveLimit = 'COD_ABOVE_LIMIT';
-  static const codNotAllowed = 'COD_NOT_ALLOWED';
 }
 
 /// One method of the list. [cardLast4] is set for a saved card (mada / card).
@@ -35,4 +33,24 @@ class PaymentMethodOption {
   /// One of [PaymentMethodReason] when not [available].
   final String? reason;
   final String? cardLast4;
+}
+
+/// PAY-API-1's tender plan: [walletAmount] halalas from the wallet, the rest with [remainingMethod] (null when
+/// the wallet covers it all).
+@immutable
+class TenderPlan {
+  const TenderPlan({required this.walletAmount, this.remainingMethod});
+
+  final int walletAmount;
+  final String? remainingMethod;
+}
+
+/// The answer of the payment methods route: the methods (COD is left out when it may not be used) and the
+/// tender plan, when the wallet pays part of the order. PAY-MOB-1 #78 reads [tender].
+@immutable
+class PaymentMethods {
+  const PaymentMethods({required this.options, this.tender});
+
+  final List<PaymentMethodOption> options;
+  final TenderPlan? tender;
 }

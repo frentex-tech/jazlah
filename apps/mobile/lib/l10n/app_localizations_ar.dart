@@ -1565,9 +1565,6 @@ class AppLocalizationsAr extends AppLocalizations {
   String get reviewConfirm => 'تأكيد الطلب';
 
   @override
-  String get reviewMethodsError => 'تعذّر تحميل طرق الدفع.';
-
-  @override
   String get payMadaCard => 'بطاقة مدى';
 
   @override
@@ -1592,9 +1589,6 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get payReasonWalletInsufficient => 'الرصيد غير كافٍ';
-
-  @override
-  String get payReasonCodAboveLimit => 'الطلب أعلى من الحد المسموح';
 
   @override
   String get payReasonUnavailable => 'غير متاح لهذا الطلب';

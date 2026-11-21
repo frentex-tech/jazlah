@@ -13,9 +13,8 @@ final paymentRepositoryProvider = Provider<PaymentRepository?>((ref) {
   return cart is MockCartRepository ? MockPaymentRepository(cart) : null;
 });
 
-final FutureProvider<List<PaymentMethodOption>> paymentMethodsProvider =
-    FutureProvider.autoDispose<List<PaymentMethodOption>>((ref) {
-      final repo = ref.watch(paymentRepositoryProvider);
-      if (repo == null) throw const ApiError(code: ApiError.unknown);
-      return repo.methods();
-    }, retry: (_, _) => null);
+final FutureProvider<PaymentMethods> paymentMethodsProvider = FutureProvider.autoDispose<PaymentMethods>((ref) {
+  final repo = ref.watch(paymentRepositoryProvider);
+  if (repo == null) throw const ApiError(code: ApiError.unknown);
+  return repo.methods();
+}, retry: (_, _) => null);

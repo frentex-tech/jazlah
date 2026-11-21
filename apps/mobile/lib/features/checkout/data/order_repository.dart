@@ -103,6 +103,7 @@ class MockOrderRepository implements OrderRepository {
     final created = now().toUtc();
     final riyadh = created.add(const Duration(hours: 3));
     String two(int n) => n.toString().padLeft(2, '0');
+    // Numbered across all days, not per Riyadh day like the server.
     final number =
         'JZ-${two(riyadh.year % 100)}${two(riyadh.month)}${two(riyadh.day)}-'
         '${(orders.length + 1).toString().padLeft(4, '0')}';

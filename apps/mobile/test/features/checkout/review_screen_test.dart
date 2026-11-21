@@ -194,11 +194,10 @@ void main() {
 
   testWidgets('double tap on «تأكيد الطلب» creates one order', (t) async {
     await _pump(t);
+    // Two taps in the same frame: the second runs before any rebuild.
     await t.tap(find.text('تأكيد الطلب'));
-    await t.pump(const Duration(milliseconds: 50));
     await t.tap(find.text('تأكيد الطلب'), warnIfMissed: false);
     await t.pump(const Duration(milliseconds: 50));
-    expect(_confirm(t), isNotNull); // the button is loading: further taps are ignored
     await _settle(t);
     expect(_orders.orders, hasLength(1));
     expect(_fake.keys.toSet(), hasLength(1));
@@ -217,6 +216,34 @@ void main() {
     expect(_fake.keys, hasLength(2));
     expect(_fake.keys[0], _fake.keys[1]);
     expect(_orders.orders, hasLength(1));
+  });
+
+  testWidgets("after a failure that keeps the key the method is locked; placed shows the order's method", (t) async {
+    await _pump(t, code: ApiError.network, then: true);
+    await t.tap(find.text('الدفع عند الاستلام'));
+    await t.pump();
+    await t.tap(find.text('تأكيد الطلب'));
+    await _settle(t);
+    await t.pump(const Duration(seconds: 4));
+    await t.pumpAndSettle();
+    await t.tap(find.text('بطاقة مدى · تنتهي بـ 4821'), warnIfMissed: false);
+    await t.pump();
+    expect(_radio(t, 'الدفع عند الاستلام').checked, isTrue);
+    await t.tap(find.text('تأكيد الطلب'));
+    await _settle(t);
+    expect(find.text('تم استلام طلبك'), findsOneWidget);
+    expect(find.text('الدفع عند الاستلام'), findsOneWidget);
+  });
+
+  testWidgets('while placing the methods are frozen, not drawn disabled', (t) async {
+    await _pump(t);
+    await t.tap(find.text('تأكيد الطلب'));
+    await t.pump(const Duration(milliseconds: 50));
+    expect(_radio(t, 'Apple Pay').onTap, isNotNull);
+    await t.tap(find.text('Apple Pay'), warnIfMissed: false);
+    await t.pump();
+    expect(_radio(t, 'Apple Pay').checked, isFalse);
+    await _settle(t);
   });
 
   test('every refusal code has its step', () {
@@ -276,6 +303,22 @@ void main() {
       _checkout.paused = true;
       await confirm(t);
       expect(find.text('الطلبات متوقفة مؤقتًا، سنعود قريبًا'), findsOneWidget);
+    });
+
+    testWidgets('system back is refused while placing; the order then shows and the cart is re-read', (t) async {
+      final c = await _pump(t, screen: const CheckoutScreen());
+      await toReview(t);
+      await t.tap(find.text('الدفع عند الاستلام'));
+      await t.pump();
+      await t.tap(find.text('تأكيد الطلب'));
+      await t.pump(const Duration(milliseconds: 50));
+      await t.binding.handlePopRoute(); // Android back
+      await t.pump();
+      expect(find.text('الدفع والمراجعة'), findsOneWidget);
+      await _settle(t);
+      expect(find.text('تم استلام طلبك'), findsOneWidget);
+      expect(_orders.orders, hasLength(1));
+      expect((await c.read(cartProvider.future)).lines, isEmpty);
     });
 
     for (final code in ['PRICE_CHANGED', 'COUPON_EXPIRED']) {

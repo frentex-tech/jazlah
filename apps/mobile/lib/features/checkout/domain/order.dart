@@ -132,7 +132,7 @@ class PlacedOrder {
   final Order order;
 
   /// [pay] when the order waits for the payment step; null when nothing is left to pay (COD, wallet only).
-  // shortcut: the shape of next action is the app's until ORD-API-1 #81 defines it (not-built-yet.md).
+  // shortcut: the app reads only pay or nothing from next action, until ORD-API-1 #81 defines its shape.
   final String? nextAction;
 
   static const pay = 'pay';

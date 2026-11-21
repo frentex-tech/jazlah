@@ -870,7 +870,6 @@
   "reviewPaymentMethod": "طريقة الدفع",
   "reviewTerms": "بتأكيد الطلب فأنت توافق على الشروط والأحكام وسياسة الإلغاء.",
   "reviewConfirm": "تأكيد الطلب",
-  "reviewMethodsError": "تعذّر تحميل طرق الدفع.",
   "payMadaCard": "بطاقة مدى",
   "payMada": "مدى",
   "payCard": "بطاقة ائتمانية",
@@ -886,7 +885,6 @@
     }
   },
   "payReasonWalletInsufficient": "الرصيد غير كافٍ",
-  "payReasonCodAboveLimit": "الطلب أعلى من الحد المسموح",
   "payReasonUnavailable": "غير متاح لهذا الطلب",
   "errPriceChanged": "تغيّرت أسعار بعض المنتجات، راجع سلتك.",
   "errItemUnavailable": "بعض المنتجات لم تعد متوفرة، راجع سلتك.",

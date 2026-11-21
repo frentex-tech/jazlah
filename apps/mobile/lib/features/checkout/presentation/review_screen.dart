@@ -57,24 +57,36 @@ class _ReviewScreenState extends ConsumerState<ReviewScreen> {
   String? _method;
   bool _placing = false;
 
-  Future<void> _place(PaymentMethodOption method) async {
+  /// A failure that may have created the order keeps the key; the method is then kept too, so a retry
+  /// cannot answer an order placed with another method.
+  bool _methodLocked = false;
+
+  Future<void> _place(PaymentMethodOption method, List<PaymentMethodOption> options) async {
     if (_placing) return;
     setState(() => _placing = true);
+    // Kept across the await: the cart must be re-read even if the screen is gone by then.
+    final container = ProviderScope.containerOf(context, listen: false);
     try {
       final placed = await ref.read(orderRepositoryProvider)!.place(idempotencyKey: _key, paymentMethod: method.method);
-      ref.invalidate(cartProvider); // the server cleared the cart (and the badge)
+      container.invalidate(cartProvider); // the server cleared the cart (and the badge)
       if (!mounted) return;
       if (placed.nextAction == PlacedOrder.pay) {
         context.go(Routes.payment(placed.order.id), extra: placed);
       } else {
-        context.go(Routes.orderPlaced, extra: (order: placed.order, method: method));
+        // The order's own method (with its card digits when listed), not the one on screen.
+        final paid = placed.order.paymentMethod;
+        final shown = options.where((m) => m.method == paid).firstOrNull ?? PaymentMethodOption(method: paid);
+        context.go(Routes.orderPlaced, extra: (order: placed.order, method: shown));
       }
     } on Object catch (e) {
       if (!mounted) return;
       final code = ApiError.from(e).code;
       showJToast(context, message: errorText(context, e), kind: JToastKind.error);
-      setState(() => _placing = false);
       final exit = reviewExit(code);
+      setState(() {
+        _placing = false;
+        if (exit == null) _methodLocked = true;
+      });
       if (exit == null) return;
       // Checkout step 1 handles the code (refetch, or on to the cart); opened alone, go to the step.
       if (context.canPop()) {
@@ -91,7 +103,8 @@ class _ReviewScreenState extends ConsumerState<ReviewScreen> {
     final cart = ref.watch(cartProvider);
     final methods = ref.watch(paymentMethodsProvider);
     final c = cart.value;
-    final available = methods.value?.where((m) => m.available).toList() ?? const <PaymentMethodOption>[];
+    final options = methods.value?.options ?? const <PaymentMethodOption>[];
+    final available = options.where((m) => m.available).toList();
     // The first method the order may use is chosen until the customer picks one (as drawn).
     final chosen =
         available.where((m) => m.method == _method).firstOrNull ?? (_method == null ? available.firstOrNull : null);
@@ -140,13 +153,17 @@ class _ReviewScreenState extends ConsumerState<ReviewScreen> {
                 ],
                 AsyncValue(hasValue: false) => [const JSkeletonRow(), const JSkeletonRow()],
                 _ => [
-                  for (final m in methods.value!)
+                  for (final m in options)
                     Align(
                       alignment: AlignmentDirectional.centerStart,
-                      child: JRadio(
-                        checked: m.method == chosen?.method,
-                        label: paymentMethodLabel(l10n, m),
-                        onTap: m.available && !_placing ? () => setState(() => _method = m.method) : null,
+                      // Frozen while placing (and after a failure that kept the key), not drawn disabled.
+                      child: AbsorbPointer(
+                        absorbing: _placing || _methodLocked,
+                        child: JRadio(
+                          checked: m.method == chosen?.method,
+                          label: paymentMethodLabel(l10n, m),
+                          onTap: m.available ? () => setState(() => _method = m.method) : null,
+                        ),
                       ),
                     ),
                 ],
@@ -159,32 +176,35 @@ class _ReviewScreenState extends ConsumerState<ReviewScreen> {
       );
     }
 
-    return Scaffold(
-      body: SafeArea(
-        bottom: false,
-        child: Column(
-          children: [
-            JAppHeader.page(
-              title: l10n.reviewTitle,
-              cartLabel: l10n.cart,
-              onBack: _placing ? null : () => popOrHome(context),
-            ),
-            Expanded(child: body),
-            Padding(
-              padding: EdgeInsets.fromLTRB(
-                JSpace.s16,
-                0,
-                JSpace.s16,
-                JSpace.s16 + MediaQuery.viewPaddingOf(context).bottom,
+    return PopScope(
+      canPop: !_placing, // leaving mid-request would hide the order it creates
+      child: Scaffold(
+        body: SafeArea(
+          bottom: false,
+          child: Column(
+            children: [
+              JAppHeader.page(
+                title: l10n.reviewTitle,
+                cartLabel: l10n.cart,
+                onBack: _placing ? null : () => popOrHome(context),
               ),
-              child: JButton(
-                label: l10n.reviewConfirm,
-                expand: true,
-                loading: _placing,
-                onPressed: ready ? () => _place(chosen) : null,
+              Expanded(child: body),
+              Padding(
+                padding: EdgeInsets.fromLTRB(
+                  JSpace.s16,
+                  0,
+                  JSpace.s16,
+                  JSpace.s16 + MediaQuery.viewPaddingOf(context).bottom,
+                ),
+                child: JButton(
+                  label: l10n.reviewConfirm,
+                  expand: true,
+                  loading: _placing,
+                  onPressed: ready ? () => _place(chosen, options) : null,
+                ),
               ),
-            ),
-          ],
+            ],
+          ),
         ),
       ),
     );
@@ -208,7 +228,6 @@ String paymentMethodLabel(AppLocalizations l10n, PaymentMethodOption m, {bool sh
     if (!short && !m.available)
       switch (m.reason) {
         PaymentMethodReason.walletInsufficient => l10n.payReasonWalletInsufficient,
-        PaymentMethodReason.codAboveLimit => l10n.payReasonCodAboveLimit,
         _ => l10n.payReasonUnavailable,
       },
   ].join(' · ');

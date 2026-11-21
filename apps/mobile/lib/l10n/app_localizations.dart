@@ -2894,12 +2894,6 @@ abstract class AppLocalizations {
   /// **'تأكيد الطلب'**
   String get reviewConfirm;
 
-  /// No description provided for @reviewMethodsError.
-  ///
-  /// In ar, this message translates to:
-  /// **'تعذّر تحميل طرق الدفع.'**
-  String get reviewMethodsError;
-
   /// No description provided for @payMadaCard.
   ///
   /// In ar, this message translates to:
@@ -2947,12 +2941,6 @@ abstract class AppLocalizations {
   /// In ar, this message translates to:
   /// **'الرصيد غير كافٍ'**
   String get payReasonWalletInsufficient;
-
-  /// No description provided for @payReasonCodAboveLimit.
-  ///
-  /// In ar, this message translates to:
-  /// **'الطلب أعلى من الحد المسموح'**
-  String get payReasonCodAboveLimit;
 
   /// No description provided for @payReasonUnavailable.
   ///

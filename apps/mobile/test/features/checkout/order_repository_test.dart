@@ -153,7 +153,8 @@ void main() {
         codMax: codMax,
         delay: Duration.zero,
       ).methods();
-      return {for (final m in list) m.method: m};
+      expect(list.tender, isNull);
+      return {for (final m in list.options) m.method: m};
     }
 
     test('wallet below the total is disabled with its reason', () async {
@@ -163,11 +164,9 @@ void main() {
       expect((await methods(walletBalance: 20000))[PaymentMethodCode.wallet]!.available, isTrue);
     });
 
-    test('COD above the cap is disabled, and left out when switched off', () async {
+    test('COD is left out above the cap and when switched off', () async {
       expect((await methods())[PaymentMethodCode.cod]!.available, isTrue);
-      final above = (await methods(codMax: 5000))[PaymentMethodCode.cod]!;
-      expect(above.available, isFalse);
-      expect(above.reason, PaymentMethodReason.codAboveLimit);
+      expect((await methods(codMax: 5000)).containsKey(PaymentMethodCode.cod), isFalse);
       expect((await methods(cod: false)).containsKey(PaymentMethodCode.cod), isFalse);
     });
   });
