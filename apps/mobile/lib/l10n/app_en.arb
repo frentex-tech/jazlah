@@ -398,7 +398,6 @@
   "cartCouponRemove": "Remove",
   "cartCouponApplied": "Code {code} applied",
   "cartSubtotal": "Subtotal",
-  "cartDiscount": "Discount",
   "cartDeliveryFee": "Delivery fee",
   "cartVat": "Including 15% VAT",
   "cartTotal": "Total",
@@ -411,10 +410,14 @@
   "cartIssuePrice": "The price of “{name}” changed from {old} to {now} SAR.",
   "cartIssueAccept": "OK",
   "cartMergeReplaced": "Your previous cart was replaced by the products you added before signing in.",
-  "cartMergeSkipped": "{count} of your products were not moved because they are no longer available.",
+  "cartMergeSkipped": "{count, plural, =1{1 product was not moved because it is no longer available.} other{{count} products were not moved because they are no longer available.}}",
   "errCouponNotFound": "This discount code is not valid.",
   "errCouponExpired": "This discount code has expired.",
   "errCouponMinOrder": "Your cart is below the minimum for this code.",
   "errCouponNotApplicable": "This code does not apply to the products in your cart.",
-  "errCouponLimitReached": "This code has reached its usage limit."
+  "errCouponLimitReached": "This code has reached its usage limit.",
+  "cartDiscountCode": "Discount ({code})",
+  "cartCouponDropped": "Code {code} no longer applies to your cart, so the discount was removed.",
+  "cartWeightEach": "{weight} each",
+  "cartWeightAbout": "about {weight}"
 }

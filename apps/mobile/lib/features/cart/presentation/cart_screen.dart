@@ -59,13 +59,25 @@ class _CartScreenState extends ConsumerState<CartScreen> {
   /// Lines swiped away while their removal is on its way.
   final _removing = <String>{};
 
+  /// Lines whose quantity change is on its way: their stepper waits.
+  final _pending = <String>{};
+
+  /// A coupon the cart dropped by itself (it stopped applying), shown once.
+  String? _droppedCoupon;
+
   @override
   void initState() {
     super.initState();
     // The field shows the applied code (also one applied on another device).
-    ref.listenManual(cartProvider, (_, next) {
+    ref.listenManual(cartProvider, (prev, next) {
+      final before = prev?.value?.couponCode;
       final code = next.value?.couponCode;
       if (code != null && _code.text != code) _code.text = code;
+      // Gone without the «إزالة» button: the cart no longer meets it (or changed store).
+      if (before != null && code == null && next.hasValue && !_couponBusy) {
+        _code.clear();
+        setState(() => _droppedCoupon = before);
+      }
     }, fireImmediately: true);
   }
 
@@ -89,6 +101,12 @@ class _CartScreenState extends ConsumerState<CartScreen> {
     if (mounted) setState(() => _removing.remove(line.id));
   }
 
+  Future<void> _step(CartLine line, int quantity) async {
+    setState(() => _pending.add(line.id));
+    await _guard(() => ref.read(cartProvider.notifier).changeQuantity(line.id, quantity - line.item.quantity));
+    if (mounted) setState(() => _pending.remove(line.id));
+  }
+
   Future<void> _coupon(Cart cart) async {
     final c = ref.read(cartProvider.notifier);
     final code = _code.text.trim();
@@ -96,6 +114,7 @@ class _CartScreenState extends ConsumerState<CartScreen> {
     setState(() {
       _couponBusy = true;
       _couponError = null;
+      _droppedCoupon = null;
     });
     try {
       if (cart.couponCode != null) {
@@ -188,6 +207,13 @@ class _CartScreenState extends ConsumerState<CartScreen> {
             action: l10n.cartIssueAccept,
             onAction: () => ref.read(cartMergeNoticeProvider.notifier).set(null),
           ),
+        if (_droppedCoupon != null)
+          _Banner(
+            text: l10n.cartCouponDropped(_droppedCoupon!),
+            icon: JIcons.info,
+            action: l10n.cartIssueAccept,
+            onAction: () => setState(() => _droppedCoupon = null),
+          ),
         for (final issue in cart.issues)
           if (!_removing.contains(issue.lineId))
             issue.code == CartIssueCode.priceChanged
@@ -217,7 +243,7 @@ class _CartScreenState extends ConsumerState<CartScreen> {
               if (i > 0) const Divider(height: 1, thickness: 1, color: JColors.line),
               _LineRow(
                 line: line,
-                onQuantity: (q) => _guard(() => ref.read(cartProvider.notifier).setQuantity(line.id, q)),
+                onQuantity: _pending.contains(line.id) ? null : (q) => _step(line, q),
                 onRemove: () => _remove(line),
               ),
             ],
@@ -310,7 +336,7 @@ class _CartScreenState extends ConsumerState<CartScreen> {
       gap: 6,
       children: [
         row(l10n.cartSubtotal, cart.subtotal),
-        if (cart.discount > 0) row('${l10n.cartDiscount} (${cart.couponCode})', -cart.discount),
+        if (cart.discount > 0) row(l10n.cartDiscountCode(cart.couponCode ?? ''), -cart.discount),
         // Only once fulfilment = delivery (SCH-MOB-1 #71 chooses it).
         if (cart.delivery) row(l10n.cartDeliveryFee, cart.deliveryFee),
         row(l10n.cartVat, cart.vatIncluded),
@@ -409,16 +435,20 @@ class _LineRow extends StatelessWidget {
   const _LineRow({required this.line, required this.onQuantity, required this.onRemove});
 
   final CartLine line;
-  final ValueChanged<int> onQuantity;
+
+  /// Null while a change is on its way.
+  final ValueChanged<int>? onQuantity;
   final VoidCallback onRemove;
 
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
     final lang = context.lang;
+    final weight = line.sizeGrams == null ? null : formatWeight(l10n, line.sizeGrams!);
+    // Figma: «500 جم للقطعة» for several pieces, «نحو 1.5 كجم» for one (the size weight is approximate).
     final details = [
       ?line.cutName?.of(lang),
-      if (line.sizeGrams != null) formatWeight(l10n, line.sizeGrams!),
+      if (weight != null) line.item.quantity > 1 ? l10n.cartWeightEach(weight) : l10n.cartWeightAbout(weight),
     ].join(' · ');
     final row = Row(
       children: [

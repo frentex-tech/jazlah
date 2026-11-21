@@ -665,7 +665,6 @@
     }
   },
   "cartSubtotal": "المجموع الفرعي",
-  "cartDiscount": "الخصم",
   "cartDeliveryFee": "رسوم التوصيل",
   "cartVat": "منها ضريبة القيمة المضافة 15%",
   "cartTotal": "الإجمالي",
@@ -698,7 +697,7 @@
   },
   "cartIssueAccept": "موافق",
   "cartMergeReplaced": "استبدلنا سلتك السابقة بالمنتجات التي أضفتها قبل تسجيل الدخول.",
-  "cartMergeSkipped": "لم ننقل {count} من المنتجات لأنها لم تعد متوفرة.",
+  "cartMergeSkipped": "{count, plural, =1{لم ننقل منتجًا واحدًا لأنه لم يعد متوفرًا.} =2{لم ننقل منتجين لأنهما لم يعودا متوفرين.} few{لم ننقل {count} منتجات لأنها لم تعد متوفرة.} many{لم ننقل {count} منتجًا لأنها لم تعد متوفرة.} other{لم ننقل {count} منتج لأنها لم تعد متوفرة.}}",
   "@cartMergeSkipped": {
     "placeholders": {
       "count": {
@@ -710,5 +709,37 @@
   "errCouponExpired": "انتهت صلاحية رمز الخصم.",
   "errCouponMinOrder": "قيمة سلتك أقل من الحد الأدنى لهذا الرمز.",
   "errCouponNotApplicable": "هذا الرمز لا ينطبق على منتجات سلتك.",
-  "errCouponLimitReached": "وصل هذا الرمز إلى حد الاستخدام."
+  "errCouponLimitReached": "وصل هذا الرمز إلى حد الاستخدام.",
+  "cartDiscountCode": "الخصم ({code})",
+  "@cartDiscountCode": {
+    "placeholders": {
+      "code": {
+        "type": "String"
+      }
+    }
+  },
+  "cartCouponDropped": "لم يعد الرمز {code} ينطبق على سلتك، فأُزيل الخصم.",
+  "@cartCouponDropped": {
+    "placeholders": {
+      "code": {
+        "type": "String"
+      }
+    }
+  },
+  "cartWeightEach": "{weight} للقطعة",
+  "@cartWeightEach": {
+    "placeholders": {
+      "weight": {
+        "type": "String"
+      }
+    }
+  },
+  "cartWeightAbout": "نحو {weight}",
+  "@cartWeightAbout": {
+    "placeholders": {
+      "weight": {
+        "type": "String"
+      }
+    }
+  }
 }

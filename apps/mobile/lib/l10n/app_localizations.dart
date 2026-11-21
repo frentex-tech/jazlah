@@ -2480,12 +2480,6 @@ abstract class AppLocalizations {
   /// **'المجموع الفرعي'**
   String get cartSubtotal;
 
-  /// No description provided for @cartDiscount.
-  ///
-  /// In ar, this message translates to:
-  /// **'الخصم'**
-  String get cartDiscount;
-
   /// No description provided for @cartDeliveryFee.
   ///
   /// In ar, this message translates to:
@@ -2561,7 +2555,7 @@ abstract class AppLocalizations {
   /// No description provided for @cartMergeSkipped.
   ///
   /// In ar, this message translates to:
-  /// **'لم ننقل {count} من المنتجات لأنها لم تعد متوفرة.'**
+  /// **'{count, plural, =1{لم ننقل منتجًا واحدًا لأنه لم يعد متوفرًا.} =2{لم ننقل منتجين لأنهما لم يعودا متوفرين.} few{لم ننقل {count} منتجات لأنها لم تعد متوفرة.} many{لم ننقل {count} منتجًا لأنها لم تعد متوفرة.} other{لم ننقل {count} منتج لأنها لم تعد متوفرة.}}'**
   String cartMergeSkipped(int count);
 
   /// No description provided for @errCouponNotFound.
@@ -2593,6 +2587,30 @@ abstract class AppLocalizations {
   /// In ar, this message translates to:
   /// **'وصل هذا الرمز إلى حد الاستخدام.'**
   String get errCouponLimitReached;
+
+  /// No description provided for @cartDiscountCode.
+  ///
+  /// In ar, this message translates to:
+  /// **'الخصم ({code})'**
+  String cartDiscountCode(String code);
+
+  /// No description provided for @cartCouponDropped.
+  ///
+  /// In ar, this message translates to:
+  /// **'لم يعد الرمز {code} ينطبق على سلتك، فأُزيل الخصم.'**
+  String cartCouponDropped(String code);
+
+  /// No description provided for @cartWeightEach.
+  ///
+  /// In ar, this message translates to:
+  /// **'{weight} للقطعة'**
+  String cartWeightEach(String weight);
+
+  /// No description provided for @cartWeightAbout.
+  ///
+  /// In ar, this message translates to:
+  /// **'نحو {weight}'**
+  String cartWeightAbout(String weight);
 }
 
 class _AppLocalizationsDelegate extends LocalizationsDelegate<AppLocalizations> {

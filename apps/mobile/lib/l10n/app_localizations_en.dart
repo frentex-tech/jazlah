@@ -1304,9 +1304,6 @@ class AppLocalizationsEn extends AppLocalizations {
   String get cartSubtotal => 'Subtotal';
 
   @override
-  String get cartDiscount => 'Discount';
-
-  @override
   String get cartDeliveryFee => 'Delivery fee';
 
   @override
@@ -1348,7 +1345,13 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String cartMergeSkipped(int count) {
-    return '$count of your products were not moved because they are no longer available.';
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count products were not moved because they are no longer available.',
+      one: '1 product was not moved because it is no longer available.',
+    );
+    return '$_temp0';
   }
 
   @override
@@ -1365,4 +1368,24 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get errCouponLimitReached => 'This code has reached its usage limit.';
+
+  @override
+  String cartDiscountCode(String code) {
+    return 'Discount ($code)';
+  }
+
+  @override
+  String cartCouponDropped(String code) {
+    return 'Code $code no longer applies to your cart, so the discount was removed.';
+  }
+
+  @override
+  String cartWeightEach(String weight) {
+    return '$weight each';
+  }
+
+  @override
+  String cartWeightAbout(String weight) {
+    return 'about $weight';
+  }
 }

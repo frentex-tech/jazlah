@@ -91,7 +91,7 @@ void main() {
     await server.add(kebab.withQuantity(3));
     await _pump(t, server);
     expect(find.text('كباب لحم غنم'), findsOneWidget);
-    expect(find.text('500 جم'), findsOneWidget);
+    expect(find.text('500 جم للقطعة'), findsOneWidget); // several pieces
     expect(find.text('108.00 ر.س'), findsNWidgets(3)); // line, subtotal, total
     expect(find.text('منها ضريبة القيمة المضافة 15%'), findsOneWidget);
     expect(find.text('رسوم التوصيل'), findsNothing); // fulfilment not chosen yet
@@ -131,6 +131,31 @@ void main() {
     }
     expect(find.text('الحد الأدنى للطلب 100.00 ر.س'), findsNothing);
     expect(_checkout(t).onPressed, isNotNull);
+  });
+
+  testWidgets('a coupon that stops applying is dropped with a notice and the field empties', (t) async {
+    final server = _Server();
+    await server.add(kebab.withQuantity(9)); // 324.00
+    await _pump(t, server);
+    await t.enterText(find.byType(TextField), 'BIG50');
+    await t.tap(find.text('تطبيق'));
+    await t.pump();
+    await t.pump();
+    expect(find.text('الخصم (BIG50)'), findsOneWidget);
+
+    await t.tap(find.bySemanticsLabel('إنقاص الكمية')); // 288.00, under its 300.00
+    await t.pump();
+    await t.pump();
+    expect(find.text('الخصم (BIG50)'), findsNothing);
+    expect(find.text('لم يعد الرمز BIG50 ينطبق على سلتك، فأُزيل الخصم.'), findsOneWidget);
+    expect(t.widget<TextField>(find.byType(TextField)).controller!.text, isEmpty);
+  });
+
+  testWidgets('one piece reads «نحو …» like Figma', (t) async {
+    final server = _Server();
+    await server.add(kebab);
+    await _pump(t, server);
+    expect(find.text('نحو 500 جم'), findsOneWidget);
   });
 
   testWidgets('an unavailable line blocks checkout until removed', (t) async {

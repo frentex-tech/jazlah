@@ -1308,9 +1308,6 @@ class AppLocalizationsAr extends AppLocalizations {
   String get cartSubtotal => 'المجموع الفرعي';
 
   @override
-  String get cartDiscount => 'الخصم';
-
-  @override
   String get cartDeliveryFee => 'رسوم التوصيل';
 
   @override
@@ -1352,7 +1349,16 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String cartMergeSkipped(int count) {
-    return 'لم ننقل $count من المنتجات لأنها لم تعد متوفرة.';
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'لم ننقل $count منتج لأنها لم تعد متوفرة.',
+      many: 'لم ننقل $count منتجًا لأنها لم تعد متوفرة.',
+      few: 'لم ننقل $count منتجات لأنها لم تعد متوفرة.',
+      two: 'لم ننقل منتجين لأنهما لم يعودا متوفرين.',
+      one: 'لم ننقل منتجًا واحدًا لأنه لم يعد متوفرًا.',
+    );
+    return '$_temp0';
   }
 
   @override
@@ -1369,4 +1375,24 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get errCouponLimitReached => 'وصل هذا الرمز إلى حد الاستخدام.';
+
+  @override
+  String cartDiscountCode(String code) {
+    return 'الخصم ($code)';
+  }
+
+  @override
+  String cartCouponDropped(String code) {
+    return 'لم يعد الرمز $code ينطبق على سلتك، فأُزيل الخصم.';
+  }
+
+  @override
+  String cartWeightEach(String weight) {
+    return '$weight للقطعة';
+  }
+
+  @override
+  String cartWeightAbout(String weight) {
+    return 'نحو $weight';
+  }
 }
