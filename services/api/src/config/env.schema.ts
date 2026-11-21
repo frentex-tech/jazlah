@@ -8,6 +8,7 @@ import { isBucketName } from './is-bucket-name';
 import { isHttpBaseUrl } from './is-http-base-url';
 import { isRedisUrl } from './is-redis-url';
 import { LOG_LEVELS } from './log-levels.constants';
+import { DEPLOYMENT_ENVS } from './deployment-envs.constants';
 import { NODE_ENVS } from './node-envs.constants';
 import { STORAGE_PROVIDERS } from './storage-providers.constants';
 import { SMS_PROVIDERS } from './sms-providers.constants';
@@ -40,7 +41,11 @@ const PRIVATE_BUCKET_SEPARATE =
 const SMS_PROVIDERS_EXPECTED = `expected a comma-separated list of: ${SMS_PROVIDERS.join(', ')}`;
 const SMS_PROVIDERS_REPEATED = 'a provider is listed more than once';
 const SMS_LOG_IN_PRODUCTION =
-  'the log provider writes message text (OTP codes) to the log: not allowed when NODE_ENV is production';
+  'the log provider writes message text (OTP codes) to the log: not allowed when DEPLOYMENT_ENV is production';
+const DEPLOYMENT_ENV_IN_PRODUCTION =
+  'required when NODE_ENV is production: staging or production';
+const DEPLOYMENT_ENV_OUTSIDE_PRODUCTION =
+  'only development is allowed when NODE_ENV is not production';
 const PENDING_TTL_AFTER_UPLOAD_EXPIRY =
   'must be greater than STORAGE_UPLOAD_URL_EXPIRY_SECONDS, so an upload is never removed while its upload URL is still valid';
 
@@ -96,6 +101,19 @@ export const envSchema = z
     NODE_ENV: z
       .enum(NODE_ENVS, { error: `expected one of ${NODE_ENVS.join(', ')}` })
       .default('development'),
+    // Where this process is deployed: development, staging or production. Separate from
+    // NODE_ENV, which stays production on staging so the build runs as in production.
+    // Required when NODE_ENV is production (staging or production, no default, so a
+    // forgotten value never starts as either); elsewhere only development, the default.
+    // Staging differs from production only in allowing the log SMS provider.
+    DEPLOYMENT_ENV: z.preprocess(
+      (value) => (value === '' ? undefined : value),
+      z
+        .enum(DEPLOYMENT_ENVS, {
+          error: `expected one of ${DEPLOYMENT_ENVS.join(', ')}`,
+        })
+        .optional(),
+    ),
     PORT: z.coerce
       .number({ error: 'expected an integer from 1 to 65535' })
       .int({ error: 'expected an integer from 1 to 65535' })
@@ -237,7 +255,8 @@ export const envSchema = z
     MEDIA_CLEANUP_INTERVAL_SECONDS: integerEnvVar(60, 86_400, 900),
     // The sms providers (src/integrations/sms/), comma-separated, in the order they are
     // tried: a retryable failure moves to the next. Unset or empty: log outside
-    // production, none in production (the sms integration then refuses to start).
+    // NODE_ENV=production, none under it, staging included (the sms integration then
+    // refuses to start). log is refused when DEPLOYMENT_ENV is production.
     SMS_PROVIDERS: z.preprocess(
       (value) => (value === '' ? undefined : value),
       z
@@ -319,6 +338,29 @@ export const envSchema = z
         }
         return accounts;
       }),
+  })
+  .superRefine((env, context) => {
+    if (env.NODE_ENV === 'production') {
+      if (
+        env.DEPLOYMENT_ENV !== 'staging' &&
+        env.DEPLOYMENT_ENV !== 'production'
+      ) {
+        context.addIssue({
+          code: 'custom',
+          path: ['DEPLOYMENT_ENV'],
+          message: DEPLOYMENT_ENV_IN_PRODUCTION,
+        });
+      }
+    } else if (
+      env.DEPLOYMENT_ENV !== undefined &&
+      env.DEPLOYMENT_ENV !== 'development'
+    ) {
+      context.addIssue({
+        code: 'custom',
+        path: ['DEPLOYMENT_ENV'],
+        message: DEPLOYMENT_ENV_OUTSIDE_PRODUCTION,
+      });
+    }
   })
   .superRefine((env, context) => {
     for (const variable of [
@@ -436,7 +478,13 @@ export const envSchema = z
         message: SMS_PROVIDERS_REPEATED,
       });
     }
-    if (env.NODE_ENV === 'production' && smsProviders.includes('log')) {
+    // Only staging may use log under NODE_ENV=production; without a valid
+    // DEPLOYMENT_ENV the process is refused above anyway.
+    if (
+      env.NODE_ENV === 'production' &&
+      env.DEPLOYMENT_ENV !== 'staging' &&
+      smsProviders.includes('log')
+    ) {
       context.addIssue({
         code: 'custom',
         path: ['SMS_PROVIDERS'],
@@ -457,6 +505,7 @@ export const envSchema = z
   })
   .transform((env) => ({
     ...env,
+    DEPLOYMENT_ENV: env.DEPLOYMENT_ENV ?? ('development' as const),
     SMS_PROVIDERS:
       env.SMS_PROVIDERS ??
       (env.NODE_ENV === 'production' ? [] : ['log' as const]),

@@ -177,6 +177,44 @@ jobs:
           fi
           echo "dist/ holds no testing.*, fake provider, in-memory fake or spec file."
 
+      # The production image (services/api/Dockerfile), built but never pushed, then run the
+      # way Render runs it: the migrations from the image on an empty database (the
+      # pre-deploy command), then the API as staging with production rules, until both
+      # health endpoints answer. Placeholder secrets are made here and never leave the run.
+      - name: Production image
+        run: |
+          docker build -t jazla-api:ci .
+          psql -h localhost -p 5434 -U jazla -d jazla -v ON_ERROR_STOP=1 -c 'CREATE DATABASE jazla_image'
+          image_db=postgresql://jazla:jazla@localhost:5434/jazla_image
+          docker run --rm --network host -e DATABASE_URL="$image_db" jazla-api:ci ./node_modules/.bin/prisma migrate deploy
+          env_file="$RUNNER_TEMP/image.env"
+          {
+            echo NODE_ENV=production
+            echo DEPLOYMENT_ENV=staging
+            echo PORT=3100
+            echo "DATABASE_URL=$image_db"
+            echo REDIS_URL=redis://localhost:6380/2
+            echo REDIS_KEY_PREFIX=jazla-image-ci
+            echo TRUST_PROXY_HOPS=1
+            echo QUEUE_WORKERS_ENABLED=true
+            echo SMS_PROVIDERS=log
+            echo "AUTH_ACCESS_TOKEN_SECRET=$(openssl rand -base64 48)"
+            echo "AUTH_OTP_SECRET=$(openssl rand -base64 48)"
+            echo "VENDORS_IBAN_KEY=$(openssl rand -base64 32)"
+            env | grep '^STORAGE_'
+          } > "$env_file"
+          docker run -d --name jazla-api-ci --network host --env-file "$env_file" jazla-api:ci
+          for i in $(seq 1 60); do
+            curl -sf http://localhost:3100/v1/health/ready && break
+            sleep 1
+          done || true
+          docker logs jazla-api-ci 2>&1 | tail -20
+          curl -sf http://localhost:3100/v1/health
+          curl -sf http://localhost:3100/v1/health/ready
+          docker inspect --format '{{.Config.User}}' jazla-api-ci | grep -qx node
+          echo "Runs as the non-root user node."
+          docker rm -f jazla-api-ci
+
       - name: OpenAPI document is up to date
         run: pnpm openapi:check
 

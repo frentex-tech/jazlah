@@ -17,14 +17,17 @@ import { SeedTally } from './seed-tally';
  * One run of `pnpm db:seed` (seed.ts), given what it reads and starts, so its test can
  * prove the order: the environment first, then the production refusal, and only then
  * `createApp`, the one step that connects to the database, Redis or the storage.
- * Under NODE_ENV=production it writes the refusal and returns 1 without calling
- * `createApp`. Otherwise it seeds, prints the summary and returns 0, or rejects.
+ * When DEPLOYMENT_ENV is production, or staging without `--allow-staging`, it writes
+ * the refusal and returns 1 without calling `createApp`. Otherwise it seeds, prints the summary and returns 0, or rejects.
  */
 export async function runSeed(
   dependencies: SeedRunDependencies,
 ): Promise<number> {
   const env = await dependencies.loadEnv();
-  const refusal = productionRefusal(env.NODE_ENV);
+  const refusal = productionRefusal(
+    env.DEPLOYMENT_ENV,
+    dependencies.allowStaging,
+  );
   if (refusal !== null) {
     dependencies.writeError(`${refusal}\n`);
     return 1;

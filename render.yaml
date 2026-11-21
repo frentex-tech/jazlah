@@ -1,0 +1,124 @@
+# Render Blueprint: the JAZLA API's STAGING environment (issue #245).
+# How to use it, and every secret below: docs/deploy/render-staging.md.
+#
+# Checked against Render's Blueprint specification (render.com/docs/blueprint-spec) on
+# 2026-11-17. Nothing here holds a secret value: every `sync: false` variable is entered in
+# the Render dashboard when the Blueprint is first applied.
+
+services:
+  # The API, built from services/api/Dockerfile. Queue workers run in the same process on
+  # staging (QUEUE_WORKERS_ENABLED=true); production will run API and worker processes apart.
+  - type: web
+    name: jazla-api-staging
+    runtime: docker
+    # A paid instance: free instances sleep when idle, which breaks testing from a phone.
+    plan: 0.5c-512mb
+    region: frankfurt
+    branch: develop
+    # Deploy a commit to develop only once its GitHub checks (API CI) have passed.
+    autoDeployTrigger: checksPass
+    # With rootDir set, Render reads dockerContext and dockerfilePath relative to it
+    # (render.com/docs/monorepo-support, "Root-relative settings").
+    rootDir: services/api
+    dockerContext: .
+    dockerfilePath: ./Dockerfile
+    # Liveness: the process answers. /v1/health/ready also checks PostgreSQL and Redis.
+    healthCheckPath: /v1/health
+    # Once per deploy, after the image is built and before the new version starts; a
+    # failure stops the deploy and the previous version keeps running.
+    preDeployCommand: ./node_modules/.bin/prisma migrate deploy
+    envVars:
+      # --- Environment -------------------------------------------------------------------
+      - key: NODE_ENV
+        value: production
+      # Staging is production except that the `log` SMS provider is allowed (DECISIONS.md).
+      - key: DEPLOYMENT_ENV
+        value: staging
+      - key: LOG_LEVEL
+        value: info
+      # Render's proxy in front of the service. Verify on the first deploy
+      # (docs/deploy/render-staging.md, "Check the client address").
+      - key: TRUST_PROXY_HOPS
+        value: "1"
+      - key: QUEUE_WORKERS_ENABLED
+        value: "true"
+      - key: API_DOCS_ENABLED
+        value: "true"
+      # Browser origins of the staging websites, comma-separated; empty turns CORS off
+      # (the mobile app needs none).
+      - key: CORS_ORIGINS
+        sync: false
+
+      # --- PostgreSQL and Redis (Render's private network) -----------------------------------
+      - key: DATABASE_URL
+        fromDatabase:
+          name: jazla-db-staging
+          property: connectionString
+      - key: REDIS_URL
+        fromService:
+          type: keyvalue
+          name: jazla-redis-staging
+          property: connectionString
+      - key: REDIS_KEY_PREFIX
+        value: jazla-staging
+
+      # --- Object storage: AWS S3, eu-central-1 (two buckets) -----------------------------
+      - key: STORAGE_PROVIDER
+        value: s3
+      - key: STORAGE_ENDPOINT
+        value: https://s3.eu-central-1.amazonaws.com
+      - key: STORAGE_REGION
+        value: eu-central-1
+      - key: STORAGE_FORCE_PATH_STYLE
+        value: "false"
+      - key: STORAGE_PUBLIC_BUCKET
+        sync: false
+      - key: STORAGE_PRIVATE_BUCKET
+        sync: false
+      # https://<public bucket>.s3.eu-central-1.amazonaws.com
+      - key: STORAGE_PUBLIC_BASE_URL
+        sync: false
+      - key: STORAGE_ACCESS_KEY_ID
+        sync: false
+      - key: STORAGE_SECRET_ACCESS_KEY
+        sync: false
+
+      # --- Sign-in -------------------------------------------------------------------------
+      # Staging only: codes are written to the log, no SMS is sent (Msegat is not connected).
+      - key: SMS_PROVIDERS
+        value: log
+      - key: AUTH_ACCESS_TOKEN_SECRET
+        sync: false
+      - key: AUTH_ACCESS_TOKEN_KEY_ID
+        value: staging-1
+      - key: AUTH_OTP_SECRET
+        sync: false
+      # phone:code pairs of the owner's and the team's phones.
+      - key: AUTH_REVIEW_ACCOUNTS
+        sync: false
+
+      # --- Vendors -------------------------------------------------------------------------
+      - key: VENDORS_IBAN_KEY
+        sync: false
+      - key: VENDORS_IBAN_KEY_ID
+        value: staging-1
+
+  # Redis for rate limits and queues. BullMQ requires the `noeviction` policy.
+  - type: keyvalue
+    name: jazla-redis-staging
+    plan: 256mb
+    region: frankfurt
+    maxmemoryPolicy: noeviction
+    # No access from the public internet; the API reaches it over the private network.
+    ipAllowList: []
+
+databases:
+  # PostgreSQL 17 (as CI and docker-compose.yml), with the PostGIS and pg_trgm extensions
+  # the migrations create (both available on Render Postgres 13 and later).
+  - name: jazla-db-staging
+    databaseName: jazla
+    plan: 0.1c-256mb
+    region: frankfurt
+    postgresMajorVersion: "17"
+    # No access from the public internet; use the Render shell or the dashboard.
+    ipAllowList: []

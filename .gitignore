@@ -17,6 +17,7 @@
 node_modules/
 .next/
 dist/
+dist-seed/
 coverage/
 # Not a test coverage report: the API's coverage zones module.
 !services/api/src/modules/coverage/
