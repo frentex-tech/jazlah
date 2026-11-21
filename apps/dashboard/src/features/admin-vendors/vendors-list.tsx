@@ -3,7 +3,7 @@
 import { CalendarBlank, DotsThree } from '@phosphor-icons/react';
 import type { ColumnDef } from '@tanstack/react-table';
 import { useLocale, useTranslations } from 'next-intl';
-import { useCallback, useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { PageHeader } from '@/components/shell/page-header';
 import { Badge, type BadgeType } from '@/components/ui/badge';
 import { Button, buttonVariants } from '@/components/ui/button';
@@ -53,7 +53,10 @@ export function VendorsList() {
   const cursors = paging.key === key ? paging.cursors : [undefined];
   const setCursors = (next: (string | undefined)[]) => setPaging({ key, cursors: next });
   const cursor = cursors[cursors.length - 1];
+  // Only the latest request may set the list: a slow answer under old filters must not overwrite newer results.
+  const latest = useRef(0);
   const load = useCallback(async () => {
+    const req = ++latest.current;
     setData('loading');
     const query = new URLSearchParams({ ...(q && { q }), ...(cursor && { cursor }) });
     try {
@@ -62,15 +65,15 @@ export function VendorsList() {
         const p = await panelFetch<Page<Application>>('admin', `/api/admin/vendor-applications?${query}`);
         // shortcut: the city filter on applications is applied to the loaded page only, API gap (no city filter there) (#46).
         const items = city ? p.items.filter((a) => a.city === city) : p.items;
-        setData({ rows: items.map((a) => applicationRow(a, locale)), next: p.nextCursor });
+        if (req === latest.current) setData({ rows: items.map((a) => applicationRow(a, locale)), next: p.nextCursor });
       } else {
         query.set('status', tab);
         if (city) query.set('city', city);
         const p = await panelFetch<Page<Vendor>>('admin', `/api/admin/vendors?${query}`);
-        setData({ rows: p.items.map((v) => vendorRow(v, locale)), next: p.nextCursor });
+        if (req === latest.current) setData({ rows: p.items.map((v) => vendorRow(v, locale)), next: p.nextCursor });
       }
     } catch (e) {
-      setData(e instanceof ApiError && e.code === 'NOT_ALLOWED' ? 'denied' : 'error');
+      if (req === latest.current) setData(e instanceof ApiError && e.code === 'NOT_ALLOWED' ? 'denied' : 'error');
     }
   }, [tab, q, city, cursor, locale]);
   useEffect(() => void load(), [load]);

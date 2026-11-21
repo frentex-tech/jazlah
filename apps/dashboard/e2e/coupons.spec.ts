@@ -48,7 +48,7 @@ test('create with validation errors, then a duplicate code, then success', async
   await page.getByLabel('حد الاستخدام الكلي').fill('0');
   await page.getByRole('button', { name: 'إنشاء الكوبون' }).click();
   await toast(page, 'راجع الحقول المظللة');
-  await expect(page.getByText('أدخل رمزًا من 3 إلى 32 حرفًا لاتينيًا أو رقمًا')).toBeVisible();
+  await expect(page.getByText('أدخل رمزًا من 3 إلى 32 حرفًا لاتينيًا أو رقمًا أو «-» أو «_»')).toBeVisible();
   await expect(page.getByText('أدخل نسبة من 1 إلى 100')).toBeVisible();
   await expect(page.getByText('يجب أن تكون النهاية بعد البداية')).toBeVisible();
   await expect(page.getByText('أدخل عددًا أكبر من صفر')).toBeVisible();

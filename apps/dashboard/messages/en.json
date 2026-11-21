@@ -1706,7 +1706,7 @@
         "body": "An inactive coupon is refused in the cart even within its period."
       },
       "code": "Coupon code",
-      "codeHint": "3 to 32 Latin letters or digits, no spaces",
+      "codeHint": "3 to 32 Latin letters, digits, \"-\" or \"_\", no spaces",
       "type": "Discount type",
       "percent": "Discount (%)",
       "percentHint": "From 1 to 100",
@@ -1727,10 +1727,11 @@
       "usageLimit": "Total usage limit",
       "perUserLimit": "Limit per customer",
       "unlimitedHint": "Leave empty for no limit",
-      "isActive": "Coupon active"
+      "isActive": "Coupon active",
+      "unavailable": "Unavailable"
     },
     "errors": {
-      "code": "Enter a code of 3 to 32 Latin letters or digits",
+      "code": "Enter a code of 3 to 32 Latin letters, digits, \"-\" or \"_\"",
       "taken": "This code is already used by another coupon",
       "percent": "Enter a percentage from 1 to 100",
       "amount": "Enter a valid amount in SAR",

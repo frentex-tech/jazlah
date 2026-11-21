@@ -21,7 +21,7 @@ import { Link, useRouter } from '@/i18n/navigation';
 import { sar } from '@/lib/money';
 import { ApiError, panelFetch } from '@/lib/panel-fetch';
 import { STATUS_BADGE } from './coupons-list';
-import { CouponSchema, emptyDraft, errorKey, fromDraft, toDraft, zodErrors, type Draft, type FieldErrors } from './schema';
+import { CouponSchema, emptyDraft, errorKey, fromDraft, localOf, toDraft, zodErrors, type Draft, type FieldErrors } from './schema';
 import { COUPON_TYPES, type Coupon, type CouponUsage } from './types';
 
 const BASE = '/api/admin/coupons';
@@ -59,9 +59,9 @@ export function CouponPage({ id }: { id?: string }) {
     }
   }, [id]);
   useEffect(() => void load(), [load]);
-  // The multi-selects' options: active vendors (JAZLA included) and categories; a failure leaves a list empty.
+  // The multi-selects' options: every vendor (JAZLA included; suspended ones shown only when selected) and categories; a failure leaves a list empty.
   useEffect(() => {
-    loadAll<Vendor>('admin', '/api/admin/vendors?status=active').then((vendors) => setOptions((o) => ({ ...o, vendors })), () => {});
+    loadAll<Vendor>('admin', '/api/admin/vendors').then((vendors) => setOptions((o) => ({ ...o, vendors })), () => {});
     loadAll<RefItem>('admin', '/api/admin/catalog/lists/categories').then((c) => setOptions((o) => ({ ...o, categories: c.sort(bySortOrder) })), () => {});
   }, []);
 
@@ -120,7 +120,11 @@ export function CouponPage({ id }: { id?: string }) {
     }
     setSaving(true);
     try {
-      const c = await panelFetch<Coupon>('admin', coupon ? `${BASE}/${coupon.id}` : BASE, { method: coupon ? 'PATCH' : 'POST', body: JSON.stringify(parsed.data) });
+      // An edit leaves out dates not touched: the form drops seconds, so sending them back would rewrite the stored times.
+      const body = { ...parsed.data } as Partial<typeof parsed.data>;
+      if (coupon && d.startsAt === localOf(coupon.startsAt)) delete body.startsAt;
+      if (coupon && d.endsAt === localOf(coupon.endsAt)) delete body.endsAt;
+      const c = await panelFetch<Coupon>('admin', coupon ? `${BASE}/${coupon.id}` : BASE, { method: coupon ? 'PATCH' : 'POST', body: JSON.stringify(body) });
       toast('success', t(coupon ? 'saved' : 'created', { code: c.code }));
       if (coupon) {
         setState((s) => (typeof s === 'object' ? { ...s, coupon: c } : s));
@@ -151,7 +155,14 @@ export function CouponPage({ id }: { id?: string }) {
   }
 
   const usage = state.usage;
-  const shownCategories = options.categories.filter((c) => c.isActive || d.categoryIds.includes(c.id));
+  // Inactive or unknown entries stay listed while selected, so they can be removed.
+  const picks = (ids: string[], items: { id: string; name: { ar: string; en: string }; shown: boolean }[]) => [
+    ...items.filter((x) => x.shown || ids.includes(x.id)).map((x) => [x.id, name(x.name)] as const),
+    ...ids.filter((id) => !items.some((x) => x.id === id)).map((id) => [id, t('form.unavailable')] as const),
+  ];
+  const vendorPicks = picks(d.vendorIds, options.vendors.map((v) => ({ ...v, shown: v.status === 'active' })));
+  const categoryPicks = picks(d.categoryIds, options.categories.map((c) => ({ ...c, shown: c.isActive })));
+  const listError = (k: string) => Object.keys(errors).find((f) => f === k || f.startsWith(`${k}.`));
   return (
     <>
       {header(
@@ -206,8 +217,8 @@ export function CouponPage({ id }: { id?: string }) {
           <div className={grid}>{text('minOrderHalalas', t('form.minOrder'), t('form.optionalHint'), { inputMode: 'decimal' })}</div>
           {(
             [
-              ['vendorIds', t('form.vendors'), t('form.vendorsHint'), options.vendors.map((v) => [v.id, name(v.name)])],
-              ['categoryIds', t('form.categories'), t('form.categoriesHint'), shownCategories.map((c) => [c.id, name(c.name)])],
+              ['vendorIds', t('form.vendors'), t('form.vendorsHint'), vendorPicks],
+              ['categoryIds', t('form.categories'), t('form.categoriesHint'), categoryPicks],
             ] as const
           ).map(([k, legend, hint, items]) => (
             <fieldset key={k} className="flex flex-col gap-s8">
@@ -218,6 +229,7 @@ export function CouponPage({ id }: { id?: string }) {
                 ))}
               </div>
               <p className="text-body-m text-muted">{d[k].length ? t('form.selected', { count: d[k].length }) : hint}</p>
+              {listError(k) && <p role="alert" className="text-body-m text-danger">{err(listError(k)!)}</p>}
             </fieldset>
           ))}
           <Switch label={t('form.firstOrderOnly')} checked={d.firstOrderOnly} onChange={(v) => edit('firstOrderOnly', v)} />
@@ -225,8 +237,8 @@ export function CouponPage({ id }: { id?: string }) {
 
         <FormSection title={t('form.period.title')} body={t('form.period.body')} invalid={invalid('startsAt', 'endsAt', 'usageLimit', 'perUserLimit')}>
           <div className={grid}>
-            {text('startsAt', t('form.startsAt'), t('form.riyadh'), { type: 'datetime-local' })}
-            {text('endsAt', t('form.endsAt'), t('form.riyadh'), { type: 'datetime-local' })}
+            {text('startsAt', t('form.startsAt'), t('form.riyadh'), { type: 'datetime-local', dir: 'ltr', className: 'rtl:text-end' })}
+            {text('endsAt', t('form.endsAt'), t('form.riyadh'), { type: 'datetime-local', dir: 'ltr', className: 'rtl:text-end' })}
             {text('usageLimit', t('form.usageLimit'), t('form.unlimitedHint'), { inputMode: 'numeric' })}
             {text('perUserLimit', t('form.perUserLimit'), t('form.unlimitedHint'), { inputMode: 'numeric' })}
           </div>
