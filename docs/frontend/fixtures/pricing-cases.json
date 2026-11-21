@@ -1,5 +1,5 @@
 {
-  "about": "Shared cases of the one product line price (unit = size price + cutting extra + packaging extra, VAT included; line = unit x quantity; \"without\" items free). The API's priceLine (services/api/src/modules/catalog/domain/price-line.spec.ts) and the apps' price function run every case and must give exactly `expected`. Products use the public product's field names; amounts are integer halalas. `errors` are compared in order: PRODUCT_UNAVAILABLE, then OPTION_NOT_IN_PRODUCT (size), SIZE_UNAVAILABLE, OPTION_NOT_IN_PRODUCT (cutting, packaging, without items; each code once), INCOMPATIBLE_CUTTING_PACKAGING, and OPTION_REQUIRED only when nothing else is wrong. Any error but OPTION_REQUIRED zeroes the line and empties the breakdown. Add a case here, never in one client only.",
+  "about": "Shared cases of the one product line price (unit = size price + cutting extra + packaging extra, VAT included; line = unit x quantity; \"without\" items free). The API (services/api/src/modules/catalog/application/pricing.service.spec.ts, through priceLine) and the apps' price function run every case and must give exactly `expected`. Products use the public product's field names; amounts are integer halalas. `errors` are compared in order: PRODUCT_UNAVAILABLE, then OPTION_NOT_IN_PRODUCT (size), SIZE_UNAVAILABLE, OPTION_NOT_IN_PRODUCT (cutting, packaging, without items; each code once), INCOMPATIBLE_CUTTING_PACKAGING, and OPTION_REQUIRED only when nothing else is wrong. Any error but OPTION_REQUIRED zeroes the line and empties the breakdown. Add a case here, never in one client only.",
   "products": {
     "ribeye": {
       "isAvailable": true,
@@ -157,6 +157,71 @@
           "packaging": "trays"
         }
       ]
+    },
+    "pausedRibeye": {
+      "isAvailable": false,
+      "sizes": [
+        {
+          "id": "sz-500g",
+          "priceHalalas": 4950,
+          "isAvailable": true
+        },
+        {
+          "id": "sz-1kg",
+          "priceHalalas": 8900,
+          "isAvailable": true
+        },
+        {
+          "id": "sz-2kg",
+          "priceHalalas": 17200,
+          "isAvailable": false
+        }
+      ],
+      "cuttings": [
+        {
+          "cuttingStyleId": "cut-slices",
+          "extraPriceHalalas": 0
+        },
+        {
+          "cuttingStyleId": "cut-cubes",
+          "extraPriceHalalas": 200
+        },
+        {
+          "cuttingStyleId": "cut-mince",
+          "extraPriceHalalas": 300
+        }
+      ],
+      "packagings": [
+        {
+          "packaging": "trays",
+          "extraPriceHalalas": 0
+        },
+        {
+          "packaging": "vacuum",
+          "extraPriceHalalas": 500
+        },
+        {
+          "packaging": "bags",
+          "extraPriceHalalas": 1500
+        }
+      ],
+      "exclusions": [
+        {
+          "id": "ex-fat"
+        },
+        {
+          "id": "ex-bone"
+        },
+        {
+          "id": "ex-sinew"
+        }
+      ],
+      "incompatiblePairs": [
+        {
+          "cuttingStyleId": "cut-mince",
+          "packaging": "trays"
+        }
+      ]
     }
   },
   "cases": [
@@ -254,9 +319,7 @@
             "halalas": 8900
           }
         ],
-        "errors": [
-          "OPTION_REQUIRED"
-        ]
+        "errors": ["OPTION_REQUIRED"]
       }
     },
     {
@@ -284,9 +347,7 @@
             "halalas": 500
           }
         ],
-        "errors": [
-          "OPTION_REQUIRED"
-        ]
+        "errors": ["OPTION_REQUIRED"]
       }
     },
     {
@@ -451,11 +512,7 @@
         "sizeId": "sz-1kg",
         "cuttingStyleId": "cut-slices",
         "packaging": null,
-        "exclusionItemIds": [
-          "ex-fat",
-          "ex-bone",
-          "ex-sinew"
-        ],
+        "exclusionItemIds": ["ex-fat", "ex-bone", "ex-sinew"],
         "quantity": 1
       },
       "expected": {
@@ -483,9 +540,7 @@
         "sizeId": "sz-large",
         "cuttingStyleId": "cut-hadrami",
         "packaging": "trays",
-        "exclusionItemIds": [
-          "ex-head"
-        ],
+        "exclusionItemIds": ["ex-head"],
         "quantity": 2
       },
       "expected": {
@@ -525,9 +580,7 @@
         "unitPriceHalalas": 0,
         "lineTotalHalalas": 0,
         "breakdown": [],
-        "errors": [
-          "INCOMPATIBLE_CUTTING_PACKAGING"
-        ]
+        "errors": ["INCOMPATIBLE_CUTTING_PACKAGING"]
       }
     },
     {
@@ -544,9 +597,7 @@
         "unitPriceHalalas": 0,
         "lineTotalHalalas": 0,
         "breakdown": [],
-        "errors": [
-          "SIZE_UNAVAILABLE"
-        ]
+        "errors": ["SIZE_UNAVAILABLE"]
       }
     },
     {
@@ -563,9 +614,7 @@
         "unitPriceHalalas": 0,
         "lineTotalHalalas": 0,
         "breakdown": [],
-        "errors": [
-          "OPTION_NOT_IN_PRODUCT"
-        ]
+        "errors": ["OPTION_NOT_IN_PRODUCT"]
       }
     },
     {
@@ -582,9 +631,7 @@
         "unitPriceHalalas": 0,
         "lineTotalHalalas": 0,
         "breakdown": [],
-        "errors": [
-          "OPTION_NOT_IN_PRODUCT"
-        ]
+        "errors": ["OPTION_NOT_IN_PRODUCT"]
       }
     },
     {
@@ -601,9 +648,7 @@
         "unitPriceHalalas": 0,
         "lineTotalHalalas": 0,
         "breakdown": [],
-        "errors": [
-          "OPTION_NOT_IN_PRODUCT"
-        ]
+        "errors": ["OPTION_NOT_IN_PRODUCT"]
       }
     },
     {
@@ -613,19 +658,14 @@
         "sizeId": "sz-1kg",
         "cuttingStyleId": "cut-slices",
         "packaging": null,
-        "exclusionItemIds": [
-          "ex-fat",
-          "ex-head"
-        ],
+        "exclusionItemIds": ["ex-fat", "ex-head"],
         "quantity": 1
       },
       "expected": {
         "unitPriceHalalas": 0,
         "lineTotalHalalas": 0,
         "breakdown": [],
-        "errors": [
-          "OPTION_NOT_IN_PRODUCT"
-        ]
+        "errors": ["OPTION_NOT_IN_PRODUCT"]
       }
     },
     {
@@ -635,18 +675,14 @@
         "sizeId": "sz-large",
         "cuttingStyleId": "cut-slices",
         "packaging": "vacuum",
-        "exclusionItemIds": [
-          "ex-fat"
-        ],
+        "exclusionItemIds": ["ex-fat"],
         "quantity": 1
       },
       "expected": {
         "unitPriceHalalas": 0,
         "lineTotalHalalas": 0,
         "breakdown": [],
-        "errors": [
-          "OPTION_NOT_IN_PRODUCT"
-        ]
+        "errors": ["OPTION_NOT_IN_PRODUCT"]
       }
     },
     {
@@ -663,9 +699,7 @@
         "unitPriceHalalas": 0,
         "lineTotalHalalas": 0,
         "breakdown": [],
-        "errors": [
-          "OPTION_NOT_IN_PRODUCT"
-        ]
+        "errors": ["OPTION_NOT_IN_PRODUCT"]
       }
     },
     {
@@ -682,10 +716,7 @@
         "unitPriceHalalas": 0,
         "lineTotalHalalas": 0,
         "breakdown": [],
-        "errors": [
-          "SIZE_UNAVAILABLE",
-          "OPTION_NOT_IN_PRODUCT"
-        ]
+        "errors": ["SIZE_UNAVAILABLE", "OPTION_NOT_IN_PRODUCT"]
       }
     },
     {
@@ -702,10 +733,7 @@
         "unitPriceHalalas": 0,
         "lineTotalHalalas": 0,
         "breakdown": [],
-        "errors": [
-          "PRODUCT_UNAVAILABLE",
-          "SIZE_UNAVAILABLE"
-        ]
+        "errors": ["PRODUCT_UNAVAILABLE", "SIZE_UNAVAILABLE"]
       }
     },
     {
@@ -722,10 +750,7 @@
         "unitPriceHalalas": 0,
         "lineTotalHalalas": 0,
         "breakdown": [],
-        "errors": [
-          "PRODUCT_UNAVAILABLE",
-          "SIZE_UNAVAILABLE"
-        ]
+        "errors": ["PRODUCT_UNAVAILABLE", "SIZE_UNAVAILABLE"]
       }
     },
     {
@@ -735,9 +760,7 @@
         "sizeId": "sz-1kg",
         "cuttingStyleId": "cut-slices",
         "packaging": "trays",
-        "exclusionItemIds": [
-          "ex-fat"
-        ],
+        "exclusionItemIds": ["ex-fat"],
         "quantity": 1
       },
       "expected": {
@@ -750,6 +773,57 @@
           "OPTION_NOT_IN_PRODUCT",
           "INCOMPATIBLE_CUTTING_PACKAGING"
         ]
+      }
+    },
+    {
+      "name": "an unavailable product with an available size: zeroed",
+      "product": "pausedRibeye",
+      "selection": {
+        "sizeId": "sz-1kg",
+        "cuttingStyleId": "cut-slices",
+        "packaging": null,
+        "exclusionItemIds": [],
+        "quantity": 1
+      },
+      "expected": {
+        "unitPriceHalalas": 0,
+        "lineTotalHalalas": 0,
+        "breakdown": [],
+        "errors": ["PRODUCT_UNAVAILABLE"]
+      }
+    },
+    {
+      "name": "an unavailable product with an unknown size: in order",
+      "product": "pausedRibeye",
+      "selection": {
+        "sizeId": "sz-9kg",
+        "cuttingStyleId": "cut-slices",
+        "packaging": null,
+        "exclusionItemIds": [],
+        "quantity": 1
+      },
+      "expected": {
+        "unitPriceHalalas": 0,
+        "lineTotalHalalas": 0,
+        "breakdown": [],
+        "errors": ["PRODUCT_UNAVAILABLE", "OPTION_NOT_IN_PRODUCT"]
+      }
+    },
+    {
+      "name": "an unknown size and an unknown cutting: one OPTION_NOT_IN_PRODUCT",
+      "product": "ribeye",
+      "selection": {
+        "sizeId": "sz-9kg",
+        "cuttingStyleId": "cut-hadrami",
+        "packaging": null,
+        "exclusionItemIds": [],
+        "quantity": 1
+      },
+      "expected": {
+        "unitPriceHalalas": 0,
+        "lineTotalHalalas": 0,
+        "breakdown": [],
+        "errors": ["OPTION_NOT_IN_PRODUCT"]
       }
     }
   ]
