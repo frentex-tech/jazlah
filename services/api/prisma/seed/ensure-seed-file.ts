@@ -1,5 +1,5 @@
 import { detectContentType } from '@common/files/detect-content-type';
-import type { CreatedUpload } from '@integrations/storage';
+import { StorageError, type CreatedUpload } from '@integrations/storage';
 import { UPLOAD_PURPOSES } from '@modules/media';
 import type { SeedContext } from './seed-context.type';
 import type { SeedFile } from './seed-file.type';
@@ -47,14 +47,26 @@ export async function ensureSeedFile(
     stored.sizeBytes !== file.bytes.length ||
     stored.contentType !== file.contentType
   ) {
-    const upload = await context.storage.createUpload({
-      visibility: policy.visibility,
-      key,
-      contentType: file.contentType,
-      maxSizeBytes: policy.maxSizeBytes,
-    });
-    await postUpload(upload, file);
-    context.tally.one('objects uploaded', true);
+    const upload = await context.storage
+      .createUpload({
+        visibility: policy.visibility,
+        key,
+        contentType: file.contentType,
+        maxSizeBytes: policy.maxSizeBytes,
+      })
+      .catch((error: unknown) => {
+        // Staging without storage: the row is still made, and a later run uploads the file.
+        if (error instanceof StorageError && error.reason === 'disabled') {
+          return null;
+        }
+        throw error;
+      });
+    if (upload === null) {
+      context.tally.one('objects skipped (storage disabled)', true);
+    } else {
+      await postUpload(upload, file);
+      context.tally.one('objects uploaded', true);
+    }
   } else {
     context.tally.one('objects uploaded', false);
   }
@@ -80,6 +92,11 @@ export async function ensureSeedFile(
     skipDuplicates: true,
   });
   context.tally.one('media', count === 1);
+  // A row made while storage was disabled names the placeholder bucket: point it at the real one.
+  await context.db.client.media.updateMany({
+    where: { id: file.id, bucket: { not: location.bucket } },
+    data: { bucket: location.bucket },
+  });
 }
 
 /** Sends the presigned form upload: every field, then the file, last (StorageService). */
