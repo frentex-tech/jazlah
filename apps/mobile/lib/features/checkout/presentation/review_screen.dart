@@ -85,7 +85,10 @@ class _ReviewScreenState extends ConsumerState<ReviewScreen> {
       final exit = reviewExit(code);
       setState(() {
         _placing = false;
-        if (exit == null) _methodLocked = true;
+        if (exit == null) {
+          _methodLocked = true;
+          _method = method.method; // pinned, so a later refetch can't change what the retry sends
+        }
       });
       if (exit == null) return;
       // Checkout step 1 handles the code (refetch, or on to the cart); opened alone, go to the step.
