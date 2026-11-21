@@ -38,6 +38,13 @@
 
 ## Log
 
+### 2026-11-21 — The core team takes over the API and staging (owner)
+- **Kerolles is paused** on Jazlah for now. The core team builds the API and staging itself, in its own sessions, on Kerolles' structure and conventions (`services/api/CLAUDE.md`, `.claude/DECISIONS.md`, the patterns of #228–#244). No rewrite: same modules, ports, Prisma migrations, error codes and e2e on a fresh DB.
+- **Order:** (A) the Sprint 2 API gaps from the lead review (incompatible pairs, server `PricingService`, public product availability, review queue, permission code, flaky logging test) so the Sprint 2 screens get wired and their issues close; (B) Sprint 3 API in the MP-1 order, each contract merged first so the clients use the generated client.
+- **Staging on free tiers first:** Kerolles' Render blueprint (#246) is taken over and run on free instance types with `*.onrender.com` addresses (no domain or DNS change); paid plans and the Saudi-region decision (#7, `needs-client`) come later.
+- **Closing rule while staging is not up:** a screen issue closes when it runs on the real API with an e2e test green in CI; a staging smoke check follows once staging is live.
+- For Kerolles when he returns: this entry, the PR list, and each decision recorded in `services/api/.claude/DECISIONS.md`.
+
 ### 2026-11-21 — Sprint 2 UI built and reviewed; Sprint 3 UI starts
 - **Sprint 2 UI is merged:** mobile #276 #277 #278 (+ review fixes #282), dashboard #275 #279 #280 #281 (+ review fixes #283). Design QA and a lead review ran; all frontend findings are fixed except those waiting on the API. #45 #46 #51 #52 #55 #56 #57 stay open (`Refs`) until each screen is verified on the real API / staging.
 - Most Sprint 2 screens already use the generated client (the vendor and catalog endpoints were in `openapi.json`); the dashboard has e2e tests for all four flows against the real API.
