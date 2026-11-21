@@ -241,7 +241,7 @@ export class AdminCatalogController {
     operationId: 'adminCreateCuttingPackagingIncompatibility',
     summary: 'Forbid a cutting style with a packaging',
     description:
-      'Admin dashboard, catalog settings. Adds a global rule: products may not offer this cutting style together with this packaging. Products already published keep their options; the rule applies to every later submission, publication and change request, refused with PRODUCT_NOT_SUBMITTABLE (INCOMPATIBLE_CUTTING_PACKAGING) while they offer the pair. ' +
+      'Admin dashboard, catalog settings. Adds a global rule: customers may not choose this cutting style together with this packaging. Products keep offering both (publishing is not blocked); the public product lists the pairs that apply to it, and a cart line with the pair is refused (INCOMPATIBLE_CUTTING_PACKAGING), at once for every product. ' +
       'Errors: VALIDATION_FAILED `isActiveCuttingStyle` when the cutting style is not an active entry; CONFLICT when the same rule exists already.',
   })
   @ApiCreatedResponse({
@@ -296,7 +296,7 @@ export class AdminCatalogController {
     operationId: 'adminDeleteCuttingPackagingIncompatibility',
     summary: 'Remove a cutting and packaging rule',
     description:
-      'Admin dashboard, catalog settings. Deletes the rule at once: products may offer the pair again from their next submission or edit. NOT_FOUND for an unknown id, also when it was removed already.',
+      'Admin dashboard, catalog settings. Deletes the rule at once: customers may choose the pair again on every product. NOT_FOUND for an unknown id, also when it was removed already.',
   })
   @ApiNoContentResponse({ description: 'The rule was removed; no body.' })
   @ApiErrorResponses(
@@ -582,9 +582,9 @@ export class AdminCatalogController {
     operationId: 'adminUpdatePlatformProductContent',
     summary: 'Replace a JAZLA product’s content',
     description:
-      'Admin dashboard, JAZLA products, edit form. Replaces the whole content of a platform vendor product (send every field, lists in display order); availability, fulfilment and prices have their own endpoints. Applies at once, also when published: no change request. An edit of a published product is recorded in the audit log and must meet the submission rules (at least one size and one image, no cutting style offered with a packaging it cannot be combined with). ' +
+      'Admin dashboard, JAZLA products, edit form. Replaces the whole content of a platform vendor product (send every field, lists in display order); availability, fulfilment and prices have their own endpoints. Applies at once, also when published: no change request. An edit of a published product is recorded in the audit log and must meet the submission rules (at least one size and one image). ' +
       'Keep an existing size by sending its `id`; a size left out is removed; a size without `id` is new. Existing sizes, cutting styles and packagings must carry their current prices (VALIDATION_FAILED `isLivePrice`): change them with PATCH …/{id}/prices. ' +
-      'Errors: VALIDATION_FAILED also for an inactive reference, a size id not of this product or a repeat; MEDIA_NOT_FOUND / MEDIA_NOT_READY for a new image not uploaded and confirmed by this admin; PRODUCT_NOT_SUBMITTABLE (published only) with `details.reasons` and `details.pairs`; PRODUCT_NOT_EDITABLE for a product under review; ' +
+      'Errors: VALIDATION_FAILED also for an inactive reference, a size id not of this product or a repeat; MEDIA_NOT_FOUND / MEDIA_NOT_READY for a new image not uploaded and confirmed by this admin; PRODUCT_NOT_SUBMITTABLE (published only) with `details.reasons`; PRODUCT_NOT_EDITABLE for a product under review; ' +
       'NOT_FOUND for an unknown id or a product of another vendor (admins act on other vendors’ products only through review), and with `details.reason` PLATFORM_VENDOR_MISSING while JAZLA’s own vendor has not been set up.',
   })
   @ApiOkResponse({
@@ -623,7 +623,7 @@ export class AdminCatalogController {
     summary: 'Publish a JAZLA draft directly',
     description:
       'Admin dashboard, JAZLA products. Moves a platform vendor `draft` straight to `published`, without review; customers see it at once if it is available and its category active. Recorded in the audit log. No body. ' +
-      'Errors: PRODUCT_NOT_SUBMITTABLE without a size or an image, or with a cutting style offered with a packaging it cannot be combined with (`details.reasons`, `details.pairs`); PRODUCT_NOT_EDITABLE when the product is not a draft (`details.status`); ' +
+      'Errors: PRODUCT_NOT_SUBMITTABLE without a size or an image (`details.reasons`); PRODUCT_NOT_EDITABLE when the product is not a draft (`details.status`); ' +
       'NOT_FOUND for an unknown id or a product of another vendor (admins act on other vendors’ products only through review), and with `details.reason` PLATFORM_VENDOR_MISSING while JAZLA’s own vendor has not been set up.',
   })
   @ApiOkResponse({
@@ -657,8 +657,8 @@ export class AdminCatalogController {
     operationId: 'adminSetPlatformProductAvailability',
     summary: 'Switch a JAZLA product on or off, at once',
     description:
-      'Admin dashboard, JAZLA products, the availability switch. Applies at once, also on a published product: an unavailable product leaves the public catalog until it is switched on again. ' +
-      'Errors: PRODUCT_NOT_EDITABLE for a product under review (`details.status`); ' +
+      'Admin dashboard, JAZLA products, the availability switches: the product, and optionally some of its sizes. Applies at once, also on a published product: an unavailable product leaves the public list until it is switched on again (its page shows it out of stock); an unavailable size stays on the page, not orderable. ' +
+      'Errors: VALIDATION_FAILED for a size not of this product (`isSizeOfProduct`) or named twice (`isNotRepeated`); PRODUCT_NOT_EDITABLE for a product under review (`details.status`); ' +
       'NOT_FOUND for an unknown id or a product of another vendor (admins act on other vendors’ products only through review), and with `details.reason` PLATFORM_VENDOR_MISSING while JAZLA’s own vendor has not been set up.',
   })
   @ApiOkResponse({
@@ -682,6 +682,7 @@ export class AdminCatalogController {
         scope: PLATFORM_SCOPE,
         productId: params.id,
         isAvailable: body.isAvailable,
+        sizes: body.sizes ?? [],
       }),
     );
   }

@@ -306,7 +306,7 @@ describe('UpdateProductContentUseCase', () => {
       expect(kit.changeRequests.rows).toEqual([]);
     });
 
-    it('refuses an edit that breaks the submission rules', async () => {
+    it('refuses an edit that breaks the submission rules; a forbidden pair is not one', async () => {
       const kit = buildCatalogUseCases();
       seedCatalog(kit);
       const live = await publishedVendorProduct(kit);
@@ -325,7 +325,7 @@ describe('UpdateProductContentUseCase', () => {
         }),
       ).rejects.toMatchObject({
         code: ErrorCode.PRODUCT_NOT_SUBMITTABLE,
-        details: { reasons: ['NO_IMAGE', 'INCOMPATIBLE_CUTTING_PACKAGING'] },
+        details: { reasons: ['NO_IMAGE'] },
       });
     });
 

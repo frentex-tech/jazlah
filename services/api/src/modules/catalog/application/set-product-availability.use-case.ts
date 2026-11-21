@@ -14,15 +14,19 @@ import {
   PRODUCT_REPOSITORY,
   type ProductRepository,
 } from '../domain/ports/product.repository.port';
+import { Product } from '../domain/product.entity';
 import { ProductStatusMachine } from '../domain/product-status.state-machine';
+import type { SizeAvailabilityChange } from '../domain/size-availability-change.type';
 import { lockWritableProduct } from './lock-writable-product';
 import type { ProductView } from './product-view.type';
 import type { ProductWriteScope } from './product-write-scope.type';
 import { toProductView } from './to-product-view';
 
 /**
- * Switches a product's availability, at once even when published (no review). An
- * unavailable product leaves the public list. Under review: PRODUCT_NOT_EDITABLE.
+ * Switches a product's availability, and that of some of its sizes, at once even when
+ * published (no review). An unavailable product leaves the public list (its page shows
+ * it out of stock); an unavailable size stays on the page, not orderable. A size not of
+ * this product or named twice: VALIDATION_FAILED. Under review: PRODUCT_NOT_EDITABLE.
  */
 @Injectable()
 export class SetProductAvailabilityUseCase {
@@ -39,6 +43,7 @@ export class SetProductAvailabilityUseCase {
       scope: ProductWriteScope;
       productId: string;
       isAvailable: boolean;
+      sizes: readonly SizeAvailabilityChange[];
     }>,
   ): Promise<ProductView> {
     const updated = await this.transactions.run(async () => {
@@ -49,7 +54,12 @@ export class SetProductAvailabilityUseCase {
         this.vendors,
       );
       ProductStatusMachine.assertEditable(live.status);
-      await this.products.setAvailability(live.id, input.isAvailable);
+      Product.assertSizeAvailabilityChanges(input.sizes, live);
+      await this.products.setAvailability(
+        live.id,
+        input.isAvailable,
+        input.sizes,
+      );
       return this.products.findDetails(live.id, live.vendorId);
     });
     if (updated === null) {

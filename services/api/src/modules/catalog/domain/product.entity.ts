@@ -1,30 +1,25 @@
 import { AppError } from '@common/errors/app-error';
 import { ErrorCode } from '@common/errors/error-code.enum';
 import type { FieldError } from '@common/errors/field-error.type';
-import type { CuttingPackagingIncompatibility } from './cutting-packaging-incompatibility.type';
 import type { ProductContent } from './product-content.type';
 import type { ProductDetails } from './product-details.type';
 import type { ProductPriceChanges } from './product-price-changes.type';
 import type { ProductSubmissionProblem } from './product-submission-problem.type';
+import type { SizeAvailabilityChange } from './size-availability-change.type';
 
 /**
  * The rules on a product's content. Plain functions of the content: the use cases load
- * what they need (the live product, the incompatibilities) and ask.
+ * what they need (the live product) and ask.
  */
 export class Product {
   /**
    * A product goes to review, is published, or takes a change request only with at
-   * least one size and one image, and no offered cutting style with an offered
-   * packaging it is incompatible with. Otherwise PRODUCT_NOT_SUBMITTABLE, every reason
-   * at once, the incompatible pairs listed.
+   * least one size and one image. Otherwise PRODUCT_NOT_SUBMITTABLE, every reason at
+   * once. The cutting and packaging rules do not block it: they constrain what a
+   * customer may choose (`priceLine`), so a product may offer both sides of a forbidden
+   * pair (DECISIONS.md, Catalog).
    */
-  static assertSubmittable(
-    content: ProductContent,
-    incompatibilities: readonly Pick<
-      CuttingPackagingIncompatibility,
-      'cuttingStyleId' | 'packaging'
-    >[],
-  ): void {
+  static assertSubmittable(content: ProductContent): void {
     const reasons: ProductSubmissionProblem[] = [];
     if (content.sizes.length === 0) {
       reasons.push('NO_SIZE');
@@ -32,27 +27,9 @@ export class Product {
     if (content.imageMediaIds.length === 0) {
       reasons.push('NO_IMAGE');
     }
-    const offered = new Set(
-      content.cuttings.map((cutting) => cutting.cuttingStyleId),
-    );
-    const pairs = incompatibilities
-      .filter(
-        (rule) =>
-          offered.has(rule.cuttingStyleId) &&
-          content.packagings.some(
-            (option) => option.packaging === rule.packaging,
-          ),
-      )
-      .map((rule) => ({
-        cuttingStyleId: rule.cuttingStyleId,
-        packaging: rule.packaging,
-      }));
-    if (pairs.length > 0) {
-      reasons.push('INCOMPATIBLE_CUTTING_PACKAGING');
-    }
     if (reasons.length > 0) {
       throw new AppError(ErrorCode.PRODUCT_NOT_SUBMITTABLE, {
-        details: pairs.length > 0 ? { reasons, pairs } : { reasons },
+        details: { reasons },
       });
     }
   }
@@ -183,6 +160,34 @@ export class Product {
     if (details.length > 0) {
       throw new AppError(ErrorCode.VALIDATION_FAILED, { details });
     }
+  }
+
+  /**
+   * An availability edit names each size once, and only sizes of this product.
+   * Otherwise VALIDATION_FAILED on `sizes.<i>.sizeId` (`isSizeOfProduct`,
+   * `isNotRepeated`).
+   */
+  static assertSizeAvailabilityChanges(
+    changes: readonly SizeAvailabilityChange[],
+    live: ProductDetails,
+  ): void {
+    const ids = new Set(live.sizes.map((size) => size.id));
+    Product.throwRepeats([
+      ...changes.flatMap((change, index) =>
+        ids.has(change.sizeId)
+          ? []
+          : [
+              {
+                field: `sizes.${index}.sizeId`,
+                constraints: ['isSizeOfProduct'],
+              },
+            ],
+      ),
+      ...Product.repeatsOf(
+        changes.map((change) => change.sizeId),
+        (index) => `sizes.${index}.sizeId`,
+      ),
+    ]);
   }
 
   /** The live product's content, as an edit would write it unchanged. */

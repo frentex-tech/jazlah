@@ -439,7 +439,7 @@ describe('Catalog (e2e)', () => {
       expect(after.sizes.map((s) => s.priceHalalas)).toEqual([95000]);
     });
 
-    it('refuses to submit without a size and an image, or with an incompatible pair (422)', async () => {
+    it('refuses to submit without a size and an image (422); a forbidden pair does not block it', async () => {
       const { owner, admin, options } = await setUp();
       const empty = await catalog.http
         .post('/v1/vendor/products')
@@ -460,24 +460,16 @@ describe('Catalog (e2e)', () => {
         .post(`/v1/vendor/products/${emptyId}/submit`)
         .set(...bearer(owner))
         .expect(422);
-      const incompatible = await catalog.http
+      const submitted = await catalog.http
         .post(`/v1/vendor/products/${paired}/submit`)
         .set(...bearer(owner))
-        .expect(422);
+        .expect(200);
 
       expect(missing.body).toMatchObject({
         code: 'PRODUCT_NOT_SUBMITTABLE',
         details: { reasons: ['NO_SIZE', 'NO_IMAGE'] },
       });
-      expect(incompatible.body).toMatchObject({
-        code: 'PRODUCT_NOT_SUBMITTABLE',
-        details: {
-          reasons: ['INCOMPATIBLE_CUTTING_PACKAGING'],
-          pairs: [
-            { cuttingStyleId: options.cuttingStyleId, packaging: 'trays' },
-          ],
-        },
-      });
+      expect(submitted.body).toMatchObject({ status: 'pending_review' });
     });
 
     it("gets the same 404 for vendor A's product as for a random id, on every vendor endpoint", async () => {
@@ -1206,20 +1198,33 @@ describe('Catalog (e2e)', () => {
         category: { id: options.categoryId },
         meatType: { id: options.meatTypeId },
         fulfilment: 'both',
+        isAvailable: true,
         minPriceHalalas: 95000,
         sizes: [
           {
             approxWeightGrams: 8000,
             priceHalalas: 95000,
             tag: { ar: 'يجزئ العقيقة', en: 'Enough for an aqiqah' },
+            isAvailable: true,
           },
         ],
         cuttings: [
-          { cuttingStyleId: options.cuttingStyleId, extraPriceHalalas: 1500 },
+          {
+            cuttingStyleId: options.cuttingStyleId,
+            extraPriceHalalas: 1500,
+          },
         ],
         packagings: [{ packaging: 'trays', extraPriceHalalas: 300 }],
         exclusions: [{ id: options.exclusionItemId }],
+        incompatiblePairs: [],
       });
+      const body = page.body as {
+        sizes: { id: string }[];
+        defaultSizeId: string;
+        cuttings: { name: { ar: string } | null }[];
+      };
+      expect(body.cuttings[0]?.name?.ar).toEqual(expect.any(String));
+      expect(body.defaultSizeId).toBe(body.sizes[0]?.id);
       expect(categories).toContain(options.categoryId);
       expect(categories).not.toContain(inactive);
     });
@@ -1285,7 +1290,7 @@ describe('Catalog (e2e)', () => {
       }
     });
 
-    it('hides an unavailable product', async () => {
+    it('leaves an unavailable product out of the list; its page shows it out of stock', async () => {
       const { owner, admin, options, vendorId } = await setUp();
       const id = await catalog.published(owner, admin, options);
       await catalog.http
@@ -1295,7 +1300,90 @@ describe('Catalog (e2e)', () => {
         .expect(200);
 
       expect(await publicIds(`vendorId=${vendorId}`)).toEqual([]);
-      await catalog.http.get(`/v1/public/products/${id}`).expect(404);
+      expect(
+        (await catalog.http.get(`/v1/public/products/${id}`).expect(200)).body,
+      ).toMatchObject({ id, isAvailable: false });
+    });
+
+    it('shows a size switched off as unavailable and defaults to the next available one', async () => {
+      const { owner, admin, options } = await setUp();
+      const id = await catalog.published(owner, admin, options, {
+        sizes: [
+          { approxWeightGrams: 8000, priceHalalas: 95000, tag: null },
+          { approxWeightGrams: 12000, priceHalalas: 125000, tag: null },
+        ],
+      });
+      const before = (
+        await catalog.http.get(`/v1/public/products/${id}`).expect(200)
+      ).body as { sizes: { id: string }[] };
+      const [small, large] = before.sizes.map((size) => size.id);
+
+      const switched = await catalog.http
+        .patch(`/v1/vendor/products/${id}/availability`)
+        .set(...bearer(owner))
+        .send({
+          isAvailable: true,
+          sizes: [{ sizeId: small, isAvailable: false }],
+        })
+        .expect(200);
+      const page = await catalog.http
+        .get(`/v1/public/products/${id}`)
+        .expect(200);
+      const foreign = await catalog.http
+        .patch(`/v1/vendor/products/${id}/availability`)
+        .set(...bearer(owner))
+        .send({
+          isAvailable: true,
+          sizes: [{ sizeId: randomUUID(), isAvailable: false }],
+        })
+        .expect(400);
+
+      expect(switched.body).toMatchObject({
+        sizes: [
+          { id: small, isAvailable: false },
+          { id: large, isAvailable: true },
+        ],
+      });
+      expect(page.body).toMatchObject({
+        isAvailable: true,
+        defaultSizeId: large,
+        sizes: [
+          { id: small, isAvailable: false },
+          { id: large, isAvailable: true },
+        ],
+      });
+      expect(foreign.body).toMatchObject({
+        code: 'VALIDATION_FAILED',
+        details: [
+          { field: 'sizes.0.sizeId', constraints: ['isSizeOfProduct'] },
+        ],
+      });
+    });
+
+    it('lists the forbidden pairs among its options; publishing is not blocked by them', async () => {
+      const { owner, admin, options } = await setUp();
+      const rule = await catalog.http
+        .post('/v1/admin/cutting-packaging-incompatibilities')
+        .set(...bearer(admin))
+        .send({ cuttingStyleId: options.cuttingStyleId, packaging: 'trays' })
+        .expect(201);
+      catalog.rememberRule((rule.body as { id: string }).id);
+      const other = await catalog.http
+        .post('/v1/admin/cutting-packaging-incompatibilities')
+        .set(...bearer(admin))
+        .send({ cuttingStyleId: options.cuttingStyleId, packaging: 'vacuum' })
+        .expect(201);
+      catalog.rememberRule((other.body as { id: string }).id);
+
+      const id = await catalog.published(owner, admin, options);
+
+      expect(
+        (await catalog.http.get(`/v1/public/products/${id}`).expect(200)).body,
+      ).toMatchObject({
+        incompatiblePairs: [
+          { cuttingStyleId: options.cuttingStyleId, packaging: 'trays' },
+        ],
+      });
     });
 
     it("hides a suspended vendor's products", async () => {

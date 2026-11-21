@@ -42,6 +42,7 @@ const LIVE: ProductDetails = {
       approxWeightGrams: 8_000,
       price: Money.of(95_000),
       tag: { ar: 'يجزئ العقيقة', en: 'Enough for an aqiqah' },
+      isAvailable: true,
     },
   ],
   cuttings: [
@@ -73,44 +74,57 @@ const errorOf = (work: () => void): unknown => {
 
 describe('Product', () => {
   describe('assertSubmittable', () => {
-    it('accepts a size, an image and compatible options', () => {
-      expect(
-        errorOf(() =>
-          Product.assertSubmittable(CONTENT, [
-            { cuttingStyleId: OTHER_CUT, packaging: 'vacuum' },
-            { cuttingStyleId: CUT, packaging: 'bags' },
-          ]),
-        ),
-      ).toBeNull();
+    it('accepts a size and an image, whatever the cutting and packaging rules', () => {
+      // The rules constrain the customer's choice (priceLine), never the product.
+      expect(errorOf(() => Product.assertSubmittable(CONTENT))).toBeNull();
     });
 
     it('refuses no size and no image, both reasons at once', () => {
       expect(
         errorOf(() =>
-          Product.assertSubmittable(
-            { ...CONTENT, sizes: [], imageMediaIds: [] },
-            [],
-          ),
+          Product.assertSubmittable({
+            ...CONTENT,
+            sizes: [],
+            imageMediaIds: [],
+          }),
         ),
       ).toMatchObject({
         code: ErrorCode.PRODUCT_NOT_SUBMITTABLE,
         details: { reasons: ['NO_SIZE', 'NO_IMAGE'] },
       });
     });
+  });
 
-    it('refuses an offered cutting with an offered packaging it is incompatible with, naming the pair', () => {
+  describe('assertSizeAvailabilityChanges', () => {
+    it("accepts the product's sizes, each once", () => {
       expect(
         errorOf(() =>
-          Product.assertSubmittable(CONTENT, [
-            { cuttingStyleId: CUT, packaging: 'vacuum' },
-          ]),
+          Product.assertSizeAvailabilityChanges(
+            [{ sizeId: SIZE, isAvailable: false }],
+            LIVE,
+          ),
+        ),
+      ).toBeNull();
+    });
+
+    it('refuses a size of another product and a size named twice', () => {
+      expect(
+        errorOf(() =>
+          Product.assertSizeAvailabilityChanges(
+            [
+              { sizeId: CUT, isAvailable: false },
+              { sizeId: SIZE, isAvailable: false },
+              { sizeId: SIZE, isAvailable: true },
+            ],
+            LIVE,
+          ),
         ),
       ).toMatchObject({
-        code: ErrorCode.PRODUCT_NOT_SUBMITTABLE,
-        details: {
-          reasons: ['INCOMPATIBLE_CUTTING_PACKAGING'],
-          pairs: [{ cuttingStyleId: CUT, packaging: 'vacuum' }],
-        },
+        code: ErrorCode.VALIDATION_FAILED,
+        details: [
+          { field: 'sizes.0.sizeId', constraints: ['isSizeOfProduct'] },
+          { field: 'sizes.2.sizeId', constraints: ['isNotRepeated'] },
+        ],
       });
     });
   });
