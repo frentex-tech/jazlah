@@ -5509,7 +5509,7 @@
     },
     "/v1/vendor/cutting-packaging-incompatibilities": {
       "get": {
-        "description": "Vendor dashboard, product form. Every global rule whose cutting style is active: a product may offer both, but a customer cannot choose that cutting style with that packaging (refused at the cart with INCOMPATIBLE_CUTTING_PACKAGING; the public product lists the pairs that apply to it), so the form can show which choices customers will not get. Each pair carries the cutting style with its Arabic and English name; oldest rule first. The whole list in one answer, not paged. The rules are managed by admins.",
+        "description": "Vendor dashboard, product form. Every global rule whose cutting style is active: a product may offer both, but a customer cannot choose that cutting style with that packaging (the public product lists the pairs that apply to it; the cart’s line price, CRT-API-1, will refuse them with INCOMPATIBLE_CUTTING_PACKAGING), so the form can show which choices customers will not get. Each pair carries the cutting style with its Arabic and English name; oldest rule first. The whole list in one answer, not paged. The rules are managed by admins.",
         "operationId": "vendorListCuttingPackagingIncompatibilities",
         "parameters": [],
         "responses": {
@@ -5579,7 +5579,7 @@
             "bearer": []
           }
         ],
-        "summary": "The cutting and packaging pairs a product cannot offer",
+        "summary": "The cutting and packaging pairs a customer cannot choose",
         "tags": [
           "Vendor catalog lists"
         ]
@@ -7020,7 +7020,7 @@
     },
     "/v1/admin/cutting-packaging-incompatibilities": {
       "post": {
-        "description": "Admin dashboard, catalog settings. Adds a global rule: customers may not choose this cutting style together with this packaging. Products keep offering both (publishing is not blocked); the public product lists the pairs that apply to it, and a cart line with the pair is refused (INCOMPATIBLE_CUTTING_PACKAGING), at once for every product. Errors: VALIDATION_FAILED `isActiveCuttingStyle` when the cutting style is not an active entry; CONFLICT when the same rule exists already.",
+        "description": "Admin dashboard, catalog settings. Adds a global rule: customers may not choose this cutting style together with this packaging. Products keep offering both (publishing is not blocked); the public product lists the pairs that apply to it, and the cart’s line price (CRT-API-1) will refuse the pair (INCOMPATIBLE_CUTTING_PACKAGING), at once for every product. Errors: VALIDATION_FAILED `isActiveCuttingStyle` when the cutting style is not an active entry; CONFLICT when the same rule exists already.",
         "operationId": "adminCreateCuttingPackagingIncompatibility",
         "parameters": [],
         "requestBody": {
@@ -12017,7 +12017,7 @@
               "none"
             ],
             "example": "vacuum",
-            "description": "The packaging: `trays`, `bags`, `vacuum`, `none`. A cutting style and a packaging an admin rule forbids together may both be offered: customers cannot choose the pair (INCOMPATIBLE_CUTTING_PACKAGING at the cart)."
+            "description": "The packaging: `trays`, `bags`, `vacuum`, `none`. A cutting style and a packaging an admin rule forbids together may both be offered: customers cannot choose the pair (the cart’s line price, CRT-API-1, will refuse it with INCOMPATIBLE_CUTTING_PACKAGING)."
           },
           "extraPriceHalalas": {
             "type": "number",
@@ -13446,7 +13446,7 @@
             }
           },
           "incompatiblePairs": {
-            "description": "Cutting style and packaging pairs among this product’s options that may not be chosen together (admin rules); a line with one is refused (INCOMPATIBLE_CUTTING_PACKAGING). Empty when none applies.",
+            "description": "Cutting style and packaging pairs among this product’s options that may not be chosen together (admin rules); the cart’s line price (CRT-API-1) will refuse one (INCOMPATIBLE_CUTTING_PACKAGING). Empty when none applies.",
             "type": "array",
             "items": {
               "$ref": "#/components/schemas/IncompatiblePairResponseDto"

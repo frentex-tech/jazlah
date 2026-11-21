@@ -115,7 +115,7 @@ export class PublicProductResponseDto {
   @ApiProperty({
     type: [IncompatiblePairResponseDto],
     description:
-      'Cutting style and packaging pairs among this product’s options that may not be chosen together (admin rules); a line with one is refused (INCOMPATIBLE_CUTTING_PACKAGING). Empty when none applies.',
+      'Cutting style and packaging pairs among this product’s options that may not be chosen together (admin rules); the cart’s line price (CRT-API-1) will refuse one (INCOMPATIBLE_CUTTING_PACKAGING). Empty when none applies.',
   })
   incompatiblePairs!: IncompatiblePairResponseDto[];
 

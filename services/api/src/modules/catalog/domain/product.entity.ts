@@ -16,7 +16,7 @@ export class Product {
    * A product goes to review, is published, or takes a change request only with at
    * least one size and one image. Otherwise PRODUCT_NOT_SUBMITTABLE, every reason at
    * once. The cutting and packaging rules do not block it: they constrain what a
-   * customer may choose (`priceLine`), so a product may offer both sides of a forbidden
+   * customer may choose (the line price, CRT-API-1), so a product may offer both sides of a forbidden
    * pair (DECISIONS.md, Catalog).
    */
   static assertSubmittable(content: ProductContent): void {

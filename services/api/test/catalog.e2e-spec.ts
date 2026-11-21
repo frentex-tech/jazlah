@@ -1360,6 +1360,57 @@ describe('Catalog (e2e)', () => {
       });
     });
 
+    it('keeps a switched-off size off through an approved change request; a new size starts available', async () => {
+      const { owner, admin, options } = await setUp();
+      const id = await catalog.published(owner, admin, options);
+      const live = (
+        await catalog.http
+          .get(`/v1/vendor/products/${id}`)
+          .set(...bearer(owner))
+          .expect(200)
+      ).body as ProductBody;
+      const kept = live.sizes[0].id;
+      await catalog.http
+        .patch(`/v1/vendor/products/${id}/availability`)
+        .set(...bearer(owner))
+        .send({
+          isAvailable: true,
+          sizes: [{ sizeId: kept, isAvailable: false }],
+        })
+        .expect(200);
+
+      const edited = await catalog.http
+        .put(`/v1/vendor/products/${id}`)
+        .set(...bearer(owner))
+        .send(
+          catalog.body(options, [live.images[0].mediaId], {
+            fulfilment: undefined,
+            sizes: [
+              { id: kept, approxWeightGrams: 8000, priceHalalas: 95000 },
+              { approxWeightGrams: 12000, priceHalalas: 125000 },
+            ],
+          }),
+        )
+        .expect(200);
+      await catalog.http
+        .post(
+          `/v1/admin/product-change-requests/${(edited.body as ProductBody).changeRequest!.id}/approve`,
+        )
+        .set(...bearer(admin))
+        .expect(200);
+      const page = await catalog.http
+        .get(`/v1/public/products/${id}`)
+        .expect(200);
+
+      const sizes = (
+        page.body as { sizes: { id: string; isAvailable: boolean }[] }
+      ).sizes;
+      expect(sizes).toHaveLength(2);
+      expect(sizes[0]).toMatchObject({ id: kept, isAvailable: false });
+      expect(sizes[1]).toMatchObject({ isAvailable: true });
+      expect(page.body).toMatchObject({ defaultSizeId: sizes[1]?.id });
+    });
+
     it('lists the forbidden pairs among its options; publishing is not blocked by them', async () => {
       const { owner, admin, options } = await setUp();
       const rule = await catalog.http
