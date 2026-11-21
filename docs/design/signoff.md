@@ -177,6 +177,7 @@ Everything else follows the five cart frames (170-28564, 170-28643, 170-28708, 1
 | Removing a line | No control (the stepper stops at 1) | Swipe the line away (red bin behind it); screen readers get a «حذف» action; an unavailable line's banner has «حذف» | No remove control in the frame. |
 | Issue and merge banners | No frame | A warning (or info) banner above the lines with one action («موافق» takes the new price, «حذف» removes the line) | Price-changed and unavailable lines block checkout and need explaining. |
 | Coupon applied | No frame | The field shows the code, «تم تطبيق الرمز …» under it, the button reads «إزالة»; a «الخصم (CODE)» row in the totals | No applied or error state for the coupon field; errors use the field's error state. |
+| Line weight (170-28564, 170-28847) | «500 جم للقطعة» at quantity 2 and «نحو 1.5 كجم» at quantity 1 in 170-28564, but «500 جم للقطعة» at quantity 1 in 170-28847 | «{weight} للقطعة» when quantity > 1, «نحو {weight}» at quantity 1 | The two frames disagree; the build follows 170-28564. **Figma needs one rule.** |
 | Add to cart success (product page) | No frame | The design-system success toast «أُضيفت القطعة إلى السلة» and the header badge count | No frame. |
 
 ## Checks run on the file (2026-11-13)

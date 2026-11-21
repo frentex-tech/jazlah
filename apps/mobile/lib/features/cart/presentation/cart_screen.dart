@@ -76,7 +76,8 @@ class _CartScreenState extends ConsumerState<CartScreen> {
       // Gone without the «إزالة» button: the cart no longer meets it (or changed store).
       if (before != null && code == null && next.hasValue && !_couponBusy) {
         _code.clear();
-        setState(() => _droppedCoupon = before);
+        // An emptied cart (sign-out, last line removed) has nothing the code could apply to.
+        if (next.value!.lines.isNotEmpty) setState(() => _droppedCoupon = before);
       }
     }, fireImmediately: true);
   }
