@@ -73,4 +73,10 @@ test('an admin approves it with a 12.5% commission: an active vendor with 1250 b
   const row = page.getByRole('table', { name: 'المتاجر' }).getByRole('row').filter({ has: page.getByRole('link', { name: NAME, exact: true }) });
   await expect(row.getByText('نشط')).toBeVisible();
   await expect(row.getByText('12.5%')).toBeVisible();
+  // And as the API answers it (through the dashboard's route, with the admin session): 1250 basis points.
+  const res = await page.request.get(`/api/admin/vendors?status=active&q=${encodeURIComponent(NAME_EN)}`);
+  const body = await res.text();
+  expect(res.ok(), body).toBe(true);
+  const vendor = (JSON.parse(body) as { items: { name: { en: string }; status: string; commissionBasisPoints: number }[] }).items.find((v) => v.name.en === NAME_EN);
+  expect(vendor, body).toMatchObject({ status: 'active', commissionBasisPoints: 1250 });
 });

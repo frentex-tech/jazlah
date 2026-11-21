@@ -19,6 +19,7 @@ import { dayOf } from '@/lib/date';
 import { sar } from '@/lib/money';
 import { ApiError, panelFetch } from '@/lib/panel-fetch';
 import { loadAll } from './client';
+import { firstKeptPage } from './skip-pages';
 import { editedContent, liveContent } from './product-form/values';
 import type { ChangeRequest, Page, Product, ProductCard, ProductContentResponse, RefItem } from './types';
 
@@ -95,7 +96,7 @@ export function ReviewQueue() {
   const vendors = useCallback(async () => (vendorList.current ??= await loadAll<Vendor>('admin', '/api/admin/vendors')), []);
 
   // Page by page: a page is up to 20 of each list (new products, edits); the cursors of the pages seen are kept for «previous».
-  // shortcut: API gap, no combined review queue (B6, the review-queue endpoint of CAT-API-3 #49): a pending page merges
+  // shortcut: API gap, no combined review queue (B6, CAT-DSH-2 #52 stays open until it is wired): a pending page merges
   // one page of each list newest first, and reads each edit's product (five at a time, at most 20) for its store; the
   // decided tabs drop JAZLA's own products on the client, so a page can show fewer than 20. Use the queue endpoint when it exists.
   const [cursors, setCursors] = useState<Cursor[]>([{}]);
@@ -128,14 +129,13 @@ export function ReviewQueue() {
         ];
         setData(items.sort((a, b) => b.sentAt.localeCompare(a.sentAt)));
       } else {
-        const [known, cards] = await Promise.all([
-          vendors(),
-          pageOf<ProductCard>(`${BASE}/products?status=${tab === 'approved' ? 'published' : 'rejected'}`, cursor.products),
-        ]);
-        const platform = known.find((v) => v.isPlatform)?.id;
+        const platform = (await vendors()).find((v) => v.isPlatform)?.id;
+        // The decided lists are the vendors' products; JAZLA's own are published without review. A page of JAZLA's only
+        // is skipped (up to 5 pages), so a tab never stops on an empty page while more exist.
+        const url = `${BASE}/products?status=${tab === 'approved' ? 'published' : 'rejected'}`;
+        const cards = await firstKeptPage((c) => pageOf<ProductCard>(url, c), cursor.products, (c) => c.vendor.id !== platform);
         setNext(cards.nextCursor ? { products: cards.nextCursor } : null);
-        // The decided lists are the vendors' products; JAZLA's own are published without review.
-        setData(cards.items.filter((c) => c.vendor.id !== platform).map((c) => ({ key: c.id, kind: 'new', product: null, card: c, request: null, vendor: nameOf(c.vendor.name), sentAt: c.createdAt })));
+        setData(cards.items.map((c) => ({ key: c.id, kind: 'new', product: null, card: c, request: null, vendor: nameOf(c.vendor.name), sentAt: c.createdAt })));
       }
     } catch (e) {
       setData(e instanceof ApiError && e.code === 'NOT_ALLOWED' ? 'denied' : 'error');

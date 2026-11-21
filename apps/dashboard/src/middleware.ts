@@ -55,8 +55,11 @@ export default async function middleware(req: NextRequest) {
     const customerToken = req.cookies.get(refreshCookie('customer'))?.value;
     if (customerToken && sessions.includes('customer')) writePanels(res, sessions);
     else if (customerToken) {
+      // Idle timeout: the sign-in comes back with ?reason=expired, which also deletes the application drafts on the device.
       await authBackend().logout(customerToken, clientIp(req));
-      clearPanel(res, 'customer');
+      const out = redirectTo(req, req.nextUrl.pathname, { reason: 'expired' });
+      clearPanel(out, 'customer');
+      return out;
     }
     return res;
   }

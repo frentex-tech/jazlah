@@ -187,9 +187,13 @@ test('store profile: validation, save, and the suspended store', async ({ page, 
   expect((await context.cookies()).find((c) => c.name === 'jz_rt_vendor')).toBeUndefined();
 });
 
-test('after the idle timeout, a remaining customer refresh token is ended and cleared', async ({ page, context }) => {
+test('after the idle timeout, a remaining customer refresh token is ended and cleared, and so are the drafts', async ({ page, context }) => {
+  await page.goto('/vendor/apply');
+  await page.evaluate(() => localStorage.setItem('jz:vendor-application-later', '{"owner":"x","at":0,"step":0,"values":{}}'));
   await context.addCookies([{ name: 'jz_rt_customer', value: 'mock-rt-customer-500000001-1', url: `http://localhost:${process.env.PORT ?? 3001}`, httpOnly: true }]);
   await page.goto('/vendor/apply');
+  await expect(page).toHaveURL(/\/vendor\/apply\?reason=expired$/);
   await expect(page.getByRole('heading', { name: 'انضم كتاجر' })).toBeVisible();
+  await expect.poll(() => page.evaluate(() => localStorage.length)).toBe(0);
   expect((await context.cookies()).find((c) => c.name === 'jz_rt_customer')).toBeUndefined();
 });

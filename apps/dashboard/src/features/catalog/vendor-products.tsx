@@ -64,7 +64,7 @@ export function VendorProducts() {
   }, [status, cursor]);
   useEffect(() => void load(), [load]);
 
-  // The rejected count of the notice (first 50; shortcut: API gap, no count, #49) and the category names; failures stay quiet.
+  // The rejected count of the notice (first 50; shortcut: API gap, no count, #52) and the category names; failures stay quiet.
   const loadRejected = useCallback(() => {
     vendorFetch<Page<ProductCard>>(`${BASE}?status=rejected&limit=50`).then((p) => setRejected(p.items.length), () => {});
   }, []);
@@ -142,7 +142,7 @@ export function VendorProducts() {
     [t, tp, locale, nameOf, categoryName],
   );
 
-  // shortcut: API gap, no search, category or availability filter on GET /v1/vendor/products: they apply to the loaded page (#49).
+  // shortcut: API gap, no search, category or availability filter on GET /v1/vendor/products: they apply to the loaded page (#52).
   const q = search.trim().toLowerCase();
   const rows =
     typeof data === 'object'
@@ -192,7 +192,7 @@ export function VendorProducts() {
               <option value="">{tp('statusFilter')}</option>
               {PRODUCT_STATUSES.map((s) => <option key={s} value={s}>{tp(`status.${s}`)}</option>)}
             </Select>
-            {/* shortcut: API gap, no date filter on GET /v1/vendor/products: shown disabled (#49). */}
+            {/* shortcut: API gap, no date filter on GET /v1/vendor/products: shown disabled (#52). */}
             <span aria-disabled className="flex h-11 w-[160px] shrink-0 items-center justify-between gap-s8 rounded-sm border border-line bg-paper px-s12 text-body-m text-muted-soft">
               {t('cols.date')}
               <CalendarBlank size={18} aria-hidden />

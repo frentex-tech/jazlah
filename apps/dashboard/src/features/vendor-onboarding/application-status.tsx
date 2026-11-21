@@ -91,7 +91,7 @@ export function ApplicationStatus({ phone }: { phone: string }) {
         </div>
       )}
       {s === 'approved' && (
-        // shortcut: API gap, the application answer has no commission, so the commission row of 410:40259 is left out (#44).
+        // shortcut: API gap, the application answer has no commission, so the commission row of 410:40259 is left out (#45).
         <dl className="flex flex-col rounded-[14px] bg-bg px-s20 py-s12">
           <Row label={t('approved.payout')} value={t('approved.payoutValue', { iban: ltr(`SA•• •••• ${last4}`) })} />
         </dl>

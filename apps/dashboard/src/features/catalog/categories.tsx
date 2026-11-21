@@ -181,7 +181,7 @@ function CategoryTable({
                   {nameOf(x)}
                 </div>
                 <div role="cell" className={cell} style={col(1)} dir="ltr">{x.name.en}</div>
-                {/* shortcut: no product count on a list entry, API gap: shown as a dash (#49). */}
+                {/* shortcut: no product count on a list entry, API gap: shown as a dash (#51). */}
                 <div role="cell" className={cell} style={col(2)}>—</div>
                 <div role="cell" className={cell} style={col(3)}>{reorder ? i + 1 : x.sortOrder}</div>
                 <div role="cell" className={cell} style={col(4)}>

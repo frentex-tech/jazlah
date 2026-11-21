@@ -89,7 +89,7 @@ export function ReviewNotes({ id }: { id: string }) {
             <Row label={t('name')} value={name} />
             <Row label={t('category')} value={locale === 'en' ? state.category.name?.en : state.category.name?.ar} />
             <Row label={tp('cols.price')} value={state.minPriceHalalas === null ? '—' : sar(state.minPriceHalalas, locale)} />
-            {/* shortcut: API gap, no submission count on a product: the «محاولات الإرسال» row is left out (#49). */}
+            {/* shortcut: API gap, no submission count on a product: the «محاولات الإرسال» row is left out (#52). */}
           </dl>
         </section>
         <section className={`${card} min-w-0 flex-1`} aria-labelledby="notes-title">
@@ -112,7 +112,7 @@ export function ReviewNotes({ id }: { id: string }) {
               </div>
               <div className="flex gap-s12">
                 <Link href={edit} className={cn(buttonVariants(), 'w-[224px]')}>{t('resubmit')}</Link>
-                {/* shortcut: API gap, products cannot be deleted (no DELETE endpoint); shown disabled (#49). */}
+                {/* shortcut: API gap, products cannot be deleted (no DELETE endpoint); shown disabled (#52). */}
                 <Button variant="ghost" className="w-[224px]" disabled>{t('delete')}</Button>
               </div>
             </>

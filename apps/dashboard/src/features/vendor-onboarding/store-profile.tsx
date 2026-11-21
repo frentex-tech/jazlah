@@ -204,7 +204,7 @@ export function StoreProfile() {
             <FormField label={t('identity.name')} hint={t('identity.nameHint')}>
               {({ id, describedBy }) => <TextInput id={id} aria-describedby={describedBy} value={name} disabled />}
             </FormField>
-            {/* shortcut: API gap, the store has no tagline in VendorProfileResponseDto; shown disabled (#44). */}
+            {/* shortcut: API gap, the store has no tagline in VendorProfileResponseDto; shown disabled (#45). */}
             <InputField label={t('identity.tagline')} hint={t('identity.taglineHint')} placeholder={t('placeholder')} disabled />
           </div>
           <InputField label={t('identity.description')} hint={t('identity.descriptionHint')} placeholder={t('placeholder')} value={v.descAr} onChange={(e) => set('descAr', e.target.value)} error={err('descAr')} />
@@ -223,7 +223,7 @@ export function StoreProfile() {
           <div className="relative h-[200px] overflow-hidden rounded-md bg-sand">
             {profile.location && <PinMap value={profile.location} label={t('location.mapLabel')} />}
           </div>
-          {/* shortcut: API gap, the profile has the city only (an admin sets it), no street address (#44). */}
+          {/* shortcut: API gap, the profile has the city only (an admin sets it), no street address (#45). */}
           <FormField label={t('location.address')} hint={t('location.addressHint')}>
             {({ id, describedBy }) => <TextInput id={id} aria-describedby={describedBy} value={profile.city ?? ''} placeholder={t('placeholder')} disabled />}
           </FormField>

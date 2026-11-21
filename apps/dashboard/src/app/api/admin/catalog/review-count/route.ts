@@ -6,7 +6,7 @@ import { langOf } from '@/lib/route';
 const CAP = 50;
 
 // The side nav badge: new products under review plus pending edits, counted up to 50 («50+» beyond).
-// shortcut: API gap, no review-queue count (B6, the review queue of CAT-API-3 #49): reads the first page (50) of each
+// shortcut: API gap, no review-queue count (B6, CAT-DSH-2 #52 stays open until it is wired): reads the first page (50) of each
 // list, never more; switch to the count endpoint when it exists.
 export function GET(req: NextRequest) {
   const lang = langOf(req);

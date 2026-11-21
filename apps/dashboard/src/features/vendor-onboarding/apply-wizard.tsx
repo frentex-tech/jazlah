@@ -27,7 +27,7 @@ const TYPES = ['butchery', 'slaughterhouse', 'farm'] as const;
 
 type Doc = { mediaId: string; name?: string; size?: number }; // no name: a file of the previous application
 type Values = {
-  // shortcut: API gap, the business type is not in SubmitVendorApplicationDto; kept on the page only, never sent (#252).
+  // shortcut: API gap, the business type is not in SubmitVendorApplicationDto; kept on the page only, never sent (#45).
   type: (typeof TYPES)[number];
   nameAr: string;
   nameEn: string;
@@ -171,7 +171,7 @@ export function ApplyWizard({ phone, owner, reapply }: { phone: string; owner: s
     if (Object.keys(all).length) return showErrors(all);
     const body: SubmitApplication = {
       name: { ar: v.nameAr.trim(), en: v.nameEn.trim() },
-      // shortcut: API gap, the design has one short description; it is sent as the Arabic description (#252).
+      // shortcut: API gap, the design has one short description; it is sent as the Arabic description (#45).
       ...(v.description.trim() && { description: { ar: v.description.trim() } }),
       commercialRegistrationNumber: v.cr,
       ...(v.vat.trim() && { vatNumber: v.vat }),
@@ -324,7 +324,7 @@ export function ApplyWizard({ phone, owner, reapply }: { phone: string; owner: s
                 <InputField label={t('business.cr')} hint={t('business.crHint')} inputMode="numeric" value={v.cr} onChange={(e) => set('cr', e.target.value)} error={err('cr')} />
                 <InputField label={t('business.vat')} hint={t('business.vatHint')} placeholder="3XXXXXXXXXXXXX3" inputMode="numeric" value={v.vat} onChange={(e) => set('vat', e.target.value)} error={err('vat')} />
                 <InputField label={t('business.city')} hint={t('business.cityHint')} value={v.city} onChange={(e) => set('city', e.target.value)} error={err('city')} />
-                {/* shortcut: API gap, no email in SubmitVendorApplicationDto; shown disabled until the API takes it (#252). */}
+                {/* shortcut: API gap, no email in SubmitVendorApplicationDto; shown disabled until the API takes it (#45). */}
                 <InputField label={t('business.email')} hint={t('business.emailHint')} type="email" dir="ltr" className="rtl:text-end" disabled />
                 <FormField label={t('business.phone')} hint={t('business.phoneHint')}>
                   {({ id, describedBy }) => <TextInput id={id} aria-describedby={describedBy} value={phone} disabled dir="ltr" className="rtl:text-end" />}
@@ -392,7 +392,7 @@ export function ApplyWizard({ phone, owner, reapply }: { phone: string; owner: s
               {errors.location && <p role="alert" className="text-body-m text-danger">{t(errors.location)}</p>}
               <div className="grid grid-cols-2 gap-s20 max-md:grid-cols-1">
                 <InputField label={t('business.city')} value={v.city} disabled />
-                {/* shortcut: API gap, the district and the address details are not in SubmitVendorApplicationDto (#43). */}
+                {/* shortcut: API gap, the district and the address details are not in SubmitVendorApplicationDto (#45). */}
                 <InputField label={t('location.district')} disabled />
               </div>
               <InputField label={t('location.address')} hint={t('location.addressHint')} disabled />
@@ -402,7 +402,7 @@ export function ApplyWizard({ phone, owner, reapply }: { phone: string; owner: s
           {step === 4 && (
             <>
               <div className="flex gap-[18px] max-md:flex-col">
-                {/* shortcut: API gap, the application takes no logo or cover; the vendor adds them in the store profile (#43). */}
+                {/* shortcut: API gap, the application takes no logo or cover; the vendor adds them in the store profile (#45). */}
                 {(['logo', 'cover'] as const).map((k) => (
                   <div key={k} className={cn('flex flex-col gap-s8', k === 'logo' ? 'w-[236px] max-md:w-full' : 'flex-1')}>
                     <span className="text-[14px] font-medium text-ink">{t(`review.${k}`)}</span>
@@ -449,7 +449,8 @@ export function ApplyWizard({ phone, owner, reapply }: { phone: string; owner: s
 
         <div className="flex items-center justify-between max-md:flex-col-reverse max-md:gap-s16">
           {step === 0 ? (
-            <button type="button" onClick={saveLater} className="text-[14px] font-medium text-ember hover:underline">
+            // A session from before the owner cookie (jz_uid_customer) cannot keep a draft: no «save» that saves nothing.
+            owner && <button type="button" onClick={saveLater} className="text-[14px] font-medium text-ember hover:underline">
               {t('saveLater')}
             </button>
           ) : (

@@ -17,7 +17,7 @@ import { dayOf } from '@/lib/date';
 import { ApiError, panelFetch } from '@/lib/panel-fetch';
 import { TABS, percentOf, type Application, type Page, type Tab, type Vendor } from './types';
 
-// shortcut: a fixed list of the main cities, API gap (no cities endpoint); the API filters vendors by exact city (#44).
+// shortcut: a fixed list of the main cities, API gap (no cities endpoint); the API filters vendors by exact city (#46).
 const CITIES = [
   ['الرياض', 'Riyadh'], ['جدة', 'Jeddah'], ['مكة المكرمة', 'Makkah'], ['المدينة المنورة', 'Madinah'], ['الدمام', 'Dammam'],
   ['الخبر', 'Khobar'], ['الأحساء', 'Al-Ahsa'], ['بريدة', 'Buraydah'], ['أبها', 'Abha'], ['تبوك', 'Tabuk'], ['حائل', 'Hail'], ['جازان', 'Jazan'],
@@ -60,7 +60,7 @@ export function VendorsList() {
       if (tab === 'pending') {
         query.set('status', 'pending');
         const p = await panelFetch<Page<Application>>('admin', `/api/admin/vendor-applications?${query}`);
-        // shortcut: the city filter on applications is applied to the loaded page only, API gap (no city filter there) (#44).
+        // shortcut: the city filter on applications is applied to the loaded page only, API gap (no city filter there) (#46).
         const items = city ? p.items.filter((a) => a.city === city) : p.items;
         setData({ rows: items.map((a) => applicationRow(a, locale)), next: p.nextCursor });
       } else {
@@ -101,7 +101,7 @@ export function VendorsList() {
         cell: ({ row }) => <Badge type={row.original.badge}>{t(`badges.${row.original.status}`)}</Badge>,
       },
       { id: 'date', header: t('cols.applied'), meta: { width: 150, skeleton: 120 }, cell: ({ row }) => row.original.date },
-      // shortcut: no product count on the vendor answer, API gap: shown as a dash (#44).
+      // shortcut: no product count on the vendor answer, API gap: shown as a dash (#46).
       { id: 'products', header: t('cols.products'), meta: { width: 90, skeleton: 60 }, cell: () => t('unknown') },
       {
         id: 'commission',
@@ -132,14 +132,14 @@ export function VendorsList() {
         title={t('title')}
         actions={
           <>
-            {/* shortcut: no vendor invitation or export in the API, API gap: shown disabled (#44). */}
+            {/* shortcut: no vendor invitation or export in the API, API gap: shown disabled (#46). */}
             <Button disabled>{t('invite')}</Button>
             <Button variant="secondary" disabled>{t('export')}</Button>
           </>
         }
       />
       <FiltersBar search={search} onSearch={setSearch} searchLabel={t('search')} clearLabel={t('clear')} applied={data === 'denied' ? [] : applied}>
-        {/* shortcut: no category or date filter in the API, API gap: shown disabled (#44). */}
+        {/* shortcut: no category or date filter in the API, API gap: shown disabled (#46). */}
         <Select aria-label={t('category')} value="" disabled className="flex-1">
           <option value="">{t('category')}</option>
         </Select>

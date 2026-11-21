@@ -150,8 +150,8 @@ export function DataTable<T>({
         </div>
       )}
 
-      {/* No footer under the loading skeleton: none of the loading frames draws one. */}
-      {status === 'ready' && data.length > 0 && (
+      {/* No footer under the loading skeleton (no loading frame draws one); an empty page keeps it when it has neighbours. */}
+      {status === 'ready' && (data.length > 0 || hasPrev || hasNext) && (
         <nav className={cn('flex h-14 items-center justify-between', tall ? 'px-s24' : 'px-s32')} aria-label={t('table.paging')}>
           <p className="text-body-m text-ink-2">{t('table.showing', { count: data.length })}</p>
           <div className="flex items-center gap-s8">

@@ -320,7 +320,7 @@ export function ProductForm({ product, options, upload, setRule, actions, delete
               </Button>
             ))}
           </div>
-          {/* shortcut: API gap, products cannot be deleted (no DELETE endpoint); shown disabled (#49). */}
+          {/* shortcut: API gap, products cannot be deleted (no DELETE endpoint); shown disabled (#51). */}
           {deleteLabel && <Button variant="danger" disabled>{deleteLabel}</Button>}
         </div>
       )}
