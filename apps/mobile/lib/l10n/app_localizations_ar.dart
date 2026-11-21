@@ -1246,7 +1246,7 @@ class AppLocalizationsAr extends AppLocalizations {
   String get productAdded => 'أُضيفت القطعة إلى السلة';
 
   @override
-  String get checkoutTitle => 'الدفع والمراجعة';
+  String get checkoutTitle => 'إتمام الطلب';
 
   @override
   String get cartReplaceTitle => 'استبدال السلة؟';
@@ -1395,4 +1395,136 @@ class AppLocalizationsAr extends AppLocalizations {
   String cartWeightAbout(String weight) {
     return 'نحو $weight';
   }
+
+  @override
+  String checkoutStep(int step, int total, String name) {
+    return 'الخطوة $step من $total: $name';
+  }
+
+  @override
+  String get checkoutStepFulfilment => 'الاستلام واليوم';
+
+  @override
+  String get checkoutDelivery => 'توصيل للعنوان';
+
+  @override
+  String get checkoutPickup => 'استلام من المتجر';
+
+  @override
+  String get checkoutDeliveryAddress => 'عنوان التوصيل';
+
+  @override
+  String get checkoutOutOfCoverage => 'خارج نطاق التغطية';
+
+  @override
+  String get checkoutNoCoveredTitle => 'لا يوجد عنوان داخل التغطية';
+
+  @override
+  String get checkoutNoCoveredBody => 'أضف عنوانًا داخل نطاق التغطية لنوصل لك، أو اختر الاستلام من المتجر.';
+
+  @override
+  String get checkoutPickupPlace => 'موقع الاستلام';
+
+  @override
+  String checkoutPickupHours(String open, String close) {
+    return 'الاستلام من $open إلى $close';
+  }
+
+  @override
+  String get checkoutDeliveryDay => 'يوم التوصيل';
+
+  @override
+  String get checkoutPickupDay => 'يوم الاستلام';
+
+  @override
+  String get checkoutCalendar => 'التقويم';
+
+  @override
+  String checkoutDeliveryWindow(String start, String end) {
+    return 'يصل بين $start و $end';
+  }
+
+  @override
+  String checkoutPickupWindow(String start, String end) {
+    return 'جاهز للاستلام بين $start و $end';
+  }
+
+  @override
+  String checkoutRiyadhTime(String date) {
+    return '$date · بتوقيت الرياض';
+  }
+
+  @override
+  String checkoutPickAnother(String date) {
+    return '$date · اختر يومًا آخر متاحًا';
+  }
+
+  @override
+  String get checkoutDaysLegend => 'دليل الأيام';
+
+  @override
+  String get checkoutDayClosed => 'مغلق: عطلة المتجر';
+
+  @override
+  String get checkoutDayFull => 'مكتمل: لا توجد سعة';
+
+  @override
+  String get checkoutDayPastCutoff => 'انتهى وقت الطلب لهذا اليوم';
+
+  @override
+  String get checkoutDayVendorClosed => 'مغلق: المتجر لا يعمل في هذا اليوم';
+
+  @override
+  String get checkoutDayOutsideHorizon => 'خارج فترة الحجز المتاحة';
+
+  @override
+  String get checkoutDayUnavailable => 'غير متاح';
+
+  @override
+  String get checkoutDaysErrorTitle => 'تعذّر تحميل الأيام المتاحة';
+
+  @override
+  String get checkoutDaysErrorBody => 'تحقق من الاتصال ثم أعد المحاولة.';
+
+  @override
+  String get checkoutPausedTitle => 'الطلبات متوقفة مؤقتًا، سنعود قريبًا';
+
+  @override
+  String get checkoutChooseDeliveryDay => 'اختر يوم التوصيل';
+
+  @override
+  String get checkoutChoosePickupDay => 'اختر يوم الاستلام';
+
+  @override
+  String get checkoutConfirmDay => 'تأكيد اليوم';
+
+  @override
+  String get checkoutPreviousMonth => 'الشهر السابق';
+
+  @override
+  String get checkoutNextMonth => 'الشهر التالي';
+
+  @override
+  String get clockAm => 'صباحًا';
+
+  @override
+  String get clockPm => 'مساءً';
+
+  @override
+  String get clockAmShort => 'ص';
+
+  @override
+  String get clockPmShort => 'م';
+
+  @override
+  String get errOrderingPaused => 'الطلبات متوقفة مؤقتًا، حاول لاحقًا.';
+
+  @override
+  String get errFulfilmentNotSupported => 'بعض منتجات سلتك لا تتوفر بطريقة الاستلام هذه.';
+
+  @override
+  String get errAddressNotCovered => 'هذا العنوان خارج نطاق التوصيل.';
+
+  @override
+  String get errDayFull => 'اكتمل هذا اليوم، اختر يومًا آخر.';
 }

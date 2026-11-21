@@ -32,7 +32,7 @@ void main() {
     });
 
     test('the delivery fee counts only once fulfilment = delivery', () async {
-      final r = mock()..delivery = true;
+      final r = mock()..fulfilment = const FulfilmentChoice(method: Fulfilment.delivery, date: '2026-11-11');
       final cart = await r.add(kebab.withQuantity(3));
       expect(cart.deliveryFee, 1500);
       expect(cart.total, 10800 + 1500);

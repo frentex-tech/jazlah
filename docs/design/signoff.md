@@ -180,6 +180,20 @@ Everything else follows the five cart frames (170-28564, 170-28643, 170-28708, 1
 | Line weight (170-28564, 170-28847) | «500 جم للقطعة» at quantity 2 and «نحو 1.5 كجم» at quantity 1 in 170-28564, but «500 جم للقطعة» at quantity 1 in 170-28847 | «{weight} للقطعة» when quantity > 1, «نحو {weight}» at quantity 1 | The two frames disagree; the build follows 170-28564. **Figma needs one rule.** |
 | Add to cart success (product page) | No frame | The design-system success toast «أُضيفت القطعة إلى السلة» and the header badge count | No frame. |
 
+## Build differences, Sprint 3 mobile: SCH-MOB-1 checkout step 1 (pending owner sign-off, not agreed)
+Everything else follows the ten frames (118-9638, 118-9741, 118-9829, 118-10052, 118-10144, 118-10199, 118-10251, 118-10342, 118-10426, 118-10510).
+
+| Screen (node) | Figma | Build | Why |
+|---|---|---|---|
+| Pickup card (118-9741) | «اتصال بالمتجر» button | Left out, and no directions button | The app has no URL launcher, so neither a call nor opening the maps app would work; the pickup point has no phone yet. |
+| Delivery address (118-9638) | No way to add an address | «+ إضافة عنوان» link in the title row, opening the existing add-address flow and coming back | The task asks for adding an address inline. |
+| Window card (all) | «يصل بين 4 و 6 مساءً» | The day's window from the server (the default 16:00 to 22:00 reads «يصل بين 4 و 10 مساءً») | Data, not design: the SCH-API-1 default window. |
+| Uncovered address (118-9638) | Second line «بريدة، خارج نطاق التوصيل الحالي» | The address line (city, street) and the «خارج نطاق التغطية» pill | The pill already says it; the address has no such text. |
+| Days error (118-10251) | Day strip still drawn above the error card | Only the error card | With no days loaded, drawing days would be invented. |
+| Day key (118-9638; absent in 118-9741) | Closed, full and past cutoff, in delivery only | The reasons present in the days, in both methods, under the window card (hidden while a disabled day is explained) | One rule for both methods; the vendor closed and outside horizon reasons have no Figma text or icon (store front, calendar with a cross). |
+| Default (118-9638) | Body scrolls to the button | The button stays at the bottom like the other nine frames | The other frames pin it. |
+| Disabled days | Tapping one outlines it and shows the reason card (118-10342 …) | The same, plus a tooltip on long press and the reason in the screen reader label | The task asks every disabled day to explain why. |
+
 ## Checks run on the file (2026-11-13)
 - Script lint over all 587 screens after the last changes: no empty or "undefined" text, no text outside its screen, no missing icon.
 - Clipped layouts: a script found 110 auto-layout frames on web and dashboard screens whose content was cut off (among them the whole animal-registration form) and opened them up. 28 small ones remain (tab labels 7 to 9 px taller than their tab, and the Adha settings body).

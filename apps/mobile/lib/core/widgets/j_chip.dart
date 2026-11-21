@@ -34,7 +34,17 @@ class JChip extends StatelessWidget {
           ),
           child: Row(
             mainAxisSize: MainAxisSize.min,
-            children: [Text(label, maxLines: 1, style: JText.labelM.copyWith(color: fg))],
+            mainAxisAlignment: MainAxisAlignment.center, // centred when stretched (checkout method toggle)
+            children: [
+              Flexible(
+                child: Text(
+                  label,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: JText.labelM.copyWith(color: fg),
+                ),
+              ),
+            ],
           ),
         ),
       ),

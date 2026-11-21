@@ -2375,7 +2375,7 @@ abstract class AppLocalizations {
   /// No description provided for @checkoutTitle.
   ///
   /// In ar, this message translates to:
-  /// **'الدفع والمراجعة'**
+  /// **'إتمام الطلب'**
   String get checkoutTitle;
 
   /// No description provided for @cartReplaceTitle.
@@ -2611,6 +2611,246 @@ abstract class AppLocalizations {
   /// In ar, this message translates to:
   /// **'نحو {weight}'**
   String cartWeightAbout(String weight);
+
+  /// No description provided for @checkoutStep.
+  ///
+  /// In ar, this message translates to:
+  /// **'الخطوة {step} من {total}: {name}'**
+  String checkoutStep(int step, int total, String name);
+
+  /// No description provided for @checkoutStepFulfilment.
+  ///
+  /// In ar, this message translates to:
+  /// **'الاستلام واليوم'**
+  String get checkoutStepFulfilment;
+
+  /// No description provided for @checkoutDelivery.
+  ///
+  /// In ar, this message translates to:
+  /// **'توصيل للعنوان'**
+  String get checkoutDelivery;
+
+  /// No description provided for @checkoutPickup.
+  ///
+  /// In ar, this message translates to:
+  /// **'استلام من المتجر'**
+  String get checkoutPickup;
+
+  /// No description provided for @checkoutDeliveryAddress.
+  ///
+  /// In ar, this message translates to:
+  /// **'عنوان التوصيل'**
+  String get checkoutDeliveryAddress;
+
+  /// No description provided for @checkoutOutOfCoverage.
+  ///
+  /// In ar, this message translates to:
+  /// **'خارج نطاق التغطية'**
+  String get checkoutOutOfCoverage;
+
+  /// No description provided for @checkoutNoCoveredTitle.
+  ///
+  /// In ar, this message translates to:
+  /// **'لا يوجد عنوان داخل التغطية'**
+  String get checkoutNoCoveredTitle;
+
+  /// No description provided for @checkoutNoCoveredBody.
+  ///
+  /// In ar, this message translates to:
+  /// **'أضف عنوانًا داخل نطاق التغطية لنوصل لك، أو اختر الاستلام من المتجر.'**
+  String get checkoutNoCoveredBody;
+
+  /// No description provided for @checkoutPickupPlace.
+  ///
+  /// In ar, this message translates to:
+  /// **'موقع الاستلام'**
+  String get checkoutPickupPlace;
+
+  /// No description provided for @checkoutPickupHours.
+  ///
+  /// In ar, this message translates to:
+  /// **'الاستلام من {open} إلى {close}'**
+  String checkoutPickupHours(String open, String close);
+
+  /// No description provided for @checkoutDeliveryDay.
+  ///
+  /// In ar, this message translates to:
+  /// **'يوم التوصيل'**
+  String get checkoutDeliveryDay;
+
+  /// No description provided for @checkoutPickupDay.
+  ///
+  /// In ar, this message translates to:
+  /// **'يوم الاستلام'**
+  String get checkoutPickupDay;
+
+  /// No description provided for @checkoutCalendar.
+  ///
+  /// In ar, this message translates to:
+  /// **'التقويم'**
+  String get checkoutCalendar;
+
+  /// No description provided for @checkoutDeliveryWindow.
+  ///
+  /// In ar, this message translates to:
+  /// **'يصل بين {start} و {end}'**
+  String checkoutDeliveryWindow(String start, String end);
+
+  /// No description provided for @checkoutPickupWindow.
+  ///
+  /// In ar, this message translates to:
+  /// **'جاهز للاستلام بين {start} و {end}'**
+  String checkoutPickupWindow(String start, String end);
+
+  /// No description provided for @checkoutRiyadhTime.
+  ///
+  /// In ar, this message translates to:
+  /// **'{date} · بتوقيت الرياض'**
+  String checkoutRiyadhTime(String date);
+
+  /// No description provided for @checkoutPickAnother.
+  ///
+  /// In ar, this message translates to:
+  /// **'{date} · اختر يومًا آخر متاحًا'**
+  String checkoutPickAnother(String date);
+
+  /// No description provided for @checkoutDaysLegend.
+  ///
+  /// In ar, this message translates to:
+  /// **'دليل الأيام'**
+  String get checkoutDaysLegend;
+
+  /// No description provided for @checkoutDayClosed.
+  ///
+  /// In ar, this message translates to:
+  /// **'مغلق: عطلة المتجر'**
+  String get checkoutDayClosed;
+
+  /// No description provided for @checkoutDayFull.
+  ///
+  /// In ar, this message translates to:
+  /// **'مكتمل: لا توجد سعة'**
+  String get checkoutDayFull;
+
+  /// No description provided for @checkoutDayPastCutoff.
+  ///
+  /// In ar, this message translates to:
+  /// **'انتهى وقت الطلب لهذا اليوم'**
+  String get checkoutDayPastCutoff;
+
+  /// No description provided for @checkoutDayVendorClosed.
+  ///
+  /// In ar, this message translates to:
+  /// **'مغلق: المتجر لا يعمل في هذا اليوم'**
+  String get checkoutDayVendorClosed;
+
+  /// No description provided for @checkoutDayOutsideHorizon.
+  ///
+  /// In ar, this message translates to:
+  /// **'خارج فترة الحجز المتاحة'**
+  String get checkoutDayOutsideHorizon;
+
+  /// No description provided for @checkoutDayUnavailable.
+  ///
+  /// In ar, this message translates to:
+  /// **'غير متاح'**
+  String get checkoutDayUnavailable;
+
+  /// No description provided for @checkoutDaysErrorTitle.
+  ///
+  /// In ar, this message translates to:
+  /// **'تعذّر تحميل الأيام المتاحة'**
+  String get checkoutDaysErrorTitle;
+
+  /// No description provided for @checkoutDaysErrorBody.
+  ///
+  /// In ar, this message translates to:
+  /// **'تحقق من الاتصال ثم أعد المحاولة.'**
+  String get checkoutDaysErrorBody;
+
+  /// No description provided for @checkoutPausedTitle.
+  ///
+  /// In ar, this message translates to:
+  /// **'الطلبات متوقفة مؤقتًا، سنعود قريبًا'**
+  String get checkoutPausedTitle;
+
+  /// No description provided for @checkoutChooseDeliveryDay.
+  ///
+  /// In ar, this message translates to:
+  /// **'اختر يوم التوصيل'**
+  String get checkoutChooseDeliveryDay;
+
+  /// No description provided for @checkoutChoosePickupDay.
+  ///
+  /// In ar, this message translates to:
+  /// **'اختر يوم الاستلام'**
+  String get checkoutChoosePickupDay;
+
+  /// No description provided for @checkoutConfirmDay.
+  ///
+  /// In ar, this message translates to:
+  /// **'تأكيد اليوم'**
+  String get checkoutConfirmDay;
+
+  /// No description provided for @checkoutPreviousMonth.
+  ///
+  /// In ar, this message translates to:
+  /// **'الشهر السابق'**
+  String get checkoutPreviousMonth;
+
+  /// No description provided for @checkoutNextMonth.
+  ///
+  /// In ar, this message translates to:
+  /// **'الشهر التالي'**
+  String get checkoutNextMonth;
+
+  /// No description provided for @clockAm.
+  ///
+  /// In ar, this message translates to:
+  /// **'صباحًا'**
+  String get clockAm;
+
+  /// No description provided for @clockPm.
+  ///
+  /// In ar, this message translates to:
+  /// **'مساءً'**
+  String get clockPm;
+
+  /// No description provided for @clockAmShort.
+  ///
+  /// In ar, this message translates to:
+  /// **'ص'**
+  String get clockAmShort;
+
+  /// No description provided for @clockPmShort.
+  ///
+  /// In ar, this message translates to:
+  /// **'م'**
+  String get clockPmShort;
+
+  /// No description provided for @errOrderingPaused.
+  ///
+  /// In ar, this message translates to:
+  /// **'الطلبات متوقفة مؤقتًا، حاول لاحقًا.'**
+  String get errOrderingPaused;
+
+  /// No description provided for @errFulfilmentNotSupported.
+  ///
+  /// In ar, this message translates to:
+  /// **'بعض منتجات سلتك لا تتوفر بطريقة الاستلام هذه.'**
+  String get errFulfilmentNotSupported;
+
+  /// No description provided for @errAddressNotCovered.
+  ///
+  /// In ar, this message translates to:
+  /// **'هذا العنوان خارج نطاق التوصيل.'**
+  String get errAddressNotCovered;
+
+  /// No description provided for @errDayFull.
+  ///
+  /// In ar, this message translates to:
+  /// **'اكتمل هذا اليوم، اختر يومًا آخر.'**
+  String get errDayFull;
 }
 
 class _AppLocalizationsDelegate extends LocalizationsDelegate<AppLocalizations> {

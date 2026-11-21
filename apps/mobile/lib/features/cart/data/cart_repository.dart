@@ -1,9 +1,11 @@
 import 'dart:convert';
 
 import 'package:jazlah/core/errors/api_error.dart';
+import 'package:jazlah/core/geo/geo_point.dart';
 import 'package:jazlah/core/storage/prefs.dart';
 import 'package:jazlah/features/cart/domain/cart.dart';
 import 'package:jazlah/features/catalog/data/mock_catalog_repository.dart';
+import 'package:jazlah/features/catalog/domain/catalog.dart';
 import 'package:jazlah/features/product/data/mock_product_repository.dart';
 import 'package:jazlah/features/product/domain/price.dart';
 import 'package:jazlah/features/product/domain/product.dart';
@@ -186,16 +188,41 @@ class _Coupon {
 /// against the mock catalog ([MockProductRepository]) on every read.
 // shortcut: mock cart until CRT-API-1 #61 and CRT-API-3 #62 land (not-built-yet.md).
 class MockCartRepository extends EntriesCart {
-  MockCartRepository({ProductLookup? products, this.delay = const Duration(milliseconds: 300), this.delivery = false})
+  MockCartRepository({ProductLookup? products, this.delay = const Duration(milliseconds: 300)})
     : super(products ?? catalogProduct, settings: opsSettings);
 
   final Duration delay;
 
-  /// Fulfilment = delivery (chosen at checkout, SCH-MOB-1 #71): shows and counts the delivery fee.
-  bool delivery;
-
   /// Ops settings as SCH-API-1 #68 would serve them.
   static const opsSettings = CartSettings(minOrder: 10000, deliveryFee: 1500);
+
+  /// The pickup point of each store that offers pickup (in the cart response, SCH-API-2 #69).
+  static const pickupPoints = {
+    'v-falah': PickupInfo(
+      name: LocalizedText('مجازر الفلاح · فرع العليا', 'Al Falah Butchers · Olaya branch'),
+      address: LocalizedText('الرياض، حي العليا، طريق التخصصي', 'Riyadh, Al Olaya, Takhassusi Road'),
+      point: GeoPoint(24.6950, 46.6830),
+      opensAt: '09:00',
+      closesAt: '22:00',
+    ),
+    'v-nukhba': PickupInfo(
+      name: LocalizedText('ملحمة النخبة · فرع الياسمين', 'Al Nukhba Butchery · Al Yasmin branch'),
+      address: LocalizedText('الرياض، حي الياسمين، طريق أنس بن مالك', 'Riyadh, Al Yasmin, Anas Ibn Malik Road'),
+      point: GeoPoint(24.8240, 46.6420),
+      opensAt: '10:00',
+      closesAt: '23:00',
+    ),
+    'v-deera': PickupInfo(
+      name: LocalizedText('ذبائح الديرة', 'Al Deera Slaughterhouse'),
+      address: LocalizedText('الرياض، حي الديرة', 'Riyadh, Al Deera'),
+      point: GeoPoint(24.6310, 46.7130),
+      opensAt: '08:00',
+      closesAt: '21:00',
+    ),
+  };
+
+  /// Set by the checkout mock once `PATCH /v1/customer/cart/fulfilment` is valid (SCH-MOB-1 #71).
+  FulfilmentChoice? fulfilment;
 
   /// JAZLA10 is the valid one; each other code answers one coupon error.
   static const _coupons = {
@@ -225,8 +252,12 @@ class MockCartRepository extends EntriesCart {
   @override
   Future<void> write(List<CartEntry> entries) async => _entries = entries;
 
+  /// Another store (or none): its coupon and fulfilment no longer apply.
   @override
-  void onCleared() => _coupon = null;
+  void onCleared() {
+    _coupon = null;
+    fulfilment = null;
+  }
 
   String? _check(String code, Cart cart) {
     final c = _coupons[code];
@@ -248,7 +279,8 @@ class MockCartRepository extends EntriesCart {
       settings: settings,
       couponCode: code,
       discountOf: code == null ? null : _coupons[code]!.discount,
-      delivery: delivery,
+      fulfilment: fulfilment,
+      pickup: pickupPoints[entries.firstOrNull?.vendorId],
     );
     final plain = price(null);
     if (_coupon != null && _check(_coupon!, plain) != null) _coupon = null;
@@ -293,7 +325,7 @@ class MockCartRepository extends EntriesCart {
     var replaced = false;
     if (vendor != null && _entries.isNotEmpty && _entries.first.vendorId != vendor) {
       _entries = [];
-      _coupon = null;
+      onCleared();
       replaced = true;
     }
     for (final (item, vendorId, price) in valid) {

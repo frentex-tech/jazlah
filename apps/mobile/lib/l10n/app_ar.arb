@@ -619,7 +619,7 @@
   "productErrorTitle": "تعذّر تحميل المنتج",
   "productErrorBody": "حدث خطأ أثناء جلب تفاصيل المنتج. حاول مرة أخرى.",
   "productAdded": "أُضيفت القطعة إلى السلة",
-  "checkoutTitle": "الدفع والمراجعة",
+  "checkoutTitle": "إتمام الطلب",
   "cartReplaceTitle": "استبدال السلة؟",
   "cartReplaceBody": "سلتك فيها منتجات من {vendor}. السلة تجمع متجرًا واحدًا، فإضافة هذا المنتج تفرّغها وتبدأ سلة جديدة.",
   "@cartReplaceBody": {
@@ -741,5 +741,102 @@
         "type": "String"
       }
     }
-  }
+  },
+  "checkoutStep": "الخطوة {step} من {total}: {name}",
+  "@checkoutStep": {
+    "placeholders": {
+      "step": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      },
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "checkoutStepFulfilment": "الاستلام واليوم",
+  "checkoutDelivery": "توصيل للعنوان",
+  "checkoutPickup": "استلام من المتجر",
+  "checkoutDeliveryAddress": "عنوان التوصيل",
+  "checkoutOutOfCoverage": "خارج نطاق التغطية",
+  "checkoutNoCoveredTitle": "لا يوجد عنوان داخل التغطية",
+  "checkoutNoCoveredBody": "أضف عنوانًا داخل نطاق التغطية لنوصل لك، أو اختر الاستلام من المتجر.",
+  "checkoutPickupPlace": "موقع الاستلام",
+  "checkoutPickupHours": "الاستلام من {open} إلى {close}",
+  "@checkoutPickupHours": {
+    "placeholders": {
+      "open": {
+        "type": "String"
+      },
+      "close": {
+        "type": "String"
+      }
+    }
+  },
+  "checkoutDeliveryDay": "يوم التوصيل",
+  "checkoutPickupDay": "يوم الاستلام",
+  "checkoutCalendar": "التقويم",
+  "checkoutDeliveryWindow": "يصل بين {start} و {end}",
+  "@checkoutDeliveryWindow": {
+    "placeholders": {
+      "start": {
+        "type": "String"
+      },
+      "end": {
+        "type": "String"
+      }
+    }
+  },
+  "checkoutPickupWindow": "جاهز للاستلام بين {start} و {end}",
+  "@checkoutPickupWindow": {
+    "placeholders": {
+      "start": {
+        "type": "String"
+      },
+      "end": {
+        "type": "String"
+      }
+    }
+  },
+  "checkoutRiyadhTime": "{date} · بتوقيت الرياض",
+  "@checkoutRiyadhTime": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "checkoutPickAnother": "{date} · اختر يومًا آخر متاحًا",
+  "@checkoutPickAnother": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "checkoutDaysLegend": "دليل الأيام",
+  "checkoutDayClosed": "مغلق: عطلة المتجر",
+  "checkoutDayFull": "مكتمل: لا توجد سعة",
+  "checkoutDayPastCutoff": "انتهى وقت الطلب لهذا اليوم",
+  "checkoutDayVendorClosed": "مغلق: المتجر لا يعمل في هذا اليوم",
+  "checkoutDayOutsideHorizon": "خارج فترة الحجز المتاحة",
+  "checkoutDayUnavailable": "غير متاح",
+  "checkoutDaysErrorTitle": "تعذّر تحميل الأيام المتاحة",
+  "checkoutDaysErrorBody": "تحقق من الاتصال ثم أعد المحاولة.",
+  "checkoutPausedTitle": "الطلبات متوقفة مؤقتًا، سنعود قريبًا",
+  "checkoutChooseDeliveryDay": "اختر يوم التوصيل",
+  "checkoutChoosePickupDay": "اختر يوم الاستلام",
+  "checkoutConfirmDay": "تأكيد اليوم",
+  "checkoutPreviousMonth": "الشهر السابق",
+  "checkoutNextMonth": "الشهر التالي",
+  "clockAm": "صباحًا",
+  "clockPm": "مساءً",
+  "clockAmShort": "ص",
+  "clockPmShort": "م",
+  "errOrderingPaused": "الطلبات متوقفة مؤقتًا، حاول لاحقًا.",
+  "errFulfilmentNotSupported": "بعض منتجات سلتك لا تتوفر بطريقة الاستلام هذه.",
+  "errAddressNotCovered": "هذا العنوان خارج نطاق التوصيل.",
+  "errDayFull": "اكتمل هذا اليوم، اختر يومًا آخر."
 }

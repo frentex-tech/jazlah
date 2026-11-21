@@ -15,7 +15,7 @@ flutter run --flavor staging -t lib/main_staging.dart --dart-define-from-file=co
 | staging | `sa.jazlah.app.staging` | `lib/main_staging.dart` |
 | prod | `sa.jazlah.app` | `lib/main_prod.dart` |
 
-Without a backend, set `"USE_MOCKS": "true"` in the config file. Outside prod, the widget gallery is at `/gallery`.
+Without a backend, set `"USE_MOCKS": "true"` in the config file. Outside prod, the widget gallery is at `/gallery`. With mocks, `--dart-define=MOCK_PAUSED=true` turns on the ordering pause at checkout (QA).
 
 iOS uses Swift Package Manager where plugins support it and **CocoaPods** for the rest (`google_maps_flutter` has no SPM package yet), so install CocoaPods (`pod --version`). The flavors' Xcode configurations and schemes were created by `scripts/setup_ios_flavors.rb`; the Podfile maps them.
 

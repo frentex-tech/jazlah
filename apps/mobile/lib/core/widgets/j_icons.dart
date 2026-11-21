@@ -47,6 +47,10 @@ abstract final class JIcons {
   static const thermometer = IconData(0xe5c6, fontFamily: _regular, fontPackage: _package);
   static const clock = IconData(0xe19a, fontFamily: _regular, fontPackage: _package);
   static const package = IconData(0xe390, fontFamily: _regular, fontPackage: _package);
+  static const calendarBlank = IconData(0xe10a, fontFamily: _regular, fontPackage: _package);
+  static const calendarX = IconData(0xe10c, fontFamily: _regular, fontPackage: _package);
+  static const clockCountdown = IconData(0xed2c, fontFamily: _regular, fontPackage: _package);
+  static const usersThree = IconData(0xe68e, fontFamily: _regular, fontPackage: _package);
   static const mapPinFill = IconData(0xe316, fontFamily: _fill, fontPackage: _package);
   static const storefrontFill = IconData(0xe470, fontFamily: _fill, fontPackage: _package);
   static const truckFill = IconData(0xe4b4, fontFamily: _fill, fontPackage: _package);
@@ -58,6 +62,7 @@ abstract final class JIcons {
   static const squaresFourFill = IconData(0xe464, fontFamily: _fill, fontPackage: _package);
   static const receiptFill = IconData(0xe3ec, fontFamily: _fill, fontPackage: _package);
   static const userFill = IconData(0xe4c2, fontFamily: _fill, fontPackage: _package);
+  static const pauseCircleFill = IconData(0xe3a0, fontFamily: _fill, fontPackage: _package);
 
   static const _package = 'phosphor_flutter';
   static const _regular = 'PhosphorRegular';
