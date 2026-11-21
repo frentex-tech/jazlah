@@ -11,7 +11,7 @@
 # the Render dashboard (sync: false, asked once when the Blueprint is created).
 
 services:
-  # The API, built from services/api/Dockerfile. Queue workers run in the same process.
+  # The API, built from services/api/Dockerfile. Queue workers are off (QUEUE_WORKERS_ENABLED).
   - type: web
     name: jazla-api-staging
     runtime: docker
@@ -72,7 +72,8 @@ services:
       # postgresql://...neon.tech/...?sslmode=require
       - key: DATABASE_URL
         sync: false
-      # A Neon compute asleep for 5 minutes takes up to a few seconds to wake.
+      # A Neon compute asleep for 5 minutes takes up to a few seconds to wake. This is the
+      # API's pool only; `prisma migrate deploy` reads `connect_timeout` from the URL (guide, step 3).
       - key: DATABASE_CONNECTION_TIMEOUT_MS
         value: "15000"
       # Upstash's TLS address: rediss://default:...@....upstash.io:6379
