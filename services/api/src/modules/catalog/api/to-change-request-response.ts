@@ -24,6 +24,7 @@ export function toChangeRequestResponse(
         approxWeightGrams: size.approxWeightGrams,
         priceHalalas: size.price.halalas,
         tag: size.tag,
+        isAvailable: null,
       })),
       cuttings: content.cuttings.map((cutting) => ({
         cuttingStyleId: cutting.cuttingStyleId,

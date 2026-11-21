@@ -34,4 +34,13 @@ export class ProductSizeResponseDto {
       'An optional label in Arabic and English, such as “Enough for an aqiqah”; null for none.',
   })
   tag!: LocalizedTextResponseDto | null;
+
+  @ApiProperty({
+    type: Boolean,
+    nullable: true,
+    example: true,
+    description:
+      'Whether this size can be ordered now (switched by the availability edit); null only inside a change request, where a new size starts available and a kept one keeps its availability.',
+  })
+  isAvailable!: boolean | null;
 }

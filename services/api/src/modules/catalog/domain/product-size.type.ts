@@ -8,4 +8,6 @@ export type ProductSize = Readonly<{
   price: Money;
   /** "Enough for an aqiqah"; null when the size has none. */
   tag: LocalizedText | null;
+  /** Whether this size can be ordered now (out of stock when false). */
+  isAvailable: boolean;
 }>;

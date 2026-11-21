@@ -2,7 +2,6 @@ import { toPackagingResponses } from './to-packaging-responses';
 import type { PublicProductView } from '../application/public-product-view.type';
 import type { PublicProductResponseDto } from './dto/public-product-response.dto';
 import { toImageResponses } from './to-image-responses';
-import { toProductOptionsResponse } from './to-product-options-response';
 
 /** A public product page. A public product always has a size, so a lowest price. */
 export function toPublicProductResponse(
@@ -20,10 +19,24 @@ export function toPublicProductResponse(
     category: product.category,
     meatType: product.meatType,
     fulfilment: product.fulfilment,
+    isAvailable: product.isAvailable,
     images: toImageResponses(product.imageMediaIds, view.imageUrls),
-    ...toProductOptionsResponse(product),
+    sizes: product.sizes.map((size) => ({
+      id: size.id,
+      approxWeightGrams: size.approxWeightGrams,
+      priceHalalas: size.price.halalas,
+      tag: size.tag,
+      isAvailable: size.isAvailable,
+    })),
+    defaultSizeId: product.sizes.find((size) => size.isAvailable)?.id ?? null,
+    cuttings: product.cuttings.map((cutting) => ({
+      cuttingStyleId: cutting.cuttingStyleId,
+      name: cutting.name,
+      extraPriceHalalas: cutting.extraPrice.halalas,
+    })),
     packagings: toPackagingResponses(product.packagings),
     exclusions: [...product.exclusions],
+    incompatiblePairs: [...view.incompatiblePairs],
     minPriceHalalas: product.minPrice.halalas,
   };
 }
