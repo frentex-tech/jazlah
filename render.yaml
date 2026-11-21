@@ -17,9 +17,11 @@ services:
     branch: develop
     # Deploy a commit to develop only once its GitHub checks (API CI) have passed.
     autoDeployTrigger: checksPass
+    # With rootDir set, Render reads dockerContext and dockerfilePath relative to it
+    # (render.com/docs/monorepo-support, "Root-relative settings").
     rootDir: services/api
-    dockerContext: ./services/api
-    dockerfilePath: ./services/api/Dockerfile
+    dockerContext: .
+    dockerfilePath: ./Dockerfile
     # Liveness: the process answers. /v1/health/ready also checks PostgreSQL and Redis.
     healthCheckPath: /v1/health
     # Once per deploy, after the image is built and before the new version starts; a
