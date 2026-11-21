@@ -15,6 +15,10 @@ String errorText(BuildContext context, Object error) {
         'COUPON_MIN_ORDER' => l10n.errCouponMinOrder,
         'COUPON_NOT_APPLICABLE' => l10n.errCouponNotApplicable,
         'COUPON_LIMIT_REACHED' => l10n.errCouponLimitReached,
+        'ORDERING_PAUSED' => l10n.errOrderingPaused,
+        'FULFILMENT_NOT_SUPPORTED' => l10n.errFulfilmentNotSupported,
+        'ADDRESS_NOT_COVERED' => l10n.errAddressNotCovered,
+        'DAY_FULL' => l10n.errDayFull,
         _ => l10n.errorGeneric,
       };
 }
