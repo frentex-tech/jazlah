@@ -89,9 +89,6 @@ class ProductDetail {
   /// API gap: packaging id → the cut ids it does not go with.
   final Map<String, Set<String>> incompatible;
 
-  /// A choice must be made when the product has cuts.
-  bool get cutRequired => cuts.isNotEmpty;
-
   bool compatible(String? cutId, String? packagingId) =>
       cutId == null || packagingId == null || !(incompatible[packagingId]?.contains(cutId) ?? false);
 }

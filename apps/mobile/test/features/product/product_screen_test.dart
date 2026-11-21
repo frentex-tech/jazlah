@@ -75,12 +75,12 @@ void main() {
   testWidgets('an incompatible packaging cannot be selected; tapping it explains why', (t) async {
     await _pump(t);
     await _tap(t, 'شرائح');
-    expect(find.text('غير متاح مع التقطيع المختار: شرائح'), findsOneWidget);
+    expect(find.text('غير متاح مع التقطيع المختار: الشرائح'), findsOneWidget);
     await _tap(t, 'صندوق هدية');
     final gift = t.widget<JRadio>(find.widgetWithText(JRadio, 'صندوق هدية'));
     expect((gift.checked, gift.onTap), (false, null));
     expect(_total(t), '89.00');
-    expect(find.text('غيّر التقطيع إلى «قطعة كاملة» أو «مكعبات» لاختيار هذا الخيار'), findsOneWidget);
+    expect(find.text('غيّر التقطيع إلى «قطعة كاملة» أو «مكعبات» لاختيار هذا الخيار.'), findsOneWidget);
     await t.tap(find.text('صندوق هدية'));
     await t.pump();
     expect(find.textContaining('غيّر التقطيع'), findsNothing);

@@ -9,8 +9,12 @@ import 'package:jazlah/features/product/domain/product.dart';
 abstract final class PriceError {
   static const productUnavailable = 'PRODUCT_UNAVAILABLE';
   static const sizeUnavailable = 'SIZE_UNAVAILABLE';
-  static const cutPackagingIncompatible = 'CUT_PACKAGING_INCOMPATIBLE';
+  static const cutPackagingIncompatible = 'INCOMPATIBLE_CUTTING_PACKAGING';
   static const optionNotInProduct = 'OPTION_NOT_IN_PRODUCT';
+
+  /// A product with cuts needs one chosen. Unlike the others it keeps the price of what is chosen,
+  /// so the bar still shows a total and the add button explains the missing cut (118-9573).
+  static const optionRequired = 'OPTION_REQUIRED';
 }
 
 enum PriceKind { size, cut, packaging }
@@ -31,10 +35,14 @@ class PriceLine {
   final int lineTotal;
   final List<PriceComponent> breakdown;
 
-  /// [PriceError] codes. When not empty, the line cannot be bought and its prices are 0.
+  /// [PriceError] codes. When not empty, the line cannot be bought; its prices are 0 unless the only
+  /// error is [PriceError.optionRequired].
   final List<String> errors;
 
   bool get ok => errors.isEmpty;
+
+  /// Only a choice is missing: the total shows and the add button can say what to choose.
+  bool get onlyMissingChoice => errors.length == 1 && errors.first == PriceError.optionRequired;
 }
 
 PriceLine priceLine(ProductDetail p, ProductSelection s) {
@@ -57,7 +65,10 @@ PriceLine priceLine(ProductDetail p, ProductSelection s) {
     find(p.exclusions, id, (o) => o.id);
   }
   if (!p.compatible(s.cutId, s.packagingId)) errors.add(PriceError.cutPackagingIncompatible);
-  if (errors.isNotEmpty) return PriceLine(unitPrice: 0, lineTotal: 0, breakdown: const [], errors: errors.toList());
+  if (errors.isEmpty && p.cuts.isNotEmpty && s.cutId == null) errors.add(PriceError.optionRequired);
+  if (errors.any((e) => e != PriceError.optionRequired)) {
+    return PriceLine(unitPrice: 0, lineTotal: 0, breakdown: const [], errors: errors.toList());
+  }
 
   final breakdown = [
     PriceComponent(PriceKind.size, size!.id, size.priceHalalas),
@@ -65,5 +76,5 @@ PriceLine priceLine(ProductDetail p, ProductSelection s) {
     if (packaging != null) PriceComponent(PriceKind.packaging, packaging.id, packaging.extraHalalas),
   ];
   final unit = breakdown.fold(0, (sum, c) => sum + c.halalas);
-  return PriceLine(unitPrice: unit, lineTotal: unit * s.quantity, breakdown: breakdown, errors: const []);
+  return PriceLine(unitPrice: unit, lineTotal: unit * s.quantity, breakdown: breakdown, errors: errors.toList());
 }

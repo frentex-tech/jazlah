@@ -52,12 +52,10 @@ class ApiProductRepository implements ProductRepository {
           ),
       ],
       cuts: [
+        // A cut without a name is skipped (never show its id), as an unknown packaging is.
         for (final c in d.cuttings)
-          ProductOption(
-            id: c.cuttingStyleId,
-            name: c.name == null ? LocalizedText(c.cuttingStyleId, c.cuttingStyleId) : _text(c.name!),
-            extraHalalas: c.extraPriceHalalas.toInt(),
-          ),
+          if (c.name case final name?)
+            ProductOption(id: c.cuttingStyleId, name: _text(name), extraHalalas: c.extraPriceHalalas.toInt()),
       ],
       packagings: [
         for (final p in d.packagings)
@@ -66,7 +64,7 @@ class ApiProductRepository implements ProductRepository {
       ],
       exclusions: [for (final e in d.exclusions) ProductOption(id: e.id, name: _text(e.name))],
       // shortcut: the public detail has no availability, per-size stock, store rating, freshness, default
-      // size or cut↔packaging rules, API gap (not-built-yet.md). Shown as available with no rules; the
+      // size or cut↔packaging rules, API gap for CAT-API-5 #50 (not-built-yet.md). Shown as available with no rules; the
       // server still refuses an unavailable size or an incompatible pair when the cart prices the line.
     );
   }

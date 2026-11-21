@@ -94,9 +94,10 @@ class JAppHeader extends StatelessWidget {
             ],
           ),
         ),
-        _CircleButton(icon: JIcons.bell, label: notificationsLabel!, onTap: onNotifications),
-        const SizedBox(width: JSpace.s8),
+        // RTL: the last child sits at the far left, where the spec puts the bell.
         cart,
+        const SizedBox(width: JSpace.s8),
+        _CircleButton(icon: JIcons.bell, label: notificationsLabel!, onTap: onNotifications),
       ],
     );
   }

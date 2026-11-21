@@ -48,8 +48,7 @@ class _ProductScreenState extends ConsumerState<ProductScreen> {
   });
 
   Future<void> _add(ProductDetail p) async {
-    final s = _selection!;
-    if (p.cutRequired && s.cutId == null) {
+    if (priceLine(p, _selection!).errors.contains(PriceError.optionRequired)) {
       setState(() => _cutError = true);
       final target = _cutKey.currentContext;
       if (target != null) await Scrollable.ensureVisible(target, duration: const Duration(milliseconds: 300));
@@ -227,7 +226,7 @@ class _ProductScreenState extends ConsumerState<ProductScreen> {
                     _IncompatibleOption(
                       option: o,
                       price: _extra(l10n, o.extraHalalas),
-                      cutName: cut!.name.of(lang),
+                      cutName: definiteName(cut!.name.of(lang), lang),
                       choices: [
                         for (final c in p.cuts)
                           if (p.compatible(c.id, o.id)) l10n.productQuoted(c.name.of(lang)),
@@ -366,7 +365,7 @@ class _ProductScreenState extends ConsumerState<ProductScreen> {
   Widget _bar(ProductDetail? p) {
     final l10n = AppLocalizations.of(context);
     final line = p == null ? null : priceLine(p, _selection!);
-    final ok = line?.ok ?? false;
+    final ok = (line?.ok ?? false) || (line?.onlyMissingChoice ?? false);
     final unavailable = p != null && !p.available;
     return Container(
       padding: EdgeInsets.fromLTRB(
@@ -449,7 +448,7 @@ class _ProductScreenState extends ConsumerState<ProductScreen> {
             l10n.productPrice(formatHalalas(c.halalas)),
           ),
           PriceKind.cut => row(l10n.productCutLine(nameOf(p.cuts, c.optionId)), _extra(l10n, c.halalas)),
-          PriceKind.packaging => row(nameOf(p.packagings, c.optionId), _extra(l10n, c.halalas)),
+          PriceKind.packaging => row(definiteName(nameOf(p.packagings, c.optionId), lang), _extra(l10n, c.halalas)),
         },
       if (s.quantity > 1) row(l10n.productQuantity, '× ${s.quantity}'),
       row(l10n.productDelivery, l10n.productDeliveryAtCheckout),
@@ -483,6 +482,13 @@ class _ProductScreenState extends ConsumerState<ProductScreen> {
 }
 
 /// `500` → "500 g", `1000` → "1 kg", `1500` → "1.5 kg".
+/// Arabic option names read as definite in a sentence (Figma: «الشرائح», «التغليف المفرغ»): "ال" on each
+/// word not already carrying it. shortcut: wrong for a construct like «صندوق هدية» (→ «الصندوق الهدية»),
+/// API gap: ask CAT-API-5 (#50) for the definite name if more such options appear.
+@visibleForTesting
+String definiteName(String name, String lang) =>
+    lang != 'ar' ? name : name.split(' ').map((w) => w.isEmpty || w.startsWith('ال') ? w : 'ال$w').join(' ');
+
 String _weight(AppLocalizations l10n, int grams) {
   if (grams < 1000) return l10n.weightGrams('$grams');
   final kg = grams / 1000;

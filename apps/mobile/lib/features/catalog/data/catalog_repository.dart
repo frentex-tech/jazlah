@@ -65,24 +65,20 @@ class ApiCatalogRepository implements CatalogRepository {
     city: d.city,
   );
 
-  // shortcut: no sort parameter on the public product list, API gap (not-built-yet.md); the control is hidden.
+  // shortcut: no sort parameter on the public product list, API gap for CAT-API-5 #50 (not-built-yet.md); the control is hidden.
   @override
   bool get canSort => false;
 
-  // shortcut: no home feed route yet, API gap (not-built-yet.md). Built from the public lists: the first
-  // products stand in for best sellers; no banners and no "stores paused" flag.
+  // shortcut: no home feed route yet, API gap for CAT-API-5 #50 (not-built-yet.md). Built from the public
+  // lists; no best sellers (no list would be true: the section is hidden), no banners, no "stores paused".
   @override
   Future<HomeFeed> home() async {
     // Future.wait reports the first failure (an ApiError) and swallows the others.
-    final r = await Future.wait<Object>([
-      categories(),
-      products((categoryId: null, vendorId: null, sort: ProductSort.popular), limit: 4),
-      stores(limit: 3),
-    ]);
+    final r = await Future.wait<Object>([categories(), stores(limit: 3)]);
     return HomeFeed(
       categories: r[0] as List<Category>,
-      bestSellers: (r[1] as CatalogPage<ProductCard>).items,
-      partnerStores: (r[2] as CatalogPage<Store>).items,
+      bestSellers: const [],
+      partnerStores: (r[1] as CatalogPage<Store>).items,
     );
   }
 

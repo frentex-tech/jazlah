@@ -106,5 +106,21 @@ void main() {
     );
   });
 
+  test('home with the API: no best sellers (no true list yet), categories and stores', () async {
+    final a = _Api({
+      '/v1/public/categories': {'items': <Object>[]},
+      '/v1/public/vendors': {
+        'items': [
+          _vendor('v1', {'ar': null, 'en': null}),
+        ],
+        'nextCursor': null,
+      },
+    });
+    final feed = await _repo(a).home();
+    expect(feed.bestSellers, isEmpty);
+    expect(feed.partnerStores.single.id, 'v1');
+    expect(a.requests.any((r) => r.path == '/v1/public/products'), isFalse);
+  });
+
   test('the API cannot sort yet', () => expect(_repo(_Api({})).canSort, isFalse));
 }

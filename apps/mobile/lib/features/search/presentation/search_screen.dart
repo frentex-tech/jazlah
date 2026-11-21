@@ -235,7 +235,7 @@ class _Results extends ConsumerWidget {
 
   List<String> _activeChips(AppLocalizations l10n, WidgetRef ref, String lang) {
     final q = query;
-    // shortcut: store names come from the first store page only, API gap (not-built-yet.md); a store
+    // shortcut: store names come from the first store page only, API gap for CAT-API-5 #50 (not-built-yet.md); a store
     // not in it (or names still loading) shows as a generic chip, so the chips match the filter count.
     final store = q.vendorId == null
         ? null

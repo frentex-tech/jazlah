@@ -30,7 +30,7 @@ void main() {
     expect(find.text('مفتوح حتى 11:00 م'), findsOneWidget);
     expect(find.text('توصيل خلال 35 دقيقة'), findsOneWidget);
     expect(find.text('الحد الأدنى للطلب 50.00 ر.س'), findsOneWidget);
-    expect(find.widgetWithText(JBadge, 'استلام من المتجر'), findsOneWidget);
+    expect(find.widgetWithText(JBadge, 'استلام من المتجر'), findsNothing); // not in Figma 118-8184
     expect(find.text('ف'), findsOneWidget); // monogram
     final cards = t.widgetList<JProductCard>(find.byType(JProductCard));
     expect(cards, isNotEmpty);

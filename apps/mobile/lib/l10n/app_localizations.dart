@@ -2006,12 +2006,6 @@ abstract class AppLocalizations {
   /// **'البحث'**
   String get searchTitle;
 
-  /// No description provided for @storePickupBadge.
-  ///
-  /// In ar, this message translates to:
-  /// **'استلام من المتجر'**
-  String get storePickupBadge;
-
   /// No description provided for @searchRecent.
   ///
   /// In ar, this message translates to:
@@ -2303,7 +2297,7 @@ abstract class AppLocalizations {
   /// No description provided for @productIncompatibleHelp.
   ///
   /// In ar, this message translates to:
-  /// **'غيّر التقطيع إلى {cuts} لاختيار هذا الخيار'**
+  /// **'غيّر التقطيع إلى {cuts} لاختيار هذا الخيار.'**
   String productIncompatibleHelp(String cuts);
 
   /// No description provided for @productQuoted.

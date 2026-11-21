@@ -24,8 +24,9 @@ class FilterSheet extends StatefulWidget {
 
   final SearchQuery query;
 
-  /// The slider's top, in riyals; at the top there is no upper bound.
-  static const maxRiyals = 500.0;
+  /// The slider's top, in riyals; at the top there is no upper bound. 150 so the common 10–100 range fills
+  /// the track as in Figma 86-13223 (most cuts are under it; carcasses stay reachable through "150+").
+  static const maxRiyals = 150.0;
 
   @override
   State<FilterSheet> createState() => _FilterSheetState();
@@ -93,7 +94,7 @@ class _FilterSheetState extends State<FilterSheet> {
         final count = ref.watch(searchCountProvider(draft));
         // Keeps the last number while the next one loads, so the button does not flicker.
         if (count.hasValue) _count = count.value;
-        // shortcut: the first store page only, API gap (not-built-yet.md); a chosen store outside it
+        // shortcut: the first store page only, API gap for CAT-API-5 #50 (not-built-yet.md); a chosen store outside it
         // keeps a generic selected chip.
         final stores = ref.watch(storePagesProvider).value?.items ?? const <Store>[];
         final otherStore = _vendorId != null && !stores.any((s) => s.id == _vendorId);
@@ -137,7 +138,7 @@ class _FilterSheetState extends State<FilterSheet> {
                               child: RangeSlider(
                                 values: _price,
                                 max: FilterSheet.maxRiyals,
-                                divisions: 50,
+                                divisions: 15,
                                 onChanged: (v) => setState(() => _price = v),
                               ),
                             ),
