@@ -2354,12 +2354,6 @@ abstract class AppLocalizations {
   /// **'اختر طريقة التقطيع قبل الإضافة إلى السلة'**
   String get productChooseCut;
 
-  /// No description provided for @productCartSoon.
-  ///
-  /// In ar, this message translates to:
-  /// **'السلة قادمة قريبًا، لم تُضَف القطعة بعد.'**
-  String get productCartSoon;
-
   /// No description provided for @productErrorTitle.
   ///
   /// In ar, this message translates to:
@@ -2371,6 +2365,252 @@ abstract class AppLocalizations {
   /// In ar, this message translates to:
   /// **'حدث خطأ أثناء جلب تفاصيل المنتج. حاول مرة أخرى.'**
   String get productErrorBody;
+
+  /// No description provided for @productAdded.
+  ///
+  /// In ar, this message translates to:
+  /// **'أُضيفت القطعة إلى السلة'**
+  String get productAdded;
+
+  /// No description provided for @checkoutTitle.
+  ///
+  /// In ar, this message translates to:
+  /// **'الدفع والمراجعة'**
+  String get checkoutTitle;
+
+  /// No description provided for @cartReplaceTitle.
+  ///
+  /// In ar, this message translates to:
+  /// **'استبدال السلة؟'**
+  String get cartReplaceTitle;
+
+  /// No description provided for @cartReplaceBody.
+  ///
+  /// In ar, this message translates to:
+  /// **'سلتك فيها منتجات من {vendor}. السلة تجمع متجرًا واحدًا، فإضافة هذا المنتج تفرّغها وتبدأ سلة جديدة.'**
+  String cartReplaceBody(String vendor);
+
+  /// No description provided for @cartAnotherStore.
+  ///
+  /// In ar, this message translates to:
+  /// **'متجر آخر'**
+  String get cartAnotherStore;
+
+  /// No description provided for @cartReplace.
+  ///
+  /// In ar, this message translates to:
+  /// **'استبدال'**
+  String get cartReplace;
+
+  /// No description provided for @cartEmptyTitle.
+  ///
+  /// In ar, this message translates to:
+  /// **'سلتك فارغة'**
+  String get cartEmptyTitle;
+
+  /// No description provided for @cartEmptyBody.
+  ///
+  /// In ar, this message translates to:
+  /// **'أضف منتجات من المتاجر وسنجهّزها لك طازجة.'**
+  String get cartEmptyBody;
+
+  /// No description provided for @cartBrowse.
+  ///
+  /// In ar, this message translates to:
+  /// **'تصفّح المنتجات'**
+  String get cartBrowse;
+
+  /// No description provided for @cartErrorTitle.
+  ///
+  /// In ar, this message translates to:
+  /// **'تعذّر تحميل السلة'**
+  String get cartErrorTitle;
+
+  /// No description provided for @cartErrorBody.
+  ///
+  /// In ar, this message translates to:
+  /// **'تحقق من اتصالك ثم حاول مرة أخرى.'**
+  String get cartErrorBody;
+
+  /// No description provided for @cartMinOrder.
+  ///
+  /// In ar, this message translates to:
+  /// **'الحد الأدنى للطلب {amount} ر.س'**
+  String cartMinOrder(String amount);
+
+  /// No description provided for @cartMinOrderRemaining.
+  ///
+  /// In ar, this message translates to:
+  /// **'أضف {amount} ر.س من المنتجات لإكمال طلبك.'**
+  String cartMinOrderRemaining(String amount);
+
+  /// No description provided for @cartCouponLabel.
+  ///
+  /// In ar, this message translates to:
+  /// **'رمز الخصم · اختياري'**
+  String get cartCouponLabel;
+
+  /// No description provided for @cartCouponPlaceholder.
+  ///
+  /// In ar, this message translates to:
+  /// **'أدخل رمز الخصم'**
+  String get cartCouponPlaceholder;
+
+  /// No description provided for @cartCouponApply.
+  ///
+  /// In ar, this message translates to:
+  /// **'تطبيق'**
+  String get cartCouponApply;
+
+  /// No description provided for @cartCouponRemove.
+  ///
+  /// In ar, this message translates to:
+  /// **'إزالة'**
+  String get cartCouponRemove;
+
+  /// No description provided for @cartCouponApplied.
+  ///
+  /// In ar, this message translates to:
+  /// **'تم تطبيق الرمز {code}'**
+  String cartCouponApplied(String code);
+
+  /// No description provided for @cartSubtotal.
+  ///
+  /// In ar, this message translates to:
+  /// **'المجموع الفرعي'**
+  String get cartSubtotal;
+
+  /// No description provided for @cartDeliveryFee.
+  ///
+  /// In ar, this message translates to:
+  /// **'رسوم التوصيل'**
+  String get cartDeliveryFee;
+
+  /// No description provided for @cartVat.
+  ///
+  /// In ar, this message translates to:
+  /// **'منها ضريبة القيمة المضافة 15%'**
+  String get cartVat;
+
+  /// No description provided for @cartTotal.
+  ///
+  /// In ar, this message translates to:
+  /// **'الإجمالي'**
+  String get cartTotal;
+
+  /// No description provided for @cartCheckout.
+  ///
+  /// In ar, this message translates to:
+  /// **'متابعة إلى الدفع'**
+  String get cartCheckout;
+
+  /// No description provided for @cartCheckoutSoon.
+  ///
+  /// In ar, this message translates to:
+  /// **'الدفع من التطبيق قادم قريبًا، وسلتك محفوظة على هذا الجهاز.'**
+  String get cartCheckoutSoon;
+
+  /// No description provided for @cartRemove.
+  ///
+  /// In ar, this message translates to:
+  /// **'حذف'**
+  String get cartRemove;
+
+  /// No description provided for @cartUnavailable.
+  ///
+  /// In ar, this message translates to:
+  /// **'غير متوفر'**
+  String get cartUnavailable;
+
+  /// No description provided for @cartItemGone.
+  ///
+  /// In ar, this message translates to:
+  /// **'منتج لم يعد متوفرًا'**
+  String get cartItemGone;
+
+  /// No description provided for @cartIssueUnavailable.
+  ///
+  /// In ar, this message translates to:
+  /// **'«{name}» لم يعد متوفرًا. احذفه لإكمال طلبك.'**
+  String cartIssueUnavailable(String name);
+
+  /// No description provided for @cartIssuePrice.
+  ///
+  /// In ar, this message translates to:
+  /// **'تغيّر سعر «{name}» من {old} إلى {now} ر.س.'**
+  String cartIssuePrice(String name, String old, String now);
+
+  /// No description provided for @cartIssueAccept.
+  ///
+  /// In ar, this message translates to:
+  /// **'موافق'**
+  String get cartIssueAccept;
+
+  /// No description provided for @cartMergeReplaced.
+  ///
+  /// In ar, this message translates to:
+  /// **'استبدلنا سلتك السابقة بالمنتجات التي أضفتها قبل تسجيل الدخول.'**
+  String get cartMergeReplaced;
+
+  /// No description provided for @cartMergeSkipped.
+  ///
+  /// In ar, this message translates to:
+  /// **'{count, plural, =1{لم ننقل منتجًا واحدًا لأنه لم يعد متوفرًا.} =2{لم ننقل منتجين لأنهما لم يعودا متوفرين.} few{لم ننقل {count} منتجات لأنها لم تعد متوفرة.} many{لم ننقل {count} منتجًا لأنها لم تعد متوفرة.} other{لم ننقل {count} منتج لأنها لم تعد متوفرة.}}'**
+  String cartMergeSkipped(int count);
+
+  /// No description provided for @errCouponNotFound.
+  ///
+  /// In ar, this message translates to:
+  /// **'رمز الخصم غير صحيح.'**
+  String get errCouponNotFound;
+
+  /// No description provided for @errCouponExpired.
+  ///
+  /// In ar, this message translates to:
+  /// **'انتهت صلاحية رمز الخصم.'**
+  String get errCouponExpired;
+
+  /// No description provided for @errCouponMinOrder.
+  ///
+  /// In ar, this message translates to:
+  /// **'قيمة سلتك أقل من الحد الأدنى لهذا الرمز.'**
+  String get errCouponMinOrder;
+
+  /// No description provided for @errCouponNotApplicable.
+  ///
+  /// In ar, this message translates to:
+  /// **'هذا الرمز لا ينطبق على منتجات سلتك.'**
+  String get errCouponNotApplicable;
+
+  /// No description provided for @errCouponLimitReached.
+  ///
+  /// In ar, this message translates to:
+  /// **'وصل هذا الرمز إلى حد الاستخدام.'**
+  String get errCouponLimitReached;
+
+  /// No description provided for @cartDiscountCode.
+  ///
+  /// In ar, this message translates to:
+  /// **'الخصم ({code})'**
+  String cartDiscountCode(String code);
+
+  /// No description provided for @cartCouponDropped.
+  ///
+  /// In ar, this message translates to:
+  /// **'لم يعد الرمز {code} ينطبق على سلتك، فأُزيل الخصم.'**
+  String cartCouponDropped(String code);
+
+  /// No description provided for @cartWeightEach.
+  ///
+  /// In ar, this message translates to:
+  /// **'{weight} للقطعة'**
+  String cartWeightEach(String weight);
+
+  /// No description provided for @cartWeightAbout.
+  ///
+  /// In ar, this message translates to:
+  /// **'نحو {weight}'**
+  String cartWeightAbout(String weight);
 }
 
 class _AppLocalizationsDelegate extends LocalizationsDelegate<AppLocalizations> {

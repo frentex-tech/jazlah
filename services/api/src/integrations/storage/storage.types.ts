@@ -64,6 +64,7 @@ export type CreatedUpload = PresignedUpload &
  * - `bucket-missing`: the configured bucket does not exist: not retryable.
  * - `object-archived`: the object must be restored before it can be read: not retryable.
  * - `rejected`: the storage refused the request for another documented reason: not retryable.
+ * - `disabled`: no storage is configured (STORAGE_PROVIDER=disabled): not retryable.
  */
 export type StorageFailureReason =
   | 'unavailable'
@@ -71,4 +72,5 @@ export type StorageFailureReason =
   | 'access-denied'
   | 'bucket-missing'
   | 'object-archived'
-  | 'rejected';
+  | 'rejected'
+  | 'disabled';
