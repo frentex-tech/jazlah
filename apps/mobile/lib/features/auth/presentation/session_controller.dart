@@ -39,6 +39,7 @@ class SessionController extends Notifier<SessionStatus> {
       try {
         await ref.read(prefsProvider).clearAccountData();
       } finally {
+        ref.read(accountDataClearedProvider.notifier).fire();
         state = SessionStatus.signedOut; // even if clearing fails, the dead session ends
       }
     });
@@ -60,6 +61,7 @@ class SessionController extends Notifier<SessionStatus> {
   Future<void> signedIn() async {
     final prefs = ref.read(prefsProvider);
     state = SessionStatus.signedIn; // first, so the router already allows the next screen
+    // cartProvider watches this state: on sign-in it merges the guest cart into the account cart.
     await prefs.setGuest(value: false);
     if (prefs.languageCode == null) {
       try {
@@ -81,6 +83,7 @@ class SessionController extends Notifier<SessionStatus> {
   Future<void> signOut() async {
     await ref.read(authRepositoryProvider).signOut();
     await ref.read(prefsProvider).clearAccountData();
+    ref.read(accountDataClearedProvider.notifier).fire();
     state = SessionStatus.signedOut;
   }
 
@@ -88,6 +91,7 @@ class SessionController extends Notifier<SessionStatus> {
   Future<void> accountDeleted() async {
     await ref.read(tokenStorageProvider).clear();
     await ref.read(prefsProvider).clearAccountData(keepOnboarding: false);
+    ref.read(accountDataClearedProvider.notifier).fire();
     ref.read(onboardingSeenProvider.notifier).reset();
     state = SessionStatus.signedOut;
   }

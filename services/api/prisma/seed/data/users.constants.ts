@@ -2,7 +2,7 @@ import type { SeedUser } from './seed-user.type';
 
 /**
  * Everyone the seed creates, in one clearly fake block of numbers (+9665000000NN):
- * 01 to 05 the development accounts, 11 to 13 the owners of the other vendors, 21 and
+ * 01 to 06 the development accounts, 11 to 13 the owners of the other vendors, 21 and
  * 22 applicants, 31 to 33 customers.
  */
 export const SEED_USERS: readonly SeedUser[] = [
@@ -26,6 +26,11 @@ export const SEED_USERS: readonly SeedUser[] = [
     key: 'dev-customer-new',
     phone: '0500000005',
     role: 'development customer with an incomplete profile',
+  },
+  {
+    key: 'dev-all-panels',
+    phone: '0500000006',
+    role: 'development account with every staff panel (admin, vendor, kitchen)',
   },
   {
     key: 'owner-wadi',

@@ -2,6 +2,7 @@ import { Module } from '@nestjs/common';
 import { storageConfig } from '@config/storage.config';
 import type { StorageConfig } from '@config/storage-config.type';
 import type { STORAGE_PROVIDERS } from '@config/storage-providers.constants';
+import { DisabledStorageProvider } from './providers/disabled.provider';
 import { S3StorageProvider } from './providers/s3.provider';
 import { STORAGE_PORT, type StoragePort } from './storage.port';
 import { StorageService } from './storage.service';
@@ -36,5 +37,6 @@ export class StorageModule {
     >
   > = {
     s3: S3StorageProvider,
+    disabled: DisabledStorageProvider,
   };
 }

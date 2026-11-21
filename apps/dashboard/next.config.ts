@@ -19,8 +19,7 @@ const media = (process.env.MEDIA_ORIGINS ?? '').split(/\s+/).filter(Boolean).map
 // A test build (the Playwright mock suite only): mocks allowed, uploads on the mock storage of our own origin. Inlined
 // into the bundles (`env` below), so it is fixed when the image is built and no runtime variable can change it.
 const testBuild = process.env.DASHBOARD_TEST_BUILD === '1';
-// shortcut: no deploy job asserts that DASHBOARD_TEST_BUILD and DASHBOARD_API_MOCK are unset; add that guard to the
-// dashboard deploy (FND-INF-5) before the first staging build (#145).
+// A deploy refuses to build or start with DASHBOARD_TEST_BUILD or DASHBOARD_API_MOCK set: scripts/deploy-guard.sh.
 
 // Staff panel: never framed (clickjacking on approvals, deletes, payouts), no third-party scripts.
 // shortcut: script-src allows 'unsafe-inline' because Next's bootstrap scripts are inline; move to per-request nonces

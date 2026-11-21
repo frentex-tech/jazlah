@@ -16,6 +16,7 @@ import 'package:jazlah/features/auth/presentation/onboarding_screen.dart';
 import 'package:jazlah/features/auth/presentation/otp_screen.dart';
 import 'package:jazlah/features/auth/presentation/phone_screen.dart';
 import 'package:jazlah/features/auth/presentation/session_controller.dart';
+import 'package:jazlah/features/cart/presentation/cart_screen.dart';
 import 'package:jazlah/features/home/presentation/categories_screen.dart';
 import 'package:jazlah/features/home/presentation/home_screen.dart';
 import 'package:jazlah/features/home/presentation/stores_screen.dart';
@@ -44,6 +45,7 @@ abstract final class Routes {
   static const search = '/search';
   static const notifications = '/notifications';
   static const cart = '/cart';
+  static const checkout = '/checkout';
   static const orders = '/orders';
   static const services = '/services';
   static const account = '/account';
@@ -127,10 +129,11 @@ final routerProvider = Provider<GoRouter>((ref) {
         path: Routes.notifications,
         builder: (context, _) => ComingSoonPage(title: AppLocalizations.of(context).menuNotifications),
       ),
-      // shortcut: placeholder until CRT-MOB-1 (#64) builds the cart.
+      GoRoute(path: Routes.cart, builder: (_, _) => const CartScreen()),
+      // shortcut: placeholder until SCH-MOB-1 #71 builds the checkout steps.
       GoRoute(
-        path: Routes.cart,
-        builder: (context, _) => ComingSoonPage(title: AppLocalizations.of(context).cart),
+        path: Routes.checkout,
+        builder: (context, _) => ComingSoonPage(title: AppLocalizations.of(context).checkoutTitle),
       ),
       GoRoute(
         path: '/product/:id',
@@ -166,7 +169,7 @@ final routerProvider = Provider<GoRouter>((ref) {
   );
 });
 
-/// The header cart button (cart count stays 0 until CRT-MOB-1 #64).
+/// The header cart button (its badge is `cartCountProvider`).
 void openCart(BuildContext context) => context.push(Routes.cart);
 
 /// Back to the previous page, or home when the page was opened by a link.
