@@ -13,7 +13,7 @@ test('a vendor session cannot open the admin panel', async ({ page, context }) =
 });
 
 for (const [panel, title, items] of [
-  ['admin', 'لوحة المعلومات', 12],
+  ['admin', 'لوحة المعلومات', 13],
   ['vendor', 'الطلبات', 6],
   ['kitchen', 'لوحة المطبخ · اليوم', 1],
 ] as const) {

@@ -2,6 +2,7 @@
 export { mockAdminVendors as adminVendors } from './admin-vendors/backend.mock';
 export { mockAdminCatalog as adminCatalog } from './catalog/backend.mock';
 export { mockCoverage as coverage } from './coverage/backend.mock';
+export { mockCoupons as coupons } from './coupons/backend.mock';
 export { mockOperations as operations } from './operations/backend.mock';
 export { mockVendorCatalog as vendorCatalog } from './catalog/vendor-backend.mock';
 export { mockOnboarding as onboarding, mockStorage as storage } from './vendor-onboarding/backend.mock';
