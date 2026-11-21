@@ -130,6 +130,9 @@ services:
         value: "6"
       # The right-most X-Forwarded-For entry is the one Render's proxy added (README, "Sign-in
       # and session"). Checked on the first deploy (guide, step 6).
+      # shortcut: free web services can't receive private traffic, so the dashboard calls the
+      # API's public address and the API sees the dashboard's outbound IP for every staff call
+      # (shared sign-in and rate limits); fix with a paid plan and the private network (#7).
       - key: CLIENT_IP_HEADER
         value: x-forwarded-for
       - key: NEXT_PUBLIC_MAP_TILES
