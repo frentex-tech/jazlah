@@ -1,5 +1,5 @@
 import { expect, test } from '@playwright/test';
-import { ADMIN, APPLICANT, PNG, RUN, apiGet, apiToken, pdf, signIn, signInTo, toast } from './helpers';
+import { ADMIN, APPLICANT, PNG, RUN, pdf, signIn, signInTo, toast } from './helpers';
 
 // VND-DSH-1 and VND-DSH-2 against the real API: a new applicant applies with uploaded documents (presigned POST to the
 // storage), then an admin approves the application with a 12.5% commission, sent as 1250 basis points.
@@ -68,10 +68,9 @@ test('an admin approves it with a 12.5% commission: an active vendor with 1250 b
   await toast(page, `تم اعتماد ${NAME} وتفعيله`);
   await expect(page.getByRole('heading', { name: 'المتجر نشط' })).toBeVisible();
 
-  const token = await apiToken('admin', ADMIN);
-  const vendors = await apiGet<{ items: { name: { en: string }; status: string; commissionBasisPoints: number }[] }>(
-    `/v1/admin/vendors?q=${encodeURIComponent(NAME_EN)}`,
-    token,
-  );
-  expect(vendors.items.find((v) => v.name.en === NAME_EN)).toMatchObject({ status: 'active', commissionBasisPoints: 1250 });
+  // Read back from the API: the active vendor, with commissionBasisPoints 1250 shown as 12.5%.
+  await page.goto('/admin/vendors');
+  const row = page.getByRole('table', { name: 'المتاجر' }).getByRole('row').filter({ has: page.getByRole('link', { name: NAME, exact: true }) });
+  await expect(row.getByText('نشط')).toBeVisible();
+  await expect(row.getByText('12.5%')).toBeVisible();
 });

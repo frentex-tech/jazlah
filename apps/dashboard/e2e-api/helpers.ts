@@ -26,18 +26,8 @@ export async function signInTo(page: Page, panel: 'admin' | 'vendor', who: { pho
   await expect(page).toHaveURL(new RegExp(`/${panel}$`));
 }
 
-/** An API access token for checks made straight against the API (not through the dashboard). */
-export async function apiToken(audience: 'admin' | 'vendor', who: { phone: string; code: string }): Promise<string> {
-  const post = (path: string, body: object) =>
-    fetch(`${API_URL}${path}`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) });
-  expect((await post('/v1/public/auth/otp/request', { phone: who.phone, audience })).ok).toBe(true);
-  const r = await post('/v1/public/auth/otp/verify', { phone: who.phone, audience, code: who.code, devicePlatform: 'web', deviceName: 'Acceptance' });
-  expect(r.ok).toBe(true);
-  return ((await r.json()) as { accessToken: string }).accessToken;
-}
-
-export async function apiGet<T>(path: string, token?: string): Promise<T> {
-  const r = await fetch(`${API_URL}${path}`, { headers: token ? { Authorization: `Bearer ${token}` } : {} });
+export async function apiGet<T>(path: string): Promise<T> {
+  const r = await fetch(`${API_URL}${path}`);
   expect(r.ok, `GET ${path}: ${r.status}`).toBe(true);
   return (await r.json()) as T;
 }
