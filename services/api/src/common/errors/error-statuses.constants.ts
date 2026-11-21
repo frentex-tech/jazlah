@@ -40,4 +40,5 @@ export const ERROR_STATUSES: Readonly<Record<ErrorCode, number>> = {
   [ErrorCode.ADDRESS_LIMIT_REACHED]: 409,
   [ErrorCode.ACCOUNT_HAS_STAFF_ACCESS]: 409,
   [ErrorCode.RECENT_SIGN_IN_REQUIRED]: 403,
+  [ErrorCode.INVALID_POLYGON]: 422,
 };

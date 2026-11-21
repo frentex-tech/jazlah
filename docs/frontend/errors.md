@@ -80,6 +80,12 @@ Status is the HTTP status the code always comes with. The English message is the
 |---|---|---|---|
 | `ADDRESS_LIMIT_REACHED` | 409 | You have reached the maximum number of addresses. Delete one to add another. | **Show**. `details.limit` is the maximum (10). Point the user to the address list. |
 
+### Coverage zones
+
+| Code | Status | English message | The app should |
+|---|---|---|---|
+| `INVALID_POLYGON` | 422 | The zone boundary is not a valid shape. Make sure it is closed and its edges do not cross. | Admin dashboard: **show** it and let the admin redraw the zone. Nothing was saved. |
+
 ### Vendors
 
 | Code | Status | English message | The app should |

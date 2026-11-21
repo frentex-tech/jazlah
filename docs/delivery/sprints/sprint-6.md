@@ -15,7 +15,7 @@
 - INV-API-2 depends on the client's ZATCA onboarding (`needs-client`). Use the ZATCA developer sandbox until then.
 - MP-4: REL-INF-6. After this release, the scope is frozen for launch: only fixes and Sprint 7 hardening.
 
-**Parallel tracks:** Backend: VIS-API-*, FED-API-*, CHT-API-1, RAT-API-1, CMS-API-1, INV-API-* · Mobile: VIS-MOB-1, FED-MOB-1, CHT-MOB-1, RAT-MOB-1, CMS-MOB-1, INV-MOB-1 · Web: VIS-WEB-1, FED-WEB-1 · Dashboard: VIS-DSH-1, FED-DSH-1, RAT-DSH-1, CMS-DSH-1
+**Parallel tracks:** Backend: VIS-API-*, FED-API-*, CHT-API-1, RAT-API-1, CMS-API-1, INV-API-* · Mobile: VIS-MOB-1, FED-MOB-1, CHT-MOB-1, RAT-MOB-1, CMS-MOB-1, INV-MOB-1 · Dashboard: VIS-DSH-1, FED-DSH-1, RAT-DSH-1, CMS-DSH-1, CMS-DSH-2 · Added 2026-11-18 (moved from post-launch): LOY-API-1, LOY-MOB-1, STY-API-1, STY-MOB-1, CHR-API-1, CHR-MOB-1
 
 ## EPIC FED — Feed marketplace
 - reqs: FR-FED-01, FR-FED-02, FR-FED-03, FR-FED-05, FR-FED-06, FR-ADM-11
@@ -74,18 +74,6 @@ Listings and buy requests between livestock owners and feed sellers. At launch t
 
 **Acceptance:**
 - [ ] A complete seller and buyer journey works on staging, including a report
-
-### FED-WEB-1 — Web: feed browse pages
-`type: Feature · area: web · size: S · prio: P2 · reqs: FR-FED-03 · depends: FED-API-1`
-
-**What:** indexable feed listings on the website. Chat stays in the app at launch.
-
-**Output:** `/[locale]/feed` (filters) and `/[locale]/feed/[id]` (SSR, SEO) with a "Chat in the app" CTA (app store links / deep link)
-
-**Where:** `apps/web/src/app/[locale]/(services)/feed`
-
-**Acceptance:**
-- [ ] Listing pages render server-side with correct metadata
 
 ## EPIC CHT — In-app chat
 - reqs: FR-FED-04
@@ -149,13 +137,13 @@ A simplified tax invoice for every order, compliant with ZATCA Phase 2 (Fatoora)
 - [ ] Sandbox: invoices and credit notes are reported with status `REPORTED`
 - [ ] A rejected invoice raises an admin alert and can be fixed and re-submitted
 
-### INV-MOB-1 — Mobile & web: invoice download
-`type: Feature · area: mobile · size: XS · prio: P0 · reqs: FR-PAY-05 · depends: INV-API-1, ORD-MOB-2, ORD-WEB-2`
+### INV-MOB-1 — Mobile: invoice download
+`type: Feature · area: mobile · size: XS · prio: P0 · reqs: FR-PAY-05 · depends: INV-API-1, ORD-MOB-2`
 
 **What:** customers get their invoice.
 
-**Output:** a "Download invoice" action on the order detail in the app (opens/shares the PDF) and on the web order page
-**Where:** `apps/mobile/lib/features/orders/`, `apps/web/src/app/[locale]/(account)/orders/[id]`
+**Output:** a "Download invoice" action on the order detail in the app (opens/shares the PDF)
+**Where:** `apps/mobile/lib/features/orders/`
 
 **Acceptance:**
 - [ ] The PDF opens on iOS and Android, and from the web page
@@ -176,14 +164,14 @@ Post-delivery ratings for the order, vendor and delivery, with averages and mode
 **Acceptance:**
 - [ ] Hidden comments disappear publicly, but the stars still count in the average
 
-### RAT-MOB-1 — Mobile & web: rate order, show ratings
-`type: Feature · area: mobile · size: M · prio: P1 · reqs: FR-RAT-01, FR-RAT-02 · depends: RAT-API-1, ORD-MOB-2, ORD-WEB-2`
+### RAT-MOB-1 — Mobile: rate order, show ratings
+`type: Feature · area: mobile · size: M · prio: P1 · reqs: FR-RAT-01, FR-RAT-02 · depends: RAT-API-1, ORD-MOB-2`
 
-**What:** customers rate, and everyone sees averages. This covers both customer clients to keep it in one task.
+**What:** customers rate, and everyone sees averages. The mobile app is the only customer client.
 
-**Output:** mobile rating sheet (from the push and from the order detail), stars on product cards, store header and product detail, reviews list on the store page; the same rating form and display on the web order and store pages (`apps/web`)
+**Output:** mobile rating sheet (from the push and from the order detail), stars on product cards, store header and product detail, reviews list on the store page
 
-**Where:** `apps/mobile/lib/features/ratings/`, `apps/web/src/features/ratings/`
+**Where:** `apps/mobile/lib/features/ratings/`
 
 **Acceptance:**
 - [ ] The rating prompt doesn't appear again after rating or after dismissing twice
@@ -226,17 +214,34 @@ Banners, pop-ups and static pages (terms, privacy, FAQ) managed from the dashboa
 **Acceptance:**
 - [ ] A banner saved here shows on the staging home screen
 
-### CMS-MOB-1 — Mobile & web: banners, pop-ups & static pages
-`type: Feature · area: mobile · size: S · prio: P0 · reqs: FR-ADM-09 · depends: CMS-API-1, STF-MOB-1, STF-WEB-1`
+### CMS-MOB-1 — Mobile: banners, pop-ups & static pages
+`type: Feature · area: mobile · size: S · prio: P0 · reqs: FR-ADM-09 · depends: CMS-API-1, STF-MOB-1`
 
-**What:** render managed content in both customer clients.
+**What:** render managed content in the customer app.
 
-**Output:** banner targets routed in the app and web, a pop-up with frequency stored locally, static pages screens (app) and `/[locale]/pages/[slug]` routes (web, SSR)
+**Output:** banner targets routed in the app, a pop-up with frequency stored locally, static pages screens
 
-**Where:** `apps/mobile/lib/features/cms/`, `apps/web/src/app/[locale]/pages/[slug]`
+**Where:** `apps/mobile/lib/features/cms/`
 
 **Acceptance:**
 - [ ] A "once" pop-up never shows twice on the same device
+
+### CMS-DSH-2 — Public page: download the app & join as a vendor
+`type: Feature · area: dashboard · size: M · prio: P1 · reqs: FR-VND-01 · depends: APP-DSH-1, VND-DSH-1`
+
+**What:** the one public page on the Jazlah domain. There is no customer website (owner's decision, 2026-11-18): customers use the app, and this page sends them to the stores and sends vendors to the application.
+
+**Output:**
+- `/[locale]` public route in the dashboard app (no sign-in): hero with the App Store and Google Play links, «كيف تعمل جزلة», what the app offers, the vendor block with «قدّم طلب الانضمام» → `/[locale]/vendor/apply` and «دخول التجّار» → `/login`, footer with the legal pages (CMS-API-1)
+- 1440 and 390 layouts; Arabic (RTL) and English
+
+**Where:** `apps/dashboard/src/app/[locale]/(public)/`
+
+**Design:** `docs/design/screens.md`, section «الصفحة العامة وانضمام التاجر» (screens «الصفحة العامة» and «الصفحة العامة (390)»)
+
+**Acceptance:**
+- [ ] The page renders without a session in ar and en, and both vendor links work
+- [ ] Store links come from settings, not from code
 
 ## EPIC VIS — Farm visits & animal selection
 - reqs: FR-VIS-01, FR-VIS-02, FR-VIS-03, FR-VIS-04, FR-VIS-05, FR-VIS-06, FR-VND-05
@@ -307,22 +312,97 @@ Book a visit at Jazlah or a partner farm, choose an animal on site, reserve it w
 - [ ] Ledger and payout totals include visit fees and deposits with no double counting when a deposit becomes part of an order
 - [ ] The visit → animal → deposit → order journey passes in CI
 
-### VIS-WEB-1 — Web: visit booking & my animals
-`type: Feature · area: web · size: M · prio: P1 · reqs: FR-VIS-01, FR-VIS-05, FR-VIS-06 · depends: VIS-API-2, ORD-WEB-1`
+## EPIC LOY — Loyalty points & engagement
+- reqs: FR-LOY-01, FR-LOY-02, FR-LOY-03, FR-LOY-04, FR-ADM-13, FR-PRD-01
+**Design (done 2026-11-13, client round 2):** screens and admin screens are in `docs/design/screens.md`, section «القصص والنقاط وسهم الخير». Moved from post-launch into the launch scope on 2026-11-18 at the owner's request. The design shows more than the Output below lists (a rewards list where points are exchanged for a reward, sharing a story to Snapchat, Instagram and WhatsApp, an intention and gift step in Sahm Al-Khair, a proof upload per batch): compare with the screens and extend the Output before starting.
+Platform-wide points earned on completed orders and actions, redeemable at checkout.
 
-**What:** farm visits on the website.
+### LOY-API-1 — Points ledger, earning, redemption & expiry
+`type: Feature · area: api · size: L · prio: P1 · reqs: FR-LOY-01, FR-LOY-02, FR-LOY-03, FR-LOY-04, FR-ADM-13 · depends: ORD-API-2, PAY-API-1`
 
-**Output:** `/[locale]/visits` (vendors offering visits, booking, detail with map and directions), my animals (deposit, schedule slaughter, link to occasion)
+**What:** a points system that works like the wallet ledger.
 
-**Where:** `apps/web/src/app/[locale]/(services)/visits`
+**Output:** `PointsTransaction` (userId, type earn|redeem|expire|bonus|reversal, points, refType, refId, expiresAt); earning on delivered/collected at `loyalty.pointsPerRiyal`; bonus actions (story published, rating, referral) from settings; redemption at checkout (minimum points, value per point, max % of order) inside the order transaction; nightly expiry job; reversal on refund; `GET /v1/customer/points`; settings in the admin; `pointsToEarn` on the product detail (FR-PRD-01)
+
+**Where:** `services/api/src/modules/loyalty/`
 
 **Acceptance:**
-- [ ] Playwright: visit booking on staging
+- [ ] Ledger consistency and concurrency tests, as for the wallet
+
+### LOY-MOB-1 — Mobile & dashboard: points experience and settings
+`type: Feature · area: mobile · size: L · prio: P1 · reqs: FR-LOY-02, FR-LOY-03, FR-ADM-13 · depends: LOY-API-1`
+
+**What:** customers see, earn and spend points; admins configure them.
+
+**Output:** points screen (balance, history, expiring soon) and a redeem toggle in the mobile checkout, points-to-earn on product pages; a loyalty settings page in the dashboard (`/admin/settings/loyalty`)
+
+**Where:** `apps/mobile/lib/features/loyalty/`, `apps/dashboard/src/app/[locale]/admin/settings/loyalty`
+
+**Acceptance:**
+- [ ] Redeeming points updates the order total, and a refund returns the points
+
+## EPIC STY — Stories
+- reqs: FR-STR-01, FR-STR-02, FR-STR-03, FR-VND-07
+**Design (done 2026-11-13, client round 2):** screens and admin screens are in `docs/design/screens.md`, section «القصص والنقاط وسهم الخير». Moved from post-launch into the launch scope on 2026-11-18 at the owner's request. The design shows more than the Output below lists (a rewards list where points are exchanged for a reward, sharing a story to Snapchat, Instagram and WhatsApp, an intention and gift step in Sahm Al-Khair, a proof upload per batch): compare with the screens and extend the Output before starting.
+Short image/video stories from customers (linked to their order), vendors and Jazlah, with moderation.
+
+### STY-API-1 — Stories API & moderation
+`type: Feature · area: api · size: M · prio: P1 · reqs: FR-STR-01, FR-STR-02, FR-STR-03 · depends: FND-API-4, ORD-API-2, ADM-API-1`
+
+**What:** create, moderate and serve stories.
+
+**Output:** `Story` (authorType customer|vendor|platform, authorId, orderId?, mediaId, caption, link target product|store, status pending|published|rejected, publishedAt, expiresAt); customer stories only for their own delivered orders; vendors and admins post; moderation mode setting (pre- or post-publication); visibility duration setting; `GET /v1/public/stories` grouped by author; view counts; loyalty bonus event
+
+**Where:** `services/api/src/modules/stories/`
+
+**Acceptance:**
+- [ ] Expired and rejected stories never appear publicly
+
+### STY-MOB-1 — Mobile & dashboard: stories bar, viewer, posting & moderation
+`type: Feature · area: mobile · size: L · prio: P1 · reqs: FR-STR-01, FR-STR-02, FR-STR-03 · depends: STY-API-1`
+
+**What:** the stories experience.
+
+**Output:** a stories bar on home (the slot reserved in STF-MOB-1), a full-screen viewer (tap/hold/swipe, link to product/store), posting from a delivered order (camera/gallery, trim video ≤ 30 s); dashboard: vendor "post story" and the admin moderation queue + settings
+
+**Where:** `apps/mobile/lib/features/stories/`, `apps/dashboard/src/app/[locale]/{admin,vendor}/stories`
+
+**Acceptance:**
+- [ ] The viewer works smoothly with 20 stories, preloading the next one
+
+## EPIC CHR — Sahm Al-Khair (charity shares)
+- reqs: FR-CHR-01, FR-CHR-02, FR-CHR-03
+**Design (done 2026-11-13, client round 2):** screens and admin screens are in `docs/design/screens.md`, section «القصص والنقاط وسهم الخير». Moved from post-launch into the launch scope on 2026-11-18 at the owner's request. The design shows more than the Output below lists (a rewards list where points are exchanged for a reward, sharing a story to Snapchat, Instagram and WhatsApp, an intention and gift step in Sahm Al-Khair, a proof upload per batch): compare with the screens and extend the Output before starting.
+Customers buy a share in a charity sacrifice managed by Jazlah. They get notified with proof when it's carried out.
+
+### CHR-API-1 — Charity sacrifices, shares & reporting
+`type: Feature · area: api · size: M · prio: P1 · reqs: FR-CHR-01, FR-CHR-02, FR-CHR-03 · depends: PAY-API-2, NOT-API-1`
+
+**What:** sell shares and close them out.
+
+**Output:** `CharitySacrifice` (type e.g. camel 7 shares, totalShares, priceHalalasPerShare, status open|full|executed, executedAt, proofMediaIds[]), `CharityShare` (userId, sacrificeId, shares, paymentId, onBehalfOf?); share purchase through payments; auto-close when full and open the next one; an admin "mark executed" with proof → notifies all contributors; an admin report of contributions and executions
+
+**Where:** `services/api/src/modules/charity/`
+
+**Acceptance:**
+- [ ] Concurrent purchases never oversell the last shares
+
+### CHR-MOB-1 — Mobile & dashboard: Sahm Al-Khair
+`type: Feature · area: mobile · size: M · prio: P1 · reqs: FR-CHR-01, FR-CHR-02, FR-CHR-03 · depends: CHR-API-1`
+
+**What:** contribute and follow.
+
+**Output:** a Sahm Al-Khair section (remaining shares progress, buy shares, on-behalf-of name), my contributions with proof when executed (app); dashboard sacrifices management, execution with proof upload, reports
+
+**Where:** `apps/mobile/lib/features/charity/`, `apps/dashboard/src/app/[locale]/admin/charity`
+
+**Acceptance:**
+- [ ] Contributors get the execution notification with media
 
 ## EPIC REL — Releases & merge points
 
 ### REL-INF-6 — Release v0.6.0 (Sprint 6 merge point, feature freeze)
-`type: Task · area: infra · size: XS · prio: P0 · depends: FED-MOB-1, CHT-MOB-1, FED-DSH-1, INV-API-2, INV-MOB-1, VIS-MOB-1, VIS-WEB-1, RAT-MOB-1, CMS-MOB-1`
+`type: Task · area: infra · size: XS · prio: P0 · depends: FED-MOB-1, CHT-MOB-1, FED-DSH-1, INV-API-2, INV-MOB-1, VIS-MOB-1, RAT-MOB-1, CMS-MOB-1, LOY-MOB-1, STY-MOB-1, CHR-MOB-1, CMS-DSH-2`
 
 **What:** close Sprint 6 and freeze the launch scope.
 

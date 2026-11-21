@@ -2,6 +2,8 @@
 
 This folder is the full plan for building Jazlah, from the first commit to the store release. Every Epic and task on the GitHub board is **generated from the files here** by [`tools/backlog/sync.py`](../../tools/backlog/sync.py). Run `python3 tools/backlog/backlog.py` to validate the plan (unknown requirements, broken or forward dependencies, cycles, uncovered SRS requirements). To change the plan, edit these files and re-run the sync. Never edit only on GitHub.
 
+**No customer website (owner's decision, 2026-11-18):** customers use the mobile app only. The `*-WEB-*` tasks were removed and are kept in [archive/web-tasks-2026-11-18.md](archive/web-tasks-2026-11-18.md). `APP-WEB-1` and `HRD-WEB-1` keep their keys with a dashboard-only scope. Where a remaining task still says "web" or `apps/web`, that part is out of scope.
+
 Lost mid-project? Start with [`STATUS.md`](STATUS.md), then the current sprint file, then the code paths named in its tasks.
 
 | File | What it holds |
@@ -24,9 +26,9 @@ Lost mid-project? Start with [`STATUS.md`](STATUS.md), then the current sprint f
 | 3 | Cart & coupons, scheduling engine & operations settings, checkout, payments (port + gateway), orders, wallet ledger | v0.3.0 (first E2E order demo) |
 | 4 | Live gateway in clients, cancellation & complaints, delivery-company integration, notifications, vendor live board & freshness, admin core, finance & payouts | v0.4.0 |
 | 5 | Occasions, kitchens (cooking), Eid al-Adha season, production environment provisioned | v0.5.0 |
-| 6 | Farm visits, feed marketplace & chat, ratings, marketing content & legal pages, ZATCA e-invoicing | v0.6.0 (feature freeze) |
+| 6 | Farm visits, feed marketplace & chat, ratings, marketing content & legal pages, the public page, ZATCA e-invoicing, loyalty points, stories, Sahm Al-Khair (the last three moved in from post-launch on 2026-11-18) | v0.6.0 (feature freeze) |
 | 7 | Production, security, performance, observability, UAT, store submission | **v1.0.0** |
-| Post-launch | Loyalty, stories, Sahm Al-Khair, installments, multi-slot, reorder/gift/favorites, verified badge & seasonal theme, paid feed transactions, vendor staff | v1.x |
+| Post-launch | Installments, multi-slot, reorder/gift/favorites, verified badge & seasonal theme, paid feed transactions, vendor staff | v1.x |
 
 There are no dates and no assignees on purpose. Pick tasks from the current sprint's **Todo** column and assign yourself when you start, so the progress dashboard credits the work.
 

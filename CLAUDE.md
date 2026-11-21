@@ -1,6 +1,6 @@
 # CLAUDE.md — working on Jazlah
 
-Jazlah (جزلة) is a multi-vendor meat & livestock platform for Saudi Arabia, built by Frentex Tech: a Flutter customer app, a Next.js customer web, a Next.js admin/vendor/kitchen dashboard, and a NestJS API.
+Jazlah (جزلة) is a multi-vendor meat & livestock platform for Saudi Arabia, built by Frentex Tech: a Flutter customer app, a Next.js admin/vendor/kitchen dashboard (with one public page), and a NestJS API. There is no customer website (dropped 2026-11-18; see `docs/delivery/STATUS.md`).
 
 ## Read first, in this order
 1. `docs/delivery/STATUS.md`: where the project is, what's blocked, decisions made during the build

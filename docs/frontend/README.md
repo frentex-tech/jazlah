@@ -69,6 +69,7 @@ To stop the containers, run `pnpm infra:down`. Your data is kept in Docker volum
 | [uploads.md](uploads.md) | How do I upload an image or a document? |
 | [customer-profile.md](customer-profile.md) | Customer app: profile, marketing consent, addresses, account deletion. |
 | [vendors.md](vendors.md) | Becoming a vendor, the vendor profile, and the admin's vendor screens. |
+| [coverage.md](coverage.md) | Do we deliver here? The public coverage check, `isCovered` on addresses, and the admin's zones map. |
 | [catalog.md](catalog.md) | Browsing, the vendor's products, the admin's catalog: what applies at once and what goes to review. |
 | [client-generation.md](client-generation.md) | Generating the Dart and TypeScript clients from `openapi.json`. |
 | [not-built-yet.md](not-built-yet.md) | What the designs show that the API does not have yet, and what comes next. |

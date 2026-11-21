@@ -1,0 +1,622 @@
+{
+  "@@locale": "ar",
+  "appName": "جزلة",
+  "languageName": "العربية",
+  "otherLanguageCode": "EN",
+  "otherLanguageName": "English",
+  "errorGeneric": "حدث خطأ غير متوقع. حاول مرة أخرى.",
+  "errorNetwork": "تعذّر الاتصال. تحقق من الإنترنت وحاول مرة أخرى.",
+  "retry": "إعادة المحاولة",
+  "galleryTitle": "معرض المكوّنات",
+  "galleryLangAr": "العربية",
+  "galleryLangEn": "English",
+  "galleryInteractiveNote": "حالات الضغط والتركيز تظهر عند التفاعل",
+  "galleryButtons": "الأزرار",
+  "galleryInputs": "حقول الإدخال",
+  "galleryPhone": "حقل رقم الجوال",
+  "galleryOtp": "رمز التحقق",
+  "galleryChips": "الرقائق",
+  "galleryChoices": "مربع الاختيار والراديو والمفتاح",
+  "galleryBadges": "الشارات",
+  "galleryCards": "البطاقات",
+  "galleryProductCards": "بطاقات المنتجات",
+  "galleryHeaders": "رأس الصفحة",
+  "galleryTabBar": "شريط التبويب",
+  "gallerySearch": "شريط البحث",
+  "galleryMapPins": "دبابيس الخريطة",
+  "galleryTimeline": "مراحل الطلب",
+  "galleryStates": "حالات الشاشة",
+  "gallerySkeleton": "هيكل التحميل",
+  "galleryOverlays": "النوافذ والتنبيهات",
+  "galleryOrderNow": "اطلب الآن",
+  "galleryFullName": "الاسم الكامل",
+  "galleryTypeHere": "اكتب هنا",
+  "galleryHelper": "نص مساعد",
+  "galleryNameValue": "عبدالرحمن محمد",
+  "galleryRequired": "هذا الحقل مطلوب",
+  "galleryPhoneLabel": "رقم الجوال",
+  "galleryPhoneHint": "سنرسل لك رمز التحقق",
+  "galleryPhoneError": "رقم الجوال غير مكتمل",
+  "galleryOtpError": "الرمز غير صحيح، حاول مرة أخرى",
+  "galleryChipLabel": "خروف نعيمي",
+  "galleryGiftWrap": "إضافة تغليف هدية",
+  "galleryBadgeNew": "جديد",
+  "galleryBadgeReview": "قيد المراجعة",
+  "galleryBadgePreparing": "قيد التجهيز",
+  "galleryBadgeDelivered": "تم التسليم",
+  "galleryBadgeCancelled": "ملغي",
+  "galleryBadgeToday": "ذُبح اليوم",
+  "galleryCardTitle": "عنوان البطاقة",
+  "galleryCardBody": "نص توضيحي قصير يصف محتوى البطاقة.",
+  "galleryVendor": "مجازر الفلاح",
+  "galleryProduct": "ريب آي بقري طازج",
+  "galleryProductMeta": "500 جم · تقطيع شرائح",
+  "galleryCurrency": "ر.س",
+  "galleryAdd": "أضف إلى السلة",
+  "galleryLocation": "التوصيل إلى الملقا، الرياض",
+  "galleryNotifications": "الإشعارات",
+  "galleryCart": "السلة",
+  "galleryPageTitle": "عنوان الصفحة",
+  "galleryTabHome": "الرئيسية",
+  "galleryTabServices": "الخدمات",
+  "galleryTabOrders": "الطلبات",
+  "galleryTabAccount": "حسابي",
+  "gallerySearchHint": "ابحث عن لحوم أو متاجر",
+  "galleryFilter": "التصفية",
+  "galleryClear": "مسح",
+  "galleryPinAddress": "موقع التوصيل",
+  "galleryPinCourier": "المندوب",
+  "galleryStepReceived": "تم استلام الطلب",
+  "galleryStepPreparing": "جارٍ التجهيز",
+  "galleryStepSlaughtered": "ذُبح وجُهّز",
+  "galleryStepOnTheWay": "في الطريق",
+  "galleryStepDelivered": "تم التسليم",
+  "galleryTime1": "10:02 ص",
+  "galleryTime2": "10:15 ص",
+  "galleryTime3": "11:30 ص",
+  "galleryTime4": "12:10 م",
+  "galleryTime5": "12:40 م",
+  "galleryCartTitle": "سلتك فارغة",
+  "galleryCartBody": "أضف منتجات من المتاجر وسنجهّزها لك طازجة.",
+  "galleryCartAction": "تصفّح المنتجات",
+  "galleryOrdersTitle": "لا توجد طلبات بعد",
+  "galleryOrdersBody": "طلباتك السابقة والحالية ستظهر هنا.",
+  "galleryOrdersAction": "ابدأ أول طلب",
+  "gallerySearchTitle": "لا توجد نتائج",
+  "gallerySearchBody": "جرّب كلمات أخرى أو غيّر عوامل التصفية.",
+  "gallerySearchAction": "مسح التصفية",
+  "galleryErrorTitle": "حدث خطأ غير متوقع",
+  "galleryErrorBody": "تعذّر تحميل البيانات. حاول مرة أخرى.",
+  "galleryOfflineTitle": "لا يوجد اتصال بالإنترنت",
+  "galleryOfflineBody": "تحقق من اتصالك ثم أعد المحاولة.",
+  "galleryDeniedTitle": "ليست لديك صلاحية",
+  "galleryDeniedBody": "تواصل مع مدير الحساب للحصول على الوصول.",
+  "galleryBack": "رجوع",
+  "gallerySheetTitle": "اختر الحجم",
+  "gallerySheetContent": "المحتوى",
+  "galleryShowSheet": "عرض النافذة السفلية",
+  "galleryShowDialog": "عرض نافذة التأكيد",
+  "galleryShowDestructive": "عرض نافذة الحذف",
+  "galleryShowToast": "عرض تنبيه",
+  "galleryDialogTitle": "تأكيد الطلب؟",
+  "galleryDialogBody": "سيتم إرسال طلبك إلى المتجر فور التأكيد.",
+  "galleryConfirm": "تأكيد",
+  "galleryCancel": "إلغاء",
+  "galleryDeleteTitle": "حذف العنوان؟",
+  "galleryDeleteBody": "لن تتمكن من استرجاع هذا العنوان بعد الحذف.",
+  "galleryDelete": "حذف",
+  "galleryToastSuccess": "تمت إضافة المنتج إلى السلة",
+  "galleryToastError": "تعذّر إتمام العملية، حاول مرة أخرى",
+  "galleryToastWarning": "الكمية المتاحة محدودة",
+  "galleryToastInfo": "سيصلك إشعار عند تجهيز الطلب",
+  "back": "رجوع",
+  "onboardingTitle1": "لحوم طازجة من أفضل المتاجر",
+  "onboardingBody1": "اختر من متاجر موثّقة، واعرف وقت الذبح وجودة كل قطعة قبل أن تطلب.",
+  "onboardingTitle2": "وصّل طلبك في يومك",
+  "onboardingBody2": "حدّد يوم التوصيل المناسب لك، وتابع طلبك لحظة بلحظة حتى باب البيت.",
+  "onboardingTitle3": "لكل مناسبة ما يناسبها",
+  "onboardingBody3": "ولائم وعقائق وأضاحٍ وزيارات مزارع، ونطبخها لك إن أردت.",
+  "onboardingNext": "التالي",
+  "onboardingSkip": "تخطي",
+  "onboardingStart": "ابدأ الآن",
+  "phoneTitle": "أهلًا بك في جزلة",
+  "phoneSubtitle": "أدخل رقم جوالك وسنرسل لك رمز التحقق.",
+  "phoneLabel": "رقم الجوال",
+  "phoneHint": "سنرسل لك رمز التحقق",
+  "phoneInvalid": "أدخل رقم جوال سعودي صحيح مكوّن من 9 أرقام",
+  "trustVerified": "متاجر موثّقة",
+  "trustFresh": "طازج يوم الذبح",
+  "trustDelivery": "توصيل في يومك",
+  "termsNotice": "بالمتابعة فأنت توافق على الشروط وسياسة الخصوصية.",
+  "sendCode": "إرسال الرمز",
+  "otpTitle": "أدخل رمز التحقق",
+  "otpSubtitle": "أرسلنا رمزًا من {length} أرقام إلى {phone}",
+  "@otpSubtitle": {
+    "placeholders": {
+      "length": {
+        "type": "int"
+      },
+      "phone": {
+        "type": "String"
+      }
+    }
+  },
+  "otpFieldLabel": "رمز التحقق",
+  "otpResendIn": "إعادة الإرسال بعد {time}",
+  "@otpResendIn": {
+    "placeholders": {
+      "time": {
+        "type": "String"
+      }
+    }
+  },
+  "otpResend": "إعادة إرسال الرمز",
+  "otpInvalid": "الرمز غير صحيح، حاول مرة أخرى",
+  "otpExpired": "انتهت صلاحية الرمز، اطلب رمزًا جديدًا",
+  "otpReauthNotice": "لأمانك، أكّد أنه أنت قبل حذف الحساب",
+  "confirm": "تأكيد",
+  "profileTitle": "أكمل ملفك",
+  "profileSubtitle": "نحتاج اسمك لنُجهّز طلباتك ونتواصل معك.",
+  "editProfileTitle": "تعديل الملف",
+  "fullNameLabel": "الاسم الكامل",
+  "fieldPlaceholder": "اكتب هنا",
+  "nameRequired": "الاسم مطلوب",
+  "nameLength": "الاسم من 2 إلى 60 حرفًا",
+  "emailLabel": "البريد الإلكتروني (اختياري)",
+  "emailHint": "لن نرسل لك إلا إشعارات طلباتك",
+  "emailInvalid": "أدخل بريدًا إلكترونيًا صحيحًا",
+  "marketingConsent": "أوافق على استلام العروض والأخبار",
+  "saveAndContinue": "حفظ ومتابعة",
+  "save": "حفظ",
+  "tabHome": "الرئيسية",
+  "tabServices": "الخدمات",
+  "tabOrders": "الطلبات",
+  "tabAccount": "حسابي",
+  "cart": "السلة",
+  "accountTitle": "حسابي",
+  "editProfile": "تعديل الملف",
+  "statOrders": "طلبًا",
+  "statAddresses": "عناوين",
+  "statAnimals": "مواشٍ",
+  "statListings": "إعلانات",
+  "menuOrders": "طلباتي",
+  "menuOrdersActive": "{count} طلب نشط",
+  "@menuOrdersActive": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "menuAddresses": "عناويني",
+  "menuAnimals": "مواشيّ",
+  "menuFeedListings": "إعلاناتي في سوق الأعلاف",
+  "menuPoints": "نقاط جزلة",
+  "menuPointsValue": "{points} نقطة",
+  "@menuPointsValue": {
+    "placeholders": {
+      "points": {
+        "type": "int"
+      }
+    }
+  },
+  "menuStories": "قصص الاستلام",
+  "menuCharity": "صدقاتي · سهم الخير",
+  "menuNotifications": "الإشعارات",
+  "menuSettings": "الإعدادات",
+  "menuHelp": "المساعدة والدعم",
+  "signOut": "تسجيل الخروج",
+  "settingsTitle": "الإعدادات",
+  "settingsLanguage": "اللغة",
+  "settingsNotifications": "الإشعارات",
+  "settingsOrderNotifications": "إشعارات الطلبات",
+  "settingsOffers": "العروض والأخبار",
+  "settingsLoadError": "تعذّر تحميل الإعدادات",
+  "checkConnection": "تحقق من اتصالك ثم حاول مرة أخرى.",
+  "deleteAccount": "حذف الحساب",
+  "deleteAccountTitle": "حذف الحساب؟",
+  "deleteAccountBody": "سيتم حذف حسابك وعناوينك وطلباتك السابقة نهائيًا، ولا يمكن التراجع عن ذلك.",
+  "cancel": "إلغاء",
+  "deleteReasonTitle": "لماذا تريد حذف حسابك؟",
+  "deleteReasonHint": "اختياري، يساعدنا على التحسّن.",
+  "deleteReasonNotUsing": "لم أعد أستخدم التطبيق",
+  "deleteReasonPrivacy": "مخاوف تتعلق بالخصوصية",
+  "deleteReasonBadExperience": "مررت بتجربة سيئة",
+  "deleteReasonOtherAccount": "لدي حساب آخر",
+  "deleteReasonOther": "سبب آخر",
+  "deleteAccountForever": "حذف الحساب نهائيًا",
+  "accountDeleted": "تم حذف حسابك",
+  "guestTitle": "سجّل دخولك",
+  "guestBody": "سجّل دخولك لتتابع طلباتك وعناوينك.",
+  "signIn": "تسجيل الدخول",
+  "comingSoonTitle": "قريبًا",
+  "comingSoonBody": "هذا القسم قيد التجهيز.",
+  "clear": "مسح",
+  "locAddAddressTitle": "إضافة عنوان",
+  "locSearchHint": "ابحث عن حي أو شارع",
+  "locSearchActiveHint": "ابحث عن عنوان أو حي",
+  "locMoveHint": "حرّك الخريطة لضبط الدبوس على موقعك.",
+  "locConfirm": "تأكيد الموقع",
+  "locPinLabel": "موقع التوصيل",
+  "locOutOfCoverageBanner": "عذرًا، لا نوصّل إلى هذا الموقع حاليًا.",
+  "locPermTitle": "السماح بالوصول إلى موقعك",
+  "locPermBody": "نستخدم موقعك لنعرض لك المتاجر القريبة ونحدد عنوان التوصيل بدقة.",
+  "locPermManual": "إدخال العنوان يدويًا",
+  "locPermAllow": "السماح أثناء الاستخدام",
+  "locPermDeniedTitle": "إذن الموقع متوقف",
+  "locPermDeniedBody": "فعّل إذن الموقع من إعدادات الجهاز، أو أدخل عنوانك يدويًا.",
+  "locPermOpenSettings": "فتح الإعدادات",
+  "locPermLoadingTitle": "نحدد موقعك",
+  "locPermLoadingBody": "لحظات ونجد موقعك الحالي…",
+  "locPermErrorTitle": "تعذّر تحديد موقعك",
+  "locPermErrorBody": "تأكد من تفعيل خدمة الموقع في جهازك ثم حاول مرة أخرى.",
+  "locOutScreenTitle": "الموقع",
+  "locOutTitle": "خارج نطاق التوصيل",
+  "locOutBody": "لا نوصّل إلى هذا الموقع حتى الآن. اختر موقعًا آخر داخل مناطق الخدمة.",
+  "locOutChange": "تغيير الموقع",
+  "locOutPickup": "تصفّح واستلم من المتجر",
+  "locOutCities": "المناطق المتاحة حاليًا: {cities}.",
+  "@locOutCities": {
+    "placeholders": {
+      "cities": {
+        "type": "String"
+      }
+    }
+  },
+  "locOutChecking": "نتحقق من تغطية موقعك…",
+  "locOutErrorTitle": "تعذّر التحقق من التغطية",
+  "locOutErrorBody": "حدث خطأ أثناء التحقق من موقعك. حاول مرة أخرى.",
+  "locHomeOutOfCoverage": "خارج نطاق التوصيل: تصفّح واطلب الاستلام من المتجر.",
+  "locChoose": "اختر موقعك",
+  "listSeparator": "، ",
+  "addrTitle": "عناويني",
+  "addrDefault": "افتراضي",
+  "addrOutOfCoverage": "خارج النطاق",
+  "addrAdd": "إضافة عنوان جديد",
+  "addrAddShort": "إضافة عنوان",
+  "addrEmptyTitle": "لا توجد عناوين بعد",
+  "addrEmptyBody": "أضف عنوانك لنعرف المتاجر القريبة منك ونوصّل إليك.",
+  "addrLoadError": "تعذّر تحميل العناوين",
+  "addrLoadErrorBody": "حدث خطأ أثناء جلب عناوينك. حاول مرة أخرى.",
+  "addrEdit": "تعديل العنوان",
+  "addrNewTitle": "عنوان جديد",
+  "addrLabel": "اسم العنوان",
+  "addrLabelRequired": "اسم العنوان مطلوب",
+  "addrCity": "المدينة",
+  "addrDistrict": "الحي",
+  "addrDistrictRequired": "الحي مطلوب",
+  "addrStreet": "الشارع وتفاصيل المبنى",
+  "addrDriverNotes": "ملاحظات للسائق (اختياري)",
+  "addrDriverNotesHint": "مثلًا: البوابة الخلفية، الدور الثاني",
+  "addrMakeDefault": "اجعله العنوان الافتراضي",
+  "addrChangeOnMap": "تغيير الموقع على الخريطة",
+  "addrSave": "حفظ التغييرات",
+  "addrSaveNew": "حفظ العنوان",
+  "addrDelete": "حذف العنوان",
+  "addrDeleteTitle": "حذف العنوان؟",
+  "addrDeleteBody": "لن تتمكن من استرجاع هذا العنوان بعد الحذف.",
+  "delete": "حذف",
+  "addrLockedNotice": "هذا العنوان مرتبط بطلب قيد التنفيذ، ولا يمكن تعديله أو حذفه حتى يكتمل الطلب.",
+  "addrLockedLabel": "عنوان مقفل",
+  "addrOutOfCoverageNotice": "هذا العنوان خارج نطاق التوصيل حاليًا. يمكنك حفظه، والاستلام من المتجر متاح.",
+  "addrLimitReached": "وصلت إلى الحد الأقصى من العناوين ({limit}). احذف عنوانًا لإضافة آخر.",
+  "@addrLimitReached": {
+    "placeholders": {
+      "limit": {
+        "type": "int"
+      }
+    }
+  },
+  "seeAll": "الكل",
+  "filters": "تصفية",
+  "currency": "ر.س",
+  "addToCart": "أضف إلى السلة",
+  "freshToday": "ذُبح اليوم",
+  "unavailableNow": "غير متاح حاليًا",
+  "offlineTitle": "لا يوجد اتصال بالإنترنت",
+  "offlineBody": "تحقق من اتصالك ثم أعد المحاولة.",
+  "loadMoreFailed": "تعذّر تحميل المزيد.",
+  "timeAm": "ص",
+  "timePm": "م",
+  "homeSearchHint": "ابحث عن لحوم أو متاجر",
+  "homeCategories": "الأقسام",
+  "homeBestSellers": "الأكثر مبيعًا",
+  "homePartnerStores": "متاجر شريكة",
+  "homeStoresPaused": "المتاجر القريبة منك متوقفة مؤقتًا. تصفّح الآن واطلب عند عودتها.",
+  "homeEmptyTitle": "لا توجد متاجر في منطقتك بعد",
+  "homeEmptyBody": "نعمل على الوصول إلى حيّك قريبًا. جرّب عنوانًا آخر.",
+  "homeChangeAddress": "تغيير العنوان",
+  "homeErrorTitle": "تعذّر تحميل الصفحة الرئيسية",
+  "homeErrorBody": "حدث خطأ أثناء جلب المتاجر والمنتجات. حاول مرة أخرى.",
+  "categoriesSubtitle": "اختر القسم الذي يناسب طلبك.",
+  "categoriesComing": "أقسام قادمة",
+  "categoriesEmptyTitle": "لا توجد أقسام متاحة",
+  "categoriesEmptyBody": "لا تتوفر أقسام في منطقتك حاليًا. تحقق مرة أخرى قريبًا.",
+  "backToHome": "العودة للرئيسية",
+  "categoriesErrorTitle": "تعذّر تحميل الأقسام",
+  "categoriesErrorBody": "حدث خطأ أثناء جلب الأقسام. حاول مرة أخرى.",
+  "categoryEmptyTitle": "لا توجد منتجات في هذا القسم بعد",
+  "categoryEmptyBody": "تصفّح الأقسام الأخرى أو عُد لاحقًا.",
+  "productsErrorTitle": "تعذّر تحميل المنتجات",
+  "productsErrorBody": "حدث خطأ أثناء جلب المنتجات. حاول مرة أخرى.",
+  "sortPopular": "الأكثر مبيعًا",
+  "sortPriceAsc": "الأقل سعرًا",
+  "sortPriceDesc": "الأعلى سعرًا",
+  "storeRating": "{rating} ({count} تقييم)",
+  "@storeRating": {
+    "placeholders": {
+      "rating": {
+        "type": "String"
+      },
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "storeOpenUntil": "مفتوح حتى {time}",
+  "@storeOpenUntil": {
+    "placeholders": {
+      "time": {
+        "type": "String"
+      }
+    }
+  },
+  "storeClosedNow": "مغلق الآن",
+  "storeDeliveryIn": "توصيل خلال {minutes} دقيقة",
+  "@storeDeliveryIn": {
+    "placeholders": {
+      "minutes": {
+        "type": "int"
+      }
+    }
+  },
+  "storeMinOrder": "الحد الأدنى للطلب {amount} ر.س",
+  "@storeMinOrder": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "storeClosedOpensTomorrow": "المتجر مغلق الآن ويفتح غدًا {time}. يمكنك تصفّح المنتجات والطلب عند فتحه.",
+  "@storeClosedOpensTomorrow": {
+    "placeholders": {
+      "time": {
+        "type": "String"
+      }
+    }
+  },
+  "storeClosedOpensAt": "المتجر مغلق الآن ويفتح {time}. يمكنك تصفّح المنتجات والطلب عند فتحه.",
+  "@storeClosedOpensAt": {
+    "placeholders": {
+      "time": {
+        "type": "String"
+      }
+    }
+  },
+  "storeClosedNotice": "المتجر مغلق الآن. يمكنك تصفّح المنتجات والطلب عند فتحه.",
+  "storeEmptyTitle": "لا توجد منتجات حاليًا",
+  "storeEmptyBody": "لم يضف هذا المتجر منتجات بعد. جرّب متجرًا آخر.",
+  "storeBrowseStores": "تصفّح المتاجر",
+  "storeErrorTitle": "تعذّر تحميل المتجر",
+  "storeErrorBody": "حدث خطأ أثناء جلب بيانات المتجر. حاول مرة أخرى.",
+  "storeInfo": "معلومات المتجر",
+  "storeHours": "ساعات العمل",
+  "storeHoursValue": "{opens} – {closes}",
+  "@storeHoursValue": {
+    "placeholders": {
+      "opens": {
+        "type": "String"
+      },
+      "closes": {
+        "type": "String"
+      }
+    }
+  },
+  "storeLocation": "الموقع",
+  "storePickup": "الاستلام من المتجر",
+  "storePickupYes": "متاح",
+  "storePickupNo": "غير متاح",
+  "storesTitle": "المتاجر",
+  "searchTitle": "البحث",
+  "searchRecent": "عمليات البحث الأخيرة",
+  "searchPopular": "الأكثر بحثًا",
+  "searchResultsFor": "{count, plural, =1{نتيجة واحدة} =2{نتيجتان} few{{count} نتائج} other{{count} نتيجة}} لـ «{query}»",
+  "@searchResultsFor": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      },
+      "query": {
+        "type": "String"
+      }
+    }
+  },
+  "searchResults": "{count, plural, =1{نتيجة واحدة} =2{نتيجتان} few{{count} نتائج} other{{count} نتيجة}}",
+  "@searchResults": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "searchNoResultsFor": "لا توجد نتائج لـ «{query}»",
+  "@searchNoResultsFor": {
+    "placeholders": {
+      "query": {
+        "type": "String"
+      }
+    }
+  },
+  "searchNoResults": "لا توجد نتائج",
+  "searchNoResultsBody": "جرّب كلمات أخرى أو غيّر عوامل التصفية.",
+  "searchClearFilters": "مسح التصفية",
+  "searchErrorTitle": "تعذّر تنفيذ البحث",
+  "searchErrorBody": "حدث خطأ أثناء البحث. حاول مرة أخرى.",
+  "searchFilterCount": "تصفية ({count})",
+  "@searchFilterCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "searchFiltersTitle": "تصفية النتائج",
+  "searchPrice": "السعر (ر.س)",
+  "searchPriceMin": "من {price} ر.س",
+  "@searchPriceMin": {
+    "placeholders": {
+      "price": {
+        "type": "String"
+      }
+    }
+  },
+  "searchPriceMax": "إلى {price} ر.س",
+  "@searchPriceMax": {
+    "placeholders": {
+      "price": {
+        "type": "String"
+      }
+    }
+  },
+  "searchPriceUpTo": "حتى {price} ر.س",
+  "@searchPriceUpTo": {
+    "placeholders": {
+      "price": {
+        "type": "String"
+      }
+    }
+  },
+  "searchPriceRange": "{min}–{max} ر.س",
+  "@searchPriceRange": {
+    "placeholders": {
+      "min": {
+        "type": "String"
+      },
+      "max": {
+        "type": "String"
+      }
+    }
+  },
+  "searchStore": "المتجر",
+  "searchCategory": "القسم",
+  "searchSort": "الترتيب",
+  "searchAvailableOnly": "المتاح الآن فقط",
+  "searchAvailable": "المتاح الآن",
+  "searchShowCount": "{count, plural, =0{لا توجد نتائج} =1{عرض نتيجة واحدة} =2{عرض نتيجتين} few{عرض {count} نتائج} other{عرض {count} نتيجة}}",
+  "@searchShowCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "searchShowResults": "عرض النتائج",
+  "searchReset": "إعادة ضبط",
+  "productTitle": "تفاصيل المنتج",
+  "productUnavailableNotice": "هذا المنتج غير متاح حاليًا.",
+  "productSlaughteredAt": "ذُبح اليوم {time}",
+  "@productSlaughteredAt": {
+    "placeholders": {
+      "time": {
+        "type": "String"
+      }
+    }
+  },
+  "productDeliveredWithin": "{hours, plural, =1{يُبرَّد ويُسلَّم طازجًا خلال ساعة} =2{يُبرَّد ويُسلَّم طازجًا خلال ساعتين} few{يُبرَّد ويُسلَّم طازجًا خلال {hours} ساعات} other{يُبرَّد ويُسلَّم طازجًا خلال {hours} ساعة}}",
+  "@productDeliveredWithin": {
+    "placeholders": {
+      "hours": {
+        "type": "int"
+      }
+    }
+  },
+  "productSize": "الحجم",
+  "productRequiredOne": "مطلوب · اختر واحدًا",
+  "productCut": "التقطيع",
+  "productPackaging": "التغليف",
+  "productPackagingHint": "بعض الخيارات تتغيّر حسب التقطيع",
+  "productExclusions": "الاستثناءات",
+  "productExclusionsHint": "اختياري · نُزيلها لك أثناء التقطيع",
+  "productNotes": "ملاحظات للجزّار (اختياري)",
+  "productNotesPlaceholder": "اكتب هنا",
+  "productNotesExample": "مثال: شرائح رفيعة وبدون تتبيل",
+  "productQuantity": "الكمية",
+  "productDecrease": "إنقاص الكمية",
+  "productIncrease": "زيادة الكمية",
+  "productFree": "مجاني",
+  "productExtra": "+{amount} ر.س",
+  "@productExtra": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "productPrice": "{amount} ر.س",
+  "@productPrice": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "weightGrams": "{n} جم",
+  "@weightGrams": {
+    "placeholders": {
+      "n": {
+        "type": "String"
+      }
+    }
+  },
+  "weightKg": "{n} كجم",
+  "@weightKg": {
+    "placeholders": {
+      "n": {
+        "type": "String"
+      }
+    }
+  },
+  "productIncompatible": "غير متاح مع التقطيع المختار: {cut}",
+  "@productIncompatible": {
+    "placeholders": {
+      "cut": {
+        "type": "String"
+      }
+    }
+  },
+  "productIncompatibleHelp": "غيّر التقطيع إلى {cuts} لاختيار هذا الخيار.",
+  "@productIncompatibleHelp": {
+    "placeholders": {
+      "cuts": {
+        "type": "String"
+      }
+    }
+  },
+  "productQuoted": "«{name}»",
+  "@productQuoted": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "productOr": " أو ",
+  "productTotal": "الإجمالي",
+  "productPriceDetails": "تفاصيل السعر",
+  "productCutLine": "التقطيع ({cut})",
+  "@productCutLine": {
+    "placeholders": {
+      "cut": {
+        "type": "String"
+      }
+    }
+  },
+  "productDelivery": "التوصيل",
+  "productDeliveryAtCheckout": "يُحسب في الدفع",
+  "productUnavailable": "غير متاح",
+  "productChooseCut": "اختر طريقة التقطيع قبل الإضافة إلى السلة",
+  "productCartSoon": "السلة قادمة قريبًا، لم تُضَف القطعة بعد.",
+  "productErrorTitle": "تعذّر تحميل المنتج",
+  "productErrorBody": "حدث خطأ أثناء جلب تفاصيل المنتج. حاول مرة أخرى."
+}
