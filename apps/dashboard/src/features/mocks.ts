@@ -5,3 +5,4 @@ export { mockCoverage as coverage } from './coverage/backend.mock';
 export { mockOperations as operations } from './operations/backend.mock';
 export { mockVendorCatalog as vendorCatalog } from './catalog/vendor-backend.mock';
 export { mockOnboarding as onboarding, mockStorage as storage } from './vendor-onboarding/backend.mock';
+export { mockOrders as orders, mockPlaceOrder as placeOrder } from './orders/backend.mock';

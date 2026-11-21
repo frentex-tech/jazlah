@@ -23,7 +23,8 @@ export async function signIn(page: Page, who: { phone: string; code: string }) {
 export async function signInTo(page: Page, panel: 'admin' | 'vendor', who: { phone: string; code: string }) {
   await page.goto(`/login?panel=${panel}`);
   await signIn(page, who);
-  await expect(page).toHaveURL(new RegExp(`/${panel}$`));
+  // The vendor panel opens on its orders (/vendor redirects to /vendor/orders): wait for the page it lands on.
+  await expect(page).toHaveURL(new RegExp(panel === 'vendor' ? '/vendor/orders$' : '/admin$'));
 }
 
 export async function apiGet<T>(path: string): Promise<T> {
