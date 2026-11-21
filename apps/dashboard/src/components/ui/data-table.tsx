@@ -69,6 +69,8 @@ export function DataTable<T>({
   });
 
   const leafColumns = table.getVisibleLeafColumns();
+  // Fixed Figma widths; the first (name) column takes the spare width, as the Figma rows do (131:16744).
+  const width = (i: number, w?: number) => ({ width: w, flexGrow: i === 0 ? 1 : 0 });
   const cell = 'flex shrink-0 items-center px-s8';
   const row = cn('flex items-center', tall ? 'px-s24' : 'px-s32');
   const rowH = tall ? 'h-16' : 'h-14';
@@ -77,7 +79,7 @@ export function DataTable<T>({
     <div className="w-full overflow-hidden rounded-md border border-line bg-paper" aria-busy={status === 'loading'}>
       <div role="table" aria-label={label}>
         <div role="row" className={cn(row, 'h-12 bg-sand')}>
-          {table.getHeaderGroups()[0]!.headers.map((h) => {
+          {table.getHeaderGroups()[0]!.headers.map((h, i) => {
             const sortable = h.column.getCanSort() && !!onSortingChange;
             const dir = h.column.getIsSorted();
             return (
@@ -86,7 +88,7 @@ export function DataTable<T>({
                 role="columnheader"
                 aria-sort={dir === 'asc' ? 'ascending' : dir === 'desc' ? 'descending' : undefined}
                 className={cn(cell, 'h-12 text-label-m text-ink')}
-                style={{ width: h.column.columnDef.meta?.width }}
+                style={width(i, h.column.columnDef.meta?.width)}
               >
                 {sortable ? (
                   <button type="button" onClick={h.column.getToggleSortingHandler()} className="flex items-center">
@@ -105,8 +107,8 @@ export function DataTable<T>({
         {status === 'loading' &&
           Array.from({ length: loadingRows }, (_, i) => (
             <div key={i} role="row" className={cn(row, rowH, 'border-b border-line')}>
-              {leafColumns.map((c) => (
-                <div key={c.id} role="cell" className={cell} style={{ width: c.columnDef.meta?.width }}>
+              {leafColumns.map((c, j) => (
+                <div key={c.id} role="cell" className={cell} style={width(j, c.columnDef.meta?.width)}>
                   <Skeleton style={{ width: c.columnDef.meta?.skeleton ?? 90 }} />
                 </div>
               ))}
@@ -117,8 +119,8 @@ export function DataTable<T>({
         {status === 'ready' &&
           table.getRowModel().rows.map((r) => (
             <div key={r.id} role="row" className={cn(row, rowH, 'border-b border-line text-body-m text-ink')}>
-              {r.getVisibleCells().map((c) => (
-                <div key={c.id} role="cell" className={cn(cell, rowH)} style={{ width: c.column.columnDef.meta?.width }}>
+              {r.getVisibleCells().map((c, j) => (
+                <div key={c.id} role="cell" className={cn(cell, rowH)} style={width(j, c.column.columnDef.meta?.width)}>
                   {flexRender(c.column.columnDef.cell, c.getContext())}
                 </div>
               ))}
@@ -148,14 +150,15 @@ export function DataTable<T>({
         </div>
       )}
 
-      {(status === 'loading' || (status === 'ready' && data.length > 0)) && (
+      {/* No footer under the loading skeleton (no loading frame draws one); an empty page keeps it when it has neighbours. */}
+      {status === 'ready' && (data.length > 0 || hasPrev || hasNext) && (
         <nav className={cn('flex h-14 items-center justify-between', tall ? 'px-s24' : 'px-s32')} aria-label={t('table.paging')}>
-          <p className="text-body-m text-ink-2">{status === 'ready' ? t('table.showing', { count: data.length }) : ' '}</p>
+          <p className="text-body-m text-ink-2">{t('table.showing', { count: data.length })}</p>
           <div className="flex items-center gap-s8">
-            <PageButton label={t('table.prev')} disabled={!hasPrev || status !== 'ready'} onClick={onPrev}>
+            <PageButton label={t('table.prev')} disabled={!hasPrev} onClick={onPrev}>
               <CaretLeft size={18} className="rtl:-scale-x-100" aria-hidden />
             </PageButton>
-            <PageButton label={t('table.next')} disabled={!hasNext || status !== 'ready'} onClick={onNext}>
+            <PageButton label={t('table.next')} disabled={!hasNext} onClick={onNext}>
               <CaretRight size={18} className="rtl:-scale-x-100" aria-hidden />
             </PageButton>
           </div>

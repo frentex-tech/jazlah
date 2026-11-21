@@ -20,6 +20,8 @@ export const IDLE_SECONDS = 12 * 60 * 60;
 export const refreshCookie = (p: Session) => `jz_rt_${p}`;
 export const accessCookie = (p: Session) => `jz_at_${p}`;
 export const phoneCookie = (p: Session) => `jz_ph_${p}`;
+/** The applicant's user id (customer session only): the owner of the application drafts on this device. */
+export const OWNER_COOKIE = 'jz_uid_customer';
 
 export const cookieBase = {
   httpOnly: true,

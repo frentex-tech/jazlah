@@ -68,10 +68,22 @@ jobs:
       - name: Unit self-checks
         run: pnpm test:unit
 
-      - name: Build
+      - name: Build (production) carries no mock code
         env:
-          PLAYWRIGHT: '1' # mock smoke tests: uploads go to the mock storage, no MEDIA_ORIGINS needed
-        run: pnpm build
+          MEDIA_ORIGINS: http://localhost:9002
+        run: |
+          pnpm build
+          ! grep -rlF --exclude='*.map' -e 'Fresh beef ribeye' -e 'mock-rt-' -e '__adminCatalog' .next/server .next/static
+
+      - name: Build (test build for the mock suite)
+        env:
+          # The mock suite's own build: mocks compiled in, uploads on the mock storage (no MEDIA_ORIGINS). Fixed at build
+          # time; a deploy builds without it (README "Builds"), so no runtime variable can open the mocks there.
+          DASHBOARD_TEST_BUILD: '1'
+        run: |
+          rm -rf .next && pnpm build
+          # Positive control for the check above: the same markers are found in a test build.
+          for m in 'Fresh beef ribeye' 'mock-rt-' '__adminCatalog'; do grep -rqF --exclude='*.map' "$m" .next/server || { echo "::error::marker '$m' missing from the test build"; exit 1; }; done
 
       - name: Install Playwright Chromium
         # The Ubuntu mirrors fail now and then: retry before failing the job.
@@ -132,11 +144,17 @@ jobs:
       STORAGE_PRIVATE_BUCKET: jazla-private
       STORAGE_PUBLIC_BASE_URL: http://localhost:9002/jazla-public
       SMS_PROVIDERS: log
-      AUTH_REVIEW_ACCOUNTS: '+966500000004:444444'
+      # The seed's admin and vendor (docs/frontend/auth.md), and a fresh applicant for the vendor application spec.
+      AUTH_REVIEW_ACCOUNTS: '+966500000004:444444,+966500000002:222222,+966500000041:414141'
       # Each test signs in again: no 60 s resend wait and no 3-per-10-minutes phone limit for this run.
       AUTH_OTP_RESEND_WAIT_SECONDS: '1'
       AUTH_OTP_PHONE_LIMIT: '100'
       AUTH_OTP_PHONE_DAILY_LIMIT: '100'
+      # Every browser call reaches the API from this one address (the dashboard server): no per-address limits here.
+      AUTH_OTP_REQUEST_ADDRESS_LIMIT: '1000'
+      AUTH_OTP_VERIFY_ADDRESS_LIMIT: '1000'
+      RATE_LIMIT_MAX_REQUESTS: '100000'
+      RATE_LIMIT_PRE_ROUTING_MAX_REQUESTS: '100000'
       API_URL: http://localhost:3000
 
     steps:
@@ -181,7 +199,8 @@ jobs:
         working-directory: apps/dashboard
         env:
           NODE_ENV: production
-          PLAYWRIGHT: '1' # test build: no media hosts (these checks upload nothing)
+          # A real production build (no mocks): the CSP lets the browser upload to the job's MinIO.
+          MEDIA_ORIGINS: http://localhost:9002
         run: |
           pnpm install --frozen-lockfile
           pnpm build

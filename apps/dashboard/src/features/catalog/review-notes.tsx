@@ -60,9 +60,9 @@ export function ReviewNotes({ id }: { id: string }) {
   const body = () => {
     if (state === 'loading') {
       return (
-        <div role="status" aria-label={t('loading')} className="flex items-start gap-s24">
-          <Skeleton className="h-[436px] w-[360px] shrink-0 rounded-md" />
-          <Skeleton className="h-[320px] flex-1 rounded-md" />
+        <div role="status" aria-label={t('loading')} className="flex w-full flex-col gap-s24">
+          <Skeleton className="h-[120px]" />
+          {[0, 1, 2].map((i) => <Skeleton key={i} className="h-14" />)}
         </div>
       );
     }
@@ -89,7 +89,7 @@ export function ReviewNotes({ id }: { id: string }) {
             <Row label={t('name')} value={name} />
             <Row label={t('category')} value={locale === 'en' ? state.category.name?.en : state.category.name?.ar} />
             <Row label={tp('cols.price')} value={state.minPriceHalalas === null ? '—' : sar(state.minPriceHalalas, locale)} />
-            {/* shortcut: API gap, no submission count on a product: the «محاولات الإرسال» row is left out. */}
+            {/* shortcut: API gap, no submission count on a product: the «محاولات الإرسال» row is left out (#52). */}
           </dl>
         </section>
         <section className={`${card} min-w-0 flex-1`} aria-labelledby="notes-title">
@@ -112,7 +112,7 @@ export function ReviewNotes({ id }: { id: string }) {
               </div>
               <div className="flex gap-s12">
                 <Link href={edit} className={cn(buttonVariants(), 'w-[224px]')}>{t('resubmit')}</Link>
-                {/* shortcut: API gap, products cannot be deleted (no DELETE endpoint); shown disabled. */}
+                {/* shortcut: API gap, products cannot be deleted (no DELETE endpoint); shown disabled (#52). */}
                 <Button variant="ghost" className="w-[224px]" disabled>{t('delete')}</Button>
               </div>
             </>

@@ -913,8 +913,8 @@
         "legendIncompatible": "Incompatible: shown disabled to customers, with the reason",
         "failed": "Could not change the rule. Try again.",
         "confirmTitle": "Change the rule for every product?",
-        "confirmForbid": "{cut} with {packaging} becomes incompatible on every product of the platform, not only this one.",
-        "confirmAllow": "{cut} with {packaging} becomes compatible on every product of the platform, not only this one.",
+        "confirmForbid": "{cut} with {packaging} becomes incompatible on every product of the platform, not only this one, including vendor products under review.",
+        "confirmAllow": "{cut} with {packaging} becomes compatible on every product of the platform, not only this one, including vendor products under review.",
         "confirm": "Change the rule"
       },
       "fulfilment": {
@@ -1005,7 +1005,9 @@
     "blocked": {
       "title": "Your store is suspended",
       "body": "The JAZLA team suspended your store, so products can't be managed now. Contact support to reactivate it, then sign in again.",
-      "action": "Sign in"
+      "action": "Sign in",
+      "formTitle": "You can't edit products now",
+      "formBody": "Your store is temporarily suspended. Contact support to reactivate it."
     },
     "done": {
       "submit": "{name} sent for review",

@@ -14,6 +14,6 @@ export default defineConfig({
     command: `pnpm start -p ${port}`,
     url: `http://localhost:${port}/login`,
     reuseExistingServer: !process.env.CI,
-    env: { DASHBOARD_API_MOCK: '1', PLAYWRIGHT: '1' },
+    env: { DASHBOARD_API_MOCK: '1' }, // needs a test build: DASHBOARD_TEST_BUILD=1 pnpm build
   },
 });

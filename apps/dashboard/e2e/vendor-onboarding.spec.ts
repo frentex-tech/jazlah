@@ -112,10 +112,11 @@ test('a draft is never shown to another applicant on the same device', async ({ 
   await page.getByLabel('اسم المتجر بالعربية').fill('مسودة المتقدم الأول');
   await page.getByRole('button', { name: 'حفظ والإكمال لاحقًا' }).click();
 
-  // The session ends, and someone else signs in on the same tab.
+  // The session ends, and someone else signs in on the same tab, with a phone that masks the same (+966 5•• ••• xyz):
+  // drafts belong to the user id, not to the shown phone.
   await context.clearCookies();
   await page.reload();
-  await signInAsApplicant(page, `05${String(Math.floor(Math.random() * 1e7)).padStart(7, '0')}7`);
+  await signInAsApplicant(page, `05${String(Math.floor(Math.random() * 1e5)).padStart(5, '0')}${first.slice(-3)}`);
   await expect(page.getByRole('heading', { level: 1, name: 'بيانات المنشأة' })).toBeVisible();
   await expect(page.getByLabel('اسم المتجر بالعربية')).toHaveValue('');
   await expect(page.getByText(/استعدنا ما كتبته/)).toHaveCount(0);
@@ -186,9 +187,13 @@ test('store profile: validation, save, and the suspended store', async ({ page, 
   expect((await context.cookies()).find((c) => c.name === 'jz_rt_vendor')).toBeUndefined();
 });
 
-test('after the idle timeout, a remaining customer refresh token is ended and cleared', async ({ page, context }) => {
+test('after the idle timeout, a remaining customer refresh token is ended and cleared, and so are the drafts', async ({ page, context }) => {
+  await page.goto('/vendor/apply');
+  await page.evaluate(() => localStorage.setItem('jz:vendor-application-later', '{"owner":"x","at":0,"step":0,"values":{}}'));
   await context.addCookies([{ name: 'jz_rt_customer', value: 'mock-rt-customer-500000001-1', url: `http://localhost:${process.env.PORT ?? 3001}`, httpOnly: true }]);
   await page.goto('/vendor/apply');
+  await expect(page).toHaveURL(/\/vendor\/apply\?reason=expired$/);
   await expect(page.getByRole('heading', { name: 'انضم كتاجر' })).toBeVisible();
+  await expect.poll(() => page.evaluate(() => localStorage.length)).toBe(0);
   expect((await context.cookies()).find((c) => c.name === 'jz_rt_customer')).toBeUndefined();
 });

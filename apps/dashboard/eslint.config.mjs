@@ -17,7 +17,13 @@ const config = [
         { selector: `TemplateElement[value.raw=/${PHYSICAL}/]`, message },
       ],
       '@typescript-eslint/no-unused-vars': ['error', { argsIgnorePattern: '^_' }],
+      // Mocks are reached only through src/lib/mock-backends.ts, so a production build leaves them out (README «Builds»).
+      'no-restricted-imports': [
+        'error',
+        { patterns: [{ group: ['**/*.mock', '@/features/mocks'], message: 'Use mockBackends() from @/lib/mock-backends.' }] },
+      ],
     },
   },
+  { files: ['src/features/mocks.ts', 'src/features/**/*.mock.ts'], rules: { 'no-restricted-imports': 'off' } },
 ];
 export default config;

@@ -85,8 +85,8 @@ export function StoreProfile() {
   if (profile === 'loading') {
     return (
       <div role="status" aria-label={t('title')} className="flex w-full flex-col gap-s24">
-        <Skeleton className="h-[120px] rounded-md" />
-        {[0, 1, 2, 3].map((i) => <Skeleton key={i} className="h-14 rounded-md" />)}
+        <Skeleton className="h-[120px]" />
+        {[0, 1, 2, 3].map((i) => <Skeleton key={i} className="h-14" />)}
       </div>
     );
   }
@@ -204,7 +204,7 @@ export function StoreProfile() {
             <FormField label={t('identity.name')} hint={t('identity.nameHint')}>
               {({ id, describedBy }) => <TextInput id={id} aria-describedby={describedBy} value={name} disabled />}
             </FormField>
-            {/* shortcut: API gap, the store has no tagline in VendorProfileResponseDto; shown disabled. */}
+            {/* shortcut: API gap, the store has no tagline in VendorProfileResponseDto; shown disabled (#45). */}
             <InputField label={t('identity.tagline')} hint={t('identity.taglineHint')} placeholder={t('placeholder')} disabled />
           </div>
           <InputField label={t('identity.description')} hint={t('identity.descriptionHint')} placeholder={t('placeholder')} value={v.descAr} onChange={(e) => set('descAr', e.target.value)} error={err('descAr')} />
@@ -214,7 +214,7 @@ export function StoreProfile() {
         <Section title={t('contact.title')} body={t('contact.body')} invalid={contactInvalid}>
           <div className="grid grid-cols-2 gap-s24">
             <PhoneInput label={t('contact.phone')} hint={t('contact.phoneHint')} placeholder="5X XXX XXXX" value={v.phone} onChange={(d) => set('phone', d)} error={err('phone')} disabled={suspended} />
-            <InputField label={t('contact.email')} hint={t('contact.emailHint')} type="email" placeholder={t('placeholder')} value={v.email} onChange={(e) => set('email', e.target.value)} error={err('email')} />
+            <InputField label={t('contact.email')} hint={t('contact.emailHint')} type="email" dir="ltr" className="rtl:text-end" placeholder={t('placeholder')} value={v.email} onChange={(e) => set('email', e.target.value)} error={err('email')} />
             <InputField label={t('contact.vat')} hint={t('contact.vatHint')} placeholder="3XXXXXXXXXXXXX3" inputMode="numeric" value={v.vat} onChange={(e) => set('vat', e.target.value)} error={err('vat')} />
           </div>
         </Section>
@@ -223,13 +223,13 @@ export function StoreProfile() {
           <div className="relative h-[200px] overflow-hidden rounded-md bg-sand">
             {profile.location && <PinMap value={profile.location} label={t('location.mapLabel')} />}
           </div>
-          {/* shortcut: API gap, the profile has the city only (an admin sets it), no street address. */}
+          {/* shortcut: API gap, the profile has the city only (an admin sets it), no street address (#45). */}
           <FormField label={t('location.address')} hint={t('location.addressHint')}>
             {({ id, describedBy }) => <TextInput id={id} aria-describedby={describedBy} value={profile.city ?? ''} placeholder={t('placeholder')} disabled />}
           </FormField>
         </Section>
 
-        {/* shortcut: API gap, no working hours in the vendor profile; the switches are shown disabled. */}
+        {/* shortcut: API gap, no working hours in the vendor profile; the switches are shown disabled (#69). */}
         <Section title={t('hours.title')} body={t('hours.body')}>
           {(['weekdays', 'friday', 'holidays'] as const).map((k) => (
             <Switch key={k} label={t(`hours.${k}`)} checked={false} onChange={() => {}} disabled />

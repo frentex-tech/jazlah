@@ -4,17 +4,17 @@ import Image from 'next/image';
 import { LoginCard, LoginLayout, otpLength } from '@/features/auth/login-layout';
 import { LoginFlow } from '@/features/auth/login-flow';
 import { Link } from '@/i18n/navigation';
-import { CustomerSignOut } from './sign-out';
-import { PANELS_COOKIE, parseSessions, phoneCookie, refreshCookie } from '@/lib/session';
+import { ClearDrafts, CustomerSignOut } from './sign-out';
+import { OWNER_COOKIE, PANELS_COOKIE, parseSessions, phoneCookie, refreshCookie } from '@/lib/session';
 
 /**
  * The applicant's customer session: the masked phone it signed in with, or null when there is none. A refresh token
  * left after the idle timeout counts as none; the middleware has already ended it at the API and cleared the cookies.
  */
-export async function customerSession(): Promise<{ phone: string } | null> {
+export async function customerSession(): Promise<{ phone: string; owner: string } | null> {
   const jar = await cookies();
   const live = parseSessions(jar.get(PANELS_COOKIE)?.value).includes('customer') && !!jar.get(refreshCookie('customer'))?.value;
-  return live ? { phone: jar.get(phoneCookie('customer'))?.value ?? '' } : null;
+  return live ? { phone: jar.get(phoneCookie('customer'))?.value ?? '', owner: jar.get(OWNER_COOKIE)?.value ?? '' } : null;
 }
 
 /** Phone and code for the applicant (410:40299, 410:40343): the staff sign-in with `audience: customer`. */
@@ -23,6 +23,7 @@ export function CustomerSignIn({ next, reason }: { next?: string; reason?: strin
     <LoginLayout panel="customer">
       <LoginCard>
         <LoginFlow panel="customer" next={next} otpLength={otpLength()} reason={reason === 'disabled' ? 'disabled' : undefined} />
+        {reason && <ClearDrafts />}
       </LoginCard>
     </LoginLayout>
   );

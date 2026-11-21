@@ -20,7 +20,7 @@ export default async function Apply({
   if (!session) return <CustomerSignIn reason={q.reason} />;
   return (
     <PublicFrame signOut>
-      <ApplyWizard phone={session.phone} reapply={q.reapply === '1'} />
+      <ApplyWizard phone={session.phone} owner={session.owner} reapply={q.reapply === '1'} />
     </PublicFrame>
   );
 }
