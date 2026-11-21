@@ -33,6 +33,7 @@ abstract final class JIcons {
   static const info = IconData(0xe2ce, fontFamily: _regular, fontPackage: _package);
   static const minus = IconData(0xe32a, fontFamily: _regular, fontPackage: _package);
   static const prohibit = IconData(0xe3de, fontFamily: _regular, fontPackage: _package);
+  static const trash = IconData(0xe4a6, fontFamily: _regular, fontPackage: _package);
   static const bell = IconData(0xe0ce, fontFamily: _regular, fontPackage: _package);
   static const x = IconData(0xe4f6, fontFamily: _regular, fontPackage: _package);
   static const slidersHorizontal = IconData(0xe434, fontFamily: _regular, fontPackage: _package);

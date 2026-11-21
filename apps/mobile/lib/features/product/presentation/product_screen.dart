@@ -7,7 +7,11 @@ import 'package:go_router/go_router.dart';
 
 import 'package:jazlah/app/router/router.dart';
 import 'package:jazlah/app/theme/theme.dart';
+import 'package:jazlah/core/errors/error_text.dart';
 import 'package:jazlah/core/widgets/widgets.dart';
+import 'package:jazlah/features/cart/domain/cart.dart';
+import 'package:jazlah/features/cart/presentation/cart_providers.dart';
+import 'package:jazlah/features/cart/presentation/cart_screen.dart';
 import 'package:jazlah/features/catalog/presentation/catalog_widgets.dart';
 import 'package:jazlah/features/product/domain/price.dart';
 import 'package:jazlah/features/product/domain/product.dart';
@@ -32,6 +36,7 @@ class _ProductScreenState extends ConsumerState<ProductScreen> {
   ProductSelection? _selection;
   int _page = 0;
   bool _cutError = false;
+  bool _adding = false;
 
   /// The incompatible packaging whose explanation is open.
   String? _explained;
@@ -54,8 +59,19 @@ class _ProductScreenState extends ConsumerState<ProductScreen> {
       if (target != null) await Scrollable.ensureVisible(target, duration: const Duration(milliseconds: 300));
       return;
     }
-    // shortcut: the cart is CRT-MOB-1 (#64); until then the button only says so (selection and notes are not kept).
-    showJToast(context, message: AppLocalizations.of(context).productCartSoon, kind: JToastKind.info);
+    setState(() => _adding = true);
+    try {
+      final added = await addToCart(
+        context,
+        ref,
+        CartItemInput.fromSelection(p.id, _selection!, notes: _notes.text),
+      );
+      if (added && mounted) showJToast(context, message: AppLocalizations.of(context).productAdded);
+    } on Object catch (e) {
+      if (mounted) showJToast(context, message: errorText(context, e), kind: JToastKind.error);
+    } finally {
+      if (mounted) setState(() => _adding = false);
+    }
   }
 
   @override
@@ -72,6 +88,7 @@ class _ProductScreenState extends ConsumerState<ProductScreen> {
               cartLabel: l10n.cart,
               onBack: () => popOrHome(context),
               onCart: () => openCart(context),
+              cartCount: ref.watch(cartCountProvider),
             ),
             Expanded(
               child: product.when(
@@ -167,7 +184,7 @@ class _ProductScreenState extends ConsumerState<ProductScreen> {
               children: [
                 for (final size in p.sizes)
                   JChip(
-                    label: [_weight(l10n, size.grams), ?size.tag?.of(lang)].join(' · '),
+                    label: [formatWeight(l10n, size.grams), ?size.tag?.of(lang)].join(' · '),
                     selected: size.id == s.sizeId,
                     onTap: on && size.available ? () => _set(s.withSize(size.id)) : null,
                   ),
@@ -418,6 +435,7 @@ class _ProductScreenState extends ConsumerState<ProductScreen> {
             child: JButton(
               label: unavailable ? l10n.productUnavailable : l10n.addToCart,
               expand: true,
+              loading: _adding,
               onPressed: ok ? () => _add(p!) : null,
             ),
           ),
@@ -443,7 +461,7 @@ class _ProductScreenState extends ConsumerState<ProductScreen> {
       for (final c in line.breakdown)
         switch (c.kind) {
           PriceKind.size => row(
-            '${_weight(l10n, p.sizes.firstWhere((z) => z.id == c.optionId).grams)} × '
+            '${formatWeight(l10n, p.sizes.firstWhere((z) => z.id == c.optionId).grams)} × '
             '${l10n.productPrice(formatHalalas(c.halalas))}',
             l10n.productPrice(formatHalalas(c.halalas)),
           ),
@@ -496,13 +514,6 @@ String definiteName(String name, String lang) {
         return plain || !arabic || w.startsWith('ال') ? w : 'ال$w';
       })
       .join(' ');
-}
-
-/// `500` → "500 g", `1000` → "1 kg", `1500` → "1.5 kg".
-String _weight(AppLocalizations l10n, int grams) {
-  if (grams < 1000) return l10n.weightGrams('$grams');
-  final kg = grams / 1000;
-  return l10n.weightKg(kg == kg.truncateToDouble() ? '${kg.toInt()}' : '$kg');
 }
 
 String _extra(AppLocalizations l10n, int halalas) =>

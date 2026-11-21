@@ -56,6 +56,13 @@ jobs:
       - name: Install (lockfile frozen)
         run: pnpm install --frozen-lockfile
 
+      - name: Deploy guard refuses the mock flags (scripts/deploy-guard.sh)
+        run: |
+          sh scripts/deploy-guard.sh
+          # `if`, not `!`: bash's errexit ignores a negated command.
+          if DASHBOARD_TEST_BUILD=1 sh scripts/deploy-guard.sh; then exit 1; fi
+          if DASHBOARD_API_MOCK=0 sh scripts/deploy-guard.sh; then exit 1; fi
+
       - name: API types match services/api/openapi.json
         run: pnpm api:generate && git diff --exit-code -- src/api/schema.d.ts
 
