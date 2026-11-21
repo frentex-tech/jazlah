@@ -501,7 +501,7 @@ describe('validateEnv', () => {
 
     it.each(['', 'S3', 'gcs'])('rejects STORAGE_PROVIDER=%p', (value) => {
       expect(problemsOf({ ...VALID, STORAGE_PROVIDER: value })).toEqual([
-        'STORAGE_PROVIDER: expected one of s3',
+        'STORAGE_PROVIDER: expected one of s3, disabled',
       ]);
     });
 
@@ -871,6 +871,44 @@ describe('validateEnv', () => {
     it('refuses the log provider in production', () => {
       expect(problemsOf({ ...PRODUCTION, SMS_PROVIDERS: 'log' })).toEqual([
         'SMS_PROVIDERS: the log provider writes message text (OTP codes) to the log: not allowed when DEPLOYMENT_ENV is production',
+      ]);
+    });
+
+    it('starts staging with storage disabled and no other storage variable', () => {
+      const withoutStorage = Object.fromEntries(
+        Object.entries(STAGING).filter(([key]) => !key.startsWith('STORAGE_')),
+      );
+      const env = validateEnv({
+        ...withoutStorage,
+        STORAGE_PROVIDER: 'disabled',
+      });
+      expect(env.STORAGE_PROVIDER).toBe('disabled');
+    });
+
+    it('keeps a storage value that is set, and fills an empty one, with storage disabled', () => {
+      const env = validateEnv({
+        ...STAGING,
+        STORAGE_PROVIDER: 'disabled',
+        STORAGE_PUBLIC_BUCKET: 'jazla-staging-public-x',
+        STORAGE_ACCESS_KEY_ID: '',
+      });
+      expect(env.STORAGE_PUBLIC_BUCKET).toBe('jazla-staging-public-x');
+      expect(env.STORAGE_ACCESS_KEY_ID).toBe('none');
+    });
+
+    it('refuses disabled storage in production', () => {
+      expect(
+        problemsOf({ ...PRODUCTION, STORAGE_PROVIDER: 'disabled' }),
+      ).toEqual([
+        'STORAGE_PROVIDER: disabled turns uploads off: not allowed when DEPLOYMENT_ENV is production',
+      ]);
+    });
+
+    it('still requires every storage variable for s3', () => {
+      expect(
+        problemsOf({ ...STAGING, STORAGE_PUBLIC_BASE_URL: undefined }),
+      ).toEqual([
+        'STORAGE_PUBLIC_BASE_URL: required: expected an http:// or https:// URL with no query, fragment, credentials or trailing slash',
       ]);
     });
 

@@ -132,6 +132,7 @@ Locally no SMS is sent: the default SMS provider writes each message, code inclu
    | `kitchen` | `0500000003` | `333333` | kitchen access for the platform vendor |
    | `admin` | `0500000004` | `444444` | admin access: review queues hold a pending application, products in review and a change request |
    | `customer` | `0500000005` | `555555` | no name yet, so `profileComplete` is `false` and the completion screen shows |
+   | `admin`, `vendor`, `kitchen` | `0500000006` | `666666` | every staff panel: admin, vendor of Al Nokhba Butchery, kitchen of the platform vendor (staging review) |
 
    The codes assume the default code length of 6 digits (`AUTH_OTP_LENGTH`). The seed prints the line for the length your `.env` sets.
 
