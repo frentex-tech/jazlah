@@ -104,6 +104,8 @@ What a built dashboard screen needs and the API does not give yet. Until it land
 | Admin reschedule: the days on offer for an order (SCH-API-2 `availableDays` for its vendor and method) and the reschedule itself (`{date}`) | Order detail «إعادة جدولة» (135:49465) | Mock: the booking horizon from today, closed days by scope from the operations mock, today past the cutoff; DAY_NOT_AVAILABLE (409) for any other day | #88 |
 | Store names for the admin orders store filter | Orders board store filter | The first page of active stores | #88 |
 | Orders export | Orders board «تصدير» | Shown disabled | #88 |
+| Admin coupons (CRT-API-3: `/v1/admin/coupons` list, read, create, update, and per-coupon usage stats) | Coupons list and form (CRT-DSH-1, no Figma frame) | In-memory mock with the sprint-3.md `Coupon` shape (`apps/dashboard/src/features/coupons/backend.mock.ts`); without it the pages show their error state. Assumed: the list filters by `status` (derived: active, scheduled, expired, inactive) and `q` (code), cursor paged; a coupon answer carries `status` and `usageCount`; update is a PATCH of the keys sent (deactivate sends `isActive: false`); a code used by another coupon in any case answers COUPON_CODE_TAKEN (409); usage is `GET …/{id}/usage` → `{uses, distinctUsers, totalDiscountHalalas}`; percent `value` is 1–100, fixed `value` is halalas | #63 (CRT-DSH-1, open until wired) |
+| Admin permissions (marketing) | Not-allowed state of the coupons pages | Only on the mock (an access token ending in `-limited` is answered NOT_ALLOWED) | #111 (ADM-API-1) |
 | Platform weekly working hours (open days and hours) as a setting | Operations settings «ساعات العمل» (118:11181) | Kept in the mock as `workingHours`; not an `ops.*` key in sprint-3.md | none open yet (API gap) |
 | `ops.cutoffs.occasion.time` and the shape of `ops.cutoffs.adha` | Operations settings cutoffs (118:11181 shows an occasion cutoff time) | Occasion has a time in the mock; adha is left out | none open yet (API decision) |
 | An admin view of full days (booked against capacity) | Operations calendar legend «مكتمل» (118:11181) | Legend shown, no day marked full | none open yet (API gap) |
@@ -111,7 +113,7 @@ What a built dashboard screen needs and the API does not give yet. Until it land
 
 The code length in the code request answer is asked for in the mobile section below; the dashboard needs it too (a dashboard setting today).
 
-The dashboard's in-process mocks (staff and customer sign-in accounts, an in-memory coverage store, the operations settings and vendor capacity, vendor applications and their admin review, store profile, the admin catalog with the vendor products and review queue, and a mock upload storage) exist only for its smoke tests; they stand in for nothing missing. They are compiled into development and test builds only (`DASHBOARD_TEST_BUILD=1`), never into a production build.
+The dashboard's in-process mocks (staff and customer sign-in accounts, an in-memory coverage store, the operations settings and vendor capacity, the admin coupons, vendor applications and their admin review, store profile, the admin catalog with the vendor products and review queue, and a mock upload storage) exist only for its smoke tests; they stand in for nothing missing. They are compiled into development and test builds only (`DASHBOARD_TEST_BUILD=1`), never into a production build.
 
 ## Requested by the apps (mobile)
 

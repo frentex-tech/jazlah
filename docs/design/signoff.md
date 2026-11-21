@@ -187,6 +187,17 @@ Agreed by the owner in the Sprint 1 fix round, after the design QA (`reviews/qa-
 | 135:49902 | The detail «empty» state reads «الطلب غير موجود» with «العودة للطلبات» (an unknown order, or another store's for a vendor) | The frame's «لا توجد طلبات بعد» does not fit a single order |
 | vendor nav | «لوحة الطلبات» opens `/vendor/orders` and `/vendor` redirects there; the live board frame (135:39184) is VOP-DSH-1 | The sprint's vendor orders page |
 
+## Build differences, Sprint 3 dashboard: CRT-DSH-1 coupons (no Figma frame) (pending owner sign-off, not agreed)
+The Figma file has no coupons frame. These screens are built from the design system (`docs/design/spec/ds/*.json`, tokens) with the patterns of the sibling admin screens (stores and products lists, operations settings, product form) and await the owner's approval.
+| Screen | What was built | Why |
+|---|---|---|
+| side nav | A new admin item «التسويق» / «Marketing» (ticket icon) after «سهم الخير», opening `/admin/marketing/coupons` | The admin shell frame (135:46622) has no marketing item |
+| `/admin/marketing/coupons` | Page header «الكوبونات» with «كوبون جديد»; Filters bar (code search, status select, «مسح الكل», status chip); Data table (code, type · value with the minimum order under it, status badge: فعّال success / مجدول info / منتهي warning / موقوف neutral, usage «used / limit» or «/ بلا حد», period from–to), cursor paging footer, row link | Admin list pattern (131:16744, 131:21286) |
+| list states | Loading (table skeleton rows), empty (no coupons yet, with «كوبون جديد»), filtered empty (the Filters bar stays mounted with its text and chip above the card, «مسح التصفية»), error (retry), not allowed (no «كوبون جديد») | The Sprint 3 list states |
+| `/admin/marketing/coupons/new` and `/[id]` | Form sections: «الاستخدام» (edit only: times used vs limit, distinct customers, total discount), «الخصم» (code, type, percent or SAR amount, max discount for percent only), «الشروط» (minimum order, stores and categories as Chip multi-selects, empty = all, «للطلب الأول فقط» switch), «المدة والحدود» (start and end as native date-time fields in Riyadh time, total and per-customer limits), «الحالة» (active switch); action bar «إنشاء الكوبون» / «حفظ التغييرات» and «إلغاء»; header status badge and «إيقاف الكوبون» | Form section pattern of the operations settings (118:11181) |
+| form states | Loading (section skeletons), validation (fields in danger with the message under them, section border danger, toast «راجع الحقول المظللة»; a taken code reads «هذا الرمز مستخدم لكوبون آخر»), load error, coupon not found, not allowed | The Sprint 3 form states |
+| deactivate | Destructive Confirm dialog (320) «إيقاف الكوبون CODE؟» with «إيقاف» / «إلغاء», then a success toast | DS Dialog (16:579) |
+
 ## Build differences, Sprint 2 mobile: STF-MOB-1, STF-MOB-3, STF-MOB-4 (owner, 2026-11-21)
 After the design QA (`reviews/qa-design-mobile-2.md`). Everything else follows Figma; the M1–M5 and M7 copy and layout findings were fixed in the build. The last two rows need a Figma update.
 
