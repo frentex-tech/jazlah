@@ -1687,4 +1687,7 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get payStillProcessing =>
       'The payment is still processing. We will update your order as soon as the result arrives.';
+
+  @override
+  String get payOrderGone => 'This order is no longer available.';
 }

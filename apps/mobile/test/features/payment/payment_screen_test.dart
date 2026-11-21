@@ -136,6 +136,7 @@ Future<ProviderContainer> _pump(
   bool none = false,
   String lang = 'ar',
   bool coldStart = false,
+  String? pendingId,
   PaymentGateway? gateway,
 }) async {
   _clock = DateTime.utc(2026, 11, 10, 10);
@@ -154,8 +155,12 @@ Future<ProviderContainer> _pump(
   if (coldStart) _orders.decide('pay-o-1-1', approve: true); // captured while the app was dead
   final c = await t.pumpScreen(
     coldStart ? const _ColdStart() : PaymentScreen(orderId: placed.order.id, placed: reopen ? null : placed),
-    prefs: {'locale': lang, 'onboardingSeen': true, if (coldStart) 'payment.pending': placed.order.id},
+    prefs: {'locale': lang, 'onboardingSeen': true, if (coldStart) 'payment.pending': pendingId ?? placed.order.id},
     routes: [
+      GoRoute(
+        path: Routes.home,
+        builder: (_, _) => const Scaffold(body: Text('route:/home')),
+      ),
       GoRoute(
         path: '/checkout/pay/:orderId',
         builder: (_, s) => PaymentScreen(orderId: s.pathParameters['orderId']!),
@@ -421,5 +426,45 @@ void main() {
     await _resume(t);
     expect(find.text(_declined), findsNothing);
     expect(find.text('إعادة المحاولة'), findsOneWidget);
+  });
+
+  testWidgets('cold start with an order that is gone (mock orders die with the app): home, id cleared', (t) async {
+    final c = await _pump(t, coldStart: true, pendingId: 'o-9'); // settles about 2 s: the toast still shows
+    expect(find.text('route:/home'), findsOneWidget);
+    expect(find.text('هذا الطلب لم يعد متاحًا.'), findsOneWidget);
+    expect(c.read(prefsProvider).pendingPayment, isNull);
+  });
+
+  testWidgets('leaving after the 60 s stop keeps the order (still in flight); after a decline it does not', (t) async {
+    var c = await _pump(t, gateway: _Silent());
+    await t.pump(const Duration(seconds: 62));
+    await t.pump();
+    GoRouter.of(t.element(find.byType(PaymentScreen))).go(Routes.home);
+    await _settle(t);
+    expect(c.read(prefsProvider).pendingPayment, 'o-1');
+
+    c = await _pump(t);
+    await t.tap(find.text('رفض'));
+    await _settle(t);
+    GoRouter.of(t.element(find.byType(PaymentScreen))).go(Routes.home);
+    await _settle(t);
+    expect(c.read(prefsProvider).pendingPayment, isNull);
+  });
+
+  testWidgets('another method after a network error gets a new payment key', (t) async {
+    await _pump(t);
+    await t.tap(find.text('رفض'));
+    await _settle(t);
+    await t.pump(const Duration(seconds: 5));
+    final payments = _payments as _Payments..failNetworkOnce = true;
+    await t.tap(find.text('إعادة المحاولة'));
+    await _settle(t);
+    await t.pump(const Duration(seconds: 5));
+    await t.tap(find.text('Apple Pay'));
+    await t.pump();
+    await t.tap(find.byType(JButton).last);
+    await _settle(t);
+    expect(payments.keys, hasLength(2));
+    expect(payments.keys[1], isNot(payments.keys[0]));
   });
 }

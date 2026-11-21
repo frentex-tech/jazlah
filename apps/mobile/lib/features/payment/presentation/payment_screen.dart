@@ -63,8 +63,13 @@ class _PaymentScreenState extends ConsumerState<PaymentScreen> {
   /// new payment is being asked for; null when opened again (any outcome is the order's).
   String? _paymentId;
 
-  /// The new payment's idempotency key, kept until the server answers it (a network error keeps it).
+  /// The new payment's idempotency key, kept until the server answers it (a network error keeps it) and
+  /// dropped when the method changes (a key belongs to one request body).
   String? _payKey;
+
+  /// A payment is open at the gateway with no outcome yet (the wait stopped after 60 s, or opened again while
+  /// it runs): leaving keeps the order for the next start.
+  bool _unsettled = false;
 
   /// Polls before the screen stops waiting (about 60 s) and lets the customer leave.
   static const _maxPolls = 30;
@@ -95,7 +100,9 @@ class _PaymentScreenState extends ConsumerState<PaymentScreen> {
   @override
   void dispose() {
     // Left with nothing in flight (after a decline, or before paying): nothing to come back to.
-    if (_phase == _Phase.failed || _phase == _Phase.ready) unawaited(_prefs.setPendingPayment(null));
+    if ((_phase == _Phase.failed || _phase == _Phase.ready) && !_unsettled) {
+      unawaited(_prefs.setPendingPayment(null));
+    }
     _life.dispose();
     _toastTimer?.cancel();
     super.dispose();
@@ -110,6 +117,7 @@ class _PaymentScreenState extends ConsumerState<PaymentScreen> {
   Future<void> _run(PaymentAction action) async {
     final flow = _flow;
     _paymentId = action.paymentId;
+    _unsettled = false;
     setState(() => _phase = _Phase.processing);
     final result = await ref.read(paymentGatewayProvider)!.startPayment(context, action);
     if (!mounted || flow != _flow) return;
@@ -125,6 +133,7 @@ class _PaymentScreenState extends ConsumerState<PaymentScreen> {
       if (polls == _maxPolls) {
         // Still open at the gateway: stop holding the customer; resume or reopening reads it again.
         _flow++;
+        _unsettled = true;
         setState(() => _phase = _Phase.ready);
         _showToast(l10n.payStillProcessing);
         return;
@@ -159,9 +168,23 @@ class _PaymentScreenState extends ConsumerState<PaymentScreen> {
       final s = await repo.status(widget.orderId);
       if (!mounted || flow != _flow || _settle(s)) return;
       // Still unpaid with nothing in flight here (opened again): the customer pays or retries.
-      if (_phase == _Phase.loading) setState(() => _phase = _Phase.ready);
+      if (_phase == _Phase.loading) {
+        _unsettled = s.paymentStatus == PaymentStatus.initiated;
+        setState(() => _phase = _Phase.ready);
+      }
     } on Object catch (e) {
-      if (!mounted || _phase != _Phase.loading) return;
+      if (!mounted) return;
+      final code = ApiError.from(e).code;
+      if (code == 'NOT_FOUND' || code == PaymentError.orderNotPayable) {
+        // Gone (another account, or a mock order lost with the app): nothing to come back to.
+        _flow++;
+        unawaited(_prefs.setPendingPayment(null));
+        _unsettled = false;
+        showJToast(context, message: AppLocalizations.of(context).payOrderGone, kind: JToastKind.error);
+        context.go(Routes.home);
+        return;
+      }
+      if (_phase != _Phase.loading) return;
       setState(() => _phase = _Phase.ready);
       _showToast(errorText(context, e));
     }
@@ -183,6 +206,7 @@ class _PaymentScreenState extends ConsumerState<PaymentScreen> {
       return false;
     }
     _flow++;
+    _unsettled = false;
     if (!failed) unawaited(_prefs.setPendingPayment(null));
     // The gateway's page may still be open (resumed after 3DS): the outcome replaces it.
     Navigator.of(context).popUntil((r) => r is! PopupRoute);
@@ -274,7 +298,10 @@ class _PaymentScreenState extends ConsumerState<PaymentScreen> {
           methods: methods,
           chosen: chosen,
           frozen: busy,
-          onChoose: (m) => setState(() => _method = m),
+          onChoose: (m) => setState(() {
+            if (m != chosen?.method) _payKey = null;
+            _method = m;
+          }),
           onRetry: () => ref.invalidate(paymentMethodsProvider(widget.orderId)),
           notice: [
             if (o != null && o.walletAmount > 0) l10n.payWalletPart(formatHalalas(o.walletAmount)),

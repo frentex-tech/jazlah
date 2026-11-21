@@ -222,6 +222,7 @@ With the mock switch on, the mock order server keeps each order's payments. A fa
 | The payment methods for an unpaid order (the wallet measured against what is left to pay) | Payment step: «طريقة الدفع» | Mock only, no tender plan on a retry | PAY-API-1 #76 |
 | The wallet part sent at placement (wallet amount) and kept on the order | Review: wallet switch | The app sends a wallet amount with the payment method; the mock refuses more than the balance | ORD-API-1 #81, PAY-API-1 #76 |
 | Whether a failed gateway part gives the wallet part back at once (the app's reading) or only when the order expires | Payment step | Given back at once; the retry charges the whole total | PAY-API-1 #76 |
+| Orders that outlive the app | Cold start into a payment left mid-way | Mock orders live in memory and die with the app: on the mock, a saved order is not found at the next start, so the app says «هذا الطلب لم يعد متاحًا.», forgets it and opens home (the same happens for a not found or no longer payable order on the real API) | ORD-API-1 #81 |
 | The live gateway SDK (mada, cards, Apple Pay) | Payment step | Fake provider sheet with the mock switch; real builds never reach the step | PAY-MOB-2 #79 |
 
 ### Search and filters (STF-MOB-4 #57)

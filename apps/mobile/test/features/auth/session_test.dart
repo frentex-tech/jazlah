@@ -123,5 +123,12 @@ void main() {
     expect(r(Routes.splash), Routes.payment('o-1'));
     expect(r('${Routes.splash}?from=${Uri.encodeComponent(Routes.cart)}'), Routes.cart);
     expect(r(Routes.cart), isNull);
+    // Only a signed-in user: a guest or a signed-out user never lands on a payment.
+    for (final s in [SessionStatus.guest, SessionStatus.signedOut]) {
+      for (final loc in [Routes.splash, Routes.onboarding, Routes.home]) {
+        final to = authRedirect(uri: Uri.parse(loc), session: s, onboardingSeen: true, pendingPayment: 'o-1');
+        expect(to ?? '', isNot(contains('/checkout/pay')), reason: '$s $loc');
+      }
+    }
   });
 }

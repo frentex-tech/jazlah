@@ -3109,6 +3109,12 @@ abstract class AppLocalizations {
   /// In ar, this message translates to:
   /// **'لا يزال الدفع قيد المعالجة، سنحدّث حالة طلبك فور وصول النتيجة.'**
   String get payStillProcessing;
+
+  /// No description provided for @payOrderGone.
+  ///
+  /// In ar, this message translates to:
+  /// **'هذا الطلب لم يعد متاحًا.'**
+  String get payOrderGone;
 }
 
 class _AppLocalizationsDelegate extends LocalizationsDelegate<AppLocalizations> {
