@@ -17,6 +17,7 @@ import 'package:jazlah/features/auth/presentation/otp_screen.dart';
 import 'package:jazlah/features/auth/presentation/phone_screen.dart';
 import 'package:jazlah/features/auth/presentation/session_controller.dart';
 import 'package:jazlah/features/cart/presentation/cart_screen.dart';
+import 'package:jazlah/features/checkout/presentation/checkout_screen.dart';
 import 'package:jazlah/features/home/presentation/categories_screen.dart';
 import 'package:jazlah/features/home/presentation/home_screen.dart';
 import 'package:jazlah/features/home/presentation/stores_screen.dart';
@@ -46,6 +47,7 @@ abstract final class Routes {
   static const notifications = '/notifications';
   static const cart = '/cart';
   static const checkout = '/checkout';
+  static const checkoutReview = '/checkout/review';
   static const orders = '/orders';
   static const services = '/services';
   static const account = '/account';
@@ -130,9 +132,10 @@ final routerProvider = Provider<GoRouter>((ref) {
         builder: (context, _) => ComingSoonPage(title: AppLocalizations.of(context).menuNotifications),
       ),
       GoRoute(path: Routes.cart, builder: (_, _) => const CartScreen()),
-      // shortcut: placeholder until SCH-MOB-1 #71 builds the checkout steps.
+      GoRoute(path: Routes.checkout, builder: (_, _) => const CheckoutScreen()),
+      // shortcut: placeholder until ORD-MOB-1 #84 builds the review step.
       GoRoute(
-        path: Routes.checkout,
+        path: Routes.checkoutReview,
         builder: (context, _) => ComingSoonPage(title: AppLocalizations.of(context).checkoutTitle),
       ),
       GoRoute(

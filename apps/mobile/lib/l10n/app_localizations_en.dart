@@ -1242,7 +1242,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get productAdded => 'Added to your cart';
 
   @override
-  String get checkoutTitle => 'Payment and review';
+  String get checkoutTitle => 'Checkout';
 
   @override
   String get cartReplaceTitle => 'Replace your cart?';
@@ -1388,4 +1388,136 @@ class AppLocalizationsEn extends AppLocalizations {
   String cartWeightAbout(String weight) {
     return 'about $weight';
   }
+
+  @override
+  String checkoutStep(int step, int total, String name) {
+    return 'Step $step of $total: $name';
+  }
+
+  @override
+  String get checkoutStepFulfilment => 'Delivery and day';
+
+  @override
+  String get checkoutDelivery => 'Deliver to address';
+
+  @override
+  String get checkoutPickup => 'Pick up from store';
+
+  @override
+  String get checkoutDeliveryAddress => 'Delivery address';
+
+  @override
+  String get checkoutOutOfCoverage => 'Outside coverage';
+
+  @override
+  String get checkoutNoCoveredTitle => 'No address inside coverage';
+
+  @override
+  String get checkoutNoCoveredBody => 'Add an address inside our delivery area, or choose pickup from the store.';
+
+  @override
+  String get checkoutPickupPlace => 'Pickup location';
+
+  @override
+  String checkoutPickupHours(String open, String close) {
+    return 'Pickup from $open to $close';
+  }
+
+  @override
+  String get checkoutDeliveryDay => 'Delivery day';
+
+  @override
+  String get checkoutPickupDay => 'Pickup day';
+
+  @override
+  String get checkoutCalendar => 'Calendar';
+
+  @override
+  String checkoutDeliveryWindow(String start, String end) {
+    return 'Arrives between $start and $end';
+  }
+
+  @override
+  String checkoutPickupWindow(String start, String end) {
+    return 'Ready for pickup between $start and $end';
+  }
+
+  @override
+  String checkoutRiyadhTime(String date) {
+    return '$date · Riyadh time';
+  }
+
+  @override
+  String checkoutPickAnother(String date) {
+    return '$date · choose another available day';
+  }
+
+  @override
+  String get checkoutDaysLegend => 'Day key';
+
+  @override
+  String get checkoutDayClosed => 'Closed: store holiday';
+
+  @override
+  String get checkoutDayFull => 'Full: no capacity left';
+
+  @override
+  String get checkoutDayPastCutoff => 'Ordering time for this day is over';
+
+  @override
+  String get checkoutDayVendorClosed => 'Closed: the store doesn\'t open this day';
+
+  @override
+  String get checkoutDayOutsideHorizon => 'Beyond the booking period';
+
+  @override
+  String get checkoutDayUnavailable => 'Not available';
+
+  @override
+  String get checkoutDaysErrorTitle => 'Couldn\'t load the available days';
+
+  @override
+  String get checkoutDaysErrorBody => 'Check your connection and try again.';
+
+  @override
+  String get checkoutPausedTitle => 'Ordering is paused, we\'ll be back soon';
+
+  @override
+  String get checkoutChooseDeliveryDay => 'Choose the delivery day';
+
+  @override
+  String get checkoutChoosePickupDay => 'Choose the pickup day';
+
+  @override
+  String get checkoutConfirmDay => 'Confirm day';
+
+  @override
+  String get checkoutPreviousMonth => 'Previous month';
+
+  @override
+  String get checkoutNextMonth => 'Next month';
+
+  @override
+  String get clockAm => 'AM';
+
+  @override
+  String get clockPm => 'PM';
+
+  @override
+  String get clockAmShort => 'AM';
+
+  @override
+  String get clockPmShort => 'PM';
+
+  @override
+  String get errOrderingPaused => 'Ordering is paused. Try again later.';
+
+  @override
+  String get errFulfilmentNotSupported => 'Some items in your cart aren\'t available this way.';
+
+  @override
+  String get errAddressNotCovered => 'This address is outside our delivery area.';
+
+  @override
+  String get errDayFull => 'This day is full. Choose another one.';
 }
