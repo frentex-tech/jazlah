@@ -40,7 +40,7 @@ Every list endpoint follows one convention, so clients page every list the same 
 
 *Why: offsets skip or repeat rows while items are added, and a count costs a scan of the table; neither scales to Eid volumes.*
 
-Exceptions: `GET public/categories` returns every active category in the order admins set, not paged (DECISIONS.md, "Catalog"); `GET customer/addresses` returns the customer's addresses, at most ten, default first, not paged (DECISIONS.md, "Customers"); `GET vendor/lists/:list` and `GET vendor/cutting-packaging-incompatibilities` return every active entry or rule, oldest first, not paged (DECISIONS.md, "Catalog").
+Exceptions: `GET public/categories` returns every active category in the order admins set, not paged (DECISIONS.md, "Catalog"); `GET customer/addresses` returns the customer's addresses, at most ten, default first, not paged (DECISIONS.md, "Customers"); `GET vendor/lists/:list` and `GET vendor/cutting-packaging-incompatibilities` return every active entry or rule, oldest first, not paged (DECISIONS.md, "Catalog"); `GET admin/review-queue` is paged but also returns `count`, the whole queue's size (DECISIONS.md, "Catalog").
 
 ## Security baseline
 

@@ -169,6 +169,8 @@ The admin list endpoints stay admin-only: a vendor token there is `FORBIDDEN`.
 
 **One product:** `GET /v1/admin/products/{id}`. It includes the latest change request: compare the live product with `changeRequest`.
 
+**The review queue (one list):** `GET /v1/admin/review-queue`. New products waiting for review (`kind: product`) and pending edits of published products (`kind: change_request`) together, newest submission first. Each item has `productId`, `changeRequestId` (null for a new product), `vendor` with its name, the product's live `name` and `submittedAt`. `count` is how many wait in all for the filter (use it for the side-nav badge). Filter with `kind` and `vendorId`; paged like every list. Open an item with the product endpoint and decide it with the approve or reject endpoint of its kind, below.
+
 **Review queue of new products:** `GET /v1/admin/products?status=pending_review`.
 - **Approve:** `POST /v1/admin/products/{id}/approve`. The product becomes `published`.
 - **Reject:** `POST /v1/admin/products/{id}/reject` with `{ "reason": "..." }`. The vendor reads the reason as `rejectionReason`.

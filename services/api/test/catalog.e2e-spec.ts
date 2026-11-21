@@ -658,6 +658,92 @@ describe('Catalog (e2e)', () => {
   });
 
   describe('admin review', () => {
+    it('lists new products and edits in one queue with a count, filtered and paged', async () => {
+      const { owner, admin, options, vendorId } = await setUp();
+      const live = await catalog.published(owner, admin, options);
+      const product = (
+        await catalog.http
+          .get(`/v1/vendor/products/${live}`)
+          .set(...bearer(owner))
+          .expect(200)
+      ).body as ProductBody;
+      const edited = await catalog.http
+        .put(`/v1/vendor/products/${live}`)
+        .set(...bearer(owner))
+        .send(
+          catalog.body(options, [product.images[0].mediaId], {
+            fulfilment: undefined,
+            name: { ar: 'تعديل', en: 'Edited' },
+            sizes: [
+              {
+                id: product.sizes[0].id,
+                approxWeightGrams: 8000,
+                priceHalalas: 95000,
+              },
+            ],
+          }),
+        )
+        .expect(200);
+      const draft = await catalog.draft(owner, options);
+      await catalog.http
+        .post(`/v1/vendor/products/${draft}/submit`)
+        .set(...bearer(owner))
+        .expect(200);
+      const queue = (query: string) =>
+        catalog.http
+          .get(`/v1/admin/review-queue?vendorId=${vendorId}${query}`)
+          .set(...bearer(admin));
+      type QueuePage = {
+        items: {
+          kind: string;
+          productId: string;
+          changeRequestId: string | null;
+          vendor: { id: string; name: { en: string } | null };
+          submittedAt: string;
+        }[];
+        nextCursor: string | null;
+        count: number;
+      };
+
+      const all = (await queue('').expect(200)).body as QueuePage;
+      const edits = (await queue('&kind=change_request').expect(200))
+        .body as QueuePage;
+      const first = (await queue('&limit=1').expect(200)).body as QueuePage;
+      const second = (
+        await queue(`&limit=1&cursor=${first.nextCursor ?? ''}`).expect(200)
+      ).body as QueuePage;
+      const invalid = await queue('&kind=draft').expect(400);
+      const asVendor = await catalog.http
+        .get('/v1/admin/review-queue')
+        .set(...bearer(owner))
+        .expect(403);
+
+      expect(all.count).toBe(2);
+      expect(all.items).toHaveLength(2);
+      expect(all.items.map((item) => item.submittedAt)).toEqual(
+        [...all.items.map((item) => item.submittedAt)].sort().reverse(),
+      );
+      expect(all.items.find((item) => item.kind === 'product')).toMatchObject({
+        productId: draft,
+        changeRequestId: null,
+        vendor: { id: vendorId },
+      });
+      expect(
+        all.items.find((item) => item.kind === 'change_request'),
+      ).toMatchObject({
+        productId: live,
+        changeRequestId: (edited.body as ProductBody).changeRequest!.id,
+      });
+      expect(edits).toMatchObject({
+        count: 1,
+        items: [{ kind: 'change_request' }],
+      });
+      expect([...first.items, ...second.items]).toEqual(all.items);
+      expect([first.count, second.nextCursor]).toEqual([2, null]);
+      expect(invalid.body).toMatchObject({ code: 'VALIDATION_FAILED' });
+      expect(asVendor.body).toMatchObject({ code: 'FORBIDDEN' });
+    });
+
     it('queues a submitted product, then approves it (public) or rejects it with a reason', async () => {
       const { owner, admin, options, vendorId } = await setUp();
       const toApprove = await catalog.draft(owner, options);
