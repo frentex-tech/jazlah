@@ -3,14 +3,15 @@
 # Build context: services/api/ (`docker build -t jazla-api services/api`).
 # Stages:
 #   build      every dependency (lockfile frozen, pinned pnpm), the Prisma client, the API
-#              (dist/) and the development seed (dist-seed/, run on staging only, by hand)
+#              (dist/) and the development seed (dist-seed/, staging only, with --allow-staging)
 #   prod-deps  production dependencies only
 #   runtime    Node, the compiled code, production dependencies and the migrations, as the
 #              non-root `node` user
 #
-# Migrations are NOT run when a container starts: the deployment runs
-# `./node_modules/.bin/prisma migrate deploy` once per deploy, before the new version
-# starts (Render's pre-deploy command).
+# The CMD never migrates. On Render's free plan (no pre-deploy command) the service's
+# dockerCommand in render.yaml runs `prisma migrate deploy`, then the seed when
+# SEED_ON_START=true, then `node dist/main`; a paid plan moves the migrations to the
+# pre-deploy command, once per deploy before the new version starts.
 
 # The major version of .nvmrc (CI reads that file; keep the two in step).
 ARG NODE_VERSION=26
