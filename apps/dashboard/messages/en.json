@@ -1407,5 +1407,201 @@
       "body": "Contact the account manager for access.",
       "action": "Back"
     }
+  },
+  "orders": {
+    "breadcrumb": "Orders / All orders",
+    "title": "Orders",
+    "export": "Export",
+    "search": "Search",
+    "clear": "Clear all",
+    "status": "Status",
+    "vendor": "Store",
+    "method": "Payment method",
+    "date": "Date",
+    "chip": {
+      "status": "Status: {value}",
+      "vendor": "Store: {value}",
+      "method": "Payment: {value}",
+      "date": "Date: {value}"
+    },
+    "cols": {
+      "number": "Order no.",
+      "customer": "Customer",
+      "vendor": "Store",
+      "status": "Status",
+      "payment": "Payment",
+      "amount": "Amount",
+      "date": "Date"
+    },
+    "statuses": {
+      "pending_payment": "Awaiting payment",
+      "new": "Awaiting confirmation",
+      "confirmed": "New",
+      "preparing": "Preparing",
+      "ready": "Ready",
+      "picked_up": "With the driver",
+      "out_for_delivery": "On the way",
+      "delivered": "Delivered",
+      "collected": "Collected",
+      "cancelled": "Cancelled",
+      "delivery_failed": "Delivery failed",
+      "returned": "Returned"
+    },
+    "methods": {
+      "mada": "mada card",
+      "card": "Credit card",
+      "applepay": "Apple Pay",
+      "cod": "Cash on delivery",
+      "wallet": "Wallet"
+    },
+    "open": "Open order {number}",
+    "fresh": "New order {number} arrived",
+    "empty": {
+      "title": "No matching orders",
+      "body": "Try changing the filters or the date range.",
+      "action": "Clear filters",
+      "noneTitle": "No orders yet",
+      "noneBody": "Your past and current orders will show here."
+    }
+  },
+  "orderDetail": {
+    "breadcrumb": "Orders / {number}",
+    "breadcrumbLoading": "Orders",
+    "title": "Order {number}",
+    "titleLoading": "Order",
+    "cancelRefund": "Cancel & refund",
+    "printLabel": "Print label",
+    "printLabelA6": "Print A6 label",
+    "reschedule": "Reschedule",
+    "items": {
+      "title": "Products ({count})",
+      "image": "Image",
+      "product": "Product",
+      "qty": "Qty",
+      "price": "Price",
+      "cut": "Cut: {value}",
+      "packaging": "Packaging: {value}",
+      "without": "Without: {value}"
+    },
+    "payment": {
+      "title": "Payment & delivery",
+      "subtotal": "Subtotal",
+      "discount": "Discount",
+      "delivery": "Delivery fee",
+      "total": "Total (VAT included)",
+      "method": "Payment method",
+      "fromWallet": "From the wallet",
+      "customer": "Customer",
+      "store": "Store",
+      "slot": "Delivery slot",
+      "pickupSlot": "Pickup day",
+      "slotValue": "{date}, {start} to {end}",
+      "notes": "Customer notes",
+      "cancelReason": "Cancellation reason",
+      "refund": {
+        "wallet": "Refund to the wallet",
+        "original": "Refund to the payment method"
+      },
+      "refundStatus": {
+        "pending": "in progress",
+        "succeeded": "done",
+        "failed": "failed"
+      }
+    },
+    "status": {
+      "title": "Order status",
+      "actions": "Update the order status",
+      "steps": {
+        "confirmed": "Order received",
+        "preparing": "Preparing",
+        "ready": "Slaughtered & prepared",
+        "out_for_delivery": "On the way",
+        "delivered": "Delivered",
+        "collected": "Collected by the customer"
+      }
+    },
+    "next": {
+      "confirmed": "Confirm order",
+      "preparing": "Start preparing",
+      "ready": "Ready",
+      "picked_up": "Picked up by the driver",
+      "out_for_delivery": "On the way",
+      "delivered": "Delivered",
+      "collected": "Collected by the customer",
+      "delivery_failed": "Delivery failed",
+      "returned": "Returned"
+    },
+    "cod": {
+      "notice": "Cash on delivery: review the order before it goes to the store.",
+      "confirm": "Confirm order",
+      "reject": "Reject order"
+    },
+    "codReject": {
+      "title": "Reject order {number}?",
+      "body": "The order is cancelled and the customer is told. Nothing has been paid yet.",
+      "confirm": "Reject order"
+    },
+    "cancel": {
+      "title": "Cancel order {number}?",
+      "original": "{amount} will go back to the {method} within 3 to 5 working days.",
+      "split": "{amount} will go back to the {method} within 3 to 5 working days, and {wallet} to the customer's wallet right away.",
+      "wallet": "{amount} will be added to the customer's wallet right away.",
+      "nothing": "Nothing has been paid, so there is nothing to refund.",
+      "confirm": "Confirm cancellation",
+      "back": "Go back",
+      "refundTo": "Refund to",
+      "toOriginal": "{method}",
+      "toWallet": "Customer wallet",
+      "reason": "Cancellation reason",
+      "reasonRequired": "Write the cancellation reason",
+      "reasonTooLong": "The reason is longer than 500 characters"
+    },
+    "rescheduleDialog": {
+      "title": "Reschedule delivery",
+      "body": "The customer will be told the new slot: {date}, {start} to {end}.",
+      "pick": "Choose an available day",
+      "day": "New day",
+      "current": "current slot",
+      "confirm": "Save slot",
+      "reasons": {
+        "PAST_CUTOFF": "past the cutoff",
+        "CLOSED": "closed",
+        "FULL": "full",
+        "OUTSIDE_HORIZON": "outside the booking window",
+        "VENDOR_CLOSED": "store closed"
+      }
+    },
+    "location": {
+      "delivery": "Delivery location",
+      "pickup": "Pickup location",
+      "notes": "Address note: {value}"
+    },
+    "label": {
+      "title": "A6 order label (preview)",
+      "number": "Order no.",
+      "customer": "Customer",
+      "store": "Store",
+      "slot": "Delivery slot",
+      "pickupSlot": "Pickup day",
+      "weight": "Weight",
+      "kg": "{value} kg",
+      "barcode": "Barcode of order number {number}",
+      "print": "Print",
+      "back": "Back to details"
+    },
+    "toast": {
+      "transitioned": "Order status updated to “{status}”",
+      "codConfirmed": "Order {number} confirmed",
+      "cancelled": "Order {number} cancelled",
+      "rescheduled": "New slot saved",
+      "conflict": "The order changed, the page was refreshed",
+      "dayGone": "That day is no longer available, choose another",
+      "failed": "The action failed, try again"
+    },
+    "notFound": {
+      "title": "Order not found",
+      "body": "The link may be wrong, or the order is not your store's.",
+      "action": "Back to orders"
+    }
   }
 }

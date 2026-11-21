@@ -1407,5 +1407,201 @@
       "body": "تواصل مع مدير الحساب للحصول على الوصول.",
       "action": "رجوع"
     }
+  },
+  "orders": {
+    "breadcrumb": "الطلبات / كل الطلبات",
+    "title": "الطلبات",
+    "export": "تصدير",
+    "search": "بحث",
+    "clear": "مسح الكل",
+    "status": "الحالة",
+    "vendor": "المتجر",
+    "method": "طريقة الدفع",
+    "date": "التاريخ",
+    "chip": {
+      "status": "الحالة: {value}",
+      "vendor": "المتجر: {value}",
+      "method": "الدفع: {value}",
+      "date": "التاريخ: {value}"
+    },
+    "cols": {
+      "number": "رقم الطلب",
+      "customer": "العميل",
+      "vendor": "المتجر",
+      "status": "الحالة",
+      "payment": "الدفع",
+      "amount": "المبلغ",
+      "date": "التاريخ"
+    },
+    "statuses": {
+      "pending_payment": "بانتظار الدفع",
+      "new": "بانتظار التأكيد",
+      "confirmed": "جديد",
+      "preparing": "قيد التجهيز",
+      "ready": "جاهز",
+      "picked_up": "مع المندوب",
+      "out_for_delivery": "في الطريق",
+      "delivered": "تم التسليم",
+      "collected": "تم الاستلام",
+      "cancelled": "ملغي",
+      "delivery_failed": "تعذّر التسليم",
+      "returned": "مرتجع"
+    },
+    "methods": {
+      "mada": "بطاقة مدى",
+      "card": "بطاقة ائتمان",
+      "applepay": "Apple Pay",
+      "cod": "عند الاستلام",
+      "wallet": "المحفظة"
+    },
+    "open": "فتح الطلب {number}",
+    "fresh": "وصل طلب جديد {number}",
+    "empty": {
+      "title": "لا توجد طلبات مطابقة",
+      "body": "جرّب تغيير المرشحات أو نطاق التاريخ.",
+      "action": "مسح المرشحات",
+      "noneTitle": "لا توجد طلبات بعد",
+      "noneBody": "طلباتك السابقة والحالية ستظهر هنا."
+    }
+  },
+  "orderDetail": {
+    "breadcrumb": "الطلبات / {number}",
+    "breadcrumbLoading": "الطلبات",
+    "title": "الطلب {number}",
+    "titleLoading": "الطلب",
+    "cancelRefund": "إلغاء واسترداد",
+    "printLabel": "طباعة الملصق",
+    "printLabelA6": "طباعة الملصق A6",
+    "reschedule": "إعادة جدولة",
+    "items": {
+      "title": "المنتجات ({count})",
+      "image": "الصورة",
+      "product": "المنتج",
+      "qty": "الكمية",
+      "price": "السعر",
+      "cut": "تقطيع: {value}",
+      "packaging": "تغليف: {value}",
+      "without": "بدون: {value}"
+    },
+    "payment": {
+      "title": "الدفع والتوصيل",
+      "subtotal": "المجموع الفرعي",
+      "discount": "الخصم",
+      "delivery": "رسوم التوصيل",
+      "total": "الإجمالي (شامل الضريبة)",
+      "method": "طريقة الدفع",
+      "fromWallet": "من المحفظة",
+      "customer": "العميل",
+      "store": "المتجر",
+      "slot": "موعد التوصيل",
+      "pickupSlot": "موعد الاستلام",
+      "slotValue": "{date}، من {start} إلى {end}",
+      "notes": "ملاحظات العميل",
+      "cancelReason": "سبب الإلغاء",
+      "refund": {
+        "wallet": "استرداد إلى المحفظة",
+        "original": "استرداد إلى وسيلة الدفع"
+      },
+      "refundStatus": {
+        "pending": "قيد التنفيذ",
+        "succeeded": "تم",
+        "failed": "تعذّر"
+      }
+    },
+    "status": {
+      "title": "حالة الطلب",
+      "actions": "تحديث حالة الطلب",
+      "steps": {
+        "confirmed": "تم استلام الطلب",
+        "preparing": "جارٍ التجهيز",
+        "ready": "ذُبح وجُهّز",
+        "out_for_delivery": "في الطريق",
+        "delivered": "تم التسليم",
+        "collected": "استلمه العميل"
+      }
+    },
+    "next": {
+      "confirmed": "تأكيد الطلب",
+      "preparing": "بدء التجهيز",
+      "ready": "جاهز",
+      "picked_up": "استلمه المندوب",
+      "out_for_delivery": "في الطريق",
+      "delivered": "تم التسليم",
+      "collected": "استلمه العميل",
+      "delivery_failed": "تعذّر التسليم",
+      "returned": "مرتجع"
+    },
+    "cod": {
+      "notice": "دفع عند الاستلام: راجع الطلب قبل إرساله للمتجر.",
+      "confirm": "تأكيد الطلب",
+      "reject": "رفض الطلب"
+    },
+    "codReject": {
+      "title": "رفض الطلب {number}؟",
+      "body": "سيُلغى الطلب ويُبلَّغ العميل. لم يُدفع أي مبلغ بعد.",
+      "confirm": "رفض الطلب"
+    },
+    "cancel": {
+      "title": "إلغاء الطلب {number}؟",
+      "original": "سيُسترجع مبلغ {amount} إلى {method} خلال 3 إلى 5 أيام عمل.",
+      "split": "سيُسترجع مبلغ {amount} إلى {method} خلال 3 إلى 5 أيام عمل، و{wallet} إلى محفظة العميل فورًا.",
+      "wallet": "سيُضاف مبلغ {amount} إلى محفظة العميل فورًا.",
+      "nothing": "لا يوجد مبلغ مدفوع لاسترداده.",
+      "confirm": "تأكيد الإلغاء",
+      "back": "تراجع",
+      "refundTo": "طريقة الاسترداد",
+      "toOriginal": "{method}",
+      "toWallet": "محفظة العميل",
+      "reason": "سبب الإلغاء",
+      "reasonRequired": "اكتب سبب الإلغاء",
+      "reasonTooLong": "السبب أطول من 500 حرف"
+    },
+    "rescheduleDialog": {
+      "title": "إعادة جدولة التوصيل",
+      "body": "سيصل إشعار للعميل بالموعد الجديد: {date}، من {start} إلى {end}.",
+      "pick": "اختر يومًا متاحًا",
+      "day": "اليوم الجديد",
+      "current": "الموعد الحالي",
+      "confirm": "حفظ الموعد",
+      "reasons": {
+        "PAST_CUTOFF": "فات وقت الطلب",
+        "CLOSED": "مغلق",
+        "FULL": "مكتمل",
+        "OUTSIDE_HORIZON": "خارج فترة الحجز",
+        "VENDOR_CLOSED": "المتجر مغلق"
+      }
+    },
+    "location": {
+      "delivery": "موقع التسليم",
+      "pickup": "موقع الاستلام",
+      "notes": "ملاحظة العنوان: {value}"
+    },
+    "label": {
+      "title": "ملصق الطلب A6 (معاينة)",
+      "number": "رقم الطلب",
+      "customer": "العميل",
+      "store": "المتجر",
+      "slot": "موعد التوصيل",
+      "pickupSlot": "موعد الاستلام",
+      "weight": "الوزن",
+      "kg": "{value} كجم",
+      "barcode": "باركود رقم الطلب {number}",
+      "print": "طباعة",
+      "back": "رجوع للتفاصيل"
+    },
+    "toast": {
+      "transitioned": "تم تحديث حالة الطلب إلى «{status}»",
+      "codConfirmed": "تم تأكيد الطلب {number}",
+      "cancelled": "أُلغي الطلب {number}",
+      "rescheduled": "تم حفظ الموعد الجديد",
+      "conflict": "تغيّرت حالة الطلب، حدّثنا الصفحة",
+      "dayGone": "لم يعد هذا اليوم متاحًا، اختر يومًا آخر",
+      "failed": "تعذّر تنفيذ الإجراء، حاول مرة أخرى"
+    },
+    "notFound": {
+      "title": "الطلب غير موجود",
+      "body": "قد يكون الرابط خاطئًا أو أن الطلب لا يخص متجرك.",
+      "action": "العودة للطلبات"
+    }
   }
 }

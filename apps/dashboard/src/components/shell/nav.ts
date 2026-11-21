@@ -30,7 +30,7 @@ export const NAV: Record<Panel, NavItem[]> = {
     { key: 'settings', href: '/admin/settings', icon: Gear },
   ],
   vendor: [
-    { key: 'orders', href: '/vendor', icon: ListChecks },
+    { key: 'orders', href: '/vendor/orders', icon: ListChecks },
     { key: 'products', href: '/vendor/products', icon: Package, weight: 'fill' },
     { key: 'earnings', href: '/vendor/earnings', icon: Wallet },
     { key: 'store', href: '/vendor/store', icon: Storefront },
