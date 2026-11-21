@@ -112,4 +112,23 @@ void main() {
     final c = await _container(MemoryTokens(), {'onboardingSeen': true, 'guest': true});
     expect(await _settled(c), SessionStatus.guest);
   });
+
+  test('a payment left mid-way reopens at start for a signed-in user, unless a link is waiting', () {
+    String? r(String loc) => authRedirect(
+      uri: Uri.parse(loc),
+      session: SessionStatus.signedIn,
+      onboardingSeen: true,
+      pendingPayment: 'o-1',
+    );
+    expect(r(Routes.splash), Routes.payment('o-1'));
+    expect(r('${Routes.splash}?from=${Uri.encodeComponent(Routes.cart)}'), Routes.cart);
+    expect(r(Routes.cart), isNull);
+    // Only a signed-in user: a guest or a signed-out user never lands on a payment.
+    for (final s in [SessionStatus.guest, SessionStatus.signedOut]) {
+      for (final loc in [Routes.splash, Routes.onboarding, Routes.home]) {
+        final to = authRedirect(uri: Uri.parse(loc), session: s, onboardingSeen: true, pendingPayment: 'o-1');
+        expect(to ?? '', isNot(contains('/checkout/pay')), reason: '$s $loc');
+      }
+    }
+  });
 }

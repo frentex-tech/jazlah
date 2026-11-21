@@ -513,11 +513,35 @@ class _Skeleton extends StatelessWidget {
   );
 }
 
-/// Subtotal, discount, delivery fee (once fulfilment is delivery), VAT and total.
+/// Subtotal, discount, delivery fee (once fulfilment is delivery), VAT and total, of a cart or (with the
+/// named constructor) of a placed order.
 class CartTotals extends StatelessWidget {
-  const CartTotals({required this.cart, super.key});
+  CartTotals({required Cart cart, super.key})
+    : subtotal = cart.subtotal,
+      discount = cart.discount,
+      couponCode = cart.couponCode,
+      deliveryFee = cart.delivery ? cart.deliveryFee : null,
+      vat = cart.vatIncluded,
+      total = cart.total;
 
-  final Cart cart;
+  const CartTotals.values({
+    required this.subtotal,
+    required this.discount,
+    required this.deliveryFee,
+    required this.vat,
+    required this.total,
+    super.key,
+    this.couponCode,
+  });
+
+  final int subtotal;
+  final int discount;
+  final String? couponCode;
+
+  /// Null hides the row: only once fulfilment = delivery (SCH-MOB-1 #71 chooses it).
+  final int? deliveryFee;
+  final int vat;
+  final int total;
 
   @override
   Widget build(BuildContext context) {
@@ -535,12 +559,11 @@ class CartTotals extends StatelessWidget {
     return CartCard(
       gap: 6,
       children: [
-        row(l10n.cartSubtotal, cart.subtotal),
-        if (cart.discount > 0) row(l10n.cartDiscountCode(cart.couponCode ?? ''), -cart.discount),
-        // Only once fulfilment = delivery (SCH-MOB-1 #71 chooses it).
-        if (cart.delivery) row(l10n.cartDeliveryFee, cart.deliveryFee),
-        row(l10n.cartVat, cart.vatIncluded),
-        row(l10n.cartTotal, cart.total, total: true),
+        row(l10n.cartSubtotal, subtotal),
+        if (discount > 0) row(l10n.cartDiscountCode(couponCode ?? ''), -discount),
+        if (deliveryFee != null) row(l10n.cartDeliveryFee, deliveryFee!),
+        row(l10n.cartVat, vat),
+        row(l10n.cartTotal, total, total: true),
       ],
     );
   }

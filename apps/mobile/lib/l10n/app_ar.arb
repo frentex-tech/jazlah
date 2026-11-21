@@ -948,5 +948,56 @@
     }
   },
   "placedTrack": "تتبع الطلب",
-  "placedHome": "العودة للرئيسية"
+  "placedHome": "العودة للرئيسية",
+  "payFakeTitle": "بوابة الدفع التجريبية",
+  "payFakeBody": "تحقق 3DS لمبلغ {amount} ر.س. هذه صفحة المزوّد التجريبي.",
+  "@payFakeBody": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "payFakeApprove": "موافقة",
+  "payFakeDecline": "رفض",
+  "payUseWallet": "استخدام رصيد المحفظة · {amount} ر.س",
+  "@payUseWallet": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "payRemaining": "المتبقي {amount} ر.س بطريقة الدفع المختارة",
+  "@payRemaining": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "payChooseMethod": "اختر طريقة دفع للمتابعة",
+  "payDeclined": "تم رفض الدفع من البنك، جرّب بطاقة أخرى أو وسيلة دفع مختلفة",
+  "payNotCompleted": "لم يكتمل الدفع، أعد المحاولة أو اختر وسيلة أخرى",
+  "payExpired": "أُلغي الطلب لانتهاء مهلة الدفع (15 دقيقة).",
+  "payWalletPart": "يُدفع {amount} ر.س من رصيد المحفظة.",
+  "@payWalletPart": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "payWalletRestored": "أُعيد {amount} ر.س إلى محفظتك.",
+  "@payWalletRestored": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "placedUnderReview": "سنراجع طلبك ونؤكده قريبًا.",
+  "placedConfirmed": "تم تأكيد طلبك.",
+  "payStillProcessing": "لا يزال الدفع قيد المعالجة، سنحدّث حالة طلبك فور وصول النتيجة.",
+  "payOrderGone": "هذا الطلب لم يعد متاحًا."
 }

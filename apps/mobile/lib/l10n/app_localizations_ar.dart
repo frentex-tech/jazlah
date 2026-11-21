@@ -1640,4 +1640,62 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get placedHome => 'العودة للرئيسية';
+
+  @override
+  String get payFakeTitle => 'بوابة الدفع التجريبية';
+
+  @override
+  String payFakeBody(String amount) {
+    return 'تحقق 3DS لمبلغ $amount ر.س. هذه صفحة المزوّد التجريبي.';
+  }
+
+  @override
+  String get payFakeApprove => 'موافقة';
+
+  @override
+  String get payFakeDecline => 'رفض';
+
+  @override
+  String payUseWallet(String amount) {
+    return 'استخدام رصيد المحفظة · $amount ر.س';
+  }
+
+  @override
+  String payRemaining(String amount) {
+    return 'المتبقي $amount ر.س بطريقة الدفع المختارة';
+  }
+
+  @override
+  String get payChooseMethod => 'اختر طريقة دفع للمتابعة';
+
+  @override
+  String get payDeclined => 'تم رفض الدفع من البنك، جرّب بطاقة أخرى أو وسيلة دفع مختلفة';
+
+  @override
+  String get payNotCompleted => 'لم يكتمل الدفع، أعد المحاولة أو اختر وسيلة أخرى';
+
+  @override
+  String get payExpired => 'أُلغي الطلب لانتهاء مهلة الدفع (15 دقيقة).';
+
+  @override
+  String payWalletPart(String amount) {
+    return 'يُدفع $amount ر.س من رصيد المحفظة.';
+  }
+
+  @override
+  String payWalletRestored(String amount) {
+    return 'أُعيد $amount ر.س إلى محفظتك.';
+  }
+
+  @override
+  String get placedUnderReview => 'سنراجع طلبك ونؤكده قريبًا.';
+
+  @override
+  String get placedConfirmed => 'تم تأكيد طلبك.';
+
+  @override
+  String get payStillProcessing => 'لا يزال الدفع قيد المعالجة، سنحدّث حالة طلبك فور وصول النتيجة.';
+
+  @override
+  String get payOrderGone => 'هذا الطلب لم يعد متاحًا.';
 }

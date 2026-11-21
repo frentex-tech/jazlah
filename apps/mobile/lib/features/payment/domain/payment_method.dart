@@ -54,3 +54,30 @@ class PaymentMethods {
   final List<PaymentMethodOption> options;
   final TenderPlan? tender;
 }
+
+/// `status` of a `Payment` (PAY-API-1).
+abstract final class PaymentStatus {
+  static const initiated = 'initiated';
+  static const authorized = 'authorized';
+  static const captured = 'captured';
+  static const failed = 'failed';
+  static const cancelled = 'cancelled';
+}
+
+/// The payment's next action: what the gateway step must do for [paymentId] ([amount] halalas with [method]).
+// shortcut: the app's shape of next action until ORD-API-1 #81 and PAY-API-1 #76 define it (not-built-yet.md).
+@immutable
+class PaymentAction {
+  const PaymentAction({required this.paymentId, required this.method, required this.amount});
+
+  final String paymentId;
+  final String method;
+  final int amount;
+}
+
+/// Refusals of a new payment on an order.
+abstract final class PaymentError {
+  /// The order is no longer waiting for a payment (paid, or cancelled by the 15-minute timeout).
+  // shortcut: the app's name until PAY-API-1 #76 names it (not-built-yet.md).
+  static const orderNotPayable = 'ORDER_NOT_PAYABLE';
+}

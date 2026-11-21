@@ -1631,4 +1631,63 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get placedHome => 'Back to home';
+
+  @override
+  String get payFakeTitle => 'Test payment gateway';
+
+  @override
+  String payFakeBody(String amount) {
+    return '3DS check for $amount SAR. This is the test provider\'s page.';
+  }
+
+  @override
+  String get payFakeApprove => 'Approve';
+
+  @override
+  String get payFakeDecline => 'Decline';
+
+  @override
+  String payUseWallet(String amount) {
+    return 'Use wallet balance · $amount SAR';
+  }
+
+  @override
+  String payRemaining(String amount) {
+    return 'The remaining $amount SAR is paid with the chosen method';
+  }
+
+  @override
+  String get payChooseMethod => 'Choose a payment method to continue';
+
+  @override
+  String get payDeclined => 'The bank declined the payment. Try another card or payment method.';
+
+  @override
+  String get payNotCompleted => 'The payment was not completed. Try again or choose another method.';
+
+  @override
+  String get payExpired => 'The order was cancelled because it was not paid within 15 minutes.';
+
+  @override
+  String payWalletPart(String amount) {
+    return '$amount SAR is paid from your wallet.';
+  }
+
+  @override
+  String payWalletRestored(String amount) {
+    return '$amount SAR was returned to your wallet.';
+  }
+
+  @override
+  String get placedUnderReview => 'We will review and confirm your order shortly.';
+
+  @override
+  String get placedConfirmed => 'Your order is confirmed.';
+
+  @override
+  String get payStillProcessing =>
+      'The payment is still processing. We will update your order as soon as the result arrives.';
+
+  @override
+  String get payOrderGone => 'This order is no longer available.';
 }

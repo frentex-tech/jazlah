@@ -8,11 +8,13 @@ import 'package:jazlah/core/widgets/widgets.dart';
 import 'package:jazlah/features/cart/presentation/cart_screen.dart';
 import 'package:jazlah/features/catalog/presentation/catalog_widgets.dart';
 import 'package:jazlah/features/checkout/domain/fulfilment.dart';
+import 'package:jazlah/features/checkout/domain/order.dart';
 import 'package:jazlah/features/checkout/presentation/review_screen.dart';
+import 'package:jazlah/features/payment/presentation/payment_widgets.dart';
 import 'package:jazlah/features/product/domain/product.dart';
 import 'package:jazlah/l10n/app_localizations.dart';
 
-/// «تم استلام طلبك» (Figma 170-29472): an order with nothing left to pay (COD, wallet only). Back goes home:
+/// «تم استلام طلبك» (Figma 170-29472): a paid order, or one with nothing left to pay (COD, wallet only). Back goes home:
 /// the cart is empty and the order cannot be placed again.
 class OrderPlacedScreen extends StatelessWidget {
   const OrderPlacedScreen({required this.args, super.key});
@@ -61,6 +63,13 @@ class OrderPlacedScreen extends StatelessWidget {
                 Text(l10n.placedTitle, style: JText.h1, textAlign: TextAlign.center),
                 const SizedBox(height: JSpace.s12),
                 Text(l10n.placedNumber(o.number), style: JText.h3, textAlign: TextAlign.center),
+                // COD under review stays new until the admin confirms it (ops.cod.confirmation).
+                const SizedBox(height: JSpace.s4),
+                Text(
+                  o.status == OrderStatus.created ? l10n.placedUnderReview : l10n.placedConfirmed,
+                  style: JText.bodyM.copyWith(color: JColors.ink2),
+                  textAlign: TextAlign.center,
+                ),
                 const Spacer(),
                 const SizedBox(height: JSpace.s12),
                 CartCard(

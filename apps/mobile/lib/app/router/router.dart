@@ -1,7 +1,6 @@
 import 'package:flutter/widgets.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-
 import 'package:jazlah/app/providers.dart';
 import 'package:jazlah/app/shell/main_shell.dart';
 import 'package:jazlah/core/geo/geo_point.dart';
@@ -17,6 +16,7 @@ import 'package:jazlah/features/auth/presentation/otp_screen.dart';
 import 'package:jazlah/features/auth/presentation/phone_screen.dart';
 import 'package:jazlah/features/auth/presentation/session_controller.dart';
 import 'package:jazlah/features/cart/presentation/cart_screen.dart';
+import 'package:jazlah/features/checkout/domain/order.dart';
 import 'package:jazlah/features/checkout/presentation/checkout_screen.dart';
 import 'package:jazlah/features/checkout/presentation/order_placed_screen.dart';
 import 'package:jazlah/features/checkout/presentation/review_screen.dart';
@@ -25,6 +25,7 @@ import 'package:jazlah/features/home/presentation/home_screen.dart';
 import 'package:jazlah/features/home/presentation/stores_screen.dart';
 import 'package:jazlah/features/location/presentation/map_picker_screen.dart';
 import 'package:jazlah/features/location/presentation/out_of_coverage_screen.dart';
+import 'package:jazlah/features/payment/presentation/payment_screen.dart';
 import 'package:jazlah/features/product/presentation/product_screen.dart';
 import 'package:jazlah/features/profile/presentation/account_screen.dart';
 import 'package:jazlah/features/profile/presentation/settings_screen.dart';
@@ -86,6 +87,7 @@ final routerProvider = Provider<GoRouter>((ref) {
       uri: state.uri,
       session: ref.read(sessionProvider),
       onboardingSeen: ref.read(onboardingSeenProvider),
+      pendingPayment: ref.read(prefsProvider).pendingPayment,
     ),
     routes: [
       GoRoute(path: '/', redirect: (_, _) => Routes.home),
@@ -144,10 +146,11 @@ final routerProvider = Provider<GoRouter>((ref) {
         redirect: (_, state) => state.extra is OrderPlacedArgs ? null : Routes.home,
         builder: (_, state) => OrderPlacedScreen(args: state.extra! as OrderPlacedArgs),
       ),
-      // shortcut: placeholder until PAY-MOB-1 #78 builds the payment step (extra: the PlacedOrder).
+      // The placement's answer comes as extra; opened again (no extra), the screen reads the order's status.
       GoRoute(
         path: '/checkout/pay/:orderId',
-        builder: (context, _) => ComingSoonPage(title: AppLocalizations.of(context).reviewTitle),
+        builder: (_, state) =>
+            PaymentScreen(orderId: state.pathParameters['orderId']!, placed: state.extra as PlacedOrder?),
       ),
       // shortcut: placeholder until ORD-MOB-2 #85 builds the order detail.
       GoRoute(
@@ -203,7 +206,12 @@ String? safeNext(String? from) => from != null && from.startsWith('/') && !from.
 /// Where a location goes for a session state; null keeps it. A deep link opened while the session is
 /// loading or signed out travels in `?from=` and is opened once the user may see it.
 @visibleForTesting
-String? authRedirect({required Uri uri, required SessionStatus session, required bool onboardingSeen}) {
+String? authRedirect({
+  required Uri uri,
+  required SessionStatus session,
+  required bool onboardingSeen,
+  String? pendingPayment,
+}) {
   final location = uri.path;
   if (location == Routes.gallery) return null;
   final from = safeNext(uri.queryParameters['from']);
@@ -226,7 +234,13 @@ String? authRedirect({required Uri uri, required SessionStatus session, required
           : location.startsWith('${Routes.account}/')
           ? Routes.account
           : null,
-    SessionStatus.signedIn => inLogin || gate ? (from ?? Routes.home) : null,
+    // A payment left mid-way (the app was killed during 3DS) reopens at start: its screen reads the outcome.
+    SessionStatus.signedIn =>
+      gate && from == null && pendingPayment != null
+          ? Routes.payment(pendingPayment)
+          : inLogin || gate
+          ? (from ?? Routes.home)
+          : null,
     SessionStatus.unknown => null,
   };
 }
