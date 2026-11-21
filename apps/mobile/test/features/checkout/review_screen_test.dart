@@ -56,10 +56,14 @@ class _Orders implements OrderRepository {
   final keys = <String>[];
 
   @override
-  Future<PlacedOrder> place({required String idempotencyKey, required String paymentMethod}) async {
+  Future<PlacedOrder> place({
+    required String idempotencyKey,
+    required String paymentMethod,
+    int walletAmount = 0,
+  }) async {
     keys.add(idempotencyKey);
     if (code != null && (!then || keys.length == 1)) throw ApiError(code: code!);
-    return inner.place(idempotencyKey: idempotencyKey, paymentMethod: paymentMethod);
+    return inner.place(idempotencyKey: idempotencyKey, paymentMethod: paymentMethod, walletAmount: walletAmount);
   }
 }
 
@@ -104,7 +108,7 @@ Future<ProviderContainer> _pump(
       cartSettingsProvider.overrideWithValue(MockCartRepository.opsSettings),
       addressRepositoryProvider.overrideWithValue(book),
       checkoutRepositoryProvider.overrideWithValue(_checkout),
-      paymentRepositoryProvider.overrideWithValue(MockPaymentRepository(_cart, delay: Duration.zero)),
+      paymentRepositoryProvider.overrideWithValue(MockPaymentRepository(_cart, _orders, delay: Duration.zero)),
       orderRepositoryProvider.overrideWithValue(_fake),
     ],
   );
@@ -134,7 +138,10 @@ void main() {
     expect(find.text('123.00 ر.س'), findsOneWidget);
     expect(_radio(t, 'بطاقة مدى · تنتهي بـ 4821').checked, isTrue);
     expect(_radio(t, 'محفظة جزلة · الرصيد غير كافٍ').onTap, isNull);
-    expect(find.text('بتأكيد الطلب فأنت توافق على الشروط والأحكام وسياسة الإلغاء.'), findsOneWidget);
+    expect(find.text('استخدام رصيد المحفظة · 50.00 ر.س'), findsOneWidget); // the tender plan's wallet part
+    const terms = 'بتأكيد الطلب فأنت توافق على الشروط والأحكام وسياسة الإلغاء.';
+    await t.scrollUntilVisible(find.text(terms), 200, scrollable: find.byType(Scrollable).first);
+    expect(find.text(terms), findsOneWidget);
     expect(_confirm(t), isNotNull);
   });
 
@@ -190,6 +197,21 @@ void main() {
     await _settle(t);
     expect(find.text('route:/checkout/pay/o-1'), findsOneWidget);
     expect(_orders.orders.single.status, OrderStatus.pendingPayment);
+  });
+
+  testWidgets('the wallet part (tender plan): the switch sends it at placement, the card pays the rest', (t) async {
+    await _pump(t);
+    final wallet = find.text('استخدام رصيد المحفظة · 50.00 ر.س');
+    await t.scrollUntilVisible(wallet, 200, scrollable: find.byType(Scrollable).first);
+    await t.tap(wallet);
+    await t.pump();
+    expect(find.text('المتبقي 73.00 ر.س بطريقة الدفع المختارة'), findsOneWidget);
+    expect(find.text('محفظة جزلة · الرصيد غير كافٍ'), findsNothing); // the wallet-only row steps aside
+    await t.tap(find.text('تأكيد الطلب'));
+    await _settle(t);
+    expect(find.text('route:/checkout/pay/o-1'), findsOneWidget);
+    expect(_orders.orders.single.walletAmount, 5000);
+    expect(_orders.wallet.balance, 0);
   });
 
   testWidgets('double tap on «تأكيد الطلب» creates one order', (t) async {

@@ -487,5 +487,19 @@
   "placedPickupWindow": "Pickup between {start} and {end}",
   "placedTotal": "{amount} SAR incl. VAT",
   "placedTrack": "Track order",
-  "placedHome": "Back to home"
+  "placedHome": "Back to home",
+  "payFakeTitle": "Test payment gateway",
+  "payFakeBody": "3DS check for {amount} SAR. This is the test provider's page.",
+  "payFakeApprove": "Approve",
+  "payFakeDecline": "Decline",
+  "payUseWallet": "Use wallet balance · {amount} SAR",
+  "payRemaining": "The remaining {amount} SAR is paid with the chosen method",
+  "payChooseMethod": "Choose a payment method to continue",
+  "payDeclined": "The bank declined the payment. Try another card or payment method.",
+  "payNotCompleted": "The payment was not completed. Try again or choose another method.",
+  "payExpired": "The order was cancelled because it was not paid within 15 minutes.",
+  "payWalletPart": "{amount} SAR is paid from your wallet.",
+  "payWalletRestored": "{amount} SAR was returned to your wallet.",
+  "placedUnderReview": "We will review and confirm your order shortly.",
+  "placedConfirmed": "Your order is confirmed."
 }

@@ -20,6 +20,7 @@ import 'package:jazlah/features/checkout/presentation/checkout_providers.dart';
 import 'package:jazlah/features/checkout/presentation/checkout_screen.dart';
 import 'package:jazlah/features/payment/domain/payment_method.dart';
 import 'package:jazlah/features/payment/presentation/payment_providers.dart';
+import 'package:jazlah/features/payment/presentation/payment_widgets.dart';
 import 'package:jazlah/features/product/domain/product.dart';
 import 'package:jazlah/l10n/app_localizations.dart';
 
@@ -55,28 +56,28 @@ class _ReviewScreenState extends ConsumerState<ReviewScreen> {
   /// One key per checkout attempt: a retry or a double tap sends the same one, so one order is created.
   final String _key = newIdempotencyKey();
   String? _method;
+  bool _useWallet = false;
   bool _placing = false;
 
   /// A failure that may have created the order keeps the key; the method is then kept too, so a retry
   /// cannot answer an order placed with another method.
   bool _methodLocked = false;
 
-  Future<void> _place(PaymentMethodOption method, List<PaymentMethodOption> options) async {
+  Future<void> _place(PaymentMethodOption method, List<PaymentMethodOption> options, int walletAmount) async {
     if (_placing) return;
     setState(() => _placing = true);
     // Kept across the await: the cart must be re-read even if the screen is gone by then.
     final container = ProviderScope.containerOf(context, listen: false);
     try {
-      final placed = await ref.read(orderRepositoryProvider)!.place(idempotencyKey: _key, paymentMethod: method.method);
+      final placed = await ref
+          .read(orderRepositoryProvider)!
+          .place(idempotencyKey: _key, paymentMethod: method.method, walletAmount: walletAmount);
       container.invalidate(cartProvider); // the server cleared the cart (and the badge)
       if (!mounted) return;
-      if (placed.nextAction == PlacedOrder.pay) {
+      if (placed.nextAction != null) {
         context.go(Routes.payment(placed.order.id), extra: placed);
       } else {
-        // The order's own method (with its card digits when listed), not the one on screen.
-        final paid = placed.order.paymentMethod;
-        final shown = options.where((m) => m.method == paid).firstOrNull ?? PaymentMethodOption(method: paid);
-        context.go(Routes.orderPlaced, extra: (order: placed.order, method: shown));
+        context.go(Routes.orderPlaced, extra: placedArgs(placed.order, options));
       }
     } on Object catch (e) {
       if (!mounted) return;
@@ -104,13 +105,15 @@ class _ReviewScreenState extends ConsumerState<ReviewScreen> {
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
     final cart = ref.watch(cartProvider);
-    final methods = ref.watch(paymentMethodsProvider);
+    final methods = ref.watch(paymentMethodsProvider(null));
     final c = cart.value;
     final options = methods.value?.options ?? const <PaymentMethodOption>[];
-    final available = options.where((m) => m.available).toList();
-    // The first method the order may use is chosen until the customer picks one (as drawn).
-    final chosen =
-        available.where((m) => m.method == _method).firstOrNull ?? (_method == null ? available.firstOrNull : null);
+    final tender = methods.value?.tender;
+    final useWallet = _useWallet && tender != null;
+    final chosen = chosenMethod(
+      useWallet ? options.where((m) => m.method != PaymentMethodCode.wallet).toList() : options,
+      _method,
+    );
     final ready = c != null && c.fulfilment != null && c.lines.isNotEmpty && chosen != null;
 
     final Widget body;
@@ -137,41 +140,15 @@ class _ReviewScreenState extends ConsumerState<ReviewScreen> {
             CartTotals(cart: c),
           ],
           const SizedBox(height: JSpace.s8),
-          CartCard(
-            gap: 6,
-            children: [
-              Text(l10n.reviewPaymentMethod, style: JText.labelM),
-              ...switch (methods) {
-                AsyncValue(:final error?) when !methods.isLoading => [
-                  Text(errorText(context, error), style: JText.bodyM.copyWith(color: JColors.ink2)),
-                  Align(
-                    alignment: AlignmentDirectional.centerStart,
-                    child: JButton(
-                      label: l10n.retry,
-                      size: JButtonSize.s,
-                      variant: JButtonVariant.secondary,
-                      onPressed: () => ref.invalidate(paymentMethodsProvider),
-                    ),
-                  ),
-                ],
-                AsyncValue(hasValue: false) => [const JSkeletonRow(), const JSkeletonRow()],
-                _ => [
-                  for (final m in options)
-                    Align(
-                      alignment: AlignmentDirectional.centerStart,
-                      // Frozen while placing (and after a failure that kept the key), not drawn disabled.
-                      child: AbsorbPointer(
-                        absorbing: _placing || _methodLocked,
-                        child: JRadio(
-                          checked: m.method == chosen?.method,
-                          label: paymentMethodLabel(l10n, m),
-                          onTap: m.available ? () => setState(() => _method = m.method) : null,
-                        ),
-                      ),
-                    ),
-                ],
-              },
-            ],
+          PaymentMethodsCard(
+            methods: methods,
+            chosen: chosen,
+            frozen: _placing || _methodLocked,
+            onChoose: (m) => setState(() => _method = m),
+            onRetry: () => ref.invalidate(paymentMethodsProvider(null)),
+            useWallet: useWallet,
+            onUseWallet: (on) => setState(() => _useWallet = on),
+            remaining: c == null || tender == null ? null : c.total - tender.walletAmount,
           ),
           const SizedBox(height: JSpace.s8),
           Text(l10n.reviewTerms, style: JText.bodyM.copyWith(color: JColors.ink2)),
@@ -181,59 +158,68 @@ class _ReviewScreenState extends ConsumerState<ReviewScreen> {
 
     return PopScope(
       canPop: !_placing, // leaving mid-request would hide the order it creates
-      child: Scaffold(
-        body: SafeArea(
-          bottom: false,
-          child: Column(
-            children: [
-              JAppHeader.page(
-                title: l10n.reviewTitle,
-                cartLabel: l10n.cart,
-                onBack: _placing ? null : () => popOrHome(context),
-              ),
-              Expanded(child: body),
-              Padding(
-                padding: EdgeInsets.fromLTRB(
-                  JSpace.s16,
-                  0,
-                  JSpace.s16,
-                  JSpace.s16 + MediaQuery.viewPaddingOf(context).bottom,
-                ),
-                child: JButton(
-                  label: l10n.reviewConfirm,
-                  expand: true,
-                  loading: _placing,
-                  onPressed: ready ? () => _place(chosen, options) : null,
-                ),
-              ),
-            ],
-          ),
+      child: CheckoutPage(
+        body: body,
+        button: JButton(
+          label: l10n.reviewConfirm,
+          expand: true,
+          loading: _placing,
+          onPressed: ready ? () => _place(chosen, options, useWallet ? tender.walletAmount : 0) : null,
         ),
+        onBack: _placing ? null : () => popOrHome(context),
       ),
     );
   }
 }
 
-/// «بطاقة مدى · تنتهي بـ 4821», «محفظة جزلة · الرصيد غير كافٍ» …; [short] names the method as the order
-/// placed screen does («مدى · …») and leaves out the reason.
-String paymentMethodLabel(AppLocalizations l10n, PaymentMethodOption m, {bool short = false}) {
-  final name = switch (m.method) {
-    PaymentMethodCode.mada => short ? l10n.payMada : l10n.payMadaCard,
-    PaymentMethodCode.card => l10n.payCard,
-    PaymentMethodCode.applePay => l10n.payApplePay,
-    PaymentMethodCode.wallet => l10n.payWallet,
-    PaymentMethodCode.cod => l10n.payCod,
-    _ => m.method,
-  };
-  return [
-    name,
-    if (m.cardLast4 != null) l10n.payEndingIn(m.cardLast4!),
-    if (!short && !m.available)
-      switch (m.reason) {
-        PaymentMethodReason.walletInsufficient => l10n.payReasonWalletInsufficient,
-        _ => l10n.payReasonUnavailable,
-      },
-  ].join(' · ');
+/// The order placed screen's arguments: the order and its own method (with the card digits when listed).
+OrderPlacedArgs placedArgs(Order order, List<PaymentMethodOption> options) {
+  final paid = order.paymentMethod;
+  return (
+    order: order,
+    method: options.where((m) => m.method == paid).firstOrNull ?? PaymentMethodOption(method: paid),
+  );
+}
+
+/// «الدفع والمراجعة»'s frame, shared by the review and the payment step: header, [body], the button pinned at
+/// the bottom, and an [overlay] (the toast drawn at the top in 170-29244).
+class CheckoutPage extends StatelessWidget {
+  const CheckoutPage({required this.body, required this.button, required this.onBack, super.key, this.overlay});
+
+  final Widget body;
+  final Widget button;
+  final VoidCallback? onBack;
+  final Widget? overlay;
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
+    return Scaffold(
+      body: SafeArea(
+        bottom: false,
+        child: Stack(
+          children: [
+            Column(
+              children: [
+                JAppHeader.page(title: l10n.reviewTitle, cartLabel: l10n.cart, onBack: onBack),
+                Expanded(child: body),
+                Padding(
+                  padding: EdgeInsets.fromLTRB(
+                    JSpace.s16,
+                    0,
+                    JSpace.s16,
+                    JSpace.s16 + MediaQuery.viewPaddingOf(context).bottom,
+                  ),
+                  child: button,
+                ),
+              ],
+            ),
+            if (overlay != null) PositionedDirectional(top: 55, start: 23, end: 23, child: overlay!),
+          ],
+        ),
+      ),
+    );
+  }
 }
 
 /// «4:00» and «6:00 م» from a Riyadh window, shown as is; the period on the start only when it differs.
@@ -269,15 +255,6 @@ class _Summary extends ConsumerWidget {
       for (final l in cart.lines) '${l.name?.of(lang) ?? l10n.cartItemGone} × ${l.item.quantity}',
     ].join(lang == 'en' ? ', ' : '، ');
 
-    Widget group(String title, String body) => Column(
-      crossAxisAlignment: CrossAxisAlignment.stretch,
-      children: [
-        Text(title, style: JText.labelM),
-        const SizedBox(height: 2),
-        Text(body, style: JText.bodyM.copyWith(color: JColors.ink2)),
-      ],
-    );
-
     String? when;
     String? where;
     if (f != null) {
@@ -299,12 +276,37 @@ class _Summary extends ConsumerWidget {
       }
     }
 
+    return SummaryCard(
+      title: l10n.reviewItemsFrom(cart.lines.length, cart.vendorName?.of(lang) ?? ''),
+      items: names,
+      when: when,
+      where: where,
+    );
+  }
+}
+
+/// What is ordered (from which store) and when and where it is received.
+class SummaryCard extends StatelessWidget {
+  const SummaryCard({required this.title, required this.items, super.key, this.when, this.where});
+
+  final String title;
+  final String items;
+  final String? when;
+  final String? where;
+
+  @override
+  Widget build(BuildContext context) {
+    Widget group(String title, String body) => Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        Text(title, style: JText.labelM),
+        const SizedBox(height: 2),
+        Text(body, style: JText.bodyM.copyWith(color: JColors.ink2)),
+      ],
+    );
     return CartCard(
       gap: JSpace.s12,
-      children: [
-        group(l10n.reviewItemsFrom(cart.lines.length, cart.vendorName?.of(lang) ?? ''), names),
-        if (when != null) group(when, where ?? ''),
-      ],
+      children: [group(title, items), if (when != null) group(when!, where ?? '')],
     );
   }
 }

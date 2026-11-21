@@ -8,6 +8,7 @@ import 'package:jazlah/features/addresses/domain/address.dart';
 import 'package:jazlah/features/cart/domain/cart.dart';
 import 'package:jazlah/features/catalog/domain/catalog.dart';
 import 'package:jazlah/features/checkout/domain/fulfilment.dart';
+import 'package:jazlah/features/payment/domain/payment_method.dart';
 import 'package:jazlah/features/product/domain/product.dart';
 
 /// ORD-API-2 statuses.
@@ -90,6 +91,7 @@ class Order {
     this.pickupSnapshot,
     this.couponCode,
     this.notes,
+    this.walletAmount = 0,
   });
 
   final String id;
@@ -122,18 +124,56 @@ class Order {
   final String? notes;
   final List<OrderItem> items;
   final DateTime createdAt;
+
+  /// Halalas paid from the wallet (PAY-API-1 tender); the rest is paid with [paymentMethod].
+  final int walletAmount;
+
+  Order copyWith({String? status, String? paymentMethod, int? walletAmount}) => Order(
+    id: id,
+    number: number,
+    status: status ?? this.status,
+    vendorId: vendorId,
+    vendorName: vendorName,
+    fulfilment: fulfilment,
+    addressSnapshot: addressSnapshot,
+    pickupSnapshot: pickupSnapshot,
+    deliveryDate: deliveryDate,
+    window: window,
+    subtotal: subtotal,
+    discount: discount,
+    deliveryFee: deliveryFee,
+    total: total,
+    vatAmount: vatAmount,
+    paymentMethod: paymentMethod ?? this.paymentMethod,
+    couponCode: couponCode,
+    notes: notes,
+    items: items,
+    createdAt: createdAt,
+    walletAmount: walletAmount ?? this.walletAmount,
+  );
 }
 
-/// `{order, payment: {nextAction}}` of `POST /v1/customer/orders`.
+/// `{order, payment: {nextAction}}` of `POST /v1/customer/orders` (and of a new payment on the order).
 @immutable
 class PlacedOrder {
   const PlacedOrder({required this.order, this.nextAction});
 
   final Order order;
 
-  /// [pay] when the order waits for the payment step; null when nothing is left to pay (COD, wallet only).
-  // shortcut: the app reads only pay or nothing from next action, until ORD-API-1 #81 defines its shape.
-  final String? nextAction;
+  /// Set when the order waits for the gateway step; null when nothing is left to pay (COD, wallet only).
+  final PaymentAction? nextAction;
+}
 
-  static const pay = 'pay';
+/// An order and its latest payment, as the server knows them (the only source of a payment's outcome).
+@immutable
+class OrderPayment {
+  const OrderPayment({required this.order, this.paymentStatus, this.walletRestored = 0});
+
+  final Order order;
+
+  /// One of [PaymentStatus]; null when the order has no gateway payment.
+  final String? paymentStatus;
+
+  /// Halalas given back to the wallet because the gateway part failed or the order expired.
+  final int walletRestored;
 }

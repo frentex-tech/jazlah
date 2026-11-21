@@ -242,6 +242,20 @@ Everything else follows 170-28952, 170-29025 and 170-29472. The processing, paym
 | Review (170-28952) | Terms line on one line | Wraps to two lines | Readex Pro is wider than Thmanyah. |
 | Review: refusals | No frame | The error toast, then back to checkout step 1 (day full, address not covered, paused) or to the cart (price changed, coupon) | ORD-MOB-1 acceptance: send the user back to the right step. |
 
+## Build differences, Sprint 3 mobile: PAY-MOB-1 payment step (pending owner sign-off, not agreed)
+Everything else follows 170-29134, 170-29244 and 170-29357 (and 170-28952 for the method list).
+
+| Screen (node) | Figma | Build | Why |
+|---|---|---|---|
+| Processing (170-29134) | Back button drawn | Back hidden and system back refused while a payment is in flight | The outcome must be seen; leaving mid-payment would hide it. |
+| Processing (170-29134) | No page over the screen | The fake provider's page (a sheet, «بوابة الدفع التجريبية», «موافقة» / «رفض») until PAY-MOB-2 #79 brings the gateway's own page | 3DS needs a gateway step; there is no frame for it. |
+| Payment failed (170-29244) | The toast | The same toast at the top for 4 seconds; «إعادة المحاولة» stays; a line «أُعيد … ر.س إلى محفظتك.» in the method card when a wallet part came back | The wallet amount is given back on a failure (PAY-API-1). |
+| No method (170-29357) | Mada drawn checked next to «اختر طريقة دفع للمتابعة» | No radio checked when the line shows | A checked method contradicts the message. |
+| Review (170-28952) | Wallet row «محفظة جزلة · الرصيد غير كافٍ» only | Plus a switch «استخدام رصيد المحفظة · 50.00 ر.س» when the wallet covers part of the total, with «المتبقي …» under it; the wallet-only row hides while it is on | The task asks for a wallet toggle with its amount; the wallet part must be sent at placement. **Figma needs the switch.** |
+| Order placed (170-29472) | No status line | «تم تأكيد طلبك.» or, for cash on delivery under review, «سنراجع طلبك ونؤكده قريبًا.» under the number | COD follows the confirmation setting. |
+| Expired order | No frame | Error toast «أُلغي الطلب لانتهاء مهلة الدفع (15 دقيقة).» and the cart | Figma has no room for a countdown; ORD-API-2 cancels after 15 minutes. |
+| Deposit payment (131-72088, 131-72146, 131-72204, 131-72268, 131-72307) | Deposit and remaining cards, method cards | Not built | Occasions are OCC-MOB-1 #124. The payment port and the method card are reusable; the frames' method cards differ from the radio list here and are left to that task. |
+
 ## Checks run on the file (2026-11-13)
 - Script lint over all 587 screens after the last changes: no empty or "undefined" text, no text outside its screen, no missing icon.
 - Clipped layouts: a script found 110 auto-layout frames on web and dashboard screens whose content was cut off (among them the whole animal-registration form) and opened them up. 28 small ones remain (tab labels 7 to 9 px taller than their tab, and the Adha settings body).

@@ -70,7 +70,8 @@ void main() {
     final repo = await _repo();
     final placed = await repo.place(idempotencyKey: 'k1', paymentMethod: PaymentMethodCode.mada);
     expect(placed.order.status, OrderStatus.pendingPayment);
-    expect(placed.nextAction, PlacedOrder.pay);
+    expect(placed.nextAction?.amount, 12300);
+    expect(placed.nextAction?.method, PaymentMethodCode.mada);
   });
 
   test('the same key twice, even in parallel, creates one order', () async {
@@ -146,14 +147,22 @@ void main() {
     }) async {
       final c = MockCartRepository(delay: Duration.zero);
       await c.add(kebab.withQuantity(3)); // 108.00
+      final book = MockAddressRepository();
+      final orders = MockOrderRepository(
+        c,
+        MockCheckoutRepository(c, addresses: book, delay: Duration.zero),
+        addresses: book,
+        wallet: MockWallet(balance: walletBalance),
+      );
       final list = await MockPaymentRepository(
         c,
-        walletBalance: walletBalance,
+        orders,
         codEnabled: cod,
         codMax: codMax,
         delay: Duration.zero,
       ).methods();
-      expect(list.tender, isNull);
+      // A tender plan only when the wallet covers part of the cart.
+      expect(list.tender?.walletAmount, walletBalance > 0 && walletBalance < 10800 ? walletBalance : null);
       return {for (final m in list.options) m.method: m};
     }
 

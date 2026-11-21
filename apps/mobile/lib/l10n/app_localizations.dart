@@ -3019,6 +3019,90 @@ abstract class AppLocalizations {
   /// In ar, this message translates to:
   /// **'العودة للرئيسية'**
   String get placedHome;
+
+  /// No description provided for @payFakeTitle.
+  ///
+  /// In ar, this message translates to:
+  /// **'بوابة الدفع التجريبية'**
+  String get payFakeTitle;
+
+  /// No description provided for @payFakeBody.
+  ///
+  /// In ar, this message translates to:
+  /// **'تحقق 3DS لمبلغ {amount} ر.س. هذه صفحة المزوّد التجريبي.'**
+  String payFakeBody(String amount);
+
+  /// No description provided for @payFakeApprove.
+  ///
+  /// In ar, this message translates to:
+  /// **'موافقة'**
+  String get payFakeApprove;
+
+  /// No description provided for @payFakeDecline.
+  ///
+  /// In ar, this message translates to:
+  /// **'رفض'**
+  String get payFakeDecline;
+
+  /// No description provided for @payUseWallet.
+  ///
+  /// In ar, this message translates to:
+  /// **'استخدام رصيد المحفظة · {amount} ر.س'**
+  String payUseWallet(String amount);
+
+  /// No description provided for @payRemaining.
+  ///
+  /// In ar, this message translates to:
+  /// **'المتبقي {amount} ر.س بطريقة الدفع المختارة'**
+  String payRemaining(String amount);
+
+  /// No description provided for @payChooseMethod.
+  ///
+  /// In ar, this message translates to:
+  /// **'اختر طريقة دفع للمتابعة'**
+  String get payChooseMethod;
+
+  /// No description provided for @payDeclined.
+  ///
+  /// In ar, this message translates to:
+  /// **'تم رفض الدفع من البنك، جرّب بطاقة أخرى أو وسيلة دفع مختلفة'**
+  String get payDeclined;
+
+  /// No description provided for @payNotCompleted.
+  ///
+  /// In ar, this message translates to:
+  /// **'لم يكتمل الدفع، أعد المحاولة أو اختر وسيلة أخرى'**
+  String get payNotCompleted;
+
+  /// No description provided for @payExpired.
+  ///
+  /// In ar, this message translates to:
+  /// **'أُلغي الطلب لانتهاء مهلة الدفع (15 دقيقة).'**
+  String get payExpired;
+
+  /// No description provided for @payWalletPart.
+  ///
+  /// In ar, this message translates to:
+  /// **'يُدفع {amount} ر.س من رصيد المحفظة.'**
+  String payWalletPart(String amount);
+
+  /// No description provided for @payWalletRestored.
+  ///
+  /// In ar, this message translates to:
+  /// **'أُعيد {amount} ر.س إلى محفظتك.'**
+  String payWalletRestored(String amount);
+
+  /// No description provided for @placedUnderReview.
+  ///
+  /// In ar, this message translates to:
+  /// **'سنراجع طلبك ونؤكده قريبًا.'**
+  String get placedUnderReview;
+
+  /// No description provided for @placedConfirmed.
+  ///
+  /// In ar, this message translates to:
+  /// **'تم تأكيد طلبك.'**
+  String get placedConfirmed;
 }
 
 class _AppLocalizationsDelegate extends LocalizationsDelegate<AppLocalizations> {

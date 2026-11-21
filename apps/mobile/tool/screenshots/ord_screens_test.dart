@@ -12,6 +12,7 @@ import 'package:jazlah/features/cart/domain/cart.dart';
 import 'package:jazlah/features/cart/presentation/cart_providers.dart';
 import 'package:jazlah/features/catalog/domain/catalog.dart';
 import 'package:jazlah/features/checkout/data/checkout_repository.dart';
+import 'package:jazlah/features/checkout/data/order_repository.dart';
 import 'package:jazlah/features/checkout/domain/fulfilment.dart';
 import 'package:jazlah/features/checkout/domain/order.dart';
 import 'package:jazlah/features/checkout/presentation/checkout_providers.dart';
@@ -47,6 +48,7 @@ Future<List<dynamic>> _o() async {
   await cart.add(const CartItemInput(productId: 'p-falah-lamb-kebab', sizeId: 'sz-500g'));
   cart.fulfilment = const FulfilmentChoice(method: Fulfilment.delivery, date: '2026-11-11', addressId: 'a1');
   final book = MockAddressRepository(seed: [_home]);
+  final checkout = MockCheckoutRepository(cart, addresses: book, now: _now, delay: Duration.zero);
   return [
     tokenStorageProvider.overrideWithValue(tokens),
     authRepositoryProvider.overrideWithValue(MockAuthRepository(tokens)),
@@ -54,10 +56,14 @@ Future<List<dynamic>> _o() async {
     cartRepositoryProvider.overrideWithValue(cart),
     cartSettingsProvider.overrideWithValue(MockCartRepository.opsSettings),
     addressRepositoryProvider.overrideWithValue(book),
-    checkoutRepositoryProvider.overrideWithValue(
-      MockCheckoutRepository(cart, addresses: book, now: _now, delay: Duration.zero),
+    checkoutRepositoryProvider.overrideWithValue(checkout),
+    paymentRepositoryProvider.overrideWithValue(
+      MockPaymentRepository(
+        cart,
+        MockOrderRepository(cart, checkout, addresses: book, now: _now),
+        delay: Duration.zero,
+      ),
     ),
-    paymentRepositoryProvider.overrideWithValue(MockPaymentRepository(cart, delay: Duration.zero)),
   ];
 }
 
