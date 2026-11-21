@@ -42,6 +42,8 @@ const SMS_PROVIDERS_EXPECTED = `expected a comma-separated list of: ${SMS_PROVID
 const SMS_PROVIDERS_REPEATED = 'a provider is listed more than once';
 const SMS_LOG_IN_PRODUCTION =
   'the log provider writes message text (OTP codes) to the log: not allowed when DEPLOYMENT_ENV is production';
+const STORAGE_DISABLED_IN_PRODUCTION =
+  'disabled turns uploads off: not allowed when DEPLOYMENT_ENV is production';
 const DEPLOYMENT_ENV_IN_PRODUCTION =
   'required when NODE_ENV is production: staging or production';
 const DEPLOYMENT_ENV_OUTSIDE_PRODUCTION =
@@ -476,6 +478,16 @@ export const envSchema = z
         code: 'custom',
         path: ['SMS_PROVIDERS'],
         message: SMS_PROVIDERS_REPEATED,
+      });
+    }
+    if (
+      env.STORAGE_PROVIDER === 'disabled' &&
+      env.DEPLOYMENT_ENV === 'production'
+    ) {
+      context.addIssue({
+        code: 'custom',
+        path: ['STORAGE_PROVIDER'],
+        message: STORAGE_DISABLED_IN_PRODUCTION,
       });
     }
     // Only staging may use log under NODE_ENV=production; without a valid

@@ -2,8 +2,9 @@ import type { DevelopmentAccount } from './development-account.type';
 
 /**
  * The accounts frontend developers sign in with, one per audience plus a customer
- * whose profile is incomplete. Each signs in through AUTH_REVIEW_ACCOUNTS (a fixed
- * code, no SMS): the seed prints the line to add to `.env`.
+ * whose profile is incomplete and one account with every staff panel. Each signs in
+ * through AUTH_REVIEW_ACCOUNTS (a fixed code, no SMS): the seed prints the line to add
+ * to `.env`.
  */
 export const DEVELOPMENT_ACCOUNTS: readonly DevelopmentAccount[] = [
   {
@@ -36,5 +37,12 @@ export const DEVELOPMENT_ACCOUNTS: readonly DevelopmentAccount[] = [
     audience: 'customer',
     codeDigit: '5',
     purpose: 'no name yet: the skippable profile completion screen',
+  },
+  {
+    user: 'dev-all-panels',
+    audience: 'admin',
+    codeDigit: '6',
+    purpose:
+      'every staff panel: admin, vendor of Al Nokhba Butchery, kitchen of the platform vendor',
   },
 ];

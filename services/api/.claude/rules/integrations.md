@@ -33,4 +33,4 @@ Never submitted inline: a queue (name in `QUEUE_NAMES`, registered and processed
 
 ## Storage
 
-S3-compatible, one provider, only through the port; no vendor named outside the provider file. Uploads are presigned POSTs (the policy limits size and type), downloads presigned GETs or public URLs: the API never streams file contents. Modules use `MediaService` (`modules.md`), not the port.
+S3-compatible, one provider, only through the port (`disabled` is staging without storage, refused in production: DECISIONS.md); no vendor named outside the provider file. Uploads are presigned POSTs (the policy limits size and type), downloads presigned GETs or public URLs: the API never streams file contents. Modules use `MediaService` (`modules.md`), not the port.
