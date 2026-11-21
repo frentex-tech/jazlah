@@ -8,7 +8,7 @@ Exact values read from the live Figma file, so the build does not measure screen
 | `dashboard/<node-id>.json` | Sprint 1 dashboard screens: every sign-in screen and state (admin, vendor, kitchen), and one screen per role for the shells (APP-DSH-1) |
 | `ds/<node-id>.json` | Every Design System component with all its variants (Button, Input, Phone input, OTP field, Side nav, Top bar, Data table …) |
 | `ds/design-system.json` | All 51 variables, 9 text styles, effect styles and the component list |
-| `sprint-1.txt`, `sprint-2.txt` | The exported lists: `<node-id> <platform> <task>` (Sprint 2 exported 2026-11-20) |
+| `sprint-1.txt`, `sprint-2.txt`, `sprint-3.txt` | The exported lists: `<node-id> <platform> <task>` (Sprint 2 exported 2026-11-20, Sprint 3 2026-11-21) |
 
 Reference images for each screen are in [`../exports/`](../exports/) under the same node id (app 1x, dashboards 0.5x). Sprint 1 states are included.
 

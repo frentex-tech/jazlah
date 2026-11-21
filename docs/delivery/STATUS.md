@@ -38,6 +38,12 @@
 
 ## Log
 
+### 2026-11-21 — Sprint 2 UI built and reviewed; Sprint 3 UI starts
+- **Sprint 2 UI is merged:** mobile #276 #277 #278 (+ review fixes #282), dashboard #275 #279 #280 #281 (+ review fixes #283). Design QA and a lead review ran; all frontend findings are fixed except those waiting on the API. #45 #46 #51 #52 #55 #56 #57 stay open (`Refs`) until each screen is verified on the real API / staging.
+- Most Sprint 2 screens already use the generated client (the vendor and catalog endpoints were in `openapi.json`); the dashboard has e2e tests for all four flows against the real API.
+- **Waiting on the API:** incompatible cut × packaging rules are global and block publishing, and the public product doesn't carry them, so the Sprint 2 exit demo "one incompatible combination blocked in the app" is not yet possible; pricing interface and error codes; public product availability / per-size stock / non-null size ids; review-queue support; a distinct permission-denied code; the flaky `logging.e2e-spec.ts`. Sent to the API owner.
+- Sprint 3 design specs exported: `docs/design/spec/sprint-3.txt` (61 screens and states). CRT-DSH-1 (coupons) has no Figma frame; it is built from the design system and recorded in `docs/design/signoff.md`.
+
 ### 2026-11-20 — Frontend runs ahead of the API (owner)
 - **The client approved the full design** (DSN-DES-2 #204 closed).
 - **UI first, on mocks:** the app and dashboard build the screens of Sprints 2, 3, 4 … ahead of the API, one sprint at a time (build → design QA + lead review → fixes → next sprint). Kerolles builds the API in parallel. Mocks follow the shapes in the sprint file (or a merged `openapi.json` contract) and sit behind the repository/backend interface, listed in `docs/frontend/not-built-yet.md`.
