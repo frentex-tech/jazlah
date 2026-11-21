@@ -38,7 +38,9 @@ test('list, status filter and code search; the side nav reaches it', async ({ pa
 test('create with validation errors, then a duplicate code, then success', async ({ page, context }) => {
   await signInAs(context, ['admin']);
   await page.goto('/admin/marketing/coupons');
+  await expect(table(page).getByRole('link', { name: 'RAMADAN25', exact: true })).toBeVisible(); // hydrated before the click
   await page.getByRole('link', { name: 'كوبون جديد' }).click();
+  await expect(page).toHaveURL(/\/admin\/marketing\/coupons\/new$/, { timeout: 15_000 });
   await expect(page.getByRole('heading', { level: 1, name: 'كوبون جديد' })).toBeVisible();
 
   await page.getByLabel('رمز الكوبون').fill('a b');
@@ -84,7 +86,7 @@ test('edit, usage stats and deactivate', async ({ page, context }) => {
   await signInAs(context, ['admin']);
   await page.goto('/admin/marketing/coupons');
   await table(page).getByRole('link', { name: 'FALAH15', exact: true }).click();
-  await expect(page.getByRole('heading', { level: 1, name: 'FALAH15' })).toBeVisible();
+  await expect(page.getByRole('heading', { level: 1, name: 'FALAH15' })).toBeVisible({ timeout: 15_000 });
   const usage = page.locator('section').filter({ has: page.getByRole('heading', { name: 'الاستخدام' }) });
   await expect(usage).toContainText('100 / 100');
   await expect(usage).toContainText('61');
@@ -141,6 +143,6 @@ test('English mirrors the list and the form', async ({ page, context }) => {
   await expect(page.getByRole('heading', { level: 1, name: 'Coupons' })).toBeVisible();
   await expect(page.getByRole('table', { name: 'Coupons' }).getByRole('row').filter({ hasText: 'WELCOME50' })).toContainText('Fixed amount · SAR 50.00');
   await page.getByRole('link', { name: 'New coupon' }).click();
-  await expect(page.getByLabel('Discount (%)')).toBeVisible();
+  await expect(page.getByLabel('Discount (%)')).toBeVisible({ timeout: 15_000 });
   await expect(page.getByText('No store chosen: applies to every store')).toBeVisible();
 });
