@@ -121,6 +121,69 @@ export const API_TAGS = {
     description:
       'The delivery areas, drawn as polygons on the map: list, read, create, edit, switch on or off, delete. Admin dashboard.',
   },
+  publicSettings: {
+    name: 'Public settings',
+    description:
+      'What the apps need of the operations settings: delivery window, minimum order, delivery fee, cash on delivery, the pause. Public.',
+  },
+  customerCart: {
+    name: 'Customer cart',
+    description:
+      'The cart, kept on the server: one store, lines, coupon, fulfilment and totals. Customer app.',
+  },
+  customerScheduling: {
+    name: 'Customer scheduling',
+    description:
+      'The days the cart can be delivered or picked up. Customer app.',
+  },
+  customerCheckout: {
+    name: 'Customer checkout',
+    description:
+      'Payment methods, placing the cart as an order, and paying an unpaid order again. Customer app.',
+  },
+  customerOrders: {
+    name: 'Customer orders',
+    description: 'The customer’s orders and their detail. Customer app.',
+  },
+  customerWallet: {
+    name: 'Customer wallet',
+    description: 'The wallet balance and its history. Customer app.',
+  },
+  vendorOrders: {
+    name: 'Vendor orders',
+    description:
+      'The vendor’s orders: list, detail, status moves. Vendor dashboard.',
+  },
+  adminOrders: {
+    name: 'Admin orders',
+    description:
+      'Every order: list, detail, status moves, the cash-on-delivery review. Admin dashboard.',
+  },
+  adminOperationsSettings: {
+    name: 'Admin operations settings',
+    description:
+      'Delivery window, cut-offs, closed days, capacity, minimum order, fees, cash on delivery and the pause. Admin dashboard.',
+  },
+  adminVendorCapacity: {
+    name: 'Admin vendor capacity',
+    description:
+      'Each vendor’s daily capacity and one day’s limits. Admin dashboard.',
+  },
+  adminCoupons: {
+    name: 'Admin coupons',
+    description:
+      'Coupons: list, create, change, switch off, usage. Admin dashboard.',
+  },
+  adminWallets: {
+    name: 'Admin wallets',
+    description:
+      'Customers’ wallet balances and audited credits or debits. Admin dashboard.',
+  },
+  webhooksPayments: {
+    name: 'Webhooks payments',
+    description:
+      'Events from payment providers. Called by the providers, never by the apps.',
+  },
   health: {
     name: 'Health',
     description:

@@ -3,6 +3,7 @@
 One line per building block: name, path, purpose; the detail is in that file's doc comment. Listed by the index, `.claude/REGISTRY.md`. Paths are relative to `services/api/`.
 
 - **AppError** — `src/common/errors/app-error.ts` — the one error class business code throws; options `src/common/errors/app-error-options.interface.ts`.
+- **notImplemented** — `src/common/errors/not-implemented.ts` — rejects with NOT_IMPLEMENTED (501) and the task key: a contract route whose task has not landed.
 - **FieldError** — `src/common/errors/field-error.type.ts` — one invalid field in VALIDATION_FAILED details.
 - **NonErrorThrownError** — `src/common/errors/non-error-thrown.error.ts` — what the filter logs for a thrown non-Error.
 - **Error filter** — `src/common/filters/all-exceptions.filter.ts` — writes every error (`src/common/filters/error-response-body.interface.ts`, `src/common/filters/http-status-error-codes.constants.ts`).

@@ -16,6 +16,14 @@ import { CoverageModule } from '@modules/coverage';
 import { MediaModule } from '@modules/media';
 import { CustomersModule } from '@modules/customers';
 import { VendorsModule } from '@modules/vendors';
+import { SettingsModule } from '@modules/settings';
+import { SchedulingModule } from '@modules/scheduling';
+import { CartModule } from '@modules/cart';
+import { CouponsModule } from '@modules/coupons';
+import { WalletModule } from '@modules/wallet';
+import { PaymentsModule } from '@modules/payments';
+import { OrdersModule } from '@modules/orders';
+import { CheckoutModule } from '@modules/checkout';
 
 @Module({
   imports: [
@@ -36,6 +44,14 @@ import { VendorsModule } from '@modules/vendors';
     CatalogModule,
     CustomersModule,
     CoverageModule,
+    SettingsModule,
+    SchedulingModule,
+    CartModule,
+    CouponsModule,
+    WalletModule,
+    PaymentsModule,
+    OrdersModule,
+    CheckoutModule,
   ],
   providers: [
     { provide: APP_FILTER, useClass: AllExceptionsFilter },
