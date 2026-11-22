@@ -6,6 +6,7 @@ import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart' show DateFormat;
 
 import 'package:jazlah/app/router/router.dart';
+import 'package:jazlah/app/shell/main_shell.dart';
 import 'package:jazlah/app/theme/theme.dart';
 import 'package:jazlah/core/errors/api_error.dart';
 import 'package:jazlah/core/widgets/widgets.dart';
@@ -45,8 +46,12 @@ class _OrderDetailScreenState extends ConsumerState<OrderDetailScreen> {
 
   void _refresh() => ref.invalidate(orderDetailProvider(widget.id));
 
+  /// Set once the order turned out not to be readable: no more polling.
+  bool _gone = false;
+
   void _startPolling() {
     _poll?.cancel();
+    if (_gone) return;
     _poll = Timer.periodic(OrderDetailScreen.pollEvery, (_) => _refresh());
   }
 
@@ -75,7 +80,17 @@ class _OrderDetailScreenState extends ConsumerState<OrderDetailScreen> {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
+    // shortcut: no order routes in real builds until ORD-API-3 #83 (not-built-yet.md).
+    if (ref.watch(ordersRepositoryProvider) == null) return ComingSoonPage(title: l10n.orderDetailTitle);
     final detail = ref.watch(orderDetailProvider(widget.id));
+    // Not this customer's order (or gone): nothing will change, so stop asking.
+    ref.listen(orderDetailProvider(widget.id), (_, next) {
+      final code = next.hasError ? ApiError.from(next.error!).code : null;
+      if (code == 'NOT_FOUND' || code == 'FORBIDDEN') {
+        _gone = true;
+        _poll?.cancel();
+      }
+    });
     final d = detail.value;
 
     final Widget body;
@@ -164,8 +179,8 @@ class _Body extends ConsumerWidget {
     final timeline = orderTimeline(l10n, detail);
     const before = {OrderStatus.pendingPayment, OrderStatus.created, OrderStatus.confirmed, OrderStatus.preparing};
 
-    Widget section(String title, List<Widget> children) => CartCard(
-      gap: JSpace.s8,
+    Widget section(String title, List<Widget> children, {double gap = JSpace.s8}) => CartCard(
+      gap: gap,
       padding: JSpace.s16,
       children: [
         Text(title, style: JText.h3),
@@ -181,7 +196,7 @@ class _Body extends ConsumerWidget {
           Text(body, style: JText.bodyM.copyWith(color: JColors.ink2)),
         ],
       ),
-    ]);
+    ], gap: JSpace.s12);
 
     final children = <Widget>[
       CartCard(

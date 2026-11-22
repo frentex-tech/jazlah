@@ -7,6 +7,7 @@ import 'package:jazlah/app/theme/theme.dart';
 import 'package:jazlah/core/widgets/widgets.dart';
 import 'package:jazlah/features/addresses/presentation/address_providers.dart';
 import 'package:jazlah/features/auth/presentation/session_controller.dart';
+import 'package:jazlah/features/checkout/domain/order.dart';
 import 'package:jazlah/features/orders/presentation/orders_providers.dart';
 import 'package:jazlah/features/profile/domain/customer_profile.dart';
 import 'package:jazlah/features/profile/presentation/profile_providers.dart';
@@ -82,7 +83,10 @@ class _AccountBody extends ConsumerWidget {
         // not-built-yet.md); orders count the order list (ORD-MOB-2 #85; "—" without the orders route).
         Row(
           children: [
-            _Stat(value: ref.watch(ordersProvider(null)).value?.length, label: l10n.statOrders),
+            _Stat(
+              value: ref.watch(ordersProvider(null)).value?.where((o) => o.status != OrderStatus.cancelled).length,
+              label: l10n.statOrders,
+            ),
             const SizedBox(width: 10),
             _Stat(value: ref.watch(addressesProvider).value?.length, label: l10n.statAddresses),
             const SizedBox(width: 10),

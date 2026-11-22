@@ -4,7 +4,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:jazlah/app/providers.dart';
+import 'package:jazlah/core/config/env.dart';
+import 'package:jazlah/core/errors/api_error.dart';
 import 'package:jazlah/core/geo/geo_point.dart';
+import 'package:jazlah/core/storage/prefs.dart';
 import 'package:jazlah/core/storage/token_storage.dart';
 import 'package:jazlah/core/widgets/widgets.dart';
 import 'package:jazlah/features/addresses/data/address_repository.dart';
@@ -27,6 +30,7 @@ import 'package:jazlah/features/payment/domain/payment_method.dart';
 import 'package:jazlah/features/product/data/mock_product_repository.dart';
 import 'package:jazlah/features/product/domain/product.dart';
 import 'package:jazlah/features/product/presentation/product_providers.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 import '../../helpers/cart_fakes.dart';
 import '../../helpers/fakes.dart';
@@ -45,6 +49,36 @@ const _home = Address(
 final _now = DateTime.utc(2026, 11, 10, 10);
 
 late MockOrderRepository _orders;
+
+/// The server fails every read.
+class _Failing extends MockOrderRepository {
+  _Failing(super.cart, super.checkout, {required super.addresses}) : super(delay: Duration.zero);
+
+  int details = 0;
+
+  @override
+  Future<List<Order>> list({OrderScope? scope}) async => throw const ApiError(code: 'SERVICE_UNAVAILABLE');
+
+  @override
+  Future<OrderDetail> detail(String id) async {
+    details++;
+    throw const ApiError(code: 'SERVICE_UNAVAILABLE');
+  }
+}
+
+/// Counts the detail reads.
+class _Counting extends MockOrderRepository {
+  _Counting(super.cart, super.checkout, {required super.addresses, super.now})
+    : super(delay: Duration.zero, seedPast: true);
+
+  int details = 0;
+
+  @override
+  Future<OrderDetail> detail(String id) {
+    details++;
+    return super.detail(id);
+  }
+}
 
 class _Hanging extends MockOrderRepository {
   _Hanging(super.cart, super.checkout, {required super.addresses});
@@ -66,6 +100,8 @@ Future<ProviderContainer> _pump(
   bool signedIn = true,
   bool mocks = true,
   bool hang = false,
+  bool fail = false,
+  bool count = false,
   bool realtime = true,
   DateTime? today,
   String lang = 'ar',
@@ -79,6 +115,10 @@ Future<ProviderContainer> _pump(
   final checkout = MockCheckoutRepository(cart, addresses: book, now: () => _now, delay: Duration.zero);
   _orders = hang
       ? _Hanging(cart, checkout, addresses: book)
+      : fail
+      ? _Failing(cart, checkout, addresses: book)
+      : count
+      ? _Counting(cart, checkout, addresses: book, now: () => _now)
       : MockOrderRepository(cart, checkout, addresses: book, now: () => _now, seedPast: seed, delay: Duration.zero);
   if (place != null) {
     // The mock address book waits on a real timer.
@@ -164,10 +204,25 @@ void main() {
       expect(find.text('route:/home'), findsOneWidget);
     });
 
-    testWidgets('error (135-63940): real builds without the route, never made-up orders', (t) async {
-      await _pump(t, const OrdersScreen(), mocks: false);
+    testWidgets('error (135-63940): retry', (t) async {
+      await _pump(t, const OrdersScreen(), place: null, fail: true);
       expect(find.text('تعذّر تحميل الطلبات'), findsOneWidget);
       expect(find.text('إعادة المحاولة'), findsOneWidget);
+    });
+
+    testWidgets('real builds without the route: the coming-soon tab, never made-up orders or a dead retry', (t) async {
+      await _pump(t, const OrdersScreen(), mocks: false);
+      expect(find.text('قريبًا'), findsOneWidget);
+      expect(find.text('إعادة المحاولة'), findsNothing);
+    });
+
+    testWidgets('a status change elsewhere reaches the list (order.updated)', (t) async {
+      await _pump(t, const OrdersScreen());
+      expect(find.text('بانتظار التأكيد'), findsOneWidget);
+      _orders.transition('o-3', OrderStatus.preparing);
+      await _settle(t);
+      expect(find.text('قيد التجهيز'), findsOneWidget);
+      expect(find.text('بانتظار التأكيد'), findsNothing);
     });
 
     testWidgets('not signed in (135-64028): sign in, back to the orders', (t) async {
@@ -260,9 +315,32 @@ void main() {
     });
 
     testWidgets('error (135-64339): retry', (t) async {
-      await _pump(t, const OrderDetailScreen(id: 'o-1'), mocks: false);
+      await _pump(t, const OrderDetailScreen(id: 'o-1'), place: null, fail: true);
       expect(find.text('تعذّر تحميل الطلب'), findsOneWidget);
       expect(find.text('إعادة المحاولة'), findsOneWidget);
+    });
+
+    testWidgets('real builds without the route: coming soon', (t) async {
+      await _pump(t, const OrderDetailScreen(id: 'o-1'), mocks: false);
+      expect(find.text('قريبًا'), findsOneWidget);
+      expect(find.text('إعادة المحاولة'), findsNothing);
+    });
+
+    testWidgets("another account's order: the 30 s polling stops", (t) async {
+      await _pump(t, const OrderDetailScreen(id: 'o-99'), count: true, realtime: false);
+      final reads = (_orders as _Counting).details;
+      await t.pump(OrderDetailScreen.pollEvery * 3);
+      await _settle(t);
+      expect((_orders as _Counting).details, reads);
+    });
+
+    testWidgets('a readable order keeps polling', (t) async {
+      await _pump(t, const OrderDetailScreen(id: 'o-3'), count: true, realtime: false);
+      expect(find.text('بانتظار التأكيد'), findsOneWidget);
+      final reads = (_orders as _Counting).details;
+      await t.pump(OrderDetailScreen.pollEvery);
+      await _settle(t);
+      expect((_orders as _Counting).details, reads + 1);
     });
 
     testWidgets("another account's order (135-64401)", (t) async {
@@ -270,5 +348,30 @@ void main() {
       expect(find.text('لا يمكنك عرض هذا الطلب'), findsOneWidget);
       expect(find.text('رجوع'), findsOneWidget);
     });
+  });
+
+  test('sign-out: the next account does not see the orders', () async {
+    SharedPreferences.setMockInitialValues({});
+    final c = ProviderContainer(
+      overrides: [
+        envProvider.overrideWithValue(const Env(Flavor.dev)),
+        prefsProvider.overrideWithValue(await Prefs.load()),
+        cartMocksProvider.overrideWithValue(true),
+        addressRepositoryProvider.overrideWithValue(MockAddressRepository(seed: [_home])),
+      ],
+    );
+    addTearDown(c.dispose);
+    final cart = c.read(cartRepositoryProvider)! as MockCartRepository;
+    await cart.add(kebab.withQuantity(3));
+    final day = (await c.read(checkoutRepositoryProvider)!.days(Fulfilment.delivery)).firstWhere((d) => d.available);
+    cart.fulfilment = FulfilmentChoice(method: Fulfilment.delivery, date: day.date, addressId: 'a1');
+    final placed = await c.read(orderRepositoryProvider)!.place(idempotencyKey: 'k', paymentMethod: 'cod');
+    final sub = c.listen(ordersProvider(null), (_, _) {});
+    expect((await c.read(ordersProvider(null).future)).map((o) => o.id), contains(placed.order.id));
+    c.read(accountDataClearedProvider.notifier).fire();
+    final after = await c.read(ordersProvider(null).future);
+    expect(after.map((o) => o.number), isNot(contains(placed.order.number)));
+    expect(after.every((o) => pastOrderStatuses.contains(o.status)), isTrue); // only the seeds
+    sub.close();
   });
 }

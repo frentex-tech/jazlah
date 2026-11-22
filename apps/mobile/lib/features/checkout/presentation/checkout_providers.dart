@@ -43,7 +43,8 @@ final FutureProviderFamily<List<CheckoutDay>, DaysQuery> checkoutDaysProvider = 
 final orderRepositoryProvider = Provider<OrderRepository?>((ref) {
   final cart = ref.watch(cartRepositoryProvider);
   final checkout = ref.watch(checkoutRepositoryProvider);
-  return cart is MockCartRepository && checkout is MockCheckoutRepository
-      ? MockOrderRepository(cart, checkout, addresses: ref.watch(addressRepositoryProvider), seedPast: true)
-      : null;
+  if (cart is! MockCartRepository || checkout is! MockCheckoutRepository) return null;
+  final mock = MockOrderRepository(cart, checkout, addresses: ref.watch(addressRepositoryProvider), seedPast: true);
+  ref.onDispose(mock.dispose); // a replaced mock (another account) closes its event stream
+  return mock;
 });

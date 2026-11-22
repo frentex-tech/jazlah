@@ -26,6 +26,9 @@ final ordersClockProvider = Provider<DateTime Function()>((ref) => DateTime.now)
 
 final FutureProviderFamily<List<Order>, OrderScope?> ordersProvider = FutureProvider.autoDispose
     .family<List<Order>, OrderScope?>((ref, scope) {
+      // Any order.updated (a status changed on the dashboard, a payment settled) re-reads the list.
+      final events = ref.watch(orderRealtimeProvider)?.orderUpdated().listen((_) => ref.invalidateSelf());
+      if (events != null) ref.onDispose(events.cancel);
       final repo = ref.watch(ordersRepositoryProvider);
       if (repo == null) throw const ApiError(code: ApiError.unknown);
       return repo.list(scope: scope);

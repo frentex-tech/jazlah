@@ -218,6 +218,8 @@ class MockOrderRepository implements OrderRepository, OrdersRepository, OrderRea
   @override
   Stream<String> orderUpdated() => _events.stream;
 
+  void dispose() => unawaited(_events.close());
+
   @override
   Future<List<Order>> list({OrderScope? scope}) async {
     if (delay > Duration.zero) await Future<void>.delayed(delay);
