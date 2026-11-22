@@ -13,6 +13,7 @@ export function ConfirmDialog({
   title,
   body,
   confirmLabel,
+  cancelLabel,
   destructive,
   loading,
   onConfirm,
@@ -24,6 +25,7 @@ export function ConfirmDialog({
   title: string;
   body?: string;
   confirmLabel?: string;
+  cancelLabel?: string;
   destructive?: boolean;
   loading?: boolean;
   onConfirm: () => void;
@@ -45,7 +47,7 @@ export function ConfirmDialog({
             </Button>
             <Dialog.Close asChild>
               <Button variant="secondary" className="flex-1">
-                {t('cancel')}
+                {cancelLabel ?? t('cancel')}
               </Button>
             </Dialog.Close>
           </div>

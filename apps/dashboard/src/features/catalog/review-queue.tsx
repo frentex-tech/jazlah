@@ -212,7 +212,7 @@ export function ReviewQueue() {
   const card = 'h-[360px]';
   return (
     <>
-      <PageHeader start breadcrumb={t('breadcrumb')} title={t('title')} />
+      <PageHeader breadcrumb={t('breadcrumb')} title={t('title')} />
       {data === 'denied' ? (
         <StateCard kind="denied" className={card} title={t('denied.title')} body={t('denied.body')} action={<Link href="/admin" className={buttonVariants({ variant: 'secondary' })}>{t('denied.action')}</Link>} />
       ) : data === 'error' ? (

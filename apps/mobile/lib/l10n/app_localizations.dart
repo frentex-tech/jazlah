@@ -2375,7 +2375,7 @@ abstract class AppLocalizations {
   /// No description provided for @checkoutTitle.
   ///
   /// In ar, this message translates to:
-  /// **'الدفع والمراجعة'**
+  /// **'إتمام الطلب'**
   String get checkoutTitle;
 
   /// No description provided for @cartReplaceTitle.
@@ -2611,6 +2611,900 @@ abstract class AppLocalizations {
   /// In ar, this message translates to:
   /// **'نحو {weight}'**
   String cartWeightAbout(String weight);
+
+  /// No description provided for @checkoutStep.
+  ///
+  /// In ar, this message translates to:
+  /// **'الخطوة {step} من {total}: {name}'**
+  String checkoutStep(int step, int total, String name);
+
+  /// No description provided for @checkoutStepFulfilment.
+  ///
+  /// In ar, this message translates to:
+  /// **'الاستلام واليوم'**
+  String get checkoutStepFulfilment;
+
+  /// No description provided for @checkoutDelivery.
+  ///
+  /// In ar, this message translates to:
+  /// **'توصيل للعنوان'**
+  String get checkoutDelivery;
+
+  /// No description provided for @checkoutPickup.
+  ///
+  /// In ar, this message translates to:
+  /// **'استلام من المتجر'**
+  String get checkoutPickup;
+
+  /// No description provided for @checkoutDeliveryAddress.
+  ///
+  /// In ar, this message translates to:
+  /// **'عنوان التوصيل'**
+  String get checkoutDeliveryAddress;
+
+  /// No description provided for @checkoutOutOfCoverage.
+  ///
+  /// In ar, this message translates to:
+  /// **'خارج نطاق التغطية'**
+  String get checkoutOutOfCoverage;
+
+  /// No description provided for @checkoutNoCoveredTitle.
+  ///
+  /// In ar, this message translates to:
+  /// **'لا يوجد عنوان داخل التغطية'**
+  String get checkoutNoCoveredTitle;
+
+  /// No description provided for @checkoutNoCoveredBody.
+  ///
+  /// In ar, this message translates to:
+  /// **'أضف عنوانًا داخل نطاق التغطية لنوصّل لك، أو اختر الاستلام من المتجر.'**
+  String get checkoutNoCoveredBody;
+
+  /// No description provided for @checkoutPickupPlace.
+  ///
+  /// In ar, this message translates to:
+  /// **'موقع الاستلام'**
+  String get checkoutPickupPlace;
+
+  /// No description provided for @checkoutPickupHours.
+  ///
+  /// In ar, this message translates to:
+  /// **'الاستلام من {open} إلى {close}'**
+  String checkoutPickupHours(String open, String close);
+
+  /// No description provided for @checkoutDeliveryDay.
+  ///
+  /// In ar, this message translates to:
+  /// **'يوم التوصيل'**
+  String get checkoutDeliveryDay;
+
+  /// No description provided for @checkoutPickupDay.
+  ///
+  /// In ar, this message translates to:
+  /// **'يوم الاستلام'**
+  String get checkoutPickupDay;
+
+  /// No description provided for @checkoutCalendar.
+  ///
+  /// In ar, this message translates to:
+  /// **'التقويم'**
+  String get checkoutCalendar;
+
+  /// No description provided for @checkoutDeliveryWindow.
+  ///
+  /// In ar, this message translates to:
+  /// **'يصل بين {start} و {end}'**
+  String checkoutDeliveryWindow(String start, String end);
+
+  /// No description provided for @checkoutPickupWindow.
+  ///
+  /// In ar, this message translates to:
+  /// **'جاهز للاستلام بين {start} و {end}'**
+  String checkoutPickupWindow(String start, String end);
+
+  /// No description provided for @checkoutRiyadhTime.
+  ///
+  /// In ar, this message translates to:
+  /// **'{date} · بتوقيت الرياض'**
+  String checkoutRiyadhTime(String date);
+
+  /// No description provided for @checkoutPickAnother.
+  ///
+  /// In ar, this message translates to:
+  /// **'{date} · اختر يومًا آخر متاحًا'**
+  String checkoutPickAnother(String date);
+
+  /// No description provided for @checkoutDaysLegend.
+  ///
+  /// In ar, this message translates to:
+  /// **'دليل الأيام'**
+  String get checkoutDaysLegend;
+
+  /// No description provided for @checkoutDayClosed.
+  ///
+  /// In ar, this message translates to:
+  /// **'مغلق: عطلة المتجر'**
+  String get checkoutDayClosed;
+
+  /// No description provided for @checkoutDayFull.
+  ///
+  /// In ar, this message translates to:
+  /// **'مكتمل: لا توجد سعة'**
+  String get checkoutDayFull;
+
+  /// No description provided for @checkoutDayPastCutoff.
+  ///
+  /// In ar, this message translates to:
+  /// **'انتهى وقت الطلب لهذا اليوم'**
+  String get checkoutDayPastCutoff;
+
+  /// No description provided for @checkoutDayVendorClosed.
+  ///
+  /// In ar, this message translates to:
+  /// **'مغلق: المتجر لا يعمل في هذا اليوم'**
+  String get checkoutDayVendorClosed;
+
+  /// No description provided for @checkoutDayOutsideHorizon.
+  ///
+  /// In ar, this message translates to:
+  /// **'خارج فترة الحجز المتاحة'**
+  String get checkoutDayOutsideHorizon;
+
+  /// No description provided for @checkoutDayUnavailable.
+  ///
+  /// In ar, this message translates to:
+  /// **'غير متاح'**
+  String get checkoutDayUnavailable;
+
+  /// No description provided for @checkoutDaysErrorTitle.
+  ///
+  /// In ar, this message translates to:
+  /// **'تعذّر تحميل الأيام المتاحة'**
+  String get checkoutDaysErrorTitle;
+
+  /// No description provided for @checkoutDaysErrorBody.
+  ///
+  /// In ar, this message translates to:
+  /// **'تحقق من الاتصال ثم أعد المحاولة.'**
+  String get checkoutDaysErrorBody;
+
+  /// No description provided for @checkoutPausedTitle.
+  ///
+  /// In ar, this message translates to:
+  /// **'الطلبات متوقفة مؤقتًا، سنعود قريبًا'**
+  String get checkoutPausedTitle;
+
+  /// No description provided for @checkoutChooseDeliveryDay.
+  ///
+  /// In ar, this message translates to:
+  /// **'اختر يوم التوصيل'**
+  String get checkoutChooseDeliveryDay;
+
+  /// No description provided for @checkoutChoosePickupDay.
+  ///
+  /// In ar, this message translates to:
+  /// **'اختر يوم الاستلام'**
+  String get checkoutChoosePickupDay;
+
+  /// No description provided for @checkoutConfirmDay.
+  ///
+  /// In ar, this message translates to:
+  /// **'تأكيد اليوم'**
+  String get checkoutConfirmDay;
+
+  /// No description provided for @checkoutPreviousMonth.
+  ///
+  /// In ar, this message translates to:
+  /// **'الشهر السابق'**
+  String get checkoutPreviousMonth;
+
+  /// No description provided for @checkoutNextMonth.
+  ///
+  /// In ar, this message translates to:
+  /// **'الشهر التالي'**
+  String get checkoutNextMonth;
+
+  /// No description provided for @clockAm.
+  ///
+  /// In ar, this message translates to:
+  /// **'صباحًا'**
+  String get clockAm;
+
+  /// No description provided for @clockPm.
+  ///
+  /// In ar, this message translates to:
+  /// **'مساءً'**
+  String get clockPm;
+
+  /// No description provided for @clockAmShort.
+  ///
+  /// In ar, this message translates to:
+  /// **'ص'**
+  String get clockAmShort;
+
+  /// No description provided for @clockPmShort.
+  ///
+  /// In ar, this message translates to:
+  /// **'م'**
+  String get clockPmShort;
+
+  /// No description provided for @errOrderingPaused.
+  ///
+  /// In ar, this message translates to:
+  /// **'الطلبات متوقفة مؤقتًا، حاول لاحقًا.'**
+  String get errOrderingPaused;
+
+  /// No description provided for @errFulfilmentNotSupported.
+  ///
+  /// In ar, this message translates to:
+  /// **'بعض منتجات سلتك لا تتوفر بطريقة الاستلام هذه.'**
+  String get errFulfilmentNotSupported;
+
+  /// No description provided for @errAddressNotCovered.
+  ///
+  /// In ar, this message translates to:
+  /// **'هذا العنوان خارج نطاق التوصيل.'**
+  String get errAddressNotCovered;
+
+  /// No description provided for @errDayFull.
+  ///
+  /// In ar, this message translates to:
+  /// **'اكتمل هذا اليوم، اختر يومًا آخر.'**
+  String get errDayFull;
+
+  /// No description provided for @reviewTitle.
+  ///
+  /// In ar, this message translates to:
+  /// **'الدفع والمراجعة'**
+  String get reviewTitle;
+
+  /// No description provided for @reviewItemsFrom.
+  ///
+  /// In ar, this message translates to:
+  /// **'{count, plural, =1{منتج واحد من {vendor}} =2{منتجان من {vendor}} few{{count} منتجات من {vendor}} many{{count} منتجًا من {vendor}} other{{count} منتج من {vendor}}}'**
+  String reviewItemsFrom(int count, String vendor);
+
+  /// No description provided for @reviewDeliveryTo.
+  ///
+  /// In ar, this message translates to:
+  /// **'توصيل إلى {place}'**
+  String reviewDeliveryTo(String place);
+
+  /// No description provided for @reviewPickupFrom.
+  ///
+  /// In ar, this message translates to:
+  /// **'استلام من {place}'**
+  String reviewPickupFrom(String place);
+
+  /// No description provided for @reviewPaymentMethod.
+  ///
+  /// In ar, this message translates to:
+  /// **'طريقة الدفع'**
+  String get reviewPaymentMethod;
+
+  /// No description provided for @reviewTerms.
+  ///
+  /// In ar, this message translates to:
+  /// **'بتأكيد الطلب فأنت توافق على الشروط والأحكام وسياسة الإلغاء.'**
+  String get reviewTerms;
+
+  /// No description provided for @reviewConfirm.
+  ///
+  /// In ar, this message translates to:
+  /// **'تأكيد الطلب'**
+  String get reviewConfirm;
+
+  /// No description provided for @payMadaCard.
+  ///
+  /// In ar, this message translates to:
+  /// **'بطاقة مدى'**
+  String get payMadaCard;
+
+  /// No description provided for @payMada.
+  ///
+  /// In ar, this message translates to:
+  /// **'مدى'**
+  String get payMada;
+
+  /// No description provided for @payCard.
+  ///
+  /// In ar, this message translates to:
+  /// **'بطاقة ائتمانية'**
+  String get payCard;
+
+  /// No description provided for @payApplePay.
+  ///
+  /// In ar, this message translates to:
+  /// **'Apple Pay'**
+  String get payApplePay;
+
+  /// No description provided for @payWallet.
+  ///
+  /// In ar, this message translates to:
+  /// **'محفظة جزلة'**
+  String get payWallet;
+
+  /// No description provided for @payCod.
+  ///
+  /// In ar, this message translates to:
+  /// **'الدفع عند الاستلام'**
+  String get payCod;
+
+  /// No description provided for @payEndingIn.
+  ///
+  /// In ar, this message translates to:
+  /// **'تنتهي بـ {last4}'**
+  String payEndingIn(String last4);
+
+  /// No description provided for @payReasonWalletInsufficient.
+  ///
+  /// In ar, this message translates to:
+  /// **'الرصيد غير كافٍ'**
+  String get payReasonWalletInsufficient;
+
+  /// No description provided for @payReasonUnavailable.
+  ///
+  /// In ar, this message translates to:
+  /// **'غير متاح لهذا الطلب'**
+  String get payReasonUnavailable;
+
+  /// No description provided for @errPriceChanged.
+  ///
+  /// In ar, this message translates to:
+  /// **'تغيّرت أسعار بعض المنتجات، راجع سلتك.'**
+  String get errPriceChanged;
+
+  /// No description provided for @errItemUnavailable.
+  ///
+  /// In ar, this message translates to:
+  /// **'بعض المنتجات لم تعد متوفرة، راجع سلتك.'**
+  String get errItemUnavailable;
+
+  /// No description provided for @errMinOrderNotMet.
+  ///
+  /// In ar, this message translates to:
+  /// **'سلتك أقل من الحد الأدنى للطلب.'**
+  String get errMinOrderNotMet;
+
+  /// No description provided for @placedTitle.
+  ///
+  /// In ar, this message translates to:
+  /// **'تم استلام طلبك'**
+  String get placedTitle;
+
+  /// No description provided for @placedNumber.
+  ///
+  /// In ar, this message translates to:
+  /// **'رقم الطلب {number}'**
+  String placedNumber(String number);
+
+  /// No description provided for @placedFresh.
+  ///
+  /// In ar, this message translates to:
+  /// **'ذبح وتجهيز طازج صباح {weekday}'**
+  String placedFresh(String weekday);
+
+  /// No description provided for @placedDateVendor.
+  ///
+  /// In ar, this message translates to:
+  /// **'{date} · بإشراف {vendor}'**
+  String placedDateVendor(String date, String vendor);
+
+  /// No description provided for @placedDeliveryWindow.
+  ///
+  /// In ar, this message translates to:
+  /// **'توصيل بين {start} و{end}'**
+  String placedDeliveryWindow(String start, String end);
+
+  /// No description provided for @placedPickupWindow.
+  ///
+  /// In ar, this message translates to:
+  /// **'استلام بين {start} و{end}'**
+  String placedPickupWindow(String start, String end);
+
+  /// No description provided for @placedTotal.
+  ///
+  /// In ar, this message translates to:
+  /// **'{amount} ر.س شامل الضريبة'**
+  String placedTotal(String amount);
+
+  /// No description provided for @placedTrack.
+  ///
+  /// In ar, this message translates to:
+  /// **'تتبع الطلب'**
+  String get placedTrack;
+
+  /// No description provided for @placedHome.
+  ///
+  /// In ar, this message translates to:
+  /// **'العودة للرئيسية'**
+  String get placedHome;
+
+  /// No description provided for @payFakeTitle.
+  ///
+  /// In ar, this message translates to:
+  /// **'بوابة الدفع التجريبية'**
+  String get payFakeTitle;
+
+  /// No description provided for @payFakeBody.
+  ///
+  /// In ar, this message translates to:
+  /// **'تحقق 3DS لمبلغ {amount} ر.س. هذه صفحة المزوّد التجريبي.'**
+  String payFakeBody(String amount);
+
+  /// No description provided for @payFakeApprove.
+  ///
+  /// In ar, this message translates to:
+  /// **'موافقة'**
+  String get payFakeApprove;
+
+  /// No description provided for @payFakeDecline.
+  ///
+  /// In ar, this message translates to:
+  /// **'رفض'**
+  String get payFakeDecline;
+
+  /// No description provided for @payUseWallet.
+  ///
+  /// In ar, this message translates to:
+  /// **'استخدام رصيد المحفظة · {amount} ر.س'**
+  String payUseWallet(String amount);
+
+  /// No description provided for @payRemaining.
+  ///
+  /// In ar, this message translates to:
+  /// **'المتبقي {amount} ر.س بطريقة الدفع المختارة'**
+  String payRemaining(String amount);
+
+  /// No description provided for @payChooseMethod.
+  ///
+  /// In ar, this message translates to:
+  /// **'اختر طريقة دفع للمتابعة'**
+  String get payChooseMethod;
+
+  /// No description provided for @payDeclined.
+  ///
+  /// In ar, this message translates to:
+  /// **'تم رفض الدفع من البنك، جرّب بطاقة أخرى أو وسيلة دفع مختلفة'**
+  String get payDeclined;
+
+  /// No description provided for @payNotCompleted.
+  ///
+  /// In ar, this message translates to:
+  /// **'لم يكتمل الدفع، أعد المحاولة أو اختر وسيلة أخرى'**
+  String get payNotCompleted;
+
+  /// No description provided for @payExpired.
+  ///
+  /// In ar, this message translates to:
+  /// **'أُلغي الطلب لانتهاء مهلة الدفع (15 دقيقة).'**
+  String get payExpired;
+
+  /// No description provided for @payWalletPart.
+  ///
+  /// In ar, this message translates to:
+  /// **'يُدفع {amount} ر.س من رصيد المحفظة.'**
+  String payWalletPart(String amount);
+
+  /// No description provided for @payWalletRestored.
+  ///
+  /// In ar, this message translates to:
+  /// **'أُعيد {amount} ر.س إلى محفظتك.'**
+  String payWalletRestored(String amount);
+
+  /// No description provided for @placedUnderReview.
+  ///
+  /// In ar, this message translates to:
+  /// **'سنراجع طلبك ونؤكده قريبًا.'**
+  String get placedUnderReview;
+
+  /// No description provided for @placedConfirmed.
+  ///
+  /// In ar, this message translates to:
+  /// **'تم تأكيد طلبك.'**
+  String get placedConfirmed;
+
+  /// No description provided for @payStillProcessing.
+  ///
+  /// In ar, this message translates to:
+  /// **'لا يزال الدفع قيد المعالجة، سنحدّث حالة طلبك فور وصول النتيجة.'**
+  String get payStillProcessing;
+
+  /// No description provided for @payOrderGone.
+  ///
+  /// In ar, this message translates to:
+  /// **'هذا الطلب لم يعد متاحًا.'**
+  String get payOrderGone;
+
+  /// No description provided for @ordersAll.
+  ///
+  /// In ar, this message translates to:
+  /// **'الكل'**
+  String get ordersAll;
+
+  /// No description provided for @ordersCurrent.
+  ///
+  /// In ar, this message translates to:
+  /// **'الجارية'**
+  String get ordersCurrent;
+
+  /// No description provided for @ordersPast.
+  ///
+  /// In ar, this message translates to:
+  /// **'المكتملة'**
+  String get ordersPast;
+
+  /// No description provided for @ordersNumber.
+  ///
+  /// In ar, this message translates to:
+  /// **'طلب {number}'**
+  String ordersNumber(String number);
+
+  /// No description provided for @ordersToday.
+  ///
+  /// In ar, this message translates to:
+  /// **'اليوم'**
+  String get ordersToday;
+
+  /// No description provided for @ordersTodayAt.
+  ///
+  /// In ar, this message translates to:
+  /// **'اليوم، {time}'**
+  String ordersTodayAt(String time);
+
+  /// No description provided for @ordersEmptyTitle.
+  ///
+  /// In ar, this message translates to:
+  /// **'لا توجد طلبات بعد'**
+  String get ordersEmptyTitle;
+
+  /// No description provided for @ordersEmptyBody.
+  ///
+  /// In ar, this message translates to:
+  /// **'طلباتك السابقة والحالية ستظهر هنا.'**
+  String get ordersEmptyBody;
+
+  /// No description provided for @ordersEmptyAction.
+  ///
+  /// In ar, this message translates to:
+  /// **'ابدأ أول طلب'**
+  String get ordersEmptyAction;
+
+  /// No description provided for @ordersErrorTitle.
+  ///
+  /// In ar, this message translates to:
+  /// **'تعذّر تحميل الطلبات'**
+  String get ordersErrorTitle;
+
+  /// No description provided for @ordersErrorBody.
+  ///
+  /// In ar, this message translates to:
+  /// **'تحقق من اتصالك ثم حاول مرة أخرى.'**
+  String get ordersErrorBody;
+
+  /// No description provided for @ordersSignInTitle.
+  ///
+  /// In ar, this message translates to:
+  /// **'سجّل دخولك لعرض الطلبات'**
+  String get ordersSignInTitle;
+
+  /// No description provided for @ordersSignInBody.
+  ///
+  /// In ar, this message translates to:
+  /// **'طلباتك محفوظة في حسابك. سجّل الدخول لمتابعتها.'**
+  String get ordersSignInBody;
+
+  /// No description provided for @orderDetailTitle.
+  ///
+  /// In ar, this message translates to:
+  /// **'تفاصيل الطلب'**
+  String get orderDetailTitle;
+
+  /// No description provided for @orderErrorTitle.
+  ///
+  /// In ar, this message translates to:
+  /// **'تعذّر تحميل الطلب'**
+  String get orderErrorTitle;
+
+  /// No description provided for @orderDeniedTitle.
+  ///
+  /// In ar, this message translates to:
+  /// **'لا يمكنك عرض هذا الطلب'**
+  String get orderDeniedTitle;
+
+  /// No description provided for @orderDeniedBody.
+  ///
+  /// In ar, this message translates to:
+  /// **'هذا الطلب مرتبط بحساب آخر.'**
+  String get orderDeniedBody;
+
+  /// No description provided for @orderLineDelivery.
+  ///
+  /// In ar, this message translates to:
+  /// **'{vendor} · توصيل {day} بين {start} و{end} إلى {place}'**
+  String orderLineDelivery(String vendor, String day, String start, String end, String place);
+
+  /// No description provided for @orderLinePickup.
+  ///
+  /// In ar, this message translates to:
+  /// **'{vendor} · استلام {day} بين {start} و{end} من {place}'**
+  String orderLinePickup(String vendor, String day, String start, String end, String place);
+
+  /// No description provided for @orderStatusTitle.
+  ///
+  /// In ar, this message translates to:
+  /// **'حالة الطلب'**
+  String get orderStatusTitle;
+
+  /// No description provided for @orderTrackingTitle.
+  ///
+  /// In ar, this message translates to:
+  /// **'تتبع التوصيل'**
+  String get orderTrackingTitle;
+
+  /// No description provided for @orderTrackingNotStarted.
+  ///
+  /// In ar, this message translates to:
+  /// **'لم يبدأ التوصيل بعد'**
+  String get orderTrackingNotStarted;
+
+  /// No description provided for @orderTrackingNotStartedBody.
+  ///
+  /// In ar, this message translates to:
+  /// **'سيُعيّن مندوب التوصيل ويصلك إشعار فور خروج الطلب.'**
+  String get orderTrackingNotStartedBody;
+
+  /// No description provided for @orderFreshnessTitle.
+  ///
+  /// In ar, this message translates to:
+  /// **'شهادة الطزاجة'**
+  String get orderFreshnessTitle;
+
+  /// No description provided for @orderFreshnessWaiting.
+  ///
+  /// In ar, this message translates to:
+  /// **'بانتظار الذبح والتجهيز'**
+  String get orderFreshnessWaiting;
+
+  /// No description provided for @orderFreshnessWaitingBody.
+  ///
+  /// In ar, this message translates to:
+  /// **'ستظهر هنا صور الذبح ووقته فور رفعها من المتجر.'**
+  String get orderFreshnessWaitingBody;
+
+  /// No description provided for @orderItems.
+  ///
+  /// In ar, this message translates to:
+  /// **'المنتجات'**
+  String get orderItems;
+
+  /// No description provided for @orderPayment.
+  ///
+  /// In ar, this message translates to:
+  /// **'الدفع'**
+  String get orderPayment;
+
+  /// No description provided for @orderPaid.
+  ///
+  /// In ar, this message translates to:
+  /// **'مدفوع'**
+  String get orderPaid;
+
+  /// No description provided for @orderAwaitingPayment.
+  ///
+  /// In ar, this message translates to:
+  /// **'بانتظار الدفع'**
+  String get orderAwaitingPayment;
+
+  /// No description provided for @orderPayNow.
+  ///
+  /// In ar, this message translates to:
+  /// **'إكمال الدفع'**
+  String get orderPayNow;
+
+  /// No description provided for @orderNotes.
+  ///
+  /// In ar, this message translates to:
+  /// **'ملاحظات: {notes}'**
+  String orderNotes(String notes);
+
+  /// No description provided for @stepReceived.
+  ///
+  /// In ar, this message translates to:
+  /// **'تم استلام الطلب'**
+  String get stepReceived;
+
+  /// No description provided for @stepPreparing.
+  ///
+  /// In ar, this message translates to:
+  /// **'الذبح والتجهيز'**
+  String get stepPreparing;
+
+  /// No description provided for @stepReadyDelivery.
+  ///
+  /// In ar, this message translates to:
+  /// **'جاهز للتوصيل'**
+  String get stepReadyDelivery;
+
+  /// No description provided for @stepReadyPickup.
+  ///
+  /// In ar, this message translates to:
+  /// **'جاهز للاستلام'**
+  String get stepReadyPickup;
+
+  /// No description provided for @stepOnTheWay.
+  ///
+  /// In ar, this message translates to:
+  /// **'في الطريق إليك'**
+  String get stepOnTheWay;
+
+  /// No description provided for @stepDelivered.
+  ///
+  /// In ar, this message translates to:
+  /// **'تم التسليم'**
+  String get stepDelivered;
+
+  /// No description provided for @stepCollected.
+  ///
+  /// In ar, this message translates to:
+  /// **'تم الاستلام'**
+  String get stepCollected;
+
+  /// No description provided for @statusPendingPayment.
+  ///
+  /// In ar, this message translates to:
+  /// **'بانتظار الدفع'**
+  String get statusPendingPayment;
+
+  /// No description provided for @statusNew.
+  ///
+  /// In ar, this message translates to:
+  /// **'بانتظار التأكيد'**
+  String get statusNew;
+
+  /// No description provided for @statusConfirmed.
+  ///
+  /// In ar, this message translates to:
+  /// **'مؤكد'**
+  String get statusConfirmed;
+
+  /// No description provided for @statusPreparing.
+  ///
+  /// In ar, this message translates to:
+  /// **'قيد التجهيز'**
+  String get statusPreparing;
+
+  /// No description provided for @statusReady.
+  ///
+  /// In ar, this message translates to:
+  /// **'جاهز'**
+  String get statusReady;
+
+  /// No description provided for @statusOnTheWay.
+  ///
+  /// In ar, this message translates to:
+  /// **'في الطريق'**
+  String get statusOnTheWay;
+
+  /// No description provided for @statusDelivered.
+  ///
+  /// In ar, this message translates to:
+  /// **'تم التسليم'**
+  String get statusDelivered;
+
+  /// No description provided for @statusCollected.
+  ///
+  /// In ar, this message translates to:
+  /// **'تم الاستلام'**
+  String get statusCollected;
+
+  /// No description provided for @statusCancelled.
+  ///
+  /// In ar, this message translates to:
+  /// **'ملغي'**
+  String get statusCancelled;
+
+  /// No description provided for @statusDeliveryFailed.
+  ///
+  /// In ar, this message translates to:
+  /// **'تعذّر التوصيل'**
+  String get statusDeliveryFailed;
+
+  /// No description provided for @statusReturned.
+  ///
+  /// In ar, this message translates to:
+  /// **'مرتجع'**
+  String get statusReturned;
+
+  /// No description provided for @checkoutCallStore.
+  ///
+  /// In ar, this message translates to:
+  /// **'اتصال بالمتجر'**
+  String get checkoutCallStore;
+
+  /// No description provided for @checkoutDirections.
+  ///
+  /// In ar, this message translates to:
+  /// **'الاتجاهات'**
+  String get checkoutDirections;
+
+  /// No description provided for @errDayNotAvailable.
+  ///
+  /// In ar, this message translates to:
+  /// **'هذا اليوم لم يعد متاحًا، اختر يومًا آخر.'**
+  String get errDayNotAvailable;
+
+  /// No description provided for @errFulfilmentRequired.
+  ///
+  /// In ar, this message translates to:
+  /// **'اختر طريقة الاستلام واليوم أولًا.'**
+  String get errFulfilmentRequired;
+
+  /// No description provided for @errCartEmpty.
+  ///
+  /// In ar, this message translates to:
+  /// **'سلتك فارغة.'**
+  String get errCartEmpty;
+
+  /// No description provided for @errWalletInsufficient.
+  ///
+  /// In ar, this message translates to:
+  /// **'رصيد محفظتك لم يعد يكفي، اختر طريقة الدفع من جديد.'**
+  String get errWalletInsufficient;
+
+  /// No description provided for @errOrderNotPayable.
+  ///
+  /// In ar, this message translates to:
+  /// **'هذا الطلب لم يعد بانتظار الدفع.'**
+  String get errOrderNotPayable;
+
+  /// No description provided for @errPaymentInProgress.
+  ///
+  /// In ar, this message translates to:
+  /// **'هناك عملية دفع لم تنتهِ بعد لهذا الطلب.'**
+  String get errPaymentInProgress;
+
+  /// No description provided for @payCheckStatus.
+  ///
+  /// In ar, this message translates to:
+  /// **'تحقق من حالة الدفع'**
+  String get payCheckStatus;
+
+  /// No description provided for @payCancelPage.
+  ///
+  /// In ar, this message translates to:
+  /// **'إلغاء الدفع'**
+  String get payCancelPage;
+
+  /// No description provided for @productSizeNoId.
+  ///
+  /// In ar, this message translates to:
+  /// **'لا يمكن إضافة هذا المقاس إلى السلة حاليًا.'**
+  String get productSizeNoId;
+
+  /// No description provided for @payPageErrorTitle.
+  ///
+  /// In ar, this message translates to:
+  /// **'تعذّر فتح صفحة الدفع'**
+  String get payPageErrorTitle;
+
+  /// No description provided for @payPageErrorBody.
+  ///
+  /// In ar, this message translates to:
+  /// **'تحقق من اتصالك ثم أعد المحاولة.'**
+  String get payPageErrorBody;
+
+  /// No description provided for @payPageClose.
+  ///
+  /// In ar, this message translates to:
+  /// **'إغلاق'**
+  String get payPageClose;
+
+  /// No description provided for @payContinue.
+  ///
+  /// In ar, this message translates to:
+  /// **'متابعة الدفع'**
+  String get payContinue;
 }
 
 class _AppLocalizationsDelegate extends LocalizationsDelegate<AppLocalizations> {

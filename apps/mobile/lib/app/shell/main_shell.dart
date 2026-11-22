@@ -7,8 +7,7 @@ import 'package:jazlah/l10n/app_localizations.dart';
 
 enum MainTab { home, services, orders, account }
 
-/// The four tabs (Figma `Bottom tab bar`, home at the start). Services and orders
-/// are placeholders until their tasks land.
+/// The four tabs (Figma `Bottom tab bar`, home at the start). Services is a placeholder until its task lands.
 class MainShell extends StatelessWidget {
   const MainShell({required this.location, required this.child, super.key});
 
@@ -37,8 +36,7 @@ class MainShell extends StatelessWidget {
   }
 }
 
-/// shortcut: a "coming soon" panel for tabs whose screens belong to later tasks: services OCC-MOB-1 (#124),
-/// orders ORD-MOB-2 (#85).
+/// shortcut: a "coming soon" panel for tabs whose screens belong to later tasks: services OCC-MOB-1 (#124).
 class PlaceholderTab extends StatelessWidget {
   const PlaceholderTab({required this.tab, super.key});
 

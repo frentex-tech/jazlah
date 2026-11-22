@@ -1,7 +1,6 @@
 import 'package:flutter/widgets.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-
 import 'package:jazlah/app/providers.dart';
 import 'package:jazlah/app/shell/main_shell.dart';
 import 'package:jazlah/core/geo/geo_point.dart';
@@ -17,11 +16,18 @@ import 'package:jazlah/features/auth/presentation/otp_screen.dart';
 import 'package:jazlah/features/auth/presentation/phone_screen.dart';
 import 'package:jazlah/features/auth/presentation/session_controller.dart';
 import 'package:jazlah/features/cart/presentation/cart_screen.dart';
+import 'package:jazlah/features/checkout/domain/order.dart';
+import 'package:jazlah/features/checkout/presentation/checkout_screen.dart';
+import 'package:jazlah/features/checkout/presentation/order_placed_screen.dart';
+import 'package:jazlah/features/checkout/presentation/review_screen.dart';
 import 'package:jazlah/features/home/presentation/categories_screen.dart';
 import 'package:jazlah/features/home/presentation/home_screen.dart';
 import 'package:jazlah/features/home/presentation/stores_screen.dart';
 import 'package:jazlah/features/location/presentation/map_picker_screen.dart';
 import 'package:jazlah/features/location/presentation/out_of_coverage_screen.dart';
+import 'package:jazlah/features/orders/presentation/order_detail_screen.dart';
+import 'package:jazlah/features/orders/presentation/orders_screen.dart';
+import 'package:jazlah/features/payment/presentation/payment_screen.dart';
 import 'package:jazlah/features/product/presentation/product_screen.dart';
 import 'package:jazlah/features/profile/presentation/account_screen.dart';
 import 'package:jazlah/features/profile/presentation/settings_screen.dart';
@@ -46,6 +52,10 @@ abstract final class Routes {
   static const notifications = '/notifications';
   static const cart = '/cart';
   static const checkout = '/checkout';
+  static const checkoutReview = '/checkout/review';
+  static const orderPlaced = '/checkout/placed';
+  static String payment(String orderId) => '/checkout/pay/$orderId';
+  static String order(String id) => '/orders/$id';
   static const orders = '/orders';
   static const services = '/services';
   static const account = '/account';
@@ -79,6 +89,7 @@ final routerProvider = Provider<GoRouter>((ref) {
       uri: state.uri,
       session: ref.read(sessionProvider),
       onboardingSeen: ref.read(onboardingSeenProvider),
+      pendingPayment: ref.read(prefsProvider).pendingPayment,
     ),
     routes: [
       GoRoute(path: '/', redirect: (_, _) => Routes.home),
@@ -130,10 +141,23 @@ final routerProvider = Provider<GoRouter>((ref) {
         builder: (context, _) => ComingSoonPage(title: AppLocalizations.of(context).menuNotifications),
       ),
       GoRoute(path: Routes.cart, builder: (_, _) => const CartScreen()),
-      // shortcut: placeholder until SCH-MOB-1 #71 builds the checkout steps.
+      GoRoute(path: Routes.checkout, builder: (_, _) => const CheckoutScreen()),
+      GoRoute(path: Routes.checkoutReview, builder: (_, _) => const ReviewScreen()),
       GoRoute(
-        path: Routes.checkout,
-        builder: (context, _) => ComingSoonPage(title: AppLocalizations.of(context).checkoutTitle),
+        path: Routes.orderPlaced,
+        redirect: (_, state) => state.extra is OrderPlacedArgs ? null : Routes.home,
+        builder: (_, state) => OrderPlacedScreen(args: state.extra! as OrderPlacedArgs),
+      ),
+      // The placement's answer comes as extra; opened again (no extra), the screen reads the order's status.
+      GoRoute(
+        path: '/checkout/pay/:orderId',
+        builder: (_, state) =>
+            PaymentScreen(orderId: state.pathParameters['orderId']!, placed: state.extra as PlacedOrder?),
+      ),
+      // Full screen like Figma (no tab bar).
+      GoRoute(
+        path: '/orders/:id',
+        builder: (_, state) => OrderDetailScreen(id: state.pathParameters['id']!),
       ),
       GoRoute(
         path: '/product/:id',
@@ -155,10 +179,7 @@ final routerProvider = Provider<GoRouter>((ref) {
             path: Routes.services,
             builder: (_, _) => const PlaceholderTab(tab: MainTab.services),
           ),
-          GoRoute(
-            path: Routes.orders,
-            builder: (_, _) => const PlaceholderTab(tab: MainTab.orders),
-          ),
+          GoRoute(path: Routes.orders, builder: (_, _) => const OrdersScreen()),
           GoRoute(path: Routes.account, builder: (_, _) => const AccountScreen()),
           GoRoute(path: Routes.settings, builder: (_, _) => const SettingsScreen()),
           GoRoute(path: Routes.addresses, builder: (_, _) => const AddressesScreen()),
@@ -175,13 +196,21 @@ void openCart(BuildContext context) => context.push(Routes.cart);
 /// Back to the previous page, or home when the page was opened by a link.
 void popOrHome(BuildContext context) => context.canPop() ? context.pop() : context.go(Routes.home);
 
+/// Back to the previous page (the cart, below checkout), or the cart when the page was opened by a link.
+void popOrCart(BuildContext context) => context.canPop() ? context.pop() : context.go(Routes.cart);
+
 /// Only in-app paths may be a redirect target (no `//host` or scheme).
 String? safeNext(String? from) => from != null && from.startsWith('/') && !from.startsWith('//') ? from : null;
 
 /// Where a location goes for a session state; null keeps it. A deep link opened while the session is
 /// loading or signed out travels in `?from=` and is opened once the user may see it.
 @visibleForTesting
-String? authRedirect({required Uri uri, required SessionStatus session, required bool onboardingSeen}) {
+String? authRedirect({
+  required Uri uri,
+  required SessionStatus session,
+  required bool onboardingSeen,
+  String? pendingPayment,
+}) {
   final location = uri.path;
   if (location == Routes.gallery) return null;
   final from = safeNext(uri.queryParameters['from']);
@@ -204,7 +233,13 @@ String? authRedirect({required Uri uri, required SessionStatus session, required
           : location.startsWith('${Routes.account}/')
           ? Routes.account
           : null,
-    SessionStatus.signedIn => inLogin || gate ? (from ?? Routes.home) : null,
+    // A payment left mid-way (the app was killed during 3DS) reopens at start: its screen reads the outcome.
+    SessionStatus.signedIn =>
+      gate && from == null && pendingPayment != null
+          ? Routes.payment(pendingPayment)
+          : inLogin || gate
+          ? (from ?? Routes.home)
+          : null,
     SessionStatus.unknown => null,
   };
 }

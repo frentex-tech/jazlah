@@ -50,11 +50,15 @@ type Props<T> = {
   rowActions?: (row: T) => React.ReactNode;
   /** Page tables of the Sprint 2 frames (131:16744): 64px rows, 24px side padding. */
   tall?: boolean;
+  /** The orders frames (135:47501): 56px rows with the 24px side padding of `tall`. */
+  inset?: boolean;
+  /** Extra classes for a row, e.g. the highlight of a row that just arrived. */
+  rowClassName?: (row: T) => string | undefined;
 };
 
 // Figma DS «Data table» (16:1564): states default, loading, empty, error. Paging, sorting and filters are the caller's.
 export function DataTable<T>({
-  columns, data, status, label, hasPrev, hasNext, onPrev, onNext, loadingRows = 10, sorting = [], onSortingChange, columnVisibility, onRetry, empty, rowActions, tall,
+  columns, data, status, label, hasPrev, hasNext, onPrev, onNext, loadingRows = 10, sorting = [], onSortingChange, columnVisibility, onRetry, empty, rowActions, tall, inset, rowClassName,
 }: Props<T>) {
   const t = useTranslations();
   const table = useReactTable({
@@ -72,7 +76,7 @@ export function DataTable<T>({
   // Fixed Figma widths; the first (name) column takes the spare width, as the Figma rows do (131:16744).
   const width = (i: number, w?: number) => ({ width: w, flexGrow: i === 0 ? 1 : 0 });
   const cell = 'flex shrink-0 items-center px-s8';
-  const row = cn('flex items-center', tall ? 'px-s24' : 'px-s32');
+  const row = cn('flex items-center', tall || inset ? 'px-s24' : 'px-s32');
   const rowH = tall ? 'h-16' : 'h-14';
 
   return (
@@ -118,7 +122,7 @@ export function DataTable<T>({
 
         {status === 'ready' &&
           table.getRowModel().rows.map((r) => (
-            <div key={r.id} role="row" className={cn(row, rowH, 'border-b border-line text-body-m text-ink')}>
+            <div key={r.id} role="row" className={cn(row, rowH, 'border-b border-line text-body-m text-ink', rowClassName?.(r.original))}>
               {r.getVisibleCells().map((c, j) => (
                 <div key={c.id} role="cell" className={cn(cell, rowH)} style={width(j, c.column.columnDef.meta?.width)}>
                   {flexRender(c.column.columnDef.cell, c.getContext())}
@@ -152,7 +156,7 @@ export function DataTable<T>({
 
       {/* No footer under the loading skeleton (no loading frame draws one); an empty page keeps it when it has neighbours. */}
       {status === 'ready' && (data.length > 0 || hasPrev || hasNext) && (
-        <nav className={cn('flex h-14 items-center justify-between', tall ? 'px-s24' : 'px-s32')} aria-label={t('table.paging')}>
+        <nav className={cn('flex h-14 items-center justify-between', tall || inset ? 'px-s24' : 'px-s32')} aria-label={t('table.paging')}>
           <p className="text-body-m text-ink-2">{t('table.showing', { count: data.length })}</p>
           <div className="flex items-center gap-s8">
             <PageButton label={t('table.prev')} disabled={!hasPrev} onClick={onPrev}>

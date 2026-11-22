@@ -1,9 +1,13 @@
+import 'dart:async';
 import 'dart:convert';
 
 import 'package:jazlah/core/errors/api_error.dart';
+import 'package:jazlah/core/geo/geo_point.dart';
 import 'package:jazlah/core/storage/prefs.dart';
 import 'package:jazlah/features/cart/domain/cart.dart';
 import 'package:jazlah/features/catalog/data/mock_catalog_repository.dart';
+import 'package:jazlah/features/catalog/domain/catalog.dart';
+import 'package:jazlah/features/checkout/data/order_repository.dart' show newIdempotencyKey;
 import 'package:jazlah/features/product/data/mock_product_repository.dart';
 import 'package:jazlah/features/product/domain/price.dart';
 import 'package:jazlah/features/product/domain/product.dart';
@@ -19,8 +23,10 @@ abstract interface class CartRepository {
   Future<Cart> applyCoupon(String code);
   Future<Cart> removeCoupon();
 
-  /// The guest cart after sign-in (CRT-API-1 merge rules).
-  Future<CartMergeResult> merge(List<CartItemInput> items);
+  /// The guest cart after sign-in (CRT-API-1 merge rules). [mergeId] is the device cart's stable id, so a merge
+  /// repeated after the app died before clearing the device cart answers the first result (lead review A8).
+  // shortcut: the server ignores the merge id until CRT-API-1 #61 dedupes by it (not-built-yet.md).
+  Future<CartMergeResult> merge(List<CartItemInput> items, {String? mergeId});
 }
 
 /// A product as it is now; null when it no longer exists.
@@ -130,14 +136,20 @@ class LocalCartRepository extends EntriesCart {
 
   List<CartItemInput> get items => [for (final e in entries) e.item];
 
-  Future<void> clear() => _prefs.remove(key);
+  Future<void> clear() async {
+    await _prefs.remove(key);
+    await _prefs.remove(mergeIdKey); // the next device cart is another merge
+  }
 
   @override
   Future<List<CartEntry>> read() async => entries;
 
   @override
-  Future<void> write(List<CartEntry> entries) =>
-      entries.isEmpty ? clear() : _prefs.setString(key, jsonEncode([for (final e in entries) e.toJson()]));
+  Future<void> write(List<CartEntry> entries) async {
+    if (entries.isEmpty) return clear();
+    mergeId; // made with the first line, kept with the cart
+    await _prefs.setString(key, jsonEncode([for (final e in entries) e.toJson()]));
+  }
 
   @override
   Future<Cart> priced(List<CartEntry> entries) async => priceCart(
@@ -154,9 +166,23 @@ class LocalCartRepository extends EntriesCart {
   Future<Cart> removeCoupon() => throw UnsupportedError('coupons need the account cart');
 
   @override
-  Future<CartMergeResult> merge(List<CartItemInput> items) => throw UnsupportedError('merge is a server call');
+  Future<CartMergeResult> merge(List<CartItemInput> items, {String? mergeId}) =>
+      throw UnsupportedError('merge is a server call');
+
+  static const mergeIdKey = 'cart.local.mergeId';
+
+  /// One stable id per device cart, made with its first line and dropped with it; sent with the merge.
+  String get mergeId {
+    final id = _prefs.getString(mergeIdKey);
+    if (id != null) return id;
+    final made = newIdempotencyKey();
+    unawaited(_prefs.setString(mergeIdKey, made));
+    return made;
+  }
 }
 
+/// A mock CRT-API-3 coupon. Dates are flags (the mock has no clock here): [scheduled] = `startsAt` in the future,
+/// [expired] = `endsAt` passed.
 class _Coupon {
   const _Coupon({
     this.percent = 0,
@@ -164,8 +190,13 @@ class _Coupon {
     this.maxDiscount,
     this.minOrder,
     this.vendorIds,
+    this.categoryIds,
     this.expired = false,
+    this.scheduled = false,
+    this.isActive = true,
     this.limitReached = false,
+    this.perUserLimitReached = false,
+    this.firstOrderOnly = false,
   });
 
   final int percent;
@@ -173,11 +204,25 @@ class _Coupon {
   final int? maxDiscount;
   final int? minOrder;
   final Set<String>? vendorIds;
+  final Set<String>? categoryIds;
   final bool expired;
+  final bool scheduled;
+  final bool isActive;
   final bool limitReached;
+  final bool perUserLimitReached;
+  final bool firstOrderOnly;
 
-  int discount(int subtotal) {
-    final d = fixed + subtotal * percent ~/ 100;
+  /// Whether a line counts for the discount (a scoped coupon discounts only the eligible lines, CRT-API-3).
+  bool eligible(String productId) {
+    if (categoryIds == null) return true;
+    final card = MockCatalogRepository.productList.where((p) => p.id == productId).firstOrNull;
+    return card != null && categoryIds!.contains(card.categoryId);
+  }
+
+  /// The discount on the eligible lines' total.
+  // shortcut: percent is floored; the server's rounding is open (lead review A10) until CRT-API-3 #62 decides it.
+  int discount(int eligibleTotal) {
+    final d = fixed + eligibleTotal * percent ~/ 100;
     return maxDiscount == null ? d : d.clamp(0, maxDiscount!);
   }
 }
@@ -186,16 +231,41 @@ class _Coupon {
 /// against the mock catalog ([MockProductRepository]) on every read.
 // shortcut: mock cart until CRT-API-1 #61 and CRT-API-3 #62 land (not-built-yet.md).
 class MockCartRepository extends EntriesCart {
-  MockCartRepository({ProductLookup? products, this.delay = const Duration(milliseconds: 300), this.delivery = false})
+  MockCartRepository({ProductLookup? products, this.delay = const Duration(milliseconds: 300)})
     : super(products ?? catalogProduct, settings: opsSettings);
 
   final Duration delay;
 
-  /// Fulfilment = delivery (chosen at checkout, SCH-MOB-1 #71): shows and counts the delivery fee.
-  bool delivery;
-
   /// Ops settings as SCH-API-1 #68 would serve them.
   static const opsSettings = CartSettings(minOrder: 10000, deliveryFee: 1500);
+
+  /// The pickup point of each store that offers pickup (in the cart response, SCH-API-2 #69).
+  static const pickupPoints = {
+    'v-falah': PickupInfo(
+      name: LocalizedText('مجازر الفلاح · فرع العليا', 'Al Falah Butchers · Olaya branch'),
+      address: LocalizedText('الرياض، حي العليا، طريق التخصصي', 'Riyadh, Al Olaya, Takhassusi Road'),
+      point: GeoPoint(24.6950, 46.6830),
+      opensAt: '09:00',
+      closesAt: '22:00',
+    ),
+    'v-nukhba': PickupInfo(
+      name: LocalizedText('ملحمة النخبة · فرع الياسمين', 'Al Nukhba Butchery · Al Yasmin branch'),
+      address: LocalizedText('الرياض، حي الياسمين، طريق أنس بن مالك', 'Riyadh, Al Yasmin, Anas Ibn Malik Road'),
+      point: GeoPoint(24.8240, 46.6420),
+      opensAt: '10:00',
+      closesAt: '23:00',
+    ),
+    'v-deera': PickupInfo(
+      name: LocalizedText('ذبائح الديرة', 'Al Deera Slaughterhouse'),
+      address: LocalizedText('الرياض، حي الديرة', 'Riyadh, Al Deera'),
+      point: GeoPoint(24.6310, 46.7130),
+      opensAt: '08:00',
+      closesAt: '21:00',
+    ),
+  };
+
+  /// Set by the checkout mock once `PATCH /v1/customer/cart/fulfilment` is valid (SCH-MOB-1 #71).
+  FulfilmentChoice? fulfilment;
 
   /// JAZLA10 is the valid one; each other code answers one coupon error.
   static const _coupons = {
@@ -204,7 +274,15 @@ class MockCartRepository extends EntriesCart {
     'BIG50': _Coupon(fixed: 5000, minOrder: 30000),
     'FALAH15': _Coupon(percent: 15, vendorIds: {'v-falah'}),
     'WELCOME5': _Coupon(fixed: 500, limitReached: true),
+    'BEEF20': _Coupon(percent: 20, categoryIds: {'c-cattle'}), // beef lines only
+    'SOON10': _Coupon(percent: 10, scheduled: true),
+    'OFF10': _Coupon(percent: 10, isActive: false),
+    'ONCE10': _Coupon(percent: 10, perUserLimitReached: true),
+    'FIRST15': _Coupon(percent: 15, firstOrderOnly: true),
   };
+
+  /// For FIRST15: the customer already has an order (first-order coupons then refuse).
+  bool hasOrdered = false;
 
   static Future<ProductDetail?> catalogProduct(String id) async {
     final card = MockCatalogRepository.productList.where((p) => p.id == id).firstOrNull;
@@ -225,15 +303,24 @@ class MockCartRepository extends EntriesCart {
   @override
   Future<void> write(List<CartEntry> entries) async => _entries = entries;
 
+  /// Another store (or none): its coupon and fulfilment no longer apply.
   @override
-  void onCleared() => _coupon = null;
+  void onCleared() {
+    _coupon = null;
+    fulfilment = null;
+  }
 
   String? _check(String code, Cart cart) {
     final c = _coupons[code];
-    if (c == null) return CartError.couponNotFound;
+    // shortcut: an inactive coupon answers not found and a scheduled one not applicable until CRT-API-3 #62
+    // names their codes (lead review A10, not-built-yet.md).
+    if (c == null || !c.isActive) return CartError.couponNotFound;
     if (c.expired) return CartError.couponExpired;
-    if (c.limitReached) return CartError.couponLimitReached;
+    if (c.scheduled) return CartError.couponNotApplicable;
+    if (c.limitReached || c.perUserLimitReached) return CartError.couponLimitReached;
+    if (c.firstOrderOnly && hasOrdered) return CartError.couponNotApplicable;
     if (c.vendorIds != null && !c.vendorIds!.contains(cart.vendorId)) return CartError.couponNotApplicable;
+    if (!cart.lines.any((l) => l.available && c.eligible(l.item.productId))) return CartError.couponNotApplicable;
     if (c.minOrder != null && cart.subtotal < c.minOrder!) return CartError.couponMinOrder;
     return null;
   }
@@ -242,15 +329,22 @@ class MockCartRepository extends EntriesCart {
   @override
   Future<Cart> priced(List<CartEntry> entries) async {
     final found = await products(entries.map((e) => e.item.productId));
+    Cart? plain;
     Cart price(String? code) => priceCart(
       entries,
       found,
       settings: settings,
       couponCode: code,
-      discountOf: code == null ? null : _coupons[code]!.discount,
-      delivery: delivery,
+      // The eligible lines only (every line for an unscoped coupon).
+      discountOf: code == null
+          ? null
+          : (_) => _coupons[code]!.discount(
+              plain!.lines.where((l) => _coupons[code]!.eligible(l.item.productId)).fold(0, (s, l) => s + l.lineTotal),
+            ),
+      fulfilment: fulfilment,
+      pickup: pickupPoints[entries.firstOrNull?.vendorId],
     );
-    final plain = price(null);
+    plain = price(null);
     if (_coupon != null && _check(_coupon!, plain) != null) _coupon = null;
     return _coupon == null ? plain : price(_coupon);
   }
@@ -275,8 +369,18 @@ class MockCartRepository extends EntriesCart {
   /// Same store or an empty account cart: lines merge (same choices sum). Another store: the guest cart
   /// wins and [CartMergeResult.replacedPreviousCart] is set. Lines that cannot be bought are skipped.
   @override
-  Future<CartMergeResult> merge(List<CartItemInput> items) async {
+  Future<CartMergeResult> merge(List<CartItemInput> items, {String? mergeId}) async {
     await _wait();
+    final seen = mergeId == null ? null : _merged[mergeId];
+    if (seen != null) return seen; // the same device cart again: merged once
+    final result = await _merge(items);
+    if (mergeId != null) _merged[mergeId] = result;
+    return result;
+  }
+
+  final _merged = <String, CartMergeResult>{};
+
+  Future<CartMergeResult> _merge(List<CartItemInput> items) async {
     var skipped = 0;
     String? vendor;
     final valid = <(CartItemInput, String, int)>[];
@@ -293,7 +397,7 @@ class MockCartRepository extends EntriesCart {
     var replaced = false;
     if (vendor != null && _entries.isNotEmpty && _entries.first.vendorId != vendor) {
       _entries = [];
-      _coupon = null;
+      onCleared();
       replaced = true;
     }
     for (final (item, vendorId, price) in valid) {

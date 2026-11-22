@@ -244,7 +244,7 @@ void main() {
       await t.tap(desc);
       await t.pump(const Duration(seconds: 1));
       await t.pump(const Duration(seconds: 1));
-      expect(t.widget<JProductCard>(find.byType(JProductCard).first).price, '1655.00');
+      expect(t.widget<JProductCard>(find.byType(JProductCard).first).price, '1,655.00');
     });
 
     testWidgets('no sort control when the API cannot sort', (t) async {
