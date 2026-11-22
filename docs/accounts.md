@@ -1,6 +1,6 @@
 # External accounts
 
-The client owns every account below. Frentex is added as admin or developer, and never as the owner. This file holds no passwords, keys or tokens. Those live in each provider and in the host's secret manager.
+**The production accounts belong to the client.** Frentex is added as admin or developer, and never as the owner. **The staging accounts** (Render, Neon, Upstash, AWS) belong to the Frentex owner until staging moves to the production provider (ADR-0003). This file holds no passwords, keys or tokens. Those live in each provider and in the host's secret manager.
 
 The decision behind the hosting rows is in ADR-0003 (`docs/adr/0003-hosting.md`).
 
@@ -17,9 +17,10 @@ The decision behind the hosting rows is in ADR-0003 (`docs/adr/0003-hosting.md`)
 | Firebase (dev, staging, prod) | Push notifications | Client | Editor | ⏳ Open |
 | Google Maps Platform | Maps and addresses, with billing and restricted keys | Client | Editor | ⏳ Open |
 | Email sender | Transactional email | Client | Admin | ⏳ Open |
-| SMS provider + sender ID | Login codes | Client | Developer | ⏳ Open: a fake provider is used until the keys arrive |
-| Payment gateway | Online payments | Client | Developer (sandbox first) | ⏳ Open: a fake provider is used until the keys arrive |
+| SMS provider + sender ID | Login codes | Client | Developer | ⏳ Open: staging uses the `log` provider until the keys arrive |
+| Payment gateway | Online payments | Client | Developer (sandbox first) | ⏳ Open: a fake or sandbox provider is used behind the payments port (PAY-API-2) until the keys arrive |
 | Delivery company | Shipping (DLV-API-2) | Client | Developer (sandbox first) | ⏳ Open |
 | ZATCA Fatoora portal | E-invoicing onboarding (ADR-0006) | Client, with the VAT number | None (the client gives the OTP) | ⏳ Open |
+| Accountant's check of ADR-0006 | Before the production CSID is requested | Client | — | ⏳ Open |
 
 When the client opens an account, update its row: the status, and who has access.

@@ -17,8 +17,8 @@
 
 | Input | Blocks | Status |
 |---|---|---|
-| Payment gateway choice + sandbox keys | PAY-API-2 (Sprint 3) | Owner's decision 2026-11-22: build against the fake/sandbox provider behind the payments port until the keys arrive |
-| SMS provider + sender ID | ACC-API-1 production SMS | Owner's decision 2026-11-22: the fake/log provider behind the SMS port until the keys arrive |
+| Payment gateway choice + sandbox keys | PAY-API-2 (Sprint 3) | Owner's decision 2026-11-22: build against a fake/sandbox provider behind a payments port (created with PAY-API-2) until the keys arrive |
+| SMS provider + sender ID | ACC-API-1 production SMS | Owner's decision 2026-11-22: the `log` provider behind the SMS port on staging until the keys arrive |
 | Delivery company API docs + sandbox | DLV-API-2 (Sprint 4) | open |
 | Operating numbers (cutoffs, capacity, fees, minimum order, COD cap, deposit %) | none (editable settings) | open |
 | Hosting approval (ADR-0003) and third-party accounts | FND-INF-4, FND-INF-5 | Owner's decision 2026-11-22 (client agrees): ADR-0003 accepted. The accounts are tracked in `docs/accounts.md` |
