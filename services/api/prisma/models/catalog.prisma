@@ -154,11 +154,14 @@ model Product {
   descriptionAr   String?           @map("description_ar")
   /// Nullable: null until a description is written.
   descriptionEn   String?           @map("description_en")
-  /// The product's and its store's names in both languages, normalised for search by the
-  /// SQL function `catalog_search_text`. Written only by the triggers
-  /// `products_search_text_trigger` and `vendors_products_search_text_trigger` (a store
-  /// renamed), never by code (the default only satisfies Prisma's create types).
+  /// The names in both languages, normalised for search by the SQL function
+  /// `catalog_search_text`. Written only by the trigger `products_search_text_trigger`,
+  /// never by code (the default only satisfies Prisma's create types).
   searchText      String            @default("") @map("search_text")
+  /// The store's names in both languages, normalised the same way, after a space (so
+  /// ` word` matches the start of any word). Written only by `products_search_text_trigger`
+  /// and, when the store is renamed, `vendors_products_search_text_trigger`; never by code.
+  storeSearchText String            @default("") @map("store_search_text")
   status          ProductStatus     @default(draft)
   isAvailable     Boolean           @default(true) @map("is_available")
   fulfilment      ProductFulfilment
@@ -204,6 +207,7 @@ model Product {
   @@index([reviewedById])
   /// The text search on the public list (trigram, `contains`).
   @@index([searchText(ops: raw("gin_trgm_ops"))], type: Gin, map: "products_search_text_idx")
+  @@index([storeSearchText(ops: raw("gin_trgm_ops"))], type: Gin, map: "products_store_search_text_idx")
   @@map("products")
 }
 

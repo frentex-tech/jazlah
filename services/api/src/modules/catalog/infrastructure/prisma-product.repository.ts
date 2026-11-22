@@ -302,11 +302,19 @@ export class PrismaProductRepository implements ProductRepository {
     if (words?.length === 0) {
       return { items: [], nextCursor: null };
     }
-    // Every word, anywhere in the product's or its store's names (DECISIONS.md).
+    // Every word: anywhere in the product's names, or at the start of a word of its
+    // store's names (stored after a space; DECISIONS.md).
     const search =
       words === undefined
         ? {}
-        : { AND: words.map((word) => ({ searchText: { contains: word } })) };
+        : {
+            AND: words.map((word) => ({
+              OR: [
+                { searchText: { contains: word } },
+                { storeSearchText: { contains: ` ${word}` } },
+              ],
+            })),
+          };
     return this.summaries(
       {
         ...this.publicWhere(),

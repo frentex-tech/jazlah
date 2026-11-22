@@ -18,7 +18,7 @@ const UUID_EXAMPLE = '7f3a2c1e-0b9d-4e5f-8a6b-1c2d3e4f5a6b';
 /**
  * The public product list's query (FR-CAT-03): a page and optional filters. The price
  * range applies to a product's lowest size price, both ends included; the text search
- * finds every word of the query in the product's or its store's names, in either language.
+ * finds every word of the query in the product's names, or at the start of a store name's word.
  */
 export class ListPublicProductsQueryDto extends PageQueryDto {
   @ApiPropertyOptional({
@@ -26,7 +26,7 @@ export class ListPublicProductsQueryDto extends PageQueryDto {
     maxLength: 100,
     example: 'نعيمي',
     description:
-      "Only products where every word of this text (split on spaces, in any order; words of one letter are ignored) appears in the product's name or its store's name, in Arabic or English; surrounding spaces are removed, then 2 to 100 characters. Matching ignores Arabic diacritics and tatweel, reads أ إ آ ٱ as ا, ى as ي and ة as ه, and ignores English letter case; `%` and `_` match themselves. Combined with every other filter and the paging. No match: an empty page. Left out: no text search.",
+      "Only products where every word of this text (split on spaces, in any order; words of one letter are ignored) appears anywhere in the product's name, or at the start of a word of its store's name, in Arabic or English; surrounding spaces are removed, then 2 to 100 characters. Matching ignores Arabic diacritics and tatweel, reads أ إ آ ٱ as ا, ى as ي and ة as ه, and ignores English letter case; `%` and `_` match themselves. Combined with every other filter and the paging. No match: an empty page. Left out: no text search.",
   })
   @IsOptional()
   @Transform(trimText)

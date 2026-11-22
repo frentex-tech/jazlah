@@ -10799,7 +10799,7 @@ export interface operations {
                 cursor?: string;
                 /** @description How many items to return, 1 to 50. */
                 limit?: number;
-                /** @description Only products where every word of this text (split on spaces, in any order; words of one letter are ignored) appears in the product's name or its store's name, in Arabic or English; surrounding spaces are removed, then 2 to 100 characters. Matching ignores Arabic diacritics and tatweel, reads أ إ آ ٱ as ا, ى as ي and ة as ه, and ignores English letter case; `%` and `_` match themselves. Combined with every other filter and the paging. No match: an empty page. Left out: no text search. */
+                /** @description Only products where every word of this text (split on spaces, in any order; words of one letter are ignored) appears anywhere in the product's name, or at the start of a word of its store's name, in Arabic or English; surrounding spaces are removed, then 2 to 100 characters. Matching ignores Arabic diacritics and tatweel, reads أ إ آ ٱ as ا, ى as ي and ة as ه, and ignores English letter case; `%` and `_` match themselves. Combined with every other filter and the paging. No match: an empty page. Left out: no text search. */
                 q?: string;
                 /** @description Only products of this category (its id, a UUID, from GET /v1/public/categories). Left out: every category. */
                 categoryId?: string;

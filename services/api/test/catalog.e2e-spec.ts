@@ -1466,11 +1466,26 @@ describe('Catalog (e2e)', () => {
         expect(await search(ctx.vendorId, 'ٱلحري')).toEqual([plain]);
       });
 
+      it('matches a store word only from its start: «لحم» is not every «ملحمة» product', async () => {
+        const ctx = await setUp('search-store-start');
+        const liver = await named(ctx, 'كبدة', 'Liver');
+        const meat = await named(ctx, 'لحم مفروم', 'Minced meat');
+
+        // The store «ملحمة النخبة» contains «لحم» inside its first word only.
+        expect(await search(ctx.vendorId, 'لحم')).toEqual([meat]);
+        expect(await search(ctx.vendorId, 'خبه')).toEqual([]);
+        expect((await search(ctx.vendorId, 'ملحمة')).sort()).toEqual(
+          [liver, meat].sort(),
+        );
+        expect(await search(ctx.vendorId, 'butch liver')).toEqual([liver]);
+      });
+
       it('matches the store name, and follows a renamed store', async () => {
         const ctx = await setUp('search-store');
         const id = await named(ctx, 'نعيمي', 'Naimi lamb');
 
         // The journey's store is «ملحمة النخبة» / "Al Nokhba Butchery".
+        expect(await search(ctx.vendorId, 'النخبة')).toEqual([id]);
         expect(await search(ctx.vendorId, 'النخبة نعيمي')).toEqual([id]);
         expect(await search(ctx.vendorId, 'nokhba')).toEqual([id]);
 

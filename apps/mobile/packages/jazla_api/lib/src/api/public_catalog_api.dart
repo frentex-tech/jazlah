@@ -166,7 +166,7 @@ _responseData = rawData == null ? null : deserialize<PublicCategoryListResponseD
   /// Parameters:
   /// * [cursor] - The `nextCursor` of the previous page; omit it for the first page. Opaque: never build or change it.
   /// * [limit] - How many items to return, 1 to 50.
-  /// * [q] - Only products where every word of this text (split on spaces, in any order; words of one letter are ignored) appears in the product's name or its store's name, in Arabic or English; surrounding spaces are removed, then 2 to 100 characters. Matching ignores Arabic diacritics and tatweel, reads أ إ آ ٱ as ا, ى as ي and ة as ه, and ignores English letter case; `%` and `_` match themselves. Combined with every other filter and the paging. No match: an empty page. Left out: no text search.
+  /// * [q] - Only products where every word of this text (split on spaces, in any order; words of one letter are ignored) appears anywhere in the product's name, or at the start of a word of its store's name, in Arabic or English; surrounding spaces are removed, then 2 to 100 characters. Matching ignores Arabic diacritics and tatweel, reads أ إ آ ٱ as ا, ى as ي and ة as ه, and ignores English letter case; `%` and `_` match themselves. Combined with every other filter and the paging. No match: an empty page. Left out: no text search.
   /// * [categoryId] - Only products of this category (its id, a UUID, from GET /v1/public/categories). Left out: every category.
   /// * [vendorId] - Only products of this vendor (its id, a UUID, from the public vendor list). Left out: every vendor.
   /// * [meatTypeId] - Only products of this meat type (its id, a UUID). Left out: every meat type.
