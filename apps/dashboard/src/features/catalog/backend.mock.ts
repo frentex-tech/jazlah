@@ -76,8 +76,8 @@ function seed(): MockState {
       id: sid('b1', i + 1), vendorId: v.id, status, isAvailable, fulfilment: 'both', name: named(ar, en), description: { ar: null, en: null },
       category: { id: cat(c).id, name: cat(c).name }, meatType: null, images: [{ mediaId: imageId, url: PHOTO[i % 2]! }],
       sizes: [
-        { id: sid('f1', i * 10 + 1), approxWeightGrams: 500, priceHalalas: price, tag: named('وسط', 'Medium') },
-        { id: sid('f1', i * 10 + 2), approxWeightGrams: 1000, priceHalalas: price * 2 - 800, tag: named('كبير', 'Large') },
+        { id: sid('f1', i * 10 + 1), approxWeightGrams: 500, priceHalalas: price, tag: named('وسط', 'Medium'), isAvailable: true },
+        { id: sid('f1', i * 10 + 2), approxWeightGrams: 1000, priceHalalas: price * 2 - 800, tag: named('كبير', 'Large'), isAvailable: true },
       ],
       cuttings: [0, 1].map((k) => ({ cuttingStyleId: cut(k).id, name: cut(k).name, extraPriceHalalas: 0 })),
       packagings: [{ packaging: 'vacuum', extraPriceHalalas: 0 }, { packaging: 'trays', extraPriceHalalas: 300 }],
@@ -159,7 +159,7 @@ export function contentOf(body: ProductContent, live: Product | null): ApiResult
     const old = s.id ? live?.sizes.find((x) => x.id === s.id) : null;
     if (s.id && !old) return invalid(`sizes.${i}.id`, 'isSizeOfProduct');
     if (old && old.priceHalalas !== s.priceHalalas) return invalid(`sizes.${i}.priceHalalas`, 'isLivePrice');
-    sizes.push({ id: s.id ?? crypto.randomUUID(), approxWeightGrams: s.approxWeightGrams, priceHalalas: s.priceHalalas, tag: s.tag ?? null });
+    sizes.push({ id: s.id ?? crypto.randomUUID(), approxWeightGrams: s.approxWeightGrams, priceHalalas: s.priceHalalas, tag: s.tag ?? null, isAvailable: true });
   }
   const cuttings: Product['cuttings'] = [];
   for (const [i, c] of body.cuttings.entries()) {

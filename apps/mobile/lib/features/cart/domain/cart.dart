@@ -6,6 +6,7 @@ import 'dart:math';
 
 import 'package:flutter/foundation.dart';
 
+import 'package:jazlah/core/geo/geo_point.dart';
 import 'package:jazlah/features/catalog/domain/catalog.dart';
 import 'package:jazlah/features/product/domain/price.dart';
 import 'package:jazlah/features/product/domain/product.dart';
@@ -189,6 +190,46 @@ class CartSettings {
   final int deliveryFee;
 }
 
+/// How and when the order is received (`PATCH /v1/customer/cart/fulfilment`, SCH-API-2). [date] is a Riyadh
+/// `yyyy-MM-dd` as the server sends it; [addressId] only for delivery.
+@immutable
+class FulfilmentChoice {
+  const FulfilmentChoice({required this.method, required this.date, this.addressId});
+
+  /// Delivery or pickup ([Fulfilment.both] is a product flag, never a choice).
+  final Fulfilment method;
+  final String date;
+  final String? addressId;
+}
+
+/// Where a pickup order is collected (SCH-API-2: vendor address, map point, hours, instructions). [opensAt] and
+/// [closesAt] are Riyadh `HH:mm`.
+@immutable
+class PickupInfo {
+  const PickupInfo({
+    required this.name,
+    required this.address,
+    required this.point,
+    required this.opensAt,
+    required this.closesAt,
+    this.instructions,
+    this.phone,
+  });
+
+  final LocalizedText name;
+  final LocalizedText address;
+  final GeoPoint point;
+  // shortcut: one open–close pair for every day; the chosen date's hours (the vendor's weekly hours) come with
+  // SCH-API-2 #69 (lead review A12, not-built-yet.md).
+  final String opensAt;
+  final String closesAt;
+  final LocalizedText? instructions;
+
+  /// The store's phone; null until the pickup point carries one.
+  // shortcut: no phone in the pickup point yet, so «اتصال بالمتجر» stays hidden until SCH-API-2 #69 sends it.
+  final String? phone;
+}
+
 @immutable
 class Cart {
   const Cart({
@@ -205,7 +246,8 @@ class Cart {
     this.couponCode,
     this.minOrder,
     this.minOrderRemaining,
-    this.delivery = false,
+    this.fulfilment,
+    this.pickup,
     this.onDevice = false,
   });
 
@@ -236,8 +278,14 @@ class Cart {
   final bool canCheckout;
   final List<CartIssue> issues;
 
+  /// Chosen at checkout step 1 (SCH-MOB-1 #71); null until then.
+  final FulfilmentChoice? fulfilment;
+
+  /// The store's pickup point; null when it does not offer pickup (or the cart is empty).
+  final PickupInfo? pickup;
+
   /// Fulfilment is delivery: only then is the delivery fee shown (and counted).
-  final bool delivery;
+  bool get delivery => fulfilment?.method == Fulfilment.delivery;
 
   /// Kept on this device (guest, or no cart API): no coupons, merged into the account cart on sign-in.
   final bool onDevice;
@@ -247,6 +295,9 @@ class Cart {
   CartIssue? issueOf(String lineId) => issues.where((i) => i.lineId == lineId).firstOrNull;
 }
 
+/// The lines, issues and totals of a cart: for the device cart and the mocks only. The API cart repository maps
+/// the server's totals (`vatIncluded` and the rest) from the answer and never recomputes them here.
+///
 /// The lines, issues and totals of a cart. [products] holds each product as it is now (null: gone);
 /// [discountOf] turns the subtotal into the coupon's discount.
 Cart priceCart(
@@ -255,9 +306,11 @@ Cart priceCart(
   CartSettings? settings,
   String? couponCode,
   int Function(int subtotal)? discountOf,
-  bool delivery = false,
+  FulfilmentChoice? fulfilment,
+  PickupInfo? pickup,
   bool onDevice = false,
 }) {
+  final delivery = fulfilment?.method == Fulfilment.delivery;
   final lines = <CartLine>[];
   final issues = <CartIssue>[];
   LocalizedText? vendorName;
@@ -313,7 +366,8 @@ Cart priceCart(
     minOrderRemaining: remaining,
     canCheckout: lines.isNotEmpty && issues.isEmpty && remaining == 0,
     issues: issues,
-    delivery: delivery,
+    fulfilment: fulfilment,
+    pickup: pickup,
     onDevice: onDevice,
   );
 }

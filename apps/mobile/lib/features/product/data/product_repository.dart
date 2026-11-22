@@ -42,20 +42,17 @@ class ApiProductRepository implements ProductRepository {
       },
       images: [for (final i in d.images) ?i.url],
       sizes: [
-        for (final (i, s) in d.sizes.indexed)
+        for (final s in d.sizes)
           ProductSize(
-            // shortcut: size id is nullable in the contract, positional id until CRT-API-1 (#61) needs a real one, API gap
-            id: s.id ?? 'size-$i',
+            id: s.id,
             grams: s.approxWeightGrams.toInt(),
             priceHalalas: s.priceHalalas.toInt(),
             tag: s.tag == null ? null : _text(s.tag!),
           ),
       ],
       cuts: [
-        // A cut without a name is skipped (never show its id), as an unknown packaging is.
         for (final c in d.cuttings)
-          if (c.name case final name?)
-            ProductOption(id: c.cuttingStyleId, name: _text(name), extraHalalas: c.extraPriceHalalas.toInt()),
+          ProductOption(id: c.cuttingStyleId, name: _text(c.name), extraHalalas: c.extraPriceHalalas.toInt()),
       ],
       packagings: [
         for (final p in d.packagings)

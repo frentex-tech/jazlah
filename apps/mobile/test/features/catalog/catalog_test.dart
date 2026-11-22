@@ -99,7 +99,11 @@ void main() {
     expect(formatHalalas(8900), '89.00');
     expect(formatHalalas(5), '0.05');
     expect(formatHalalas(-1250), '-12.50');
-    expect(formatHalalas(165000), '1650.00');
+    expect(formatHalalas(118000), '1,180.00');
+    expect(formatHalalas(99999), '999.99');
+    expect(formatHalalas(123456789), '1,234,567.89');
+    expect(formatHalalas(-165000), '-1,650.00');
+    expect(formatHalalas(165000), '1,650.00');
     expect(formatMinutes(l10n, 23 * 60), '11:00 م');
     expect(formatMinutes(l10n, 8 * 60), '8:00 ص');
     expect(formatMinutes(l10n, 12 * 60 + 30), '12:30 م');

@@ -619,7 +619,7 @@
   "productErrorTitle": "تعذّر تحميل المنتج",
   "productErrorBody": "حدث خطأ أثناء جلب تفاصيل المنتج. حاول مرة أخرى.",
   "productAdded": "أُضيفت القطعة إلى السلة",
-  "checkoutTitle": "الدفع والمراجعة",
+  "checkoutTitle": "إتمام الطلب",
   "cartReplaceTitle": "استبدال السلة؟",
   "cartReplaceBody": "سلتك فيها منتجات من {vendor}. السلة تجمع متجرًا واحدًا، فإضافة هذا المنتج تفرّغها وتبدأ سلة جديدة.",
   "@cartReplaceBody": {
@@ -741,5 +741,387 @@
         "type": "String"
       }
     }
-  }
+  },
+  "checkoutStep": "الخطوة {step} من {total}: {name}",
+  "@checkoutStep": {
+    "placeholders": {
+      "step": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      },
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "checkoutStepFulfilment": "الاستلام واليوم",
+  "checkoutDelivery": "توصيل للعنوان",
+  "checkoutPickup": "استلام من المتجر",
+  "checkoutDeliveryAddress": "عنوان التوصيل",
+  "checkoutOutOfCoverage": "خارج نطاق التغطية",
+  "checkoutNoCoveredTitle": "لا يوجد عنوان داخل التغطية",
+  "checkoutNoCoveredBody": "أضف عنوانًا داخل نطاق التغطية لنوصّل لك، أو اختر الاستلام من المتجر.",
+  "checkoutPickupPlace": "موقع الاستلام",
+  "checkoutPickupHours": "الاستلام من {open} إلى {close}",
+  "@checkoutPickupHours": {
+    "placeholders": {
+      "open": {
+        "type": "String"
+      },
+      "close": {
+        "type": "String"
+      }
+    }
+  },
+  "checkoutDeliveryDay": "يوم التوصيل",
+  "checkoutPickupDay": "يوم الاستلام",
+  "checkoutCalendar": "التقويم",
+  "checkoutDeliveryWindow": "يصل بين {start} و {end}",
+  "@checkoutDeliveryWindow": {
+    "placeholders": {
+      "start": {
+        "type": "String"
+      },
+      "end": {
+        "type": "String"
+      }
+    }
+  },
+  "checkoutPickupWindow": "جاهز للاستلام بين {start} و {end}",
+  "@checkoutPickupWindow": {
+    "placeholders": {
+      "start": {
+        "type": "String"
+      },
+      "end": {
+        "type": "String"
+      }
+    }
+  },
+  "checkoutRiyadhTime": "{date} · بتوقيت الرياض",
+  "@checkoutRiyadhTime": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "checkoutPickAnother": "{date} · اختر يومًا آخر متاحًا",
+  "@checkoutPickAnother": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "checkoutDaysLegend": "دليل الأيام",
+  "checkoutDayClosed": "مغلق: عطلة المتجر",
+  "checkoutDayFull": "مكتمل: لا توجد سعة",
+  "checkoutDayPastCutoff": "انتهى وقت الطلب لهذا اليوم",
+  "checkoutDayVendorClosed": "مغلق: المتجر لا يعمل في هذا اليوم",
+  "checkoutDayOutsideHorizon": "خارج فترة الحجز المتاحة",
+  "checkoutDayUnavailable": "غير متاح",
+  "checkoutDaysErrorTitle": "تعذّر تحميل الأيام المتاحة",
+  "checkoutDaysErrorBody": "تحقق من الاتصال ثم أعد المحاولة.",
+  "checkoutPausedTitle": "الطلبات متوقفة مؤقتًا، سنعود قريبًا",
+  "checkoutChooseDeliveryDay": "اختر يوم التوصيل",
+  "checkoutChoosePickupDay": "اختر يوم الاستلام",
+  "checkoutConfirmDay": "تأكيد اليوم",
+  "checkoutPreviousMonth": "الشهر السابق",
+  "checkoutNextMonth": "الشهر التالي",
+  "clockAm": "صباحًا",
+  "clockPm": "مساءً",
+  "clockAmShort": "ص",
+  "clockPmShort": "م",
+  "errOrderingPaused": "الطلبات متوقفة مؤقتًا، حاول لاحقًا.",
+  "errFulfilmentNotSupported": "بعض منتجات سلتك لا تتوفر بطريقة الاستلام هذه.",
+  "errAddressNotCovered": "هذا العنوان خارج نطاق التوصيل.",
+  "errDayFull": "اكتمل هذا اليوم، اختر يومًا آخر.",
+  "reviewTitle": "الدفع والمراجعة",
+  "reviewItemsFrom": "{count, plural, =1{منتج واحد من {vendor}} =2{منتجان من {vendor}} few{{count} منتجات من {vendor}} many{{count} منتجًا من {vendor}} other{{count} منتج من {vendor}}}",
+  "@reviewItemsFrom": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      },
+      "vendor": {
+        "type": "String"
+      }
+    }
+  },
+  "reviewDeliveryTo": "توصيل إلى {place}",
+  "@reviewDeliveryTo": {
+    "placeholders": {
+      "place": {
+        "type": "String"
+      }
+    }
+  },
+  "reviewPickupFrom": "استلام من {place}",
+  "@reviewPickupFrom": {
+    "placeholders": {
+      "place": {
+        "type": "String"
+      }
+    }
+  },
+  "reviewPaymentMethod": "طريقة الدفع",
+  "reviewTerms": "بتأكيد الطلب فأنت توافق على الشروط والأحكام وسياسة الإلغاء.",
+  "reviewConfirm": "تأكيد الطلب",
+  "payMadaCard": "بطاقة مدى",
+  "payMada": "مدى",
+  "payCard": "بطاقة ائتمانية",
+  "payApplePay": "Apple Pay",
+  "payWallet": "محفظة جزلة",
+  "payCod": "الدفع عند الاستلام",
+  "payEndingIn": "تنتهي بـ {last4}",
+  "@payEndingIn": {
+    "placeholders": {
+      "last4": {
+        "type": "String"
+      }
+    }
+  },
+  "payReasonWalletInsufficient": "الرصيد غير كافٍ",
+  "payReasonUnavailable": "غير متاح لهذا الطلب",
+  "errPriceChanged": "تغيّرت أسعار بعض المنتجات، راجع سلتك.",
+  "errItemUnavailable": "بعض المنتجات لم تعد متوفرة، راجع سلتك.",
+  "errMinOrderNotMet": "سلتك أقل من الحد الأدنى للطلب.",
+  "placedTitle": "تم استلام طلبك",
+  "placedNumber": "رقم الطلب {number}",
+  "@placedNumber": {
+    "placeholders": {
+      "number": {
+        "type": "String"
+      }
+    }
+  },
+  "placedFresh": "ذبح وتجهيز طازج صباح {weekday}",
+  "@placedFresh": {
+    "placeholders": {
+      "weekday": {
+        "type": "String"
+      }
+    }
+  },
+  "placedDateVendor": "{date} · بإشراف {vendor}",
+  "@placedDateVendor": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      },
+      "vendor": {
+        "type": "String"
+      }
+    }
+  },
+  "placedDeliveryWindow": "توصيل بين {start} و{end}",
+  "@placedDeliveryWindow": {
+    "placeholders": {
+      "start": {
+        "type": "String"
+      },
+      "end": {
+        "type": "String"
+      }
+    }
+  },
+  "placedPickupWindow": "استلام بين {start} و{end}",
+  "@placedPickupWindow": {
+    "placeholders": {
+      "start": {
+        "type": "String"
+      },
+      "end": {
+        "type": "String"
+      }
+    }
+  },
+  "placedTotal": "{amount} ر.س شامل الضريبة",
+  "@placedTotal": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "placedTrack": "تتبع الطلب",
+  "placedHome": "العودة للرئيسية",
+  "payFakeTitle": "بوابة الدفع التجريبية",
+  "payFakeBody": "تحقق 3DS لمبلغ {amount} ر.س. هذه صفحة المزوّد التجريبي.",
+  "@payFakeBody": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "payFakeApprove": "موافقة",
+  "payFakeDecline": "رفض",
+  "payUseWallet": "استخدام رصيد المحفظة · {amount} ر.س",
+  "@payUseWallet": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "payRemaining": "المتبقي {amount} ر.س بطريقة الدفع المختارة",
+  "@payRemaining": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "payChooseMethod": "اختر طريقة دفع للمتابعة",
+  "payDeclined": "تم رفض الدفع من البنك، جرّب بطاقة أخرى أو وسيلة دفع مختلفة",
+  "payNotCompleted": "لم يكتمل الدفع، أعد المحاولة أو اختر وسيلة أخرى",
+  "payExpired": "أُلغي الطلب لانتهاء مهلة الدفع (15 دقيقة).",
+  "payWalletPart": "يُدفع {amount} ر.س من رصيد المحفظة.",
+  "@payWalletPart": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "payWalletRestored": "أُعيد {amount} ر.س إلى محفظتك.",
+  "@payWalletRestored": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "placedUnderReview": "سنراجع طلبك ونؤكده قريبًا.",
+  "placedConfirmed": "تم تأكيد طلبك.",
+  "payStillProcessing": "لا يزال الدفع قيد المعالجة، سنحدّث حالة طلبك فور وصول النتيجة.",
+  "payOrderGone": "هذا الطلب لم يعد متاحًا.",
+  "ordersAll": "الكل",
+  "ordersCurrent": "الجارية",
+  "ordersPast": "المكتملة",
+  "ordersNumber": "طلب {number}",
+  "@ordersNumber": {
+    "placeholders": {
+      "number": {
+        "type": "String"
+      }
+    }
+  },
+  "ordersToday": "اليوم",
+  "ordersTodayAt": "اليوم، {time}",
+  "@ordersTodayAt": {
+    "placeholders": {
+      "time": {
+        "type": "String"
+      }
+    }
+  },
+  "ordersEmptyTitle": "لا توجد طلبات بعد",
+  "ordersEmptyBody": "طلباتك السابقة والحالية ستظهر هنا.",
+  "ordersEmptyAction": "ابدأ أول طلب",
+  "ordersErrorTitle": "تعذّر تحميل الطلبات",
+  "ordersErrorBody": "تحقق من اتصالك ثم حاول مرة أخرى.",
+  "ordersSignInTitle": "سجّل دخولك لعرض الطلبات",
+  "ordersSignInBody": "طلباتك محفوظة في حسابك. سجّل الدخول لمتابعتها.",
+  "orderDetailTitle": "تفاصيل الطلب",
+  "orderErrorTitle": "تعذّر تحميل الطلب",
+  "orderDeniedTitle": "لا يمكنك عرض هذا الطلب",
+  "orderDeniedBody": "هذا الطلب مرتبط بحساب آخر.",
+  "orderLineDelivery": "{vendor} · توصيل {day} بين {start} و{end} إلى {place}",
+  "@orderLineDelivery": {
+    "placeholders": {
+      "vendor": {
+        "type": "String"
+      },
+      "day": {
+        "type": "String"
+      },
+      "start": {
+        "type": "String"
+      },
+      "end": {
+        "type": "String"
+      },
+      "place": {
+        "type": "String"
+      }
+    }
+  },
+  "orderLinePickup": "{vendor} · استلام {day} بين {start} و{end} من {place}",
+  "@orderLinePickup": {
+    "placeholders": {
+      "vendor": {
+        "type": "String"
+      },
+      "day": {
+        "type": "String"
+      },
+      "start": {
+        "type": "String"
+      },
+      "end": {
+        "type": "String"
+      },
+      "place": {
+        "type": "String"
+      }
+    }
+  },
+  "orderStatusTitle": "حالة الطلب",
+  "orderTrackingTitle": "تتبع التوصيل",
+  "orderTrackingNotStarted": "لم يبدأ التوصيل بعد",
+  "orderTrackingNotStartedBody": "سيُعيّن مندوب التوصيل ويصلك إشعار فور خروج الطلب.",
+  "orderFreshnessTitle": "شهادة الطزاجة",
+  "orderFreshnessWaiting": "بانتظار الذبح والتجهيز",
+  "orderFreshnessWaitingBody": "ستظهر هنا صور الذبح ووقته فور رفعها من المتجر.",
+  "orderItems": "المنتجات",
+  "orderPayment": "الدفع",
+  "orderPaid": "مدفوع",
+  "orderAwaitingPayment": "بانتظار الدفع",
+  "orderPayNow": "إكمال الدفع",
+  "orderNotes": "ملاحظات: {notes}",
+  "@orderNotes": {
+    "placeholders": {
+      "notes": {
+        "type": "String"
+      }
+    }
+  },
+  "stepReceived": "تم استلام الطلب",
+  "stepPreparing": "الذبح والتجهيز",
+  "stepReadyDelivery": "جاهز للتوصيل",
+  "stepReadyPickup": "جاهز للاستلام",
+  "stepOnTheWay": "في الطريق إليك",
+  "stepDelivered": "تم التسليم",
+  "stepCollected": "تم الاستلام",
+  "statusPendingPayment": "بانتظار الدفع",
+  "statusNew": "بانتظار التأكيد",
+  "statusConfirmed": "مؤكد",
+  "statusPreparing": "قيد التجهيز",
+  "statusReady": "جاهز",
+  "statusOnTheWay": "في الطريق",
+  "statusDelivered": "تم التسليم",
+  "statusCollected": "تم الاستلام",
+  "statusCancelled": "ملغي",
+  "statusDeliveryFailed": "تعذّر التوصيل",
+  "statusReturned": "مرتجع",
+  "checkoutCallStore": "اتصال بالمتجر",
+  "checkoutDirections": "الاتجاهات",
+  "errDayNotAvailable": "هذا اليوم لم يعد متاحًا، اختر يومًا آخر.",
+  "errFulfilmentRequired": "اختر طريقة الاستلام واليوم أولًا.",
+  "errCartEmpty": "سلتك فارغة.",
+  "errWalletInsufficient": "رصيد محفظتك لم يعد يكفي، اختر طريقة الدفع من جديد.",
+  "errOrderNotPayable": "هذا الطلب لم يعد بانتظار الدفع.",
+  "errPaymentInProgress": "هناك عملية دفع لم تنتهِ بعد لهذا الطلب.",
+  "payCheckStatus": "تحقق من حالة الدفع",
+  "payCancelPage": "إلغاء الدفع",
+  "productSizeNoId": "لا يمكن إضافة هذا المقاس إلى السلة حاليًا.",
+  "payPageErrorTitle": "تعذّر فتح صفحة الدفع",
+  "payPageErrorBody": "تحقق من اتصالك ثم أعد المحاولة.",
+  "payPageClose": "إغلاق",
+  "payContinue": "متابعة الدفع"
 }

@@ -1,6 +1,8 @@
-/** Halalas (integer, VAT included) as the frames show them: «89.00 ر.س» / «SAR 89.00». */
+/** Halalas (integer, VAT included) as the frames show them: «1,180.00 ر.س» / «SAR 1,180.00». */
+// Latin digits with a comma for thousands in both languages, as every frame writes amounts («1,180.00 ر.س»).
+const amount = new Intl.NumberFormat('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
 export const sar = (halalas: number, locale: string) => {
-  const v = (halalas / 100).toFixed(2);
+  const v = amount.format(halalas / 100);
   return locale === 'en' ? `SAR ${v}` : `${v} ر.س`;
 };
 

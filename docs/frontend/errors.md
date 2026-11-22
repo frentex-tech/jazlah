@@ -67,6 +67,7 @@ Status is the HTTP status the code always comes with. The English message is the
 | `UNAUTHORIZED` | 401 | Authentication is required. | **Sign in again**: there was no token, or it is not valid. Do not refresh. |
 | `ACCESS_TOKEN_EXPIRED` | 401 | The access token has expired. Please refresh it. | **Refresh token**, then repeat the request. This is the only 401 that refreshes. |
 | `FORBIDDEN` | 403 | You do not have permission to perform this action. | The token is for another audience, or the user's access was removed. **Sign in again** for this app. |
+| `PERMISSION_DENIED` | 403 | Your account does not have the permission for this action. | **Show** "not allowed" and keep the user signed in: the session is fine, this staff user lacks one permission (`details.permission`). Never sign out on it. Admin permissions come with ADM-API-1 (#111); no route returns it yet. |
 | `REFRESH_TOKEN_INVALID` | 401 | Your session has ended. Please sign in again. | **Sign in again**: the session ended (signed out, expired, deleted account, or the refresh token was used twice). |
 | `OTP_INVALID` | 422 | The verification code is incorrect. | **Show**, clear the code field and let the user type again. The attempt was counted. |
 | `OTP_EXPIRED` | 410 | The verification code is no longer valid. Please request a new one. | **Show**, and offer "send a new code". The code expired, was used, or ran out of attempts. |

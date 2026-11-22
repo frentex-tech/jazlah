@@ -9599,6 +9599,7 @@
           "METHOD_NOT_ALLOWED",
           "UNAUTHORIZED",
           "FORBIDDEN",
+          "PERMISSION_DENIED",
           "CONFLICT",
           "PAYLOAD_TOO_LARGE",
           "UNSUPPORTED_MEDIA_TYPE",

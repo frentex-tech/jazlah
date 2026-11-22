@@ -25,7 +25,7 @@ class _Api implements HttpClientAdapter {
 }
 
 void main() {
-  test('a cut without a name is skipped, never shown by its id', () async {
+  test('maps every cut and keeps the size id', () async {
     final api = JazlaApi(dio: Dio(BaseOptions(baseUrl: 'http://api.test')))
       ..dio.httpClientAdapter = _Api({
         'id': 'p1',
@@ -43,7 +43,7 @@ void main() {
         'fulfilment': 'both',
         'images': <Object>[],
         'sizes': [
-          {'id': 's1', 'approxWeightGrams': 1000, 'priceHalalas': 8900, 'tag': null},
+          {'id': 's1', 'approxWeightGrams': 1000, 'priceHalalas': 8900, 'tag': null, 'isAvailable': true},
         ],
         'cuttings': [
           {
@@ -51,13 +51,21 @@ void main() {
             'name': {'ar': 'شرائح', 'en': 'Slices'},
             'extraPriceHalalas': 0,
           },
-          {'cuttingStyleId': 'cut-2', 'name': null, 'extraPriceHalalas': 200},
+          {
+            'cuttingStyleId': 'cut-2',
+            'name': {'ar': 'مكعبات', 'en': 'Cubes'},
+            'extraPriceHalalas': 200,
+          },
         ],
         'packagings': <Object>[],
         'exclusions': <Object>[],
         'minPriceHalalas': 8900,
+        'isAvailable': true,
+        'defaultSizeId': 's1',
+        'incompatiblePairs': <Object>[],
       });
     final p = await ApiProductRepository(api).product('p1');
-    expect(p.cuts.map((c) => c.id), ['cut-1']);
+    expect(p.cuts.map((c) => c.id), ['cut-1', 'cut-2']);
+    expect(p.sizes.single.id, 's1');
   });
 }

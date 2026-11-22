@@ -9,8 +9,8 @@
 #              non-root `node` user
 #
 # The CMD never migrates. On Render's free plan (no pre-deploy command) the service's
-# dockerCommand in render.yaml runs `prisma migrate deploy`, then the seed when
-# SEED_ON_START=true, then `node dist/main`; a paid plan moves the migrations to the
+# Docker Command is `sh scripts/render-start.sh`: `prisma migrate deploy`, then the seed
+# when SEED_ON_START=true, then `node dist/main`; a paid plan moves the migrations to the
 # pre-deploy command, once per deploy before the new version starts.
 
 # The major version of .nvmrc (CI reads that file; keep the two in step).
@@ -60,6 +60,7 @@ COPY --chown=node:node package.json prisma.config.ts ./
 COPY --chown=node:node prisma/schema.prisma ./prisma/schema.prisma
 COPY --chown=node:node prisma/models ./prisma/models
 COPY --chown=node:node prisma/migrations ./prisma/migrations
+COPY --chown=node:node scripts/render-start.sh ./scripts/render-start.sh
 USER node
 EXPOSE 3000
 # Liveness only (no dependency checked): /v1/health/ready is for the load balancer.
