@@ -1437,6 +1437,53 @@ describe('Catalog (e2e)', () => {
         expect(await search(ctx.vendorId, 'ادم اسلام')).toEqual([lamb]);
       });
 
+      it('finds «نعيمي» spelled «نعيمى», and "naimi" in the English name', async () => {
+        const ctx = await setUp('search-naimi');
+        const naimi = await named(ctx, 'نعيمي', 'Naimi lamb');
+        await named(ctx, 'حري', 'Harri lamb');
+
+        expect(await search(ctx.vendorId, 'نعيمي')).toEqual([naimi]);
+        expect(await search(ctx.vendorId, 'نعيمى')).toEqual([naimi]);
+        expect(await search(ctx.vendorId, 'naimi')).toEqual([naimi]);
+      });
+
+      it('needs every word, in any order', async () => {
+        const ctx = await setUp('search-words');
+        const local = await named(ctx, 'نعيمي بلدي', 'Local Naimi');
+        await named(ctx, 'نعيمي مستورد', 'Imported Naimi');
+
+        expect(await search(ctx.vendorId, 'بلدي نعيمي')).toEqual([local]);
+        expect(await search(ctx.vendorId, 'naimi   local')).toEqual([local]);
+        expect(await search(ctx.vendorId, 'نعيمي حري')).toEqual([]);
+      });
+
+      it('reads ٱ as ا, both ways', async () => {
+        const ctx = await setUp('search-wasla');
+        const wasla = await named(ctx, 'ٱلنعيمي', 'The Naimi');
+        const plain = await named(ctx, 'الحري', 'The Harri');
+
+        expect(await search(ctx.vendorId, 'النعيمي')).toEqual([wasla]);
+        expect(await search(ctx.vendorId, 'ٱلحري')).toEqual([plain]);
+      });
+
+      it('matches the store name, and follows a renamed store', async () => {
+        const ctx = await setUp('search-store');
+        const id = await named(ctx, 'نعيمي', 'Naimi lamb');
+
+        // The journey's store is «ملحمة النخبة» / "Al Nokhba Butchery".
+        expect(await search(ctx.vendorId, 'النخبة نعيمي')).toEqual([id]);
+        expect(await search(ctx.vendorId, 'nokhba')).toEqual([id]);
+
+        // No endpoint renames a store yet: the trigger is proved on the row.
+        await prisma.vendor.update({
+          where: { id: ctx.vendorId },
+          data: { nameAr: 'ملحمة الريف', nameEn: 'Al Reef Butchery' },
+        });
+
+        expect(await search(ctx.vendorId, 'النخبة')).toEqual([]);
+        expect(await search(ctx.vendorId, 'الريف نعيمي')).toEqual([id]);
+      });
+
       it('ignores English case and combines with the category filter', async () => {
         const ctx = await setUp('search-case');
         const id = await named(ctx, 'ريش', 'Lamb RIBS Special');

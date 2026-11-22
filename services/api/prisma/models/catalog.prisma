@@ -154,9 +154,10 @@ model Product {
   descriptionAr   String?           @map("description_ar")
   /// Nullable: null until a description is written.
   descriptionEn   String?           @map("description_en")
-  /// The names in both languages, normalised for search by the SQL function
-  /// `catalog_search_text`. Written only by the trigger `products_search_text_trigger`,
-  /// never by code (the default only satisfies Prisma's create types).
+  /// The product's and its store's names in both languages, normalised for search by the
+  /// SQL function `catalog_search_text`. Written only by the triggers
+  /// `products_search_text_trigger` and `vendors_products_search_text_trigger` (a store
+  /// renamed), never by code (the default only satisfies Prisma's create types).
   searchText      String            @default("") @map("search_text")
   status          ProductStatus     @default(draft)
   isAvailable     Boolean           @default(true) @map("is_available")
