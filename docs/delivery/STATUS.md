@@ -17,13 +17,13 @@
 
 | Input | Blocks | Status |
 |---|---|---|
-| Payment gateway choice + sandbox keys | PAY-API-2 (Sprint 3) | open |
-| SMS provider + sender ID | ACC-API-1 production SMS | open |
+| Payment gateway choice + sandbox keys | PAY-API-2 (Sprint 3) | Owner's decision 2026-11-22: build against the fake/sandbox provider behind the payments port until the keys arrive |
+| SMS provider + sender ID | ACC-API-1 production SMS | Owner's decision 2026-11-22: the fake/log provider behind the SMS port until the keys arrive |
 | Delivery company API docs + sandbox | DLV-API-2 (Sprint 4) | open |
 | Operating numbers (cutoffs, capacity, fees, minimum order, COD cap, deposit %) | none (editable settings) | open |
-| Hosting approval (ADR-0003) and third-party accounts | FND-INF-4, FND-INF-5 | open |
+| Hosting approval (ADR-0003) and third-party accounts | FND-INF-4, FND-INF-5 | Owner's decision 2026-11-22 (client agrees): ADR-0003 accepted. The accounts are tracked in `docs/accounts.md` |
 | Jazlah brand assets (logo, palette) | DSN-DES-1 | open |
-| ZATCA onboarding + seller-of-record confirmation | INV-API-2 (Sprint 6) | open |
+| ZATCA onboarding + seller-of-record confirmation | INV-API-2 (Sprint 6) | Owner's decision 2026-11-22: ADR-0006 accepted (Jazlah is the seller of record; direct integration). VAT number, Fatoora access and the accountant's check are still needed before production |
 | Installment provider (Tamara/Tabby) | post-launch | open |
 
 ## Decisions taken during planning (not in the SRS text)
@@ -37,6 +37,12 @@
 - **Feed buyers** are registered platform users. Feed sellers need admin approval.
 
 ## Log
+
+### 2026-11-22 — Hosting and ZATCA decided; staging closed (owner)
+- **#8 closed:** staging was checked live on Render (see the last comment on #8).
+- **ADR-0003 accepted** (client agrees). Staging stays on free tiers in Frankfurt. Production goes to Google Cloud Dammam through CNTXT, with Oracle as the fallback. The external accounts are listed in `docs/accounts.md`.
+- **ADR-0006 accepted.** Jazlah is the seller of record for every order, with one invoice per order. The integration with ZATCA is direct, behind `integrations/zatca`.
+- **Payments and SMS** are built against fake or sandbox providers behind their ports until the client's keys arrive.
 
 ### 2026-11-21 — The core team takes over the API and staging (owner)
 - **Kerolles is paused** on Jazlah for now. The core team builds the API and staging itself, in its own sessions, on Kerolles' structure and conventions (`services/api/CLAUDE.md`, `.claude/DECISIONS.md`, the patterns of #228–#244). No rewrite: same modules, ports, Prisma migrations, error codes and e2e on a fresh DB.
