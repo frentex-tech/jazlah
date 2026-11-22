@@ -83,7 +83,7 @@ export enum ErrorCode {
   PRODUCT_NOT_EDITABLE = 'PRODUCT_NOT_EDITABLE',
   /**
    * The product cannot go to review or be published as it is. Details: `{ reasons }`,
-   * each NO_SIZE, NO_IMAGE or INCOMPATIBLE_CUTTING_PACKAGING (with `pairs`).
+   * each NO_SIZE or NO_IMAGE.
    */
   PRODUCT_NOT_SUBMITTABLE = 'PRODUCT_NOT_SUBMITTABLE',
   /**

@@ -7,10 +7,6 @@ import {
   type CatalogMedia,
 } from '../domain/ports/catalog-media.port';
 import {
-  CUTTING_PACKAGING_INCOMPATIBILITY_REPOSITORY,
-  type CuttingPackagingIncompatibilityRepository,
-} from '../domain/ports/cutting-packaging-incompatibility.repository.port';
-import {
   PRODUCT_REPOSITORY,
   type ProductRepository,
 } from '../domain/ports/product.repository.port';
@@ -31,8 +27,6 @@ import { toProductView } from './to-product-view';
 export class SubmitProductUseCase {
   constructor(
     @Inject(PRODUCT_REPOSITORY) private readonly products: ProductRepository,
-    @Inject(CUTTING_PACKAGING_INCOMPATIBILITY_REPOSITORY)
-    private readonly rules: CuttingPackagingIncompatibilityRepository,
     @Inject(CATALOG_MEDIA) private readonly media: CatalogMedia,
     @Inject(TransactionRunner)
     private readonly transactions: Pick<TransactionRunner, 'run'>,
@@ -49,12 +43,7 @@ export class SubmitProductUseCase {
       );
       ProductStatusMachine.assertCanMove(live.status, 'pending_review');
       const content = Product.contentOf(live);
-      Product.assertSubmittable(
-        content,
-        await this.rules.findForCuttingStyles(
-          content.cuttings.map((cutting) => cutting.cuttingStyleId),
-        ),
-      );
+      Product.assertSubmittable(content);
       const moved = await this.products.transition(live.id, live.status, {
         to: 'pending_review',
         reviewerId: null,

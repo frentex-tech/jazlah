@@ -101,7 +101,7 @@ Status is the HTTP status the code always comes with. The English message is the
 | Code | Status | English message | The app should |
 |---|---|---|---|
 | `PRODUCT_NOT_EDITABLE` | 409 | This product cannot be changed in its current state. | **Reload** the product. `details.status` is its current status: for example, it is under review, or an admin already reviewed it. |
-| `PRODUCT_NOT_SUBMITTABLE` | 422 | Add at least one image and one size, and packaging that suits each cutting style. | **Show** what is missing. `details.reasons` lists `NO_SIZE`, `NO_IMAGE` and `INCOMPATIBLE_CUTTING_PACKAGING`; the last comes with `pairs`, the cutting and packaging pairs that cannot be combined. |
+| `PRODUCT_NOT_SUBMITTABLE` | 422 | Add at least one image and one size. | **Show** what is missing. `details.reasons` lists `NO_SIZE` and `NO_IMAGE`. The cutting and packaging rules never block a product. |
 | `PRODUCT_CHANGE_REQUEST_SUPERSEDED` | 409 | The vendor has edited this product again since this request. Reload and review the newer request. | Admin: **Reload** the change requests and review the newer one. |
 
 ### Uploads (media)

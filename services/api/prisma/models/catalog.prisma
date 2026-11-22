@@ -237,6 +237,8 @@ model ProductSize {
   /// Nullable: null when the size has no tag.
   tagEn             String?  @map("tag_en")
   position          Int
+  /// Whether this size can be ordered now; switched by the availability edit, at once.
+  isAvailable       Boolean  @default(true) @map("is_available")
   createdAt         DateTime @default(now()) @map("created_at") @db.Timestamptz(3)
   updatedAt         DateTime @updatedAt @map("updated_at") @db.Timestamptz(3)
 

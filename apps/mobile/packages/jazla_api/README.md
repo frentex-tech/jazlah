@@ -140,7 +140,7 @@ Class | Method | HTTP request | Description
 [*VendorAccountApi*](doc/VendorAccountApi.md) | [**vendorGetMe**](doc/VendorAccountApi.md#vendorgetme) | **GET** /v1/vendor/me | Who is signed in
 [*VendorAccountApi*](doc/VendorAccountApi.md) | [**vendorLogoutAll**](doc/VendorAccountApi.md#vendorlogoutall) | **POST** /v1/vendor/auth/logout-all | Sign out of every vendor session of this user
 [*VendorCatalogListsApi*](doc/VendorCatalogListsApi.md) | [**vendorListCatalogListEntries**](doc/VendorCatalogListsApi.md#vendorlistcataloglistentries) | **GET** /v1/vendor/lists/{list} | The active entries of a list, for the product form
-[*VendorCatalogListsApi*](doc/VendorCatalogListsApi.md) | [**vendorListCuttingPackagingIncompatibilities**](doc/VendorCatalogListsApi.md#vendorlistcuttingpackagingincompatibilities) | **GET** /v1/vendor/cutting-packaging-incompatibilities | The cutting and packaging pairs a product cannot offer
+[*VendorCatalogListsApi*](doc/VendorCatalogListsApi.md) | [**vendorListCuttingPackagingIncompatibilities**](doc/VendorCatalogListsApi.md#vendorlistcuttingpackagingincompatibilities) | **GET** /v1/vendor/cutting-packaging-incompatibilities | The cutting and packaging pairs a customer cannot choose
 [*VendorMediaApi*](doc/VendorMediaApi.md) | [**vendorConfirmMediaUpload**](doc/VendorMediaApi.md#vendorconfirmmediaupload) | **POST** /v1/vendor/media/{id}/confirm | Confirm an uploaded file
 [*VendorMediaApi*](doc/VendorMediaApi.md) | [**vendorRequestMediaUpload**](doc/VendorMediaApi.md#vendorrequestmediaupload) | **POST** /v1/vendor/media/uploads | Get a ticket to upload one file
 [*VendorProductsApi*](doc/VendorProductsApi.md) | [**vendorChangeProductPrices**](doc/VendorProductsApi.md#vendorchangeproductprices) | **PATCH** /v1/vendor/products/{id}/prices | Change size, cutting and packaging prices
@@ -184,6 +184,7 @@ Class | Method | HTTP request | Description
  - [FieldErrorDto](doc/FieldErrorDto.md)
  - [GeoJsonPolygonDto](doc/GeoJsonPolygonDto.md)
  - [GeoPointDto](doc/GeoPointDto.md)
+ - [IncompatiblePairResponseDto](doc/IncompatiblePairResponseDto.md)
  - [LivenessResponseDto](doc/LivenessResponseDto.md)
  - [LocalizedDescriptionDto](doc/LocalizedDescriptionDto.md)
  - [LocalizedNameDto](doc/LocalizedNameDto.md)
@@ -212,7 +213,9 @@ Class | Method | HTTP request | Description
  - [ProductSizeResponseDto](doc/ProductSizeResponseDto.md)
  - [ProductVendorResponseDto](doc/ProductVendorResponseDto.md)
  - [PublicCategoryListResponseDto](doc/PublicCategoryListResponseDto.md)
+ - [PublicProductCuttingResponseDto](doc/PublicProductCuttingResponseDto.md)
  - [PublicProductResponseDto](doc/PublicProductResponseDto.md)
+ - [PublicProductSizeResponseDto](doc/PublicProductSizeResponseDto.md)
  - [PublicVendorPageResponseDto](doc/PublicVendorPageResponseDto.md)
  - [PublicVendorResponseDto](doc/PublicVendorResponseDto.md)
  - [ReadinessChecksDto](doc/ReadinessChecksDto.md)
@@ -229,6 +232,7 @@ Class | Method | HTTP request | Description
  - [SetProductAvailabilityDto](doc/SetProductAvailabilityDto.md)
  - [SetProductFulfilmentDto](doc/SetProductFulfilmentDto.md)
  - [SignedInResponseDto](doc/SignedInResponseDto.md)
+ - [SizeAvailabilityDto](doc/SizeAvailabilityDto.md)
  - [SizePriceDto](doc/SizePriceDto.md)
  - [SubmitVendorApplicationDto](doc/SubmitVendorApplicationDto.md)
  - [UpdateCoverageZoneDto](doc/UpdateCoverageZoneDto.md)

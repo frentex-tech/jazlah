@@ -10,6 +10,7 @@ import type { ProductStatus } from '../product-status.type';
 import type { ProductSummary } from '../product-summary.type';
 import type { ProductTransition } from '../product-transition.type';
 import type { PublicProductFilter } from '../public-product-filter.type';
+import type { SizeAvailabilityChange } from '../size-availability-change.type';
 
 /** Injection token of the ProductRepository. */
 export const PRODUCT_REPOSITORY = Symbol('PRODUCT_REPOSITORY');
@@ -65,7 +66,11 @@ export interface ProductRepository {
     transition: ProductTransition,
   ): Promise<boolean>;
 
-  setAvailability(id: string, isAvailable: boolean): Promise<void>;
+  setAvailability(
+    id: string,
+    isAvailable: boolean,
+    sizes: readonly SizeAvailabilityChange[],
+  ): Promise<void>;
 
   setFulfilment(id: string, fulfilment: ProductFulfilment): Promise<void>;
 
@@ -85,6 +90,10 @@ export interface ProductRepository {
     page: PageRequest,
   ): Promise<Page<ProductSummary>>;
 
-  /** The product if the public may see it (as listPublic); null otherwise. */
+  /**
+   * The product if the public may see its page: published, of an active vendor, in an
+   * active category, available or not (the page shows it out of stock, where listPublic
+   * leaves it out); null otherwise.
+   */
   findPublic(id: string): Promise<ProductDetails | null>;
 }

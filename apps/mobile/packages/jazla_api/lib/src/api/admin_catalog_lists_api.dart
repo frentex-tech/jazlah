@@ -122,7 +122,7 @@ _responseData = rawData == null ? null : deserialize<ReferenceItemResponseDto, R
   }
 
   /// Forbid a cutting style with a packaging
-  /// Admin dashboard, catalog settings. Adds a global rule: products may not offer this cutting style together with this packaging. Products already published keep their options; the rule applies to every later submission, publication and change request, refused with PRODUCT_NOT_SUBMITTABLE (INCOMPATIBLE_CUTTING_PACKAGING) while they offer the pair. Errors: VALIDATION_FAILED &#x60;isActiveCuttingStyle&#x60; when the cutting style is not an active entry; CONFLICT when the same rule exists already.
+  /// Admin dashboard, catalog settings. Adds a global rule: customers may not choose this cutting style together with this packaging. Products keep offering both (publishing is not blocked); the public product lists the pairs that apply to it, and the cart’s line price (CRT-API-1) will refuse the pair (INCOMPATIBLE_CUTTING_PACKAGING), at once for every product. Errors: VALIDATION_FAILED &#x60;isActiveCuttingStyle&#x60; when the cutting style is not an active entry; CONFLICT when the same rule exists already.
   ///
   /// Parameters:
   /// * [createCuttingPackagingIncompatibilityDto] 
@@ -217,7 +217,7 @@ _responseData = rawData == null ? null : deserialize<CuttingPackagingIncompatibi
   }
 
   /// Remove a cutting and packaging rule
-  /// Admin dashboard, catalog settings. Deletes the rule at once: products may offer the pair again from their next submission or edit. NOT_FOUND for an unknown id, also when it was removed already.
+  /// Admin dashboard, catalog settings. Deletes the rule at once: customers may choose the pair again on every product. NOT_FOUND for an unknown id, also when it was removed already.
   ///
   /// Parameters:
   /// * [id] - The id (a UUID) of the item the path names; another value is VALIDATION_FAILED on `id`.

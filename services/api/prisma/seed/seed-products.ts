@@ -113,6 +113,7 @@ async function seedProduct(
             priceHalalas: size.priceHalalas,
             tagAr: size.tag === null ? null : size.tag.ar,
             tagEn: size.tag === null ? null : size.tag.en,
+            isAvailable: size.isAvailable ?? true,
             position,
             createdAt,
           })),

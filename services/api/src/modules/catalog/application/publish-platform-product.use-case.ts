@@ -13,10 +13,6 @@ import {
   type CatalogVendors,
 } from '../domain/ports/catalog-vendors.port';
 import {
-  CUTTING_PACKAGING_INCOMPATIBILITY_REPOSITORY,
-  type CuttingPackagingIncompatibilityRepository,
-} from '../domain/ports/cutting-packaging-incompatibility.repository.port';
-import {
   PRODUCT_REPOSITORY,
   type ProductRepository,
 } from '../domain/ports/product.repository.port';
@@ -36,8 +32,6 @@ import { toProductView } from './to-product-view';
 export class PublishPlatformProductUseCase {
   constructor(
     @Inject(PRODUCT_REPOSITORY) private readonly products: ProductRepository,
-    @Inject(CUTTING_PACKAGING_INCOMPATIBILITY_REPOSITORY)
-    private readonly rules: CuttingPackagingIncompatibilityRepository,
     @Inject(CATALOG_MEDIA) private readonly media: CatalogMedia,
     @Inject(CATALOG_VENDORS) private readonly vendors: CatalogVendors,
     @Inject(AuditLogWriter)
@@ -63,12 +57,7 @@ export class PublishPlatformProductUseCase {
       }
       ProductStatusMachine.assertCanMove(live.status, 'published');
       const content = Product.contentOf(live);
-      Product.assertSubmittable(
-        content,
-        await this.rules.findForCuttingStyles(
-          content.cuttings.map((cutting) => cutting.cuttingStyleId),
-        ),
-      );
+      Product.assertSubmittable(content);
       const moved = await this.products.transition(live.id, 'draft', {
         to: 'published',
         reviewerId: input.actorId,
