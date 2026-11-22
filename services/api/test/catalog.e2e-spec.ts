@@ -1735,6 +1735,8 @@ describe('Catalog (e2e)', () => {
         // The store «ملحمة النخبة» contains «لحم» inside its first word only.
         expect(await search(ctx.vendorId, 'لحم')).toEqual([meat]);
         expect(await search(ctx.vendorId, 'خبه')).toEqual([]);
+        // Escaped: `%` cannot reach the middle of a store word.
+        expect(await search(ctx.vendorId, '%خبه')).toEqual([]);
         expect((await search(ctx.vendorId, 'ملحمة')).sort()).toEqual(
           [liver, meat].sort(),
         );
