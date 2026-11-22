@@ -242,6 +242,8 @@ Decided 2026-11-16 by the backend owner (task brief, `.claude/plans/catalog.md`)
 - *Session:* `cutting_packaging_incompatibilities_pair_key` breaks the `<table>_<columns>_key` naming: the full name passes PostgreSQL's 63-byte limit.
 - *Session:* building blocks moved out of vendors unchanged, for the catalog: the bilingual DTOs, `ReasonDto`, `organisationOf`, `ADMIN_AUTH_ERRORS`, `OptionalLocalizedText`, the fakes' `keysetPage`, `InMemoryAuditLog`; `VENDOR_AUTH_ERRORS` added beside `ADMIN_AUTH_ERRORS`. The vendors e2e no longer deletes the platform vendor, which the catalog suite uses at the same time.
 
+- **A missing permission is PERMISSION_DENIED, not FORBIDDEN** (2026-11-22, project owner, lead review of Sprint 2, B7): 403 with `details.permission`. FORBIDDEN keeps its meaning (wrong audience or lost access: sign in again), so the dashboard can show "not allowed" without signing an admin out. Added to the catalogue now so clients map it; the permission checks that raise it come with ADM-API-1 (#111).
+
 ### Customers and account deletion (issue #239)
 
 Decided 2026-11-17 by the backend owner (the approved plan and its decisions) unless marked *session*.
