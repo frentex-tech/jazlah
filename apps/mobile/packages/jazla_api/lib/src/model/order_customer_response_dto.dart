@@ -51,7 +51,7 @@ class OrderCustomerResponseDto {
 
 
 
-      /// The customer’s mobile: in full for admins, masked for the vendor (`+9665•••••01`).
+      /// The customer’s mobile: in full for admins, masked for the vendor (`+966*******01`, as maskPhoneNumber).
   @JsonKey(
     
     name: r'phone',

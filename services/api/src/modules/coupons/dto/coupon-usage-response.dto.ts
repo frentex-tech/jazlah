@@ -5,7 +5,8 @@ export class CouponUsageResponseDto {
   @ApiProperty({
     type: 'integer',
     example: 37,
-    description: 'Orders that used it (not cancelled).',
+    description:
+      'Orders that used it (not cancelled, and not unpaid past their `expiresAt`).',
   })
   uses!: number;
 

@@ -25,7 +25,7 @@ class CouponUsageResponseDto {
     required  this.totalDiscountHalalas,
   });
 
-      /// Orders that used it (not cancelled).
+      /// Orders that used it (not cancelled, and not unpaid past their `expiresAt`).
   @JsonKey(
     
     name: r'uses',

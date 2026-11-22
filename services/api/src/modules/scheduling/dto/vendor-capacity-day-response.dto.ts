@@ -28,14 +28,16 @@ export class VendorCapacityDayResponseDto {
   @ApiProperty({
     type: 'integer',
     example: 12,
-    description: 'Orders already booked for the day.',
+    description:
+      'Orders already booked for the day (unpaid orders past their `expiresAt` no longer count).',
   })
   ordersBooked!: number;
 
   @ApiProperty({
     type: 'integer',
     example: 3,
-    description: 'Carcasses already booked for the day.',
+    description:
+      'Carcasses already booked for the day (unpaid orders past their `expiresAt` no longer count).',
   })
   carcassesBooked!: number;
 }

@@ -21,7 +21,7 @@ class WalletResponseDto {
     required  this.balanceHalalas,
   });
 
-      /// The balance, in halalas; never below 0.
+      /// The balance, in halalas; never below 0. The wallet part of an unpaid order past its `expiresAt` is already back in it.
   @JsonKey(
     
     name: r'balanceHalalas',

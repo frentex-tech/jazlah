@@ -68,7 +68,7 @@ class VendorCapacityDayResponseDto {
 
 
 
-      /// Orders already booked for the day.
+      /// Orders already booked for the day (unpaid orders past their `expiresAt` no longer count).
   @JsonKey(
     
     name: r'ordersBooked',
@@ -81,7 +81,7 @@ class VendorCapacityDayResponseDto {
 
 
 
-      /// Carcasses already booked for the day.
+      /// Carcasses already booked for the day (unpaid orders past their `expiresAt` no longer count).
   @JsonKey(
     
     name: r'carcassesBooked',

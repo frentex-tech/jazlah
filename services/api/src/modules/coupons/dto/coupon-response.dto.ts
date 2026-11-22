@@ -75,13 +75,13 @@ export class CouponResponseDto {
   categoryIds!: string[];
 
   @ApiProperty({
-    example: '2026-12-01T00:00:00+03:00',
+    example: '2026-11-30T21:00:00.000Z',
     description: 'When it starts (UTC).',
   })
   startsAt!: Date;
 
   @ApiProperty({
-    example: '2026-12-10T00:00:00+03:00',
+    example: '2026-12-09T21:00:00.000Z',
     description: 'When it ends (UTC).',
   })
   endsAt!: Date;

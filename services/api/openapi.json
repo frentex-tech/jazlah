@@ -19268,12 +19268,12 @@
           "ordersBooked": {
             "type": "integer",
             "example": 12,
-            "description": "Orders already booked for the day."
+            "description": "Orders already booked for the day (unpaid orders past their `expiresAt` no longer count)."
           },
           "carcassesBooked": {
             "type": "integer",
             "example": 3,
-            "description": "Carcasses already booked for the day."
+            "description": "Carcasses already booked for the day (unpaid orders past their `expiresAt` no longer count)."
           }
         },
         "required": [
@@ -20138,13 +20138,13 @@
           "startsAt": {
             "format": "date-time",
             "type": "string",
-            "example": "2026-12-01T00:00:00+03:00",
+            "example": "2026-11-30T21:00:00.000Z",
             "description": "When it starts (UTC)."
           },
           "endsAt": {
             "format": "date-time",
             "type": "string",
-            "example": "2026-12-10T00:00:00+03:00",
+            "example": "2026-12-09T21:00:00.000Z",
             "description": "When it ends (UTC)."
           },
           "usageLimit": {
@@ -20449,7 +20449,7 @@
           "uses": {
             "type": "integer",
             "example": 37,
-            "description": "Orders that used it (not cancelled)."
+            "description": "Orders that used it (not cancelled, and not unpaid past their `expiresAt`)."
           },
           "distinctCustomers": {
             "type": "integer",
@@ -20474,7 +20474,7 @@
           "balanceHalalas": {
             "type": "integer",
             "example": 5000,
-            "description": "The balance, in halalas; never below 0."
+            "description": "The balance, in halalas; never below 0. The wallet part of an unpaid order past its `expiresAt` is already back in it."
           }
         },
         "required": [
@@ -20692,7 +20692,7 @@
           "phone": {
             "type": "string",
             "example": "+966500000001",
-            "description": "The customer’s mobile: in full for admins, masked for the vendor (`+9665•••••01`)."
+            "description": "The customer’s mobile: in full for admins, masked for the vendor (`+966*******01`, as maskPhoneNumber)."
           }
         },
         "required": [

@@ -4860,12 +4860,12 @@ export interface components {
              */
             carcassesLimit: number | null;
             /**
-             * @description Orders already booked for the day.
+             * @description Orders already booked for the day (unpaid orders past their `expiresAt` no longer count).
              * @example 12
              */
             ordersBooked: number;
             /**
-             * @description Carcasses already booked for the day.
+             * @description Carcasses already booked for the day (unpaid orders past their `expiresAt` no longer count).
              * @example 3
              */
             carcassesBooked: number;
@@ -5329,13 +5329,13 @@ export interface components {
             /**
              * Format: date-time
              * @description When it starts (UTC).
-             * @example 2026-12-01T00:00:00+03:00
+             * @example 2026-11-30T21:00:00.000Z
              */
             startsAt: string;
             /**
              * Format: date-time
              * @description When it ends (UTC).
-             * @example 2026-12-10T00:00:00+03:00
+             * @example 2026-12-09T21:00:00.000Z
              */
             endsAt: string;
             /**
@@ -5522,7 +5522,7 @@ export interface components {
         };
         CouponUsageResponseDto: {
             /**
-             * @description Orders that used it (not cancelled).
+             * @description Orders that used it (not cancelled, and not unpaid past their `expiresAt`).
              * @example 37
              */
             uses: number;
@@ -5539,7 +5539,7 @@ export interface components {
         };
         WalletResponseDto: {
             /**
-             * @description The balance, in halalas; never below 0.
+             * @description The balance, in halalas; never below 0. The wallet part of an unpaid order past its `expiresAt` is already back in it.
              * @example 5000
              */
             balanceHalalas: number;
@@ -5659,7 +5659,7 @@ export interface components {
              */
             name: string | null;
             /**
-             * @description The customer’s mobile: in full for admins, masked for the vendor (`+9665•••••01`).
+             * @description The customer’s mobile: in full for admins, masked for the vendor (`+966*******01`, as maskPhoneNumber).
              * @example +966500000001
              */
             phone: string;
