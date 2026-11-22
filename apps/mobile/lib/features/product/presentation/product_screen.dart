@@ -47,18 +47,6 @@ class _ProductScreenState extends ConsumerState<ProductScreen> {
     super.dispose();
   }
 
-  /// Another product in the same place (a link replacing the route): start over from its own default size.
-  @override
-  void didUpdateWidget(ProductScreen old) {
-    super.didUpdateWidget(old);
-    if (old.id == widget.id) return;
-    _selection = null;
-    _page = 0;
-    _cutError = false;
-    _explained = null;
-    _notes.clear();
-  }
-
   void _set(ProductSelection s) => setState(() {
     _selection = s;
     if (s.cutId != null) _cutError = false;

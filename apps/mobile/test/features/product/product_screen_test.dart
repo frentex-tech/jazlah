@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:go_router/go_router.dart';
+import 'package:jazlah/app/router/router.dart';
 import 'package:jazlah/core/errors/api_error.dart';
 import 'package:jazlah/core/widgets/widgets.dart';
 import 'package:jazlah/features/product/data/mock_product_repository.dart';
@@ -156,7 +157,7 @@ void main() {
       routes: [
         GoRoute(
           path: '/product/:id',
-          builder: (_, s) => ProductScreen(id: s.pathParameters['id']!),
+          builder: (_, s) => productPage(s.pathParameters['id']!),
         ),
       ],
     );
@@ -164,8 +165,12 @@ void main() {
     GoRouter.of(t.element(find.byType(ProductScreen))).go('/product/p-falah-ribeye');
     await t.pumpAndSettle();
     final before = _total(t);
+    await t.drag(_page, const Offset(0, -400)); // scrolled down
+    await t.pumpAndSettle();
+    expect(t.state<ScrollableState>(_page).position.pixels, greaterThan(0));
     GoRouter.of(t.element(find.byType(ProductScreen))).go('/product/p-falah-harri-half');
     await t.pumpAndSettle();
+    expect(t.state<ScrollableState>(_page).position.pixels, 0); // a fresh page, at the top
     expect(t.widget<JChip>(find.widgetWithText(JChip, '7 كجم')).selected, isTrue);
     expect(_total(t), isNot('0.00'));
     expect(_total(t), isNot(before));
