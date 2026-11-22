@@ -31,8 +31,14 @@ export function FiltersBar({
             onChange={(e) => onSearch(e.target.value)}
             placeholder={searchLabel}
             aria-label={searchLabel}
-            className="min-w-0 flex-1 bg-transparent text-body-m text-ink outline-none placeholder:text-muted"
+            className="min-w-0 flex-1 bg-transparent text-body-m text-ink outline-none placeholder:text-muted [&::-webkit-search-cancel-button]:appearance-none"
           />
+          {/* The DS «x» instead of the browser's own search clear button. */}
+          {search !== '' && (
+            <button type="button" onClick={() => onSearch('')} aria-label={`${clearLabel}: ${searchLabel}`} className="shrink-0 text-ink-2">
+              <X size={16} aria-hidden />
+            </button>
+          )}
         </label>
         {children}
         <span className="flex-1" />

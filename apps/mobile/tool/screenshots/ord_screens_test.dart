@@ -70,7 +70,7 @@ Future<List<dynamic>> _o() async {
 final _order = Order(
   id: 'o-1',
   number: 'JZ-261110-0001',
-  status: OrderStatus.created,
+  status: OrderStatus.confirmed,
   vendorId: 'v-falah',
   vendorName: const LocalizedText('مجازر الفلاح', 'Al Falah Butchers'),
   fulfilment: Fulfilment.delivery,
@@ -91,7 +91,18 @@ void main() {
   setUpAll(loadFonts);
 
   testWidgets('review and order placed', (t) async {
-    await shoot(t, '170-28952', const ReviewScreen(), overrides: await _o());
+    // Nothing preselected: the «اختر طريقة دفع للمتابعة» state.
+    await shoot(t, '170-29357', const ReviewScreen(), overrides: await _o());
+    await shoot(
+      t,
+      '170-28952',
+      const ReviewScreen(),
+      overrides: await _o(),
+      act: (t) async {
+        await t.tap(find.text('بطاقة مدى · تنتهي بـ 4821'));
+        await t.pump();
+      },
+    );
     await shoot(
       t,
       '170-29025',

@@ -1858,4 +1858,49 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get statusReturned => 'مرتجع';
+
+  @override
+  String get checkoutCallStore => 'اتصال بالمتجر';
+
+  @override
+  String get checkoutDirections => 'الاتجاهات';
+
+  @override
+  String get errDayNotAvailable => 'هذا اليوم لم يعد متاحًا، اختر يومًا آخر.';
+
+  @override
+  String get errFulfilmentRequired => 'اختر طريقة الاستلام واليوم أولًا.';
+
+  @override
+  String get errCartEmpty => 'سلتك فارغة.';
+
+  @override
+  String get errWalletInsufficient => 'رصيد محفظتك لم يعد يكفي، اختر طريقة الدفع من جديد.';
+
+  @override
+  String get errOrderNotPayable => 'هذا الطلب لم يعد بانتظار الدفع.';
+
+  @override
+  String get errPaymentInProgress => 'هناك عملية دفع لم تنتهِ بعد لهذا الطلب.';
+
+  @override
+  String get payCheckStatus => 'تحقق من حالة الدفع';
+
+  @override
+  String get payCancelPage => 'إلغاء الدفع';
+
+  @override
+  String get productSizeNoId => 'لا يمكن إضافة هذا المقاس إلى السلة حاليًا.';
+
+  @override
+  String get payPageErrorTitle => 'تعذّر فتح صفحة الدفع';
+
+  @override
+  String get payPageErrorBody => 'تحقق من اتصالك ثم أعد المحاولة.';
+
+  @override
+  String get payPageClose => 'إغلاق';
+
+  @override
+  String get payContinue => 'متابعة الدفع';
 }

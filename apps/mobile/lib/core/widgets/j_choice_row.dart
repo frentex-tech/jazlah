@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:jazlah/app/theme/theme.dart';
 
-/// The 44-high row shared by Checkbox, Radio and Switch: the control at the start, then the label.
+/// The row shared by Checkbox, Radio and Switch: the control at the start, then the label. At least 44 high
+/// (the tap target); a label that wraps grows the row instead of being clipped.
 class JChoiceRow extends StatelessWidget {
   const JChoiceRow({required this.control, required this.label, required this.enabled, required this.onTap, super.key});
 
@@ -15,8 +16,8 @@ class JChoiceRow extends StatelessWidget {
     return GestureDetector(
       behavior: HitTestBehavior.opaque,
       onTap: onTap,
-      child: SizedBox(
-        height: 44,
+      child: ConstrainedBox(
+        constraints: const BoxConstraints(minHeight: 44),
         child: Row(
           mainAxisSize: MainAxisSize.min,
           children: [

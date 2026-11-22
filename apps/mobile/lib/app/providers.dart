@@ -1,11 +1,17 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:jazla_api/jazla_api.dart';
-
 import 'package:jazlah/app/locale.dart';
 import 'package:jazlah/core/api/api_client.dart';
 import 'package:jazlah/core/config/env.dart';
 import 'package:jazlah/core/storage/prefs.dart';
 import 'package:jazlah/core/storage/token_storage.dart';
+import 'package:url_launcher/url_launcher.dart';
+
+/// Opens a link outside the app (dialer, maps). A seam for tests, where no platform handler exists.
+final urlLauncherProvider = Provider<Future<bool> Function(Uri)>(
+  (ref) =>
+      (uri) => launchUrl(uri, mode: LaunchMode.externalApplication),
+);
 
 /// Overridden in `bootstrap()`.
 final envProvider = Provider<Env>((ref) => throw UnimplementedError('envProvider'));

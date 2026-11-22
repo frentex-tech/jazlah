@@ -37,7 +37,7 @@ export function PauseProvider({ initial, children }: { initial: Paused | null; c
     };
   }, [initial]);
   const apply = useCallback(async (p: Paused) => {
-    const s = await panelFetch<OperationsSettings>('admin', '/api/admin/settings/operations', { method: 'PUT', body: JSON.stringify({ paused: p }) });
+    const s = await panelFetch<OperationsSettings>('admin', '/api/admin/settings/operations/pause', { method: 'PUT', body: JSON.stringify(p) });
     sync(s.paused);
     return s;
   }, []);
@@ -107,7 +107,8 @@ export function PauseDialog({ open, onOpenChange, current, withMessage, onConfir
 /** What a failed pause change shows: the fields refused, or a toast (and nothing to show in the dialog). */
 export function pauseErrors(e: unknown, t: (k: string) => string): FieldErrors | void {
   const fields = fieldErrors(e);
-  if (fields) return fields;
+  // The pause route's fields are the Paused keys; the page and dialog show them under `paused.`.
+  if (fields) return Object.fromEntries(Object.entries(fields).map(([k, v]) => [k.startsWith('paused.') ? k : `paused.${k}`, v]));
   toast('error', t(e instanceof ApiError && e.code === 'NOT_ALLOWED' ? 'denied' : 'failed'));
 }
 

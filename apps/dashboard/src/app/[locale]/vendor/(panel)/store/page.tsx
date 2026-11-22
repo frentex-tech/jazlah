@@ -8,7 +8,7 @@ export default async function Store({ params }: { params: Promise<{ locale: stri
   const t = await getTranslations('store');
   return (
     <>
-      <PageHeader breadcrumb={t('breadcrumb')} title={t('title')} start />
+      <PageHeader breadcrumb={t('breadcrumb')} title={t('title')} />
       <StoreProfile />
     </>
   );

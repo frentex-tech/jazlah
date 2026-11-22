@@ -75,6 +75,7 @@ class _Checkout extends MockCheckoutRepository {
 }
 
 late MockCartRepository _cart;
+final _launched = <Uri>[];
 late _Checkout _checkout;
 
 Future<ProviderContainer> _pump(
@@ -103,6 +104,10 @@ Future<ProviderContainer> _pump(
       cartSettingsProvider.overrideWithValue(MockCartRepository.opsSettings),
       addressRepositoryProvider.overrideWithValue(book),
       checkoutRepositoryProvider.overrideWithValue(mocks ? _checkout : null),
+      urlLauncherProvider.overrideWithValue((uri) async {
+        _launched.add(uri);
+        return true;
+      }),
     ],
   );
   await _settle(t);
@@ -143,6 +148,20 @@ void main() {
     expect(find.text('جاهز للاستلام بين 4 و 10 مساءً'), findsOneWidget);
     expect(find.byType(MapPicker), findsOneWidget);
     expect(_continue(t), isNotNull);
+  });
+
+  testWidgets('pickup: directions open maps at the pickup point; no call button without a store phone', (t) async {
+    _launched.clear();
+    await _pump(t);
+    await t.tap(find.text('استلام من المتجر'));
+    await _settle(t);
+    expect(find.text('اتصال بالمتجر'), findsNothing);
+    await t.ensureVisible(find.text('الاتجاهات'));
+    await t.pump();
+    await t.tap(find.text('الاتجاهات'));
+    await t.pump();
+    expect(_launched.single.host, 'www.google.com');
+    expect(_launched.single.queryParameters['destination'], '24.695,46.683');
   });
 
   testWidgets('calendar (118-9829): picking a day in the month updates the window', (t) async {

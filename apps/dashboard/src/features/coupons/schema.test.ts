@@ -4,7 +4,7 @@ import { statusOf, type CouponInput } from './types.ts';
 
 const coupon: CouponInput = {
   code: 'RAMADAN25', type: 'percent', value: 25, maxDiscountHalalas: 5000, minOrderHalalas: 10000, vendorIds: [], categoryIds: [],
-  startsAt: '2026-11-30T21:00:00.000Z', endsAt: '2026-12-31T20:59:00.000Z', usageLimit: 500, perUserLimit: 1, isActive: true, firstOrderOnly: false,
+  startsAt: '2026-11-30T21:00:00.000Z', endsAt: '2026-12-31T20:59:00.000Z', usageLimit: 500, perUserLimit: 1, isActive: true,
 };
 const errors = (v: unknown) => {
   const r = CouponSchema.safeParse(v);
@@ -29,6 +29,9 @@ assert.equal(fromDraft({ ...d, usageLimit: ' ', minOrderHalalas: '' }).usageLimi
 // The rules: percent 1–100, end after start, money in whole halalas, code shape; the code goes upper-case.
 assert.deepEqual(errors(coupon), {});
 assert.equal(CouponSchema.parse({ ...coupon, code: 'eid-10' }).code, 'EID-10');
+// Decision 25: a first-order flag never reaches the API, on create or edit.
+assert.ok(!('firstOrderOnly' in CouponSchema.parse({ ...coupon, firstOrderOnly: true })));
+assert.ok(!('firstOrderOnly' in CouponPatchSchema.parse({ firstOrderOnly: true })));
 assert.deepEqual(errors({ ...coupon, value: 101 }), { value: 'percent' });
 assert.deepEqual(errors({ ...coupon, value: 0 }), { value: 'too_small' });
 assert.deepEqual(errors({ ...coupon, type: 'fixed', value: 15000 }), {});

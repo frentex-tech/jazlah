@@ -54,6 +54,7 @@ class _Orders implements OrderRepository {
   final String? code;
   final bool then;
   final keys = <String>[];
+  final wallets = <int>[];
 
   @override
   Future<PlacedOrder> place({
@@ -62,6 +63,7 @@ class _Orders implements OrderRepository {
     int walletAmount = 0,
   }) async {
     keys.add(idempotencyKey);
+    wallets.add(walletAmount);
     if (code != null && (!then || keys.length == 1)) throw ApiError(code: code!);
     return inner.place(idempotencyKey: idempotencyKey, paymentMethod: paymentMethod, walletAmount: walletAmount);
   }
@@ -125,8 +127,14 @@ Future<void> _settle(WidgetTester t) async {
 JRadio _radio(WidgetTester t, String label) => t.widget<JRadio>(find.widgetWithText(JRadio, label));
 VoidCallback? _confirm(WidgetTester t) => t.widget<JButton>(find.widgetWithText(JButton, 'تأكيد الطلب')).onPressed;
 
+/// Picks the saved mada card (nothing is preselected).
+Future<void> _pickMada(WidgetTester t) async {
+  await t.tap(find.text('بطاقة مدى · تنتهي بـ 4821'));
+  await t.pump();
+}
+
 void main() {
-  testWidgets('default (170-28952): items, fulfilment, totals, methods, first method chosen', (t) async {
+  testWidgets('default (170-28952): items, fulfilment, totals, methods; nothing preselected (170-29357)', (t) async {
     await _pump(t);
     expect(find.text('الدفع والمراجعة'), findsOneWidget);
     expect(find.text('منتج واحد من مجازر الفلاح'), findsOneWidget);
@@ -136,12 +144,16 @@ void main() {
     expect(find.text('108.00 ر.س'), findsOneWidget);
     expect(find.text('15.00 ر.س'), findsOneWidget);
     expect(find.text('123.00 ر.س'), findsOneWidget);
-    expect(_radio(t, 'بطاقة مدى · تنتهي بـ 4821').checked, isTrue);
+    expect(_radio(t, 'بطاقة مدى · تنتهي بـ 4821').checked, isFalse);
     expect(_radio(t, 'محفظة جزلة · الرصيد غير كافٍ').onTap, isNull);
+    expect(find.text('اختر طريقة دفع للمتابعة'), findsOneWidget);
+    expect(_confirm(t), isNull);
     expect(find.text('استخدام رصيد المحفظة · 50.00 ر.س'), findsOneWidget); // the tender plan's wallet part
     const terms = 'بتأكيد الطلب فأنت توافق على الشروط والأحكام وسياسة الإلغاء.';
     await t.scrollUntilVisible(find.text(terms), 200, scrollable: find.byType(Scrollable).first);
     expect(find.text(terms), findsOneWidget);
+    await _pickMada(t);
+    expect(find.text('اختر طريقة دفع للمتابعة'), findsNothing);
     expect(_confirm(t), isNotNull);
   });
 
@@ -193,6 +205,7 @@ void main() {
 
   testWidgets('a card method → the payment step', (t) async {
     await _pump(t);
+    await _pickMada(t);
     await t.tap(find.text('تأكيد الطلب'));
     await _settle(t);
     expect(find.text('route:/checkout/pay/o-1'), findsOneWidget);
@@ -202,8 +215,14 @@ void main() {
   testWidgets('the wallet part (tender plan): the switch sends it at placement, the card pays the rest', (t) async {
     await _pump(t);
     final wallet = find.text('استخدام رصيد المحفظة · 50.00 ر.س');
-    await t.scrollUntilVisible(wallet, 200, scrollable: find.byType(Scrollable).first);
+    await t.ensureVisible(wallet);
+    await t.pump();
     await t.tap(wallet);
+    await t.pump();
+    await t.ensureVisible(find.text('بطاقة مدى · تنتهي بـ 4821'));
+    await t.pump();
+    await _pickMada(t);
+    await t.ensureVisible(find.textContaining('المتبقي'));
     await t.pump();
     expect(find.text('المتبقي 73.00 ر.س بطريقة الدفع المختارة'), findsOneWidget);
     expect(find.text('محفظة جزلة · الرصيد غير كافٍ'), findsNothing); // the wallet-only row steps aside
@@ -216,6 +235,7 @@ void main() {
 
   testWidgets('double tap on «تأكيد الطلب» creates one order', (t) async {
     await _pump(t);
+    await _pickMada(t);
     // Two taps in the same frame: the second runs before any rebuild.
     await t.tap(find.text('تأكيد الطلب'));
     await t.tap(find.text('تأكيد الطلب'), warnIfMissed: false);
@@ -227,6 +247,7 @@ void main() {
 
   testWidgets('a retry after a failure sends the same idempotency key', (t) async {
     await _pump(t, code: ApiError.network, then: true);
+    await _pickMada(t);
     await t.tap(find.text('تأكيد الطلب'));
     await _settle(t);
     expect(find.text('تعذّر الاتصال. تحقق من الإنترنت وحاول مرة أخرى.'), findsOneWidget);
@@ -257,8 +278,32 @@ void main() {
     expect(find.text('الدفع عند الاستلام'), findsOneWidget);
   });
 
+  testWidgets('a retry with the kept key sends the same wallet part, even if the balance changed', (t) async {
+    final c = await _pump(t, code: ApiError.network, then: true);
+    final wallet = find.text('استخدام رصيد المحفظة · 50.00 ر.س');
+    await t.ensureVisible(wallet);
+    await t.pump();
+    await t.tap(wallet);
+    await t.pump();
+    await t.ensureVisible(find.text('بطاقة مدى · تنتهي بـ 4821'));
+    await t.pump();
+    await _pickMada(t);
+    await t.tap(find.text('تأكيد الطلب'));
+    await _settle(t);
+    _orders.wallet.balance = 3000; // the balance moved; the tender plan would now say 30.00
+    c.invalidate(paymentMethodsProvider(null));
+    await _settle(t);
+    await t.pump(const Duration(seconds: 4));
+    await t.pumpAndSettle();
+    await t.tap(find.text('تأكيد الطلب'));
+    await _settle(t);
+    expect(_fake.keys[0], _fake.keys[1]);
+    expect(_fake.wallets, [5000, 5000]);
+  });
+
   testWidgets('while placing the methods are frozen, not drawn disabled', (t) async {
     await _pump(t);
+    await _pickMada(t);
     await t.tap(find.text('تأكيد الطلب'));
     await t.pump(const Duration(milliseconds: 50));
     expect(_radio(t, 'Apple Pay').onTap, isNotNull);
@@ -268,14 +313,44 @@ void main() {
     await _settle(t);
   });
 
+  testWidgets('WALLET_INSUFFICIENT: stays, the wallet part is switched off and the methods are read again', (t) async {
+    await _pump(t, code: 'WALLET_INSUFFICIENT', then: true);
+    final wallet = find.text('استخدام رصيد المحفظة · 50.00 ر.س');
+    await t.ensureVisible(wallet);
+    await t.pump();
+    await t.tap(wallet);
+    await t.pump();
+    await t.ensureVisible(find.text('بطاقة مدى · تنتهي بـ 4821'));
+    await t.pump();
+    await _pickMada(t);
+    await t.tap(find.text('تأكيد الطلب'));
+    await _settle(t);
+    expect(find.text('الدفع والمراجعة'), findsOneWidget);
+    expect(find.text('رصيد محفظتك لم يعد يكفي، اختر طريقة الدفع من جديد.'), findsOneWidget);
+    expect(find.textContaining('المتبقي'), findsNothing); // switched off
+    await t.pump(const Duration(seconds: 4));
+    await t.pumpAndSettle();
+    await t.tap(find.text('تأكيد الطلب')); // a definite refusal: not locked, mada still chosen
+    await _settle(t);
+    expect(_orders.orders.single.walletAmount, 0);
+  });
+
   test('every refusal code has its step', () {
-    for (final code in ['DAY_FULL', 'ADDRESS_NOT_COVERED', 'ORDERING_PAUSED', 'FULFILMENT_NOT_SUPPORTED']) {
+    for (final code in [
+      'DAY_FULL',
+      'DAY_NOT_AVAILABLE',
+      'FULFILMENT_REQUIRED',
+      'ADDRESS_NOT_COVERED',
+      'ORDERING_PAUSED',
+      'FULFILMENT_NOT_SUPPORTED',
+    ]) {
       expect(reviewExit(code), ReviewExit.fulfilment, reason: code);
     }
     for (final code in [
       'PRICE_CHANGED',
       'ITEM_UNAVAILABLE',
       'MIN_ORDER_NOT_MET',
+      'CART_EMPTY',
       'COUPON_NOT_FOUND',
       'COUPON_EXPIRED',
       'COUPON_MIN_ORDER',
@@ -285,6 +360,8 @@ void main() {
       expect(reviewExit(code), ReviewExit.cart, reason: code);
     }
     expect(reviewExit(ApiError.network), isNull);
+    expect(reviewExit('WALLET_INSUFFICIENT'), isNull); // stays; the methods are read again
+    expect(reviewExit('VALIDATION_FAILED'), isNull); // the validation pipe only, never a business refusal
   });
 
   group('through checkout step 1', () {
@@ -295,6 +372,7 @@ void main() {
     }
 
     Future<void> confirm(WidgetTester t) async {
+      await _pickMada(t);
       await t.tap(find.text('تأكيد الطلب'));
       await _settle(t);
     }
@@ -326,6 +404,25 @@ void main() {
       await confirm(t);
       expect(find.text('الطلبات متوقفة مؤقتًا، سنعود قريبًا'), findsOneWidget);
     });
+
+    for (final code in ['DAY_NOT_AVAILABLE', 'FULFILMENT_REQUIRED']) {
+      testWidgets('$code → the day step', (t) async {
+        await _pump(t, screen: const CheckoutScreen(), code: code);
+        await toReview(t);
+        await confirm(t);
+        expect(find.text('الخطوة 1 من 3: الاستلام واليوم'), findsOneWidget);
+        expect(find.text('الدفع والمراجعة'), findsNothing);
+      });
+    }
+
+    for (final code in ['CART_EMPTY', 'ITEM_UNAVAILABLE', 'MIN_ORDER_NOT_MET']) {
+      testWidgets('$code → the cart', (t) async {
+        await _pump(t, screen: const CheckoutScreen(), code: code);
+        await toReview(t);
+        await confirm(t);
+        expect(find.text('route:/cart'), findsOneWidget);
+      });
+    }
 
     testWidgets('system back is refused while placing; the order then shows and the cart is re-read', (t) async {
       final c = await _pump(t, screen: const CheckoutScreen());
