@@ -5,12 +5,13 @@
 // ignore_for_file: unused_element
 import 'package:jazla_api/src/model/localized_text_response_dto.dart';
 import 'package:jazla_api/src/model/named_reference_response_dto.dart';
+import 'package:jazla_api/src/model/public_product_size_response_dto.dart';
 import 'package:jazla_api/src/model/optional_localized_text_response_dto.dart';
 import 'package:jazla_api/src/model/product_image_response_dto.dart';
-import 'package:jazla_api/src/model/product_cutting_response_dto.dart';
+import 'package:jazla_api/src/model/incompatible_pair_response_dto.dart';
 import 'package:jazla_api/src/model/product_packaging_response_dto.dart';
 import 'package:jazla_api/src/model/product_vendor_response_dto.dart';
-import 'package:jazla_api/src/model/product_size_response_dto.dart';
+import 'package:jazla_api/src/model/public_product_cutting_response_dto.dart';
 import 'package:json_annotation/json_annotation.dart';
 
 part 'public_product_response_dto.g.dart';
@@ -40,15 +41,21 @@ class PublicProductResponseDto {
 
     required  this.fulfilment,
 
+    required  this.isAvailable,
+
     required  this.images,
 
     required  this.sizes,
+
+    required  this.defaultSizeId,
 
     required  this.cuttings,
 
     required  this.packagings,
 
     required  this.exclusions,
+
+    required  this.incompatiblePairs,
 
     required  this.minPriceHalalas,
   });
@@ -145,6 +152,19 @@ class PublicProductResponseDto {
 
 
 
+      /// Whether the product can be ordered now; `false`: out of stock (the page shows it, nothing can be added). An unavailable product is left out of the public list.
+  @JsonKey(
+    
+    name: r'isAvailable',
+    required: true,
+    includeIfNull: false,
+  )
+
+
+  final bool isAvailable;
+
+
+
       /// The images in display order, the first is the cover.
   @JsonKey(
     
@@ -158,7 +178,7 @@ class PublicProductResponseDto {
 
 
 
-      /// The sizes to choose from, in display order, each with its approximate weight and price; at least one.
+      /// The sizes to choose from, in display order, each with its approximate weight, price and availability; at least one.
   @JsonKey(
     
     name: r'sizes',
@@ -167,11 +187,24 @@ class PublicProductResponseDto {
   )
 
 
-  final List<ProductSizeResponseDto> sizes;
+  final List<PublicProductSizeResponseDto> sizes;
 
 
 
-      /// The cutting styles to choose from, with their extra prices; empty when there is no cutting choice.
+      /// The size chosen when the page opens: the first available size in display order; null when no size is available.
+  @JsonKey(
+    
+    name: r'defaultSizeId',
+    required: true,
+    includeIfNull: true,
+  )
+
+
+  final String? defaultSizeId;
+
+
+
+      /// The cutting styles to choose from, with their extra prices; empty when there is no cutting choice. With any, the customer must choose one (OPTION_REQUIRED).
   @JsonKey(
     
     name: r'cuttings',
@@ -180,7 +213,7 @@ class PublicProductResponseDto {
   )
 
 
-  final List<ProductCuttingResponseDto> cuttings;
+  final List<PublicProductCuttingResponseDto> cuttings;
 
 
 
@@ -210,6 +243,19 @@ class PublicProductResponseDto {
 
 
 
+      /// Cutting style and packaging pairs among this product’s options that may not be chosen together (admin rules); the cart’s line price (CRT-API-1) will refuse one (INCOMPATIBLE_CUTTING_PACKAGING). Empty when none applies.
+  @JsonKey(
+    
+    name: r'incompatiblePairs',
+    required: true,
+    includeIfNull: false,
+  )
+
+
+  final List<IncompatiblePairResponseDto> incompatiblePairs;
+
+
+
       /// The lowest size price in halalas, VAT included (`95000` is 950.00 SAR): the \"from\" price.
   @JsonKey(
     
@@ -234,11 +280,14 @@ class PublicProductResponseDto {
       other.category == category &&
       other.meatType == meatType &&
       other.fulfilment == fulfilment &&
+      other.isAvailable == isAvailable &&
       other.images == images &&
       other.sizes == sizes &&
+      other.defaultSizeId == defaultSizeId &&
       other.cuttings == cuttings &&
       other.packagings == packagings &&
       other.exclusions == exclusions &&
+      other.incompatiblePairs == incompatiblePairs &&
       other.minPriceHalalas == minPriceHalalas;
 
     @override
@@ -250,11 +299,14 @@ class PublicProductResponseDto {
         category.hashCode +
         (meatType == null ? 0 : meatType.hashCode) +
         fulfilment.hashCode +
+        isAvailable.hashCode +
         images.hashCode +
         sizes.hashCode +
+        (defaultSizeId == null ? 0 : defaultSizeId.hashCode) +
         cuttings.hashCode +
         packagings.hashCode +
         exclusions.hashCode +
+        incompatiblePairs.hashCode +
         minPriceHalalas.hashCode;
 
   factory PublicProductResponseDto.fromJson(Map<String, dynamic> json) => _$PublicProductResponseDtoFromJson(json);

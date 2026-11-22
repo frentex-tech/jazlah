@@ -19,11 +19,14 @@ PublicProductResponseDto _$PublicProductResponseDtoFromJson(
       'category',
       'meatType',
       'fulfilment',
+      'isAvailable',
       'images',
       'sizes',
+      'defaultSizeId',
       'cuttings',
       'packagings',
       'exclusions',
+      'incompatiblePairs',
       'minPriceHalalas',
     ],
   );
@@ -61,6 +64,7 @@ PublicProductResponseDto _$PublicProductResponseDtoFromJson(
             PublicProductResponseDtoFulfilmentEnum.unknownDefaultOpenApi,
       ),
     ),
+    isAvailable: $checkedConvert('isAvailable', (v) => v as bool),
     images: $checkedConvert(
       'images',
       (v) => (v as List<dynamic>)
@@ -73,16 +77,20 @@ PublicProductResponseDto _$PublicProductResponseDtoFromJson(
       'sizes',
       (v) => (v as List<dynamic>)
           .map(
-            (e) => ProductSizeResponseDto.fromJson(e as Map<String, dynamic>),
+            (e) => PublicProductSizeResponseDto.fromJson(
+              e as Map<String, dynamic>,
+            ),
           )
           .toList(),
     ),
+    defaultSizeId: $checkedConvert('defaultSizeId', (v) => v as String?),
     cuttings: $checkedConvert(
       'cuttings',
       (v) => (v as List<dynamic>)
           .map(
-            (e) =>
-                ProductCuttingResponseDto.fromJson(e as Map<String, dynamic>),
+            (e) => PublicProductCuttingResponseDto.fromJson(
+              e as Map<String, dynamic>,
+            ),
           )
           .toList(),
     ),
@@ -104,6 +112,15 @@ PublicProductResponseDto _$PublicProductResponseDtoFromJson(
           )
           .toList(),
     ),
+    incompatiblePairs: $checkedConvert(
+      'incompatiblePairs',
+      (v) => (v as List<dynamic>)
+          .map(
+            (e) =>
+                IncompatiblePairResponseDto.fromJson(e as Map<String, dynamic>),
+          )
+          .toList(),
+    ),
     minPriceHalalas: $checkedConvert('minPriceHalalas', (v) => v as num),
   );
   return val;
@@ -120,11 +137,16 @@ Map<String, dynamic> _$PublicProductResponseDtoToJson(
   'meatType': instance.meatType?.toJson(),
   'fulfilment':
       _$PublicProductResponseDtoFulfilmentEnumEnumMap[instance.fulfilment]!,
+  'isAvailable': instance.isAvailable,
   'images': instance.images.map((e) => e.toJson()).toList(),
   'sizes': instance.sizes.map((e) => e.toJson()).toList(),
+  'defaultSizeId': instance.defaultSizeId,
   'cuttings': instance.cuttings.map((e) => e.toJson()).toList(),
   'packagings': instance.packagings.map((e) => e.toJson()).toList(),
   'exclusions': instance.exclusions.map((e) => e.toJson()).toList(),
+  'incompatiblePairs': instance.incompatiblePairs
+      .map((e) => e.toJson())
+      .toList(),
   'minPriceHalalas': instance.minPriceHalalas,
 };
 

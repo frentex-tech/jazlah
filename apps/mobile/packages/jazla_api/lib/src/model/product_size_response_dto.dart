@@ -26,6 +26,8 @@ class ProductSizeResponseDto {
     required  this.priceHalalas,
 
     required  this.tag,
+
+    required  this.isAvailable,
   });
 
       /// The size id (UUID): send it back to keep the size in a content edit, or as `sizeId` to change its price. Null only for a new size proposed in a change request.
@@ -80,6 +82,19 @@ class ProductSizeResponseDto {
 
 
 
+      /// Whether this size can be ordered now (switched by the availability edit); null only inside a change request, where a new size starts available and a kept one keeps its availability.
+  @JsonKey(
+    
+    name: r'isAvailable',
+    required: true,
+    includeIfNull: true,
+  )
+
+
+  final bool? isAvailable;
+
+
+
 
 
     @override
@@ -87,14 +102,16 @@ class ProductSizeResponseDto {
       other.id == id &&
       other.approxWeightGrams == approxWeightGrams &&
       other.priceHalalas == priceHalalas &&
-      other.tag == tag;
+      other.tag == tag &&
+      other.isAvailable == isAvailable;
 
     @override
     int get hashCode =>
         (id == null ? 0 : id.hashCode) +
         approxWeightGrams.hashCode +
         priceHalalas.hashCode +
-        (tag == null ? 0 : tag.hashCode);
+        (tag == null ? 0 : tag.hashCode) +
+        (isAvailable == null ? 0 : isAvailable.hashCode);
 
   factory ProductSizeResponseDto.fromJson(Map<String, dynamic> json) => _$ProductSizeResponseDtoFromJson(json);
 
