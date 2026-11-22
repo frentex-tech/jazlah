@@ -1,7 +1,7 @@
 import { defineConfig, devices } from '@playwright/test';
 
 // Acceptance checks against a running API (services/api, seeded, with the review accounts): CI job "api-e2e".
-// Locally: start a freshly seeded API (services/api/README.md) with the review accounts of the CI job, build with
+// Locally: start a freshly seeded API (services/api/README.md) with the review accounts of the CI job (AUTH_REVIEW_ACCOUNTS in ci-dashboard.yml), build with
 // MEDIA_ORIGINS=http://localhost:9002, then API_URL=http://localhost:3000 pnpm test:e2e:api
 const port = Number(process.env.PORT ?? 3002);
 
