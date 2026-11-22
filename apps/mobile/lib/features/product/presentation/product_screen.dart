@@ -47,6 +47,18 @@ class _ProductScreenState extends ConsumerState<ProductScreen> {
     super.dispose();
   }
 
+  /// Another product in the same place (a link replacing the route): start over from its own default size.
+  @override
+  void didUpdateWidget(ProductScreen old) {
+    super.didUpdateWidget(old);
+    if (old.id == widget.id) return;
+    _selection = null;
+    _page = 0;
+    _cutError = false;
+    _explained = null;
+    _notes.clear();
+  }
+
   void _set(ProductSelection s) => setState(() {
     _selection = s;
     if (s.cutId != null) _cutError = false;
@@ -57,13 +69,6 @@ class _ProductScreenState extends ConsumerState<ProductScreen> {
       setState(() => _cutError = true);
       final target = _cutKey.currentContext;
       if (target != null) await Scrollable.ensureVisible(target, duration: const Duration(milliseconds: 300));
-      return;
-    }
-    // A size without a real id would be skipped by the server cart (or its merge): refuse it here.
-    final size = p.sizes.where((s) => s.id == _selection!.sizeId).firstOrNull;
-    if (size != null && !size.hasRealId) {
-      debugPrint('add to cart refused: size ${size.id} of ${p.id} has no id from the API');
-      showJToast(context, message: AppLocalizations.of(context).productSizeNoId, kind: JToastKind.error);
       return;
     }
     setState(() => _adding = true);

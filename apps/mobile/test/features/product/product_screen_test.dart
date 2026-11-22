@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:go_router/go_router.dart';
 import 'package:jazlah/core/errors/api_error.dart';
 import 'package:jazlah/core/widgets/widgets.dart';
 import 'package:jazlah/features/product/data/mock_product_repository.dart';
@@ -146,6 +147,28 @@ void main() {
     await t.tap(find.bySemanticsLabel('السلة'));
     await t.pumpAndSettle();
     expect(find.text('route:/cart'), findsOneWidget);
+  });
+
+  testWidgets('another product in the same place starts from its own default size', (t) async {
+    await t.pumpScreen(
+      const ProductScreen(id: 'p-falah-ribeye'),
+      overrides: [productRepositoryProvider.overrideWithValue(_Repo())],
+      routes: [
+        GoRoute(
+          path: '/product/:id',
+          builder: (_, s) => ProductScreen(id: s.pathParameters['id']!),
+        ),
+      ],
+    );
+    await t.pump();
+    GoRouter.of(t.element(find.byType(ProductScreen))).go('/product/p-falah-ribeye');
+    await t.pumpAndSettle();
+    final before = _total(t);
+    GoRouter.of(t.element(find.byType(ProductScreen))).go('/product/p-falah-harri-half');
+    await t.pumpAndSettle();
+    expect(t.widget<JChip>(find.widgetWithText(JChip, '7 كجم')).selected, isTrue);
+    expect(_total(t), isNot('0.00'));
+    expect(_total(t), isNot(before));
   });
 
   testWidgets('a sold-out size is disabled', (t) async {

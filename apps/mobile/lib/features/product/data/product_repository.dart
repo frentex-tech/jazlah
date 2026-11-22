@@ -48,6 +48,7 @@ class ApiProductRepository implements ProductRepository {
             grams: s.approxWeightGrams.toInt(),
             priceHalalas: s.priceHalalas.toInt(),
             tag: s.tag == null ? null : _text(s.tag!),
+            available: s.isAvailable,
           ),
       ],
       cuts: [
@@ -60,9 +61,11 @@ class ApiProductRepository implements ProductRepository {
             ProductOption(id: p.packaging.value, name: name, extraHalalas: p.extraPriceHalalas.toInt()),
       ],
       exclusions: [for (final e in d.exclusions) ProductOption(id: e.id, name: _text(e.name))],
-      // shortcut: the public detail has no availability, per-size stock, store rating, freshness, default
-      // size or cut↔packaging rules, API gap for CAT-API-5 #50 (not-built-yet.md). Shown as available with no rules; the
-      // server still refuses an unavailable size or an incompatible pair when the cart prices the line.
+      available: d.isAvailable,
+      defaultSizeId: d.defaultSizeId,
+      incompatible: incompatibleFrom([for (final i in d.incompatiblePairs) (i.cuttingStyleId, i.packaging.value)]),
+      // shortcut: no store rating or freshness (slaughter time, chilled window) in the public detail yet, API gap
+      // for CAT-API-5 #50 (not-built-yet.md); both are hidden.
     );
   }
 

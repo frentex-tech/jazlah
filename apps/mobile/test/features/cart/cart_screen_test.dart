@@ -13,10 +13,7 @@ import 'package:jazlah/features/cart/data/cart_repository.dart';
 import 'package:jazlah/features/cart/domain/cart.dart';
 import 'package:jazlah/features/cart/presentation/cart_providers.dart';
 import 'package:jazlah/features/cart/presentation/cart_screen.dart';
-import 'package:jazlah/features/catalog/domain/catalog.dart';
 import 'package:jazlah/features/product/data/mock_product_repository.dart';
-import 'package:jazlah/features/product/data/product_repository.dart';
-import 'package:jazlah/features/product/domain/product.dart';
 import 'package:jazlah/features/product/presentation/product_providers.dart';
 import 'package:jazlah/features/product/presentation/product_screen.dart';
 
@@ -40,12 +37,12 @@ class _Server extends MockCartRepository {
 
 /// Signed in with the mock account cart and ops settings, unless [server] is null (a real build: the cart
 /// stays on the device and nothing about fees or minimums is known).
-List<dynamic> _overrides(MockCartRepository? server, {bool guest = false, ProductRepository? products}) {
+List<dynamic> _overrides(MockCartRepository? server, {bool guest = false}) {
   final tokens = MemoryTokens(guest ? null : const AuthTokens(accessToken: 'a', refreshToken: 'r'));
   return [
     tokenStorageProvider.overrideWithValue(tokens),
     authRepositoryProvider.overrideWithValue(MockAuthRepository(tokens)),
-    productRepositoryProvider.overrideWithValue(products ?? MockProductRepository(delay: Duration.zero)),
+    productRepositoryProvider.overrideWithValue(MockProductRepository(delay: Duration.zero)),
     cartRepositoryProvider.overrideWithValue(server),
     cartSettingsProvider.overrideWithValue(server == null ? null : MockCartRepository.opsSettings),
   ];
@@ -233,29 +230,4 @@ void main() {
     await _settle(t); // the dialog has closed
     expect(find.bySemanticsLabel('السلة 1'), findsOneWidget);
   });
-
-  testWidgets('a size without an id from the API is refused with a toast, nothing reaches the cart', (t) async {
-    final server = _Server();
-    await t.pumpScreen(
-      const ProductScreen(id: 'p-x'),
-      overrides: _overrides(server, products: _StandInSizes()),
-    );
-    await t.pump();
-    await t.pump();
-    await t.tap(find.text('أضف إلى السلة'));
-    await t.pump();
-    expect(find.text('لا يمكن إضافة هذا المقاس إلى السلة حاليًا.'), findsOneWidget);
-    expect((await server.get()).lines, isEmpty);
-  });
-}
-
-/// A public product whose size came without an id (the repository made a stand-in id).
-class _StandInSizes implements ProductRepository {
-  @override
-  Future<ProductDetail> product(String id) async => const ProductDetail(
-    id: 'p-x',
-    vendorId: 'v-falah',
-    name: LocalizedText('منتج', 'Product'),
-    sizes: [ProductSize(id: '${ProductSize.standInPrefix}0', grams: 500, priceHalalas: 4000)],
-  );
 }

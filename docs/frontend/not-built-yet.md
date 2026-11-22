@@ -153,14 +153,14 @@ The app reads the public catalog through one repository. Categories, product lis
 
 ### Product detail and customization (STF-MOB-3 #56)
 
-The product page reads one public product (images, sizes, cuts, packagings, exclusions, description). The displayed total is computed on the device by one pure function with the CAT-API-1 formula (size + cut extra + packaging extra, times quantity, VAT included, exclusions free) and returns the same shape and error codes as the server pricing; the server stays authoritative in the cart. With the mock switch on, every seeded product has options (the Al Falah ribeye matches the design option for option, one product per store is out of stock, one carcass has a sold-out size).
+The product page reads one public product (images, sizes with their availability, cuts, packagings, exclusions, description, availability, default size and the cutting and packaging pairs that cannot go together). An unavailable product opens with the unavailable notice and the add button disabled; an unavailable size shows but cannot be chosen; the default size is preselected; a packaging that does not go with the chosen cut cannot be chosen and says why. The displayed total is computed on the device by one pure function with the server's formula and error order, and the app's tests run every case of [fixtures/pricing-cases.json](fixtures/pricing-cases.json) against it; the server stays authoritative in the cart. With the mock switch on, every seeded product has options (the Al Falah ribeye matches the design option for option, one product per store is out of stock, one carcass has a sold-out size).
 
 | Gap | Screen waiting on it | The app today | Issue |
 |---|---|---|---|
 | Slaughter time and chilled delivery window | Product: freshness card | Hidden | API gap |
 | Store rating in the product | Product: rating next to the store name | Hidden | API gap |
 | A gift box packaging | Product: packaging list (the design shows one) | The API knows trays, bags, vacuum and none; only the mock offers a gift box | API gap |
-| Server price for a product line (pricing route) | Product: total and price details | Computed on the device with the same formula, in one place to swap. The server's function and its error names are fixed (`priceLine`: PRODUCT_UNAVAILABLE, SIZE_UNAVAILABLE, OPTION_NOT_IN_PRODUCT, INCOMPATIBLE_CUTTING_PACKAGING, OPTION_REQUIRED) and proven against [fixtures/pricing-cases.json](fixtures/pricing-cases.json), which the app's tests should read too; no route prices a single line: the cart (CRT-API-1) returns the server's prices | CRT-API-1 #61 |
+| Server price for a product line | Product: total and price details | Computed on the device by the same function, proven on the shared cases; no route prices a single line: the cart returns the server's prices | CRT-API-1 #61 |
 | A design for the fulfilment badge (delivery, pickup or both) | Product: the badge the task Output asks for | The value is read from the product and kept, nothing is drawn until the badge is designed | Design gap |
 | "Notify me when back in stock" (stock alerts) | Product: out-of-stock notice | The notice says only that the product is unavailable; the design's "you can ask to be notified" sentence is left out until the feature exists | API gap |
 
@@ -245,7 +245,7 @@ The orders tab and the order detail follow the ORD-API-3 shapes of sprint-3.md: 
 
 ### Search and filters (STF-MOB-4 #57)
 
-Search reads the public product list with its words, category, store and price range, cursor-paged. Recent searches are kept on the device (8 at most, cleared on sign-out). With the mock switch on, the seeded catalog is searched on the device the way the server searches: the folded query as one phrase inside the folded Arabic and English product names (no tashkeel or tatweel; أ/إ/آ as ا; ى as ي; ة as ه; English in any case), so «نعيمى» finds «نعيمي» and "naimi" finds the English name. **The server has changed (B5, 2026-11-22):** every word on its own, all of them required, in any order, anywhere in the product's Arabic and English names or at the start of a word of its store's names (so «لحم» does not find every «ملحمة …» store), one-letter words ignored, and ٱ also reads as ا; the mock still searches one phrase in product names only. The words are trimmed and searched only from 2 to 100 characters (shorter text shows the start screen). Recent searches drop repeats that fold to the same words.
+Search reads the public product list with its words, category, store and price range, cursor-paged. Recent searches are kept on the device (8 at most, cleared on sign-out). With the mock switch on, the seeded catalog is searched on the device exactly the way the server searches (B5, 2026-11-22): every word on its own, all of them required, in any order, anywhere in the product's Arabic and English names or at the start of a word of its store's names (so «لحم» does not find every «ملحمة …» store), one-letter words ignored; words folded (no tashkeel or tatweel; أ/إ/آ/ٱ as ا; ى as ي; ة as ه; English in any case), so «نعيمى» finds «نعيمي» and "naimi" finds the English name. The words are trimmed and searched only from 2 to 100 characters (shorter text shows the start screen). Recent searches drop repeats that fold to the same words.
 
 | Gap | Screen waiting on it | The app today | Issue |
 |---|---|---|---|
@@ -255,6 +255,5 @@ Search reads the public product list with its words, category, store and price r
 | An "available now only" filter | Filters sheet: switch and its chip | Switch hidden; the mock filters | API gap |
 | A public list of meat types | Filters sheet: meat type (not in the design) | Not shown; the product list already accepts a meat type, so it can be added once names can be listed | API gap |
 | Store names for any store id (or the whole store list in one call) | Search: store chips in the filters sheet and the active store chip | Only the first page of stores is offered; a chosen store outside it shows as a generic "Store" chip | API gap |
-| Store names in search (and words in any order) | Search results | The server does both since B5 (2026-11-22); the mock still searches one phrase in product names, so it finds fewer results than the server | mobile follow-up (CAT-API-5 #50) |
 
 When one of these lands, its endpoints appear in `openapi.json`, and this file and the module guides are updated in the same pull request.

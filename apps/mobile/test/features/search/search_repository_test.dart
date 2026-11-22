@@ -17,8 +17,8 @@ import '../../helpers/fakes.dart';
 void main() {
   group('normalizeSearch', () {
     test('ى → ي', () => expect(normalizeSearch('نعيمى'), normalizeSearch('نعيمي')));
-    test('أ إ آ → ا (as the server; ٱ is not folded)', () {
-      expect(normalizeSearch('أإآ'), 'ااا');
+    test('أ إ آ ٱ → ا (as the server)', () {
+      expect(normalizeSearch('أإآٱ'), 'اااا');
       expect(normalizeSearch('ريب آي'), normalizeSearch('ريب أي'));
     });
     test('ة → ه', () => expect(normalizeSearch('كبدة'), 'كبده'));
@@ -58,11 +58,44 @@ void main() {
       expect(await names('RIBEYE'), {'ريب آي بقري طازج'});
     });
 
-    test('as the server: one phrase in the product names, store names not searched', () async {
+    // The server's catalog e2e cases (services/api/test/catalog.e2e-spec.ts, search), on the mock catalog.
+    test('every word is needed, in any order', () async {
       expect(await names('غنم نعيمي مفروم'), {'لحم غنم نعيمي مفروم'});
-      expect(await names('مفروم غنم'), isEmpty); // words out of order
-      expect(await names('الفلاح'), isEmpty); // a store name only
+      expect(await names('مفروم غنم'), {'لحم غنم نعيمي مفروم'}); // any order
+      expect(await names('naimi   minced'), {'لحم غنم نعيمي مفروم'});
+      expect(await names('نعيمي حري'), isEmpty); // both words are needed
       expect(await names('xyz'), isEmpty);
+    });
+
+    test('ٱ reads as ا, both ways', () async {
+      expect(await names('ٱلفلاح'), await names('الفلاح'));
+      expect(await names('ٱلفلاح'), isNotEmpty);
+    });
+
+    test('a store name matches from the start of its words only', () async {
+      // «ملحمة النخبة»: «النخبة» and «ملحمة» start words; «لحم» and «خبة» are inside them.
+      final nukhba = {
+        for (final p in await find(const SearchQuery(text: 'النخبة'))) p.vendorId,
+      };
+      expect(nukhba, {'v-nukhba'});
+      expect(
+        await find(const SearchQuery(text: 'ملحمة')),
+        hasLength((await find(const SearchQuery(text: 'nukhba'))).length),
+      );
+      expect(await find(const SearchQuery(text: 'خبة')), isEmpty);
+      // «لحم» finds products named «لحم …», not every «ملحمة» product.
+      final meat = await find(const SearchQuery(text: 'لحم'));
+      expect(meat, isNotEmpty);
+      expect(meat.every((p) => normalizeSearch('${p.name.ar} ${p.name.en}').contains('لحم')), isTrue);
+      // A store word and a product word together.
+      expect(await names('النخبة كبدة'), {'كبدة غنم طازجة'});
+      expect({for (final p in await find(const SearchQuery(text: 'butch liver'))) p.name.en}, {'Fresh lamb liver'});
+    });
+
+    test('one-letter words are ignored; none left answers nothing', () async {
+      expect(await find(const SearchQuery(text: 'a b')), isEmpty);
+      expect(await find(const SearchQuery(text: 'ًـ ٌ')), isEmpty);
+      expect(await names('كبدة ل'), {'كبدة غنم طازجة'});
     });
 
     test('filters: category, store, price, availability', () async {

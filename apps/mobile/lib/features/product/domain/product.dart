@@ -19,12 +19,6 @@ class ProductSize {
 
   final String id;
 
-  /// Ids made up on the device for a size the public product sends without one.
-  // shortcut: stand-in size ids can't go to the cart until CAT-API-1 #48 sends non-null size ids (lead review
-  // A13 / Sprint 2 B4, not-built-yet.md).
-  static const standInPrefix = 'size-';
-  bool get hasRealId => !id.startsWith(standInPrefix);
-
   /// Approximate weight; the label ("500 g", "1 kg") is built from it.
   final int grams;
   final int priceHalalas;
@@ -151,4 +145,14 @@ class ProductSelection {
 
   ProductSelection withQuantity(int q) =>
       _copy(sizeId: sizeId, cutId: cutId, packagingId: packagingId, quantity: q.clamp(1, maxQuantity));
+}
+
+/// The public product's `incompatiblePairs` (cutting style, packaging) as [ProductDetail.incompatible]:
+/// packaging id → the cut ids it does not go with.
+Map<String, Set<String>> incompatibleFrom(Iterable<(String cutId, String packagingId)> pairs) {
+  final map = <String, Set<String>>{};
+  for (final (cut, packaging) in pairs) {
+    (map[packaging] ??= {}).add(cut);
+  }
+  return map;
 }

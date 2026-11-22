@@ -25,7 +25,7 @@ class _Api implements HttpClientAdapter {
 }
 
 void main() {
-  test('maps every cut and keeps the size id', () async {
+  test('maps cuts, sizes with their availability, the default size and the incompatible pairs', () async {
     final api = JazlaApi(dio: Dio(BaseOptions(baseUrl: 'http://api.test')))
       ..dio.httpClientAdapter = _Api({
         'id': 'p1',
@@ -44,6 +44,7 @@ void main() {
         'images': <Object>[],
         'sizes': [
           {'id': 's1', 'approxWeightGrams': 1000, 'priceHalalas': 8900, 'tag': null, 'isAvailable': true},
+          {'id': 's2', 'approxWeightGrams': 2000, 'priceHalalas': 17200, 'tag': null, 'isAvailable': false},
         ],
         'cuttings': [
           {
@@ -57,15 +58,25 @@ void main() {
             'extraPriceHalalas': 200,
           },
         ],
-        'packagings': <Object>[],
+        'packagings': [
+          {'packaging': 'trays', 'extraPriceHalalas': 0},
+          {'packaging': 'vacuum', 'extraPriceHalalas': 500},
+        ],
         'exclusions': <Object>[],
         'minPriceHalalas': 8900,
-        'isAvailable': true,
+        'isAvailable': false,
         'defaultSizeId': 's1',
-        'incompatiblePairs': <Object>[],
+        'incompatiblePairs': [
+          {'cuttingStyleId': 'cut-2', 'packaging': 'trays'},
+        ],
       });
     final p = await ApiProductRepository(api).product('p1');
     expect(p.cuts.map((c) => c.id), ['cut-1', 'cut-2']);
-    expect(p.sizes.single.id, 's1');
+    expect(p.sizes.map((s) => (s.id, s.available)), [('s1', true), ('s2', false)]);
+    expect(p.available, isFalse); // an unavailable product now opens, marked
+    expect(p.defaultSizeId, 's1');
+    expect(p.compatible('cut-2', 'trays'), isFalse);
+    expect(p.compatible('cut-2', 'vacuum'), isTrue);
+    expect(p.compatible('cut-1', 'trays'), isTrue);
   });
 }
