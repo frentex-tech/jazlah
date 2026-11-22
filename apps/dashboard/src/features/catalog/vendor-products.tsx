@@ -16,7 +16,7 @@ import { toast } from '@/components/ui/toast';
 import { Link, useRouter } from '@/i18n/navigation';
 import { dayOf } from '@/lib/date';
 import { sar } from '@/lib/money';
-import { ApiError } from '@/lib/panel-fetch';
+import { PRODUCT_NOT_SUBMITTABLE, ApiError } from '@/lib/panel-fetch';
 import { productBadge } from './products-list';
 import { PRODUCT_STATUSES, type Page, type Product, type ProductCard, type ProductStatus, type RefItem } from './types';
 import { StoreBlocked, vendorFetch } from './vendor-product';
@@ -90,7 +90,7 @@ export function VendorProducts() {
       } catch (e) {
         const code = e instanceof ApiError ? e.code : '';
         if (code === 'VENDOR_SUSPENDED') return setData('blocked');
-        toast('error', t(code === 'PRODUCT_NOT_SUBMITTABLE' ? 'failed.incomplete' : code === 'PRODUCT_NOT_EDITABLE' ? 'failed.notEditable' : 'failed.other'));
+        toast('error', t(code === PRODUCT_NOT_SUBMITTABLE ? 'failed.incomplete' : code === 'PRODUCT_NOT_EDITABLE' ? 'failed.notEditable' : 'failed.other'));
       } finally {
         setBusy(null);
       }

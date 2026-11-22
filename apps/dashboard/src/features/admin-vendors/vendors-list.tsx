@@ -14,7 +14,7 @@ import { StateCard } from '@/components/ui/state-card';
 import { Tabs } from '@/components/ui/tabs';
 import { Link } from '@/i18n/navigation';
 import { dayOf } from '@/lib/date';
-import { ApiError, panelFetch } from '@/lib/panel-fetch';
+import { PERMISSION_DENIED, ApiError, panelFetch } from '@/lib/panel-fetch';
 import { TABS, percentOf, type Application, type Page, type Tab, type Vendor } from './types';
 
 // shortcut: a fixed list of the main cities, API gap (no cities endpoint); the API filters vendors by exact city (#46).
@@ -73,7 +73,7 @@ export function VendorsList() {
         if (req === latest.current) setData({ rows: p.items.map((v) => vendorRow(v, locale)), next: p.nextCursor });
       }
     } catch (e) {
-      if (req === latest.current) setData(e instanceof ApiError && e.code === 'NOT_ALLOWED' ? 'denied' : 'error');
+      if (req === latest.current) setData(e instanceof ApiError && e.code === PERMISSION_DENIED ? 'denied' : 'error');
     }
   }, [tab, q, city, cursor, locale]);
   useEffect(() => void load(), [load]);

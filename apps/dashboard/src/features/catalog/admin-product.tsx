@@ -7,10 +7,10 @@ import { Button, buttonVariants } from '@/components/ui/button';
 import { StateCard } from '@/components/ui/state-card';
 import { toast } from '@/components/ui/toast';
 import { Link } from '@/i18n/navigation';
-import { ApiError, panelFetch } from '@/lib/panel-fetch';
+import { PERMISSION_DENIED, ApiError, panelFetch } from '@/lib/panel-fetch';
 import { loadAll, uploadImage } from './client';
 import { ProductForm, ProductFormSkeleton, SubmitError, type FormOptions, type ProductFormValues } from './product-form/product-form';
-import { priceChanges, priceField } from './product-form/values';
+import { availabilityChange, priceChanges, priceField } from './product-form/values';
 import type { Review } from '@/features/admin-vendors/types';
 import { bySortOrder, type Packaging, type Product, type RefItem, type Rule } from './types';
 
@@ -59,7 +59,7 @@ export function AdminProduct({ id }: { id?: string }) {
       setState(review?.vendor && !review.vendor.isPlatform ? 'foreign' : { product, options });
     } catch (e) {
       const code = e instanceof ApiError ? e.code : '';
-      setState(code === 'NOT_ALLOWED' ? 'denied' : code === 'NOT_FOUND' ? 'missing' : 'error');
+      setState(code === PERMISSION_DENIED ? 'denied' : code === 'NOT_FOUND' ? 'missing' : 'error');
     }
   }, [id]);
   useEffect(() => void load(), [load]);
@@ -100,7 +100,8 @@ export function AdminProduct({ id }: { id?: string }) {
         contentSaved = true;
         if (values.fulfilment !== p.fulfilment) p = await panelFetch<Product>('admin', `${BASE}/products/${id}/fulfilment`, json('PATCH', { fulfilment: values.fulfilment }));
       }
-      if (values.isAvailable !== p.isAvailable) p = await panelFetch<Product>('admin', `${BASE}/products/${p.id}/availability`, json('PATCH', { isAvailable: values.isAvailable }));
+      const availability = availabilityChange(p, values);
+      if (availability) p = await panelFetch<Product>('admin', `${BASE}/products/${p.id}/availability`, json('PATCH', availability));
       if (intent === 'publish' && p.status === 'draft') p = await panelFetch<Product>('admin', `${BASE}/products/${p.id}/publish`, json('POST'));
     } catch (e) {
       throw fail(e, p === product ? null : p);

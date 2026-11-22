@@ -3,7 +3,7 @@
 import { CalendarBlank, DotsThree } from '@phosphor-icons/react';
 import type { ColumnDef } from '@tanstack/react-table';
 import { useLocale, useTranslations } from 'next-intl';
-import { useCallback, useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { PageHeader } from '@/components/shell/page-header';
 import { dayOf } from '@/lib/date';
 import type { Vendor } from '@/features/admin-vendors/types';
@@ -17,7 +17,7 @@ import { Switch } from '@/components/ui/switch';
 import { toast } from '@/components/ui/toast';
 import { Link } from '@/i18n/navigation';
 import { sar } from '@/lib/money';
-import { ApiError, panelFetch } from '@/lib/panel-fetch';
+import { PERMISSION_DENIED, ApiError, panelFetch } from '@/lib/panel-fetch';
 import { loadAll } from './client';
 import { PRODUCT_STATUSES, bySortOrder, type Page, type ProductCard, type ProductStatus, type RefItem } from './types';
 
@@ -59,14 +59,17 @@ export function ProductsList() {
   const cursors = paging.key === key ? paging.cursors : [undefined];
   const setCursors = (next: (string | undefined)[]) => setPaging({ key, cursors: next });
   const cursor = cursors[cursors.length - 1];
+  // Only the latest request may set the list: a slow answer under old filters must not overwrite newer results.
+  const latest = useRef(0);
   const load = useCallback(async () => {
+    const req = ++latest.current;
     setData('loading');
     const query = new URLSearchParams({ ...(status && { status }), ...(vendorId && { vendorId }), ...(cursor && { cursor }) });
     try {
       const p = await panelFetch<Page<ProductCard>>('admin', `/api/admin/catalog/products?${query}`);
-      setData({ items: p.items, next: p.nextCursor });
+      if (req === latest.current) setData({ items: p.items, next: p.nextCursor });
     } catch (e) {
-      setData(e instanceof ApiError && e.code === 'NOT_ALLOWED' ? 'denied' : 'error');
+      if (req === latest.current) setData(e instanceof ApiError && e.code === PERMISSION_DENIED ? 'denied' : 'error');
     }
   }, [status, vendorId, cursor]);
   useEffect(() => void load(), [load]);

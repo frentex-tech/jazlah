@@ -27,7 +27,7 @@ export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id
   const b = adminCatalogBackend();
   if (action === 'availability') {
     const body = AvailabilitySchema.safeParse(json);
-    return withPanelSession(req, 'admin', async (token) => (body.success ? await b.setAvailability(token, langOf(req), id, body.data.isAvailable) : invalidBody(body.error)));
+    return withPanelSession(req, 'admin', async (token) => (body.success ? await b.setAvailability(token, langOf(req), id, body.data) : invalidBody(body.error)));
   }
   if (action === 'fulfilment') {
     const body = FulfilmentSchema.safeParse(json);

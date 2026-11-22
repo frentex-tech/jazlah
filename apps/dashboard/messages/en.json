@@ -398,6 +398,7 @@
       "location": "Move the pin to the facility",
       "documents": "Upload the three required documents",
       "alreadyHeld": "Your number already works for a JAZLA store. Sign in to the vendor dashboard.",
+      "crExists": "A JAZLA store is already registered with this commercial registration number",
       "submit": "The application could not be sent. Try again.",
       "rateLimited": "Too many attempts. Wait a little, then send the application again."
     }
@@ -673,6 +674,7 @@
       "body": "The store shows to customers again and its team can sign in again.",
       "confirm": "Reactivate"
     },
+    "crExists": "Already registered to another JAZLA store",
     "reasonRequired": "Write the reason",
     "reasonTooLong": "500 characters at most",
     "toast": {
@@ -682,6 +684,7 @@
       "reinstated": "{name} is active again",
       "notPending": "Another admin reviewed this application; this is where it stands now",
       "accessHeld": "The applicant now works for another vendor; nothing changed",
+      "crExists": "Not approved: another store is registered with the same commercial registration number. Reject the application with the reason.",
       "conflict": "The store's status changed; this is where it stands now",
       "failed": "Couldn't complete that. Try again."
     },
@@ -876,6 +879,7 @@
         "remove": "Remove image {n}"
       },
       "sizes": {
+        "available": "Size {n} can be ordered",
         "title": "Sizes and prices",
         "body": "Each size has its own price in Saudi riyals.",
         "tagAr": "Size {n} label (Arabic)",
@@ -977,7 +981,6 @@
         "isSizeOfProduct": "This size is no longer on the product; reload the page",
         "NO_SIZE": "Add at least one size before publishing",
         "NO_IMAGE": "Add at least one image before publishing",
-        "INCOMPATIBLE_CUTTING_PACKAGING": "The product offers a cutting style with a packaging it cannot be combined with (marked red). Remove one or change the rule before publishing.",
         "MEDIA_NOT_READY": "An image did not finish uploading; upload it again"
       }
     }
@@ -1021,7 +1024,7 @@
       "off": "Orders of {name} paused"
     },
     "failed": {
-      "incomplete": "Complete the product before sending it: at least one size and one image, and no cut with a packaging it can't be combined with.",
+      "incomplete": "The product is incomplete: add an image and at least one size",
       "notEditable": "A product under review can't be changed.",
       "other": "Couldn't do that. Try again."
     },
@@ -1097,6 +1100,10 @@
     }
   },
   "reviewQueue": {
+    "filters": {
+      "allKinds": "All kinds",
+      "allStores": "All stores"
+    },
     "breadcrumb": "Catalog / Review requests",
     "title": "Product review",
     "tabs": {
@@ -1181,7 +1188,7 @@
       "close": "Close",
       "approved": "{name} approved and published",
       "rejected": "{name} rejected; the reason was sent to the vendor",
-      "notSubmittable": "The product can't be approved: it has no size or no image.",
+      "notSubmittable": "The product is incomplete: add an image and at least one size",
       "failed": "Couldn't save the decision. Try again."
     }
   },

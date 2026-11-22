@@ -2,7 +2,7 @@
 // production build leaves it out.
 import type { ApiResult } from '@/lib/auth/panel-session';
 import { mockVendors } from '@/features/admin-vendors/backend.mock';
-import { card, contentOf, contentResponse, mock, newPrices, notFound, page, patchOwn, unsubmittable } from './backend.mock';
+import { availabilityOf, card, contentOf, contentResponse, mock, newPrices, notFound, page, patchOwn, unsubmittable } from './backend.mock';
 import type { ChangeRequest, NamedRef, Product, RefItem } from './types';
 import type { VendorCatalogBackend } from './vendor-backend';
 
@@ -86,8 +86,8 @@ export const mockVendorCatalog: VendorCatalogBackend = {
     const now = new Date().toISOString();
     return unsubmittable(r.data) ?? patchOwn(token, id, () => ({ status: 'pending_review', submittedAt: now, changeRequest: null }), vendor().id);
   },
-  async setAvailability(token, _l, id, isAvailable) {
-    return suspended(token) ? SUSPENDED : quiet(patchOwn(token, id, () => ({ isAvailable }), vendor().id));
+  async setAvailability(token, _l, id, body) {
+    return suspended(token) ? SUSPENDED : quiet(patchOwn(token, id, (p) => availabilityOf(p, body), vendor().id));
   },
   async setFulfilment(token, _l, id, fulfilment) {
     return suspended(token) ? SUSPENDED : quiet(patchOwn(token, id, () => ({ fulfilment }), vendor().id));

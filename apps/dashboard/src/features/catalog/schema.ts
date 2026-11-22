@@ -47,7 +47,10 @@ export const ContentSchema = z.object({
 });
 const fulfilment = z.enum(['delivery', 'pickup', 'both']);
 export const CreateProductSchema = ContentSchema.extend({ fulfilment });
-export const AvailabilitySchema = z.object({ isAvailable: z.boolean() });
+export const AvailabilitySchema = z.object({
+  isAvailable: z.boolean(),
+  sizes: z.array(z.object({ sizeId: uuid, isAvailable: z.boolean() })).max(20).superRefine(unique<{ sizeId: string }>((s) => s.sizeId, 'sizeId')).optional(),
+});
 export const FulfilmentSchema = z.object({ fulfilment });
 export const PricesSchema = z.object({
   sizes: z.array(z.object({ sizeId: uuid, priceHalalas: halalas(1) })).max(20).optional(),
@@ -55,7 +58,12 @@ export const PricesSchema = z.object({
   packagings: z.array(z.object({ packaging: z.enum(PACKAGINGS as [string, ...string[]]), extraPriceHalalas: halalas(0) })).max(4).optional(),
 });
 export const ReasonSchema = z.object({ reason: z.string().trim().min(1).max(500) });
-export const PageQuerySchema = z.object({ cursor: z.string().min(1).optional(), limit: z.coerce.number().int().min(1).max(50).optional() });
+export const ReviewQuerySchema = z.object({
+  kind: z.enum(['product', 'change_request']).optional(),
+  vendorId: uuid.optional(),
+  cursor: z.string().min(1).optional(),
+  limit: z.coerce.number().int().min(1).max(50).optional(),
+});
 export const VendorListSchema = z.enum(['meat-types', 'cutting-styles', 'exclusion-items']);
 export const UploadSchema = z.object({
   purpose: z.enum(['catalog.product-image', 'catalog.category-image']),

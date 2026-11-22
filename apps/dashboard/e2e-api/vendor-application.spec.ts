@@ -2,7 +2,8 @@ import { expect, test } from '@playwright/test';
 import { ADMIN, APPLICANT, PNG, RUN, pdf, signIn, signInTo, toast } from './helpers';
 
 // VND-DSH-1 and VND-DSH-2 against the real API: a new applicant applies with uploaded documents (presigned POST to the
-// storage), then an admin approves the application with a 12.5% commission, sent as 1250 basis points.
+// storage), first with a registration number a seeded store holds (VENDOR_CR_EXISTS on the field), then an admin
+// approves the application with a 12.5% commission, sent as 1250 basis points.
 // Needs a freshly seeded API: the applicant phone has no application yet.
 const NAME = `ملحمة القبول ${RUN}`;
 const NAME_EN = `Acceptance Butchery ${RUN}`;
@@ -17,7 +18,7 @@ test('a new applicant sends a full application with documents', async ({ page })
 
   await page.getByLabel('اسم المتجر بالعربية').fill(NAME);
   await page.getByLabel('اسم المتجر بالإنجليزية').fill(NAME_EN);
-  await page.getByLabel('رقم السجل التجاري').fill('1010458216');
+  await page.getByLabel('رقم السجل التجاري').fill('1010000101'); // the seeded ملحمة النخبة's: refused at submit
   await page.getByLabel('الرقم الضريبي (اختياري)').fill('310123456700003');
   await page.getByLabel('المدينة').fill('الرياض');
   await page.getByRole('button', { name: 'التالي' }).click();
@@ -45,6 +46,17 @@ test('a new applicant sends a full application with documents', async ({ page })
   await page.getByRole('button', { name: 'التالي' }).click();
 
   await expect(page.getByRole('heading', { level: 1, name: 'الصور والمراجعة' })).toBeVisible();
+  await page.getByLabel('أقرّ بصحة البيانات وأوافق على شروط التجّار في جزلة').check();
+  await page.getByRole('button', { name: 'إرسال الطلب' }).click();
+
+  // VENDOR_CR_EXISTS: the wizard goes back to the business step with the error on the registration number field.
+  await expect(page.getByRole('heading', { level: 1, name: 'بيانات المنشأة' })).toBeVisible({ timeout: 15_000 });
+  await expect(page.getByText('يوجد متجر مسجّل في جزلة بهذا السجل التجاري')).toBeVisible();
+  await page.getByLabel('رقم السجل التجاري').fill('1010458216');
+  for (const step of ['المستندات', 'الحساب البنكي', 'موقع المنشأة', 'الصور والمراجعة']) {
+    await page.getByRole('button', { name: 'التالي' }).click();
+    await expect(page.getByRole('heading', { level: 1, name: step })).toBeVisible();
+  }
   await page.getByLabel('أقرّ بصحة البيانات وأوافق على شروط التجّار في جزلة').check();
   await page.getByRole('button', { name: 'إرسال الطلب' }).click();
 
@@ -79,4 +91,32 @@ test('an admin approves it with a 12.5% commission: an active vendor with 1250 b
   expect(res.ok(), body).toBe(true);
   const vendor = (JSON.parse(body) as { items: { name: { en: string }; status: string; commissionBasisPoints: number }[] }).items.find((v) => v.name.en === NAME_EN);
   expect(vendor, body).toMatchObject({ status: 'active', commissionBasisPoints: 1250 });
+});
+
+test('an admin rejects the seeded pending application, and suspends then reactivates a seeded store', async ({ page }) => {
+  await signInTo(page, 'admin', ADMIN);
+  await page.goto('/admin/vendors');
+  const table = page.getByRole('table', { name: 'المتاجر' });
+  await page.getByRole('tab', { name: 'قيد المراجعة' }).click();
+  await table.getByRole('link', { name: 'مزرعة الخير', exact: true }).click();
+  await page.getByRole('button', { name: 'رفض الطلب' }).click();
+  const reject = page.getByRole('dialog', { name: 'رفض الطلب' });
+  await reject.getByRole('button', { name: 'مستند منتهي' }).click();
+  await reject.getByRole('button', { name: 'تأكيد الرفض' }).click();
+  await toast(page, 'تم رفض طلب مزرعة الخير');
+  await expect(page.getByRole('heading', { name: 'الطلب مرفوض' })).toBeVisible();
+
+  await page.goto('/admin/vendors');
+  await table.getByRole('link', { name: 'ذبائح نجد', exact: true }).click();
+  await expect(page.getByRole('heading', { name: 'المتجر نشط' })).toBeVisible();
+  await page.getByRole('button', { name: 'إيقاف المتجر' }).click();
+  const suspend = page.getByRole('dialog', { name: 'إيقاف المتجر' });
+  await suspend.getByLabel('سبب الإيقاف').fill(`مراجعة الجودة ${RUN}`);
+  await suspend.getByRole('button', { name: 'إيقاف المتجر' }).click();
+  await toast(page, 'تم إيقاف ذبائح نجد');
+  await expect(page.getByRole('heading', { name: 'المتجر موقوف' })).toBeVisible();
+  await page.getByRole('button', { name: 'إعادة تفعيل المتجر' }).click();
+  await page.getByRole('dialog', { name: 'إعادة تفعيل ذبائح نجد' }).getByRole('button', { name: 'إعادة التفعيل' }).click();
+  await toast(page, 'تمت إعادة تفعيل ذبائح نجد');
+  await expect(page.getByRole('heading', { name: 'المتجر نشط' })).toBeVisible();
 });

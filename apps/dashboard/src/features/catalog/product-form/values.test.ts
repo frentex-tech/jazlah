@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict';
 import type { Product } from '../types';
-import { bodyOf, differsForReview, editedContent, emptySize, liveContent, priceChanges, priceField, stateOf, toValues } from './values.ts';
+import { availabilityChange, bodyOf, differsForReview, editedContent, emptySize, liveContent, priceChanges, priceField, stateOf, toValues } from './values.ts';
 
 // A new product: required fields are reported on the API's paths.
 const blank = stateOf(null);
@@ -65,3 +65,13 @@ assert.equal(stateOf(withEdit).nameAr, 'ريب آي'); // opt-in: the admin form
 assert.equal(stateOf({ ...withEdit, changeRequest: { status: 'rejected', content: proposed } } as unknown as Product, true).nameAr, 'ريب آي');
 assert.equal(differsForReview(withEdit, bodyOf(editedContent(withEdit)), toValues(stateOf(withEdit, true)).values.content), false);
 console.log('product-form values: ok');
+
+// Availability: the product's switch, and only the live sizes switched (a new size has no switch).
+const shelf = { isAvailable: true, sizes: [{ id: 's1', isAvailable: true }, { id: 's2', isAvailable: false }] } as unknown as Product;
+const form = stateOf({ ...shelf, name: { ar: 'a', en: 'b' }, description: { ar: null, en: null }, category: { id: 'c' }, meatType: null, images: [],
+  cuttings: [], packagings: [], exclusions: [], fulfilment: 'both', status: 'draft', changeRequest: null } as unknown as Product);
+assert.deepEqual(form.sizes.map((x) => x.available), [true, false]);
+const switched = toValues({ ...form, sizes: [{ ...form.sizes[0]!, available: false }, form.sizes[1]!, emptySize()] }).values;
+assert.deepEqual(availabilityChange(shelf, switched), { isAvailable: true, sizes: [{ sizeId: 's1', isAvailable: false }] });
+assert.equal(availabilityChange(shelf, toValues(form).values), null);
+assert.deepEqual(availabilityChange(shelf, { ...toValues(form).values, isAvailable: false }), { isAvailable: false });

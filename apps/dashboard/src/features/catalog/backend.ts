@@ -5,8 +5,8 @@ import { apiCall as call, apiClient, apiHeaders as headers } from '@/api/client'
 import type { ApiResult } from '@/lib/auth/panel-session';
 import { mockBackends } from '@/lib/mock-backends';
 import type {
-  ChangeRequest, CreateItem, CreateProduct, CreateRule, Fulfilment, ListName, ListQuery, MediaFile, Page, PageQuery, Prices, Product, ProductCard,
-  ProductContent, ProductQuery, RefItem, Rule, UpdateItem, UploadTicket,
+  Availability, CreateItem, CreateProduct, CreateRule, Fulfilment, ListName, ListQuery, MediaFile, Page, Prices, Product, ProductCard,
+  ProductContent, ProductQuery, RefItem, ReviewPage, ReviewQuery, Rule, UpdateItem, UploadTicket,
 } from './types';
 
 export type UploadBody = { purpose: 'catalog.product-image' | 'catalog.category-image'; contentType: string; fileName?: string };
@@ -24,15 +24,15 @@ export interface AdminCatalogBackend {
   createProduct(token: string, lang: string, body: CreateProduct): R<Product>;
   updateProduct(token: string, lang: string, id: string, body: ProductContent): R<Product>;
   publish(token: string, lang: string, id: string): R<Product>;
-  setAvailability(token: string, lang: string, id: string, isAvailable: boolean): R<Product>;
+  setAvailability(token: string, lang: string, id: string, body: Availability): R<Product>;
   setFulfilment(token: string, lang: string, id: string, fulfilment: Fulfilment): R<Product>;
   setPrices(token: string, lang: string, id: string, body: Prices): R<Product>;
   requestUpload(token: string, lang: string, body: UploadBody): R<UploadTicket>;
   confirmUpload(token: string, lang: string, id: string): R<MediaFile>;
-  // The review queue (CAT-DSH-2): new products (listProducts status=pending_review) and edits of published ones.
+  // The review queue (CAT-DSH-2): new products and edits of published ones in one list, with the count of the side nav.
+  reviewQueue(token: string, lang: string, query: ReviewQuery): R<ReviewPage>;
   approve(token: string, lang: string, id: string): R<Product>;
   reject(token: string, lang: string, id: string, reason: string): R<Product>;
-  listChangeRequests(token: string, lang: string, query: PageQuery): R<Page<ChangeRequest>>;
   approveChange(token: string, lang: string, id: string): R<Product>;
   rejectChange(token: string, lang: string, id: string, reason: string): R<null>;
 }
@@ -53,8 +53,8 @@ function apiBackend(): AdminCatalogBackend {
     createProduct: (token, lang, body) => call(api.POST('/v1/admin/products', { body, headers: headers(token, lang) })),
     updateProduct: (token, lang, x, body) => call(api.PUT('/v1/admin/products/{id}', { params: id(x), body, headers: headers(token, lang) })),
     publish: (token, lang, x) => call(api.POST('/v1/admin/products/{id}/publish', { params: id(x), headers: headers(token, lang) })),
-    setAvailability: (token, lang, x, isAvailable) =>
-      call(api.PATCH('/v1/admin/products/{id}/availability', { params: id(x), body: { isAvailable }, headers: headers(token, lang) })),
+    setAvailability: (token, lang, x, body) =>
+      call(api.PATCH('/v1/admin/products/{id}/availability', { params: id(x), body, headers: headers(token, lang) })),
     setFulfilment: (token, lang, x, fulfilment) =>
       call(api.PATCH('/v1/admin/products/{id}/fulfilment', { params: id(x), body: { fulfilment }, headers: headers(token, lang) })),
     setPrices: (token, lang, x, body) => call(api.PATCH('/v1/admin/products/{id}/prices', { params: id(x), body, headers: headers(token, lang) })),
@@ -62,7 +62,7 @@ function apiBackend(): AdminCatalogBackend {
     confirmUpload: (token, lang, x) => call(api.POST('/v1/admin/media/{id}/confirm', { params: id(x), headers: headers(token, lang) })),
     approve: (token, lang, x) => call(api.POST('/v1/admin/products/{id}/approve', { params: id(x), headers: headers(token, lang) })),
     reject: (token, lang, x, reason) => call(api.POST('/v1/admin/products/{id}/reject', { params: id(x), body: { reason }, headers: headers(token, lang) })),
-    listChangeRequests: (token, lang, query) => call(api.GET('/v1/admin/product-change-requests', { params: { query }, headers: headers(token, lang) })),
+    reviewQueue: (token, lang, query) => call(api.GET('/v1/admin/review-queue', { params: { query }, headers: headers(token, lang) })),
     approveChange: (token, lang, x) => call(api.POST('/v1/admin/product-change-requests/{id}/approve', { params: id(x), headers: headers(token, lang) })),
     rejectChange: (token, lang, x, reason) =>
       call<null>(api.POST('/v1/admin/product-change-requests/{id}/reject', { params: id(x), body: { reason }, headers: headers(token, lang) }), true),

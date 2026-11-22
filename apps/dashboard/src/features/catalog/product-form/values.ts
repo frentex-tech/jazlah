@@ -1,8 +1,11 @@
 import { halalasOf, sarInput } from '../../../lib/money.ts'; // relative: the unit test runs under plain node
-import type { Fulfilment, Packaging, Product, ProductContent, ProductContentResponse } from '../types';
+import type { Availability, Fulfilment, Packaging, Product, ProductContent, ProductContentResponse } from '../types';
 
-/** What the form edits; amounts as typed (SAR), turned into the API's content on submit. */
-export type SizeRow = { key: string; id: string | null; tagAr: string; tagEn: string; grams: string; price: string };
+/**
+ * What the form edits; amounts as typed (SAR), turned into the API's content on submit. `available`: the live size's
+ * switch; null for a size the product does not have yet (new, or only in a change request), which starts available.
+ */
+export type SizeRow = { key: string; id: string | null; tagAr: string; tagEn: string; grams: string; price: string; available: boolean | null };
 export type FormState = {
   nameAr: string;
   nameEn: string;
@@ -19,7 +22,7 @@ export type FormState = {
   pickup: boolean;
   available: boolean;
 };
-export type ProductFormValues = { content: ProductContent; fulfilment: Fulfilment; isAvailable: boolean };
+export type ProductFormValues = { content: ProductContent; fulfilment: Fulfilment; isAvailable: boolean; sizes: { sizeId: string; isAvailable: boolean }[] };
 /** Field errors keyed by the API's field paths (`name.ar`, `sizes.2.priceHalalas`, …), as VALIDATION_FAILED names them. */
 export type Errors = Record<string, string>;
 
@@ -28,7 +31,7 @@ const MAX_HALALAS = 100_000_000;
 
 let seq = 0;
 export const rowKey = () => `row-${++seq}`;
-export const emptySize = (): SizeRow => ({ key: rowKey(), id: null, tagAr: '', tagEn: '', grams: '', price: '' });
+export const emptySize = (): SizeRow => ({ key: rowKey(), id: null, tagAr: '', tagEn: '', grams: '', price: '', available: null });
 
 /** The live content of a product (or a draft's), as a change request holds it. */
 export const liveContent = (p: Product): ProductContentResponse => ({
@@ -87,7 +90,11 @@ export function stateOf(p: Product | null, preferPending = false): FormState {
   return {
     nameAr: c.name.ar, nameEn: c.name.en, descAr: c.description.ar ?? '', descEn: c.description.en ?? '', categoryId: c.categoryId, meatTypeId: c.meatTypeId ?? '',
     images: c.images.map((i) => ({ mediaId: i.mediaId, url: i.url })),
-    sizes: c.sizes.map((s) => ({ key: rowKey(), id: s.id, tagAr: s.tag?.ar ?? '', tagEn: s.tag?.en ?? '', grams: String(s.approxWeightGrams), price: sarInput(s.priceHalalas) })),
+    sizes: c.sizes.map((s) => ({
+      key: rowKey(), id: s.id, tagAr: s.tag?.ar ?? '', tagEn: s.tag?.en ?? '', grams: String(s.approxWeightGrams), price: sarInput(s.priceHalalas),
+      // A change request's sizes carry no availability (null): the live size's switch applies.
+      available: p.sizes.find((x) => x.id === s.id)?.isAvailable ?? null,
+    })),
     cuts: c.cuttings.map((k) => ({ id: k.cuttingStyleId, price: sarInput(k.extraPriceHalalas) })),
     packs: c.packagings.map((k) => ({ packaging: k.packaging, price: sarInput(k.extraPriceHalalas) })),
     exclusions: c.exclusionItemIds,
@@ -143,7 +150,14 @@ export function toValues(s: FormState): { values: ProductFormValues; errors: Err
     exclusionItemIds: s.exclusions,
   };
   const fulfilment: Fulfilment = s.delivery && s.pickup ? 'both' : s.pickup ? 'pickup' : 'delivery';
-  return { values: { content, fulfilment, isAvailable: s.available }, errors };
+  const switched = s.sizes.flatMap((r) => (r.id && r.available !== null ? [{ sizeId: r.id, isAvailable: r.available }] : []));
+  return { values: { content, fulfilment, isAvailable: s.available, sizes: switched }, errors };
+}
+
+/** The availability edit (PATCH …/availability): the product's switch, with only the sizes switched since `p`; null: none. */
+export function availabilityChange(p: Product, v: ProductFormValues): Availability | null {
+  const sizes = v.sizes.filter((s) => p.sizes.some((x) => x.id === s.sizeId && x.isAvailable !== s.isAvailable));
+  return v.isAvailable !== p.isAvailable || sizes.length > 0 ? { isAvailable: v.isAvailable, ...(sizes.length > 0 && { sizes }) } : null;
 }
 
 /**
