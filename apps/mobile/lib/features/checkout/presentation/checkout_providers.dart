@@ -44,6 +44,6 @@ final orderRepositoryProvider = Provider<OrderRepository?>((ref) {
   final cart = ref.watch(cartRepositoryProvider);
   final checkout = ref.watch(checkoutRepositoryProvider);
   return cart is MockCartRepository && checkout is MockCheckoutRepository
-      ? MockOrderRepository(cart, checkout, addresses: ref.watch(addressRepositoryProvider))
+      ? MockOrderRepository(cart, checkout, addresses: ref.watch(addressRepositoryProvider), seedPast: true)
       : null;
 });

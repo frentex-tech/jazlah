@@ -999,5 +999,114 @@
   "placedUnderReview": "سنراجع طلبك ونؤكده قريبًا.",
   "placedConfirmed": "تم تأكيد طلبك.",
   "payStillProcessing": "لا يزال الدفع قيد المعالجة، سنحدّث حالة طلبك فور وصول النتيجة.",
-  "payOrderGone": "هذا الطلب لم يعد متاحًا."
+  "payOrderGone": "هذا الطلب لم يعد متاحًا.",
+  "ordersAll": "الكل",
+  "ordersCurrent": "الجارية",
+  "ordersPast": "المكتملة",
+  "ordersNumber": "طلب {number}",
+  "@ordersNumber": {
+    "placeholders": {
+      "number": {
+        "type": "String"
+      }
+    }
+  },
+  "ordersToday": "اليوم",
+  "ordersTodayAt": "اليوم، {time}",
+  "@ordersTodayAt": {
+    "placeholders": {
+      "time": {
+        "type": "String"
+      }
+    }
+  },
+  "ordersEmptyTitle": "لا توجد طلبات بعد",
+  "ordersEmptyBody": "طلباتك السابقة والحالية ستظهر هنا.",
+  "ordersEmptyAction": "ابدأ أول طلب",
+  "ordersErrorTitle": "تعذّر تحميل الطلبات",
+  "ordersErrorBody": "تحقق من اتصالك ثم حاول مرة أخرى.",
+  "ordersSignInTitle": "سجّل دخولك لعرض الطلبات",
+  "ordersSignInBody": "طلباتك محفوظة في حسابك. سجّل الدخول لمتابعتها.",
+  "orderDetailTitle": "تفاصيل الطلب",
+  "orderErrorTitle": "تعذّر تحميل الطلب",
+  "orderDeniedTitle": "لا يمكنك عرض هذا الطلب",
+  "orderDeniedBody": "هذا الطلب مرتبط بحساب آخر.",
+  "orderLineDelivery": "{vendor} · توصيل {day} بين {start} و{end} إلى {place}",
+  "@orderLineDelivery": {
+    "placeholders": {
+      "vendor": {
+        "type": "String"
+      },
+      "day": {
+        "type": "String"
+      },
+      "start": {
+        "type": "String"
+      },
+      "end": {
+        "type": "String"
+      },
+      "place": {
+        "type": "String"
+      }
+    }
+  },
+  "orderLinePickup": "{vendor} · استلام {day} بين {start} و{end} من {place}",
+  "@orderLinePickup": {
+    "placeholders": {
+      "vendor": {
+        "type": "String"
+      },
+      "day": {
+        "type": "String"
+      },
+      "start": {
+        "type": "String"
+      },
+      "end": {
+        "type": "String"
+      },
+      "place": {
+        "type": "String"
+      }
+    }
+  },
+  "orderStatusTitle": "حالة الطلب",
+  "orderTrackingTitle": "تتبع التوصيل",
+  "orderTrackingNotStarted": "لم يبدأ التوصيل بعد",
+  "orderTrackingNotStartedBody": "سيُعيّن مندوب التوصيل ويصلك إشعار فور خروج الطلب.",
+  "orderFreshnessTitle": "شهادة الطزاجة",
+  "orderFreshnessWaiting": "بانتظار الذبح والتجهيز",
+  "orderFreshnessWaitingBody": "ستظهر هنا صور الذبح ووقته فور رفعها من المتجر.",
+  "orderItems": "المنتجات",
+  "orderPayment": "الدفع",
+  "orderPaid": "مدفوع",
+  "orderAwaitingPayment": "بانتظار الدفع",
+  "orderPayNow": "إكمال الدفع",
+  "orderNotes": "ملاحظات: {notes}",
+  "@orderNotes": {
+    "placeholders": {
+      "notes": {
+        "type": "String"
+      }
+    }
+  },
+  "stepReceived": "تم استلام الطلب",
+  "stepPreparing": "الذبح والتجهيز",
+  "stepReadyDelivery": "جاهز للتوصيل",
+  "stepReadyPickup": "جاهز للاستلام",
+  "stepOnTheWay": "في الطريق إليك",
+  "stepDelivered": "تم التسليم",
+  "stepCollected": "تم الاستلام",
+  "statusPendingPayment": "بانتظار الدفع",
+  "statusNew": "بانتظار التأكيد",
+  "statusConfirmed": "مؤكد",
+  "statusPreparing": "قيد التجهيز",
+  "statusReady": "جاهز",
+  "statusOnTheWay": "في الطريق",
+  "statusDelivered": "تم التسليم",
+  "statusCollected": "تم الاستلام",
+  "statusCancelled": "ملغي",
+  "statusDeliveryFailed": "تعذّر التوصيل",
+  "statusReturned": "مرتجع"
 }

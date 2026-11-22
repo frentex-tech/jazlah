@@ -7,6 +7,7 @@ import 'package:jazlah/app/theme/theme.dart';
 import 'package:jazlah/core/widgets/widgets.dart';
 import 'package:jazlah/features/addresses/presentation/address_providers.dart';
 import 'package:jazlah/features/auth/presentation/session_controller.dart';
+import 'package:jazlah/features/orders/presentation/orders_providers.dart';
 import 'package:jazlah/features/profile/domain/customer_profile.dart';
 import 'package:jazlah/features/profile/presentation/profile_providers.dart';
 import 'package:jazlah/l10n/app_localizations.dart';
@@ -77,11 +78,11 @@ class _AccountBody extends ConsumerWidget {
       children: [
         _ProfileCard(profile: p, onEdit: () => context.push(Routes.editProfile)),
         const SizedBox(height: JSpace.s16),
-        // shortcut: only the address count has an API today; orders (ORD-MOB-2, #85), animals and
-        // listings (FED-MOB-1, #152) show "—" until their counters exist (API gap, not-built-yet.md).
+        // shortcut: animals and listings (FED-MOB-1, #152) show "—" until their counters exist (API gap,
+        // not-built-yet.md); orders count the order list (ORD-MOB-2 #85; "—" without the orders route).
         Row(
           children: [
-            _Stat(value: null, label: l10n.statOrders),
+            _Stat(value: ref.watch(ordersProvider(null)).value?.length, label: l10n.statOrders),
             const SizedBox(width: 10),
             _Stat(value: ref.watch(addressesProvider).value?.length, label: l10n.statAddresses),
             const SizedBox(width: 10),
@@ -93,7 +94,7 @@ class _AccountBody extends ConsumerWidget {
         const SizedBox(height: JSpace.s16),
         _MenuGroup(
           items: [
-            _MenuItem(icon: JIcons.receipt, label: l10n.menuOrders),
+            _MenuItem(icon: JIcons.receipt, label: l10n.menuOrders, onTap: () => context.go(Routes.orders)),
             _MenuItem(icon: JIcons.mapPin, label: l10n.menuAddresses, onTap: () => context.go(Routes.addresses)),
             _MenuItem(icon: JIcons.pawPrint, label: l10n.menuAnimals),
             _MenuItem(icon: JIcons.storefront, label: l10n.menuFeedListings),

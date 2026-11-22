@@ -570,7 +570,6 @@ class _PickupCard extends ConsumerWidget {
 }
 
 /// «4» or «6 مساءً» (or «9 ص» when [short]) from a Riyadh `HH:mm`, shown as is.
-@visibleForTesting
 String clockText(AppLocalizations l10n, String hhmm, {bool period = true, bool short = false}) {
   final [h, m] = [for (final p in hhmm.split(':')) int.parse(p)];
   final hour = h % 12 == 0 ? 12 : h % 12;

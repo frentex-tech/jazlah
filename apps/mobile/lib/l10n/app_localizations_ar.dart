@@ -1698,4 +1698,164 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get payOrderGone => 'هذا الطلب لم يعد متاحًا.';
+
+  @override
+  String get ordersAll => 'الكل';
+
+  @override
+  String get ordersCurrent => 'الجارية';
+
+  @override
+  String get ordersPast => 'المكتملة';
+
+  @override
+  String ordersNumber(String number) {
+    return 'طلب $number';
+  }
+
+  @override
+  String get ordersToday => 'اليوم';
+
+  @override
+  String ordersTodayAt(String time) {
+    return 'اليوم، $time';
+  }
+
+  @override
+  String get ordersEmptyTitle => 'لا توجد طلبات بعد';
+
+  @override
+  String get ordersEmptyBody => 'طلباتك السابقة والحالية ستظهر هنا.';
+
+  @override
+  String get ordersEmptyAction => 'ابدأ أول طلب';
+
+  @override
+  String get ordersErrorTitle => 'تعذّر تحميل الطلبات';
+
+  @override
+  String get ordersErrorBody => 'تحقق من اتصالك ثم حاول مرة أخرى.';
+
+  @override
+  String get ordersSignInTitle => 'سجّل دخولك لعرض الطلبات';
+
+  @override
+  String get ordersSignInBody => 'طلباتك محفوظة في حسابك. سجّل الدخول لمتابعتها.';
+
+  @override
+  String get orderDetailTitle => 'تفاصيل الطلب';
+
+  @override
+  String get orderErrorTitle => 'تعذّر تحميل الطلب';
+
+  @override
+  String get orderDeniedTitle => 'لا يمكنك عرض هذا الطلب';
+
+  @override
+  String get orderDeniedBody => 'هذا الطلب مرتبط بحساب آخر.';
+
+  @override
+  String orderLineDelivery(String vendor, String day, String start, String end, String place) {
+    return '$vendor · توصيل $day بين $start و$end إلى $place';
+  }
+
+  @override
+  String orderLinePickup(String vendor, String day, String start, String end, String place) {
+    return '$vendor · استلام $day بين $start و$end من $place';
+  }
+
+  @override
+  String get orderStatusTitle => 'حالة الطلب';
+
+  @override
+  String get orderTrackingTitle => 'تتبع التوصيل';
+
+  @override
+  String get orderTrackingNotStarted => 'لم يبدأ التوصيل بعد';
+
+  @override
+  String get orderTrackingNotStartedBody => 'سيُعيّن مندوب التوصيل ويصلك إشعار فور خروج الطلب.';
+
+  @override
+  String get orderFreshnessTitle => 'شهادة الطزاجة';
+
+  @override
+  String get orderFreshnessWaiting => 'بانتظار الذبح والتجهيز';
+
+  @override
+  String get orderFreshnessWaitingBody => 'ستظهر هنا صور الذبح ووقته فور رفعها من المتجر.';
+
+  @override
+  String get orderItems => 'المنتجات';
+
+  @override
+  String get orderPayment => 'الدفع';
+
+  @override
+  String get orderPaid => 'مدفوع';
+
+  @override
+  String get orderAwaitingPayment => 'بانتظار الدفع';
+
+  @override
+  String get orderPayNow => 'إكمال الدفع';
+
+  @override
+  String orderNotes(String notes) {
+    return 'ملاحظات: $notes';
+  }
+
+  @override
+  String get stepReceived => 'تم استلام الطلب';
+
+  @override
+  String get stepPreparing => 'الذبح والتجهيز';
+
+  @override
+  String get stepReadyDelivery => 'جاهز للتوصيل';
+
+  @override
+  String get stepReadyPickup => 'جاهز للاستلام';
+
+  @override
+  String get stepOnTheWay => 'في الطريق إليك';
+
+  @override
+  String get stepDelivered => 'تم التسليم';
+
+  @override
+  String get stepCollected => 'تم الاستلام';
+
+  @override
+  String get statusPendingPayment => 'بانتظار الدفع';
+
+  @override
+  String get statusNew => 'بانتظار التأكيد';
+
+  @override
+  String get statusConfirmed => 'مؤكد';
+
+  @override
+  String get statusPreparing => 'قيد التجهيز';
+
+  @override
+  String get statusReady => 'جاهز';
+
+  @override
+  String get statusOnTheWay => 'في الطريق';
+
+  @override
+  String get statusDelivered => 'تم التسليم';
+
+  @override
+  String get statusCollected => 'تم الاستلام';
+
+  @override
+  String get statusCancelled => 'ملغي';
+
+  @override
+  String get statusDeliveryFailed => 'تعذّر التوصيل';
+
+  @override
+  String get statusReturned => 'مرتجع';
 }
