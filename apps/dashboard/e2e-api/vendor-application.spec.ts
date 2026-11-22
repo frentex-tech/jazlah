@@ -92,3 +92,31 @@ test('an admin approves it with a 12.5% commission: an active vendor with 1250 b
   const vendor = (JSON.parse(body) as { items: { name: { en: string }; status: string; commissionBasisPoints: number }[] }).items.find((v) => v.name.en === NAME_EN);
   expect(vendor, body).toMatchObject({ status: 'active', commissionBasisPoints: 1250 });
 });
+
+test('an admin rejects the seeded pending application, and suspends then reactivates a seeded store', async ({ page }) => {
+  await signInTo(page, 'admin', ADMIN);
+  await page.goto('/admin/vendors');
+  const table = page.getByRole('table', { name: 'المتاجر' });
+  await page.getByRole('tab', { name: 'قيد المراجعة' }).click();
+  await table.getByRole('link', { name: 'مزرعة الخير', exact: true }).click();
+  await page.getByRole('button', { name: 'رفض الطلب' }).click();
+  const reject = page.getByRole('dialog', { name: 'رفض الطلب' });
+  await reject.getByRole('button', { name: 'مستند منتهي' }).click();
+  await reject.getByRole('button', { name: 'تأكيد الرفض' }).click();
+  await toast(page, 'تم رفض طلب مزرعة الخير');
+  await expect(page.getByRole('heading', { name: 'الطلب مرفوض' })).toBeVisible();
+
+  await page.goto('/admin/vendors');
+  await table.getByRole('link', { name: 'ذبائح نجد', exact: true }).click();
+  await expect(page.getByRole('heading', { name: 'المتجر نشط' })).toBeVisible();
+  await page.getByRole('button', { name: 'إيقاف المتجر' }).click();
+  const suspend = page.getByRole('dialog', { name: 'إيقاف المتجر' });
+  await suspend.getByLabel('سبب الإيقاف').fill(`مراجعة الجودة ${RUN}`);
+  await suspend.getByRole('button', { name: 'إيقاف المتجر' }).click();
+  await toast(page, 'تم إيقاف ذبائح نجد');
+  await expect(page.getByRole('heading', { name: 'المتجر موقوف' })).toBeVisible();
+  await page.getByRole('button', { name: 'إعادة تفعيل المتجر' }).click();
+  await page.getByRole('dialog', { name: 'إعادة تفعيل ذبائح نجد' }).getByRole('button', { name: 'إعادة التفعيل' }).click();
+  await toast(page, 'تمت إعادة تفعيل ذبائح نجد');
+  await expect(page.getByRole('heading', { name: 'المتجر نشط' })).toBeVisible();
+});

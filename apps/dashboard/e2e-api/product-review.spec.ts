@@ -6,6 +6,9 @@ import { ADMIN, PNG, RUN, VENDOR, publicCard, rowOf, signInTo, toast } from './h
 // «نعيمي كامل»), the admin approves it, and it reaches GET /v1/public/products.
 const NAME = `فخذ عجل ${RUN}`;
 const NAME_EN = `Acceptance veal leg ${RUN}`;
+const EDITED = `فخذ عجل طازج ${RUN}`;
+
+test.describe.configure({ mode: 'serial' });
 
 test('a vendor submits a product, an admin approves it from the queue, and it is public', async ({ page }) => {
   await signInTo(page, 'vendor', VENDOR);
@@ -55,4 +58,37 @@ test('a vendor submits a product, an admin approves it from the queue, and it is
   await expect(queue.getByText(NAME)).toHaveCount(0);
 
   expect(await publicCard(NAME_EN)).toMatchObject({ minPriceHalalas: 12000 });
+});
+
+test('the vendor switches it off and on, then edits it; the admin rejects the edit with a reason', async ({ page }) => {
+  const live = (await publicCard(NAME_EN))!;
+  await signInTo(page, 'vendor', VENDOR);
+  await page.goto('/vendor/products');
+  await page.getByRole('button', { name: `إجراءات ${NAME}` }).click();
+  await page.getByRole('button', { name: 'إيقاف الطلب' }).click();
+  await toast(page, `أُوقف طلب ${NAME}`);
+  expect(await publicCard(NAME_EN)).toBeNull(); // out of stock: left out of the public list
+  await page.getByRole('button', { name: `إجراءات ${NAME}` }).click();
+  await page.getByRole('button', { name: 'إتاحة للطلب' }).click();
+  await expect.poll(() => publicCard(NAME_EN)).not.toBeNull();
+
+  // A review-sensitive edit warns, and becomes a change request: the live product keeps its name.
+  await page.goto(`/vendor/products/${live.id}`);
+  await page.getByLabel('اسم المنتج', { exact: true }).fill(EDITED);
+  await expect(page.getByText('سيُعاد مراجعة المنتج', { exact: false })).toBeVisible();
+  await page.getByRole('button', { name: 'حفظ التعديلات' }).click();
+  await toast(page, `أُرسل تعديل ${NAME} للمراجعة`);
+
+  await page.context().clearCookies();
+  await signInTo(page, 'admin', ADMIN);
+  await page.goto('/admin/catalog/review');
+  const queue = page.getByRole('table', { name: 'قيد المراجعة' });
+  await expect(rowOf(page, queue, NAME).getByText('تعديل منتج')).toBeVisible({ timeout: 15_000 });
+  await page.getByRole('button', { name: `مراجعة ${NAME}`, exact: true }).click();
+  const dialog = page.getByRole('dialog', { name: `مراجعة: ${EDITED}` });
+  await dialog.getByRole('button', { name: 'صورة غير واضحة' }).click();
+  await dialog.getByRole('button', { name: 'رفض مع السبب' }).click();
+  await toast(page, `رُفض ${EDITED} وأُرسل السبب للبائع`);
+  await expect(rowOf(page, queue, NAME)).toHaveCount(0);
+  expect(await publicCard(NAME_EN)).toMatchObject({ name: { en: NAME_EN } });
 });
