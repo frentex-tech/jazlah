@@ -10,6 +10,7 @@ import 'package:jazlah/app/router/router.dart';
 import 'package:jazlah/app/theme/theme.dart';
 import 'package:jazlah/core/errors/api_error.dart';
 import 'package:jazlah/core/errors/error_text.dart';
+import 'package:jazlah/core/geo/geo_point.dart';
 import 'package:jazlah/core/widgets/widgets.dart';
 import 'package:jazlah/features/addresses/domain/address.dart';
 import 'package:jazlah/features/addresses/presentation/address_providers.dart';
@@ -18,6 +19,7 @@ import 'package:jazlah/features/cart/domain/cart.dart';
 import 'package:jazlah/features/cart/presentation/cart_providers.dart';
 import 'package:jazlah/features/catalog/presentation/catalog_widgets.dart';
 import 'package:jazlah/features/checkout/domain/fulfilment.dart';
+import 'package:jazlah/features/checkout/domain/order.dart';
 import 'package:jazlah/features/checkout/presentation/checkout_providers.dart';
 import 'package:jazlah/features/checkout/presentation/review_screen.dart';
 import 'package:jazlah/features/product/domain/product.dart';
@@ -77,7 +79,10 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen> {
         // The address left coverage or was deleted: reload the book and choose again.
         ref.invalidate(addressesProvider);
         if (mounted) setState(() => _addressId = null);
-      case FulfilmentError.dayFull || FulfilmentError.notSupported || 'VALIDATION_FAILED':
+      case FulfilmentError.dayFull ||
+          FulfilmentError.dayNotAvailable ||
+          FulfilmentError.notSupported ||
+          OrderError.fulfilmentRequired:
         ref.invalidate(checkoutDaysProvider);
     }
   }
@@ -548,7 +553,7 @@ class _PickupCard extends ConsumerWidget {
             ],
           ),
           const SizedBox(height: JSpace.s12),
-          // The store's point, not draggable.
+          // The store's point, not draggable; the button below opens directions.
           IgnorePointer(
             child: ClipRRect(
               borderRadius: BorderRadius.circular(JRadius.md),
@@ -563,11 +568,34 @@ class _PickupCard extends ConsumerWidget {
               ),
             ),
           ),
+          const SizedBox(height: JSpace.s12),
+          // 118-9741: «اتصال بالمتجر» (only with a phone), and directions to the pickup point in maps.
+          if (pickup.phone case final phone?) ...[
+            JButton(
+              label: l10n.checkoutCallStore,
+              variant: JButtonVariant.secondary,
+              expand: true,
+              onPressed: () => ref.read(urlLauncherProvider)(Uri(scheme: 'tel', path: phone)),
+            ),
+            const SizedBox(height: JSpace.s8),
+          ],
+          JButton(
+            label: l10n.checkoutDirections,
+            variant: JButtonVariant.secondary,
+            expand: true,
+            onPressed: () => ref.read(urlLauncherProvider)(directionsUri(pickup.point)),
+          ),
         ],
       ),
     );
   }
 }
+
+/// Directions to [p] in the maps app (Google Maps' universal link opens the app or the browser).
+Uri directionsUri(GeoPoint p) => Uri.https('www.google.com', '/maps/dir/', {
+  'api': '1',
+  'destination': '${p.latitude},${p.longitude}',
+});
 
 /// «4» or «6 مساءً» (or «9 ص» when [short]) from a Riyadh `HH:mm`, shown as is.
 String clockText(AppLocalizations l10n, String hhmm, {bool period = true, bool short = false}) {
@@ -899,7 +927,7 @@ class _ErrorCard extends StatelessWidget {
         ),
         const SizedBox(height: JSpace.s12),
         Align(
-          alignment: AlignmentDirectional.centerEnd,
+          alignment: AlignmentDirectional.centerStart, // under the text, as 118-10251 draws it
           child: JButton(
             label: AppLocalizations.of(context).retry,
             size: JButtonSize.s,

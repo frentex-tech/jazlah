@@ -42,7 +42,7 @@ export function ClosedDays({ days, today, errors, onAdd, onRemove }: {
   const cells = [...Array<null>(offset).fill(null), ...Array.from({ length }, (_, i) => `${month}-${String(i + 1).padStart(2, '0')}`)];
   const closed = new Map(days.map((d) => [d.date, d]));
   const shift = (n: number) => setMonth(new Date(Date.UTC(first.getUTCFullYear(), first.getUTCMonth() + n, 1)).toISOString().slice(0, 7));
-  const weekdays = Array.from({ length: 7 }, (_, i) => fmt(locale, { weekday: 'long' }).format(new Date(Date.UTC(2026, 0, 3 + i)))); // 3 Jan 2026 is a Saturday
+  const weekdays = Array.from({ length: 7 }, (_, i) => fmt(locale, { weekday: locale === 'en' ? 'short' : 'long' }).format(new Date(Date.UTC(2026, 0, 3 + i)))); // 3 Jan 2026 is a Saturday; English full names collide in the 56 px columns
   const inMonth = days.map((d, i) => ({ d, i })).filter(({ d }) => d.date.startsWith(month));
   const label = (d: ClosedDay) => [dayLabel(d.date, locale), d.scope !== 'both' && t(`scope.${d.scope}`), locale === 'en' ? d.reasonEn : d.reasonAr].filter(Boolean).join(' · ');
   const nav = 'flex size-11 items-center justify-center rounded-pill border border-line bg-paper text-ink';

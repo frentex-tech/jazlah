@@ -1108,5 +1108,20 @@
   "statusCollected": "تم الاستلام",
   "statusCancelled": "ملغي",
   "statusDeliveryFailed": "تعذّر التوصيل",
-  "statusReturned": "مرتجع"
+  "statusReturned": "مرتجع",
+  "checkoutCallStore": "اتصال بالمتجر",
+  "checkoutDirections": "الاتجاهات",
+  "errDayNotAvailable": "هذا اليوم لم يعد متاحًا، اختر يومًا آخر.",
+  "errFulfilmentRequired": "اختر طريقة الاستلام واليوم أولًا.",
+  "errCartEmpty": "سلتك فارغة.",
+  "errWalletInsufficient": "رصيد محفظتك لم يعد يكفي، اختر طريقة الدفع من جديد.",
+  "errOrderNotPayable": "هذا الطلب لم يعد بانتظار الدفع.",
+  "errPaymentInProgress": "هناك عملية دفع لم تنتهِ بعد لهذا الطلب.",
+  "payCheckStatus": "تحقق من حالة الدفع",
+  "payCancelPage": "إلغاء الدفع",
+  "productSizeNoId": "لا يمكن إضافة هذا المقاس إلى السلة حاليًا.",
+  "payPageErrorTitle": "تعذّر فتح صفحة الدفع",
+  "payPageErrorBody": "تحقق من اتصالك ثم أعد المحاولة.",
+  "payPageClose": "إغلاق",
+  "payContinue": "متابعة الدفع"
 }

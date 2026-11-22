@@ -45,7 +45,7 @@ class ApiProductRepository implements ProductRepository {
         for (final (i, s) in d.sizes.indexed)
           ProductSize(
             // shortcut: size id is nullable in the contract, positional id until CRT-API-1 (#61) needs a real one, API gap
-            id: s.id ?? 'size-$i',
+            id: s.id ?? '${ProductSize.standInPrefix}$i',
             grams: s.approxWeightGrams.toInt(),
             priceHalalas: s.priceHalalas.toInt(),
             tag: s.tag == null ? null : _text(s.tag!),

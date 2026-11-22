@@ -19,6 +19,12 @@ class ProductSize {
 
   final String id;
 
+  /// Ids made up on the device for a size the public product sends without one.
+  // shortcut: stand-in size ids can't go to the cart until CAT-API-1 #48 sends non-null size ids (lead review
+  // A13 / Sprint 2 B4, not-built-yet.md).
+  static const standInPrefix = 'size-';
+  bool get hasRealId => !id.startsWith(standInPrefix);
+
   /// Approximate weight; the label ("500 g", "1 kg") is built from it.
   final int grams;
   final int priceHalalas;

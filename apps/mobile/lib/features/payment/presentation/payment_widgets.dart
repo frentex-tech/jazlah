@@ -9,12 +9,10 @@ import 'package:jazlah/features/catalog/presentation/catalog_widgets.dart';
 import 'package:jazlah/features/payment/domain/payment_method.dart';
 import 'package:jazlah/l10n/app_localizations.dart';
 
-/// The method the customer picked if it can still be used; else, before any pick, the first usable one (as
-/// drawn); null when none can be used (Figma 170-29357).
-PaymentMethodOption? chosenMethod(List<PaymentMethodOption> options, String? picked) {
-  final available = options.where((m) => m.available);
-  return available.where((m) => m.method == picked).firstOrNull ?? (picked == null ? available.firstOrNull : null);
-}
+/// The method the customer picked, if it can still be used. Nothing is preselected: until a pick the screen shows
+/// «اختر طريقة دفع للمتابعة» (Figma 170-29357) and the button stays disabled.
+PaymentMethodOption? chosenMethod(List<PaymentMethodOption> options, String? picked) =>
+    options.where((m) => m.available && m.method == picked).firstOrNull;
 
 /// «طريقة الدفع» (170-28952): the methods as radios, the wallet part switch when the tender plan offers one,
 /// a notice (the wallet amount given back) and «اختر طريقة دفع للمتابعة» when no method can be chosen.

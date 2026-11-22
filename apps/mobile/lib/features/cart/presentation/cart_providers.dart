@@ -75,7 +75,7 @@ class CartController extends AsyncNotifier<Cart> {
     final guest = local.items;
     if (guest.isEmpty) return server.get();
     // A failed merge keeps the device cart; the next build tries again.
-    final merged = await server.merge(guest);
+    final merged = await server.merge(guest, mergeId: local.mergeId);
     await local.clear();
     if (merged.replacedPreviousCart || merged.skipped > 0) ref.read(cartMergeNoticeProvider.notifier).set(merged);
     return merged.cart;

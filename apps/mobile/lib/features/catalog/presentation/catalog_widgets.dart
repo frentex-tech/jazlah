@@ -15,10 +15,11 @@ extension CatalogContext on BuildContext {
   String get lang => Localizations.localeOf(this).languageCode;
 }
 
-/// `8900` → `89.00` (prices include VAT).
+/// `8900` → `89.00`, `118000` → `1,180.00` (prices include VAT; grouped like Figma).
 String formatHalalas(int halalas) {
   final h = halalas.abs();
-  return '${halalas < 0 ? '-' : ''}${h ~/ 100}.${(h % 100).toString().padLeft(2, '0')}';
+  final riyals = (h ~/ 100).toString().replaceAllMapped(RegExp(r'\B(?=(\d{3})+$)'), (_) => ',');
+  return '${halalas < 0 ? '-' : ''}$riyals.${(h % 100).toString().padLeft(2, '0')}';
 }
 
 /// `500` → "500 g", `1000` → "1 kg", `1500` → "1.5 kg".

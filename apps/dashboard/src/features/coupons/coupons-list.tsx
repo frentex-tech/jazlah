@@ -90,7 +90,7 @@ export function CouponsList() {
       {
         id: 'dates',
         header: t('cols.dates'),
-        meta: { width: 260, skeleton: 160 },
+        meta: { width: 360, skeleton: 160 },
         cell: ({ row: { original: c } }) => t('dateRange', { from: dayOf(c.startsAt, locale), to: dayOf(c.endsAt, locale) }),
       },
     ],

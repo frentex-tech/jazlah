@@ -22,10 +22,13 @@ export type CouponInput = {
   usageLimit: number | null;
   perUserLimit: number | null;
   isActive: boolean;
-  firstOrderOnly: boolean;
 };
 
-export type Coupon = CouponInput & { id: string; status: CouponStatus; usageCount: number; createdAt: string; updatedAt: string };
+/**
+ * `firstOrderOnly` is read but never sent: decision 25 keeps the first-order discount off, so the form shows the switch
+ * disabled and creates leave it to the API's default (false).
+ */
+export type Coupon = CouponInput & { firstOrderOnly: boolean; id: string; status: CouponStatus; usageCount: number; createdAt: string; updatedAt: string };
 /** GET …/{id}/usage: the coupon's redemptions (CouponRedemption) summed. */
 export type CouponUsage = { uses: number; distinctUsers: number; totalDiscountHalalas: number };
 export type Page<T> = { items: T[]; nextCursor: string | null };

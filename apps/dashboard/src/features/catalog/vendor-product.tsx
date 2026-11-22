@@ -115,7 +115,7 @@ export function VendorProduct({ id }: { id?: string }) {
   const card = 'h-[360px]';
   return (
     <>
-      <PageHeader start breadcrumb={t(id ? 'breadcrumbEdit' : 'breadcrumbNew')} title={title} />
+      <PageHeader breadcrumb={t(id ? 'breadcrumbEdit' : 'breadcrumbNew')} title={title} />
       {state === 'loading' ? (
         <ProductFormSkeleton label={t('loading')} />
       ) : state === 'blocked' ? (

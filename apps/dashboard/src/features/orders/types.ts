@@ -1,6 +1,9 @@
 // The order model of sprint-3.md (ORD-API-1 Order/OrderItem, ORD-API-2 statuses and history, PAY-API-1 payment and
 // refund, WAL-API-1 wallet refunds). Not in openapi.json yet: the mock follows these shapes (docs/frontend/not-built-yet.md).
 // Money is integer halalas (VAT included), times ISO instants shown in Asia/Riyadh, dates `YYYY-MM-DD` Riyadh days.
+// shortcut: this shape is the dashboard's proposal and differs from the mobile app's (money suffixes, item options,
+// nested payment, an address snapshot that is not `CustomerAddressResponseDto`); align it with the generated client once
+// the API session fixes the canonical `Order` (A1) in openapi.json (#88).
 
 export const STATUSES = [
   'pending_payment', 'new', 'confirmed', 'preparing', 'ready', 'picked_up', 'out_for_delivery', 'delivered', 'collected', 'cancelled', 'delivery_failed', 'returned',
