@@ -3,7 +3,8 @@ import type { SeedProduct } from './seed-product.type';
 
 /**
  * The seeded products: 36 published and available (34 of active vendors, 2 of the
- * suspended one), and for the dashboards 2 published but unavailable, 3 drafts (one
+ * suspended one; the platform's whole Naimi with its largest size sold out), and for
+ * the dashboards 2 published but unavailable, 3 drafts (one
  * empty), 2 in review, 2 rejected, and a pending change request on Al Nokhba's whole
  * Naimi. Prices are integer halalas with VAT included, at Riyadh market levels (a whole
  * Naimi lamb 1,600 to 2,200 SAR). The list order is the creation order.
@@ -36,6 +37,8 @@ export const SEED_PRODUCTS: readonly SeedProduct[] = [
         approxWeightGrams: 15000,
         priceHalalas: 215000,
         tag: { ar: 'يجزئ العقيقة', en: 'Enough for an aqiqah' },
+        // The sold-out size of the product page design.
+        isAvailable: false,
       },
     ],
     cuttings: [

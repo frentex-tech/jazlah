@@ -96,8 +96,8 @@ _responseData = rawData == null ? null : deserialize<NamedReferenceListResponseD
     );
   }
 
-  /// The cutting and packaging pairs a product cannot offer
-  /// Vendor dashboard, product form. Every global rule whose cutting style is active: a product offering that cutting style with that packaging cannot be submitted (PRODUCT_NOT_SUBMITTABLE, INCOMPATIBLE_CUTTING_PACKAGING), so the form can warn first. Each pair carries the cutting style with its Arabic and English name; oldest rule first. The whole list in one answer, not paged. The rules are managed by admins.
+  /// The cutting and packaging pairs a customer cannot choose
+  /// Vendor dashboard, product form. Every global rule whose cutting style is active: a product may offer both, but a customer cannot choose that cutting style with that packaging (the public product lists the pairs that apply to it; the cart’s line price, CRT-API-1, will refuse them with INCOMPATIBLE_CUTTING_PACKAGING), so the form can show which choices customers will not get. Each pair carries the cutting style with its Arabic and English name; oldest rule first. The whole list in one answer, not paged. The rules are managed by admins.
   ///
   /// Parameters:
   /// * [cancelToken] - A [CancelToken] that can be used to cancel the operation
