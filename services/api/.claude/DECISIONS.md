@@ -11,6 +11,41 @@ Paths are relative to `services/api/`.
 - You make an architectural decision while working (a new shared building block, a new convention, a new dependency the user approved, a pattern the next module should copy): add a dated line under the right heading in the same change, update the rule file it affects, and update `.claude/ARCHITECTURE.md` if it changes the layout. A decision that lives only in a chat transcript will be made again, differently.
 - A decision listed here is changed only by the backend owner. If you think one is wrong, say so in your report.
 
+## Handover to Kerolles — 2026-11-23
+
+From the session that covered the backend from 2026-11-21 to 2026-11-23, for the backend owner. The Sprint 3 implementation is yours; nothing of it is built.
+
+**Merged into `develop`** (each with the reviewer, CI green, squash):
+
+| PR | What it did |
+|---|---|
+| #286 | B3: the logging e2e finds its line by request id (no flaky match). |
+| #290 | B1 + B4: the pair rule moved from submission to the customer's choice; per-size availability (migration `20261121182718_catalog_size_availability`); the public product shows a switched-off product with `isAvailable`, `defaultSizeId`, `incompatiblePairs`. |
+| #293 | B2: `priceLine` and `PricingService` in the catalog, with the shared cases `docs/frontend/fixtures/pricing-cases.json`; the cart (CRT-API-1) calls it. |
+| #294 | B6: `GET /v1/admin/review-queue`, one keyset list of products waiting for review and pending change requests, with `count`. |
+| #302 | B7: `PERMISSION_DENIED` (403, `details.permission`) in the catalogue; no route returns it until ADM-API-1 (#111). |
+| #304 | B8: `VENDOR_CR_EXISTS` (409) at application and approval, and the unique index `vendors_commercial_registration_number_key` (migration `20261122090000_vendors_unique_commercial_registration`). |
+| #307 | B5: search by every word in any order, store names from the start of a word, ٱ as ا (migration `20261122150000_catalog_search_store_names`, column `products.store_search_text`). |
+| #311 | The `PUT /v1/vendor/products/{id}` description no longer names the removed pair rule. |
+| #314 | The Sprint 3 contract (section "Sprint 3 contract" below; app guide `docs/frontend/orders.md`). |
+
+**The contract:** 44 operations in `openapi.json`, each answering NOT_IMPLEMENTED (501) with `details.task` naming the task that builds it, through `notImplemented` (`src/common/errors/not-implemented.ts`). A task replaces the stub's body, keeps the decorators and DTOs, adds the layers it needs, and deletes its rows from `test/sprint-3-contract.e2e-spec.ts` for its own e2e tests. Modules: `settings`, `scheduling`, `cart`, `coupons` (CRUD-shaped), `wallet`, `payments`, `orders`, `checkout` (four layers, `api/` only so far). Every Idempotency-Key route still needs its missing-key test (ORD-API-1, PAY-API-1, WAL-API-1), and `closedDays` its `isNotRepeated` check (SCH-API-1): both are documented, not built.
+
+**Not started, no branch:** SCH-API-1 (#68). Nothing of Sprint 3 is half-built.
+
+**Next, MP-1 order:** SCH-API-1 → CRT-API-1 → SCH-API-2 → WAL-API-1 with PAY-API-1 → ORD-API-1 → ORD-API-2 → ORD-API-3 → CRT-API-3 → SCH-QA-1. Every money-moving PR gets e2e on a fresh database. The owner's seven musts (redirect `nextAction`, inline webhook and expiry on read with workers off, the pause route, COD rejection by transition, dedicated codes, one open payment per order, the seeded demo wallet for 0500000001 with `--allow-staging`) are in the contract; the demo wallet seed comes with WAL-API-1.
+
+**Owner's decisions** (2026-11-23):
+- Commission is computed on the lines' total without VAT.
+- Every external provider (payments, SMS) is built behind its port with a fake or sandbox provider until the keys arrive; the real integration is its own task. Nothing waits on the client.
+
+**Open, for you:**
+- Promote `cart` and `coupons` to four layers before CRT-API-1 and CRT-API-3 (they will hold money logic)?
+- Review the Arabic messages of the 28 new codes in `error-messages.constants.ts` (and the ones of #302, #304, approved by the owner).
+- The webhook controller sits in `payments/api/controllers/webhook.controller.ts`; the open question "where it lives" (below) is answered by that placement unless you move it.
+
+**The apps are wired to the contract:** the dashboard and mobile Sprint 3 screens build on the generated clients. Any change to a route, DTO or code needs `pnpm openapi:generate`, `pnpm api:generate` (dashboard) and `apps/mobile/scripts/gen-api-client.sh`, a line in `docs/frontend/orders.md`, and a note to the DSH and MOB sessions.
+
 ## Open questions
 
 ### Before launch
@@ -37,7 +72,7 @@ These are questions for the business owners, not for engineering. Until they are
 | What an integration's errors file holds exactly (error classes, code constants, or both) | Every integration has one | The first integration built sets the pattern and records it here |
 | File naming suffixes (the table in `.claude/rules/code-structure.md`) | "Correctly named file" needs a definition | The table is provisional: where existing code differs, follow the code and correct the table |
 | The folder name of the event bus inside `src/infra/`. `event-bus/` was chosen by the session that recorded the decision, not by the backend owner | Every module imports the bus | Use `event-bus/` unless the backend owner names another |
-| Where the controller for an incoming webhook lives (the route is decided) | The first webhook | Ask before adding the first one |
+| Where the controller for an incoming webhook lives (the route is decided) | The first webhook | Placed in `payments/api/controllers/webhook.controller.ts` by the Sprint 3 contract (#314); the backend owner may move it |
 | Spec and e2e files are not type-checked by `pnpm build` or by Jest | A type error in a test can pass unnoticed | Run `pnpm exec tsc --noEmit -p tsconfig.json`. Adding a `typecheck` script is a suggestion for a later step |
 
 ## Decisions in force
