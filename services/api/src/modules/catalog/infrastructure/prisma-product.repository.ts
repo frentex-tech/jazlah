@@ -305,17 +305,28 @@ export class PrismaProductRepository implements ProductRepository {
                 : { lte: filter.maxPrice.halalas }),
             },
           };
-    const pattern =
+    const words =
       filter.text === undefined
         ? undefined
-        : await this.searchPattern(filter.text);
-    // A query of only diacritics or tatweel normalises to nothing: it names no product,
-    // so the answer is an empty page, never every product (`LIKE '%%'`).
-    if (pattern === '') {
+        : await this.searchWords(filter.text);
+    // A query of only diacritics, tatweel or one-letter words leaves no word: it names no
+    // product, so the answer is an empty page, never every product (`LIKE '%%'`).
+    if (words?.length === 0) {
       return { items: [], nextCursor: null };
     }
+    // Every word: anywhere in the product's names, or at the start of a word of its
+    // store's names (stored after a space; DECISIONS.md).
     const search =
-      pattern === undefined ? {} : { searchText: { contains: pattern } };
+      words === undefined
+        ? {}
+        : {
+            AND: words.map((word) => ({
+              OR: [
+                { searchText: { contains: word } },
+                { storeSearchText: { contains: ` ${word}` } },
+              ],
+            })),
+          };
     return this.summaries(
       {
         ...this.publicWhere(),
@@ -346,11 +357,11 @@ export class PrismaProductRepository implements ProductRepository {
   }
 
   /**
-   * The text search's pattern: the query normalised by the same SQL function as the
-   * stored `search_text` (`catalog_search_text`, one definition, in the migration), then
-   * its LIKE wildcards escaped so `%` and `_` match themselves.
+   * The text search's words: the query normalised by the same SQL function as the
+   * stored `search_text` (`catalog_search_text`, one definition, in the migrations), split
+   * on white space, words of one letter dropped, each with its LIKE wildcards escaped so `%` and `_` match themselves.
    */
-  private async searchPattern(text: string): Promise<string> {
+  private async searchWords(text: string): Promise<string[]> {
     try {
       const rows = await this.db.client.$queryRaw<
         unknown[]
@@ -363,7 +374,13 @@ export class PrismaProductRepository implements ProductRepository {
         typeof row.normalized === 'string'
           ? row.normalized
           : '';
-      return escapeLikePattern(normalized);
+      return (
+        normalized
+          .split(/\s+/)
+          // A one-letter word would match nearly every product: it narrows nothing.
+          .filter((word) => [...word].length >= 2)
+          .map(escapeLikePattern)
+      );
     } catch (error) {
       mapPrismaError(error);
     }

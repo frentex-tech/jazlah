@@ -261,10 +261,7 @@ export class InMemoryProductRepository implements ProductRepository {
             (row) =>
               this.isPublic(row) &&
               (filter.text === undefined ||
-                (searchTextOf(filter.text) !== '' &&
-                  searchTextOf(
-                    `${row.content.name.ar} ${row.content.name.en}`,
-                  ).includes(searchTextOf(filter.text)))) &&
+                this.matchesWords(row, filter.text)) &&
               (filter.categoryId === undefined ||
                 row.content.categoryId === filter.categoryId) &&
               (filter.vendorId === undefined ||
@@ -366,6 +363,15 @@ export class InMemoryProductRepository implements ProductRepository {
       createdAt: row.createdAt,
       updatedAt: row.updatedAt,
     };
+  }
+
+  /** Every word of the query in the names; store names are left to the e2e tests. */
+  private matchesWords(row: StoredProduct, text: string): boolean {
+    const words = searchTextOf(text)
+      .split(/\s+/)
+      .filter((word) => [...word].length >= 2);
+    const names = searchTextOf(`${row.content.name.ar} ${row.content.name.en}`);
+    return words.length > 0 && words.every((word) => names.includes(word));
   }
 
   private summaryOf(row: StoredProduct): ProductSummary {

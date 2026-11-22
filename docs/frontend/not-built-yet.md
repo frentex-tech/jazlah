@@ -245,7 +245,7 @@ The orders tab and the order detail follow the ORD-API-3 shapes of sprint-3.md: 
 
 ### Search and filters (STF-MOB-4 #57)
 
-Search reads the public product list with its words, category, store and price range, cursor-paged. Recent searches are kept on the device (8 at most, cleared on sign-out). With the mock switch on, the seeded catalog is searched on the device the way the server searches: the folded query as one phrase inside the folded Arabic and English product names (no tashkeel or tatweel; أ/إ/آ as ا; ى as ي; ة as ه; English in any case), so «نعيمى» finds «نعيمي» and "naimi" finds the English name. Like the server, store names are not searched, words must be in order, and the words are trimmed and searched only from 2 to 100 characters (shorter text shows the start screen). Recent searches drop repeats that fold to the same words.
+Search reads the public product list with its words, category, store and price range, cursor-paged. Recent searches are kept on the device (8 at most, cleared on sign-out). With the mock switch on, the seeded catalog is searched on the device the way the server searches: the folded query as one phrase inside the folded Arabic and English product names (no tashkeel or tatweel; أ/إ/آ as ا; ى as ي; ة as ه; English in any case), so «نعيمى» finds «نعيمي» and "naimi" finds the English name. **The server has changed (B5, 2026-11-22):** every word on its own, all of them required, in any order, anywhere in the product's Arabic and English names or at the start of a word of its store's names (so «لحم» does not find every «ملحمة …» store), one-letter words ignored, and ٱ also reads as ا; the mock still searches one phrase in product names only. The words are trimmed and searched only from 2 to 100 characters (shorter text shows the start screen). Recent searches drop repeats that fold to the same words.
 
 | Gap | Screen waiting on it | The app today | Issue |
 |---|---|---|---|
@@ -255,6 +255,6 @@ Search reads the public product list with its words, category, store and price r
 | An "available now only" filter | Filters sheet: switch and its chip | Switch hidden; the mock filters | API gap |
 | A public list of meat types | Filters sheet: meat type (not in the design) | Not shown; the product list already accepts a meat type, so it can be added once names can be listed | API gap |
 | Store names for any store id (or the whole store list in one call) | Search: store chips in the filters sheet and the active store chip | Only the first page of stores is offered; a chosen store outside it shows as a generic "Store" chip | API gap |
-| Store names in search (and words in any order) | Search results | Not searched, as on the server; the mock matches the server | CAT-API-5 #50 |
+| Store names in search (and words in any order) | Search results | The server does both since B5 (2026-11-22); the mock still searches one phrase in product names, so it finds fewer results than the server | mobile follow-up (CAT-API-5 #50) |
 
 When one of these lands, its endpoints appear in `openapi.json`, and this file and the module guides are updated in the same pull request.
