@@ -14,6 +14,10 @@ import {
   type VendorAccess,
 } from '../domain/ports/vendor-access.port';
 import {
+  VENDOR_REPOSITORY,
+  type VendorRepository,
+} from '../domain/ports/vendor.repository.port';
+import {
   VENDOR_APPLICATION_REPOSITORY,
   type VendorApplicationRepository,
 } from '../domain/ports/vendor-application.repository.port';
@@ -31,8 +35,9 @@ const DOCUMENT_PURPOSE = 'vendor.document';
 /**
  * A signed-in customer applies to become a vendor (FR-VND-01).
  *
- * 0. The applicant does not work for a vendor already, or VENDOR_ACCESS_ALREADY_HELD.
- *    A read, not a lock: an access granted after it is refused again at approval.
+ * 0. The applicant does not work for a vendor already, or VENDOR_ACCESS_ALREADY_HELD;
+ *    no vendor holds the commercial registration number, or VENDOR_CR_EXISTS. Reads,
+ *    not locks: both are checked again at approval.
  * 1. The documents follow the rules (VendorApplication.assertDocuments).
  * 2. The IBAN is a valid Saudi IBAN (the DTO checked it already; this is the domain's
  *    own guard), or VALIDATION_FAILED on `iban`.
@@ -57,6 +62,7 @@ export class SubmitVendorApplicationUseCase {
     @Inject(IBAN_CIPHER) private readonly cipher: IbanCipher,
     @Inject(VENDOR_ACCESS) private readonly access: VendorAccess,
     @Inject(APPLICANT_ACCOUNTS) private readonly accounts: ApplicantAccounts,
+    @Inject(VENDOR_REPOSITORY) private readonly vendors: VendorRepository,
     // Narrowed to what is used, so a unit test passes a plain object.
     @Inject(TransactionRunner)
     private readonly transactions: Pick<TransactionRunner, 'run'>,
@@ -76,6 +82,13 @@ export class SubmitVendorApplicationUseCase {
   ): Promise<VendorApplication> {
     if (await this.access.isHeldBy(input.applicantId)) {
       throw new AppError(ErrorCode.VENDOR_ACCESS_ALREADY_HELD);
+    }
+    if (
+      await this.vendors.existsWithRegistration(
+        input.details.commercialRegistrationNumber,
+      )
+    ) {
+      throw new AppError(ErrorCode.VENDOR_CR_EXISTS);
     }
     VendorApplication.assertDocuments(input.documents);
     const iban = Iban.parse(input.iban);

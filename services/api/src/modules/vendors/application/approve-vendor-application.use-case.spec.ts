@@ -1,7 +1,13 @@
 import { AppError } from '@common/errors/app-error';
 import { ErrorCode } from '@common/errors/error-code.enum';
 import { buildVendorsUseCases } from './vendors-use-cases.fake';
-import { ADMIN, APPLICANT, submitted } from './vendors-test-data.fake';
+import {
+  ADMIN,
+  APPLICANT,
+  OTHER_CUSTOMER,
+  applicationInput,
+  submitted,
+} from './vendors-test-data.fake';
 
 const UNKNOWN = '00000000-0000-4000-8000-0000000000ff';
 
@@ -75,6 +81,57 @@ describe('ApproveVendorApplicationUseCase', () => {
     expect(kit.vendors.rows).toEqual([]);
     expect(kit.history.rows).toEqual([]);
     expect(kit.audit.rows).toEqual([]);
+  });
+
+  it('refuses a second application with the same commercial registration number once the first is approved, leaving it pending', async () => {
+    const kit = buildVendorsUseCases();
+    const first = await submitted(kit);
+    const second = await kit.submitApplication.execute(
+      applicationInput(kit, { applicantId: OTHER_CUSTOMER }),
+    );
+    await kit.approveApplication.execute({
+      applicationId: first.id,
+      reviewerId: ADMIN,
+      commissionBasisPoints: 1000,
+    });
+
+    await expect(
+      kit.approveApplication.execute({
+        applicationId: second.id,
+        reviewerId: ADMIN,
+        commissionBasisPoints: 1000,
+      }),
+    ).rejects.toMatchObject({ code: ErrorCode.VENDOR_CR_EXISTS });
+    expect(
+      kit.applications.rows.find((row) => row.application.id === second.id)
+        ?.application.status,
+    ).toBe('pending');
+  });
+
+  it('answers VENDOR_CR_EXISTS when the number is approved between its check and the insert, leaving the application pending', async () => {
+    const kit = buildVendorsUseCases();
+    const first = await submitted(kit);
+    const second = await kit.submitApplication.execute(
+      applicationInput(kit, { applicantId: OTHER_CUSTOMER }),
+    );
+    await kit.approveApplication.execute({
+      applicationId: first.id,
+      reviewerId: ADMIN,
+      commissionBasisPoints: 1000,
+    });
+    // The concurrent approval: its read ran before the first insert committed.
+    jest
+      .spyOn(kit.vendors, 'existsWithRegistration')
+      .mockResolvedValueOnce(false);
+
+    await expect(
+      kit.approveApplication.execute({
+        applicationId: second.id,
+        reviewerId: ADMIN,
+        commissionBasisPoints: 1000,
+      }),
+    ).rejects.toMatchObject({ code: ErrorCode.VENDOR_CR_EXISTS });
+    expect(kit.vendors.rows).toHaveLength(1);
   });
 
   it('refuses an application already reviewed with VENDOR_APPLICATION_NOT_PENDING', async () => {

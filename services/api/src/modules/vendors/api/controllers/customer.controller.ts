@@ -36,7 +36,7 @@ export class CustomerVendorsController {
     description: [
       'Customer app, "sell on JAZLA" form: the signed-in customer applies to become a vendor. The application is created pending and waits for an admin; nothing is published until it is approved, when the applicant gets vendor access and signs in to the vendor dashboard with the same phone number.',
       'Before sending, upload each document (POST /v1/customer/media/uploads, purpose vendor.document: PDF, JPEG or PNG up to 10 MB) and confirm it (POST /v1/customer/media/{id}/confirm). Send at least one document of each kind (commercial_registration, health_certificate, facility_photo), each file once, at most 10 in all. The IBAN is checked as a Saudi IBAN and never returned in full.',
-      'Errors: VALIDATION_FAILED names the field (documents with requiresEachDocumentKind, uniqueFiles or arrayMaxSize; iban with isSaudiIban). MEDIA_NOT_FOUND (details.mediaId): no such file uploaded by this user with purpose vendor.document. MEDIA_NOT_READY (details.mediaId): the upload was not confirmed. VENDOR_APPLICATION_ALREADY_PENDING: one application is already waiting; show it (GET latest) instead. VENDOR_ACCESS_ALREADY_HELD: this user already works for a vendor. UNAUTHORIZED also when the account was deleted. TRANSACTION_CONFLICT: send again.',
+      'Errors: VALIDATION_FAILED names the field (documents with requiresEachDocumentKind, uniqueFiles or arrayMaxSize; iban with isSaudiIban). MEDIA_NOT_FOUND (details.mediaId): no such file uploaded by this user with purpose vendor.document. MEDIA_NOT_READY (details.mediaId): the upload was not confirmed. VENDOR_APPLICATION_ALREADY_PENDING: one application is already waiting; show it (GET latest) instead. VENDOR_ACCESS_ALREADY_HELD: this user already works for a vendor. VENDOR_CR_EXISTS: a store with this commercial registration number is registered already. UNAUTHORIZED also when the account was deleted. TRANSACTION_CONFLICT: send again.',
     ].join('\n\n'),
   })
   @ApiCreatedResponse({
@@ -49,6 +49,7 @@ export class CustomerVendorsController {
     ErrorCode.MEDIA_NOT_READY,
     ErrorCode.VENDOR_APPLICATION_ALREADY_PENDING,
     ErrorCode.VENDOR_ACCESS_ALREADY_HELD,
+    ErrorCode.VENDOR_CR_EXISTS,
     ErrorCode.TRANSACTION_CONFLICT,
     ErrorCode.SERVICE_UNAVAILABLE,
     ...CUSTOMER_AUTH_ERRORS,

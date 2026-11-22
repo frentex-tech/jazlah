@@ -77,6 +77,11 @@ export enum ErrorCode {
    */
   VENDOR_ACCESS_ALREADY_HELD = 'VENDOR_ACCESS_ALREADY_HELD',
   /**
+   * A vendor with this commercial registration number exists already: refused when
+   * applying, and at approval when that vendor was approved after the application.
+   */
+  VENDOR_CR_EXISTS = 'VENDOR_CR_EXISTS',
+  /**
    * The product's status does not allow this: editing a product under review, or a
    * review step on a product that is not waiting for it. Details: `{ status }`.
    */

@@ -1,6 +1,7 @@
 import { ErrorCode } from '@common/errors/error-code.enum';
 import { buildVendorsUseCases } from './vendors-use-cases.fake';
 import {
+  ADMIN,
   APPLICANT,
   BAD_CHECKSUM_IBAN,
   IBAN,
@@ -73,6 +74,25 @@ describe('SubmitVendorApplicationUseCase', () => {
     ).toBe(ErrorCode.VENDOR_ACCESS_ALREADY_HELD);
     expect(kit.applications.rows).toEqual([]);
     expect(kit.cipher.sealed).toEqual([]);
+  });
+
+  it('refuses a commercial registration number a vendor holds with VENDOR_CR_EXISTS, storing nothing', async () => {
+    const kit = buildVendorsUseCases();
+    const first = await kit.submitApplication.execute(applicationInput(kit));
+    await kit.approveApplication.execute({
+      applicationId: first.id,
+      reviewerId: ADMIN,
+      commissionBasisPoints: 1000,
+    });
+
+    expect(
+      await codeOf(
+        kit.submitApplication.execute(
+          applicationInput(kit, { applicantId: OTHER_CUSTOMER }),
+        ),
+      ),
+    ).toBe(ErrorCode.VENDOR_CR_EXISTS);
+    expect(kit.applications.rows).toHaveLength(1);
   });
 
   it('refuses an IBAN that fails the checksum, without sealing it', async () => {
