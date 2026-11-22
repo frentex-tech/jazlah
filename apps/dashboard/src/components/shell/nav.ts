@@ -1,5 +1,5 @@
 import {
-  Bank, Camera, ChartLineUp, CookingPot, Gear, ListChecks, Package, PawPrint, Receipt, Star, Storefront, Truck, Users, Wallet,
+  Bank, Camera, ChartLineUp, CookingPot, Gear, ListChecks, Package, PawPrint, Receipt, Star, Storefront, Ticket, Truck, Users, Wallet,
 } from '@phosphor-icons/react/dist/ssr';
 import type { Icon, IconWeight } from '@phosphor-icons/react';
 import type { Panel } from '@/lib/session';
@@ -27,10 +27,12 @@ export const NAV: Record<Panel, NavItem[]> = {
     { key: 'stories', href: '/admin/stories', icon: Camera },
     { key: 'loyalty', href: '/admin/loyalty', icon: Star, weight: 'fill' },
     { key: 'charity', href: '/admin/charity', icon: PawPrint },
+    // No marketing item in the shell frame (135:46622): added for the coupons (CRT-DSH-1), signoff.md.
+    { key: 'marketing', href: '/admin/marketing', icon: Ticket },
     { key: 'settings', href: '/admin/settings', icon: Gear },
   ],
   vendor: [
-    { key: 'orders', href: '/vendor', icon: ListChecks },
+    { key: 'orders', href: '/vendor/orders', icon: ListChecks },
     { key: 'products', href: '/vendor/products', icon: Package, weight: 'fill' },
     { key: 'earnings', href: '/vendor/earnings', icon: Wallet },
     { key: 'store', href: '/vendor/store', icon: Storefront },

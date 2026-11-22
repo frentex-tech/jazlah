@@ -69,6 +69,9 @@ class MockProductRepository implements ProductRepository {
 
   static const _carcasses = {'naimi-whole', 'harri-half', 'tais-whole'};
 
+  /// A whole or half carcass (order type carcass for the scheduling mock); every other mock product is ready meat.
+  static bool isCarcass(String productId) => _carcasses.contains(productId.split('-').skip(2).join('-'));
+
   static ProductDetail detail(ProductCard card) {
     final slug = card.id.split('-').skip(2).join('-');
     final p = card.minPriceHalalas ?? 0;

@@ -80,7 +80,7 @@ jobs:
           MEDIA_ORIGINS: http://localhost:9002
         run: |
           pnpm build
-          ! grep -rlF --exclude='*.map' -e 'Fresh beef ribeye' -e 'mock-rt-' -e '__adminCatalog' .next/server .next/static
+          ! grep -rlF --exclude='*.map' -e 'Fresh beef ribeye' -e 'mock-rt-' -e '__adminCatalog' -e '__operations' -e '__orders' -e '__coupons' .next/server .next/static
 
       - name: Build (test build for the mock suite)
         env:
@@ -90,7 +90,7 @@ jobs:
         run: |
           rm -rf .next && pnpm build
           # Positive control for the check above: the same markers are found in a test build.
-          for m in 'Fresh beef ribeye' 'mock-rt-' '__adminCatalog'; do grep -rqF --exclude='*.map' "$m" .next/server || { echo "::error::marker '$m' missing from the test build"; exit 1; }; done
+          for m in 'Fresh beef ribeye' 'mock-rt-' '__adminCatalog' '__operations' '__orders' '__coupons'; do grep -rqF --exclude='*.map' "$m" .next/server || { echo "::error::marker '$m' missing from the test build"; exit 1; }; done
 
       - name: Install Playwright Chromium
         # The Ubuntu mirrors fail now and then: retry before failing the job.

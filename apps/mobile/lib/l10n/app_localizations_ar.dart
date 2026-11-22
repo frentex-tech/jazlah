@@ -1246,7 +1246,7 @@ class AppLocalizationsAr extends AppLocalizations {
   String get productAdded => 'أُضيفت القطعة إلى السلة';
 
   @override
-  String get checkoutTitle => 'الدفع والمراجعة';
+  String get checkoutTitle => 'إتمام الطلب';
 
   @override
   String get cartReplaceTitle => 'استبدال السلة؟';
@@ -1395,4 +1395,467 @@ class AppLocalizationsAr extends AppLocalizations {
   String cartWeightAbout(String weight) {
     return 'نحو $weight';
   }
+
+  @override
+  String checkoutStep(int step, int total, String name) {
+    return 'الخطوة $step من $total: $name';
+  }
+
+  @override
+  String get checkoutStepFulfilment => 'الاستلام واليوم';
+
+  @override
+  String get checkoutDelivery => 'توصيل للعنوان';
+
+  @override
+  String get checkoutPickup => 'استلام من المتجر';
+
+  @override
+  String get checkoutDeliveryAddress => 'عنوان التوصيل';
+
+  @override
+  String get checkoutOutOfCoverage => 'خارج نطاق التغطية';
+
+  @override
+  String get checkoutNoCoveredTitle => 'لا يوجد عنوان داخل التغطية';
+
+  @override
+  String get checkoutNoCoveredBody => 'أضف عنوانًا داخل نطاق التغطية لنوصّل لك، أو اختر الاستلام من المتجر.';
+
+  @override
+  String get checkoutPickupPlace => 'موقع الاستلام';
+
+  @override
+  String checkoutPickupHours(String open, String close) {
+    return 'الاستلام من $open إلى $close';
+  }
+
+  @override
+  String get checkoutDeliveryDay => 'يوم التوصيل';
+
+  @override
+  String get checkoutPickupDay => 'يوم الاستلام';
+
+  @override
+  String get checkoutCalendar => 'التقويم';
+
+  @override
+  String checkoutDeliveryWindow(String start, String end) {
+    return 'يصل بين $start و $end';
+  }
+
+  @override
+  String checkoutPickupWindow(String start, String end) {
+    return 'جاهز للاستلام بين $start و $end';
+  }
+
+  @override
+  String checkoutRiyadhTime(String date) {
+    return '$date · بتوقيت الرياض';
+  }
+
+  @override
+  String checkoutPickAnother(String date) {
+    return '$date · اختر يومًا آخر متاحًا';
+  }
+
+  @override
+  String get checkoutDaysLegend => 'دليل الأيام';
+
+  @override
+  String get checkoutDayClosed => 'مغلق: عطلة المتجر';
+
+  @override
+  String get checkoutDayFull => 'مكتمل: لا توجد سعة';
+
+  @override
+  String get checkoutDayPastCutoff => 'انتهى وقت الطلب لهذا اليوم';
+
+  @override
+  String get checkoutDayVendorClosed => 'مغلق: المتجر لا يعمل في هذا اليوم';
+
+  @override
+  String get checkoutDayOutsideHorizon => 'خارج فترة الحجز المتاحة';
+
+  @override
+  String get checkoutDayUnavailable => 'غير متاح';
+
+  @override
+  String get checkoutDaysErrorTitle => 'تعذّر تحميل الأيام المتاحة';
+
+  @override
+  String get checkoutDaysErrorBody => 'تحقق من الاتصال ثم أعد المحاولة.';
+
+  @override
+  String get checkoutPausedTitle => 'الطلبات متوقفة مؤقتًا، سنعود قريبًا';
+
+  @override
+  String get checkoutChooseDeliveryDay => 'اختر يوم التوصيل';
+
+  @override
+  String get checkoutChoosePickupDay => 'اختر يوم الاستلام';
+
+  @override
+  String get checkoutConfirmDay => 'تأكيد اليوم';
+
+  @override
+  String get checkoutPreviousMonth => 'الشهر السابق';
+
+  @override
+  String get checkoutNextMonth => 'الشهر التالي';
+
+  @override
+  String get clockAm => 'صباحًا';
+
+  @override
+  String get clockPm => 'مساءً';
+
+  @override
+  String get clockAmShort => 'ص';
+
+  @override
+  String get clockPmShort => 'م';
+
+  @override
+  String get errOrderingPaused => 'الطلبات متوقفة مؤقتًا، حاول لاحقًا.';
+
+  @override
+  String get errFulfilmentNotSupported => 'بعض منتجات سلتك لا تتوفر بطريقة الاستلام هذه.';
+
+  @override
+  String get errAddressNotCovered => 'هذا العنوان خارج نطاق التوصيل.';
+
+  @override
+  String get errDayFull => 'اكتمل هذا اليوم، اختر يومًا آخر.';
+
+  @override
+  String get reviewTitle => 'الدفع والمراجعة';
+
+  @override
+  String reviewItemsFrom(int count, String vendor) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count منتج من $vendor',
+      many: '$count منتجًا من $vendor',
+      few: '$count منتجات من $vendor',
+      two: 'منتجان من $vendor',
+      one: 'منتج واحد من $vendor',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String reviewDeliveryTo(String place) {
+    return 'توصيل إلى $place';
+  }
+
+  @override
+  String reviewPickupFrom(String place) {
+    return 'استلام من $place';
+  }
+
+  @override
+  String get reviewPaymentMethod => 'طريقة الدفع';
+
+  @override
+  String get reviewTerms => 'بتأكيد الطلب فأنت توافق على الشروط والأحكام وسياسة الإلغاء.';
+
+  @override
+  String get reviewConfirm => 'تأكيد الطلب';
+
+  @override
+  String get payMadaCard => 'بطاقة مدى';
+
+  @override
+  String get payMada => 'مدى';
+
+  @override
+  String get payCard => 'بطاقة ائتمانية';
+
+  @override
+  String get payApplePay => 'Apple Pay';
+
+  @override
+  String get payWallet => 'محفظة جزلة';
+
+  @override
+  String get payCod => 'الدفع عند الاستلام';
+
+  @override
+  String payEndingIn(String last4) {
+    return 'تنتهي بـ $last4';
+  }
+
+  @override
+  String get payReasonWalletInsufficient => 'الرصيد غير كافٍ';
+
+  @override
+  String get payReasonUnavailable => 'غير متاح لهذا الطلب';
+
+  @override
+  String get errPriceChanged => 'تغيّرت أسعار بعض المنتجات، راجع سلتك.';
+
+  @override
+  String get errItemUnavailable => 'بعض المنتجات لم تعد متوفرة، راجع سلتك.';
+
+  @override
+  String get errMinOrderNotMet => 'سلتك أقل من الحد الأدنى للطلب.';
+
+  @override
+  String get placedTitle => 'تم استلام طلبك';
+
+  @override
+  String placedNumber(String number) {
+    return 'رقم الطلب $number';
+  }
+
+  @override
+  String placedFresh(String weekday) {
+    return 'ذبح وتجهيز طازج صباح $weekday';
+  }
+
+  @override
+  String placedDateVendor(String date, String vendor) {
+    return '$date · بإشراف $vendor';
+  }
+
+  @override
+  String placedDeliveryWindow(String start, String end) {
+    return 'توصيل بين $start و$end';
+  }
+
+  @override
+  String placedPickupWindow(String start, String end) {
+    return 'استلام بين $start و$end';
+  }
+
+  @override
+  String placedTotal(String amount) {
+    return '$amount ر.س شامل الضريبة';
+  }
+
+  @override
+  String get placedTrack => 'تتبع الطلب';
+
+  @override
+  String get placedHome => 'العودة للرئيسية';
+
+  @override
+  String get payFakeTitle => 'بوابة الدفع التجريبية';
+
+  @override
+  String payFakeBody(String amount) {
+    return 'تحقق 3DS لمبلغ $amount ر.س. هذه صفحة المزوّد التجريبي.';
+  }
+
+  @override
+  String get payFakeApprove => 'موافقة';
+
+  @override
+  String get payFakeDecline => 'رفض';
+
+  @override
+  String payUseWallet(String amount) {
+    return 'استخدام رصيد المحفظة · $amount ر.س';
+  }
+
+  @override
+  String payRemaining(String amount) {
+    return 'المتبقي $amount ر.س بطريقة الدفع المختارة';
+  }
+
+  @override
+  String get payChooseMethod => 'اختر طريقة دفع للمتابعة';
+
+  @override
+  String get payDeclined => 'تم رفض الدفع من البنك، جرّب بطاقة أخرى أو وسيلة دفع مختلفة';
+
+  @override
+  String get payNotCompleted => 'لم يكتمل الدفع، أعد المحاولة أو اختر وسيلة أخرى';
+
+  @override
+  String get payExpired => 'أُلغي الطلب لانتهاء مهلة الدفع (15 دقيقة).';
+
+  @override
+  String payWalletPart(String amount) {
+    return 'يُدفع $amount ر.س من رصيد المحفظة.';
+  }
+
+  @override
+  String payWalletRestored(String amount) {
+    return 'أُعيد $amount ر.س إلى محفظتك.';
+  }
+
+  @override
+  String get placedUnderReview => 'سنراجع طلبك ونؤكده قريبًا.';
+
+  @override
+  String get placedConfirmed => 'تم تأكيد طلبك.';
+
+  @override
+  String get payStillProcessing => 'لا يزال الدفع قيد المعالجة، سنحدّث حالة طلبك فور وصول النتيجة.';
+
+  @override
+  String get payOrderGone => 'هذا الطلب لم يعد متاحًا.';
+
+  @override
+  String get ordersAll => 'الكل';
+
+  @override
+  String get ordersCurrent => 'الجارية';
+
+  @override
+  String get ordersPast => 'المكتملة';
+
+  @override
+  String ordersNumber(String number) {
+    return 'طلب $number';
+  }
+
+  @override
+  String get ordersToday => 'اليوم';
+
+  @override
+  String ordersTodayAt(String time) {
+    return 'اليوم، $time';
+  }
+
+  @override
+  String get ordersEmptyTitle => 'لا توجد طلبات بعد';
+
+  @override
+  String get ordersEmptyBody => 'طلباتك السابقة والحالية ستظهر هنا.';
+
+  @override
+  String get ordersEmptyAction => 'ابدأ أول طلب';
+
+  @override
+  String get ordersErrorTitle => 'تعذّر تحميل الطلبات';
+
+  @override
+  String get ordersErrorBody => 'تحقق من اتصالك ثم حاول مرة أخرى.';
+
+  @override
+  String get ordersSignInTitle => 'سجّل دخولك لعرض الطلبات';
+
+  @override
+  String get ordersSignInBody => 'طلباتك محفوظة في حسابك. سجّل الدخول لمتابعتها.';
+
+  @override
+  String get orderDetailTitle => 'تفاصيل الطلب';
+
+  @override
+  String get orderErrorTitle => 'تعذّر تحميل الطلب';
+
+  @override
+  String get orderDeniedTitle => 'لا يمكنك عرض هذا الطلب';
+
+  @override
+  String get orderDeniedBody => 'هذا الطلب مرتبط بحساب آخر.';
+
+  @override
+  String orderLineDelivery(String vendor, String day, String start, String end, String place) {
+    return '$vendor · توصيل $day بين $start و$end إلى $place';
+  }
+
+  @override
+  String orderLinePickup(String vendor, String day, String start, String end, String place) {
+    return '$vendor · استلام $day بين $start و$end من $place';
+  }
+
+  @override
+  String get orderStatusTitle => 'حالة الطلب';
+
+  @override
+  String get orderTrackingTitle => 'تتبع التوصيل';
+
+  @override
+  String get orderTrackingNotStarted => 'لم يبدأ التوصيل بعد';
+
+  @override
+  String get orderTrackingNotStartedBody => 'سيُعيّن مندوب التوصيل ويصلك إشعار فور خروج الطلب.';
+
+  @override
+  String get orderFreshnessTitle => 'شهادة الطزاجة';
+
+  @override
+  String get orderFreshnessWaiting => 'بانتظار الذبح والتجهيز';
+
+  @override
+  String get orderFreshnessWaitingBody => 'ستظهر هنا صور الذبح ووقته فور رفعها من المتجر.';
+
+  @override
+  String get orderItems => 'المنتجات';
+
+  @override
+  String get orderPayment => 'الدفع';
+
+  @override
+  String get orderPaid => 'مدفوع';
+
+  @override
+  String get orderAwaitingPayment => 'بانتظار الدفع';
+
+  @override
+  String get orderPayNow => 'إكمال الدفع';
+
+  @override
+  String orderNotes(String notes) {
+    return 'ملاحظات: $notes';
+  }
+
+  @override
+  String get stepReceived => 'تم استلام الطلب';
+
+  @override
+  String get stepPreparing => 'الذبح والتجهيز';
+
+  @override
+  String get stepReadyDelivery => 'جاهز للتوصيل';
+
+  @override
+  String get stepReadyPickup => 'جاهز للاستلام';
+
+  @override
+  String get stepOnTheWay => 'في الطريق إليك';
+
+  @override
+  String get stepDelivered => 'تم التسليم';
+
+  @override
+  String get stepCollected => 'تم الاستلام';
+
+  @override
+  String get statusPendingPayment => 'بانتظار الدفع';
+
+  @override
+  String get statusNew => 'بانتظار التأكيد';
+
+  @override
+  String get statusConfirmed => 'مؤكد';
+
+  @override
+  String get statusPreparing => 'قيد التجهيز';
+
+  @override
+  String get statusReady => 'جاهز';
+
+  @override
+  String get statusOnTheWay => 'في الطريق';
+
+  @override
+  String get statusDelivered => 'تم التسليم';
+
+  @override
+  String get statusCollected => 'تم الاستلام';
+
+  @override
+  String get statusCancelled => 'ملغي';
+
+  @override
+  String get statusDeliveryFailed => 'تعذّر التوصيل';
+
+  @override
+  String get statusReturned => 'مرتجع';
 }

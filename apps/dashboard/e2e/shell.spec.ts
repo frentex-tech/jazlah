@@ -13,8 +13,8 @@ test('a vendor session cannot open the admin panel', async ({ page, context }) =
 });
 
 for (const [panel, title, items] of [
-  ['admin', 'لوحة المعلومات', 12],
-  ['vendor', 'الطلبات المباشرة', 6],
+  ['admin', 'لوحة المعلومات', 13],
+  ['vendor', 'الطلبات', 6],
   ['kitchen', 'لوحة المطبخ · اليوم', 1],
 ] as const) {
   test(`${panel} shell renders its side nav, top bar and header`, async ({ page, context }) => {
@@ -38,7 +38,7 @@ test('English mirrors the layout', async ({ page, context }) => {
 
 test('a nav item without a page shows the localised not-found inside the shell', async ({ page, context }) => {
   await signInAs(context, ['admin']);
-  await page.goto('/admin/orders');
+  await page.goto('/admin/customers');
   await expect(page.getByRole('status').filter({ hasText: 'الصفحة غير موجودة' })).toBeVisible();
   await expect(page.getByRole('navigation', { name: 'القائمة الرئيسية' })).toBeVisible();
   await page.getByRole('link', { name: 'العودة للرئيسية' }).click();

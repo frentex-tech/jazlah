@@ -26,6 +26,12 @@ class Prefs {
   List<String> get recentSearches => _p.getStringList('recentSearches') ?? const [];
   Future<void> setRecentSearches(List<String> value) => _p.setStringList('recentSearches', value);
 
+  /// The order whose payment step was left mid-payment (app killed during 3DS); reopened on the next start.
+  /// Cleared with the account data like every other account key.
+  String? get pendingPayment => _p.getString('payment.pending');
+  Future<void> setPendingPayment(String? orderId) =>
+      orderId == null ? _p.remove('payment.pending') : _p.setString('payment.pending', orderId);
+
   String? getString(String key) => _p.getString(key);
   Future<void> setString(String key, String value) => _p.setString(key, value);
   Future<void> remove(String key) => _p.remove(key);
