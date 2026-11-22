@@ -116,4 +116,62 @@ export enum ErrorCode {
    * position out of range, or edges that cross (PostGIS ST_IsValid). Nothing was saved.
    */
   INVALID_POLYGON = 'INVALID_POLYGON',
+  /** The route is in the contract but its task has not landed yet (`details.task`, the task key). Show "coming soon"; do not retry. */
+  NOT_IMPLEMENTED = 'NOT_IMPLEMENTED',
+  /** The cart has no lines, so it cannot get a coupon, a fulfilment or be placed. */
+  CART_EMPTY = 'CART_EMPTY',
+  /** The cart holds another store’s products; one store per cart. Details: `{ vendorId, vendorName }` of the cart’s store. Ask, then send again with `replaceCart: true`. */
+  CART_VENDOR_MISMATCH = 'CART_VENDOR_MISMATCH',
+  /** The product cannot be ordered now: not published, switched off, or its store or category is not active. */
+  PRODUCT_UNAVAILABLE = 'PRODUCT_UNAVAILABLE',
+  /** The chosen size is out of stock. */
+  SIZE_UNAVAILABLE = 'SIZE_UNAVAILABLE',
+  /** A chosen size, cutting style, packaging or "without" item is not one of the product’s. Refresh the product. */
+  OPTION_NOT_IN_PRODUCT = 'OPTION_NOT_IN_PRODUCT',
+  /** The chosen cutting style cannot be packed in the chosen packaging (an admin rule). */
+  INCOMPATIBLE_CUTTING_PACKAGING = 'INCOMPATIBLE_CUTTING_PACKAGING',
+  /** The product offers cutting styles and none was chosen. */
+  OPTION_REQUIRED = 'OPTION_REQUIRED',
+  /** A line’s price changed since it was added. Details: `{ lineIds }`. Show the new price; PATCH the line to accept it. */
+  PRICE_CHANGED = 'PRICE_CHANGED',
+  /** A line can no longer be ordered as chosen. Details: `{ lineIds }`. Remove it. */
+  ITEM_UNAVAILABLE = 'ITEM_UNAVAILABLE',
+  /** The subtotal is below the minimum order. Details: `{ minOrderHalalas, remainingHalalas }`. */
+  MIN_ORDER_NOT_MET = 'MIN_ORDER_NOT_MET',
+  /** No coupon with this code, or it is switched off. */
+  COUPON_NOT_FOUND = 'COUPON_NOT_FOUND',
+  /** The coupon has ended. */
+  COUPON_EXPIRED = 'COUPON_EXPIRED',
+  /** The coupon has not started yet, or is not for this store or these products. */
+  COUPON_NOT_APPLICABLE = 'COUPON_NOT_APPLICABLE',
+  /** The cart is below the coupon’s minimum. Details: `{ minOrderHalalas }`. */
+  COUPON_MIN_ORDER = 'COUPON_MIN_ORDER',
+  /** The coupon has been used as many times as allowed, in all or by this customer. */
+  COUPON_LIMIT_REACHED = 'COUPON_LIMIT_REACHED',
+  /** Another coupon has this code (in any case). */
+  COUPON_CODE_TAKEN = 'COUPON_CODE_TAKEN',
+  /** The cart has no fulfilment yet: choose delivery or pickup and the day first. */
+  FULFILMENT_REQUIRED = 'FULFILMENT_REQUIRED',
+  /** A product in the cart does not allow this fulfilment method. */
+  FULFILMENT_NOT_SUPPORTED = 'FULFILMENT_NOT_SUPPORTED',
+  /** The address is outside every active delivery zone. */
+  ADDRESS_NOT_COVERED = 'ADDRESS_NOT_COVERED',
+  /** The day has no capacity left for this store. */
+  DAY_FULL = 'DAY_FULL',
+  /** The day cannot be chosen. Details: `{ reason }`: PAST_CUTOFF, CLOSED, OUTSIDE_HORIZON or VENDOR_CLOSED. */
+  DAY_NOT_AVAILABLE = 'DAY_NOT_AVAILABLE',
+  /** New orders are paused by the platform. Details: `{ messageAr, messageEn }`, the admin’s message to show. */
+  ORDERING_PAUSED = 'ORDERING_PAUSED',
+  /** The profile has no full name yet; placing an order needs one. */
+  PROFILE_INCOMPLETE = 'PROFILE_INCOMPLETE',
+  /** The wallet balance does not cover the amount. Details: `{ balanceHalalas }`. */
+  WALLET_INSUFFICIENT = 'WALLET_INSUFFICIENT',
+  /** The method is not offered for this order (cash on delivery off, over its limit or not for this kind of order). Details: `{ method }`. Refetch the methods. */
+  PAYMENT_METHOD_NOT_AVAILABLE = 'PAYMENT_METHOD_NOT_AVAILABLE',
+  /** The order is not waiting for payment: paid, cancelled or expired. */
+  ORDER_NOT_PAYABLE = 'ORDER_NOT_PAYABLE',
+  /** A payment of this order with another method is still open. Details: `{ paymentId }`. Finish or wait for it. */
+  PAYMENT_IN_PROGRESS = 'PAYMENT_IN_PROGRESS',
+  /** The order cannot move to that status now, or not by this caller. Details: `{ from, to }`. Reload the order. */
+  ORDER_TRANSITION_NOT_ALLOWED = 'ORDER_TRANSITION_NOT_ALLOWED',
 }
