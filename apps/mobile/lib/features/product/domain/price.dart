@@ -1,7 +1,8 @@
-/// The one place the app prices a product line, with the formula of CAT-API-1 / CRT-API-1
-/// (PricingService.priceLine): unit = size + cut extra + packaging extra, line = unit × quantity, VAT
-/// included, exclusions free. Same result shape and error codes as the server. The server stays
-/// authoritative in the cart; swap this for its price here when the product page should show it.
+/// The one place the app prices a product line, with the server's `priceLine` (CAT-API-1, #293): unit = size +
+/// cut extra + packaging extra, line = unit × quantity, VAT included, exclusions free. Same result shape and error
+/// codes; the errors come in the order of the fixture and the server's price-line.ts (each once, in the order
+/// found: SIZE_UNAVAILABLE comes before an unknown cut, packaging or exclusion), proven by
+/// test/features/product/pricing_cases_test.dart on the shared docs/frontend/fixtures/pricing-cases.json. The server stays authoritative in the cart (CRT-API-1 #61).
 library;
 
 import 'package:jazlah/features/product/domain/product.dart';

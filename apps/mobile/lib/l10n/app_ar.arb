@@ -1119,7 +1119,6 @@
   "errPaymentInProgress": "هناك عملية دفع لم تنتهِ بعد لهذا الطلب.",
   "payCheckStatus": "تحقق من حالة الدفع",
   "payCancelPage": "إلغاء الدفع",
-  "productSizeNoId": "لا يمكن إضافة هذا المقاس إلى السلة حاليًا.",
   "payPageErrorTitle": "تعذّر فتح صفحة الدفع",
   "payPageErrorBody": "تحقق من اتصالك ثم أعد المحاولة.",
   "payPageClose": "إغلاق",

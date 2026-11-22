@@ -3,10 +3,15 @@ import 'package:jazlah/features/catalog/domain/catalog.dart';
 import 'package:jazlah/features/search/data/search_repository.dart';
 import 'package:jazlah/features/search/domain/search.dart';
 
-/// As the server (catalog_search_text): the folded query, as one phrase, inside the folded
-/// "Arabic name + space + English name". Store names are not searched.
-bool matchesSearch(ProductCard p, String query) =>
-    normalizeSearch('${p.name.ar} ${p.name.en}').contains(normalizeSearch(query));
+/// As the server (CAT-API-5, owner's decision 2026-11-22): every word of the folded query (one-letter words
+/// dropped) must appear, in any order, anywhere in the product's names or at the start of a word of its store's
+/// names, Arabic or English. No word left: nothing matches (an empty page, never every product).
+bool matchesSearch(ProductCard p, String query) {
+  final words = searchWords(query);
+  final names = normalizeSearch('${p.name.ar} ${p.name.en}');
+  final store = p.vendorName == null ? '' : ' ${normalizeSearch('${p.vendorName!.ar} ${p.vendorName!.en}')}';
+  return words.isNotEmpty && words.every((w) => names.contains(w) || store.contains(' $w'));
+}
 
 /// Search over the mock catalog for USE_MOCKS and tests, with the parts the API lacks filled.
 class MockSearchRepository implements SearchRepository {
@@ -29,7 +34,8 @@ class MockSearchRepository implements SearchRepository {
   List<ProductCard> _all(SearchQuery q) {
     final all = [
       for (final p in MockCatalogRepository.productList)
-        if (matchesSearch(p, q.text) &&
+        // No text: no text filter (only a text with no word left answers an empty page).
+        if ((q.text.trim().isEmpty || matchesSearch(p, q.text)) &&
             (q.categoryId == null || p.categoryId == q.categoryId) &&
             (q.vendorId == null || p.vendorId == q.vendorId) &&
             // A card without a price never matches a price bound.

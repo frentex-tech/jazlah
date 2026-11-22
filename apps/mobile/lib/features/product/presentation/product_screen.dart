@@ -59,13 +59,6 @@ class _ProductScreenState extends ConsumerState<ProductScreen> {
       if (target != null) await Scrollable.ensureVisible(target, duration: const Duration(milliseconds: 300));
       return;
     }
-    // A size without a real id would be skipped by the server cart (or its merge): refuse it here.
-    final size = p.sizes.where((s) => s.id == _selection!.sizeId).firstOrNull;
-    if (size != null && !size.hasRealId) {
-      debugPrint('add to cart refused: size ${size.id} of ${p.id} has no id from the API');
-      showJToast(context, message: AppLocalizations.of(context).productSizeNoId, kind: JToastKind.error);
-      return;
-    }
     setState(() => _adding = true);
     try {
       final added = await addToCart(

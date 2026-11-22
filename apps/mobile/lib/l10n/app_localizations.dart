@@ -3476,12 +3476,6 @@ abstract class AppLocalizations {
   /// **'إلغاء الدفع'**
   String get payCancelPage;
 
-  /// No description provided for @productSizeNoId.
-  ///
-  /// In ar, this message translates to:
-  /// **'لا يمكن إضافة هذا المقاس إلى السلة حاليًا.'**
-  String get productSizeNoId;
-
   /// No description provided for @payPageErrorTitle.
   ///
   /// In ar, this message translates to:

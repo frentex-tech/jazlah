@@ -1884,9 +1884,6 @@ class AppLocalizationsEn extends AppLocalizations {
   String get payCancelPage => 'Cancel payment';
 
   @override
-  String get productSizeNoId => 'This size can\'t be added to the cart right now.';
-
-  @override
   String get payPageErrorTitle => 'The payment page could not be opened';
 
   @override

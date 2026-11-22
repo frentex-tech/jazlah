@@ -59,12 +59,13 @@ class SearchQuery {
   int get hashCode => _key.hashCode;
 }
 
-final _marks = RegExp('[\u064B-\u065F\u0670\u0640]'); // tashkeel, dagger alif, tatweel
-final _alifs = RegExp('[أإآ]');
+// As the server's catalog_search_text: U+064B..U+0670 (tashkeel, dagger alif, and the range between) and tatweel.
+final _marks = RegExp('[\u064B-\u0670\u0640]');
+final _alifs = RegExp('[أإآٱ]');
 final _spaces = RegExp(r'\s+');
 
 /// Folds spelling variants as the server's catalog_search_text does (the server folds on its own):
-/// no tashkeel or tatweel, أ/إ/آ → ا, ى → ي, ة → ه, Latin lower-cased. «نعيمى» and «نعيمي» fold to the same word.
+/// no tashkeel or tatweel, أ/إ/آ/ٱ → ا, ى → ي, ة → ه, Latin lower-cased. «نعيمى» and «نعيمي» fold to the same word.
 String normalizeSearch(String text) => text
     .toLowerCase()
     .replaceAll(_marks, '')
@@ -73,3 +74,9 @@ String normalizeSearch(String text) => text
     .replaceAll('ة', 'ه')
     .replaceAll(_spaces, ' ')
     .trim();
+
+/// The search words of a query, as the server splits them: folded, split on white space, one-letter words dropped.
+List<String> searchWords(String query) => [
+  for (final w in normalizeSearch(query).split(' '))
+    if (w.runes.length >= 2) w,
+];

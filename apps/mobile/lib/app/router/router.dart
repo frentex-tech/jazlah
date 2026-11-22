@@ -161,7 +161,7 @@ final routerProvider = Provider<GoRouter>((ref) {
       ),
       GoRoute(
         path: '/product/:id',
-        builder: (_, state) => ProductScreen(id: state.pathParameters['id']!),
+        builder: (_, state) => productPage(state.pathParameters['id']!),
       ),
       // Full screen like Figma (no tab bar).
       GoRoute(path: Routes.search, builder: (_, _) => const SearchScreen()),
@@ -189,6 +189,10 @@ final routerProvider = Provider<GoRouter>((ref) {
     ],
   );
 });
+
+/// A product page keyed by its id: another product in the same place opens fresh (gallery page 1, at the top, its
+/// own default size) instead of keeping the previous one's state.
+Widget productPage(String id) => ProductScreen(key: ValueKey(id), id: id);
 
 /// The header cart button (its badge is `cartCountProvider`).
 void openCart(BuildContext context) => context.push(Routes.cart);
