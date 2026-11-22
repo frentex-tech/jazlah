@@ -234,8 +234,10 @@ export function CouponPage({ id }: { id?: string }) {
           ))}
           {/* Decision 25: the first-order discount is off for now; shown disabled and never sent. */}
           <div className="flex items-center gap-s12">
-            <Switch label={t('form.firstOrderOnly')} checked={false} disabled onChange={() => {}} />
-            <Badge type="neutral" size="M">{t('form.firstOrderOnlySoon')}</Badge>
+            <Switch label={t('form.firstOrderOnly')} checked={coupon?.firstOrderOnly ?? false} disabled describedBy="first-order-soon" onChange={() => {}} />
+            <span id="first-order-soon">
+              <Badge type="neutral" size="M">{t('form.firstOrderOnlySoon')}</Badge>
+            </span>
           </div>
         </FormSection>
 

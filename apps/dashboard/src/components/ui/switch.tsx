@@ -3,7 +3,7 @@ import { cn } from '@/lib/utils';
 
 // Figma DS «Switch» (16:411): checked (ember, knob at the end) / unchecked (sand, muted border, knob at the start), disabled.
 // `hideLabel`: the label is read out only (a table's availability toggle).
-export function Switch({ label, checked, onChange, disabled, hideLabel }: { label: string; checked: boolean; onChange: (v: boolean) => void; disabled?: boolean; hideLabel?: boolean }) {
+export function Switch({ label, checked, onChange, disabled, hideLabel, describedBy }: { label: string; checked: boolean; onChange: (v: boolean) => void; disabled?: boolean; hideLabel?: boolean; describedBy?: string }) {
   const id = useId();
   return (
     <label htmlFor={id} className={cn('flex h-11 items-center gap-s12', disabled ? 'text-muted-soft' : 'text-ink')}>
@@ -12,6 +12,7 @@ export function Switch({ label, checked, onChange, disabled, hideLabel }: { labe
         type="button"
         role="switch"
         aria-checked={checked}
+        aria-describedby={describedBy}
         disabled={disabled}
         onClick={() => onChange(!checked)}
         className={cn(

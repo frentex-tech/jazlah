@@ -1437,7 +1437,7 @@
     },
     "statuses": {
       "pending_payment": "Awaiting payment",
-      "new": "Awaiting confirmation",
+      "new": "To confirm",
       "confirmed": "New",
       "preparing": "Preparing",
       "ready": "Ready",

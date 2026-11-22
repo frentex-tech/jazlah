@@ -54,11 +54,13 @@ export const pollFeed = (panel: OrdersPanel, everyMs = 15_000): OrdersFeed => ({
     const tick = async () => {
       const page = await panelFetch<Page<OrderSummary>>(panel, `/api/${panel}/orders`).catch(() => null);
       if (!page) return;
+      let changed: OrderSummary | undefined;
       for (const o of seen ? page.items : []) {
         const was = seen!.get(o.id);
         if (was === undefined) onOrder(o);
-        else if (was !== o.status) onChanged?.(o);
+        else if (was !== o.status) changed = o;
       }
+      if (changed) onChanged?.(changed); // once per poll: one quiet reload covers every changed row
       seen = new Map([...(seen ?? []), ...page.items.map((o) => [o.id, o.status] as const)]);
       onPolled?.();
     };

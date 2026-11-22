@@ -99,6 +99,31 @@ test('a refused live stream falls back to polling, then reopens the stream', asy
   await expect(table(page).getByText(o.number)).toBeVisible();
 });
 
+test('while polling, a status changed elsewhere updates the row', async ({ page, context }) => {
+  await signInAs(context, ['admin']);
+  // The stream is always refused, so the board keeps polling (every 15 s, on a fake clock).
+  await page.route('**/api/admin/orders/events', (r) => r.fulfill({ status: 401, body: '{"code":"UNAUTHORIZED"}' }));
+  await page.clock.install();
+  const o = await place(context);
+  await page.goto('/admin/orders');
+  const row = table(page).getByRole('row').filter({ hasText: o.number });
+  await expect(row.getByText('جديد')).toBeVisible();
+  await page.clock.runFor(16_000); // the polling feed has read the page once
+  const moved = await page.evaluate(async (u) => (await fetch(u, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: '{"to":"preparing"}' })).status, `/api/admin/orders/${o.id}/transition`);
+  expect(moved).toBe(200);
+  await page.clock.runFor(16_000);
+  await expect(row.getByText('قيد التجهيز')).toBeVisible();
+  await expect(row).not.toHaveClass(/row-new/);
+});
+
+test('the mock order route wants our own origin and a session', async ({ playwright }) => {
+  const base = `http://localhost:${process.env.PORT ?? 3001}`;
+  const api = await playwright.request.newContext({ baseURL: base });
+  expect((await api.post('/api/mock-orders', { data: {} })).status()).toBe(403); // no Origin
+  expect((await api.post('/api/mock-orders', { data: {}, headers: { origin: base } })).status()).toBe(401); // same origin, no session
+  await api.dispose();
+});
+
 test('the vendor opens an order and moves it to the next status', async ({ page, context }) => {
   await signInAs(context, ['vendor']);
   const o = await place(context);

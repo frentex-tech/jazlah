@@ -211,7 +211,7 @@ export function OperationsSettingsPage() {
             return (
               <div key={h.day} className="flex flex-col gap-s8">
                 <div className="flex items-center gap-s16">
-                  <div className="min-w-[200px] whitespace-nowrap">
+                  <div className="w-[210px] whitespace-nowrap">
                     <Switch label={t(h.open ? 'hours.open' : 'hours.closed', { day })} checked={h.open} onChange={(v) => edit(`workingHours.${i}.open`, v)} />
                   </div>
                   <span className="w-s32 text-body-m text-ink-2">{t('hours.from')}</span>
