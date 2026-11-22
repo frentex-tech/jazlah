@@ -1,3 +1,5 @@
+import { AppError } from '@common/errors/app-error';
+import { ErrorCode } from '@common/errors/error-code.enum';
 import type { LocalizedText } from '@common/i18n/localized-text.type';
 import type { Page } from '@common/pagination/page.type';
 import type { PageRequest } from '@common/pagination/page-request.type';
@@ -40,6 +42,16 @@ export class InMemoryVendorRepository implements VendorRepository {
       return Promise.reject(new Error('no such application'));
     }
     const { details } = application;
+    // As the unique index vendors_commercial_registration_number_key.
+    if (
+      this.rows.some(
+        ({ vendor }) =>
+          vendor.commercialRegistrationNumber ===
+          details.commercialRegistrationNumber,
+      )
+    ) {
+      return Promise.reject(new AppError(ErrorCode.VENDOR_CR_EXISTS));
+    }
     const vendor = new Vendor(
       this.nextId(),
       details.name,
@@ -107,6 +119,17 @@ export class InMemoryVendorRepository implements VendorRepository {
   findActiveById(id: string): Promise<Vendor | null> {
     const vendor = this.get(id);
     return Promise.resolve(vendor?.status === 'active' ? vendor : null);
+  }
+
+  existsWithRegistration(
+    commercialRegistrationNumber: string,
+  ): Promise<boolean> {
+    return Promise.resolve(
+      this.rows.some(
+        ({ vendor }) =>
+          vendor.commercialRegistrationNumber === commercialRegistrationNumber,
+      ),
+    );
   }
 
   findPlatform(): Promise<Vendor | null> {

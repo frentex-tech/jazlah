@@ -36,6 +36,11 @@ export interface VendorRepository {
 
   findById(id: string): Promise<Vendor | null>;
 
+  /** Whether a vendor holds this commercial registration number, in any status. */
+  existsWithRegistration(
+    commercialRegistrationNumber: string,
+  ): Promise<boolean>;
+
   /** The vendor if it is active; null otherwise (public reads). */
   findActiveById(id: string): Promise<Vendor | null>;
 

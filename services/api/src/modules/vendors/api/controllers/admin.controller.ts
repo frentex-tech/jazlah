@@ -150,7 +150,7 @@ export class AdminVendorsController {
     summary: 'Approve a pending application with a commission',
     description: [
       "Admin dashboard, application review screen: approves a pending application with the platform commission for the vendor's orders, in basis points (1250 is 12.5%). In one step it creates the vendor (active, listed publicly at once, without a logo), records the first commission in its history, and gives the applicant vendor access: they sign in to the vendor dashboard with the same phone number. Audited.",
-      'Errors: VALIDATION_FAILED for a commission that is not a whole number from 0 to 10000. NOT_FOUND for an unknown application. VENDOR_APPLICATION_NOT_PENDING: it was already approved or rejected (also when two admins approve at once: only one vendor is created); reload it. VENDOR_ACCESS_ALREADY_HELD: the applicant came to work for another vendor after applying; nothing changed and the application stays pending. TRANSACTION_CONFLICT: nothing was saved; send again.',
+      'Errors: VALIDATION_FAILED for a commission that is not a whole number from 0 to 10000. NOT_FOUND for an unknown application. VENDOR_APPLICATION_NOT_PENDING: it was already approved or rejected (also when two admins approve at once: only one vendor is created); reload it. VENDOR_ACCESS_ALREADY_HELD: the applicant came to work for another vendor after applying; nothing changed and the application stays pending. VENDOR_CR_EXISTS: another application with the same commercial registration number was approved first; the application stays pending (reject it). TRANSACTION_CONFLICT: nothing was saved; send again.',
     ].join('\n\n'),
   })
   @ApiOkResponse({
@@ -162,6 +162,7 @@ export class AdminVendorsController {
     ErrorCode.NOT_FOUND,
     ErrorCode.VENDOR_APPLICATION_NOT_PENDING,
     ErrorCode.VENDOR_ACCESS_ALREADY_HELD,
+    ErrorCode.VENDOR_CR_EXISTS,
     ErrorCode.TRANSACTION_CONFLICT,
     ErrorCode.SERVICE_UNAVAILABLE,
     ...ADMIN_AUTH_ERRORS,

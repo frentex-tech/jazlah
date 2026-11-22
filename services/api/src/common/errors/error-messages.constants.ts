@@ -124,6 +124,10 @@ export const ERROR_MESSAGES: Readonly<Record<ErrorCode, LocalizedText>> = {
     ar: 'حسابك مرتبط بمتجر من قبل، ما تقدر تقدّم طلب متجر جديد',
     en: 'This account already works for a vendor.',
   },
+  [ErrorCode.VENDOR_CR_EXISTS]: {
+    ar: 'رقم السجل التجاري مسجّل لمتجر عندنا، تأكد من الرقم أو تواصل معنا',
+    en: 'A store with this commercial registration number is already registered.',
+  },
   [ErrorCode.PRODUCT_NOT_EDITABLE]: {
     ar: 'ما تقدر تعدّل المنتج وهو بهالحالة، حدّث الصفحة وشوف حالته',
     en: 'This product cannot be changed in its current state.',

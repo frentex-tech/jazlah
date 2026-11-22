@@ -1,3 +1,4 @@
+import { testRegistrationNumber } from './support/test-registration-number';
 import { randomUUID } from 'node:crypto';
 import type { INestApplication } from '@nestjs/common';
 import type { App } from 'supertest/types';
@@ -84,14 +85,49 @@ describe('Vendors (e2e)', () => {
   ];
 
   describe('a customer applying', () => {
+    it('refuses a commercial registration number a vendor holds (VENDOR_CR_EXISTS), at submission and at approval', async () => {
+      const number = testRegistrationNumber();
+      const waiting = await journey.pendingApplication('second', {
+        commercialRegistrationNumber: number,
+      });
+      const { admin } = await journey.approvedVendor('first', {
+        commercialRegistrationNumber: number,
+      });
+      const late = await journey.customer('late');
+
+      const submitted = await journey.http
+        .post('/v1/customer/vendor-applications')
+        .set(...bearer(late))
+        .send(
+          journey.applicationBody(await journey.documents(late), {
+            commercialRegistrationNumber: number,
+          }),
+        )
+        .expect(409);
+      const approved = await journey.http
+        .post(`/v1/admin/vendor-applications/${waiting.applicationId}/approve`)
+        .set(...bearer(admin))
+        .send({ commissionBasisPoints: 1250 })
+        .expect(409);
+      const stillPending = await journey.http
+        .get('/v1/customer/vendor-applications/latest')
+        .set(...bearer(waiting.customer))
+        .expect(200);
+
+      expect(submitted.body).toMatchObject({ code: 'VENDOR_CR_EXISTS' });
+      expect(approved.body).toMatchObject({ code: 'VENDOR_CR_EXISTS' });
+      expect(stillPending.body).toMatchObject({ status: 'pending' });
+    });
+
     it('applies, sees the application with the IBAN masked, and the documents attached', async () => {
       const customer = await journey.customer();
       const documents = await journey.documents(customer);
 
+      const sent = journey.applicationBody(documents);
       const res = await journey.http
         .post('/v1/customer/vendor-applications')
         .set(...bearer(customer))
-        .send(journey.applicationBody(documents))
+        .send(sent)
         .expect(201);
       const latest = await journey.http
         .get('/v1/customer/vendor-applications/latest')
@@ -102,7 +138,10 @@ describe('Vendors (e2e)', () => {
       expect(body).toMatchObject({
         status: 'pending',
         ibanMasked: 'SA** **** **** **** **** 7519',
-        commercialRegistrationNumber: '1010123456',
+        // The Arabic-Indic digits sent, stored as Latin ones.
+        commercialRegistrationNumber: String(
+          sent.commercialRegistrationNumber,
+        ).replace(/[\u0660-\u0669]/g, (d) => String(d.charCodeAt(0) - 0x0660)),
         rejectionReason: null,
       });
       expect(body.documents).toHaveLength(3);

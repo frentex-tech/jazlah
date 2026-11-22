@@ -93,6 +93,7 @@ Status is the HTTP status the code always comes with. The English message is the
 |---|---|---|---|
 | `VENDOR_APPLICATION_ALREADY_PENDING` | 409 | You already have a vendor application under review. | **Show**, and open the application status (`GET /v1/customer/vendor-applications/latest`). |
 | `VENDOR_ACCESS_ALREADY_HELD` | 409 | This account already works for a vendor. | **Show**. The customer app hides "become a vendor" after this. For an admin approving an application, the applicant got vendor access elsewhere in the meantime. |
+| `VENDOR_CR_EXISTS` | 409 | A store with this commercial registration number is already registered. | **Show** on the registration number field. For an admin approving, another application with the number was approved first: reject this one. |
 | `VENDOR_APPLICATION_NOT_PENDING` | 409 | This vendor application has already been reviewed. | Admin: **Reload** the application, because another admin reviewed it. |
 | `VENDOR_SUSPENDED` | 403 | This vendor account is suspended. | Vendor dashboard: show a "suspended" screen with a way to contact the platform. Every vendor route, sign-in and refresh is refused until an admin reinstates the vendor. Clear the tokens. |
 
