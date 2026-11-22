@@ -25,6 +25,8 @@ import 'package:jazlah/features/home/presentation/home_screen.dart';
 import 'package:jazlah/features/home/presentation/stores_screen.dart';
 import 'package:jazlah/features/location/presentation/map_picker_screen.dart';
 import 'package:jazlah/features/location/presentation/out_of_coverage_screen.dart';
+import 'package:jazlah/features/orders/presentation/order_detail_screen.dart';
+import 'package:jazlah/features/orders/presentation/orders_screen.dart';
 import 'package:jazlah/features/payment/presentation/payment_screen.dart';
 import 'package:jazlah/features/product/presentation/product_screen.dart';
 import 'package:jazlah/features/profile/presentation/account_screen.dart';
@@ -152,10 +154,10 @@ final routerProvider = Provider<GoRouter>((ref) {
         builder: (_, state) =>
             PaymentScreen(orderId: state.pathParameters['orderId']!, placed: state.extra as PlacedOrder?),
       ),
-      // shortcut: placeholder until ORD-MOB-2 #85 builds the order detail.
+      // Full screen like Figma (no tab bar).
       GoRoute(
         path: '/orders/:id',
-        builder: (context, _) => ComingSoonPage(title: AppLocalizations.of(context).menuOrders),
+        builder: (_, state) => OrderDetailScreen(id: state.pathParameters['id']!),
       ),
       GoRoute(
         path: '/product/:id',
@@ -177,10 +179,7 @@ final routerProvider = Provider<GoRouter>((ref) {
             path: Routes.services,
             builder: (_, _) => const PlaceholderTab(tab: MainTab.services),
           ),
-          GoRoute(
-            path: Routes.orders,
-            builder: (_, _) => const PlaceholderTab(tab: MainTab.orders),
-          ),
+          GoRoute(path: Routes.orders, builder: (_, _) => const OrdersScreen()),
           GoRoute(path: Routes.account, builder: (_, _) => const AccountScreen()),
           GoRoute(path: Routes.settings, builder: (_, _) => const SettingsScreen()),
           GoRoute(path: Routes.addresses, builder: (_, _) => const AddressesScreen()),

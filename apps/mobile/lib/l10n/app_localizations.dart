@@ -3115,6 +3115,306 @@ abstract class AppLocalizations {
   /// In ar, this message translates to:
   /// **'هذا الطلب لم يعد متاحًا.'**
   String get payOrderGone;
+
+  /// No description provided for @ordersAll.
+  ///
+  /// In ar, this message translates to:
+  /// **'الكل'**
+  String get ordersAll;
+
+  /// No description provided for @ordersCurrent.
+  ///
+  /// In ar, this message translates to:
+  /// **'الجارية'**
+  String get ordersCurrent;
+
+  /// No description provided for @ordersPast.
+  ///
+  /// In ar, this message translates to:
+  /// **'المكتملة'**
+  String get ordersPast;
+
+  /// No description provided for @ordersNumber.
+  ///
+  /// In ar, this message translates to:
+  /// **'طلب {number}'**
+  String ordersNumber(String number);
+
+  /// No description provided for @ordersToday.
+  ///
+  /// In ar, this message translates to:
+  /// **'اليوم'**
+  String get ordersToday;
+
+  /// No description provided for @ordersTodayAt.
+  ///
+  /// In ar, this message translates to:
+  /// **'اليوم، {time}'**
+  String ordersTodayAt(String time);
+
+  /// No description provided for @ordersEmptyTitle.
+  ///
+  /// In ar, this message translates to:
+  /// **'لا توجد طلبات بعد'**
+  String get ordersEmptyTitle;
+
+  /// No description provided for @ordersEmptyBody.
+  ///
+  /// In ar, this message translates to:
+  /// **'طلباتك السابقة والحالية ستظهر هنا.'**
+  String get ordersEmptyBody;
+
+  /// No description provided for @ordersEmptyAction.
+  ///
+  /// In ar, this message translates to:
+  /// **'ابدأ أول طلب'**
+  String get ordersEmptyAction;
+
+  /// No description provided for @ordersErrorTitle.
+  ///
+  /// In ar, this message translates to:
+  /// **'تعذّر تحميل الطلبات'**
+  String get ordersErrorTitle;
+
+  /// No description provided for @ordersErrorBody.
+  ///
+  /// In ar, this message translates to:
+  /// **'تحقق من اتصالك ثم حاول مرة أخرى.'**
+  String get ordersErrorBody;
+
+  /// No description provided for @ordersSignInTitle.
+  ///
+  /// In ar, this message translates to:
+  /// **'سجّل دخولك لعرض الطلبات'**
+  String get ordersSignInTitle;
+
+  /// No description provided for @ordersSignInBody.
+  ///
+  /// In ar, this message translates to:
+  /// **'طلباتك محفوظة في حسابك. سجّل الدخول لمتابعتها.'**
+  String get ordersSignInBody;
+
+  /// No description provided for @orderDetailTitle.
+  ///
+  /// In ar, this message translates to:
+  /// **'تفاصيل الطلب'**
+  String get orderDetailTitle;
+
+  /// No description provided for @orderErrorTitle.
+  ///
+  /// In ar, this message translates to:
+  /// **'تعذّر تحميل الطلب'**
+  String get orderErrorTitle;
+
+  /// No description provided for @orderDeniedTitle.
+  ///
+  /// In ar, this message translates to:
+  /// **'لا يمكنك عرض هذا الطلب'**
+  String get orderDeniedTitle;
+
+  /// No description provided for @orderDeniedBody.
+  ///
+  /// In ar, this message translates to:
+  /// **'هذا الطلب مرتبط بحساب آخر.'**
+  String get orderDeniedBody;
+
+  /// No description provided for @orderLineDelivery.
+  ///
+  /// In ar, this message translates to:
+  /// **'{vendor} · توصيل {day} بين {start} و{end} إلى {place}'**
+  String orderLineDelivery(String vendor, String day, String start, String end, String place);
+
+  /// No description provided for @orderLinePickup.
+  ///
+  /// In ar, this message translates to:
+  /// **'{vendor} · استلام {day} بين {start} و{end} من {place}'**
+  String orderLinePickup(String vendor, String day, String start, String end, String place);
+
+  /// No description provided for @orderStatusTitle.
+  ///
+  /// In ar, this message translates to:
+  /// **'حالة الطلب'**
+  String get orderStatusTitle;
+
+  /// No description provided for @orderTrackingTitle.
+  ///
+  /// In ar, this message translates to:
+  /// **'تتبع التوصيل'**
+  String get orderTrackingTitle;
+
+  /// No description provided for @orderTrackingNotStarted.
+  ///
+  /// In ar, this message translates to:
+  /// **'لم يبدأ التوصيل بعد'**
+  String get orderTrackingNotStarted;
+
+  /// No description provided for @orderTrackingNotStartedBody.
+  ///
+  /// In ar, this message translates to:
+  /// **'سيُعيّن مندوب التوصيل ويصلك إشعار فور خروج الطلب.'**
+  String get orderTrackingNotStartedBody;
+
+  /// No description provided for @orderFreshnessTitle.
+  ///
+  /// In ar, this message translates to:
+  /// **'شهادة الطزاجة'**
+  String get orderFreshnessTitle;
+
+  /// No description provided for @orderFreshnessWaiting.
+  ///
+  /// In ar, this message translates to:
+  /// **'بانتظار الذبح والتجهيز'**
+  String get orderFreshnessWaiting;
+
+  /// No description provided for @orderFreshnessWaitingBody.
+  ///
+  /// In ar, this message translates to:
+  /// **'ستظهر هنا صور الذبح ووقته فور رفعها من المتجر.'**
+  String get orderFreshnessWaitingBody;
+
+  /// No description provided for @orderItems.
+  ///
+  /// In ar, this message translates to:
+  /// **'المنتجات'**
+  String get orderItems;
+
+  /// No description provided for @orderPayment.
+  ///
+  /// In ar, this message translates to:
+  /// **'الدفع'**
+  String get orderPayment;
+
+  /// No description provided for @orderPaid.
+  ///
+  /// In ar, this message translates to:
+  /// **'مدفوع'**
+  String get orderPaid;
+
+  /// No description provided for @orderAwaitingPayment.
+  ///
+  /// In ar, this message translates to:
+  /// **'بانتظار الدفع'**
+  String get orderAwaitingPayment;
+
+  /// No description provided for @orderPayNow.
+  ///
+  /// In ar, this message translates to:
+  /// **'إكمال الدفع'**
+  String get orderPayNow;
+
+  /// No description provided for @orderNotes.
+  ///
+  /// In ar, this message translates to:
+  /// **'ملاحظات: {notes}'**
+  String orderNotes(String notes);
+
+  /// No description provided for @stepReceived.
+  ///
+  /// In ar, this message translates to:
+  /// **'تم استلام الطلب'**
+  String get stepReceived;
+
+  /// No description provided for @stepPreparing.
+  ///
+  /// In ar, this message translates to:
+  /// **'الذبح والتجهيز'**
+  String get stepPreparing;
+
+  /// No description provided for @stepReadyDelivery.
+  ///
+  /// In ar, this message translates to:
+  /// **'جاهز للتوصيل'**
+  String get stepReadyDelivery;
+
+  /// No description provided for @stepReadyPickup.
+  ///
+  /// In ar, this message translates to:
+  /// **'جاهز للاستلام'**
+  String get stepReadyPickup;
+
+  /// No description provided for @stepOnTheWay.
+  ///
+  /// In ar, this message translates to:
+  /// **'في الطريق إليك'**
+  String get stepOnTheWay;
+
+  /// No description provided for @stepDelivered.
+  ///
+  /// In ar, this message translates to:
+  /// **'تم التسليم'**
+  String get stepDelivered;
+
+  /// No description provided for @stepCollected.
+  ///
+  /// In ar, this message translates to:
+  /// **'تم الاستلام'**
+  String get stepCollected;
+
+  /// No description provided for @statusPendingPayment.
+  ///
+  /// In ar, this message translates to:
+  /// **'بانتظار الدفع'**
+  String get statusPendingPayment;
+
+  /// No description provided for @statusNew.
+  ///
+  /// In ar, this message translates to:
+  /// **'بانتظار التأكيد'**
+  String get statusNew;
+
+  /// No description provided for @statusConfirmed.
+  ///
+  /// In ar, this message translates to:
+  /// **'مؤكد'**
+  String get statusConfirmed;
+
+  /// No description provided for @statusPreparing.
+  ///
+  /// In ar, this message translates to:
+  /// **'قيد التجهيز'**
+  String get statusPreparing;
+
+  /// No description provided for @statusReady.
+  ///
+  /// In ar, this message translates to:
+  /// **'جاهز'**
+  String get statusReady;
+
+  /// No description provided for @statusOnTheWay.
+  ///
+  /// In ar, this message translates to:
+  /// **'في الطريق'**
+  String get statusOnTheWay;
+
+  /// No description provided for @statusDelivered.
+  ///
+  /// In ar, this message translates to:
+  /// **'تم التسليم'**
+  String get statusDelivered;
+
+  /// No description provided for @statusCollected.
+  ///
+  /// In ar, this message translates to:
+  /// **'تم الاستلام'**
+  String get statusCollected;
+
+  /// No description provided for @statusCancelled.
+  ///
+  /// In ar, this message translates to:
+  /// **'ملغي'**
+  String get statusCancelled;
+
+  /// No description provided for @statusDeliveryFailed.
+  ///
+  /// In ar, this message translates to:
+  /// **'تعذّر التوصيل'**
+  String get statusDeliveryFailed;
+
+  /// No description provided for @statusReturned.
+  ///
+  /// In ar, this message translates to:
+  /// **'مرتجع'**
+  String get statusReturned;
 }
 
 class _AppLocalizationsDelegate extends LocalizationsDelegate<AppLocalizations> {

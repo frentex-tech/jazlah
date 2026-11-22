@@ -1,12 +1,17 @@
+import 'dart:async';
 import 'dart:math';
 
 import 'package:jazlah/core/errors/api_error.dart';
+import 'package:jazlah/core/geo/geo_point.dart';
 import 'package:jazlah/features/addresses/data/address_repository.dart';
+import 'package:jazlah/features/addresses/domain/address.dart';
 import 'package:jazlah/features/cart/data/cart_repository.dart';
 import 'package:jazlah/features/cart/domain/cart.dart';
+import 'package:jazlah/features/catalog/data/mock_catalog_repository.dart';
 import 'package:jazlah/features/checkout/data/checkout_repository.dart';
 import 'package:jazlah/features/checkout/domain/fulfilment.dart';
 import 'package:jazlah/features/checkout/domain/order.dart';
+import 'package:jazlah/features/orders/data/orders_repository.dart';
 import 'package:jazlah/features/payment/data/payment_repository.dart';
 import 'package:jazlah/features/payment/domain/payment_method.dart';
 import 'package:jazlah/features/product/domain/product.dart';
@@ -39,7 +44,7 @@ String newIdempotencyKey([Random? random]) {
 /// payments, captures or fails them on the fake provider's decision, and cancels an unpaid order after
 /// [paymentTimeout] (giving the wallet part back).
 // shortcut: mock orders and payments until ORD-API-1 #81, ORD-API-2 #82 and PAY-API-1 #76 land (not-built-yet.md).
-class MockOrderRepository implements OrderRepository {
+class MockOrderRepository implements OrderRepository, OrdersRepository, OrderRealtime {
   MockOrderRepository(
     this.cart,
     this.checkout, {
@@ -47,9 +52,12 @@ class MockOrderRepository implements OrderRepository {
     MockWallet? wallet,
     DateTime Function()? now,
     this.codAutoConfirm = false,
+    bool seedPast = false,
     this.delay = const Duration(milliseconds: 600),
   }) : wallet = wallet ?? MockWallet(),
-       now = now ?? DateTime.now;
+       now = now ?? DateTime.now {
+    if (seedPast) _seed();
+  }
 
   final MockCartRepository cart;
   final MockCheckoutRepository checkout;
@@ -129,11 +137,10 @@ class MockOrderRepository implements OrderRepository {
     final riyadh = created.add(const Duration(hours: 3));
     String two(int n) => n.toString().padLeft(2, '0');
     // Numbered across all days, not per Riyadh day like the server.
-    final number =
-        'JZ-${two(riyadh.year % 100)}${two(riyadh.month)}${two(riyadh.day)}-'
-        '${(orders.length + 1).toString().padLeft(4, '0')}';
+    final n = ++_count;
+    final number = 'JZ-${two(riyadh.year % 100)}${two(riyadh.month)}${two(riyadh.day)}-${n.toString().padLeft(4, '0')}';
     final order = Order(
-      id: 'o-${orders.length + 1}',
+      id: 'o-$n',
       number: number,
       status: OrderStatus.pendingPayment,
       vendorId: c.vendorId!,
@@ -167,10 +174,12 @@ class MockOrderRepository implements OrderRepository {
             quantity: l.item.quantity,
             unitPrice: l.unitPrice,
             lineTotal: l.lineTotal,
+            image: l.image,
           ),
       ],
     );
     orders.add(order);
+    _history[order.id] = [OrderStatusChange(order.status, created)];
     wallet.balance -= fromWallet; // debited in the order transaction
     // The server clears the cart in the order transaction.
     await cart.write(const []);
@@ -188,7 +197,113 @@ class MockOrderRepository implements OrderRepository {
     return o;
   }
 
-  void _save(Order o) => orders[orders.indexWhere((x) => x.id == o.id)] = o;
+  /// Stores [o]; a status change goes to its history and to the realtime room, as ORD-API-2/3 do.
+  void _save(Order o) {
+    final i = orders.indexWhere((x) => x.id == o.id);
+    final before = orders[i].status;
+    orders[i] = o;
+    if (o.status != before) {
+      (_history[o.id] ??= []).add(OrderStatusChange(o.status, now().toUtc()));
+      _events.add(o.id);
+    }
+  }
+
+  var _count = 0;
+  final _history = <String, List<OrderStatusChange>>{};
+  final _events = StreamController<String>.broadcast();
+
+  /// A status change made elsewhere (the dashboard), for QA and tests.
+  void transition(String orderId, String to) => _save(_order(orderId).copyWith(status: to));
+
+  @override
+  Stream<String> orderUpdated() => _events.stream;
+
+  void dispose() => unawaited(_events.close());
+
+  @override
+  Future<List<Order>> list({OrderScope? scope}) async {
+    if (delay > Duration.zero) await Future<void>.delayed(delay);
+    [...orders].forEach(_expire);
+    bool past(Order o) => pastOrderStatuses.contains(o.status);
+    return [
+      for (final o in orders)
+        if (scope == null || (scope == OrderScope.past) == past(o)) o,
+    ]..sort((a, b) => b.createdAt.compareTo(a.createdAt));
+  }
+
+  @override
+  Future<OrderDetail> detail(String id) async {
+    if (delay > Duration.zero) await Future<void>.delayed(delay);
+    final s = await status(id);
+    final o = s.order;
+    return OrderDetail(
+      order: o,
+      history: List.unmodifiable(_history[id] ?? const <OrderStatusChange>[]),
+      paymentStatus: s.paymentStatus,
+      canCancel: o.status == OrderStatus.created || o.status == OrderStatus.confirmed,
+      canComplain: o.status == OrderStatus.delivered || o.status == OrderStatus.collected,
+    );
+  }
+
+  /// Two past orders of Al Falah (delivered a week ago, cancelled before that), for the order list.
+  void _seed() {
+    final created = now().toUtc();
+    Order past(int daysAgo, String status, String productId, int quantity) {
+      final card = MockCatalogRepository.productList.firstWhere((p) => p.id == productId);
+      final at = created.subtract(Duration(days: daysAgo));
+      final riyadh = at.add(const Duration(hours: 3));
+      final date = '${riyadh.year}-${riyadh.month.toString().padLeft(2, '0')}-${riyadh.day.toString().padLeft(2, '0')}';
+      final price = card.minPriceHalalas!;
+      final n = ++_count;
+      final o = Order(
+        id: 'o-$n',
+        number: 'JZ-${date.substring(2).replaceAll('-', '')}-${n.toString().padLeft(4, '0')}',
+        status: status,
+        vendorId: card.vendorId,
+        vendorName: card.vendorName!,
+        fulfilment: Fulfilment.delivery,
+        addressSnapshot: _seedAddress,
+        deliveryDate: date,
+        window: MockCheckoutRepository.window,
+        subtotal: price * quantity,
+        discount: 0,
+        deliveryFee: MockCartRepository.opsSettings.deliveryFee,
+        total: price * quantity + MockCartRepository.opsSettings.deliveryFee,
+        vatAmount: ((price * quantity + MockCartRepository.opsSettings.deliveryFee) * 15 + 57) ~/ 115,
+        paymentMethod: PaymentMethodCode.mada,
+        createdAt: at,
+        items: [
+          OrderItem(
+            productId: card.id,
+            sizeId: 'sz-default',
+            name: card.name,
+            quantity: quantity,
+            unitPrice: price,
+            lineTotal: price * quantity,
+            image: card.coverUrl,
+          ),
+        ],
+      );
+      orders.add(o);
+      _history[o.id] = [
+        OrderStatusChange(OrderStatus.confirmed, at),
+        OrderStatusChange(status, at.add(const Duration(hours: 6))),
+      ];
+      return o;
+    }
+
+    past(9, OrderStatus.cancelled, 'p-falah-naimi-mince', 3);
+    past(7, OrderStatus.delivered, 'p-falah-naimi-whole', 1);
+  }
+
+  static const _seedAddress = Address(
+    id: 'a-seed',
+    label: 'المنزل',
+    point: GeoPoint(24.8168, 46.6195),
+    isDefault: true,
+    city: 'الرياض',
+    district: 'حي الملقا',
+  );
 
   /// What is left to pay goes to [method]: COD and wallet settle at once (ORD-API-2 confirmation rules), a
   /// gateway method gets a new initiated payment and a next action.

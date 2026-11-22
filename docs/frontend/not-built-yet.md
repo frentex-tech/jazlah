@@ -125,7 +125,7 @@ What the customer app needs from the API and does not have yet. Each row names t
 | A public list of served cities (or of zones) | Location: out of coverage, "available areas" line | The line is hidden in real builds; the mock lists Riyadh, Jeddah, Dammam | API gap |
 | A geocoding and place-search proxy (a public geocode route) | Location: map picker address line and search | The device calls Google Geocoding with the key from the app config. Until the proxy exists, use a **separate key restricted to the Geocoding API**, with daily quota caps and billing alerts, and keep the Maps SDK key app-restricted (owner action). In dev or with the mock switch on, the app uses sample places; real builds without a key leave the fields empty for typing | API gap |
 | The app hash in the sign-in SMS, per flavor (Android SMS Retriever) | Sign-in: OTP autofill on Android (`sms_autofill`) | Keyboard suggestion only (`AutofillHints.oneTimeCode`) | API gap |
-| Account counters: orders, animals, listings | Account: the stats row | Shows "—" (addresses are real) | Orders with ORD-MOB-2 #85; animals and listings with FED-MOB-1 #152; counters: API gap |
+| Account counters: orders, animals, listings | Account: the stats row | Orders count the order list without cancelled orders ("—" without the orders route); addresses are real; animals and listings show "—" | Orders: ORD-API-3 #83; animals and listings with FED-MOB-1 #152; counters: API gap |
 | Points balance | Account: "JAZLA points" row | No balance shown | LOY-MOB-1 #174 |
 | Notification settings | Settings: order notifications switch | Stored on the device | NOT-MOB-1 #105 (API gap) |
 | Support contact (public settings) | Sign-in errors `ACCOUNT_DISABLED`, `ACCOUNT_HAS_STAFF_ACCESS` | The message only, no "contact support" action | API gap |
@@ -226,6 +226,21 @@ With the mock switch on, the mock order server keeps each order's payments. A fa
 | Whether a failed gateway part gives the wallet part back at once (the app's reading) or only when the order expires | Payment step | Given back at once; the retry charges the whole total | PAY-API-1 #76 |
 | Orders that outlive the app | Cold start into a payment left mid-way | Mock orders live in memory and die with the app: on the mock, a saved order is not found at the next start, so the app says «هذا الطلب لم يعد متاحًا.», forgets it and opens home (the same happens for a not found or no longer payable order on the real API) | ORD-API-1 #81 |
 | The live gateway SDK (mada, cards, Apple Pay) | Payment step | Fake provider sheet with the mock switch; real builds never reach the step | PAY-MOB-2 #79 |
+
+### My orders and order detail (ORD-MOB-2 #85)
+
+The orders tab and the order detail follow the ORD-API-3 shapes of sprint-3.md: the customer order list by scope (current, past; «الكل» asks for both), and one order with its items (names, size, cut, notes, line totals), totals, payment, status history and what the customer may do. Statuses are ORD-API-2's; the timeline shows the time each step was reached, in Riyadh time. An unpaid order offers «إكمال الدفع» (the payment step). Live updates: the list and the detail listen to order updated events through a realtime port, the detail and re-reads every 30 seconds while it is open and the app is in the foreground. With the mock switch on, the orders are the ones placed in this session on the mock order server, plus two seeded past Al Falah orders (cancelled 9 days ago, delivered a week ago); a status change on the mock server (as the dashboard would make it) is recorded in the history and sent as an event.
+
+| What the app needs | Screen | Today | Issue |
+|---|---|---|---|
+| The customer order list and detail routes (scope current or past, the detail with payment, status history, can cancel, can complain) | Orders tab; order detail | Mock only; real builds show the coming-soon tab and page (no made-up orders, no retry that could never work) | ORD-API-3 #83 |
+| A list of all scopes at once | Orders: «الكل» | The app asks without a scope and expects both | ORD-API-3 #83 |
+| The product picture and the size weight and cut name in the order item snapshots | Orders: card thumbnail; detail items | The mock keeps them from the cart line | ORD-API-1 #81 |
+| The socket gateway and order updated to the user room | Order detail: live status | Mock events; real builds poll every 30 seconds (the app has no socket client yet) | ORD-API-3 #83 |
+| A customer cancel route | Order detail: «إلغاء الطلب» | Hidden (can cancel is read, but nothing could be sent) | ORD-API-3 #83 |
+| Complaints | Order detail: «الإبلاغ عن مشكلة» | Hidden | CMP (Sprint 5) |
+| Tracking (driver, ETA, map) and the freshness certificate | Order detail: «تتبع التوصيل», «شهادة الطزاجة»; tracking screen | The frame's own not started states before shipping; nothing after; no tracking screen | DLV-MOB-1 #101 |
+| Invoice and rating | Order detail | Not shown | INV-MOB-1 #32, RAT-MOB-1 #159 |
 
 ### Search and filters (STF-MOB-4 #57)
 

@@ -52,7 +52,11 @@ class OrderItem {
     this.packagingId,
     this.exclusionIds = const [],
     this.notes = '',
+    this.image,
   });
+
+  /// The product's picture when ordered (the order list thumbnail).
+  final String? image;
 
   final String productId;
   final String sizeId;
@@ -180,3 +184,42 @@ class OrderPayment {
   /// Halalas given back to the wallet because the gateway part failed or the order expired.
   final int walletRestored;
 }
+
+/// One `OrderStatusHistory` row (ORD-API-2): the status reached and when (UTC; shown in Riyadh time).
+@immutable
+class OrderStatusChange {
+  const OrderStatusChange(this.to, this.at);
+
+  final String to;
+  final DateTime at;
+}
+
+/// `GET /v1/customer/orders/:id` (ORD-API-3): the order with its payment, status timeline and what the
+/// customer may do. The tracking block (Sprint 4) and the invoice link (Sprint 6) are not read yet.
+@immutable
+class OrderDetail {
+  const OrderDetail({
+    required this.order,
+    required this.history,
+    this.paymentStatus,
+    this.canCancel = false,
+    this.canComplain = false,
+  });
+
+  final Order order;
+  final List<OrderStatusChange> history;
+
+  /// One of `PaymentStatus`; null without a gateway payment.
+  final String? paymentStatus;
+  final bool canCancel;
+  final bool canComplain;
+}
+
+/// Statuses a customer sees as done (the «المكتملة» tab, ORD-API-3 scope past).
+const Set<String> pastOrderStatuses = {
+  OrderStatus.delivered,
+  OrderStatus.collected,
+  OrderStatus.cancelled,
+  OrderStatus.deliveryFailed,
+  OrderStatus.returned,
+};

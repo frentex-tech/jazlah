@@ -270,6 +270,19 @@ Everything else follows 170-29134, 170-29244 and 170-29357 (and 170-28952 for th
 | Expired order | No frame | Error toast «أُلغي الطلب لانتهاء مهلة الدفع (15 دقيقة).» and the cart | Figma has no room for a countdown; ORD-API-2 cancels after 15 minutes. |
 | Deposit payment (131-72088, 131-72146, 131-72204, 131-72268, 131-72307) | Deposit and remaining cards, method cards | Not built | Occasions are OCC-MOB-1 #124. The payment port and the method card are reusable; the frames' method cards differ from the radio list here and are left to that task. |
 
+## Build differences, Sprint 3 mobile: ORD-MOB-2 my orders and order detail (pending owner sign-off, not agreed)
+Everything else follows 135-63663, 135-63749, 135-63826, 135-63940, 135-64028, 135-64189, 135-64272, 135-64339 and 135-64401. The order number reads JZ-YYMMDD-XXXX, as already recorded for ORD-MOB-1.
+
+| Screen (node) | Figma | Build | Why |
+|---|---|---|---|
+| Order detail (135-64128) | Tracking card with the driver, ETA and map link; freshness certificate with photos | Not built: before shipping both cards show 135-64189's «لم يبدأ التوصيل بعد» and «بانتظار الذبح والتجهيز»; after that they are left out | Tracking and freshness are DLV-MOB-1 #101 (Sprint 4); a driver or ETA with nothing behind it would mislead. |
+| Order detail (135-64128, 135-64189) | Header, tracking and freshness only | Adds «حالة الطلب» (the design system status timeline, from the status history with each step's time), the pickup point for pickup orders, «المنتجات», the totals card and «الدفع» | The task asks for the timeline, items, totals, payment and pickup details; no frame draws them. **Figma needs these sections.** |
+| Order detail (135-64128, 135-64189) | «إلغاء الطلب» and «الإبلاغ عن مشكلة» | Both hidden; an unpaid order shows «إكمال الدفع» instead | No customer cancel route in the Sprint 3 contract; complaints are CMP (Sprint 5). The payment step opens from the order. |
+| Tracking (135-64472, 135-64553, 135-64644, 135-64730) | Tracking screen with the timeline, driver, photos and temperature | Not built | Its timeline is on the order detail; the rest (driver, map, photos, temperature, tracking errors) is DLV-MOB-1 #101, which builds the screen. |
+| Orders list (135-63663) | Filters on one row | The same chips, wrapping to a second row when they do not fit | A long translation or a narrow screen. |
+| Orders list (135-63663) | «1,180.00» | «1180.00» | The app's one money format has no thousands separator (all screens). |
+| Orders empty (135-63826) | No filters | No filters on «الكل»; on «الجارية» or «المكتملة» they stay so the customer can switch back | An empty scope must not trap the customer. |
+
 ## Checks run on the file (2026-11-13)
 - Script lint over all 587 screens after the last changes: no empty or "undefined" text, no text outside its screen, no missing icon.
 - Clipped layouts: a script found 110 auto-layout frames on web and dashboard screens whose content was cut off (among them the whole animal-registration form) and opened them up. 28 small ones remain (tab labels 7 to 9 px taller than their tab, and the Adha settings body).

@@ -1690,4 +1690,166 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get payOrderGone => 'This order is no longer available.';
+
+  @override
+  String get ordersAll => 'All';
+
+  @override
+  String get ordersCurrent => 'Current';
+
+  @override
+  String get ordersPast => 'Completed';
+
+  @override
+  String ordersNumber(String number) {
+    return 'Order $number';
+  }
+
+  @override
+  String get ordersToday => 'Today';
+
+  @override
+  String ordersTodayAt(String time) {
+    return 'Today, $time';
+  }
+
+  @override
+  String get ordersEmptyTitle => 'No orders yet';
+
+  @override
+  String get ordersEmptyBody => 'Your past and current orders will show here.';
+
+  @override
+  String get ordersEmptyAction => 'Place your first order';
+
+  @override
+  String get ordersErrorTitle => 'Orders could not be loaded';
+
+  @override
+  String get ordersErrorBody => 'Check your connection and try again.';
+
+  @override
+  String get ordersSignInTitle => 'Sign in to see your orders';
+
+  @override
+  String get ordersSignInBody => 'Your orders are saved in your account. Sign in to follow them.';
+
+  @override
+  String get orderDetailTitle => 'Order details';
+
+  @override
+  String get orderErrorTitle => 'The order could not be loaded';
+
+  @override
+  String get orderDeniedTitle => 'You can\'t view this order';
+
+  @override
+  String get orderDeniedBody => 'This order belongs to another account.';
+
+  @override
+  String orderLineDelivery(String vendor, String day, String start, String end, String place) {
+    return '$vendor · delivery $day between $start and $end to $place';
+  }
+
+  @override
+  String orderLinePickup(String vendor, String day, String start, String end, String place) {
+    return '$vendor · pickup $day between $start and $end at $place';
+  }
+
+  @override
+  String get orderStatusTitle => 'Order status';
+
+  @override
+  String get orderTrackingTitle => 'Delivery tracking';
+
+  @override
+  String get orderTrackingNotStarted => 'Delivery has not started yet';
+
+  @override
+  String get orderTrackingNotStartedBody =>
+      'A driver will be assigned and you will be notified as soon as the order leaves.';
+
+  @override
+  String get orderFreshnessTitle => 'Freshness certificate';
+
+  @override
+  String get orderFreshnessWaiting => 'Waiting for slaughter and preparation';
+
+  @override
+  String get orderFreshnessWaitingBody =>
+      'Photos and the time of slaughter will show here once the store uploads them.';
+
+  @override
+  String get orderItems => 'Products';
+
+  @override
+  String get orderPayment => 'Payment';
+
+  @override
+  String get orderPaid => 'Paid';
+
+  @override
+  String get orderAwaitingPayment => 'Awaiting payment';
+
+  @override
+  String get orderPayNow => 'Complete payment';
+
+  @override
+  String orderNotes(String notes) {
+    return 'Notes: $notes';
+  }
+
+  @override
+  String get stepReceived => 'Order received';
+
+  @override
+  String get stepPreparing => 'Slaughter and preparation';
+
+  @override
+  String get stepReadyDelivery => 'Ready for delivery';
+
+  @override
+  String get stepReadyPickup => 'Ready for pickup';
+
+  @override
+  String get stepOnTheWay => 'On the way to you';
+
+  @override
+  String get stepDelivered => 'Delivered';
+
+  @override
+  String get stepCollected => 'Collected';
+
+  @override
+  String get statusPendingPayment => 'Awaiting payment';
+
+  @override
+  String get statusNew => 'Awaiting confirmation';
+
+  @override
+  String get statusConfirmed => 'Confirmed';
+
+  @override
+  String get statusPreparing => 'Preparing';
+
+  @override
+  String get statusReady => 'Ready';
+
+  @override
+  String get statusOnTheWay => 'On the way';
+
+  @override
+  String get statusDelivered => 'Delivered';
+
+  @override
+  String get statusCollected => 'Collected';
+
+  @override
+  String get statusCancelled => 'Cancelled';
+
+  @override
+  String get statusDeliveryFailed => 'Delivery failed';
+
+  @override
+  String get statusReturned => 'Returned';
 }
