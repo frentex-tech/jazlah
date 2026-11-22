@@ -113,7 +113,7 @@ export function AdminProduct({ id }: { id?: string }) {
   const card = 'h-[360px]';
   return (
     <>
-      <PageHeader start breadcrumb={t(product || id ? 'breadcrumbEdit' : 'breadcrumbNew')} title={title} />
+      <PageHeader breadcrumb={t(product || id ? 'breadcrumbEdit' : 'breadcrumbNew')} title={title} />
       {state === 'loading' ? (
         <ProductFormSkeleton label={t('loading')} />
       ) : state === 'denied' ? (

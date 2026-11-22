@@ -29,7 +29,7 @@ test('list, status filter and code search; the side nav reaches it', async ({ pa
   await page.getByRole('searchbox', { name: 'ابحث برمز الكوبون' }).fill('zzz');
   await expect(page.getByText('لا توجد كوبونات مطابقة')).toBeVisible();
   await expect(page.getByRole('searchbox', { name: 'ابحث برمز الكوبون' })).toHaveValue('zzz');
-  await page.getByRole('button', { name: 'مسح التصفية' }).click();
+  await page.getByRole('button', { name: 'مسح المرشحات' }).click();
   await page.getByRole('searchbox', { name: 'ابحث برمز الكوبون' }).fill('eid');
   await expect(table(page).getByRole('row')).toHaveCount(2); // header + EID10
   await expect(table(page)).toContainText('مجدول');
@@ -65,8 +65,12 @@ test('create with validation errors, then a duplicate code, then success', async
   await page.getByLabel('الحد الأدنى للطلب (ر.س)').fill('150');
   await page.getByRole('button', { name: 'مجازر الفلاح' }).click();
   await page.getByRole('button', { name: 'الأغنام' }).click();
-  await page.getByRole('switch', { name: 'للطلب الأول فقط' }).click();
+  // Decision 25: the first-order discount is off for now, shown disabled and never sent.
+  await expect(page.getByRole('switch', { name: 'للطلب الأول فقط' })).toBeDisabled();
+  await expect(page.getByText('غير متاح حاليًا')).toBeVisible();
+  const sent = page.waitForRequest((r) => r.method() === 'POST' && r.url().endsWith('/api/admin/coupons'));
   await page.getByRole('button', { name: 'إنشاء الكوبون' }).click();
+  expect((await sent).postDataJSON()).not.toHaveProperty('firstOrderOnly');
   await expect(page.getByText('هذا الرمز مستخدم لكوبون آخر')).toBeVisible();
 
   const code = `NEW${Date.now() % 100000}`;
@@ -77,7 +81,7 @@ test('create with validation errors, then a duplicate code, then success', async
   await expect(page.getByLabel('قيمة الخصم (ر.س)')).toHaveValue('30.00');
   await expect(page.getByLabel('الحد الأدنى للطلب (ر.س)')).toHaveValue('150.00');
   await expect(page.getByRole('button', { name: 'مجازر الفلاح' })).toHaveAttribute('aria-pressed', 'true');
-  await expect(page.getByRole('switch', { name: 'للطلب الأول فقط' })).toBeChecked();
+  await expect(page.getByRole('switch', { name: 'للطلب الأول فقط' })).not.toBeChecked();
   await expect(page.getByLabel('يبدأ في')).toHaveValue(`${riyadh(2)}T10:00`);
   await expect(page.getByText('0 / بلا حد')).toBeVisible();
 });

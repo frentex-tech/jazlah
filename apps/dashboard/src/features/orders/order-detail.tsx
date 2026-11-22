@@ -40,7 +40,7 @@ export const refundOf = (o: Order) => ({ paid: o.payment.status === 'captured' ?
  * and for admins the COD review, cancel & refund (135:49317) and reschedule (135:49465). The printable A6 label
  * (135:49613) replaces the body.
  */
-export function OrderDetail({ panel, id }: { panel: OrdersPanel; id: string }) {
+export function OrderDetail({ panel, id, adminActions = false }: { panel: OrdersPanel; id: string; adminActions?: boolean }) {
   const t = useTranslations('orderDetail');
   const to = useTranslations('orders');
   const ts = useTranslations('state');
@@ -71,7 +71,9 @@ export function OrderDetail({ panel, id }: { panel: OrdersPanel; id: string }) {
 
   const o = typeof order === 'object' ? order : null;
   const admin = panel === 'admin';
-  const cancellable = !!o && admin && canTransition(o, 'cancelled', 'admin');
+  // shortcut: cancel & refund and reschedule are Sprint 4 routes; without them (the Sprint 3 API) both show disabled, as
+  // drawn. Enable them when CAN-API-1 / DLV-API-1 land (#88).
+  const cancellable = !!o && admin && adminActions && canTransition(o, 'cancelled', 'admin');
   const openLabel = () => (view === 'label' ? window.print() : setView('label'));
   const header = (
     <PageHeader
@@ -80,12 +82,13 @@ export function OrderDetail({ panel, id }: { panel: OrdersPanel; id: string }) {
       actions={
         o && (
           <>
+            {/* 135:49134: the primary sits beside the title, the secondary outside it. */}
+            <Button onClick={openLabel}>{t('printLabel')}</Button>
             {admin && (
               <Button variant="secondary" disabled={!cancellable} onClick={() => openDialog('cancel')}>
                 {t('cancelRefund')}
               </Button>
             )}
-            <Button onClick={openLabel}>{t('printLabel')}</Button>
           </>
         )
       }
@@ -110,7 +113,7 @@ export function OrderDetail({ panel, id }: { panel: OrdersPanel; id: string }) {
           <StateCard
             kind="orders"
             title={t('notFound.title')}
-            body={t('notFound.body')}
+            body={t(admin ? 'notFound.adminBody' : 'notFound.body')}
             action={<Link href={`/${panel}/orders`} className={buttonVariants({ variant: 'secondary' })}>{t('notFound.action')}</Link>}
           />
         )}
@@ -170,7 +173,9 @@ export function OrderDetail({ panel, id }: { panel: OrdersPanel; id: string }) {
     }
     const r = reason.trim();
     if (!r || r.length > 500) return setReasonError(t(r ? 'cancel.reasonTooLong' : 'cancel.reasonRequired'));
-    void act('cancel', `/api/admin/orders/${id}/cancel`, { reason: r, refundTo }, t('toast.cancelled', { number: o!.number }));
+    // COD reject is a plain Sprint 3 move to `cancelled` (nothing was paid); cancel & refund is the Sprint 4 route.
+    if (dialog === 'codReject') void act('cancel', `/api/admin/orders/${id}/transition`, { to: 'cancelled', note: r }, t('toast.cancelled', { number: o!.number }));
+    else void act('cancel', `/api/admin/orders/${id}/cancel`, { reason: r, refundTo }, t('toast.cancelled', { number: o!.number }));
   }
 
   const { paid, wallet } = refundOf(o);
@@ -195,7 +200,7 @@ export function OrderDetail({ panel, id }: { panel: OrdersPanel; id: string }) {
       <Button size="S" onClick={openLabel}>{t('printLabelA6')}</Button>
       {admin && (
         <>
-          <Button size="S" variant="secondary" disabled={!canReschedule(o.status)} onClick={() => openDialog('reschedule')}>{t('reschedule')}</Button>
+          <Button size="S" variant="secondary" disabled={!adminActions || !canReschedule(o.status)} onClick={() => openDialog('reschedule')}>{t('reschedule')}</Button>
           <Button size="S" variant="danger" disabled={!cancellable} onClick={() => openDialog('cancel')}>{t('cancelRefund')}</Button>
         </>
       )}
@@ -432,7 +437,7 @@ function OrderLabel({ order: o, slot, onBack }: { order: Order; slot: string; on
           {grams > 0 && <Row label={t('weight')} value={t('kg', { value: Number((grams / 1000).toFixed(2)) })} />}
         </dl>
         {bars && (
-          <svg role="img" aria-label={t('barcode', { number: o.number })} viewBox={`0 0 ${bars.length} 56`} preserveAspectRatio="none" className="h-14 w-[168px] self-end text-ink">
+          <svg role="img" aria-label={t('barcode', { number: o.number })} viewBox={`0 0 ${bars.length} 56`} preserveAspectRatio="none" className="h-14 w-[168px] self-start text-ink">
             {[...bars].map((b, i) => (b === '1' ? <rect key={i} x={i} width={1} height={56} fill="currentColor" /> : null))}
           </svg>
         )}

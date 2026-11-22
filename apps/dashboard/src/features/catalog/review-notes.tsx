@@ -126,7 +126,7 @@ export function ReviewNotes({ id }: { id: string }) {
 
   return (
     <>
-      <PageHeader start breadcrumb={t('breadcrumb', { name: name || '…' })} title={t('heading')} />
+      <PageHeader breadcrumb={t('breadcrumb', { name: name || '…' })} title={t('heading')} />
       {body()}
     </>
   );

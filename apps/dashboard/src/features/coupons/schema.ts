@@ -23,7 +23,7 @@ const Fields = z.object({
   usageLimit: int(1, 10_000_000).nullable(),
   perUserLimit: int(1, 1000).nullable(),
   isActive: z.boolean(),
-  firstOrderOnly: z.boolean(),
+  // No `firstOrderOnly` (decision 25): unknown keys are dropped, so our routes never forward it.
 });
 
 /** Rules across fields; on a partial body only those whose fields are all sent. Custom names reach the field as its constraint. */
@@ -67,7 +67,7 @@ export function emptyDraft(now = Date.now()): Draft {
   const start = localOf(new Date(now).toISOString()).slice(0, 10);
   return {
     code: '', type: 'percent', value: '', maxDiscountHalalas: '', minOrderHalalas: '', vendorIds: [], categoryIds: [],
-    startsAt: `${start}T00:00`, endsAt: '', usageLimit: '', perUserLimit: '1', isActive: true, firstOrderOnly: false,
+    startsAt: `${start}T00:00`, endsAt: '', usageLimit: '', perUserLimit: '1', isActive: true,
   };
 }
 

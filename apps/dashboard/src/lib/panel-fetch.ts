@@ -1,5 +1,8 @@
 import type { Session } from './session';
 
+// shortcut: the pages read a refused permission as `NOT_ALLOWED` (the mocks' code), while the API answers 403 `FORBIDDEN`,
+// so against the API a refusal shows the error state, not "not allowed"; switch every check to the code the API session
+// picks (A15) (#88).
 export class ApiError extends Error {
   constructor(
     readonly code: string,

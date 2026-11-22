@@ -10,6 +10,7 @@ import { ConfirmDialog } from '@/components/ui/confirm-dialog';
 import { DataTable } from '@/components/ui/data-table';
 import { FormField, InputField, TextInput } from '@/components/ui/form-field';
 import { FormSection } from '@/components/ui/form-section';
+import { StatePanel } from '@/components/ui/state-panel';
 import { Skeleton } from '@/components/ui/skeleton';
 import { StateCard } from '@/components/ui/state-card';
 import { toast } from '@/components/ui/toast';
@@ -113,7 +114,7 @@ export function VendorCapacityTab({ vendorId }: { vendorId: string }) {
 
   return (
     <>
-      <FormSection title={t('default.title')} body={t('default.body')} invalid={Object.keys(errors).length > 0}>
+      <FormSection hug title={t('default.title')} body={t('default.body')} invalid={Object.keys(errors).length > 0}>
         <div className="grid grid-cols-[repeat(2,342px)] gap-x-s24 gap-y-s20">
           {(['ordersPerDay', 'carcassesPerDay'] as const).map((k) => (
             <InputField
@@ -133,7 +134,7 @@ export function VendorCapacityTab({ vendorId }: { vendorId: string }) {
         <Button className="self-start" loading={saving} onClick={() => void saveDefault()}>{t('default.save')}</Button>
       </FormSection>
 
-      <FormSection title={t('days.title')} body={t('days.body')}>
+      <FormSection hug title={t('days.title')} body={t('days.body')}>
         <DataTable
           columns={columns}
           data={cap.days}
@@ -143,7 +144,7 @@ export function VendorCapacityTab({ vendorId }: { vendorId: string }) {
           hasNext={false}
           onPrev={() => {}}
           onNext={() => {}}
-          empty={<p className="p-s24 text-center text-body-m text-ink-2">{t('days.empty')}</p>}
+          empty={<StatePanel kind="orders" title={t('days.emptyTitle')} body={t('days.emptyBody')} />}
           rowActions={(d) => (
             <button type="button" aria-label={t('days.remove', { date: dayOf(`${d.date}T12:00:00+03:00`, locale) })} onClick={() => void removeDay(d.date)} className="flex items-center text-ink-2">
               <X size={20} aria-hidden />

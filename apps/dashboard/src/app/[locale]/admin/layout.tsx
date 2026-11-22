@@ -9,6 +9,9 @@ import { getStaffName } from '@/lib/staff';
 /**
  * The ordering pause, read on every admin page (FR-SCH-07); null when it cannot be read here (not allowed, API down, an
  * access token that just expired): the provider then asks once from the page, through the refreshing route.
+ * shortcut: reads the whole operations settings (one more API call per admin page, and an admin without the operations
+ * permission sees no banner); read `paused` from `GET /v1/public/settings/client` with a short revalidate once it is in
+ * openapi.json (A5) (#70).
  */
 async function pauseState() {
   try {

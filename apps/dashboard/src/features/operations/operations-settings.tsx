@@ -86,7 +86,7 @@ export function OperationsSettingsPage() {
 
   const header = (
     <>
-      <PageHeader breadcrumb={t('breadcrumb')} title={t('title')} start />
+      <PageHeader breadcrumb={t('breadcrumb')} title={t('title')} />
       <SettingsTabs current="operations" />
     </>
   );
@@ -193,7 +193,7 @@ export function OperationsSettingsPage() {
         />
 
         {d.workingHours && (
-        <FormSection title={t('hours.title')} body={t('hours.body')} invalid={invalid('workingHours')}>
+        <FormSection hug title={t('hours.title')} body={t('hours.body')} invalid={invalid('workingHours')}>
           {d.workingHours.map((h, i) => {
             const day = t(`hours.days.${h.day}`);
             const hourSelect = (k: 'start' | 'end') => (
@@ -211,7 +211,7 @@ export function OperationsSettingsPage() {
             return (
               <div key={h.day} className="flex flex-col gap-s8">
                 <div className="flex items-center gap-s16">
-                  <div className="w-[200px]">
+                  <div className="w-[210px] whitespace-nowrap">
                     <Switch label={t(h.open ? 'hours.open' : 'hours.closed', { day })} checked={h.open} onChange={(v) => edit(`workingHours.${i}.open`, v)} />
                   </div>
                   <span className="w-s32 text-body-m text-ink-2">{t('hours.from')}</span>
@@ -226,7 +226,7 @@ export function OperationsSettingsPage() {
         </FormSection>
         )}
 
-        <FormSection title={t('capacity.title')} body={t('capacity.body')} invalid={invalid('capacity', 'cutoffs')}>
+        <FormSection hug title={t('capacity.title')} body={t('capacity.body')} invalid={invalid('capacity', 'cutoffs')}>
           <div className={grid}>
             {numInput('capacity.ordersPerDay', t('capacity.orders'), t('capacity.hint'))}
             {numInput('capacity.carcassesPerDay', t('capacity.carcasses'), t('capacity.hint'))}
@@ -239,7 +239,7 @@ export function OperationsSettingsPage() {
           </p>
         </FormSection>
 
-        <FormSection title={t('closed.title')} body={t('closed.body')} invalid={invalid('closedDays')}>
+        <FormSection hug title={t('closed.title')} body={t('closed.body')} invalid={invalid('closedDays')}>
           <ClosedDays
             days={d.closedDays}
             today={today}
@@ -249,7 +249,7 @@ export function OperationsSettingsPage() {
           />
         </FormSection>
 
-        <FormSection title={t('delivery.title')} body={t('delivery.body')} invalid={invalid('deliveryWindow', 'bookingHorizonDays')}>
+        <FormSection hug title={t('delivery.title')} body={t('delivery.body')} invalid={invalid('deliveryWindow', 'bookingHorizonDays')}>
           <div className={grid}>
             {timeInput('deliveryWindow.start', t('delivery.start'))}
             {timeInput('deliveryWindow.end', t('delivery.end'))}
@@ -267,14 +267,14 @@ export function OperationsSettingsPage() {
           </div>
         </FormSection>
 
-        <FormSection title={t('fees.title')} body={t('fees.body')} invalid={invalid('minOrderHalalas', 'deliveryFeeHalalas')}>
+        <FormSection hug title={t('fees.title')} body={t('fees.body')} invalid={invalid('minOrderHalalas', 'deliveryFeeHalalas')}>
           <div className={grid}>
             {moneyInput('minOrderHalalas', t('fees.minOrder'), t('fees.minOrderHint'))}
             {moneyInput('deliveryFeeHalalas', t('fees.fee'), t('fees.feeHint'))}
           </div>
         </FormSection>
 
-        <FormSection title={t('cod.title')} body={t('cod.body')} invalid={invalid('cod')}>
+        <FormSection hug title={t('cod.title')} body={t('cod.body')} invalid={invalid('cod')}>
           <Switch label={t('cod.enabled')} checked={d.cod.enabled} onChange={(v) => edit('cod.enabled', v)} />
           <div className={grid}>
             {moneyInput('cod.maxOrderHalalas', t('cod.max'), t('cod.maxHint'))}
@@ -302,7 +302,7 @@ export function OperationsSettingsPage() {
           </fieldset>
         </FormSection>
 
-        <FormSection title={t('complaints.title')} body={t('complaints.body')} invalid={invalid('complaintWindowHours')}>
+        <FormSection hug title={t('complaints.title')} body={t('complaints.body')} invalid={invalid('complaintWindowHours')}>
           <div className={grid}>{numInput('complaintWindowHours', t('complaints.hours'), t('complaints.hint'))}</div>
         </FormSection>
 
@@ -350,7 +350,9 @@ function PauseCard({ paused, draft, error, invalid, onMessage, onToggle }: {
       aria-label={t('section')}
       className={cn('flex w-full flex-col gap-s20 rounded-md p-s24', on ? 'border-2 border-warning bg-warning-bg' : 'border bg-paper', invalid ? 'border-danger' : !on && 'border-line')}
     >
+      {/* 118:11181 / 118:11833: the switch and the message box on the start side, the icon and copy on the end side. */}
       <div className="flex items-center justify-between gap-s16">
+        <Switch label={t('switch')} checked={on} onChange={onToggle} />
         <div className="flex items-center gap-s16">
           <span className={cn('flex size-[72px] shrink-0 items-center justify-center rounded-pill', on ? 'bg-paper' : 'bg-sand')}>
             {on ? <PauseCircle size={40} weight="fill" className="text-warning" aria-hidden /> : <PlayCircle size={40} weight="fill" className="text-success" aria-hidden />}
@@ -361,9 +363,8 @@ function PauseCard({ paused, draft, error, invalid, onMessage, onToggle }: {
             <p className="text-body-l text-ink-2">{t(on ? 'bodyPaused' : 'bodyOpen')}</p>
           </div>
         </div>
-        <Switch label={t('switch')} checked={on} onChange={onToggle} />
       </div>
-      <div className="flex w-[374px] flex-col gap-s16 self-end rounded-md border border-line bg-paper p-s16">
+      <div className="flex w-[374px] flex-col gap-s16 self-start rounded-md border border-line bg-paper p-s16">
         <InputField label={t('messageAr')} hint={t('messageHint')} error={error('paused.messageAr')} maxLength={200} dir="rtl" disabled={on} value={draft.messageAr} onChange={(e) => onMessage('messageAr', e.target.value)} />
         <InputField label={t('messageEn')} error={error('paused.messageEn')} maxLength={200} dir="ltr" disabled={on} value={draft.messageEn} onChange={(e) => onMessage('messageEn', e.target.value)} />
       </div>

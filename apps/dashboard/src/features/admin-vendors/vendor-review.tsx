@@ -66,7 +66,6 @@ export function VendorReview({ id: routeId }: { id: string }) {
   const name = r ? (locale === 'en' ? (r.vendor ?? r.application)!.name.en : (r.vendor ?? r.application)!.name.ar) : '';
   const header = (
     <PageHeader
-      start
       breadcrumb={r ? t(r.vendor ? 'breadcrumb.vendor' : 'breadcrumb.application', { name }) : t('breadcrumb.loading')}
       title={r ? t('title', { name }) : t('titleLoading')}
     />
