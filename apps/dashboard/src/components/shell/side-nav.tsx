@@ -66,7 +66,7 @@ export function SideNav({ panel, badges: given = {} }: { panel: Panel; badges?: 
 }
 
 /** The last review count and when it was read, for every mount of the side nav in this tab. */
-let reviewCache: { count: number | string; at: number } | null = null;
+let reviewCache: { count: number; at: number } | null = null;
 const REVIEW_TTL = 5 * 60_000;
 
 /**
@@ -75,15 +75,14 @@ const REVIEW_TTL = 5 * 60_000;
  * A plain fetch: a refused count (no permission, session over) only hides the badge; the page handles the session.
  */
 function useReviewCount(enabled: boolean) {
-  const [count, setCount] = useState<number | string>(reviewCache?.count ?? 0);
+  const [count, setCount] = useState(reviewCache?.count ?? 0);
   useEffect(() => {
     if (!enabled) return;
     let live = true;
     const load = () =>
-      fetch('/api/admin/catalog/review-count')
-        .then((r) => (r.ok ? (r.json() as Promise<{ count: number; more?: boolean }>) : { count: 0 }))
-        .then((d) => {
-          const shown = 'more' in d && d.more ? `${d.count}+` : d.count; // capped at 50 (review-count route)
+      fetch('/api/admin/catalog/review-queue?limit=1') // `count` is the whole queue, whatever the page size
+        .then((r) => (r.ok ? (r.json() as Promise<{ count: number }>) : { count: 0 }))
+        .then(({ count: shown }) => {
           reviewCache = { count: shown, at: Date.now() };
           if (live) setCount(shown);
         }, () => {});

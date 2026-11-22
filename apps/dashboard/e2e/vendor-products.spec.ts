@@ -153,9 +153,10 @@ test('a published product: a price applies at once, a name change warns and beco
   await expect(rowOf(page, mine(page), liveName).getByText('97.00 ر.س')).toBeVisible();
 
   await page.goto('/admin/catalog/review');
-  const row = rowOf(page, queue(page), `ريب آي بقري طازج ${RUN}`);
+  // The queue row names the live product (GET /v1/admin/review-queue); the dialog shows the proposed edit.
+  const row = rowOf(page, queue(page), liveName);
   await expect(row.getByText('تعديل منتج')).toBeVisible();
-  await page.getByRole('button', { name: `مراجعة ريب آي بقري طازج ${RUN}` }).click();
+  await page.getByRole('button', { name: `مراجعة ${liveName}`, exact: true }).click();
   const dialog = page.getByRole('dialog', { name: `مراجعة: ريب آي بقري طازج ${RUN}` });
   await expect(dialog.getByText('الاسم والوصف')).toBeVisible();
   // What approval makes live: the live price (not the request's 95.00) and the cuts by name.
@@ -163,10 +164,27 @@ test('a published product: a price applies at once, a name change warns and beco
   await expect(dialog.getByText('تقطيع شرائح، مكعبات')).toBeVisible();
   await dialog.getByRole('button', { name: 'اعتماد ونشر' }).click();
   await toast(page, `اعتُمد ريب آي بقري طازج ${RUN} ونُشر`);
-  await expect(queue(page).getByText(`ريب آي بقري طازج ${RUN}`)).toHaveCount(0);
+  await expect(queue(page).getByRole('button', { name: `مراجعة ${liveName}`, exact: true })).toHaveCount(0);
 
   await page.goto('/vendor/products');
   await expect(rowOf(page, mine(page), `ريب آي بقري طازج ${RUN}`).getByText('منشور')).toBeVisible();
+});
+
+test('the review queue: new products and edits in one list, filtered by kind and by store', async ({ page, context }) => {
+  await signInAs(context, ['admin']);
+  await page.goto('/admin/catalog/review');
+  await expect(rowOf(page, queue(page), 'فخذ غنم نعيمي').getByText('منتج جديد')).toBeVisible();
+  await expect(rowOf(page, queue(page), 'كتف غنم للتحمير').getByText('تعديل منتج')).toBeVisible();
+  await page.getByLabel('نوع الطلب').selectOption({ label: 'تعديل منتج' });
+  await expect(rowOf(page, queue(page), 'فخذ غنم نعيمي')).toHaveCount(0);
+  await expect(rowOf(page, queue(page), 'كتف غنم للتحمير')).toHaveCount(1);
+  await page.getByLabel('نوع الطلب').selectOption({ label: 'نوع الطلب' });
+  await page.getByLabel('المتجر').selectOption({ label: 'مجازر الفلاح' });
+  await expect(rowOf(page, queue(page), 'فخذ غنم نعيمي')).toHaveCount(0);
+  await expect(rowOf(page, queue(page), 'كتف غنم للتحمير')).toHaveCount(0);
+  await page.getByLabel('المتجر').selectOption({ label: 'ذبائح الرياض' });
+  await expect(rowOf(page, queue(page), 'فخذ غنم نعيمي')).toHaveCount(1);
+  await expect(rowOf(page, queue(page), 'كتف غنم للتحمير')).toHaveCount(1);
 });
 
 test('not allowed: a suspended store, and an admin without the review permission', async ({ page, context }) => {

@@ -2,7 +2,7 @@ import { expect, test, type Page } from '@playwright/test';
 import { signInAs } from './helpers';
 
 // Mock (src/features/admin-vendors/backend.ts): seeds follow 131:16744. Pending: ملحمة النخبة (جدة), مزارع الواحة;
-// active: مجازر الفلاح, ذبائح الرياض; suspended: أسواق الراعي. An access token ending in «-limited» is refused (FORBIDDEN).
+// active: مجازر الفلاح, ذبائح الرياض; suspended: أسواق الراعي. An access token ending in «-limited» is refused (PERMISSION_DENIED).
 // One server and one mock store for the whole run: each test acts on its own seed.
 
 const table = (page: Page) => page.getByRole('table', { name: 'المتاجر' });

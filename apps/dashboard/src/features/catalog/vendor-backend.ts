@@ -4,7 +4,7 @@ import { apiCall as call, apiClient, apiHeaders as headers } from '@/api/client'
 import type { ApiResult } from '@/lib/auth/panel-session';
 import { mockBackends } from '@/lib/mock-backends';
 import type {
-  CreateProduct, Fulfilment, NamedRef, Page, Prices, Product, ProductCard, ProductContent, ProductQuery, RefItem, VendorList, VendorRule,
+  Availability, CreateProduct, Fulfilment, NamedRef, Page, Prices, Product, ProductCard, ProductContent, ProductQuery, RefItem, VendorList, VendorRule,
 } from './types';
 
 type R<T> = Promise<ApiResult<T>>;
@@ -19,7 +19,7 @@ export interface VendorCatalogBackend {
   createProduct(token: string, lang: string, body: CreateProduct): R<Product>;
   updateProduct(token: string, lang: string, id: string, body: ProductContent): R<Product>;
   submit(token: string, lang: string, id: string): R<Product>;
-  setAvailability(token: string, lang: string, id: string, isAvailable: boolean): R<Product>;
+  setAvailability(token: string, lang: string, id: string, body: Availability): R<Product>;
   setFulfilment(token: string, lang: string, id: string, fulfilment: Fulfilment): R<Product>;
   setPrices(token: string, lang: string, id: string, body: Prices): R<Product>;
 }
@@ -36,8 +36,8 @@ function apiBackend(): VendorCatalogBackend {
     createProduct: (token, lang, body) => call(api.POST('/v1/vendor/products', { body, headers: headers(token, lang) })),
     updateProduct: (token, lang, x, body) => call(api.PUT('/v1/vendor/products/{id}', { params: id(x), body, headers: headers(token, lang) })),
     submit: (token, lang, x) => call(api.POST('/v1/vendor/products/{id}/submit', { params: id(x), headers: headers(token, lang) })),
-    setAvailability: (token, lang, x, isAvailable) =>
-      call(api.PATCH('/v1/vendor/products/{id}/availability', { params: id(x), body: { isAvailable }, headers: headers(token, lang) })),
+    setAvailability: (token, lang, x, body) =>
+      call(api.PATCH('/v1/vendor/products/{id}/availability', { params: id(x), body, headers: headers(token, lang) })),
     setFulfilment: (token, lang, x, fulfilment) =>
       call(api.PATCH('/v1/vendor/products/{id}/fulfilment', { params: id(x), body: { fulfilment }, headers: headers(token, lang) })),
     setPrices: (token, lang, x, body) => call(api.PATCH('/v1/vendor/products/{id}/prices', { params: id(x), body, headers: headers(token, lang) })),

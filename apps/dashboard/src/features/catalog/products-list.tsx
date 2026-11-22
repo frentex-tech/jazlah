@@ -66,7 +66,7 @@ export function ProductsList() {
       const p = await panelFetch<Page<ProductCard>>('admin', `/api/admin/catalog/products?${query}`);
       setData({ items: p.items, next: p.nextCursor });
     } catch (e) {
-      setData(e instanceof ApiError && e.code === 'NOT_ALLOWED' ? 'denied' : 'error');
+      setData(e instanceof ApiError && e.code === 'PERMISSION_DENIED' ? 'denied' : 'error');
     }
   }, [status, vendorId, cursor]);
   useEffect(() => void load(), [load]);

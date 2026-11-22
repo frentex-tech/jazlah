@@ -73,7 +73,7 @@ export function VendorsList() {
         if (req === latest.current) setData({ rows: p.items.map((v) => vendorRow(v, locale)), next: p.nextCursor });
       }
     } catch (e) {
-      if (req === latest.current) setData(e instanceof ApiError && e.code === 'NOT_ALLOWED' ? 'denied' : 'error');
+      if (req === latest.current) setData(e instanceof ApiError && e.code === 'PERMISSION_DENIED' ? 'denied' : 'error');
     }
   }, [tab, q, city, cursor, locale]);
   useEffect(() => void load(), [load]);

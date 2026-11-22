@@ -1,8 +1,9 @@
 import type { Session } from './session';
 
-// shortcut: the pages read a refused permission as `NOT_ALLOWED` (the mocks' code), while the API answers 403 `FORBIDDEN`,
-// so against the API a refusal shows the error state, not "not allowed"; switch every check to the code the API session
-// picks (A15) (#88).
+// A refused permission is 403 PERMISSION_DENIED: the session stays (not in panel-session's SIGNED_OUT) and the Sprint 2
+// pages (stores, catalog, review) show their not-allowed state. shortcut: no API route returns it until ADM-API-1 adds
+// the permission checks (#111), so only the mocks' `-limited` token shows it; the Sprint 3 pages (operations, orders,
+// coupons) still read their mocks' `NOT_ALLOWED` until they are wired (#88).
 export class ApiError extends Error {
   constructor(
     readonly code: string,

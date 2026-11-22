@@ -5,9 +5,9 @@ import { mockApplications } from '@/features/vendor-onboarding/backend.mock';
 import type { Application, Page, Vendor } from './types';
 import type { AdminVendorsBackend } from './backend';
 
-// Seeds follow the rows of 131:16744. An admin whose mock access token ends in «-limited» is answered NOT_ALLOWED, to
-// show the not-allowed states (131:17922, 131:18972). The API's FORBIDDEN ends the session (errors.md); the real
-// per-permission refusal arrives with ADM-API-1 (#111).
+// Seeds follow the rows of 131:16744. An admin whose mock access token ends in «-limited» is answered PERMISSION_DENIED (the
+// API's 403 for a missing permission, which keeps the session), to show the not-allowed states (131:17922, 131:18972).
+// The API raises it once ADM-API-1 (#111) adds the permission checks.
 const ADMIN_ID = '9a1b2c3d-4e5f-4a6b-8c7d-0e1f2a3b4c5d';
 const PHOTO = ['/login/vendor.jpg', '/login/admin.jpg'];
 type Seed = { key: string; status: Application['status']; ar: string; en: string; city: string; cr: string; created: string; holder: string; lat: number; lng: number };
@@ -74,7 +74,7 @@ function vendorFrom(a: Application, commissionBasisPoints: number, createdAt: st
 }
 
 const notFound = { ok: false, code: 'NOT_FOUND', status: 404 } as const;
-const forbidden = { ok: false, code: 'NOT_ALLOWED', status: 403 } as const;
+const forbidden = { ok: false, code: 'PERMISSION_DENIED', status: 403 } as const;
 const invalid = (field: string, constraint: string) => ({ ok: false, code: 'VALIDATION_FAILED', status: 400, details: [{ field, constraints: [constraint] }] }) as const;
 const limited = (token: string) => token.endsWith('-limited');
 const entry = (id: string) => [...mockApplications].find(([, a]) => a.id === id);
@@ -114,6 +114,9 @@ export const mockAdminVendors: AdminVendorsBackend = {
     const e = entry(id);
     if (!e) return notFound;
     if (e[1].status !== 'pending') return { ok: false, code: 'VENDOR_APPLICATION_NOT_PENDING', status: 409 };
+    // shortcut: the mock's submit does not refuse a held number (the API's does), so the admin side can show it (#45).
+    const held = [...mock.vendors.values()].some((v) => v.commercialRegistrationNumber === e[1].commercialRegistrationNumber);
+    if (held) return { ok: false, code: 'VENDOR_CR_EXISTS', status: 409 };
     const now = new Date().toISOString();
     mockApplications.set(e[0], { ...e[1], status: 'approved', reviewedAt: now });
     const v = vendorFrom(e[1], bps, now);

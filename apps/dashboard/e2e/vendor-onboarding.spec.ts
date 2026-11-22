@@ -28,7 +28,8 @@ test('a full application, from the phone to the pending status, survives a sessi
   await page.getByRole('button', { name: 'التالي' }).click();
   await expect(page.getByRole('alert').filter({ hasText: 'صحّح الحقول المظلّلة بالأحمر ثم تابع.' })).toBeVisible();
   await expect(page.getByText('السجل التجاري 10 أرقام')).toBeVisible();
-  await page.getByLabel('رقم السجل التجاري').fill('1010458216');
+  // مجازر الفلاح's number: the mock takes the application, and its approval is refused below (VENDOR_CR_EXISTS).
+  await page.getByLabel('رقم السجل التجاري').fill('1010123456');
   await page.getByLabel('الرقم الضريبي (اختياري)').fill('310123456700003');
   await page.getByLabel('المدينة').fill('الرياض');
   await page.getByRole('button', { name: 'التالي' }).click();
@@ -103,6 +104,14 @@ test('a full application, from the phone to the pending status, survives a sessi
   await page.getByRole('table', { name: 'المتاجر' }).getByRole('link', { name: 'ملحمة الاختبار', exact: true }).click();
   await expect(page.getByRole('heading', { level: 1, name: 'مراجعة: ملحمة الاختبار' })).toBeVisible();
   await expect(page.getByRole('link', { name: 'فتح الملف' })).toBeVisible();
+  // Its registration number is held by an active store: the approval is refused on that field, the application stays pending.
+  await page.getByRole('button', { name: 'اعتماد المتجر' }).click();
+  const dialog = page.getByRole('dialog', { name: 'اعتماد ملحمة الاختبار' });
+  await dialog.getByLabel('نسبة العمولة (%)').fill('10');
+  await dialog.getByRole('button', { name: 'اعتماد وتفعيل' }).click();
+  await expect(page.getByRole('status').getByText('لم يُعتمد الطلب: يوجد متجر مسجّل بالسجل التجاري نفسه')).toBeVisible();
+  await expect(page.getByRole('alert').filter({ hasText: 'سجل تجاري مسجّل لمتجر آخر في جزلة' })).toBeVisible();
+  await expect(page.getByRole('button', { name: 'اعتماد المتجر' })).toBeVisible();
 });
 
 test('a draft is never shown to another applicant on the same device', async ({ page, context }) => {

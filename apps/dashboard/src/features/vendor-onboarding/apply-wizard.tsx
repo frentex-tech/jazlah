@@ -195,6 +195,7 @@ export function ApplyWizard({ phone, owner, reapply }: { phone: string; owner: s
         return router.replace('/vendor/application');
       }
       if (e.code === 'VENDOR_ACCESS_ALREADY_HELD') return setSubmitError(t('errors.alreadyHeld'));
+      if (e.code === 'VENDOR_CR_EXISTS') return showErrors({ cr: 'errors.crExists' });
       if ((e.code === 'MEDIA_NOT_FOUND' || e.code === 'MEDIA_NOT_READY') && e.details) {
         const id = (e.details as { mediaId?: string }).mediaId;
         const kind = DOC_KINDS.find((k) => v.docs[k]?.mediaId === id);

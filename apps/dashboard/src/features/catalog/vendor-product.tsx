@@ -13,7 +13,7 @@ import { dayOf } from '@/lib/date';
 import { ApiError, panelFetch } from '@/lib/panel-fetch';
 import { uploadImage } from './client';
 import { ProductForm, ProductFormSkeleton, SubmitError, type FormOptions, type ProductFormValues } from './product-form/product-form';
-import { bodyOf, differsForReview, editedContent, priceChanges, priceField } from './product-form/values';
+import { availabilityChange, bodyOf, differsForReview, editedContent, priceChanges, priceField } from './product-form/values';
 import type { Product } from './types';
 
 const BASE = '/api/vendor/products';
@@ -93,7 +93,8 @@ export function VendorProduct({ id }: { id?: string }) {
         }
         if (values.fulfilment !== p.fulfilment) p = await vendorFetch<Product>(`${BASE}/${base.id}/fulfilment`, json('PATCH', { fulfilment: values.fulfilment }));
       }
-      if (values.isAvailable !== p.isAvailable) p = await vendorFetch<Product>(`${BASE}/${p.id}/availability`, json('PATCH', { isAvailable: values.isAvailable }));
+      const availability = availabilityChange(p, values);
+      if (availability) p = await vendorFetch<Product>(`${BASE}/${p.id}/availability`, json('PATCH', availability));
       if (intent === 'submit' && (p.status === 'draft' || p.status === 'rejected')) p = await vendorFetch<Product>(`${BASE}/${p.id}/submit`, json('POST'));
     } catch (e) {
       if (e instanceof ApiError && e.code === 'VENDOR_SUSPENDED') setState('blocked');

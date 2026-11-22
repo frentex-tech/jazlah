@@ -42,7 +42,7 @@ export function Categories() {
     try {
       setData((await loadAll<RefItem>('admin', URL_LIST)).sort(bySortOrder));
     } catch (e) {
-      setData(e instanceof ApiError && e.code === 'NOT_ALLOWED' ? 'denied' : 'error');
+      setData(e instanceof ApiError && e.code === 'PERMISSION_DENIED' ? 'denied' : 'error');
     }
   }, []);
   useEffect(() => void load(), [load]);

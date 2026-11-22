@@ -67,7 +67,6 @@ const SECTION_OF: [string, RegExp][] = [
   ['cuts', /^cuttings/],
   ['packs', /^packagings/],
   ['exclusions', /^exclusionItemIds/],
-  ['matrix', /^pairs/],
   ['fulfilment', /^fulfilment/],
 ];
 const sectionOf = (key: string) => SECTION_OF.find(([, re]) => re.test(key))?.[0];
@@ -190,6 +189,8 @@ export function ProductForm({ product, options, upload, setRule, actions, delete
               <SmallInput label={t('sizes.tagEn', { n })} placeholder={t('sizes.tagEnPlaceholder')} value={r.tagEn} error={message(`sizes.${i}.tag.en`)} onChange={(v) => patch({ tagEn: v }, 'tag')} className="w-[150px]" dir="ltr" />
               <SmallInput label={t('sizes.grams', { n })} placeholder={t('sizes.gramsPlaceholder')} suffix={t('sizes.gramsUnit')} inputMode="numeric" value={r.grams} error={message(`sizes.${i}.approxWeightGrams`)} onChange={(v) => patch({ grams: v }, 'approxWeightGrams')} className="w-[150px]" />
               <SmallInput label={t('sizes.price', { n })} placeholder="0.00" suffix={t('sar')} inputMode="decimal" value={r.price} error={message(`sizes.${i}.priceHalalas`)} onChange={(v) => patch({ price: v }, 'priceHalalas')} className="w-[170px]" />
+              {/* A live size's own availability (PATCH …/availability `sizes`, at once, no review); a new size starts available. */}
+              {r.available !== null && <Switch hideLabel label={t('sizes.available', { n })} checked={r.available} onChange={(available) => patch({ available }, 'isAvailable')} />}
               <button type="button" aria-label={t('sizes.remove', { n })} onClick={() => set({ sizes: s.sizes.filter((x) => x.key !== r.key) }, ['sizes'])} className="flex size-9 items-center justify-center text-ink-2">
                 <Trash size={20} aria-hidden />
               </button>
@@ -270,19 +271,15 @@ export function ProductForm({ product, options, upload, setRule, actions, delete
         </div>
       </FormSection>
 
-      <FormSection title={t('matrix.title')} body={t(setRule ? 'matrix.body' : 'matrix.bodyReadOnly', { cuts: cuttingStyles.length, packs: PACKAGINGS.length })} invalid={invalid('matrix')}>
+      <FormSection title={t('matrix.title')} body={t(setRule ? 'matrix.body' : 'matrix.bodyReadOnly', { cuts: cuttingStyles.length, packs: PACKAGINGS.length })}>
         <Matrix
           cuttingStyles={cuttingStyles}
           rules={rules}
-          onRules={(next) => {
-            setRules(next);
-            setErrors(({ pairs: _, ...rest }) => rest);
-          }}
+          onRules={setRules}
           setRule={setRule}
           offered={(cut, k) => s.cuts.some((x) => x.id === cut) && s.packs.some((x) => x.packaging === k)}
           name={name}
         />
-        {message('pairs') && <p role="alert" className="text-body-m text-danger">{message('pairs')}</p>}
       </FormSection>
 
       <FormSection title={t('fulfilment.title')} body={t('fulfilment.body')} invalid={invalid('fulfilment')}>
@@ -338,7 +335,6 @@ function errorsOf(e: unknown, values: ProductFormValues): Errors | null {
     const out: Errors = {};
     if (reasons.includes('NO_SIZE')) out.sizes = 'NO_SIZE';
     if (reasons.includes('NO_IMAGE')) out.imageMediaIds = 'NO_IMAGE';
-    if (reasons.includes('INCOMPATIBLE_CUTTING_PACKAGING')) out.pairs = 'INCOMPATIBLE_CUTTING_PACKAGING';
     return Object.keys(out).length ? out : null;
   }
   if (e.code === 'MEDIA_NOT_FOUND' || e.code === 'MEDIA_NOT_READY') {

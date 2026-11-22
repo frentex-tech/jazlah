@@ -3,7 +3,7 @@ import { signInAs } from './helpers';
 
 // Mock (src/features/catalog/backend.ts): categories of 131:19875, products of 131:21286 (مندي لحم للولائم, ضلوع غنم
 // للمشاوي and لحم مفروم ناعم are JAZLA's own), the cuts, packagings and "without" items of 131:35405. An access token
-// ending in «-limited» is answered NOT_ALLOWED. One server and one mock store for the whole run.
+// ending in «-limited» is answered PERMISSION_DENIED. One server and one mock store for the whole run.
 
 const PNG = Buffer.from('iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8z8BQDwAEhQGAhKmMIQAAAABJRU5ErkJggg==', 'base64');
 const categories = (page: Page) => page.getByRole('table', { name: 'التصنيفات' });
@@ -119,17 +119,24 @@ test('exit criteria: a JAZLA carcass with 3 sizes, cuts (one priced), packaging 
   await expect(page).toHaveURL(/\/admin\/catalog\/products\/[0-9a-f-]{36}$/);
   await expect(page.getByRole('heading', { level: 1, name: 'ذبيحة نعيمي كاملة' })).toBeVisible();
 
-  // Publishing a product that offers the forbidden pair is refused by the API: the form says why.
+  // A forbidden pair no longer blocks publishing (it limits the customer's choice, #290): the product goes live.
   await page.getByRole('button', { name: 'حفظ ونشر' }).click();
-  await expect(page.getByText('يقدّم المنتج تقطيعًا مع تغليف غير متوافق')).toBeVisible();
+  await expect(page.getByRole('status').getByText('تم نشر ذبيحة نعيمي كاملة')).toBeVisible();
 
   // Reloaded from the API: everything was saved.
   await page.reload();
   await expect(page.getByLabel('سعر الحجم 3')).toHaveValue('1550.00');
   await expect(page.getByLabel('السعر الإضافي لـمكعبات')).toHaveValue('25.00');
   await expect(page.getByRole('button', { name: 'بدون جلد' })).toHaveAttribute('aria-pressed', 'true');
+  // One size out of stock (PATCH …/availability `sizes`), the others and the product stay on sale.
+  await page.getByRole('switch', { name: 'الحجم 2 متاح للطلب' }).click();
+  await page.getByRole('button', { name: 'حفظ التعديلات' }).click();
+  await expect(page.getByRole('status').getByText('تم حفظ ذبيحة نعيمي كاملة')).toBeVisible();
+  await page.reload();
+  await expect(page.getByRole('switch', { name: 'الحجم 2 متاح للطلب' })).toHaveAttribute('aria-checked', 'false');
+  await expect(page.getByRole('switch', { name: 'الحجم 1 متاح للطلب' })).toHaveAttribute('aria-checked', 'true');
   await page.goto('/admin/catalog/products');
-  await expect(rowOf(page, products(page), 'ذبيحة نعيمي كاملة').getByText('مسودة')).toBeVisible();
+  await expect(rowOf(page, products(page), 'ذبيحة نعيمي كاملة').getByText('منشور')).toBeVisible();
   await expect(rowOf(page, products(page), 'ذبيحة نعيمي كاملة').getByText('950.00 ر.س')).toBeVisible();
 });
 

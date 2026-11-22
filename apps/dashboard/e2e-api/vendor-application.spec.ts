@@ -2,7 +2,8 @@ import { expect, test } from '@playwright/test';
 import { ADMIN, APPLICANT, PNG, RUN, pdf, signIn, signInTo, toast } from './helpers';
 
 // VND-DSH-1 and VND-DSH-2 against the real API: a new applicant applies with uploaded documents (presigned POST to the
-// storage), then an admin approves the application with a 12.5% commission, sent as 1250 basis points.
+// storage), first with a registration number a seeded store holds (VENDOR_CR_EXISTS on the field), then an admin
+// approves the application with a 12.5% commission, sent as 1250 basis points.
 // Needs a freshly seeded API: the applicant phone has no application yet.
 const NAME = `ملحمة القبول ${RUN}`;
 const NAME_EN = `Acceptance Butchery ${RUN}`;
@@ -17,7 +18,7 @@ test('a new applicant sends a full application with documents', async ({ page })
 
   await page.getByLabel('اسم المتجر بالعربية').fill(NAME);
   await page.getByLabel('اسم المتجر بالإنجليزية').fill(NAME_EN);
-  await page.getByLabel('رقم السجل التجاري').fill('1010458216');
+  await page.getByLabel('رقم السجل التجاري').fill('1010000101'); // the seeded ملحمة النخبة's: refused at submit
   await page.getByLabel('الرقم الضريبي (اختياري)').fill('310123456700003');
   await page.getByLabel('المدينة').fill('الرياض');
   await page.getByRole('button', { name: 'التالي' }).click();
@@ -45,6 +46,17 @@ test('a new applicant sends a full application with documents', async ({ page })
   await page.getByRole('button', { name: 'التالي' }).click();
 
   await expect(page.getByRole('heading', { level: 1, name: 'الصور والمراجعة' })).toBeVisible();
+  await page.getByLabel('أقرّ بصحة البيانات وأوافق على شروط التجّار في جزلة').check();
+  await page.getByRole('button', { name: 'إرسال الطلب' }).click();
+
+  // VENDOR_CR_EXISTS: the wizard goes back to the business step with the error on the registration number field.
+  await expect(page.getByRole('heading', { level: 1, name: 'بيانات المنشأة' })).toBeVisible({ timeout: 15_000 });
+  await expect(page.getByText('يوجد متجر مسجّل في جزلة بهذا السجل التجاري')).toBeVisible();
+  await page.getByLabel('رقم السجل التجاري').fill('1010458216');
+  for (const step of ['المستندات', 'الحساب البنكي', 'موقع المنشأة', 'الصور والمراجعة']) {
+    await page.getByRole('button', { name: 'التالي' }).click();
+    await expect(page.getByRole('heading', { level: 1, name: step })).toBeVisible();
+  }
   await page.getByLabel('أقرّ بصحة البيانات وأوافق على شروط التجّار في جزلة').check();
   await page.getByRole('button', { name: 'إرسال الطلب' }).click();
 
