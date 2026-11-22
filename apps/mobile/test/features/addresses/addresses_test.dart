@@ -103,6 +103,9 @@ void main() {
     expect(find.textContaining('خارج نطاق التوصيل حاليًا'), findsOneWidget);
     await t.enterText(find.byType(TextField).first, 'الاستراحة');
     await t.pump();
+    // The test font's wide glyphs wrap the checkbox label, so the page scrolls a little.
+    await t.ensureVisible(find.text('حفظ العنوان'));
+    await t.pump();
     await t.tap(find.text('حفظ العنوان'));
     await t.pump(const Duration(seconds: 1));
     final saved = (await t.runAsync(repo.list))!;

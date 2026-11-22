@@ -65,6 +65,11 @@ export const mockOperations: OperationsBackend = {
     state.settings = next;
     return ok(next);
   },
+  async setPause(token, _lang, paused) {
+    if (limited(token)) return denied;
+    state.settings = { ...state.settings, paused };
+    return ok(state.settings);
+  },
   async vendorCapacity(token, _lang, vendorId) {
     return limited(token) ? denied : ok(capacityOf(vendorId));
   },

@@ -34,6 +34,13 @@ abstract final class OrderError {
   /// The app's names until ORD-API-1 #81 fixes them (not-built-yet.md).
   static const String itemUnavailable = CartIssueCode.unavailable;
   static const minOrderNotMet = 'MIN_ORDER_NOT_MET';
+
+  /// Lead review A6 proposals until ORD-API-1 #81 names them (not-built-yet.md).
+  static const cartEmpty = 'CART_EMPTY';
+  static const fulfilmentRequired = 'FULFILMENT_REQUIRED';
+
+  /// The wallet part (or wallet only) is above the balance: stay on the review and read the methods again.
+  static const walletInsufficient = 'WALLET_INSUFFICIENT';
 }
 
 /// An `OrderItem`: product, size and options as they were when ordered, names AR/EN and prices.
@@ -120,6 +127,8 @@ class Order {
   final int discount;
   final int deliveryFee;
   final int total;
+
+  /// From the order answer as is: an API repository never recomputes it (lead review M9).
   final int vatAmount;
 
   /// One of `PaymentMethodCode`.

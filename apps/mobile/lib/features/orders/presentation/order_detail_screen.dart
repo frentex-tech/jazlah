@@ -117,7 +117,7 @@ class _OrderDetailScreenState extends ConsumerState<OrderDetailScreen> {
         padding: const EdgeInsets.all(JSpace.s16),
         children: [
           for (var i = 0; i < 3; i++) ...[
-            const CartCard(gap: 0, padding: JSpace.s16, children: [JSkeletonRow()]),
+            const JSkeletonRow(), // draws its own card
             const SizedBox(height: JSpace.s12),
           ],
         ],
@@ -217,15 +217,13 @@ class _Body extends ConsumerWidget {
           ),
         ],
       ),
-      if (timeline != null) ...[
-        Text(l10n.orderStatusTitle, style: JText.h3),
-        JStatusTimeline(steps: timeline.$1, stage: timeline.$2),
-      ],
       // Reserved for DLV-MOB-1 #101: the frame's own «not started yet» states, never a made-up driver.
       if (delivery && before.contains(o.status))
         slot(l10n.orderTrackingTitle, l10n.orderTrackingNotStarted, l10n.orderTrackingNotStartedBody),
       if (before.contains(o.status))
         slot(l10n.orderFreshnessTitle, l10n.orderFreshnessWaiting, l10n.orderFreshnessWaitingBody),
+      // The sections no frame draws come after the drawn cards, each titled inside its card (signoff.md).
+      if (timeline != null) JStatusTimeline(title: l10n.orderStatusTitle, steps: timeline.$1, stage: timeline.$2),
       if (!delivery && o.pickupSnapshot != null)
         section(l10n.checkoutPickupPlace, [
           Text(o.pickupSnapshot!.name.of(lang), style: JText.labelM),

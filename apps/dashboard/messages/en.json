@@ -1385,7 +1385,8 @@
     "days": {
       "title": "Specific dates",
       "body": "A different capacity for one day (occasion, Eid, maintenance). It comes before the default.",
-      "empty": "No specific dates",
+      "emptyTitle": "No specific dates",
+      "emptyBody": "Every day follows the default capacity. Add a date for a different one.",
       "add": "Add date",
       "remove": "Remove {date}"
     },
@@ -1436,7 +1437,7 @@
     },
     "statuses": {
       "pending_payment": "Awaiting payment",
-      "new": "Awaiting confirmation",
+      "new": "To confirm",
       "confirmed": "New",
       "preparing": "Preparing",
       "ready": "Ready",
@@ -1602,6 +1603,7 @@
     "notFound": {
       "title": "Order not found",
       "body": "The link may be wrong, or the order is not your store's.",
+      "adminBody": "The link may be wrong. Look the order up by its number in the orders list.",
       "action": "Back to orders"
     }
   },
@@ -1721,6 +1723,7 @@
       "categoriesHint": "No category chosen: applies to every category",
       "selected": "{count} selected",
       "firstOrderOnly": "First order only",
+      "firstOrderOnlySoon": "Not available yet",
       "startsAt": "Starts",
       "endsAt": "Ends",
       "riyadh": "Riyadh time",

@@ -26,6 +26,9 @@ enum ErrorCode {
       @JsonValue(r'FORBIDDEN')
       FORBIDDEN(r'FORBIDDEN'),
           /// Stable error code. Clients branch on it; it is never renamed or reused.
+      @JsonValue(r'PERMISSION_DENIED')
+      PERMISSION_DENIED(r'PERMISSION_DENIED'),
+          /// Stable error code. Clients branch on it; it is never renamed or reused.
       @JsonValue(r'CONFLICT')
       CONFLICT(r'CONFLICT'),
           /// Stable error code. Clients branch on it; it is never renamed or reused.

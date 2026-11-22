@@ -44,6 +44,10 @@ export const ERROR_MESSAGES: Readonly<Record<ErrorCode, LocalizedText>> = {
     ar: 'هذا الإجراء غير متاح لحسابك',
     en: 'You do not have permission to perform this action.',
   },
+  [ErrorCode.PERMISSION_DENIED]: {
+    ar: 'ما عندك صلاحية لهالإجراء، كلّم مدير الحساب',
+    en: 'Your account does not have the permission for this action.',
+  },
   [ErrorCode.CONFLICT]: {
     ar: 'ما قدرنا ننفّذ طلبك لأن البيانات تغيّرت، حدّث الصفحة وجرّب مرة ثانية',
     en: 'The request conflicts with the current state of the resource.',

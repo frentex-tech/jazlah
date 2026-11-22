@@ -125,6 +125,23 @@ void main() {
     expect(repo.orders, isEmpty);
   });
 
+  test('business refusals use their codes (A6 proposal), never VALIDATION_FAILED', () async {
+    var repo = await _repo();
+    cart.fulfilment = null;
+    await expectLater(
+      repo.place(idempotencyKey: 'a', paymentMethod: 'cod'),
+      throwsA(apiError(OrderError.fulfilmentRequired)),
+    );
+    repo = await _repo(date: '2026-11-13'); // closed
+    await expectLater(
+      repo.place(idempotencyKey: 'b', paymentMethod: 'cod'),
+      throwsA(apiError(FulfilmentError.dayNotAvailable)),
+    );
+    repo = await _repo();
+    await cart.write(const []);
+    await expectLater(repo.place(idempotencyKey: 'c', paymentMethod: 'cod'), throwsA(apiError(OrderError.cartEmpty)));
+  });
+
   test('pickup: the pickup point is snapshotted, no address', () async {
     final repo = await _repo(method: Fulfilment.pickup);
     final o = (await repo.place(idempotencyKey: 'k', paymentMethod: 'cod')).order;

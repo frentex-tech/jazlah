@@ -14,6 +14,7 @@ export const ERROR_STATUSES: Readonly<Record<ErrorCode, number>> = {
   [ErrorCode.UNSUPPORTED_MEDIA_TYPE]: 415,
   [ErrorCode.UNAUTHORIZED]: 401,
   [ErrorCode.FORBIDDEN]: 403,
+  [ErrorCode.PERMISSION_DENIED]: 403,
   [ErrorCode.CONFLICT]: 409,
   [ErrorCode.RATE_LIMITED]: 429,
   [ErrorCode.TRANSACTION_CONFLICT]: 409,

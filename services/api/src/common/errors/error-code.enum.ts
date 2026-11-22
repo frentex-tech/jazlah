@@ -15,6 +15,12 @@ export enum ErrorCode {
   METHOD_NOT_ALLOWED = 'METHOD_NOT_ALLOWED',
   UNAUTHORIZED = 'UNAUTHORIZED',
   FORBIDDEN = 'FORBIDDEN',
+  /**
+   * Signed in with the right audience, but this staff user lacks the permission the
+   * action needs (admin permissions, ADM-API-1). Unlike FORBIDDEN, the session is fine:
+   * a client shows "not allowed" and keeps the user signed in. Details: `{ permission }`.
+   */
+  PERMISSION_DENIED = 'PERMISSION_DENIED',
   CONFLICT = 'CONFLICT',
   PAYLOAD_TOO_LARGE = 'PAYLOAD_TOO_LARGE',
   UNSUPPORTED_MEDIA_TYPE = 'UNSUPPORTED_MEDIA_TYPE',
