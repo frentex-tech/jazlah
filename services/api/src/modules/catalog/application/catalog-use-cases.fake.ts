@@ -32,6 +32,8 @@ import { SetProductFulfilmentUseCase } from './set-product-fulfilment.use-case';
 import { SubmitProductUseCase } from './submit-product.use-case';
 import { UpdateProductContentUseCase } from './update-product-content.use-case';
 import { UpdateReferenceItemUseCase } from './update-reference-item.use-case';
+import { ListReviewQueueUseCase } from './list-review-queue.use-case';
+import { InMemoryReviewQueue } from '../domain/fakes/in-memory-review-queue.fake';
 
 /**
  * Every use case of the catalog wired to the in-memory fakes, for the unit tests: no
@@ -108,21 +110,14 @@ export function buildCatalogUseCases() {
       products,
       changeRequests,
       lists,
-      rules,
       media,
       vendors,
       audit,
       transactions,
     ),
-    submitProduct: new SubmitProductUseCase(
-      products,
-      rules,
-      media,
-      transactions,
-    ),
+    submitProduct: new SubmitProductUseCase(products, media, transactions),
     publishPlatformProduct: new PublishPlatformProductUseCase(
       products,
-      rules,
       media,
       vendors,
       audit,
@@ -179,7 +174,16 @@ export function buildCatalogUseCases() {
       transactions,
     ),
     listPublicProducts: new ListPublicProductsUseCase(products, media, vendors),
-    getPublicProduct: new GetPublicProductUseCase(products, media, vendors),
+    listReviewQueue: new ListReviewQueueUseCase(
+      new InMemoryReviewQueue(products, changeRequests),
+      vendors,
+    ),
+    getPublicProduct: new GetPublicProductUseCase(
+      products,
+      media,
+      vendors,
+      rules,
+    ),
   };
 }
 

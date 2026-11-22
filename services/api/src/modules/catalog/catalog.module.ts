@@ -15,6 +15,10 @@ import { CreateProductUseCase } from './application/create-product.use-case';
 import { CreateReferenceItemUseCase } from './application/create-reference-item.use-case';
 import { DeleteCuttingPackagingIncompatibilityUseCase } from './application/delete-cutting-packaging-incompatibility.use-case';
 import { GetProductUseCase } from './application/get-product.use-case';
+import { PricingService } from './application/pricing.service';
+import { ListReviewQueueUseCase } from './application/list-review-queue.use-case';
+import { REVIEW_QUEUE_REPOSITORY } from './domain/ports/review-queue.repository.port';
+import { PrismaReviewQueueRepository } from './infrastructure/prisma-review-queue.repository';
 import { GetPublicProductUseCase } from './application/get-public-product.use-case';
 import { ListCuttingPackagingIncompatibilitiesUseCase } from './application/list-cutting-packaging-incompatibilities.use-case';
 import { ListProductChangeRequestsUseCase } from './application/list-product-change-requests.use-case';
@@ -82,6 +86,9 @@ import { VendorDirectoryCatalogVendors } from './infrastructure/vendor-directory
     RejectProductChangeRequestUseCase,
     ListPublicProductsUseCase,
     GetPublicProductUseCase,
+    PricingService,
+    ListReviewQueueUseCase,
+    { provide: REVIEW_QUEUE_REPOSITORY, useClass: PrismaReviewQueueRepository },
     { provide: PRODUCT_REPOSITORY, useClass: PrismaProductRepository },
     {
       provide: PRODUCT_CHANGE_REQUEST_REPOSITORY,
@@ -98,5 +105,6 @@ import { VendorDirectoryCatalogVendors } from './infrastructure/vendor-directory
     { provide: CATALOG_MEDIA, useClass: MediaServiceCatalogMedia },
     { provide: CATALOG_VENDORS, useClass: VendorDirectoryCatalogVendors },
   ],
+  exports: [PricingService],
 })
 export class CatalogModule {}

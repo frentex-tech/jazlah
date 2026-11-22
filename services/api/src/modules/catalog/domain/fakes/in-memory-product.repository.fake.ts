@@ -15,6 +15,7 @@ import type { ProductStatus } from '../product-status.type';
 import type { ProductSummary } from '../product-summary.type';
 import type { ProductTransition } from '../product-transition.type';
 import type { PublicProductFilter } from '../public-product-filter.type';
+import type { SizeAvailabilityChange } from '../size-availability-change.type';
 import type { InMemoryProductLocks } from './in-memory-product-locks.fake';
 import type { InMemoryReferenceLists } from './in-memory-reference-lists.fake';
 import { fakeIds } from './fake-ids.fake';
@@ -181,9 +182,24 @@ export class InMemoryProductRepository implements ProductRepository {
     return Promise.resolve(true);
   }
 
-  setAvailability(id: string, isAvailable: boolean): Promise<void> {
+  setAvailability(
+    id: string,
+    isAvailable: boolean,
+    sizes: readonly SizeAvailabilityChange[],
+  ): Promise<void> {
     this.locks.assertLocked(id);
-    this.replace({ ...this.get(id), isAvailable, updatedAt: this.nextDate() });
+    const stored = this.get(id);
+    this.replace({
+      ...stored,
+      isAvailable,
+      sizes: stored.sizes.map((size) => ({
+        ...size,
+        isAvailable:
+          sizes.find((change) => change.sizeId === size.id)?.isAvailable ??
+          size.isAvailable,
+      })),
+      updatedAt: this.nextDate(),
+    });
     return Promise.resolve();
   }
 
@@ -266,16 +282,22 @@ export class InMemoryProductRepository implements ProductRepository {
   }
 
   findPublic(id: string): Promise<ProductDetails | null> {
-    const stored = this.rows.find((row) => row.id === id && this.isPublic(row));
+    const stored = this.rows.find(
+      (row) => row.id === id && this.isVisible(row),
+    );
     return Promise.resolve(
       stored === undefined ? null : this.detailsOf(stored),
     );
   }
 
   private isPublic(row: StoredProduct): boolean {
+    return row.isAvailable && this.isVisible(row);
+  }
+
+  /** As the public page: published, active vendor and category, available or not. */
+  private isVisible(row: StoredProduct): boolean {
     return (
       row.status === 'published' &&
-      row.isAvailable &&
       !this.suspendedVendors.has(row.vendorId) &&
       this.lists.find('categories', row.content.categoryId)?.isActive === true
     );
@@ -296,6 +318,7 @@ export class InMemoryProductRepository implements ProductRepository {
         approxWeightGrams: size.approxWeightGrams,
         price: old?.price ?? size.price,
         tag: size.tag,
+        isAvailable: old?.isAvailable ?? true,
       };
     });
   }

@@ -314,7 +314,7 @@ export interface paths {
          *
          *     Before sending, upload each document (POST /v1/customer/media/uploads, purpose vendor.document: PDF, JPEG or PNG up to 10 MB) and confirm it (POST /v1/customer/media/{id}/confirm). Send at least one document of each kind (commercial_registration, health_certificate, facility_photo), each file once, at most 10 in all. The IBAN is checked as a Saudi IBAN and never returned in full.
          *
-         *     Errors: VALIDATION_FAILED names the field (documents with requiresEachDocumentKind, uniqueFiles or arrayMaxSize; iban with isSaudiIban). MEDIA_NOT_FOUND (details.mediaId): no such file uploaded by this user with purpose vendor.document. MEDIA_NOT_READY (details.mediaId): the upload was not confirmed. VENDOR_APPLICATION_ALREADY_PENDING: one application is already waiting; show it (GET latest) instead. VENDOR_ACCESS_ALREADY_HELD: this user already works for a vendor. UNAUTHORIZED also when the account was deleted. TRANSACTION_CONFLICT: send again.
+         *     Errors: VALIDATION_FAILED names the field (documents with requiresEachDocumentKind, uniqueFiles or arrayMaxSize; iban with isSaudiIban). MEDIA_NOT_FOUND (details.mediaId): no such file uploaded by this user with purpose vendor.document. MEDIA_NOT_READY (details.mediaId): the upload was not confirmed. VENDOR_APPLICATION_ALREADY_PENDING: one application is already waiting; show it (GET latest) instead. VENDOR_ACCESS_ALREADY_HELD: this user already works for a vendor. VENDOR_CR_EXISTS: a store with this commercial registration number is registered already. UNAUTHORIZED also when the account was deleted. TRANSACTION_CONFLICT: send again.
          */
         post: operations["customerSubmitVendorApplication"];
         delete?: never;
@@ -432,7 +432,7 @@ export interface paths {
          * Approve a pending application with a commission
          * @description Admin dashboard, application review screen: approves a pending application with the platform commission for the vendor's orders, in basis points (1250 is 12.5%). In one step it creates the vendor (active, listed publicly at once, without a logo), records the first commission in its history, and gives the applicant vendor access: they sign in to the vendor dashboard with the same phone number. Audited.
          *
-         *     Errors: VALIDATION_FAILED for a commission that is not a whole number from 0 to 10000. NOT_FOUND for an unknown application. VENDOR_APPLICATION_NOT_PENDING: it was already approved or rejected (also when two admins approve at once: only one vendor is created); reload it. VENDOR_ACCESS_ALREADY_HELD: the applicant came to work for another vendor after applying; nothing changed and the application stays pending. TRANSACTION_CONFLICT: nothing was saved; send again.
+         *     Errors: VALIDATION_FAILED for a commission that is not a whole number from 0 to 10000. NOT_FOUND for an unknown application. VENDOR_APPLICATION_NOT_PENDING: it was already approved or rejected (also when two admins approve at once: only one vendor is created); reload it. VENDOR_ACCESS_ALREADY_HELD: the applicant came to work for another vendor after applying; nothing changed and the application stays pending. VENDOR_CR_EXISTS: another application with the same commercial registration number was approved first; the application stays pending (reject it). TRANSACTION_CONFLICT: nothing was saved; send again.
          */
         post: operations["adminApproveVendorApplication"];
         delete?: never;
@@ -1135,8 +1135,8 @@ export interface paths {
             cookie?: never;
         };
         /**
-         * The cutting and packaging pairs a product cannot offer
-         * @description Vendor dashboard, product form. Every global rule whose cutting style is active: a product offering that cutting style with that packaging cannot be submitted (PRODUCT_NOT_SUBMITTABLE, INCOMPATIBLE_CUTTING_PACKAGING), so the form can warn first. Each pair carries the cutting style with its Arabic and English name; oldest rule first. The whole list in one answer, not paged. The rules are managed by admins.
+         * The cutting and packaging pairs a customer cannot choose
+         * @description Vendor dashboard, product form. Every global rule whose cutting style is active: a product may offer both, but a customer cannot choose that cutting style with that packaging (the public product lists the pairs that apply to it; the cart’s line price, CRT-API-1, will refuse them with INCOMPATIBLE_CUTTING_PACKAGING), so the form can show which choices customers will not get. Each pair carries the cutting style with its Arabic and English name; oldest rule first. The whole list in one answer, not paged. The rules are managed by admins.
          */
         get: operations["vendorListCuttingPackagingIncompatibilities"];
         put?: never;
@@ -1185,7 +1185,7 @@ export interface paths {
         get: operations["vendorGetProduct"];
         /**
          * Replace a product’s content
-         * @description Vendor dashboard, edit product form. Replaces the whole content (names, description, category, meat type, images, sizes, cutting styles, packagings, "without" items); send every field, lists in display order. Availability, fulfilment and prices have their own endpoints and are not changed here. By status: `draft` or `rejected`: saved at once (a rejected product stays rejected until submitted again). `published`: nothing changes on the live product; the edit becomes a new pending change request for admin review (any pending one is closed as `superseded`), returned in `changeRequest`, and it must meet the submission rules (at least one size and one image, no cutting style offered with a packaging it cannot be combined with). `pending_review`: refused with PRODUCT_NOT_EDITABLE until an admin decides. Keep an existing size by sending its `id`; a size left out is removed; a size without `id` is new. Existing sizes, cutting styles and packagings must carry their current prices (VALIDATION_FAILED `isLivePrice`): change prices with PATCH …/{id}/prices, which applies at once. New sizes, cutting styles and packagings take the prices sent (halalas, VAT included). Errors: VALIDATION_FAILED also for an inactive reference, a size id not of this product (`isSizeOfProduct`) or a repeat (`isNotRepeated`); MEDIA_NOT_FOUND / MEDIA_NOT_READY for a new image not uploaded and confirmed by this user; PRODUCT_NOT_SUBMITTABLE (published only) with `details.reasons` (NO_SIZE, NO_IMAGE, INCOMPATIBLE_CUTTING_PACKAGING with `details.pairs`); NOT_FOUND for an unknown id or another vendor’s product.
+         * @description Vendor dashboard, edit product form. Replaces the whole content (names, description, category, meat type, images, sizes, cutting styles, packagings, "without" items); send every field, lists in display order. Availability, fulfilment and prices have their own endpoints and are not changed here. By status: `draft` or `rejected`: saved at once (a rejected product stays rejected until submitted again). `published`: nothing changes on the live product; the edit becomes a new pending change request for admin review (any pending one is closed as `superseded`), returned in `changeRequest`, and it must meet the submission rules (at least one size and one image, no cutting style offered with a packaging it cannot be combined with). `pending_review`: refused with PRODUCT_NOT_EDITABLE until an admin decides. Keep an existing size by sending its `id`; a size left out is removed; a size without `id` is new. Existing sizes, cutting styles and packagings must carry their current prices (VALIDATION_FAILED `isLivePrice`): change prices with PATCH …/{id}/prices, which applies at once. New sizes, cutting styles and packagings take the prices sent (halalas, VAT included). Errors: VALIDATION_FAILED also for an inactive reference, a size id not of this product (`isSizeOfProduct`) or a repeat (`isNotRepeated`); MEDIA_NOT_FOUND / MEDIA_NOT_READY for a new image not uploaded and confirmed by this user; PRODUCT_NOT_SUBMITTABLE (published only) with `details.reasons` (NO_SIZE, NO_IMAGE); NOT_FOUND for an unknown id or another vendor’s product.
          */
         put: operations["vendorUpdateProductContent"];
         post?: never;
@@ -1206,7 +1206,7 @@ export interface paths {
         put?: never;
         /**
          * Send a draft or rejected product to review
-         * @description Vendor dashboard, "submit for review" on a draft or rejected product. Moves it to `pending_review`, where admins approve it (it becomes `published`) or reject it with a reason (`rejected`, editable and submittable again). While under review the product cannot be edited. No body. Errors: PRODUCT_NOT_SUBMITTABLE when the product has no size or no image, or offers a cutting style with a packaging it cannot be combined with: `details.reasons` lists every reason (NO_SIZE, NO_IMAGE, INCOMPATIBLE_CUTTING_PACKAGING) and `details.pairs` the incompatible pairs; PRODUCT_NOT_EDITABLE when the product is already under review or published (`details.status`); NOT_FOUND for an unknown id or another vendor’s product.
+         * @description Vendor dashboard, "submit for review" on a draft or rejected product. Moves it to `pending_review`, where admins approve it (it becomes `published`) or reject it with a reason (`rejected`, editable and submittable again). While under review the product cannot be edited. No body. Errors: PRODUCT_NOT_SUBMITTABLE when the product has no size or no image: `details.reasons` lists every reason (NO_SIZE, NO_IMAGE); the cutting and packaging rules do not block a submission; PRODUCT_NOT_EDITABLE when the product is already under review or published (`details.status`); NOT_FOUND for an unknown id or another vendor’s product.
          */
         post: operations["vendorSubmitProduct"];
         delete?: never;
@@ -1230,7 +1230,7 @@ export interface paths {
         head?: never;
         /**
          * Switch a product on or off
-         * @description Vendor dashboard, the availability switch (out of stock, back in stock). Applies at once in every status but `pending_review`, also on a published product: no review. An unavailable published product leaves the public catalog at once and comes back when switched on. Errors: PRODUCT_NOT_EDITABLE while the product is under review (`details.status`); NOT_FOUND for an unknown id or another vendor’s product.
+         * @description Vendor dashboard, the availability switches (out of stock, back in stock): the product, and optionally some of its sizes. Applies at once in every status but `pending_review`, also on a published product: no review. An unavailable published product leaves the public list at once (its page shows it out of stock) and comes back when switched on; an unavailable size stays on the page, not orderable. Errors: VALIDATION_FAILED for a size not of this product (`isSizeOfProduct`) or named twice (`isNotRepeated`); PRODUCT_NOT_EDITABLE while the product is under review (`details.status`); NOT_FOUND for an unknown id or another vendor’s product.
          */
         patch: operations["vendorSetProductAvailability"];
         trace?: never;
@@ -1334,7 +1334,7 @@ export interface paths {
         put?: never;
         /**
          * Forbid a cutting style with a packaging
-         * @description Admin dashboard, catalog settings. Adds a global rule: products may not offer this cutting style together with this packaging. Products already published keep their options; the rule applies to every later submission, publication and change request, refused with PRODUCT_NOT_SUBMITTABLE (INCOMPATIBLE_CUTTING_PACKAGING) while they offer the pair. Errors: VALIDATION_FAILED `isActiveCuttingStyle` when the cutting style is not an active entry; CONFLICT when the same rule exists already.
+         * @description Admin dashboard, catalog settings. Adds a global rule: customers may not choose this cutting style together with this packaging. Products keep offering both (publishing is not blocked); the public product lists the pairs that apply to it, and the cart’s line price (CRT-API-1) will refuse the pair (INCOMPATIBLE_CUTTING_PACKAGING), at once for every product. Errors: VALIDATION_FAILED `isActiveCuttingStyle` when the cutting style is not an active entry; CONFLICT when the same rule exists already.
          */
         post: operations["adminCreateCuttingPackagingIncompatibility"];
         delete?: never;
@@ -1355,7 +1355,7 @@ export interface paths {
         post?: never;
         /**
          * Remove a cutting and packaging rule
-         * @description Admin dashboard, catalog settings. Deletes the rule at once: products may offer the pair again from their next submission or edit. NOT_FOUND for an unknown id, also when it was removed already.
+         * @description Admin dashboard, catalog settings. Deletes the rule at once: customers may choose the pair again on every product. NOT_FOUND for an unknown id, also when it was removed already.
          */
         delete: operations["adminDeleteCuttingPackagingIncompatibility"];
         options?: never;
@@ -1401,7 +1401,7 @@ export interface paths {
         get: operations["adminGetProduct"];
         /**
          * Replace a JAZLA product’s content
-         * @description Admin dashboard, JAZLA products, edit form. Replaces the whole content of a platform vendor product (send every field, lists in display order); availability, fulfilment and prices have their own endpoints. Applies at once, also when published: no change request. An edit of a published product is recorded in the audit log and must meet the submission rules (at least one size and one image, no cutting style offered with a packaging it cannot be combined with). Keep an existing size by sending its `id`; a size left out is removed; a size without `id` is new. Existing sizes, cutting styles and packagings must carry their current prices (VALIDATION_FAILED `isLivePrice`): change them with PATCH …/{id}/prices. Errors: VALIDATION_FAILED also for an inactive reference, a size id not of this product or a repeat; MEDIA_NOT_FOUND / MEDIA_NOT_READY for a new image not uploaded and confirmed by this admin; PRODUCT_NOT_SUBMITTABLE (published only) with `details.reasons` and `details.pairs`; PRODUCT_NOT_EDITABLE for a product under review; NOT_FOUND for an unknown id or a product of another vendor (admins act on other vendors’ products only through review), and with `details.reason` PLATFORM_VENDOR_MISSING while JAZLA’s own vendor has not been set up.
+         * @description Admin dashboard, JAZLA products, edit form. Replaces the whole content of a platform vendor product (send every field, lists in display order); availability, fulfilment and prices have their own endpoints. Applies at once, also when published: no change request. An edit of a published product is recorded in the audit log and must meet the submission rules (at least one size and one image). Keep an existing size by sending its `id`; a size left out is removed; a size without `id` is new. Existing sizes, cutting styles and packagings must carry their current prices (VALIDATION_FAILED `isLivePrice`): change them with PATCH …/{id}/prices. Errors: VALIDATION_FAILED also for an inactive reference, a size id not of this product or a repeat; MEDIA_NOT_FOUND / MEDIA_NOT_READY for a new image not uploaded and confirmed by this admin; PRODUCT_NOT_SUBMITTABLE (published only) with `details.reasons`; PRODUCT_NOT_EDITABLE for a product under review; NOT_FOUND for an unknown id or a product of another vendor (admins act on other vendors’ products only through review), and with `details.reason` PLATFORM_VENDOR_MISSING while JAZLA’s own vendor has not been set up.
          */
         put: operations["adminUpdatePlatformProductContent"];
         post?: never;
@@ -1445,6 +1445,26 @@ export interface paths {
          * @description Admin dashboard, review queue. Moves a `pending_review` product to `rejected` with the reason the vendor reads on the product (`rejectionReason`); the vendor edits it and submits it again. Recorded in the audit log. Errors: PRODUCT_NOT_EDITABLE when the product is not under review, also when another admin decided first (`details.status`; reload the queue); NOT_FOUND for an unknown id.
          */
         post: operations["adminRejectProduct"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/admin/review-queue": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * The one review queue: new products and edits, newest first, with a count
+         * @description Admin dashboard, the product review queue and its side-nav badge. New products waiting for review (`kind: product`, `pending_review`) and pending edits of published products (`kind: change_request`) in one list, newest submission first, each with its vendor’s name and `submittedAt`; `count` is how many wait in all for the filter. Filter with `kind` and `vendorId`. Open an item with GET /v1/admin/products/{id} (and the request’s content in GET /v1/admin/product-change-requests); decide it with the approve and reject endpoints of its kind. Keyset paging: send `nextCursor` back as `cursor` until it is null.
+         */
+        get: operations["adminListReviewQueue"];
+        put?: never;
+        post?: never;
         delete?: never;
         options?: never;
         head?: never;
@@ -1522,7 +1542,7 @@ export interface paths {
         put?: never;
         /**
          * Publish a JAZLA draft directly
-         * @description Admin dashboard, JAZLA products. Moves a platform vendor `draft` straight to `published`, without review; customers see it at once if it is available and its category active. Recorded in the audit log. No body. Errors: PRODUCT_NOT_SUBMITTABLE without a size or an image, or with a cutting style offered with a packaging it cannot be combined with (`details.reasons`, `details.pairs`); PRODUCT_NOT_EDITABLE when the product is not a draft (`details.status`); NOT_FOUND for an unknown id or a product of another vendor (admins act on other vendors’ products only through review), and with `details.reason` PLATFORM_VENDOR_MISSING while JAZLA’s own vendor has not been set up.
+         * @description Admin dashboard, JAZLA products. Moves a platform vendor `draft` straight to `published`, without review; customers see it at once if it is available and its category active. Recorded in the audit log. No body. Errors: PRODUCT_NOT_SUBMITTABLE without a size or an image (`details.reasons`); PRODUCT_NOT_EDITABLE when the product is not a draft (`details.status`); NOT_FOUND for an unknown id or a product of another vendor (admins act on other vendors’ products only through review), and with `details.reason` PLATFORM_VENDOR_MISSING while JAZLA’s own vendor has not been set up.
          */
         post: operations["adminPublishPlatformProduct"];
         delete?: never;
@@ -1546,7 +1566,7 @@ export interface paths {
         head?: never;
         /**
          * Switch a JAZLA product on or off, at once
-         * @description Admin dashboard, JAZLA products, the availability switch. Applies at once, also on a published product: an unavailable product leaves the public catalog until it is switched on again. Errors: PRODUCT_NOT_EDITABLE for a product under review (`details.status`); NOT_FOUND for an unknown id or a product of another vendor (admins act on other vendors’ products only through review), and with `details.reason` PLATFORM_VENDOR_MISSING while JAZLA’s own vendor has not been set up.
+         * @description Admin dashboard, JAZLA products, the availability switches: the product, and optionally some of its sizes. Applies at once, also on a published product: an unavailable product leaves the public list until it is switched on again (its page shows it out of stock); an unavailable size stays on the page, not orderable. Errors: VALIDATION_FAILED for a size not of this product (`isSizeOfProduct`) or named twice (`isNotRepeated`); PRODUCT_NOT_EDITABLE for a product under review (`details.status`); NOT_FOUND for an unknown id or a product of another vendor (admins act on other vendors’ products only through review), and with `details.reason` PLATFORM_VENDOR_MISSING while JAZLA’s own vendor has not been set up.
          */
         patch: operations["adminSetPlatformProductAvailability"];
         trace?: never;
@@ -1640,7 +1660,7 @@ export interface paths {
         };
         /**
          * One product with every option
-         * @description Customer app and web, product page; public, no sign-in needed. The product with what a customer chooses from: sizes (approximate weight and price), cutting styles (extra price), packagings, "without" items, and how it is fulfilled (delivery, pickup or both). Prices are integer halalas, VAT included. NOT_FOUND for an unknown id and also for any product customers cannot buy now (not published, switched off, its vendor suspended or its category inactive): show it as no longer available.
+         * @description Customer app and web, product page; public, no sign-in needed. The product with what a customer chooses from: sizes (approximate weight, price, availability, the default one), cutting styles (extra price), packagings, "without" items, the cutting and packaging pairs that may not be chosen together, and how it is fulfilled (delivery, pickup or both). Prices are integer halalas, VAT included. A product switched off (out of stock) is returned with `isAvailable` false: show it out of stock. NOT_FOUND for an unknown id and also for a product not published, of a suspended vendor or in an inactive category: show it as no longer available.
          */
         get: operations["publicGetProduct"];
         put?: never;
@@ -1699,7 +1719,7 @@ export interface components {
          * @description Stable error code. Clients branch on it; it is never renamed or reused.
          * @enum {string}
          */
-        ErrorCode: "VALIDATION_FAILED" | "BAD_REQUEST" | "NOT_FOUND" | "METHOD_NOT_ALLOWED" | "UNAUTHORIZED" | "FORBIDDEN" | "CONFLICT" | "PAYLOAD_TOO_LARGE" | "UNSUPPORTED_MEDIA_TYPE" | "RATE_LIMITED" | "TRANSACTION_CONFLICT" | "SERVICE_UNAVAILABLE" | "INTERNAL_ERROR" | "MEDIA_CONTENT_TYPE_NOT_ALLOWED" | "MEDIA_NOT_FOUND" | "MEDIA_UPLOAD_EXPIRED" | "MEDIA_UPLOAD_REJECTED" | "MEDIA_NOT_READY" | "OTP_INVALID" | "OTP_EXPIRED" | "REFRESH_TOKEN_INVALID" | "ACCESS_TOKEN_EXPIRED" | "ACCOUNT_DISABLED" | "VENDOR_APPLICATION_ALREADY_PENDING" | "VENDOR_APPLICATION_NOT_PENDING" | "VENDOR_SUSPENDED" | "VENDOR_ACCESS_ALREADY_HELD" | "PRODUCT_NOT_EDITABLE" | "PRODUCT_NOT_SUBMITTABLE" | "PRODUCT_CHANGE_REQUEST_SUPERSEDED" | "ADDRESS_LIMIT_REACHED" | "ACCOUNT_HAS_STAFF_ACCESS" | "RECENT_SIGN_IN_REQUIRED" | "INVALID_POLYGON";
+        ErrorCode: "VALIDATION_FAILED" | "BAD_REQUEST" | "NOT_FOUND" | "METHOD_NOT_ALLOWED" | "UNAUTHORIZED" | "FORBIDDEN" | "PERMISSION_DENIED" | "CONFLICT" | "PAYLOAD_TOO_LARGE" | "UNSUPPORTED_MEDIA_TYPE" | "RATE_LIMITED" | "TRANSACTION_CONFLICT" | "SERVICE_UNAVAILABLE" | "INTERNAL_ERROR" | "MEDIA_CONTENT_TYPE_NOT_ALLOWED" | "MEDIA_NOT_FOUND" | "MEDIA_UPLOAD_EXPIRED" | "MEDIA_UPLOAD_REJECTED" | "MEDIA_NOT_READY" | "OTP_INVALID" | "OTP_EXPIRED" | "REFRESH_TOKEN_INVALID" | "ACCESS_TOKEN_EXPIRED" | "ACCOUNT_DISABLED" | "VENDOR_APPLICATION_ALREADY_PENDING" | "VENDOR_APPLICATION_NOT_PENDING" | "VENDOR_SUSPENDED" | "VENDOR_ACCESS_ALREADY_HELD" | "VENDOR_CR_EXISTS" | "PRODUCT_NOT_EDITABLE" | "PRODUCT_NOT_SUBMITTABLE" | "PRODUCT_CHANGE_REQUEST_SUPERSEDED" | "ADDRESS_LIMIT_REACHED" | "ACCOUNT_HAS_STAFF_ACCESS" | "RECENT_SIGN_IN_REQUIRED" | "INVALID_POLYGON";
         ErrorResponseDto: {
             /**
              * @description Stable error code. Clients branch on it; it is never renamed or reused.
@@ -3160,7 +3180,7 @@ export interface components {
         };
         ProductPackagingDto: {
             /**
-             * @description The packaging: `trays`, `bags`, `vacuum`, `none`. A cutting style offered with a packaging an admin rule forbids blocks submission (PRODUCT_NOT_SUBMITTABLE, INCOMPATIBLE_CUTTING_PACKAGING).
+             * @description The packaging: `trays`, `bags`, `vacuum`, `none`. A cutting style and a packaging an admin rule forbids together may both be offered: customers cannot choose the pair (the cart’s line price, CRT-API-1, will refuse it with INCOMPATIBLE_CUTTING_PACKAGING).
              * @example vacuum
              * @enum {string}
              */
@@ -3247,6 +3267,11 @@ export interface components {
             priceHalalas: number;
             /** @description An optional label in Arabic and English, such as “Enough for an aqiqah”; null for none. */
             tag: components["schemas"]["LocalizedTextResponseDto"] | null;
+            /**
+             * @description Whether this size can be ordered now (switched by the availability edit); null only inside a change request, where a new size starts available and a kept one keeps its availability.
+             * @example true
+             */
+            isAvailable: boolean | null;
         };
         ProductCuttingResponseDto: {
             /**
@@ -3553,12 +3578,27 @@ export interface components {
              */
             exclusionItemIds: string[];
         };
-        SetProductAvailabilityDto: {
+        SizeAvailabilityDto: {
             /**
-             * @description `true`: can be ordered (shown in the public catalog when published); `false`: out of stock, hidden from the public catalog.
+             * Format: uuid
+             * @description The id (UUID) of one of the product’s sizes (`sizes[].id` of the product); another one is VALIDATION_FAILED `isSizeOfProduct`.
+             * @example 7f3a2c1e-0b9d-4e5f-8a6b-1c2d3e4f5a6b
+             */
+            sizeId: string;
+            /**
+             * @description `true`: this size can be ordered; `false`: out of stock, shown on the product page but not orderable.
              * @example false
              */
             isAvailable: boolean;
+        };
+        SetProductAvailabilityDto: {
+            /**
+             * @description `true`: can be ordered (shown in the public catalog when published); `false`: out of stock, left out of the public list, its page shown out of stock.
+             * @example false
+             */
+            isAvailable: boolean;
+            /** @description Sizes to switch, each at most once (VALIDATION_FAILED `isNotRepeated` on `sizes.<i>.sizeId`); left out or empty: every size keeps its availability. A new size starts available. */
+            sizes?: components["schemas"]["SizeAvailabilityDto"][];
         };
         SetProductFulfilmentDto: {
             /**
@@ -3739,6 +3779,50 @@ export interface components {
              */
             nextCursor: string | null;
         };
+        ReviewQueueItemResponseDto: {
+            /**
+             * @description `product`: a new product waiting for review (approve or reject it with its product id); `change_request`: an edit of a published product (approve or reject it with `changeRequestId`).
+             * @example product
+             * @enum {string}
+             */
+            kind: "product" | "change_request";
+            /**
+             * Format: uuid
+             * @description The product id (UUID): open it with GET /v1/admin/products/{id}.
+             * @example 7f3a2c1e-0b9d-4e5f-8a6b-1c2d3e4f5a6b
+             */
+            productId: string;
+            /**
+             * Format: uuid
+             * @description The change request’s id (UUID) for `change_request`, its content in GET /v1/admin/product-change-requests; null for `product`.
+             * @example null
+             */
+            changeRequestId: string | null;
+            /** @description The vendor who sent it, with the store name. */
+            vendor: components["schemas"]["ProductVendorResponseDto"];
+            /** @description The product’s live name in Arabic and English (an edit may propose another). */
+            name: components["schemas"]["LocalizedTextResponseDto"];
+            /**
+             * Format: date-time
+             * @description When it entered the queue, UTC ISO 8601: the product’s submission, or the vendor’s edit that opened the request.
+             * @example 2026-11-21T09:30:00.000Z
+             */
+            submittedAt: string;
+        };
+        ReviewQueuePageResponseDto: {
+            /** @description The items of this page, newest submission first; empty when none wait. */
+            items: components["schemas"]["ReviewQueueItemResponseDto"][];
+            /**
+             * @description Send as `cursor` for the next page; null on the last page.
+             * @example null
+             */
+            nextCursor: string | null;
+            /**
+             * @description How many items wait in all for this filter (every page, not this page): the side-nav badge.
+             * @example 7
+             */
+            count: number;
+        };
         ProductChangeRequestPageResponseDto: {
             /** @description The pending change requests of this page, newest first; empty when none wait. */
             items: components["schemas"]["ProductChangeRequestResponseDto"][];
@@ -3751,6 +3835,60 @@ export interface components {
         PublicCategoryListResponseDto: {
             /** @description Every active category, by `sortOrder` (lower first), then oldest first; empty when there is none. */
             items: components["schemas"]["ReferenceItemResponseDto"][];
+        };
+        PublicProductSizeResponseDto: {
+            /**
+             * Format: uuid
+             * @description The size id (UUID): send it as the chosen size.
+             * @example 7f3a2c1e-0b9d-4e5f-8a6b-1c2d3e4f5a6b
+             */
+            id: string;
+            /**
+             * @description The approximate weight in grams (`8000` is 8 kg); the final weight may differ.
+             * @example 8000
+             */
+            approxWeightGrams: number;
+            /**
+             * @description The price of this size in halalas, VAT included (`95000` is 950.00 SAR).
+             * @example 95000
+             */
+            priceHalalas: number;
+            /** @description An optional label in Arabic and English, such as “Enough for an aqiqah”; null for none. */
+            tag: components["schemas"]["LocalizedTextResponseDto"] | null;
+            /**
+             * @description Whether this size can be ordered now; `false`: out of stock, shown disabled.
+             * @example true
+             */
+            isAvailable: boolean;
+        };
+        PublicProductCuttingResponseDto: {
+            /**
+             * Format: uuid
+             * @description The id (UUID) of the cutting style: send it as the chosen cutting.
+             * @example 7f3a2c1e-0b9d-4e5f-8a6b-1c2d3e4f5a6b
+             */
+            cuttingStyleId: string;
+            /** @description The cutting style’s name in Arabic and English. */
+            name: components["schemas"]["LocalizedTextResponseDto"];
+            /**
+             * @description The extra price for this cutting style, in halalas, VAT included (`1500` is 15.00 SAR); 0 for no extra charge.
+             * @example 1500
+             */
+            extraPriceHalalas: number;
+        };
+        IncompatiblePairResponseDto: {
+            /**
+             * Format: uuid
+             * @description The id (UUID) of one of the product’s cutting styles.
+             * @example 7f3a2c1e-0b9d-4e5f-8a6b-1c2d3e4f5a6b
+             */
+            cuttingStyleId: string;
+            /**
+             * @description One of the product’s packagings, not allowed with that cutting style.
+             * @example vacuum
+             * @enum {string}
+             */
+            packaging: "trays" | "bags" | "vacuum" | "none";
         };
         PublicProductResponseDto: {
             /**
@@ -3775,16 +3913,29 @@ export interface components {
              * @enum {string}
              */
             fulfilment: "delivery" | "pickup" | "both";
+            /**
+             * @description Whether the product can be ordered now; `false`: out of stock (the page shows it, nothing can be added). An unavailable product is left out of the public list.
+             * @example true
+             */
+            isAvailable: boolean;
             /** @description The images in display order, the first is the cover. */
             images: components["schemas"]["ProductImageResponseDto"][];
-            /** @description The sizes to choose from, in display order, each with its approximate weight and price; at least one. */
-            sizes: components["schemas"]["ProductSizeResponseDto"][];
-            /** @description The cutting styles to choose from, with their extra prices; empty when there is no cutting choice. */
-            cuttings: components["schemas"]["ProductCuttingResponseDto"][];
+            /** @description The sizes to choose from, in display order, each with its approximate weight, price and availability; at least one. */
+            sizes: components["schemas"]["PublicProductSizeResponseDto"][];
+            /**
+             * Format: uuid
+             * @description The size chosen when the page opens: the first available size in display order; null when no size is available.
+             * @example 7f3a2c1e-0b9d-4e5f-8a6b-1c2d3e4f5a6b
+             */
+            defaultSizeId: string | null;
+            /** @description The cutting styles to choose from, with their extra prices; empty when there is no cutting choice. With any, the customer must choose one (OPTION_REQUIRED). */
+            cuttings: components["schemas"]["PublicProductCuttingResponseDto"][];
             /** @description The packagings to choose from (`trays`, `bags`, `vacuum`, `none`), with their extra prices; empty when there is no packaging choice. */
             packagings: components["schemas"]["ProductPackagingResponseDto"][];
             /** @description The "without" items the customer may ask to leave out. */
             exclusions: components["schemas"]["NamedReferenceResponseDto"][];
+            /** @description Cutting style and packaging pairs among this product’s options that may not be chosen together (admin rules); the cart’s line price (CRT-API-1) will refuse one (INCOMPATIBLE_CUTTING_PACKAGING). Empty when none applies. */
+            incompatiblePairs: components["schemas"]["IncompatiblePairResponseDto"][];
             /**
              * @description The lowest size price in halalas, VAT included (`95000` is 950.00 SAR): the "from" price.
              * @example 95000
@@ -4755,7 +4906,7 @@ export interface operations {
                     "application/json": components["schemas"]["ErrorResponseDto"];
                 };
             };
-            /** @description Error. code: MEDIA_NOT_READY, VENDOR_APPLICATION_ALREADY_PENDING, VENDOR_ACCESS_ALREADY_HELD, TRANSACTION_CONFLICT. */
+            /** @description Error. code: MEDIA_NOT_READY, VENDOR_APPLICATION_ALREADY_PENDING, VENDOR_ACCESS_ALREADY_HELD, VENDOR_CR_EXISTS, TRANSACTION_CONFLICT. */
             409: {
                 headers: {
                     [name: string]: unknown;
@@ -5267,7 +5418,7 @@ export interface operations {
                     "application/json": components["schemas"]["ErrorResponseDto"];
                 };
             };
-            /** @description Error. code: VENDOR_APPLICATION_NOT_PENDING, VENDOR_ACCESS_ALREADY_HELD, TRANSACTION_CONFLICT. */
+            /** @description Error. code: VENDOR_APPLICATION_NOT_PENDING, VENDOR_ACCESS_ALREADY_HELD, VENDOR_CR_EXISTS, TRANSACTION_CONFLICT. */
             409: {
                 headers: {
                     [name: string]: unknown;
@@ -10037,6 +10188,89 @@ export interface operations {
             };
             /** @description Error. code: PRODUCT_NOT_EDITABLE, TRANSACTION_CONFLICT. */
             409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponseDto"];
+                };
+            };
+            /** @description Error. code: RATE_LIMITED. */
+            429: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponseDto"];
+                };
+            };
+            /** @description Error. code: INTERNAL_ERROR. */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponseDto"];
+                };
+            };
+            /** @description Error. code: SERVICE_UNAVAILABLE. */
+            503: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponseDto"];
+                };
+            };
+        };
+    };
+    adminListReviewQueue: {
+        parameters: {
+            query?: {
+                /** @description The `nextCursor` of the previous page; omit it for the first page. Opaque: never build or change it. */
+                cursor?: string;
+                /** @description How many items to return, 1 to 50. */
+                limit?: number;
+                /** @description `product`: only new products waiting for review; `change_request`: only edits of published products. Left out: both. */
+                kind?: "product" | "change_request";
+                /** @description Only the items of this vendor (its id, a UUID). Left out: every vendor. */
+                vendorId?: string;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description One page of the queue and the total waiting. */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ReviewQueuePageResponseDto"];
+                };
+            };
+            /** @description Error. code: VALIDATION_FAILED. */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponseDto"];
+                };
+            };
+            /** @description Error. code: UNAUTHORIZED, ACCESS_TOKEN_EXPIRED. */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponseDto"];
+                };
+            };
+            /** @description Error. code: FORBIDDEN. */
+            403: {
                 headers: {
                     [name: string]: unknown;
                 };

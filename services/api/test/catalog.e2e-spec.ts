@@ -439,7 +439,7 @@ describe('Catalog (e2e)', () => {
       expect(after.sizes.map((s) => s.priceHalalas)).toEqual([95000]);
     });
 
-    it('refuses to submit without a size and an image, or with an incompatible pair (422)', async () => {
+    it('refuses to submit without a size and an image (422); a forbidden pair does not block it', async () => {
       const { owner, admin, options } = await setUp();
       const empty = await catalog.http
         .post('/v1/vendor/products')
@@ -460,24 +460,16 @@ describe('Catalog (e2e)', () => {
         .post(`/v1/vendor/products/${emptyId}/submit`)
         .set(...bearer(owner))
         .expect(422);
-      const incompatible = await catalog.http
+      const submitted = await catalog.http
         .post(`/v1/vendor/products/${paired}/submit`)
         .set(...bearer(owner))
-        .expect(422);
+        .expect(200);
 
       expect(missing.body).toMatchObject({
         code: 'PRODUCT_NOT_SUBMITTABLE',
         details: { reasons: ['NO_SIZE', 'NO_IMAGE'] },
       });
-      expect(incompatible.body).toMatchObject({
-        code: 'PRODUCT_NOT_SUBMITTABLE',
-        details: {
-          reasons: ['INCOMPATIBLE_CUTTING_PACKAGING'],
-          pairs: [
-            { cuttingStyleId: options.cuttingStyleId, packaging: 'trays' },
-          ],
-        },
-      });
+      expect(submitted.body).toMatchObject({ status: 'pending_review' });
     });
 
     it("gets the same 404 for vendor A's product as for a random id, on every vendor endpoint", async () => {
@@ -666,6 +658,128 @@ describe('Catalog (e2e)', () => {
   });
 
   describe('admin review', () => {
+    it('lists new products and edits in one queue with a count, filtered and paged', async () => {
+      const { owner, admin, options, vendorId } = await setUp();
+      const live = await catalog.published(owner, admin, options);
+      const product = (
+        await catalog.http
+          .get(`/v1/vendor/products/${live}`)
+          .set(...bearer(owner))
+          .expect(200)
+      ).body as ProductBody;
+      const edited = await catalog.http
+        .put(`/v1/vendor/products/${live}`)
+        .set(...bearer(owner))
+        .send(
+          catalog.body(options, [product.images[0].mediaId], {
+            fulfilment: undefined,
+            name: { ar: 'تعديل', en: 'Edited' },
+            sizes: [
+              {
+                id: product.sizes[0].id,
+                approxWeightGrams: 8000,
+                priceHalalas: 95000,
+              },
+            ],
+          }),
+        )
+        .expect(200);
+      const draft = await catalog.draft(owner, options);
+      await catalog.http
+        .post(`/v1/vendor/products/${draft}/submit`)
+        .set(...bearer(owner))
+        .expect(200);
+      const queue = (query: string) =>
+        catalog.http
+          .get(`/v1/admin/review-queue?vendorId=${vendorId}${query}`)
+          .set(...bearer(admin));
+      type QueuePage = {
+        items: {
+          kind: string;
+          productId: string;
+          changeRequestId: string | null;
+          vendor: { id: string; name: { en: string } | null };
+          submittedAt: string;
+        }[];
+        nextCursor: string | null;
+        count: number;
+      };
+
+      const all = (await queue('').expect(200)).body as QueuePage;
+      const edits = (await queue('&kind=change_request').expect(200))
+        .body as QueuePage;
+      const first = (await queue('&limit=1').expect(200)).body as QueuePage;
+      const second = (
+        await queue(`&limit=1&cursor=${first.nextCursor ?? ''}`).expect(200)
+      ).body as QueuePage;
+      const invalid = await queue('&kind=draft').expect(400);
+      const asVendor = await catalog.http
+        .get('/v1/admin/review-queue')
+        .set(...bearer(owner))
+        .expect(403);
+
+      expect(all.count).toBe(2);
+      expect(all.items).toHaveLength(2);
+      expect(all.items.map((item) => item.submittedAt)).toEqual(
+        [...all.items.map((item) => item.submittedAt)].sort().reverse(),
+      );
+      expect(all.items.find((item) => item.kind === 'product')).toMatchObject({
+        productId: draft,
+        changeRequestId: null,
+        vendor: { id: vendorId },
+      });
+      expect(
+        all.items.find((item) => item.kind === 'change_request'),
+      ).toMatchObject({
+        productId: live,
+        changeRequestId: (edited.body as ProductBody).changeRequest!.id,
+      });
+      expect(edits).toMatchObject({
+        count: 1,
+        items: [{ kind: 'change_request' }],
+      });
+      expect([...first.items, ...second.items]).toEqual(all.items);
+      expect([first.count, second.nextCursor]).toEqual([2, null]);
+      expect(invalid.body).toMatchObject({ code: 'VALIDATION_FAILED' });
+      expect(asVendor.body).toMatchObject({ code: 'FORBIDDEN' });
+
+      const upper = (await queue('').expect(200)).body as QueuePage;
+      const upperCase = (
+        await catalog.http
+          .get(`/v1/admin/review-queue?vendorId=${vendorId.toUpperCase()}`)
+          .set(...bearer(admin))
+          .expect(200)
+      ).body as QueuePage;
+      const products = (await queue('&kind=product').expect(200))
+        .body as QueuePage;
+      expect(upperCase).toEqual(upper);
+      expect(products).toMatchObject({
+        count: 1,
+        items: [{ kind: 'product', productId: draft }],
+      });
+
+      // Same submission time: the id breaks the tie, and paging loses neither item.
+      const at = new Date('2026-11-01T09:00:00.000Z');
+      await prisma.product.update({
+        where: { id: draft },
+        data: { submittedAt: at },
+      });
+      await prisma.productChangeRequest.update({
+        where: { id: (edited.body as ProductBody).changeRequest!.id },
+        data: { createdAt: at },
+      });
+      const tiedFirst = (await queue('&limit=1').expect(200)).body as QueuePage;
+      const tiedSecond = (
+        await queue(`&limit=1&cursor=${tiedFirst.nextCursor ?? ''}`).expect(200)
+      ).body as QueuePage;
+      expect(
+        [...tiedFirst.items, ...tiedSecond.items]
+          .map((item) => item.kind)
+          .sort(),
+      ).toEqual(['change_request', 'product']);
+      expect(tiedSecond.nextCursor).toBeNull();
+    });
+
     it('queues a submitted product, then approves it (public) or rejects it with a reason', async () => {
       const { owner, admin, options, vendorId } = await setUp();
       const toApprove = await catalog.draft(owner, options);
@@ -1206,20 +1320,33 @@ describe('Catalog (e2e)', () => {
         category: { id: options.categoryId },
         meatType: { id: options.meatTypeId },
         fulfilment: 'both',
+        isAvailable: true,
         minPriceHalalas: 95000,
         sizes: [
           {
             approxWeightGrams: 8000,
             priceHalalas: 95000,
             tag: { ar: 'يجزئ العقيقة', en: 'Enough for an aqiqah' },
+            isAvailable: true,
           },
         ],
         cuttings: [
-          { cuttingStyleId: options.cuttingStyleId, extraPriceHalalas: 1500 },
+          {
+            cuttingStyleId: options.cuttingStyleId,
+            extraPriceHalalas: 1500,
+          },
         ],
         packagings: [{ packaging: 'trays', extraPriceHalalas: 300 }],
         exclusions: [{ id: options.exclusionItemId }],
+        incompatiblePairs: [],
       });
+      const body = page.body as {
+        sizes: { id: string }[];
+        defaultSizeId: string;
+        cuttings: { name: { ar: string } | null }[];
+      };
+      expect(body.cuttings[0]?.name?.ar).toEqual(expect.any(String));
+      expect(body.defaultSizeId).toBe(body.sizes[0]?.id);
       expect(categories).toContain(options.categoryId);
       expect(categories).not.toContain(inactive);
     });
@@ -1285,7 +1412,7 @@ describe('Catalog (e2e)', () => {
       }
     });
 
-    it('hides an unavailable product', async () => {
+    it('leaves an unavailable product out of the list; its page shows it out of stock', async () => {
       const { owner, admin, options, vendorId } = await setUp();
       const id = await catalog.published(owner, admin, options);
       await catalog.http
@@ -1295,7 +1422,141 @@ describe('Catalog (e2e)', () => {
         .expect(200);
 
       expect(await publicIds(`vendorId=${vendorId}`)).toEqual([]);
-      await catalog.http.get(`/v1/public/products/${id}`).expect(404);
+      expect(
+        (await catalog.http.get(`/v1/public/products/${id}`).expect(200)).body,
+      ).toMatchObject({ id, isAvailable: false });
+    });
+
+    it('shows a size switched off as unavailable and defaults to the next available one', async () => {
+      const { owner, admin, options } = await setUp();
+      const id = await catalog.published(owner, admin, options, {
+        sizes: [
+          { approxWeightGrams: 8000, priceHalalas: 95000, tag: null },
+          { approxWeightGrams: 12000, priceHalalas: 125000, tag: null },
+        ],
+      });
+      const before = (
+        await catalog.http.get(`/v1/public/products/${id}`).expect(200)
+      ).body as { sizes: { id: string }[] };
+      const [small, large] = before.sizes.map((size) => size.id);
+
+      const switched = await catalog.http
+        .patch(`/v1/vendor/products/${id}/availability`)
+        .set(...bearer(owner))
+        .send({
+          isAvailable: true,
+          sizes: [{ sizeId: small, isAvailable: false }],
+        })
+        .expect(200);
+      const page = await catalog.http
+        .get(`/v1/public/products/${id}`)
+        .expect(200);
+      const foreign = await catalog.http
+        .patch(`/v1/vendor/products/${id}/availability`)
+        .set(...bearer(owner))
+        .send({
+          isAvailable: true,
+          sizes: [{ sizeId: randomUUID(), isAvailable: false }],
+        })
+        .expect(400);
+
+      expect(switched.body).toMatchObject({
+        sizes: [
+          { id: small, isAvailable: false },
+          { id: large, isAvailable: true },
+        ],
+      });
+      expect(page.body).toMatchObject({
+        isAvailable: true,
+        defaultSizeId: large,
+        sizes: [
+          { id: small, isAvailable: false },
+          { id: large, isAvailable: true },
+        ],
+      });
+      expect(foreign.body).toMatchObject({
+        code: 'VALIDATION_FAILED',
+        details: [
+          { field: 'sizes.0.sizeId', constraints: ['isSizeOfProduct'] },
+        ],
+      });
+    });
+
+    it('keeps a switched-off size off through an approved change request; a new size starts available', async () => {
+      const { owner, admin, options } = await setUp();
+      const id = await catalog.published(owner, admin, options);
+      const live = (
+        await catalog.http
+          .get(`/v1/vendor/products/${id}`)
+          .set(...bearer(owner))
+          .expect(200)
+      ).body as ProductBody;
+      const kept = live.sizes[0].id;
+      await catalog.http
+        .patch(`/v1/vendor/products/${id}/availability`)
+        .set(...bearer(owner))
+        .send({
+          isAvailable: true,
+          sizes: [{ sizeId: kept, isAvailable: false }],
+        })
+        .expect(200);
+
+      const edited = await catalog.http
+        .put(`/v1/vendor/products/${id}`)
+        .set(...bearer(owner))
+        .send(
+          catalog.body(options, [live.images[0].mediaId], {
+            fulfilment: undefined,
+            sizes: [
+              { id: kept, approxWeightGrams: 8000, priceHalalas: 95000 },
+              { approxWeightGrams: 12000, priceHalalas: 125000 },
+            ],
+          }),
+        )
+        .expect(200);
+      await catalog.http
+        .post(
+          `/v1/admin/product-change-requests/${(edited.body as ProductBody).changeRequest!.id}/approve`,
+        )
+        .set(...bearer(admin))
+        .expect(200);
+      const page = await catalog.http
+        .get(`/v1/public/products/${id}`)
+        .expect(200);
+
+      const sizes = (
+        page.body as { sizes: { id: string; isAvailable: boolean }[] }
+      ).sizes;
+      expect(sizes).toHaveLength(2);
+      expect(sizes[0]).toMatchObject({ id: kept, isAvailable: false });
+      expect(sizes[1]).toMatchObject({ isAvailable: true });
+      expect(page.body).toMatchObject({ defaultSizeId: sizes[1]?.id });
+    });
+
+    it('lists the forbidden pairs among its options; publishing is not blocked by them', async () => {
+      const { owner, admin, options } = await setUp();
+      const rule = await catalog.http
+        .post('/v1/admin/cutting-packaging-incompatibilities')
+        .set(...bearer(admin))
+        .send({ cuttingStyleId: options.cuttingStyleId, packaging: 'trays' })
+        .expect(201);
+      catalog.rememberRule((rule.body as { id: string }).id);
+      const other = await catalog.http
+        .post('/v1/admin/cutting-packaging-incompatibilities')
+        .set(...bearer(admin))
+        .send({ cuttingStyleId: options.cuttingStyleId, packaging: 'vacuum' })
+        .expect(201);
+      catalog.rememberRule((other.body as { id: string }).id);
+
+      const id = await catalog.published(owner, admin, options);
+
+      expect(
+        (await catalog.http.get(`/v1/public/products/${id}`).expect(200)).body,
+      ).toMatchObject({
+        incompatiblePairs: [
+          { cuttingStyleId: options.cuttingStyleId, packaging: 'trays' },
+        ],
+      });
     });
 
     it("hides a suspended vendor's products", async () => {

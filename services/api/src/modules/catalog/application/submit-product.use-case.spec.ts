@@ -66,21 +66,18 @@ describe('SubmitProductUseCase', () => {
     expect(kit.products.rows[0]?.status).toBe('draft');
   });
 
-  it('refuses an incompatible cutting and packaging pair', async () => {
+  it('submits a product offering a forbidden cutting and packaging pair: the rule constrains customers', async () => {
     const kit = buildCatalogUseCases();
     seedCatalog(kit);
     await kit.createIncompatibility.execute(CUT, 'trays');
     const draft = await vendorDraft(kit);
 
-    await expect(
-      kit.submitProduct.execute({
-        vendorId: VENDOR,
-        productId: draft.product.id,
-      }),
-    ).rejects.toMatchObject({
-      code: ErrorCode.PRODUCT_NOT_SUBMITTABLE,
-      details: { pairs: [{ cuttingStyleId: CUT, packaging: 'trays' }] },
+    const view = await kit.submitProduct.execute({
+      vendorId: VENDOR,
+      productId: draft.product.id,
     });
+
+    expect(view.product.status).toBe('pending_review');
   });
 
   it('refuses a product under review or published with PRODUCT_NOT_EDITABLE', async () => {

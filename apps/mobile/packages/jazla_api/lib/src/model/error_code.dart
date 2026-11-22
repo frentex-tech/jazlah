@@ -26,6 +26,9 @@ enum ErrorCode {
       @JsonValue(r'FORBIDDEN')
       FORBIDDEN(r'FORBIDDEN'),
           /// Stable error code. Clients branch on it; it is never renamed or reused.
+      @JsonValue(r'PERMISSION_DENIED')
+      PERMISSION_DENIED(r'PERMISSION_DENIED'),
+          /// Stable error code. Clients branch on it; it is never renamed or reused.
       @JsonValue(r'CONFLICT')
       CONFLICT(r'CONFLICT'),
           /// Stable error code. Clients branch on it; it is never renamed or reused.
@@ -88,6 +91,9 @@ enum ErrorCode {
           /// Stable error code. Clients branch on it; it is never renamed or reused.
       @JsonValue(r'VENDOR_ACCESS_ALREADY_HELD')
       VENDOR_ACCESS_ALREADY_HELD(r'VENDOR_ACCESS_ALREADY_HELD'),
+          /// Stable error code. Clients branch on it; it is never renamed or reused.
+      @JsonValue(r'VENDOR_CR_EXISTS')
+      VENDOR_CR_EXISTS(r'VENDOR_CR_EXISTS'),
           /// Stable error code. Clients branch on it; it is never renamed or reused.
       @JsonValue(r'PRODUCT_NOT_EDITABLE')
       PRODUCT_NOT_EDITABLE(r'PRODUCT_NOT_EDITABLE'),

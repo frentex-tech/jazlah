@@ -15,6 +15,12 @@ export enum ErrorCode {
   METHOD_NOT_ALLOWED = 'METHOD_NOT_ALLOWED',
   UNAUTHORIZED = 'UNAUTHORIZED',
   FORBIDDEN = 'FORBIDDEN',
+  /**
+   * Signed in with the right audience, but this staff user lacks the permission the
+   * action needs (admin permissions, ADM-API-1). Unlike FORBIDDEN, the session is fine:
+   * a client shows "not allowed" and keeps the user signed in. Details: `{ permission }`.
+   */
+  PERMISSION_DENIED = 'PERMISSION_DENIED',
   CONFLICT = 'CONFLICT',
   PAYLOAD_TOO_LARGE = 'PAYLOAD_TOO_LARGE',
   UNSUPPORTED_MEDIA_TYPE = 'UNSUPPORTED_MEDIA_TYPE',
@@ -71,13 +77,18 @@ export enum ErrorCode {
    */
   VENDOR_ACCESS_ALREADY_HELD = 'VENDOR_ACCESS_ALREADY_HELD',
   /**
+   * A vendor with this commercial registration number exists already: refused when
+   * applying, and at approval when that vendor was approved after the application.
+   */
+  VENDOR_CR_EXISTS = 'VENDOR_CR_EXISTS',
+  /**
    * The product's status does not allow this: editing a product under review, or a
    * review step on a product that is not waiting for it. Details: `{ status }`.
    */
   PRODUCT_NOT_EDITABLE = 'PRODUCT_NOT_EDITABLE',
   /**
    * The product cannot go to review or be published as it is. Details: `{ reasons }`,
-   * each NO_SIZE, NO_IMAGE or INCOMPATIBLE_CUTTING_PACKAGING (with `pairs`).
+   * each NO_SIZE or NO_IMAGE.
    */
   PRODUCT_NOT_SUBMITTABLE = 'PRODUCT_NOT_SUBMITTABLE',
   /**

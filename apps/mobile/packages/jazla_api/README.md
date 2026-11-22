@@ -92,6 +92,7 @@ Class | Method | HTTP request | Description
 [*AdminProductsApi*](doc/AdminProductsApi.md) | [**adminCreatePlatformProduct**](doc/AdminProductsApi.md#admincreateplatformproduct) | **POST** /v1/admin/products | Create a JAZLA product (a draft of the platform vendor)
 [*AdminProductsApi*](doc/AdminProductsApi.md) | [**adminGetProduct**](doc/AdminProductsApi.md#admingetproduct) | **GET** /v1/admin/products/{id} | One product of any vendor, with its latest change request
 [*AdminProductsApi*](doc/AdminProductsApi.md) | [**adminListProducts**](doc/AdminProductsApi.md#adminlistproducts) | **GET** /v1/admin/products | Products of every vendor, newest first
+[*AdminProductsApi*](doc/AdminProductsApi.md) | [**adminListReviewQueue**](doc/AdminProductsApi.md#adminlistreviewqueue) | **GET** /v1/admin/review-queue | The one review queue: new products and edits, newest first, with a count
 [*AdminProductsApi*](doc/AdminProductsApi.md) | [**adminPublishPlatformProduct**](doc/AdminProductsApi.md#adminpublishplatformproduct) | **POST** /v1/admin/products/{id}/publish | Publish a JAZLA draft directly
 [*AdminProductsApi*](doc/AdminProductsApi.md) | [**adminRejectProduct**](doc/AdminProductsApi.md#adminrejectproduct) | **POST** /v1/admin/products/{id}/reject | Reject a product under review with a reason
 [*AdminProductsApi*](doc/AdminProductsApi.md) | [**adminSetPlatformProductAvailability**](doc/AdminProductsApi.md#adminsetplatformproductavailability) | **PATCH** /v1/admin/products/{id}/availability | Switch a JAZLA product on or off, at once
@@ -140,7 +141,7 @@ Class | Method | HTTP request | Description
 [*VendorAccountApi*](doc/VendorAccountApi.md) | [**vendorGetMe**](doc/VendorAccountApi.md#vendorgetme) | **GET** /v1/vendor/me | Who is signed in
 [*VendorAccountApi*](doc/VendorAccountApi.md) | [**vendorLogoutAll**](doc/VendorAccountApi.md#vendorlogoutall) | **POST** /v1/vendor/auth/logout-all | Sign out of every vendor session of this user
 [*VendorCatalogListsApi*](doc/VendorCatalogListsApi.md) | [**vendorListCatalogListEntries**](doc/VendorCatalogListsApi.md#vendorlistcataloglistentries) | **GET** /v1/vendor/lists/{list} | The active entries of a list, for the product form
-[*VendorCatalogListsApi*](doc/VendorCatalogListsApi.md) | [**vendorListCuttingPackagingIncompatibilities**](doc/VendorCatalogListsApi.md#vendorlistcuttingpackagingincompatibilities) | **GET** /v1/vendor/cutting-packaging-incompatibilities | The cutting and packaging pairs a product cannot offer
+[*VendorCatalogListsApi*](doc/VendorCatalogListsApi.md) | [**vendorListCuttingPackagingIncompatibilities**](doc/VendorCatalogListsApi.md#vendorlistcuttingpackagingincompatibilities) | **GET** /v1/vendor/cutting-packaging-incompatibilities | The cutting and packaging pairs a customer cannot choose
 [*VendorMediaApi*](doc/VendorMediaApi.md) | [**vendorConfirmMediaUpload**](doc/VendorMediaApi.md#vendorconfirmmediaupload) | **POST** /v1/vendor/media/{id}/confirm | Confirm an uploaded file
 [*VendorMediaApi*](doc/VendorMediaApi.md) | [**vendorRequestMediaUpload**](doc/VendorMediaApi.md#vendorrequestmediaupload) | **POST** /v1/vendor/media/uploads | Get a ticket to upload one file
 [*VendorProductsApi*](doc/VendorProductsApi.md) | [**vendorChangeProductPrices**](doc/VendorProductsApi.md#vendorchangeproductprices) | **PATCH** /v1/vendor/products/{id}/prices | Change size, cutting and packaging prices
@@ -184,6 +185,7 @@ Class | Method | HTTP request | Description
  - [FieldErrorDto](doc/FieldErrorDto.md)
  - [GeoJsonPolygonDto](doc/GeoJsonPolygonDto.md)
  - [GeoPointDto](doc/GeoPointDto.md)
+ - [IncompatiblePairResponseDto](doc/IncompatiblePairResponseDto.md)
  - [LivenessResponseDto](doc/LivenessResponseDto.md)
  - [LocalizedDescriptionDto](doc/LocalizedDescriptionDto.md)
  - [LocalizedNameDto](doc/LocalizedNameDto.md)
@@ -212,7 +214,9 @@ Class | Method | HTTP request | Description
  - [ProductSizeResponseDto](doc/ProductSizeResponseDto.md)
  - [ProductVendorResponseDto](doc/ProductVendorResponseDto.md)
  - [PublicCategoryListResponseDto](doc/PublicCategoryListResponseDto.md)
+ - [PublicProductCuttingResponseDto](doc/PublicProductCuttingResponseDto.md)
  - [PublicProductResponseDto](doc/PublicProductResponseDto.md)
+ - [PublicProductSizeResponseDto](doc/PublicProductSizeResponseDto.md)
  - [PublicVendorPageResponseDto](doc/PublicVendorPageResponseDto.md)
  - [PublicVendorResponseDto](doc/PublicVendorResponseDto.md)
  - [ReadinessChecksDto](doc/ReadinessChecksDto.md)
@@ -225,10 +229,13 @@ Class | Method | HTTP request | Description
  - [RequestCustomerUploadDto](doc/RequestCustomerUploadDto.md)
  - [RequestOtpDto](doc/RequestOtpDto.md)
  - [RequestVendorUploadDto](doc/RequestVendorUploadDto.md)
+ - [ReviewQueueItemResponseDto](doc/ReviewQueueItemResponseDto.md)
+ - [ReviewQueuePageResponseDto](doc/ReviewQueuePageResponseDto.md)
  - [SetMarketingConsentDto](doc/SetMarketingConsentDto.md)
  - [SetProductAvailabilityDto](doc/SetProductAvailabilityDto.md)
  - [SetProductFulfilmentDto](doc/SetProductFulfilmentDto.md)
  - [SignedInResponseDto](doc/SignedInResponseDto.md)
+ - [SizeAvailabilityDto](doc/SizeAvailabilityDto.md)
  - [SizePriceDto](doc/SizePriceDto.md)
  - [SubmitVendorApplicationDto](doc/SubmitVendorApplicationDto.md)
  - [UpdateCoverageZoneDto](doc/UpdateCoverageZoneDto.md)

@@ -37,6 +37,7 @@ export function toProductDetails(row: ProductDetailsRow): ProductDetails {
         size.tagAr === null || size.tagEn === null
           ? null
           : { ar: size.tagAr, en: size.tagEn },
+      isAvailable: size.isAvailable,
     })),
     cuttings: row.cuttings.map((cutting) => ({
       cuttingStyleId: cutting.cuttingStyleId,

@@ -1,3 +1,4 @@
+import { testRegistrationNumber } from './test-registration-number';
 import type { INestApplication } from '@nestjs/common';
 import request from 'supertest';
 import type { App } from 'supertest/types';
@@ -166,7 +167,11 @@ export class VendorJourney {
     return {
       name: { ar: 'ملحمة النخبة', en: 'Al Nokhba Butchery' },
       description: { ar: 'لحوم بلدية', en: 'Local meat' },
-      commercialRegistrationNumber: '١٠١٠١٢٣٤٥٦',
+      // Arabic-Indic digits: the API converts them (VND-API-1).
+      commercialRegistrationNumber: testRegistrationNumber().replace(
+        /\d/g,
+        (d) => String.fromCharCode(0x0660 + Number(d)),
+      ),
       city: ' الرياض ',
       iban: TEST_IBAN,
       accountHolderName: 'مؤسسة النخبة للحوم',

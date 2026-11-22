@@ -60,6 +60,7 @@ lib/src/model/error_response_dto_details.dart
 lib/src/model/field_error_dto.dart
 lib/src/model/geo_json_polygon_dto.dart
 lib/src/model/geo_point_dto.dart
+lib/src/model/incompatible_pair_response_dto.dart
 lib/src/model/liveness_response_dto.dart
 lib/src/model/localized_description_dto.dart
 lib/src/model/localized_name_dto.dart
@@ -88,7 +89,9 @@ lib/src/model/product_size_dto.dart
 lib/src/model/product_size_response_dto.dart
 lib/src/model/product_vendor_response_dto.dart
 lib/src/model/public_category_list_response_dto.dart
+lib/src/model/public_product_cutting_response_dto.dart
 lib/src/model/public_product_response_dto.dart
+lib/src/model/public_product_size_response_dto.dart
 lib/src/model/public_vendor_page_response_dto.dart
 lib/src/model/public_vendor_response_dto.dart
 lib/src/model/readiness_checks_dto.dart
@@ -101,10 +104,13 @@ lib/src/model/request_admin_upload_dto.dart
 lib/src/model/request_customer_upload_dto.dart
 lib/src/model/request_otp_dto.dart
 lib/src/model/request_vendor_upload_dto.dart
+lib/src/model/review_queue_item_response_dto.dart
+lib/src/model/review_queue_page_response_dto.dart
 lib/src/model/set_marketing_consent_dto.dart
 lib/src/model/set_product_availability_dto.dart
 lib/src/model/set_product_fulfilment_dto.dart
 lib/src/model/signed_in_response_dto.dart
+lib/src/model/size_availability_dto.dart
 lib/src/model/size_price_dto.dart
 lib/src/model/submit_vendor_application_dto.dart
 lib/src/model/update_coverage_zone_dto.dart

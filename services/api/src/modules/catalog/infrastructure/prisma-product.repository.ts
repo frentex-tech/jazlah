@@ -19,6 +19,7 @@ import type { ProductStatus } from '../domain/product-status.type';
 import type { ProductSummary } from '../domain/product-summary.type';
 import type { ProductTransition } from '../domain/product-transition.type';
 import type { PublicProductFilter } from '../domain/public-product-filter.type';
+import type { SizeAvailabilityChange } from '../domain/size-availability-change.type';
 import { PRODUCT_DETAILS_INCLUDE } from './product-details-include.constants';
 import { PRODUCT_SUMMARY_SELECT } from './product-summary-select.constants';
 import { toProductDetails, toProductSummary } from './product.mapper';
@@ -221,12 +222,23 @@ export class PrismaProductRepository implements ProductRepository {
     }
   }
 
-  async setAvailability(id: string, isAvailable: boolean): Promise<void> {
+  async setAvailability(
+    id: string,
+    isAvailable: boolean,
+    sizes: readonly SizeAvailabilityChange[],
+  ): Promise<void> {
     try {
-      await this.db.client.product.updateMany({
+      const client = this.db.client;
+      await client.product.updateMany({
         where: { id },
         data: { isAvailable },
       });
+      for (const change of sizes) {
+        await client.productSize.updateMany({
+          where: { id: change.sizeId, productId: id },
+          data: { isAvailable: change.isAvailable },
+        });
+      }
     } catch (error) {
       mapPrismaError(error);
     }
@@ -335,7 +347,7 @@ export class PrismaProductRepository implements ProductRepository {
   async findPublic(id: string): Promise<ProductDetails | null> {
     try {
       const row = await this.db.client.product.findFirst({
-        where: { id, ...this.publicWhere() },
+        where: { id, ...this.visibleWhere() },
         include: PRODUCT_DETAILS_INCLUDE,
       });
       return row === null ? null : toProductDetails(row);
@@ -380,9 +392,13 @@ export class PrismaProductRepository implements ProductRepository {
    * `vendors.status`), in an active category.
    */
   private publicWhere(): Prisma.ProductWhereInput {
+    return { ...this.visibleWhere(), isAvailable: true };
+  }
+
+  /** What the public product page shows: as the list, available or not. */
+  private visibleWhere(): Prisma.ProductWhereInput {
     return {
       status: 'published',
-      isAvailable: true,
       vendor: { is: { status: 'active' } },
       category: { is: { isActive: true } },
     };

@@ -1,3 +1,4 @@
+import { testRegistrationNumber } from './support/test-registration-number';
 import type { INestApplication } from '@nestjs/common';
 import request, { type Response, type Test } from 'supertest';
 import type { App } from 'supertest/types';
@@ -93,7 +94,7 @@ describe('Authentication (e2e)', () => {
     const business = {
       nameAr: 'منظمة اختبار',
       nameEn: 'Test organisation',
-      commercialRegistrationNumber: '1010123456',
+      commercialRegistrationNumber: testRegistrationNumber(),
       ibanEncrypted: 'not-a-real-ciphertext',
       ibanKeyId: 'test',
       ibanLast4: '0000',

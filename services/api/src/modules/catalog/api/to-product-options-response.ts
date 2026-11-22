@@ -13,6 +13,7 @@ export function toProductOptionsResponse(product: ProductDetails): Readonly<{
       approxWeightGrams: size.approxWeightGrams,
       priceHalalas: size.price.halalas,
       tag: size.tag,
+      isAvailable: size.isAvailable,
     })),
     cuttings: product.cuttings.map((cutting) => ({
       cuttingStyleId: cutting.cuttingStyleId,

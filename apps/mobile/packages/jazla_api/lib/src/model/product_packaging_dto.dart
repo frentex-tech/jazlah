@@ -23,7 +23,7 @@ class ProductPackagingDto {
     required  this.extraPriceHalalas,
   });
 
-      /// The packaging: `trays`, `bags`, `vacuum`, `none`. A cutting style offered with a packaging an admin rule forbids blocks submission (PRODUCT_NOT_SUBMITTABLE, INCOMPATIBLE_CUTTING_PACKAGING).
+      /// The packaging: `trays`, `bags`, `vacuum`, `none`. A cutting style and a packaging an admin rule forbids together may both be offered: customers cannot choose the pair (the cart’s line price, CRT-API-1, will refuse it with INCOMPATIBLE_CUTTING_PACKAGING).
   @JsonKey(
     
     name: r'packaging',
@@ -75,21 +75,21 @@ class ProductPackagingDto {
 
 }
 
-/// The packaging: `trays`, `bags`, `vacuum`, `none`. A cutting style offered with a packaging an admin rule forbids blocks submission (PRODUCT_NOT_SUBMITTABLE, INCOMPATIBLE_CUTTING_PACKAGING).
+/// The packaging: `trays`, `bags`, `vacuum`, `none`. A cutting style and a packaging an admin rule forbids together may both be offered: customers cannot choose the pair (the cart’s line price, CRT-API-1, will refuse it with INCOMPATIBLE_CUTTING_PACKAGING).
 enum ProductPackagingDtoPackagingEnum {
-    /// The packaging: `trays`, `bags`, `vacuum`, `none`. A cutting style offered with a packaging an admin rule forbids blocks submission (PRODUCT_NOT_SUBMITTABLE, INCOMPATIBLE_CUTTING_PACKAGING).
+    /// The packaging: `trays`, `bags`, `vacuum`, `none`. A cutting style and a packaging an admin rule forbids together may both be offered: customers cannot choose the pair (the cart’s line price, CRT-API-1, will refuse it with INCOMPATIBLE_CUTTING_PACKAGING).
 @JsonValue(r'trays')
 trays(r'trays'),
-    /// The packaging: `trays`, `bags`, `vacuum`, `none`. A cutting style offered with a packaging an admin rule forbids blocks submission (PRODUCT_NOT_SUBMITTABLE, INCOMPATIBLE_CUTTING_PACKAGING).
+    /// The packaging: `trays`, `bags`, `vacuum`, `none`. A cutting style and a packaging an admin rule forbids together may both be offered: customers cannot choose the pair (the cart’s line price, CRT-API-1, will refuse it with INCOMPATIBLE_CUTTING_PACKAGING).
 @JsonValue(r'bags')
 bags(r'bags'),
-    /// The packaging: `trays`, `bags`, `vacuum`, `none`. A cutting style offered with a packaging an admin rule forbids blocks submission (PRODUCT_NOT_SUBMITTABLE, INCOMPATIBLE_CUTTING_PACKAGING).
+    /// The packaging: `trays`, `bags`, `vacuum`, `none`. A cutting style and a packaging an admin rule forbids together may both be offered: customers cannot choose the pair (the cart’s line price, CRT-API-1, will refuse it with INCOMPATIBLE_CUTTING_PACKAGING).
 @JsonValue(r'vacuum')
 vacuum(r'vacuum'),
-    /// The packaging: `trays`, `bags`, `vacuum`, `none`. A cutting style offered with a packaging an admin rule forbids blocks submission (PRODUCT_NOT_SUBMITTABLE, INCOMPATIBLE_CUTTING_PACKAGING).
+    /// The packaging: `trays`, `bags`, `vacuum`, `none`. A cutting style and a packaging an admin rule forbids together may both be offered: customers cannot choose the pair (the cart’s line price, CRT-API-1, will refuse it with INCOMPATIBLE_CUTTING_PACKAGING).
 @JsonValue(r'none')
 none(r'none'),
-    /// The packaging: `trays`, `bags`, `vacuum`, `none`. A cutting style offered with a packaging an admin rule forbids blocks submission (PRODUCT_NOT_SUBMITTABLE, INCOMPATIBLE_CUTTING_PACKAGING).
+    /// The packaging: `trays`, `bags`, `vacuum`, `none`. A cutting style and a packaging an admin rule forbids together may both be offered: customers cannot choose the pair (the cart’s line price, CRT-API-1, will refuse it with INCOMPATIBLE_CUTTING_PACKAGING).
 @JsonValue(r'unknown_default_open_api')
 unknownDefaultOpenApi(r'unknown_default_open_api');
 

@@ -104,6 +104,8 @@ model Vendor {
   products          Product[]
 
   @@unique([applicationId], map: "vendors_application_id_key")
+  /// One vendor per commercial registration number (null for the platform vendor).
+  @@unique([commercialRegistrationNumber], map: "vendors_commercial_registration_number_key")
   @@index([logoMediaId])
   @@index([coverMediaId])
   @@index([city, createdAt, id])

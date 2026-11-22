@@ -44,6 +44,10 @@ export const ERROR_MESSAGES: Readonly<Record<ErrorCode, LocalizedText>> = {
     ar: 'هذا الإجراء غير متاح لحسابك',
     en: 'You do not have permission to perform this action.',
   },
+  [ErrorCode.PERMISSION_DENIED]: {
+    ar: 'ما عندك صلاحية لهالإجراء، كلّم مدير الحساب',
+    en: 'Your account does not have the permission for this action.',
+  },
   [ErrorCode.CONFLICT]: {
     ar: 'ما قدرنا ننفّذ طلبك لأن البيانات تغيّرت، حدّث الصفحة وجرّب مرة ثانية',
     en: 'The request conflicts with the current state of the resource.',
@@ -120,13 +124,17 @@ export const ERROR_MESSAGES: Readonly<Record<ErrorCode, LocalizedText>> = {
     ar: 'حسابك مرتبط بمتجر من قبل، ما تقدر تقدّم طلب متجر جديد',
     en: 'This account already works for a vendor.',
   },
+  [ErrorCode.VENDOR_CR_EXISTS]: {
+    ar: 'رقم السجل التجاري مسجّل لمتجر عندنا، تأكد من الرقم أو تواصل معنا',
+    en: 'A store with this commercial registration number is already registered.',
+  },
   [ErrorCode.PRODUCT_NOT_EDITABLE]: {
     ar: 'ما تقدر تعدّل المنتج وهو بهالحالة، حدّث الصفحة وشوف حالته',
     en: 'This product cannot be changed in its current state.',
   },
   [ErrorCode.PRODUCT_NOT_SUBMITTABLE]: {
-    ar: 'المنتج ناقص: أضف صورة وحجم واحد على الأقل، وتأكد إن التغليف يناسب التقطيع',
-    en: 'Add at least one image and one size, and packaging that suits each cutting style.',
+    ar: 'المنتج ناقص: أضف صورة وحجم واحد على الأقل',
+    en: 'Add at least one image and one size.',
   },
   [ErrorCode.PRODUCT_CHANGE_REQUEST_SUPERSEDED]: {
     ar: 'التاجر عدّل المنتج بعد هالطلب، حدّث الصفحة وراجع التعديل الجديد',

@@ -67,6 +67,7 @@ Status is the HTTP status the code always comes with. The English message is the
 | `UNAUTHORIZED` | 401 | Authentication is required. | **Sign in again**: there was no token, or it is not valid. Do not refresh. |
 | `ACCESS_TOKEN_EXPIRED` | 401 | The access token has expired. Please refresh it. | **Refresh token**, then repeat the request. This is the only 401 that refreshes. |
 | `FORBIDDEN` | 403 | You do not have permission to perform this action. | The token is for another audience, or the user's access was removed. **Sign in again** for this app. |
+| `PERMISSION_DENIED` | 403 | Your account does not have the permission for this action. | **Show** "not allowed" and keep the user signed in: the session is fine, this staff user lacks one permission (`details.permission`). Never sign out on it. Admin permissions come with ADM-API-1 (#111); no route returns it yet. |
 | `REFRESH_TOKEN_INVALID` | 401 | Your session has ended. Please sign in again. | **Sign in again**: the session ended (signed out, expired, deleted account, or the refresh token was used twice). |
 | `OTP_INVALID` | 422 | The verification code is incorrect. | **Show**, clear the code field and let the user type again. The attempt was counted. |
 | `OTP_EXPIRED` | 410 | The verification code is no longer valid. Please request a new one. | **Show**, and offer "send a new code". The code expired, was used, or ran out of attempts. |
@@ -92,6 +93,7 @@ Status is the HTTP status the code always comes with. The English message is the
 |---|---|---|---|
 | `VENDOR_APPLICATION_ALREADY_PENDING` | 409 | You already have a vendor application under review. | **Show**, and open the application status (`GET /v1/customer/vendor-applications/latest`). |
 | `VENDOR_ACCESS_ALREADY_HELD` | 409 | This account already works for a vendor. | **Show**. The customer app hides "become a vendor" after this. For an admin approving an application, the applicant got vendor access elsewhere in the meantime. |
+| `VENDOR_CR_EXISTS` | 409 | A store with this commercial registration number is already registered. | **Show** on the registration number field. For an admin approving, another application with the number was approved first: reject this one. |
 | `VENDOR_APPLICATION_NOT_PENDING` | 409 | This vendor application has already been reviewed. | Admin: **Reload** the application, because another admin reviewed it. |
 | `VENDOR_SUSPENDED` | 403 | This vendor account is suspended. | Vendor dashboard: show a "suspended" screen with a way to contact the platform. Every vendor route, sign-in and refresh is refused until an admin reinstates the vendor. Clear the tokens. |
 
@@ -100,7 +102,7 @@ Status is the HTTP status the code always comes with. The English message is the
 | Code | Status | English message | The app should |
 |---|---|---|---|
 | `PRODUCT_NOT_EDITABLE` | 409 | This product cannot be changed in its current state. | **Reload** the product. `details.status` is its current status: for example, it is under review, or an admin already reviewed it. |
-| `PRODUCT_NOT_SUBMITTABLE` | 422 | Add at least one image and one size, and packaging that suits each cutting style. | **Show** what is missing. `details.reasons` lists `NO_SIZE`, `NO_IMAGE` and `INCOMPATIBLE_CUTTING_PACKAGING`; the last comes with `pairs`, the cutting and packaging pairs that cannot be combined. |
+| `PRODUCT_NOT_SUBMITTABLE` | 422 | Add at least one image and one size. | **Show** what is missing. `details.reasons` lists `NO_SIZE` and `NO_IMAGE`. The cutting and packaging rules never block a product. |
 | `PRODUCT_CHANGE_REQUEST_SUPERSEDED` | 409 | The vendor has edited this product again since this request. Reload and review the newer request. | Admin: **Reload** the change requests and review the newer one. |
 
 ### Uploads (media)
