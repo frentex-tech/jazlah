@@ -1,6 +1,7 @@
-# NOT APPLIED. A REFERENCE FOR THE VALUES ONLY: on the free plan, New -> Blueprint asks for a
-# card, so the two services are created by hand as Web Services (Free) with these exact
-# settings: docs/deploy/render-staging.md, step 3. Change a value here and there together.
+# NOT APPLIED. A REFERENCE FOR THE VALUES ONLY: the two services were created by hand as
+# Web Services (Free) with these exact settings (docs/deploy/render-staging.md, step 3),
+# because a Blueprint would also create a Render database and Key Value, and those live on
+# Neon and Upstash. Change a value here and on Render together.
 #
 # JAZLA STAGING on Render's FREE plans (issues #245, #8).
 # How to use it, step by step (Arabic, for the owner): docs/deploy/render-staging.md.
@@ -17,31 +18,25 @@
 services:
   # The API, built from services/api/Dockerfile. Queue workers are off (QUEUE_WORKERS_ENABLED).
   - type: web
-    name: jazlah-api-staging
+    name: jazla-api-staging
     runtime: docker
     # Free: sleeps after 15 minutes without traffic, about a minute to wake up.
     plan: free
     region: frankfurt
     branch: develop
-    # Every commit to develop deploys (Render's "On Commit"), even before its checks pass.
-    autoDeployTrigger: commit
+    # Deploy a commit to develop only once its GitHub checks have passed ("After CI Checks Pass").
+    autoDeployTrigger: checksPass
     # With rootDir set, Render reads dockerContext and dockerfilePath relative to it
     # (render.com/docs/monorepo-support, "Root-relative settings").
     rootDir: services/api
     dockerContext: .
     dockerfilePath: ./Dockerfile
     healthCheckPath: /v1/health
-    # The free plan has no pre-deploy command and no Shell, so the start command does both:
-    # 1. the migrations; a failure stops the start, and Render keeps the previous version;
-    # 2. the seed when SEED_ON_START=true (idempotent; it refills a new or emptied database);
-    #    a seed failure is logged and the API starts anyway;
-    # 3. the API.
-    dockerCommand: >-
-      sh -c './node_modules/.bin/prisma migrate deploy &&
-      { [ "$SEED_ON_START" != "true" ] ||
-      node dist-seed/prisma/seed/seed.js --allow-staging ||
-      echo "Seed failed: the API starts anyway. Read the lines above."; } &&
-      exec node dist/main'
+    # The free plan has no pre-deploy command and no Shell, so the start script does both:
+    # the migrations (a failure stops the start), the seed when SEED_ON_START=true (a
+    # failure is logged), then the API (services/api/scripts/render-start.sh).
+    # Render's Docker Command field keeps quotes as typed, so no `sh -c '...'` there.
+    dockerCommand: sh scripts/render-start.sh
     envVars:
       # --- Environment -------------------------------------------------------------------
       - key: NODE_ENV
@@ -65,7 +60,7 @@ services:
         value: "true"
       - key: SEED_ON_START
         value: "true"
-      # The dashboard's address (https://jazlah-dashboard-staging-....onrender.com), typed
+      # The dashboard's address (https://jazla-dashboard-staging.onrender.com), typed
       # after the first deploy (guide, step 4). Empty turns CORS off: the dashboard calls
       # the API from its server, and the mobile app needs no CORS.
       - key: CORS_ORIGINS
@@ -120,12 +115,12 @@ services:
 
   # The dashboard (admin, vendor and kitchen panels), Next.js on Render's Node runtime.
   - type: web
-    name: jazlah-dashboard-staging
+    name: jazla-dashboard-staging
     runtime: node
     plan: free
     region: frankfurt
     branch: develop
-    autoDeployTrigger: commit
+    autoDeployTrigger: checksPass
     rootDir: apps/dashboard
     # The guard refuses a build or start with the mock flags (README «Builds», #145).
     buildCommand: sh scripts/deploy-guard.sh && pnpm install --frozen-lockfile && pnpm build
@@ -136,7 +131,7 @@ services:
         value: "24"
       - key: NEXT_TELEMETRY_DISABLED
         value: "1"
-      # The API's address (https://jazlah-api-staging-....onrender.com, no trailing slash),
+      # The API's address (https://jazla-api-staging.onrender.com, no trailing slash),
       # typed after the first deploy (guide, step 4). Read at run time: no rebuild needed.
       - key: API_URL
         sync: false

@@ -178,15 +178,20 @@ jobs:
           echo "dist/ holds no testing.*, fake provider, in-memory fake or spec file."
 
       # The production image (services/api/Dockerfile), built but never pushed, then run the
-      # way Render runs it: the migrations from the image on an empty database (the
-      # pre-deploy command), then the API as staging with production rules, until both
-      # health endpoints answer. Placeholder secrets are made here and never leave the run.
+      # way Render runs it: Render's Docker Command `sh scripts/render-start.sh` on an empty
+      # database (migrations, the seed, then the API as staging with production rules),
+      # until both health endpoints answer. A failed migration must stop the script before
+      # the API starts. Placeholder secrets are made here and never leave the run.
       - name: Production image
         run: |
           docker build -t jazla-api:ci .
           psql -h localhost -p 5434 -U jazla -d jazla -v ON_ERROR_STOP=1 -c 'CREATE DATABASE jazla_image'
           image_db=postgresql://jazla:jazla@localhost:5434/jazla_image
-          docker run --rm --network host -e DATABASE_URL="$image_db" jazla-api:ci ./node_modules/.bin/prisma migrate deploy
+          if docker run --rm -e DATABASE_URL=postgresql://none:none@127.0.0.1:1/none \
+            jazla-api:ci sh scripts/render-start.sh; then
+            echo "render-start.sh went on after a failed migration"; exit 1
+          fi
+          echo "render-start.sh stops when the migrations fail."
           env_file="$RUNNER_TEMP/image.env"
           {
             echo NODE_ENV=production
@@ -197,13 +202,14 @@ jobs:
             echo REDIS_KEY_PREFIX=jazla-image-ci
             echo TRUST_PROXY_HOPS=1
             echo QUEUE_WORKERS_ENABLED=true
+            echo SEED_ON_START=true
             echo SMS_PROVIDERS=log
             echo "AUTH_ACCESS_TOKEN_SECRET=$(openssl rand -base64 48)"
             echo "AUTH_OTP_SECRET=$(openssl rand -base64 48)"
             echo "VENDORS_IBAN_KEY=$(openssl rand -base64 32)"
             env | grep '^STORAGE_'
           } > "$env_file"
-          docker run -d --name jazla-api-ci --network host --env-file "$env_file" jazla-api:ci
+          docker run -d --name jazla-api-ci --network host --env-file "$env_file" jazla-api:ci sh scripts/render-start.sh
           for i in $(seq 1 60); do
             curl -sf http://localhost:3100/v1/health/ready && break
             sleep 1
@@ -211,6 +217,10 @@ jobs:
           docker logs jazla-api-ci 2>&1 | tail -20
           curl -sf http://localhost:3100/v1/health
           curl -sf http://localhost:3100/v1/health/ready
+          if docker logs jazla-api-ci 2>&1 | grep -q 'Seed failed'; then
+            echo "The seed failed in the image"; exit 1
+          fi
+          echo "render-start.sh migrated, seeded and started the API."
           docker inspect --format '{{.Config.User}}' jazla-api-ci | grep -qx node
           echo "Runs as the non-root user node."
           docker rm -f jazla-api-ci

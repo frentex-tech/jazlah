@@ -9,14 +9,14 @@
 
 | فين | الاسم | هو إيه |
 |---|---|---|
-| Render | `jazlah-api-staging` | الـAPI (السيرفر) |
-| Render | `jazlah-dashboard-staging` | لوحة التحكم: الأدمن والتاجر والمطبخ |
+| Render | `jazla-api-staging` | الـAPI (السيرفر) |
+| Render | `jazla-dashboard-staging` | لوحة التحكم: الأدمن والتاجر والمطبخ |
 | Neon | `jazlah-staging` | قاعدة البيانات (PostgreSQL). **إنت عملتها خلاص.** |
 | Upstash | `jazlah-staging` | Redis (لحدود المحاولات). **إنت عملته خلاص.** |
 
 خدمتين Render بتعملهم بإيدك (الخطوة 3). ملف `render.yaml` مرجع للقيم بس.
 
-كل دمج في فرع `develop` بينزل لوحده على Render.
+كل دمج في فرع `develop` بينزل لوحده على Render، بعد ما الـCI يبقى أخضر.
 
 **حدود الخطة المجانية (مهم تعرفها):**
 - **السيرفر بينام** بعد 15 دقيقة من غير استخدام. أول فتحة بعدها بتاخد حوالي دقيقة. ده طبيعي.
@@ -34,7 +34,7 @@
 
 1. ادخل [dashboard.render.com](https://dashboard.render.com) واعمل حساب. الأسهل تدخل بحساب GitHub.
 2. اسمح لـRender يوصل للريبو `frentex-tech/jazlah`. لو طلب صلاحية من منظمة frentex-tech، وافق.
-3. مش محتاج تحط كارت دفع للخطط المجانية.
+3. **Render بيطلب كارت دفع حتى للخدمات المجانية.** ضيفه، وخلّي الخدمتين على **Free**: مش هيتسحب فلوس طول ما هم Free.
 
 ## الخطوة 2: اختار رموز حسابات المراجعة
 
@@ -59,7 +59,7 @@
 
 ## الخطوة 3: اعمل الخدمتين بإيدك (من غير Blueprint)
 
-**ليه مش Blueprint؟** على الخطة المجانية، **New ← Blueprint** بيطلب كارت دفع. اللي مش بيطلب كارت هو **New ← Web Service** بس. وعشان كده بنعمل الخدمتين بإيدينا. القاعدة والـRedis موجودين خلاص على Neon وUpstash. ملف `render.yaml` في الريبو **مرجع للقيم بس**، ومش بيتطبّق على Render لوحده.
+**ليه مش Blueprint؟** الـBlueprint بيعمل كمان قاعدة وRedis على Render، وإحنا عاملينهم على Neon وUpstash. فبنعمل الخدمتين بإيدينا من **New ← Web Service**. القاعدة والـRedis موجودين خلاص على Neon وUpstash. ملف `render.yaml` في الريبو **مرجع للقيم بس**، ومش بيتطبّق على Render لوحده.
 
 **قبل ما تبدأ، جهّز 3 مفاتيح عشوائية.** هتحطهم في الـAPI. افتح Terminal على جهازك، واكتب الأمر ده **3 مرات**، وكل مرة انسخ الناتج في مدير الباسووردات (كل مرة بيطلع مفتاح مختلف، ولازم يكونوا مختلفين):
 
@@ -67,7 +67,7 @@
 openssl rand -base64 32
 ```
 
-الناتج 44 حرف وآخره `=`. سمّيهم في مدير الباسووردات: **مفتاح 1** و**مفتاح 2** و**مفتاح 3**.
+الناتج 44 حرف وآخره `=`. **متستخدمش زرار Generate في Render:** بيطلّع 32 حرف، وده مش مفتاح صالح لـ`VENDORS_IBAN_KEY`، والـAPI هيرفض يشتغل. سمّيهم في مدير الباسووردات: **مفتاح 1** و**مفتاح 2** و**مفتاح 3**.
 
 **علامة 🔒 في الجداول تحت يعني سر.** الصقه في Render بس، ومتبعتهوش لحد، ومتصوّرش الصفحة اللي هو فيها. عندك **6 أسرار**، كلهم في الـAPI. **3 بتجيبهم** من Neon وUpstash والخطوة 2:
 - 🔒 `DATABASE_URL`
@@ -76,13 +76,13 @@ openssl rand -base64 32
 
 و**3 مفاتيح** من الـTerminal (مفتاح 1 و2 و3)، بتلصقهم زي ما هم.
 
-### 3.1 الـAPI: `jazlah-api-staging`
+### 3.1 الـAPI: `jazla-api-staging`
 
 في Render اضغط **New** (فوق) ← **Web Service** ← اختار الريبو `frentex-tech/jazlah`. وبعدين املأ الحقول دي بالظبط:
 
 | الحقل في Render | القيمة |
 |---|---|
-| **Name** | `jazlah-api-staging` |
+| **Name** | `jazla-api-staging` |
 | **Language** | `Docker` |
 | **Branch** | `develop` |
 | **Region** | `Frankfurt (EU Central)` |
@@ -126,24 +126,22 @@ openssl rand -base64 32
 |---|---|
 | **Health Check Path** | `/v1/health` |
 | **Pre-Deploy Command** | **سيبه فاضي**: مش متاح على Free |
-| **Docker Command** | السطر اللي تحت الجدول، كله في سطر واحد |
-| **Auto-Deploy** | `On Commit` |
+| **Docker Command** | `sh scripts/render-start.sh` |
+| **Auto-Deploy** | `After CI Checks Pass` |
 
-```
-sh -c './node_modules/.bin/prisma migrate deploy && { [ "$SEED_ON_START" != "true" ] || node dist-seed/prisma/seed/seed.js --allow-staging || echo "Seed failed: the API starts anyway. Read the lines above."; } && exec node dist/main'
-```
+**مهم:** خانة **Docker Command** في Render بتسيب علامات التنصيص (`'` و`"`) زي ما هي، فأمر زي `sh -c '...'` بيقع بـ`not found`. **اكتب الكلمات التلاتة دي بس، من غير أي علامات تنصيص.** السكريبت نفسه موجود جوه الـimage (`services/api/scripts/render-start.sh`).
 
-الأمر ده بيعمل 3 حاجات بالترتيب: يعمل الجداول (migrations)، وبعدين يعبّي البيانات التجريبية (seed)، وبعدين يشغّل الـAPI. لو الجداول فشلت، الـAPI مش بيشتغل، وRender بيسيب النسخة القديمة شغالة. ولو التعبئة فشلت، الـAPI بيشتغل عادي.
+السكريبت ده بيعمل 3 حاجات بالترتيب: يعمل الجداول (migrations)، وبعدين يعبّي البيانات التجريبية (seed)، وبعدين يشغّل الـAPI. لو الجداول فشلت، الـAPI مش بيشتغل، وRender بيسيب النسخة القديمة شغالة. ولو التعبئة فشلت، الـAPI بيشتغل عادي.
 
 اضغط **Deploy Web Service** (أو **Create Web Service**). أول مرة بتاخد من 5 لـ15 دقيقة.
 
-### 3.2 الداشبورد: `jazlah-dashboard-staging`
+### 3.2 الداشبورد: `jazla-dashboard-staging`
 
 **New** ← **Web Service** ← نفس الريبو:
 
 | الحقل في Render | القيمة |
 |---|---|
-| **Name** | `jazlah-dashboard-staging` |
+| **Name** | `jazla-dashboard-staging` |
 | **Language** | `Node` |
 | **Branch** | `develop` |
 | **Region** | `Frankfurt (EU Central)` |
@@ -168,7 +166,7 @@ sh -c './node_modules/.bin/prisma migrate deploy && { [ "$SEED_ON_START" != "tru
 
 **ممنوع تضيف** `DASHBOARD_TEST_BUILD` ولا `DASHBOARD_API_MOCK`.
 
-**Advanced** ← **Auto-Deploy**: `On Commit`. سيب **Health Check Path** فاضي.
+**Advanced** ← **Auto-Deploy**: `After CI Checks Pass`. سيب **Health Check Path** فاضي.
 
 اضغط **Deploy Web Service** (أو **Create Web Service**).
 
@@ -176,10 +174,10 @@ sh -c './node_modules/.bin/prisma migrate deploy && { [ "$SEED_ON_START" != "tru
 
 بعد ما الاتنين يبقوا **Live** (أخضر):
 
-1. افتح `jazlah-api-staging`. هتلاقي عنوانه فوق تحت الاسم، شكله `https://jazlah-api-staging-xxxx.onrender.com`. انسخه.
-2. افتح `jazlah-dashboard-staging` ← **Environment** ← **Add Environment Variable**. الاسم `API_URL`، والقيمة عنوان الـAPI **من غير `/` في الآخر** ← **Save Changes**.
-3. انسخ عنوان الداشبورد (شكله `https://jazlah-dashboard-staging-xxxx.onrender.com`).
-4. افتح `jazlah-api-staging` ← **Environment** ← **Add Environment Variable**. الاسم `CORS_ORIGINS`، والقيمة عنوان الداشبورد من غير `/` في الآخر ← **Save Changes**.
+1. عنوان الـAPI: `https://jazla-api-staging.onrender.com`.
+2. افتح `jazla-dashboard-staging` ← **Environment** ← **Add Environment Variable**. الاسم `API_URL`، والقيمة عنوان الـAPI **من غير `/` في الآخر** ← **Save Changes**.
+3. عنوان الداشبورد: `https://jazla-dashboard-staging.onrender.com`.
+4. افتح `jazla-api-staging` ← **Environment** ← **Add Environment Variable**. الاسم `CORS_ORIGINS`، والقيمة عنوان الداشبورد من غير `/` في الآخر ← **Save Changes**.
 5. كل خدمة هتعيد تشغيل نفسها لوحدها (دقيقتين تقريبًا).
 6. **ابعت العنوانين للفريق** (مش سر). هيحطوهم في `docs/frontend/README.md` وفي إعدادات الموبايل.
 
@@ -201,7 +199,6 @@ sh -c './node_modules/.bin/prisma migrate deploy && { [ "$SEED_ON_START" != "tru
 ## الخطوة 6: للفريق (مش للمالك)، أول تشغيل
 
 - **عنوان العميل:** في Logs بتاع الـAPI، دوّر على طلب عملته إنت **مباشرة** (من المتصفح على `API/docs` أو من الموبايل) وشوف `req.ip`. لازم يبقى الـIP العام بتاعك. لو طلع عنوان داخلي لـRender، ارفع `TRUST_PROXY_HOPS` واحد. طلبات الداشبورد هتظهر بالـIP الخارجي للداشبورد نفسه: ده متوقع على الخطة المجانية (مفيش شبكة داخلية)، يعني كل الموظفين بيتحسبوا كعنوان واحد في حدود المحاولات. **متغيّرش `TRUST_PROXY_HOPS` عشانها.**
-- **`/v1/health/ready` وUpstash:** فحص Redis بيقرا `db=` من `CLIENT INFO`. لو الصفحة قالت redis `down` والدخول وحدود المحاولات شغالين، يبقى رد Upstash مختلف: افتح issue، ومتلمسش الـdeploy (Render بيفحص `/v1/health` بس).
 - **سطر `SECURITY WARNING` من pg** وقت التشغيل عن `sslmode=require`: متوقع، والاتصال مشفّر.
 - **رمز دخول لرقم مش حساب مراجعة:** في Logs دوّر على `SMS written to the log instead of sent`. السطر فيه الرقم (`to`) والرسالة بالرمز (`text`).
 - **الموبايل:** `apps/mobile/config/staging.json` (مش بيتحفظ في git)، و`API_BASE_URL` = عنوان الـAPI من غير `/v1`. التفاصيل في `apps/mobile/config/README.md`.
@@ -247,7 +244,7 @@ sh -c './node_modules/.bin/prisma migrate deploy && { [ "$SEED_ON_START" != "tru
   {
     "AllowedHeaders": ["*"],
     "AllowedMethods": ["POST", "GET", "HEAD"],
-    "AllowedOrigins": ["https://jazlah-dashboard-staging-xxxx.onrender.com"],
+    "AllowedOrigins": ["https://jazla-dashboard-staging.onrender.com"],
     "ExposeHeaders": ["ETag"],
     "MaxAgeSeconds": 3000
   }
@@ -280,7 +277,7 @@ sh -c './node_modules/.bin/prisma migrate deploy && { [ "$SEED_ON_START" != "tru
 3. افتح المستخدم ← **Security credentials** ← **Create access key** ← **Application running outside AWS**. **انسخ الـAccess key ID والـSecret access key دلوقتي**، لأن الـSecret بيظهر مرة واحدة بس. احفظهم في مدير الباسووردات.
 
 ### 7.5 حط القيم في Render
-افتح `jazlah-api-staging` ← **Environment** ← **Add Environment Variable**، وضيف الـ7 دول ← **Save Changes**:
+افتح `jazla-api-staging` ← **Environment** ← **Add Environment Variable**، وضيف الـ7 دول ← **Save Changes**:
 
 | الاسم | القيمة |
 |---|---|
@@ -294,7 +291,7 @@ sh -c './node_modules/.bin/prisma migrate deploy && { [ "$SEED_ON_START" != "tru
 
 وفي نفس الصفحة غيّر `STORAGE_PROVIDER` من `disabled` لـ`s3` ← **Save Changes**. **متغيّرهاش تاني لـ`disabled`.**
 
-وبعدين افتح `jazlah-dashboard-staging` ← **Environment** ← `MEDIA_ORIGINS` ← **Edit**. حط `https://<اسم الباكت العام>.s3.eu-central-1.amazonaws.com` (من غير `/` في الآخر) ← اختار **Save, rebuild, and deploy** (لازم rebuild، لأن القيمة دي بتتحفظ وقت البناء).
+وبعدين افتح `jazla-dashboard-staging` ← **Environment** ← `MEDIA_ORIGINS` ← **Edit**. حط `https://<اسم الباكت العام>.s3.eu-central-1.amazonaws.com` (من غير `/` في الآخر) ← اختار **Save, rebuild, and deploy** (لازم rebuild، لأن القيمة دي بتتحفظ وقت البناء).
 
 أول ما الاتنين يشتغلوا، الرفع يشتغل، والصور التجريبية تترفع لوحدها مع أول تشغيل للـAPI. **ابعت للفريق اسم الباكت العام بس** (مش المفاتيح)، علشان يحدّثوا `render.yaml` كمرجع.
 
@@ -302,7 +299,7 @@ sh -c './node_modules/.bin/prisma migrate deploy && { [ "$SEED_ON_START" != "tru
 
 - **Upstash:** افتح `jazlah-staging` ← **Usage**. لو عدد الأوامر في الشهر قرّب من 400 ألف، قول للفريق.
 - **Neon:** افتح `jazlah-staging` ← **Monitoring** أو صفحة **Usage**. لو الـCU-hours قرّبت من 80، قول للفريق.
-- **Upstash بيأرشف القاعدة المجانية** لو فضلت 30 يوم من غير استخدام. لو حصل، ادخل Upstash واعمل **Restore**، وأعد تشغيل `jazlah-api-staging` (**Manual Deploy**).
+- **Upstash بيأرشف القاعدة المجانية** لو فضلت 30 يوم من غير استخدام. لو حصل، ادخل Upstash واعمل **Restore**، وأعد تشغيل `jazla-api-staging` (**Manual Deploy**).
 - **في Upstash سيب Eviction مقفول** (ده الافتراضي). لو اتفتح، Redis ممكن يمسح بيانات لوحده.
 
 ---
