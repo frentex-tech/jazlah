@@ -4,11 +4,17 @@ library;
 
 import 'package:flutter/foundation.dart';
 
+import 'package:jazlah/core/errors/api_error.dart';
+
 abstract final class FulfilmentError {
   static const notSupported = 'FULFILMENT_NOT_SUPPORTED';
   static const addressNotCovered = 'ADDRESS_NOT_COVERED';
   static const dayFull = 'DAY_FULL';
   static const orderingPaused = 'ORDERING_PAUSED';
+
+  /// A day that cannot be chosen for another reason than full; `details.reason` is one of [DayReason].
+  // shortcut: lead review A6 proposal until SCH-API-2 #69 names it (not-built-yet.md).
+  static const dayNotAvailable = 'DAY_NOT_AVAILABLE';
 }
 
 /// Why a day cannot be chosen (`reason` of each day).
@@ -63,3 +69,9 @@ class OrderingPause {
 
   String message(String language) => language == 'en' ? messageEn : messageAr;
 }
+
+/// The refusal for a day that cannot be chosen (or is not offered at all): DAY_FULL, else DAY_NOT_AVAILABLE with
+/// its reason, as the mocks answer it.
+Exception dayRefusal(CheckoutDay? day) => day?.reason == DayReason.full
+    ? const ApiError(code: FulfilmentError.dayFull)
+    : ApiError(code: FulfilmentError.dayNotAvailable, details: {'reason': day?.reason ?? DayReason.outsideHorizon});

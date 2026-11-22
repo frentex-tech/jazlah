@@ -132,10 +132,33 @@ void main() {
         ('BIG50', CartError.couponMinOrder),
         ('FALAH15', CartError.couponNotApplicable),
         ('WELCOME5', CartError.couponLimitReached),
+        ('OFF10', CartError.couponNotFound), // inactive
+        ('SOON10', CartError.couponNotApplicable), // starts later
+        ('ONCE10', CartError.couponLimitReached), // per-customer limit
+        ('BEEF20', CartError.couponNotApplicable), // no beef line
       ]) {
         await expectLater(r.applyCoupon(code), throwsA(apiError(error)), reason: code);
       }
     });
+  });
+
+  test('a category coupon discounts only the eligible lines', () async {
+    final r = mock();
+    await r.add(kebab.withQuantity(3)); // 108.00 lamb
+    await r.add(const CartItemInput(productId: 'p-falah-ribeye', sizeId: 'sz-1kg', cutId: 'cut-slices'));
+    final cart = await r.applyCoupon('BEEF20');
+    final beef = cart.lines.firstWhere((l) => l.item.productId == 'p-falah-ribeye').lineTotal;
+    expect(cart.discount, beef * 20 ~/ 100);
+    expect(cart.subtotal, 10800 + beef);
+  });
+
+  test('a first-order coupon refuses a customer who already ordered', () async {
+    final r = mock();
+    await r.add(kebab.withQuantity(3));
+    expect((await r.applyCoupon('FIRST15')).discount, 10800 * 15 ~/ 100);
+    await r.removeCoupon();
+    r.hasOrdered = true;
+    await expectLater(r.applyCoupon('FIRST15'), throwsA(apiError(CartError.couponNotApplicable)));
   });
 
   group('merge on sign-in', () {
@@ -169,6 +192,24 @@ void main() {
       expect(result.skipped, 2);
       expect(result.cart.lines.single.item.productId, otherStore.productId);
     });
+  });
+
+  test('the device cart keeps one merge id; the same id merges once', () async {
+    SharedPreferences.setMockInitialValues({});
+    final prefs = await Prefs.load();
+    final local = LocalCartRepository(prefs, MockCartRepository.catalogProduct);
+    await local.add(kebab.withQuantity(2));
+    final id = local.mergeId;
+    await local.add(kebab);
+    expect(local.mergeId, id); // stable with the cart
+    final server = mock();
+    final first = await server.merge(local.items, mergeId: id);
+    final again = await server.merge(local.items, mergeId: id); // the app died before clearing the device cart
+    expect(again.cart.count, first.cart.count);
+    expect((await server.get()).count, 3);
+    await local.clear();
+    await local.add(kebab);
+    expect(local.mergeId, isNot(id)); // a new device cart, a new merge
   });
 
   test('the device cart survives a restart and keeps the one-store rule', () async {

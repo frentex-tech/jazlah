@@ -213,14 +213,21 @@ class PickupInfo {
     required this.opensAt,
     required this.closesAt,
     this.instructions,
+    this.phone,
   });
 
   final LocalizedText name;
   final LocalizedText address;
   final GeoPoint point;
+  // shortcut: one open–close pair for every day; the chosen date's hours (the vendor's weekly hours) come with
+  // SCH-API-2 #69 (lead review A12, not-built-yet.md).
   final String opensAt;
   final String closesAt;
   final LocalizedText? instructions;
+
+  /// The store's phone; null until the pickup point carries one.
+  // shortcut: no phone in the pickup point yet, so «اتصال بالمتجر» stays hidden until SCH-API-2 #69 sends it.
+  final String? phone;
 }
 
 @immutable
@@ -288,6 +295,9 @@ class Cart {
   CartIssue? issueOf(String lineId) => issues.where((i) => i.lineId == lineId).firstOrNull;
 }
 
+/// The lines, issues and totals of a cart: for the device cart and the mocks only. The API cart repository maps
+/// the server's totals (`vatIncluded` and the rest) from the answer and never recomputes them here.
+///
 /// The lines, issues and totals of a cart. [products] holds each product as it is now (null: gone);
 /// [discountOf] turns the subtotal into the coupon's discount.
 Cart priceCart(

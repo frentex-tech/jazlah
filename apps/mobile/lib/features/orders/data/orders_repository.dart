@@ -13,7 +13,7 @@ abstract interface class OrdersRepository {
 }
 
 /// The realtime port (ORD-API-3 `order.updated` to the `user:{id}` room): the ids of the caller's orders that
-/// changed. The socket client replaces the mock once the gateway exists.
+/// changed. Id only on purpose (lead review M10): the order is then read again, whatever the event payload becomes. The socket client replaces the mock once the gateway exists.
 // ignore: one_member_abstracts, the seam between the socket and the USE_MOCKS events.
 abstract interface class OrderRealtime {
   Stream<String> orderUpdated();

@@ -1852,4 +1852,37 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get statusReturned => 'Returned';
+
+  @override
+  String get checkoutCallStore => 'Call the store';
+
+  @override
+  String get checkoutDirections => 'Directions';
+
+  @override
+  String get errDayNotAvailable => 'This day is no longer available. Choose another day.';
+
+  @override
+  String get errFulfilmentRequired => 'Choose how and when to receive the order first.';
+
+  @override
+  String get errCartEmpty => 'Your cart is empty.';
+
+  @override
+  String get errWalletInsufficient => 'Your wallet balance is no longer enough. Choose the payment method again.';
+
+  @override
+  String get errOrderNotPayable => 'This order is no longer waiting for payment.';
+
+  @override
+  String get errPaymentInProgress => 'A payment for this order has not finished yet.';
+
+  @override
+  String get payCheckStatus => 'Check payment status';
+
+  @override
+  String get payCancelPage => 'Cancel payment';
+
+  @override
+  String get productSizeNoId => 'This size can\'t be added to the cart right now.';
 }

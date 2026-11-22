@@ -13,11 +13,14 @@ class JTimelineStep {
 /// Figma `Status timeline` (stage=1..n): steps before [stage] are done (green check),
 /// step [stage] is current (ember ring), later ones upcoming (sand). The last stage marks every step done.
 class JStatusTimeline extends StatelessWidget {
-  const JStatusTimeline({required this.steps, required this.stage, super.key})
+  const JStatusTimeline({required this.steps, required this.stage, super.key, this.title})
     : assert(stage >= 1 && stage <= steps.length, 'stage is 1-based');
 
   final List<JTimelineStep> steps;
   final int stage;
+
+  /// An H3 title inside the card, above the steps.
+  final String? title;
 
   @override
   Widget build(BuildContext context) {
@@ -31,7 +34,10 @@ class JStatusTimeline extends StatelessWidget {
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
-        children: [for (var i = 0; i < steps.length; i++) _step(i)],
+        children: [
+          if (title != null) ...[Text(title!, style: JText.h3), const SizedBox(height: JSpace.s12)],
+          for (var i = 0; i < steps.length; i++) _step(i),
+        ],
       ),
     );
   }

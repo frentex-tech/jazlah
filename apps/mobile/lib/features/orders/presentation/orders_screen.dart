@@ -72,7 +72,7 @@ class _OrdersScreenState extends ConsumerState<OrdersScreen> {
           padding: const EdgeInsets.symmetric(horizontal: JSpace.s16),
           children: [
             for (var i = 0; i < 3; i++) ...[
-              const CartCard(gap: 0, children: [JSkeletonRow()]),
+              const JSkeletonRow(), // draws its own card
               const SizedBox(height: JSpace.s12),
             ],
           ],
@@ -99,8 +99,9 @@ class _OrdersScreenState extends ConsumerState<OrdersScreen> {
       body = Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          // The empty and not-signed-in frames draw no tabs; the list, loading and error keep them.
-          if (orders.value?.isEmpty != true || _scope != null)
+          // Only the list draws the tabs (135-63663); loading, error and empty don't, except that an empty
+          // «الجارية» or «المكتملة» keeps them so the customer can switch back.
+          if (orders.value case final items? when items.isNotEmpty || _scope != null)
             Padding(
               padding: const EdgeInsets.fromLTRB(JSpace.s16, JSpace.s16, JSpace.s16, JSpace.s12),
               // Wraps on a narrow screen or a long translation.

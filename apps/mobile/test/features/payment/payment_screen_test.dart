@@ -136,6 +136,7 @@ Future<ProviderContainer> _pump(
   bool none = false,
   String lang = 'ar',
   bool coldStart = false,
+  bool declineFirst = false,
   String? pendingId,
   PaymentGateway? gateway,
 }) async {
@@ -153,6 +154,7 @@ Future<ProviderContainer> _pump(
   ))!;
   final tokens = MemoryTokens(const AuthTokens(accessToken: 'a', refreshToken: 'r'));
   if (coldStart) _orders.decide('pay-o-1-1', approve: true); // captured while the app was dead
+  if (declineFirst) _orders.decide('pay-o-1-1', approve: false);
   final c = await t.pumpScreen(
     coldStart ? const _ColdStart() : PaymentScreen(orderId: placed.order.id, placed: reopen ? null : placed),
     prefs: {'locale': lang, 'onboardingSeen': true, if (coldStart) 'payment.pending': pendingId ?? placed.order.id},
@@ -185,7 +187,7 @@ Future<ProviderContainer> _pump(
       checkoutRepositoryProvider.overrideWithValue(checkout),
       orderRepositoryProvider.overrideWithValue(_orders),
       paymentRepositoryProvider.overrideWithValue(_payments),
-      paymentGatewayProvider.overrideWithValue(gateway ?? FakePaymentGateway(_orders.decide)),
+      paymentGatewayProvider.overrideWithValue(gateway ?? MockHostedPageGateway(_orders.hostedPage)),
     ],
   );
   await t.pump(const Duration(milliseconds: 100));
@@ -280,13 +282,40 @@ void main() {
     expect(_orders.wallet.balance, 5000);
   });
 
-  testWidgets('closing the gateway step: the status is read once; not paid → retry', (t) async {
+  testWidgets('closing the hosted page: the payment may still capture, so the button only checks the status', (
+    t,
+  ) async {
     await _pump(t);
     await t.tapAt(const Offset(195, 60)); // the scrim
     await _settle(t);
     expect(find.text(_sheet), findsNothing);
     expect(find.text('لم يكتمل الدفع، أعد المحاولة أو اختر وسيلة أخرى'), findsOneWidget);
-    expect(_button(t).onPressed, isNotNull);
+    await t.pump(const Duration(seconds: 5));
+    expect(find.text('تحقق من حالة الدفع'), findsOneWidget);
+    await t.tap(find.text('تحقق من حالة الدفع'));
+    await _settle(t);
+    expect((_payments as _Payments).retries, 0); // never a second payment
+    expect(find.text('لا يزال الدفع قيد المعالجة، سنحدّث حالة طلبك فور وصول النتيجة.'), findsOneWidget);
+    _orders.decide('pay-o-1-1', approve: true); // it captured after all
+    await t.pump(const Duration(seconds: 5));
+    await t.tap(find.text('تحقق من حالة الدفع'));
+    await _settle(t);
+    expect(find.text('تم استلام طلبك'), findsOneWidget);
+    expect(_orders.orders.single.status, OrderStatus.confirmed);
+  });
+
+  testWidgets('cancelled on the hosted page: over, the customer may pay again (a new payment)', (t) async {
+    await _pump(t);
+    await t.tap(find.text('إلغاء الدفع'));
+    await _settle(t);
+    expect(find.text('لم يكتمل الدفع، أعد المحاولة أو اختر وسيلة أخرى'), findsOneWidget);
+    await t.pump(const Duration(seconds: 5));
+    await t.tap(find.text('تأكيد الطلب'));
+    await _settle(t);
+    expect((_payments as _Payments).retries, 1);
+    await t.tap(find.text('موافقة'));
+    await _settle(t);
+    expect(find.text('تم استلام طلبك'), findsOneWidget);
   });
 
   testWidgets('3DS interrupted, captured meanwhile, app resumed → the final state, gateway page closed', (t) async {
@@ -318,14 +347,14 @@ void main() {
     _clock = DateTime.utc(2026, 11, 10, 10);
     await _pump(t, reopen: true);
     expect(find.text(_sheet), findsNothing); // nothing started on its own
-    expect(_button(t).onPressed, isNotNull);
+    expect(find.text('تحقق من حالة الدفع'), findsOneWidget); // its payment is still open
     _orders.decide('pay-o-1-1', approve: true);
     await _resume(t);
     expect(find.text('تم استلام طلبك'), findsOneWidget);
   });
 
   testWidgets('no method can be used (170-29357): «اختر طريقة دفع للمتابعة», button disabled', (t) async {
-    await _pump(t, reopen: true, none: true);
+    await _pump(t, reopen: true, none: true, declineFirst: true);
     await t.scrollUntilVisible(find.text('اختر طريقة دفع للمتابعة'), 200, scrollable: find.byType(Scrollable).first);
     expect(find.text('اختر طريقة دفع للمتابعة'), findsOneWidget);
     expect(_button(t).onPressed, isNull);
@@ -390,6 +419,12 @@ void main() {
     await t.pump();
     expect(find.text('لا يزال الدفع قيد المعالجة، سنحدّث حالة طلبك فور وصول النتيجة.'), findsOneWidget);
     expect(_button(t).loading, isFalse);
+    // Still open: «تحقق من حالة الدفع» re-reads instead of starting another payment.
+    expect(find.text('تحقق من حالة الدفع'), findsOneWidget);
+    await t.pump(const Duration(seconds: 5));
+    await t.tap(find.text('تحقق من حالة الدفع'));
+    await _settle(t);
+    expect((_payments as _Payments).retries, 0);
     _orders.decide('pay-o-1-1', approve: true);
     await _resume(t);
     expect(find.text('تم استلام طلبك'), findsOneWidget);
@@ -451,7 +486,7 @@ void main() {
     expect(c.read(prefsProvider).pendingPayment, isNull);
   });
 
-  testWidgets('another method after a network error gets a new payment key', (t) async {
+  testWidgets('after a network error the methods are frozen: the retry sends the same key and method', (t) async {
     await _pump(t);
     await t.tap(find.text('رفض'));
     await _settle(t);
@@ -460,11 +495,14 @@ void main() {
     await t.tap(find.text('إعادة المحاولة'));
     await _settle(t);
     await t.pump(const Duration(seconds: 5));
-    await t.tap(find.text('Apple Pay'));
+    await t.tap(find.text('Apple Pay'), warnIfMissed: false); // ignored: the payment may exist
     await t.pump();
+    expect(t.widget<JRadio>(find.widgetWithText(JRadio, 'Apple Pay')).checked, isFalse);
     await t.tap(find.byType(JButton).last);
     await _settle(t);
     expect(payments.keys, hasLength(2));
-    expect(payments.keys[1], isNot(payments.keys[0]));
+    expect(payments.keys[1], payments.keys[0]);
+    expect(find.text(_sheet), findsOneWidget);
+    expect(find.text('تحقق 3DS لمبلغ 123.00 ر.س. هذه صفحة المزوّد التجريبي.'), findsOneWidget); // mada, as before
   });
 }

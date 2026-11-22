@@ -63,12 +63,13 @@ class _PaymentScreenState extends ConsumerState<PaymentScreen> {
   /// new payment is being asked for; null when opened again (any outcome is the order's).
   String? _paymentId;
 
-  /// The new payment's idempotency key, kept until the server answers it (a network error keeps it) and
-  /// dropped when the method changes (a key belongs to one request body).
+  /// The new payment's idempotency key, kept until the server answers it (a network or unknown error keeps
+  /// it). While it is kept the methods are frozen, so the retry sends the same body: the payment may exist.
   String? _payKey;
 
-  /// A payment is open at the gateway with no outcome yet (the wait stopped after 60 s, or opened again while
-  /// it runs): leaving keeps the order for the next start.
+  /// The latest payment may still capture (initiated: the wait stopped after 60 s, the hosted page was closed,
+  /// or opened again while it runs). No new payment then: the button re-reads the status («تحقق من حالة الدفع»)
+  /// until the payment is failed or cancelled (lead review M2); leaving keeps the order for the next start.
   bool _unsettled = false;
 
   /// Polls before the screen stops waiting (about 60 s) and lets the customer leave.
@@ -119,7 +120,7 @@ class _PaymentScreenState extends ConsumerState<PaymentScreen> {
     _paymentId = action.paymentId;
     _unsettled = false;
     setState(() => _phase = _Phase.processing);
-    final result = await ref.read(paymentGatewayProvider)!.startPayment(context, action);
+    final result = await ref.read(paymentGatewayProvider).startPayment(context, action);
     if (!mounted || flow != _flow) return;
     await _follow(flow, once: result == GatewayResult.cancelled);
   }
@@ -150,7 +151,9 @@ class _PaymentScreenState extends ConsumerState<PaymentScreen> {
       }
       if (!mounted || flow != _flow || _settle(s)) return;
       if (once) {
+        // The hosted page was closed with the payment still open: it may capture later.
         _flow++;
+        _unsettled = s.paymentStatus == PaymentStatus.initiated;
         setState(() => _phase = _Phase.ready);
         _showToast(l10n.payNotCompleted);
         return;
@@ -159,19 +162,20 @@ class _PaymentScreenState extends ConsumerState<PaymentScreen> {
     }
   }
 
-  /// One read of the status: on resume, or when the screen is opened again.
-  Future<void> _check() async {
+  /// One read of the status: on resume, when the screen is opened again, or from «تحقق من حالة الدفع» ([asked]).
+  Future<void> _check({bool asked = false}) async {
     final flow = _flow;
     final repo = _repo;
     if (repo == null) return;
+    if (asked) setState(() => _phase = _Phase.processing);
     try {
       final s = await repo.status(widget.orderId);
       if (!mounted || flow != _flow || _settle(s)) return;
-      // Still unpaid with nothing in flight here (opened again): the customer pays or retries.
-      if (_phase == _Phase.loading) {
-        _unsettled = s.paymentStatus == PaymentStatus.initiated;
-        setState(() => _phase = _Phase.ready);
-      }
+      if (_phase == _Phase.processing && !asked) return; // a payment in flight here: its flow reads on
+      // Still unpaid with nothing in flight here: pay, retry, or (payment still open) check again later.
+      _unsettled = s.paymentStatus == PaymentStatus.initiated;
+      setState(() => _phase = _phase == _Phase.failed ? _Phase.failed : _Phase.ready);
+      if (asked && _unsettled) _showToast(AppLocalizations.of(context).payStillProcessing);
     } on Object catch (e) {
       if (!mounted) return;
       final code = ApiError.from(e).code;
@@ -184,7 +188,7 @@ class _PaymentScreenState extends ConsumerState<PaymentScreen> {
         context.go(Routes.home);
         return;
       }
-      if (_phase != _Phase.loading) return;
+      if (_phase != _Phase.loading && !asked) return;
       setState(() => _phase = _Phase.ready);
       _showToast(errorText(context, e));
     }
@@ -201,6 +205,19 @@ class _PaymentScreenState extends ConsumerState<PaymentScreen> {
         o.status == OrderStatus.pendingPayment &&
         s.paymentStatus == PaymentStatus.failed &&
         (_paymentId == null || s.paymentId == _paymentId);
+    // Cancelled on the hosted page (or by the provider): over, nothing charged; the customer may pay again.
+    final dropped =
+        o.status == OrderStatus.pendingPayment &&
+        s.paymentStatus == PaymentStatus.cancelled &&
+        _paymentId != null &&
+        s.paymentId == _paymentId;
+    if (dropped) {
+      _flow++;
+      _unsettled = false;
+      setState(() => _phase = _Phase.ready);
+      _showToast(l10n.payNotCompleted);
+      return true;
+    }
     if (!paid && !failed && o.status != OrderStatus.cancelled) {
       setState(() {});
       return false;
@@ -229,6 +246,7 @@ class _PaymentScreenState extends ConsumerState<PaymentScreen> {
   Future<void> _pay(PaymentMethodOption method) async {
     final repo = _repo;
     if (_phase == _Phase.processing || repo == null) return;
+    if (_unsettled) return _check(asked: true); // never a second payment while one may capture
     final flow = _flow;
     _paymentId = ''; // the old payment's failure is not this attempt's
     final key = _payKey ??= newIdempotencyKey();
@@ -249,6 +267,12 @@ class _PaymentScreenState extends ConsumerState<PaymentScreen> {
       if (code != ApiError.network && code != ApiError.unknown) _payKey = null;
       if (!mounted || flow != _flow) return;
       if (code == PaymentError.orderNotPayable) return _check();
+      if (code == PaymentError.paymentInProgress) {
+        // An earlier payment is still open at the provider: follow it instead of starting another.
+        _paymentId = null;
+        _unsettled = true;
+        return _check(asked: true);
+      }
       setState(() => _phase = _Phase.ready);
       _showToast(errorText(context, e));
     }
@@ -297,11 +321,9 @@ class _PaymentScreenState extends ConsumerState<PaymentScreen> {
         PaymentMethodsCard(
           methods: methods,
           chosen: chosen,
-          frozen: busy,
-          onChoose: (m) => setState(() {
-            if (m != chosen?.method) _payKey = null;
-            _method = m;
-          }),
+          // A kept key (no answer yet) belongs to one method; an open payment allows none.
+          frozen: busy || _payKey != null || _unsettled,
+          onChoose: (m) => setState(() => _method = m),
           onRetry: () => ref.invalidate(paymentMethodsProvider(widget.orderId)),
           notice: [
             if (o != null && o.walletAmount > 0) l10n.payWalletPart(formatHalalas(o.walletAmount)),
@@ -320,10 +342,18 @@ class _PaymentScreenState extends ConsumerState<PaymentScreen> {
         onBack: _phase == _Phase.processing ? null : () => popOrHome(context),
         overlay: _toast == null ? null : JToast(message: _toast!, kind: JToastKind.error),
         button: JButton(
-          label: _phase == _Phase.failed ? l10n.retry : l10n.reviewConfirm,
+          label: _unsettled
+              ? l10n.payCheckStatus
+              : _phase == _Phase.failed
+              ? l10n.retry
+              : l10n.reviewConfirm,
           expand: true,
           loading: busy,
-          onPressed: chosen == null || o == null ? null : () => _pay(chosen),
+          onPressed: _unsettled
+              ? () => _check(asked: true)
+              : chosen == null || o == null
+              ? null
+              : () => _pay(chosen),
         ),
       ),
     );

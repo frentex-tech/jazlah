@@ -27,15 +27,20 @@ import 'package:jazlah/l10n/app_localizations.dart';
 /// Where a refused placement sends the customer.
 enum ReviewExit { fulfilment, cart }
 
-/// The step that can fix what the server refused; null: stay and try again (same idempotency key).
+/// The step that can fix what the server refused; null: stay (a retry sends the same idempotency key; for
+/// WALLET_INSUFFICIENT the methods are read again).
 ReviewExit? reviewExit(String code) => switch (code) {
   FulfilmentError.dayFull ||
+  FulfilmentError.dayNotAvailable ||
   FulfilmentError.addressNotCovered ||
   FulfilmentError.notSupported ||
   FulfilmentError.orderingPaused ||
-  'NOT_FOUND' ||
-  'VALIDATION_FAILED' => ReviewExit.fulfilment,
-  OrderError.priceChanged || OrderError.itemUnavailable || OrderError.minOrderNotMet => ReviewExit.cart,
+  OrderError.fulfilmentRequired ||
+  'NOT_FOUND' => ReviewExit.fulfilment,
+  OrderError.priceChanged ||
+  OrderError.itemUnavailable ||
+  OrderError.minOrderNotMet ||
+  OrderError.cartEmpty => ReviewExit.cart,
   _ when code.startsWith('COUPON_') => ReviewExit.cart,
   _ => null,
 };
@@ -59,9 +64,10 @@ class _ReviewScreenState extends ConsumerState<ReviewScreen> {
   bool _useWallet = false;
   bool _placing = false;
 
-  /// A failure that may have created the order keeps the key; the method is then kept too, so a retry
-  /// cannot answer an order placed with another method.
+  /// A failure that may have created the order keeps the key; the method and the wallet part are then kept
+  /// too, so a retry sends the same body ([_lockedWallet]; a refetched tender plan can't change it).
   bool _methodLocked = false;
+  int? _lockedWallet;
 
   Future<void> _place(PaymentMethodOption method, List<PaymentMethodOption> options, int walletAmount) async {
     if (_placing) return;
@@ -84,13 +90,18 @@ class _ReviewScreenState extends ConsumerState<ReviewScreen> {
       final code = ApiError.from(e).code;
       showJToast(context, message: errorText(context, e), kind: JToastKind.error);
       final exit = reviewExit(code);
+      final wallet = code == OrderError.walletInsufficient; // a definite refusal: the balance changed
       setState(() {
         _placing = false;
-        if (exit == null) {
+        if (wallet) {
+          _useWallet = false;
+        } else if (exit == null) {
           _methodLocked = true;
           _method = method.method; // pinned, so a later refetch can't change what the retry sends
+          _lockedWallet = walletAmount;
         }
       });
+      if (wallet) ref.invalidate(paymentMethodsProvider(null));
       if (exit == null) return;
       // Checkout step 1 handles the code (refetch, or on to the cart); opened alone, go to the step.
       if (context.canPop()) {
@@ -164,7 +175,9 @@ class _ReviewScreenState extends ConsumerState<ReviewScreen> {
           label: l10n.reviewConfirm,
           expand: true,
           loading: _placing,
-          onPressed: ready ? () => _place(chosen, options, useWallet ? tender.walletAmount : 0) : null,
+          onPressed: ready
+              ? () => _place(chosen, options, _lockedWallet ?? (useWallet ? tender.walletAmount : 0))
+              : null,
         ),
         onBack: _placing ? null : () => popOrHome(context),
       ),

@@ -553,5 +553,16 @@
   "statusCollected": "Collected",
   "statusCancelled": "Cancelled",
   "statusDeliveryFailed": "Delivery failed",
-  "statusReturned": "Returned"
+  "statusReturned": "Returned",
+  "checkoutCallStore": "Call the store",
+  "checkoutDirections": "Directions",
+  "errDayNotAvailable": "This day is no longer available. Choose another day.",
+  "errFulfilmentRequired": "Choose how and when to receive the order first.",
+  "errCartEmpty": "Your cart is empty.",
+  "errWalletInsufficient": "Your wallet balance is no longer enough. Choose the payment method again.",
+  "errOrderNotPayable": "This order is no longer waiting for payment.",
+  "errPaymentInProgress": "A payment for this order has not finished yet.",
+  "payCheckStatus": "Check payment status",
+  "payCancelPage": "Cancel payment",
+  "productSizeNoId": "This size can't be added to the cart right now."
 }

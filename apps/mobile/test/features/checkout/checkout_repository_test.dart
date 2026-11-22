@@ -105,6 +105,18 @@ void main() {
     );
   });
 
+  test('another unavailable day answers DAY_NOT_AVAILABLE with its reason (not VALIDATION_FAILED)', () async {
+    final r = await repo([kebab.withQuantity(3)], now: riyadh(9, 0), closed: {3: null});
+    await expectLater(
+      r.save(const FulfilmentChoice(method: Fulfilment.delivery, date: '2026-11-13', addressId: 'a1')),
+      throwsA(
+        isA<ApiError>()
+            .having((e) => e.code, 'code', FulfilmentError.dayNotAvailable)
+            .having((e) => (e.details! as Map)['reason'], 'reason', DayReason.closed),
+      ),
+    );
+  });
+
   group('fulfilment rules', () {
     test('a delivery-only store cannot be picked up: FULFILMENT_NOT_SUPPORTED', () async {
       final r = await repo([

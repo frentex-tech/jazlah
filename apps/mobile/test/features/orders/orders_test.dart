@@ -18,6 +18,7 @@ import 'package:jazlah/features/auth/presentation/session_controller.dart';
 import 'package:jazlah/features/cart/data/cart_repository.dart';
 import 'package:jazlah/features/cart/domain/cart.dart';
 import 'package:jazlah/features/cart/presentation/cart_providers.dart';
+import 'package:jazlah/features/cart/presentation/cart_screen.dart';
 import 'package:jazlah/features/checkout/data/checkout_repository.dart';
 import 'package:jazlah/features/checkout/data/order_repository.dart';
 import 'package:jazlah/features/checkout/domain/order.dart';
@@ -193,6 +194,8 @@ void main() {
     testWidgets('loading (135-63749): skeleton cards', (t) async {
       await _pump(t, const OrdersScreen(), place: null, hang: true);
       expect(find.byType(JSkeletonRow), findsNWidgets(3));
+      expect(find.byType(CartCard), findsNothing); // the skeleton is its own card
+      expect(find.text('الكل'), findsNothing); // no tabs while loading
     });
 
     testWidgets('empty (135-63826): start a first order', (t) async {
@@ -207,6 +210,7 @@ void main() {
     testWidgets('error (135-63940): retry', (t) async {
       await _pump(t, const OrdersScreen(), place: null, fail: true);
       expect(find.text('تعذّر تحميل الطلبات'), findsOneWidget);
+      expect(find.text('الكل'), findsNothing); // no tabs on the error
       expect(find.text('إعادة المحاولة'), findsOneWidget);
     });
 
@@ -257,6 +261,10 @@ void main() {
       expect(find.text('1:00 م'), findsOneWidget); // placed at 13:00 Riyadh
       expect(find.text('لم يبدأ التوصيل بعد'), findsOneWidget);
       expect(find.text('بانتظار الذبح والتجهيز'), findsOneWidget);
+      // The drawn cards first (header, tracking, freshness), then the added ones, titles inside their cards.
+      double y(String text) => t.getTopLeft(find.text(text)).dy;
+      expect(y('شهادة الطزاجة'), lessThan(y('حالة الطلب')));
+      expect(find.ancestor(of: find.text('حالة الطلب'), matching: find.byType(JStatusTimeline)), findsOneWidget);
       expect(find.text('إلغاء الطلب'), findsNothing);
       expect(find.text('الإبلاغ عن مشكلة'), findsNothing);
       await t.scrollUntilVisible(find.text('الدفع'), 300, scrollable: find.byType(Scrollable).first);

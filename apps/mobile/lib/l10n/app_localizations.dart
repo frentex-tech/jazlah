@@ -3415,6 +3415,72 @@ abstract class AppLocalizations {
   /// In ar, this message translates to:
   /// **'مرتجع'**
   String get statusReturned;
+
+  /// No description provided for @checkoutCallStore.
+  ///
+  /// In ar, this message translates to:
+  /// **'اتصال بالمتجر'**
+  String get checkoutCallStore;
+
+  /// No description provided for @checkoutDirections.
+  ///
+  /// In ar, this message translates to:
+  /// **'الاتجاهات'**
+  String get checkoutDirections;
+
+  /// No description provided for @errDayNotAvailable.
+  ///
+  /// In ar, this message translates to:
+  /// **'هذا اليوم لم يعد متاحًا، اختر يومًا آخر.'**
+  String get errDayNotAvailable;
+
+  /// No description provided for @errFulfilmentRequired.
+  ///
+  /// In ar, this message translates to:
+  /// **'اختر طريقة الاستلام واليوم أولًا.'**
+  String get errFulfilmentRequired;
+
+  /// No description provided for @errCartEmpty.
+  ///
+  /// In ar, this message translates to:
+  /// **'سلتك فارغة.'**
+  String get errCartEmpty;
+
+  /// No description provided for @errWalletInsufficient.
+  ///
+  /// In ar, this message translates to:
+  /// **'رصيد محفظتك لم يعد يكفي، اختر طريقة الدفع من جديد.'**
+  String get errWalletInsufficient;
+
+  /// No description provided for @errOrderNotPayable.
+  ///
+  /// In ar, this message translates to:
+  /// **'هذا الطلب لم يعد بانتظار الدفع.'**
+  String get errOrderNotPayable;
+
+  /// No description provided for @errPaymentInProgress.
+  ///
+  /// In ar, this message translates to:
+  /// **'هناك عملية دفع لم تنتهِ بعد لهذا الطلب.'**
+  String get errPaymentInProgress;
+
+  /// No description provided for @payCheckStatus.
+  ///
+  /// In ar, this message translates to:
+  /// **'تحقق من حالة الدفع'**
+  String get payCheckStatus;
+
+  /// No description provided for @payCancelPage.
+  ///
+  /// In ar, this message translates to:
+  /// **'إلغاء الدفع'**
+  String get payCancelPage;
+
+  /// No description provided for @productSizeNoId.
+  ///
+  /// In ar, this message translates to:
+  /// **'لا يمكن إضافة هذا المقاس إلى السلة حاليًا.'**
+  String get productSizeNoId;
 }
 
 class _AppLocalizationsDelegate extends LocalizationsDelegate<AppLocalizations> {

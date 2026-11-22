@@ -75,12 +75,41 @@ void main() {
     );
   });
 
-  test('a late decision on a replaced payment is ignored', () async {
+  test('no second payment while one is open (a real gateway does not cancel it by itself)', () async {
     await setUpRepos();
     final placed = await orders.place(idempotencyKey: 'k', paymentMethod: PaymentMethodCode.mada);
-    await payments.retry(orderId: 'o-1', method: PaymentMethodCode.mada, idempotencyKey: 'p2');
-    orders.decide(placed.nextAction!.paymentId, approve: true);
-    expect((await payments.status('o-1')).order.status, OrderStatus.pendingPayment);
+    await expectLater(
+      payments.retry(orderId: 'o-1', method: PaymentMethodCode.applePay, idempotencyKey: 'p2'),
+      throwsA(apiError(PaymentError.paymentInProgress)),
+    );
+    orders.decide(placed.nextAction!.paymentId, approve: true); // the first one still captures
+    expect((await payments.status('o-1')).order.status, OrderStatus.confirmed);
+  });
+
+  test('the next action is a redirect to the hosted page, which returns to the app', () async {
+    await setUpRepos();
+    final a = (await orders.place(idempotencyKey: 'k', paymentMethod: PaymentMethodCode.mada)).nextAction!;
+    expect(a.type, PaymentAction.redirect);
+    expect(a.url, '${MockOrderRepository.hostedBase}/${a.paymentId}');
+    final back = orders.hostedPage(a.url, 'cancel')!;
+    expect(isReturnUrl(back, a.returnUrl), isTrue);
+    final s = await payments.status('o-1');
+    expect(s.paymentStatus, PaymentStatus.cancelled);
+    expect(s.order.status, OrderStatus.pendingPayment);
+    // Cancelled: a new payment may start.
+    final again = await payments.retry(orderId: 'o-1', method: PaymentMethodCode.mada, idempotencyKey: 'p2');
+    expect(orders.hostedPage(again.nextAction!.url, 'approve'), startsWith(again.nextAction!.returnUrl));
+    expect((await payments.status('o-1')).order.status, OrderStatus.confirmed);
+    expect(orders.hostedPage('https://elsewhere.test/x', 'approve'), isNull);
+  });
+
+  test('return detection: same scheme, host and path, any query', () {
+    const r = 'jazlah://checkout/pay/o-1/return';
+    expect(isReturnUrl('$r?payment=pay-1&status=ok', r), isTrue);
+    expect(isReturnUrl(r, r), isTrue);
+    expect(isReturnUrl('jazlah://checkout/pay/o-2/return', r), isFalse);
+    expect(isReturnUrl('https://checkout/pay/o-1/return', r), isFalse);
+    expect(isReturnUrl('https://pay.mock.jazla.test/fake/pay-1', r), isFalse);
   });
 
   test('amounts ending in 13 halalas are declined by the fake provider', () async {
@@ -119,7 +148,7 @@ void main() {
     await setUpRepos(balance: 1000);
     await expectLater(
       orders.place(idempotencyKey: 'k', paymentMethod: PaymentMethodCode.mada, walletAmount: 5000),
-      throwsA(apiError('VALIDATION_FAILED')),
+      throwsA(apiError(OrderError.walletInsufficient)),
     );
   });
 

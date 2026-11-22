@@ -109,12 +109,12 @@ class MockOrderRepository implements OrderRepository, OrdersRepository, OrderRea
       }
     }
     final c = await cart.get(); // re-priced
-    if (c.lines.isEmpty) throw const ApiError(code: 'VALIDATION_FAILED');
+    if (c.lines.isEmpty) throw const ApiError(code: OrderError.cartEmpty);
     if (c.issues.any((i) => i.code == CartIssueCode.priceChanged)) throw const ApiError(code: OrderError.priceChanged);
     if (c.issues.isNotEmpty) throw const ApiError(code: OrderError.itemUnavailable);
     if ((c.minOrderRemaining ?? 0) > 0) throw const ApiError(code: OrderError.minOrderNotMet);
     final f = c.fulfilment;
-    if (f == null) throw const ApiError(code: 'VALIDATION_FAILED');
+    if (f == null) throw const ApiError(code: OrderError.fulfilmentRequired);
     final address = f.method == Fulfilment.delivery
         ? (await addresses.list()).where((a) => a.id == f.addressId).firstOrNull
         : null;
@@ -124,13 +124,14 @@ class MockOrderRepository implements OrderRepository, OrdersRepository, OrderRea
     }
     final day = (await checkout.days(f.method)).where((d) => d.date == f.date).firstOrNull;
     if (day == null || !day.available) {
-      throw ApiError(code: day?.reason == DayReason.full ? FulfilmentError.dayFull : 'VALIDATION_FAILED');
+      throw dayRefusal(day);
     }
 
     final walletOnly = paymentMethod == PaymentMethodCode.wallet;
     final fromWallet = walletOnly ? c.total : walletAmount;
-    if (fromWallet < 0 || fromWallet > wallet.balance || (!walletOnly && fromWallet >= c.total)) {
-      throw const ApiError(code: 'VALIDATION_FAILED');
+    if (fromWallet < 0 || (!walletOnly && fromWallet >= c.total)) throw const ApiError(code: 'VALIDATION_FAILED');
+    if (fromWallet > wallet.balance) {
+      throw const ApiError(code: OrderError.walletInsufficient);
     }
 
     final created = now().toUtc();
@@ -316,9 +317,16 @@ class MockOrderRepository implements OrderRepository, OrdersRepository, OrderRea
       // Wallet only: captured without the gateway, so the order is confirmed.
       o = o.copyWith(status: OrderStatus.confirmed);
     } else {
-      final p = _Payment('pay-${o.id}-${(_payments[o.id]?.length ?? 0) + 1}', method, o.total - o.walletAmount, key);
+      final id = 'pay-${o.id}-${(_payments[o.id]?.length ?? 0) + 1}';
+      final p = _Payment(id, method, o.total - o.walletAmount, key, returnUrl: '$returnBase/${o.id}/return');
       _payments.putIfAbsent(o.id, () => []).add(p);
-      action = PaymentAction(paymentId: p.id, method: method, amount: p.amount);
+      action = PaymentAction(
+        paymentId: p.id,
+        method: method,
+        amount: p.amount,
+        url: '$hostedBase/${p.id}',
+        returnUrl: p.returnUrl,
+      );
     }
     _save(o);
     return PlacedOrder(order: o, nextAction: action);
@@ -363,13 +371,40 @@ class MockOrderRepository implements OrderRepository, OrdersRepository, OrderRea
     if (o.status != OrderStatus.pendingPayment) throw const ApiError(code: PaymentError.orderNotPayable);
     final last = _payments[orderId]?.lastOrNull;
     if (last != null && last.status == PaymentStatus.captured) throw const ApiError(code: PaymentError.orderNotPayable);
-    if (last != null && last.status == PaymentStatus.initiated) last.status = PaymentStatus.cancelled;
+    // Like a real gateway, an open payment is not cancelled by asking for another one (lead review A7).
+    if (last != null && last.status == PaymentStatus.initiated) {
+      throw const ApiError(code: PaymentError.paymentInProgress);
+    }
     if (method == PaymentMethodCode.wallet) {
-      if (wallet.balance < o.total - o.walletAmount) throw const ApiError(code: 'VALIDATION_FAILED');
+      if (wallet.balance < o.total - o.walletAmount) throw const ApiError(code: OrderError.walletInsufficient);
       wallet.balance -= o.total - o.walletAmount;
       _save(o.copyWith(walletAmount: o.total));
     }
     return _paymentByKey[idempotencyKey] = _tender(_order(orderId), method, idempotencyKey);
+  }
+
+  /// The fake provider's hosted page, at a payment's next action url.
+  static const hostedBase = 'https://pay.mock.jazla.test/fake';
+
+  /// Where the hosted page sends the customer back (the app's deep link, caught by the gateway step).
+  static const returnBase = 'jazlah://checkout/pay';
+
+  /// The fake provider's hosted page: the customer approves, declines or cancels at [url]; the provider records
+  /// it (as its webhook would) and answers the redirect to the payment's return url. Null for an unknown page.
+  String? hostedPage(String url, String choice) {
+    final id = url.startsWith('$hostedBase/') ? url.substring(hostedBase.length + 1) : null;
+    for (final MapEntry(key: orderId, value: list) in _payments.entries) {
+      final p = list.where((p) => p.id == id).firstOrNull;
+      if (p == null) continue;
+      if (choice == 'cancel') {
+        if (p.status == PaymentStatus.initiated) p.status = PaymentStatus.cancelled;
+        _giveBack(_order(orderId));
+      } else {
+        decide(p.id, approve: choice == 'approve');
+      }
+      return '${p.returnUrl}?payment=${p.id}';
+    }
+    return null;
   }
 
   /// The fake provider's webhook: approves or declines [paymentId]. Amounts ending in 13 halalas are always
@@ -393,8 +428,9 @@ class MockOrderRepository implements OrderRepository, OrdersRepository, OrderRea
 }
 
 class _Payment {
-  _Payment(this.id, this.method, this.amount, this.key);
+  _Payment(this.id, this.method, this.amount, this.key, {required this.returnUrl});
 
+  final String returnUrl;
   final String id;
   final String method;
   final int amount;
