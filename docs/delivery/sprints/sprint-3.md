@@ -30,7 +30,7 @@ This task also covers:
 - **Guest cart merge on login:** a cart built as a guest moves to the account after login.
 
 **Output:**
-- **Moved in 2026-11-17 from CAT-API-1:** the authoritative `PricingService.priceLine({productId, sizeId, cutId?, packagingId?, exclusionIds[], quantity})` (unit = size + cut extra + packaging extra, prices include VAT, pure function), with table-driven tests and 100% branch coverage.
+- **Moved in 2026-11-17 from CAT-API-1:** the authoritative `PricingService.priceLine({productId, sizeId, cutId?, packagingId?, exclusionIds[], quantity})` (unit = size + cut extra + packaging extra, prices include VAT, pure function), with table-driven tests and 100% branch coverage. **Built 2026-11-21** in `src/modules/catalog/` (exported `PricingService`, shared cases in `docs/frontend/fixtures/pricing-cases.json`): the cart uses it.
 
 *Cart service (single-vendor rule, totals)*
 - `Cart` (userId unique, vendorId?, couponId?, fulfilment?, addressId?, deliveryDate?) and `CartItem` (productId, sizeId, cutId?, packagingId?, exclusionIds[], notes, quantity, unitPriceSnapshot)

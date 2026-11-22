@@ -84,6 +84,8 @@ No token is needed for any of these.
    - `fulfilment`.
 
    `NOT_FOUND` means the product is no longer for sale (not published, vendor suspended, category off): show "no longer available". A product switched off is still returned, with `isAvailable: false`, but it is left out of the lists.
+
+   **The line price.** Show the total with the server's formula: unit = size price + the chosen cutting's extra + the chosen packaging's extra (VAT included), line = unit × quantity, "without" items free. A line that cannot be bought carries errors, each once, in the order found: PRODUCT_UNAVAILABLE; OPTION_NOT_IN_PRODUCT for an unknown size; SIZE_UNAVAILABLE; OPTION_NOT_IN_PRODUCT for an unknown cutting, packaging or "without" item (once only); INCOMPATIBLE_CUTTING_PACKAGING; and OPTION_REQUIRED (cuttings offered, none chosen; added only when nothing else is wrong). No route returns them yet: the cart route will document them. Every error but OPTION_REQUIRED makes the price 0; with OPTION_REQUIRED the total still shows and the add button asks for a cut. The cases are in [fixtures/pricing-cases.json](fixtures/pricing-cases.json): the API's tests run every one, and the app's price function must pass the same file. The cart (CRT-API-1) re-prices every line on the server, which stays authoritative.
 4. **A store's products:** `GET /v1/public/products?vendorId=<id>`, next to `GET /v1/public/vendors/{id}`.
 
 Adding to a cart is not built yet (see [not-built-yet.md](not-built-yet.md)).
