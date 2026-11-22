@@ -106,6 +106,20 @@ export class PrismaVendorRepository implements VendorRepository {
     return this.findOne({ id, status: 'active' });
   }
 
+  async existsWithRegistration(
+    commercialRegistrationNumber: string,
+  ): Promise<boolean> {
+    try {
+      const row = await this.db.client.vendor.findUnique({
+        where: { commercialRegistrationNumber },
+        select: { id: true },
+      });
+      return row !== null;
+    } catch (error) {
+      mapPrismaError(error);
+    }
+  }
+
   async findPlatform(): Promise<Vendor | null> {
     try {
       const row = await this.db.client.vendor.findFirst({

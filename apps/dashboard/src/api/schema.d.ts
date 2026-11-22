@@ -314,7 +314,7 @@ export interface paths {
          *
          *     Before sending, upload each document (POST /v1/customer/media/uploads, purpose vendor.document: PDF, JPEG or PNG up to 10 MB) and confirm it (POST /v1/customer/media/{id}/confirm). Send at least one document of each kind (commercial_registration, health_certificate, facility_photo), each file once, at most 10 in all. The IBAN is checked as a Saudi IBAN and never returned in full.
          *
-         *     Errors: VALIDATION_FAILED names the field (documents with requiresEachDocumentKind, uniqueFiles or arrayMaxSize; iban with isSaudiIban). MEDIA_NOT_FOUND (details.mediaId): no such file uploaded by this user with purpose vendor.document. MEDIA_NOT_READY (details.mediaId): the upload was not confirmed. VENDOR_APPLICATION_ALREADY_PENDING: one application is already waiting; show it (GET latest) instead. VENDOR_ACCESS_ALREADY_HELD: this user already works for a vendor. UNAUTHORIZED also when the account was deleted. TRANSACTION_CONFLICT: send again.
+         *     Errors: VALIDATION_FAILED names the field (documents with requiresEachDocumentKind, uniqueFiles or arrayMaxSize; iban with isSaudiIban). MEDIA_NOT_FOUND (details.mediaId): no such file uploaded by this user with purpose vendor.document. MEDIA_NOT_READY (details.mediaId): the upload was not confirmed. VENDOR_APPLICATION_ALREADY_PENDING: one application is already waiting; show it (GET latest) instead. VENDOR_ACCESS_ALREADY_HELD: this user already works for a vendor. VENDOR_CR_EXISTS: a store with this commercial registration number is registered already. UNAUTHORIZED also when the account was deleted. TRANSACTION_CONFLICT: send again.
          */
         post: operations["customerSubmitVendorApplication"];
         delete?: never;
@@ -432,7 +432,7 @@ export interface paths {
          * Approve a pending application with a commission
          * @description Admin dashboard, application review screen: approves a pending application with the platform commission for the vendor's orders, in basis points (1250 is 12.5%). In one step it creates the vendor (active, listed publicly at once, without a logo), records the first commission in its history, and gives the applicant vendor access: they sign in to the vendor dashboard with the same phone number. Audited.
          *
-         *     Errors: VALIDATION_FAILED for a commission that is not a whole number from 0 to 10000. NOT_FOUND for an unknown application. VENDOR_APPLICATION_NOT_PENDING: it was already approved or rejected (also when two admins approve at once: only one vendor is created); reload it. VENDOR_ACCESS_ALREADY_HELD: the applicant came to work for another vendor after applying; nothing changed and the application stays pending. TRANSACTION_CONFLICT: nothing was saved; send again.
+         *     Errors: VALIDATION_FAILED for a commission that is not a whole number from 0 to 10000. NOT_FOUND for an unknown application. VENDOR_APPLICATION_NOT_PENDING: it was already approved or rejected (also when two admins approve at once: only one vendor is created); reload it. VENDOR_ACCESS_ALREADY_HELD: the applicant came to work for another vendor after applying; nothing changed and the application stays pending. VENDOR_CR_EXISTS: another application with the same commercial registration number was approved first; the application stays pending (reject it). TRANSACTION_CONFLICT: nothing was saved; send again.
          */
         post: operations["adminApproveVendorApplication"];
         delete?: never;
@@ -1699,7 +1699,7 @@ export interface components {
          * @description Stable error code. Clients branch on it; it is never renamed or reused.
          * @enum {string}
          */
-        ErrorCode: "VALIDATION_FAILED" | "BAD_REQUEST" | "NOT_FOUND" | "METHOD_NOT_ALLOWED" | "UNAUTHORIZED" | "FORBIDDEN" | "CONFLICT" | "PAYLOAD_TOO_LARGE" | "UNSUPPORTED_MEDIA_TYPE" | "RATE_LIMITED" | "TRANSACTION_CONFLICT" | "SERVICE_UNAVAILABLE" | "INTERNAL_ERROR" | "MEDIA_CONTENT_TYPE_NOT_ALLOWED" | "MEDIA_NOT_FOUND" | "MEDIA_UPLOAD_EXPIRED" | "MEDIA_UPLOAD_REJECTED" | "MEDIA_NOT_READY" | "OTP_INVALID" | "OTP_EXPIRED" | "REFRESH_TOKEN_INVALID" | "ACCESS_TOKEN_EXPIRED" | "ACCOUNT_DISABLED" | "VENDOR_APPLICATION_ALREADY_PENDING" | "VENDOR_APPLICATION_NOT_PENDING" | "VENDOR_SUSPENDED" | "VENDOR_ACCESS_ALREADY_HELD" | "PRODUCT_NOT_EDITABLE" | "PRODUCT_NOT_SUBMITTABLE" | "PRODUCT_CHANGE_REQUEST_SUPERSEDED" | "ADDRESS_LIMIT_REACHED" | "ACCOUNT_HAS_STAFF_ACCESS" | "RECENT_SIGN_IN_REQUIRED" | "INVALID_POLYGON";
+        ErrorCode: "VALIDATION_FAILED" | "BAD_REQUEST" | "NOT_FOUND" | "METHOD_NOT_ALLOWED" | "UNAUTHORIZED" | "FORBIDDEN" | "CONFLICT" | "PAYLOAD_TOO_LARGE" | "UNSUPPORTED_MEDIA_TYPE" | "RATE_LIMITED" | "TRANSACTION_CONFLICT" | "SERVICE_UNAVAILABLE" | "INTERNAL_ERROR" | "MEDIA_CONTENT_TYPE_NOT_ALLOWED" | "MEDIA_NOT_FOUND" | "MEDIA_UPLOAD_EXPIRED" | "MEDIA_UPLOAD_REJECTED" | "MEDIA_NOT_READY" | "OTP_INVALID" | "OTP_EXPIRED" | "REFRESH_TOKEN_INVALID" | "ACCESS_TOKEN_EXPIRED" | "ACCOUNT_DISABLED" | "VENDOR_APPLICATION_ALREADY_PENDING" | "VENDOR_APPLICATION_NOT_PENDING" | "VENDOR_SUSPENDED" | "VENDOR_ACCESS_ALREADY_HELD" | "VENDOR_CR_EXISTS" | "PRODUCT_NOT_EDITABLE" | "PRODUCT_NOT_SUBMITTABLE" | "PRODUCT_CHANGE_REQUEST_SUPERSEDED" | "ADDRESS_LIMIT_REACHED" | "ACCOUNT_HAS_STAFF_ACCESS" | "RECENT_SIGN_IN_REQUIRED" | "INVALID_POLYGON";
         ErrorResponseDto: {
             /**
              * @description Stable error code. Clients branch on it; it is never renamed or reused.
@@ -4755,7 +4755,7 @@ export interface operations {
                     "application/json": components["schemas"]["ErrorResponseDto"];
                 };
             };
-            /** @description Error. code: MEDIA_NOT_READY, VENDOR_APPLICATION_ALREADY_PENDING, VENDOR_ACCESS_ALREADY_HELD, TRANSACTION_CONFLICT. */
+            /** @description Error. code: MEDIA_NOT_READY, VENDOR_APPLICATION_ALREADY_PENDING, VENDOR_ACCESS_ALREADY_HELD, VENDOR_CR_EXISTS, TRANSACTION_CONFLICT. */
             409: {
                 headers: {
                     [name: string]: unknown;
@@ -5267,7 +5267,7 @@ export interface operations {
                     "application/json": components["schemas"]["ErrorResponseDto"];
                 };
             };
-            /** @description Error. code: VENDOR_APPLICATION_NOT_PENDING, VENDOR_ACCESS_ALREADY_HELD, TRANSACTION_CONFLICT. */
+            /** @description Error. code: VENDOR_APPLICATION_NOT_PENDING, VENDOR_ACCESS_ALREADY_HELD, VENDOR_CR_EXISTS, TRANSACTION_CONFLICT. */
             409: {
                 headers: {
                     [name: string]: unknown;

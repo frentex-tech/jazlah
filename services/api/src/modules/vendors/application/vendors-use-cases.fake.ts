@@ -79,6 +79,7 @@ export function buildVendorsUseCases() {
       cipher,
       access,
       accounts,
+      vendors,
       transactions,
     ),
     eraseApplicantData: new EraseApplicantDataUseCase(applications, media),

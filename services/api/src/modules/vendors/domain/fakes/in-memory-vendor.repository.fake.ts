@@ -109,6 +109,17 @@ export class InMemoryVendorRepository implements VendorRepository {
     return Promise.resolve(vendor?.status === 'active' ? vendor : null);
   }
 
+  existsWithRegistration(
+    commercialRegistrationNumber: string,
+  ): Promise<boolean> {
+    return Promise.resolve(
+      this.rows.some(
+        ({ vendor }) =>
+          vendor.commercialRegistrationNumber === commercialRegistrationNumber,
+      ),
+    );
+  }
+
   findPlatform(): Promise<Vendor | null> {
     return Promise.resolve(
       this.rows.find(({ vendor }) => vendor.isPlatform)?.vendor ?? null,

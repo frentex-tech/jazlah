@@ -31,8 +31,10 @@ import type { ReviewVendorApplicationInput } from './review-vendor-application-i
  * 1. The application must exist (NOT_FOUND) and be pending; the change is a conditional
  *    update from pending, so of two approvals at once only one updates the row and the
  *    other gets VENDOR_APPLICATION_NOT_PENDING: one vendor is ever created.
- * 2. The vendor is created from the application, with the commission and its first
- *    history entry.
+ * 2. No vendor holds its commercial registration number (VENDOR_CR_EXISTS: another
+ *    application with the same number was approved first); the unique index
+ *    `vendors_commercial_registration_number_key` is the backstop. Then the vendor is
+ *    created from the application, with the commission and its first history entry.
  * 3. The applicant is granted vendor access for it (VENDOR_ACCESS_ALREADY_HELD if
  *    they came to work for another vendor after applying).
  * 4. The audit entry is written.
@@ -72,6 +74,15 @@ export class ApproveVendorApplicationUseCase {
       if (application === null) {
         throw new AppError(ErrorCode.VENDOR_APPLICATION_NOT_PENDING);
       }
+      if (
+        await this.vendors.existsWithRegistration(
+          application.details.commercialRegistrationNumber,
+        )
+      ) {
+        throw new AppError(ErrorCode.VENDOR_CR_EXISTS);
+      }
+      // shortcut: two approvals of two applications with one number at the same moment
+      // both pass this read; the unique index fails one (500). Lock if it ever happens.
       const vendor = await this.vendors.createFromApplication(
         application,
         input.commissionBasisPoints,
