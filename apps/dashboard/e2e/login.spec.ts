@@ -142,3 +142,13 @@ test('a refresh that fails for a passing reason keeps the session', async ({ pag
   await expect(page).toHaveURL(/\/admin$/);
   expect((await context.cookies()).find((c) => c.name === 'jz_rt_admin')?.value).toBe('mock-rt-busy');
 });
+
+test('sign-out redirects with a relative Location, whatever address the server sees (#22)', async ({ request }) => {
+  // Behind the host's proxy the server sees an internal address: the Location must not carry it.
+  const internal = { Host: 'localhost:10000', Origin: 'http://localhost:10000' };
+  for (const [form, path] of [[{}, '/login'], [{ locale: 'en' }, '/en/login'], [{ only: 'customer', locale: 'ar' }, '/vendor/apply']] as const) {
+    const res = await request.post('/api/auth/logout', { headers: internal, form, maxRedirects: 0 });
+    expect(res.status()).toBe(303);
+    expect(res.headers()['location']).toBe(path);
+  }
+});
