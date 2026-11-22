@@ -4,16 +4,18 @@
 
 // ignore_for_file: unused_element
 import 'package:jazla_api/src/model/order_refund_response_dto.dart';
-import 'package:jazla_api/src/model/order_vendor_response_dto.dart';
 import 'package:jazla_api/src/model/order_status.dart';
 import 'package:jazla_api/src/model/order_type.dart';
-import 'package:jazla_api/src/model/order_customer_response_dto.dart';
 import 'package:jazla_api/src/model/pickup_point_response_dto.dart';
+import 'package:jazla_api/src/model/order_payment_summary_response_dto.dart';
+import 'package:jazla_api/src/model/payment_method.dart';
+import 'package:jazla_api/src/model/time_window_dto.dart';
+import 'package:jazla_api/src/model/order_vendor_response_dto.dart';
+import 'package:jazla_api/src/model/order_customer_response_dto.dart';
 import 'package:jazla_api/src/model/order_history_entry_response_dto.dart';
 import 'package:jazla_api/src/model/order_item_response_dto.dart';
 import 'package:jazla_api/src/model/order_address_response_dto.dart';
-import 'package:jazla_api/src/model/order_payment_summary_response_dto.dart';
-import 'package:jazla_api/src/model/time_window_dto.dart';
+import 'package:jazla_api/src/model/fulfilment_method.dart';
 import 'package:json_annotation/json_annotation.dart';
 
 part 'order_response_dto.g.dart';
@@ -144,11 +146,11 @@ class OrderResponseDto {
     name: r'fulfilment',
     required: true,
     includeIfNull: false,
-  unknownEnumValue: OrderResponseDtoFulfilmentEnum.unknownDefaultOpenApi,
+  unknownEnumValue: FulfilmentMethod.unknownDefaultOpenApi,
   )
 
 
-  final OrderResponseDtoFulfilmentEnum fulfilment;
+  final FulfilmentMethod fulfilment;
 
 
 
@@ -197,11 +199,11 @@ class OrderResponseDto {
     name: r'paymentMethod',
     required: true,
     includeIfNull: false,
-  unknownEnumValue: OrderResponseDtoPaymentMethodEnum.unknownDefaultOpenApi,
+  unknownEnumValue: PaymentMethod.unknownDefaultOpenApi,
   )
 
 
-  final OrderResponseDtoPaymentMethodEnum paymentMethod;
+  final PaymentMethod paymentMethod;
 
 
 
@@ -511,55 +513,4 @@ class OrderResponseDto {
   }
 
 }
-
-/// Delivered or picked up.
-enum OrderResponseDtoFulfilmentEnum {
-    /// Delivered or picked up.
-@JsonValue(r'delivery')
-delivery(r'delivery'),
-    /// Delivered or picked up.
-@JsonValue(r'pickup')
-pickup(r'pickup'),
-    /// Delivered or picked up.
-@JsonValue(r'unknown_default_open_api')
-unknownDefaultOpenApi(r'unknown_default_open_api');
-
-const OrderResponseDtoFulfilmentEnum(this.value);
-
-final String value;
-
-@override
-String toString() => value;
-}
-
-
-/// The method chosen (beside any wallet part).
-enum OrderResponseDtoPaymentMethodEnum {
-    /// The method chosen (beside any wallet part).
-@JsonValue(r'mada')
-mada(r'mada'),
-    /// The method chosen (beside any wallet part).
-@JsonValue(r'card')
-card(r'card'),
-    /// The method chosen (beside any wallet part).
-@JsonValue(r'applepay')
-applepay(r'applepay'),
-    /// The method chosen (beside any wallet part).
-@JsonValue(r'cod')
-cod(r'cod'),
-    /// The method chosen (beside any wallet part).
-@JsonValue(r'wallet')
-wallet(r'wallet'),
-    /// The method chosen (beside any wallet part).
-@JsonValue(r'unknown_default_open_api')
-unknownDefaultOpenApi(r'unknown_default_open_api');
-
-const OrderResponseDtoPaymentMethodEnum(this.value);
-
-final String value;
-
-@override
-String toString() => value;
-}
-
 

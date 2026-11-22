@@ -141,7 +141,7 @@ class CreateCouponDto {
 
 
 
-      /// When it starts, ISO 8601 with an offset.
+      /// When it starts: an ISO 8601 date and time with `Z` or an offset (VALIDATION_FAILED `isInstant` otherwise).
   @JsonKey(
     
     name: r'startsAt',
@@ -154,7 +154,7 @@ class CreateCouponDto {
 
 
 
-      /// When it ends, after startsAt (VALIDATION_FAILED `endBeforeStart` otherwise).
+      /// When it ends, after startsAt (VALIDATION_FAILED `endBeforeStart` otherwise); with `Z` or an offset.
   @JsonKey(
     
     name: r'endsAt',

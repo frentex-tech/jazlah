@@ -63,9 +63,9 @@ OrderResponseDto _$OrderResponseDtoFromJson(
     fulfilment: $checkedConvert(
       'fulfilment',
       (v) => $enumDecode(
-        _$OrderResponseDtoFulfilmentEnumEnumMap,
+        _$FulfilmentMethodEnumMap,
         v,
-        unknownValue: OrderResponseDtoFulfilmentEnum.unknownDefaultOpenApi,
+        unknownValue: FulfilmentMethod.unknownDefaultOpenApi,
       ),
     ),
     fulfilmentDate: $checkedConvert('fulfilmentDate', (v) => v as String),
@@ -80,9 +80,9 @@ OrderResponseDto _$OrderResponseDtoFromJson(
     paymentMethod: $checkedConvert(
       'paymentMethod',
       (v) => $enumDecode(
-        _$OrderResponseDtoPaymentMethodEnumEnumMap,
+        _$PaymentMethodEnumMap,
         v,
-        unknownValue: OrderResponseDtoPaymentMethodEnum.unknownDefaultOpenApi,
+        unknownValue: PaymentMethod.unknownDefaultOpenApi,
       ),
     ),
     totalHalalas: $checkedConvert('totalHalalas', (v) => (v as num).toInt()),
@@ -162,40 +162,38 @@ OrderResponseDto _$OrderResponseDtoFromJson(
   return val;
 });
 
-Map<String, dynamic> _$OrderResponseDtoToJson(
-  OrderResponseDto instance,
-) => <String, dynamic>{
-  'id': instance.id,
-  'number': instance.number,
-  'status': _$OrderStatusEnumMap[instance.status]!,
-  'orderType': _$OrderTypeEnumMap[instance.orderType]!,
-  'fulfilment': _$OrderResponseDtoFulfilmentEnumEnumMap[instance.fulfilment]!,
-  'fulfilmentDate': instance.fulfilmentDate,
-  'vendor': instance.vendor.toJson(),
-  'customer': instance.customer.toJson(),
-  'paymentMethod':
-      _$OrderResponseDtoPaymentMethodEnumEnumMap[instance.paymentMethod]!,
-  'totalHalalas': instance.totalHalalas,
-  'createdAt': instance.createdAt.toIso8601String(),
-  'items': instance.items.map((e) => e.toJson()).toList(),
-  'address': instance.address?.toJson(),
-  'pickupPoint': instance.pickupPoint?.toJson(),
-  'window': instance.window?.toJson(),
-  'subtotalHalalas': instance.subtotalHalalas,
-  'discountHalalas': instance.discountHalalas,
-  'deliveryFeeHalalas': instance.deliveryFeeHalalas,
-  'vatHalalas': instance.vatHalalas,
-  'couponCode': instance.couponCode,
-  'notes': instance.notes,
-  'cancelReason': instance.cancelReason,
-  'expiresAt': instance.expiresAt?.toIso8601String(),
-  'payment': instance.payment.toJson(),
-  'refunds': instance.refunds.map((e) => e.toJson()).toList(),
-  'history': instance.history.map((e) => e.toJson()).toList(),
-  'allowedTransitions': instance.allowedTransitions
-      .map((e) => _$OrderStatusEnumMap[e]!)
-      .toList(),
-};
+Map<String, dynamic> _$OrderResponseDtoToJson(OrderResponseDto instance) =>
+    <String, dynamic>{
+      'id': instance.id,
+      'number': instance.number,
+      'status': _$OrderStatusEnumMap[instance.status]!,
+      'orderType': _$OrderTypeEnumMap[instance.orderType]!,
+      'fulfilment': _$FulfilmentMethodEnumMap[instance.fulfilment]!,
+      'fulfilmentDate': instance.fulfilmentDate,
+      'vendor': instance.vendor.toJson(),
+      'customer': instance.customer.toJson(),
+      'paymentMethod': _$PaymentMethodEnumMap[instance.paymentMethod]!,
+      'totalHalalas': instance.totalHalalas,
+      'createdAt': instance.createdAt.toIso8601String(),
+      'items': instance.items.map((e) => e.toJson()).toList(),
+      'address': instance.address?.toJson(),
+      'pickupPoint': instance.pickupPoint?.toJson(),
+      'window': instance.window?.toJson(),
+      'subtotalHalalas': instance.subtotalHalalas,
+      'discountHalalas': instance.discountHalalas,
+      'deliveryFeeHalalas': instance.deliveryFeeHalalas,
+      'vatHalalas': instance.vatHalalas,
+      'couponCode': instance.couponCode,
+      'notes': instance.notes,
+      'cancelReason': instance.cancelReason,
+      'expiresAt': instance.expiresAt?.toIso8601String(),
+      'payment': instance.payment.toJson(),
+      'refunds': instance.refunds.map((e) => e.toJson()).toList(),
+      'history': instance.history.map((e) => e.toJson()).toList(),
+      'allowedTransitions': instance.allowedTransitions
+          .map((e) => _$OrderStatusEnumMap[e]!)
+          .toList(),
+    };
 
 const _$OrderStatusEnumMap = {
   OrderStatus.pendingPayment: 'pending_payment',
@@ -223,19 +221,17 @@ const _$OrderTypeEnumMap = {
   OrderType.unknownDefaultOpenApi: 'unknown_default_open_api',
 };
 
-const _$OrderResponseDtoFulfilmentEnumEnumMap = {
-  OrderResponseDtoFulfilmentEnum.delivery: 'delivery',
-  OrderResponseDtoFulfilmentEnum.pickup: 'pickup',
-  OrderResponseDtoFulfilmentEnum.unknownDefaultOpenApi:
-      'unknown_default_open_api',
+const _$FulfilmentMethodEnumMap = {
+  FulfilmentMethod.delivery: 'delivery',
+  FulfilmentMethod.pickup: 'pickup',
+  FulfilmentMethod.unknownDefaultOpenApi: 'unknown_default_open_api',
 };
 
-const _$OrderResponseDtoPaymentMethodEnumEnumMap = {
-  OrderResponseDtoPaymentMethodEnum.mada: 'mada',
-  OrderResponseDtoPaymentMethodEnum.card: 'card',
-  OrderResponseDtoPaymentMethodEnum.applepay: 'applepay',
-  OrderResponseDtoPaymentMethodEnum.cod: 'cod',
-  OrderResponseDtoPaymentMethodEnum.wallet: 'wallet',
-  OrderResponseDtoPaymentMethodEnum.unknownDefaultOpenApi:
-      'unknown_default_open_api',
+const _$PaymentMethodEnumMap = {
+  PaymentMethod.mada: 'mada',
+  PaymentMethod.card: 'card',
+  PaymentMethod.applepay: 'applepay',
+  PaymentMethod.cod: 'cod',
+  PaymentMethod.wallet: 'wallet',
+  PaymentMethod.unknownDefaultOpenApi: 'unknown_default_open_api',
 };

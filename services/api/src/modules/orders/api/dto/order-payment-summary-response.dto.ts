@@ -1,11 +1,11 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { PAYMENT_METHOD_NAMES } from '../../domain/payment-method-names.constants';
-import { PAYMENT_STATUS_NAMES } from '../../domain/payment-status-names.constants';
+import { PAYMENT_METHOD_NAMES, PAYMENT_STATUS_NAMES } from '@modules/payments';
 
 /** How the order is paid: the method, the latest payment’s status and the wallet part. */
 export class OrderPaymentSummaryResponseDto {
   @ApiProperty({
     enum: PAYMENT_METHOD_NAMES,
+    enumName: 'PaymentMethod',
     example: 'mada',
     description: 'The method chosen for what the wallet does not cover.',
   })
@@ -13,6 +13,7 @@ export class OrderPaymentSummaryResponseDto {
 
   @ApiProperty({
     enum: PAYMENT_STATUS_NAMES,
+    enumName: 'PaymentStatus',
     nullable: true,
     example: 'captured',
     description:

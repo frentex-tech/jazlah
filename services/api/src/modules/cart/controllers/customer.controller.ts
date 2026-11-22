@@ -87,7 +87,7 @@ export class CustomerCartController {
     operationId: 'customerAddCartItem',
     summary: 'Add to my cart',
     description:
-      'Customer app, product page "add to cart". Prices the selection with the catalog’s rules; the same configuration (size, options, note) adds to its line’s quantity. A product of another store: CART_VENDOR_MISMATCH (`details.vendorId`, `details.vendorName`: the cart’s store) unless `replaceCart` is true. Selection refusals, in this order: PRODUCT_UNAVAILABLE, OPTION_NOT_IN_PRODUCT, SIZE_UNAVAILABLE, INCOMPATIBLE_CUTTING_PACKAGING, OPTION_REQUIRED. ORDERING_PAUSED while orders are paused (`details.messageAr`, `details.messageEn`: the admin’s message). Until CRT-API-1 lands: NOT_IMPLEMENTED.',
+      'Customer app, product page "add to cart". Prices the selection with the catalog’s rules; the same configuration (size, options, note) adds to its line’s quantity (past 99: VALIDATION_FAILED on `quantity`). A product of another store: CART_VENDOR_MISMATCH (`details.vendorId`, `details.vendorName`: the cart’s store) unless `replaceCart` is true. Selection refusals, in this order: PRODUCT_UNAVAILABLE, OPTION_NOT_IN_PRODUCT, SIZE_UNAVAILABLE, INCOMPATIBLE_CUTTING_PACKAGING, OPTION_REQUIRED. ORDERING_PAUSED while orders are paused (`details.messageAr`, `details.messageEn`: the admin’s message). Until CRT-API-1 lands: NOT_IMPLEMENTED.',
   })
   @ApiOkResponse({
     type: CartResponseDto,

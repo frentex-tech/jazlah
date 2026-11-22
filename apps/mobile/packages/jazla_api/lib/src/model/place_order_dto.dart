@@ -3,6 +3,7 @@
 //
 
 // ignore_for_file: unused_element
+import 'package:jazla_api/src/model/payment_method.dart';
 import 'package:json_annotation/json_annotation.dart';
 
 part 'place_order_dto.g.dart';
@@ -31,15 +32,15 @@ class PlaceOrderDto {
     name: r'paymentMethod',
     required: true,
     includeIfNull: false,
-  unknownEnumValue: PlaceOrderDtoPaymentMethodEnum.unknownDefaultOpenApi,
+  unknownEnumValue: PaymentMethod.unknownDefaultOpenApi,
   )
 
 
-  final PlaceOrderDtoPaymentMethodEnum paymentMethod;
+  final PaymentMethod paymentMethod;
 
 
 
-      /// How much of the total to take from the wallet, in halalas, 0 up to the total (the whole total only with `wallet`); left out: 0. More than the balance: WALLET_INSUFFICIENT.
+      /// Part of the total to take from the wallet with another method, in halalas, 0 to less than the total; left out: 0. With `wallet` leave it out: the whole total is taken. More than the balance: WALLET_INSUFFICIENT.
           // minimum: 0
   @JsonKey(
     
@@ -90,34 +91,4 @@ class PlaceOrderDto {
   }
 
 }
-
-/// The method, from GET /v1/customer/checkout/payment-methods.
-enum PlaceOrderDtoPaymentMethodEnum {
-    /// The method, from GET /v1/customer/checkout/payment-methods.
-@JsonValue(r'mada')
-mada(r'mada'),
-    /// The method, from GET /v1/customer/checkout/payment-methods.
-@JsonValue(r'card')
-card(r'card'),
-    /// The method, from GET /v1/customer/checkout/payment-methods.
-@JsonValue(r'applepay')
-applepay(r'applepay'),
-    /// The method, from GET /v1/customer/checkout/payment-methods.
-@JsonValue(r'cod')
-cod(r'cod'),
-    /// The method, from GET /v1/customer/checkout/payment-methods.
-@JsonValue(r'wallet')
-wallet(r'wallet'),
-    /// The method, from GET /v1/customer/checkout/payment-methods.
-@JsonValue(r'unknown_default_open_api')
-unknownDefaultOpenApi(r'unknown_default_open_api');
-
-const PlaceOrderDtoPaymentMethodEnum(this.value);
-
-final String value;
-
-@override
-String toString() => value;
-}
-
 

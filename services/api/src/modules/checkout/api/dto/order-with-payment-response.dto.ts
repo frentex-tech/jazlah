@@ -1,6 +1,6 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { OrderResponseDto } from '@modules/orders';
-import { PaymentResponseDto } from './payment-response.dto';
+import { PaymentResponseDto } from '@modules/payments';
 
 /** An order and its payment attempt: what placing an order or starting a new payment answers. */
 export class OrderWithPaymentResponseDto {
@@ -14,7 +14,7 @@ export class OrderWithPaymentResponseDto {
     type: PaymentResponseDto,
     nullable: true,
     description:
-      'The payment attempt; null when no payment record is made (cash on delivery).',
+      'The payment attempt; null when nothing is paid online (cash on delivery, wallet only): no payment record is made.',
   })
   payment!: PaymentResponseDto | null;
 }

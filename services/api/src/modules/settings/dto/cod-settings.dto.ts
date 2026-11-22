@@ -9,8 +9,8 @@ import {
   Min,
   ValidateIf,
 } from 'class-validator';
+import { ORDER_TYPES } from '@modules/orders';
 import { COD_CONFIRMATION_MODES } from '../cod-confirmation-modes.constants';
-import { ORDER_TYPES } from '../order-types.constants';
 
 /** Cash on delivery: whether it is offered, up to what amount, for which orders, and how it is confirmed. */
 export class CodSettingsDto {

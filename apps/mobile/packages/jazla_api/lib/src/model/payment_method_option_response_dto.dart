@@ -3,6 +3,7 @@
 //
 
 // ignore_for_file: unused_element
+import 'package:jazla_api/src/model/payment_method.dart';
 import 'package:json_annotation/json_annotation.dart';
 
 part 'payment_method_option_response_dto.g.dart';
@@ -31,11 +32,11 @@ class PaymentMethodOptionResponseDto {
     name: r'method',
     required: true,
     includeIfNull: false,
-  unknownEnumValue: PaymentMethodOptionResponseDtoMethodEnum.unknownDefaultOpenApi,
+  unknownEnumValue: PaymentMethod.unknownDefaultOpenApi,
   )
 
 
-  final PaymentMethodOptionResponseDtoMethodEnum method;
+  final PaymentMethod method;
 
 
 
@@ -91,41 +92,11 @@ class PaymentMethodOptionResponseDto {
 
 }
 
-/// The method.
-enum PaymentMethodOptionResponseDtoMethodEnum {
-    /// The method.
-@JsonValue(r'mada')
-mada(r'mada'),
-    /// The method.
-@JsonValue(r'card')
-card(r'card'),
-    /// The method.
-@JsonValue(r'applepay')
-applepay(r'applepay'),
-    /// The method.
-@JsonValue(r'cod')
-cod(r'cod'),
-    /// The method.
-@JsonValue(r'wallet')
-wallet(r'wallet'),
-    /// The method.
-@JsonValue(r'unknown_default_open_api')
-unknownDefaultOpenApi(r'unknown_default_open_api');
-
-const PaymentMethodOptionResponseDtoMethodEnum(this.value);
-
-final String value;
-
-@override
-String toString() => value;
-}
-
-
 /// Why not, when not available; null otherwise.
 enum PaymentMethodOptionResponseDtoReasonEnum {
     /// Why not, when not available; null otherwise.
-@JsonValue(r'insufficient_balance')
-insufficientBalance(r'insufficient_balance'),
+@JsonValue(r'INSUFFICIENT_BALANCE')
+INSUFFICIENT_BALANCE(r'INSUFFICIENT_BALANCE'),
     /// Why not, when not available; null otherwise.
 @JsonValue(r'unknown_default_open_api')
 unknownDefaultOpenApi(r'unknown_default_open_api');

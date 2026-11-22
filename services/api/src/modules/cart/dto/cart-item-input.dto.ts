@@ -51,7 +51,7 @@ export class CartItemInputDto {
     nullable: true,
     example: 'vacuum',
     description:
-      'The chosen packaging (`packagings[].packaging`); null or left out: none.',
+      'The chosen packaging (`packagings[].packaging`; `none` is the product’s own "no packaging" option); null or left out: the product offers no packaging.',
   })
   @IsOptional()
   @IsIn(PRODUCT_PACKAGINGS)

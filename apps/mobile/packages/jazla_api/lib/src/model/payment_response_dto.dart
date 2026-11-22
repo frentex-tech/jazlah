@@ -3,7 +3,9 @@
 //
 
 // ignore_for_file: unused_element
+import 'package:jazla_api/src/model/payment_status.dart';
 import 'package:jazla_api/src/model/payment_next_action_response_dto.dart';
+import 'package:jazla_api/src/model/payment_method.dart';
 import 'package:json_annotation/json_annotation.dart';
 
 part 'payment_response_dto.g.dart';
@@ -51,11 +53,11 @@ class PaymentResponseDto {
     name: r'method',
     required: true,
     includeIfNull: false,
-  unknownEnumValue: PaymentResponseDtoMethodEnum.unknownDefaultOpenApi,
+  unknownEnumValue: PaymentMethod.unknownDefaultOpenApi,
   )
 
 
-  final PaymentResponseDtoMethodEnum method;
+  final PaymentMethod method;
 
 
 
@@ -65,11 +67,11 @@ class PaymentResponseDto {
     name: r'status',
     required: true,
     includeIfNull: false,
-  unknownEnumValue: PaymentResponseDtoStatusEnum.unknownDefaultOpenApi,
+  unknownEnumValue: PaymentStatus.unknownDefaultOpenApi,
   )
 
 
-  final PaymentResponseDtoStatusEnum status;
+  final PaymentStatus status;
 
 
 
@@ -142,70 +144,4 @@ class PaymentResponseDto {
   }
 
 }
-
-/// How it is paid.
-enum PaymentResponseDtoMethodEnum {
-    /// How it is paid.
-@JsonValue(r'mada')
-mada(r'mada'),
-    /// How it is paid.
-@JsonValue(r'card')
-card(r'card'),
-    /// How it is paid.
-@JsonValue(r'applepay')
-applepay(r'applepay'),
-    /// How it is paid.
-@JsonValue(r'cod')
-cod(r'cod'),
-    /// How it is paid.
-@JsonValue(r'wallet')
-wallet(r'wallet'),
-    /// How it is paid.
-@JsonValue(r'unknown_default_open_api')
-unknownDefaultOpenApi(r'unknown_default_open_api');
-
-const PaymentResponseDtoMethodEnum(this.value);
-
-final String value;
-
-@override
-String toString() => value;
-}
-
-
-/// Where it is.
-enum PaymentResponseDtoStatusEnum {
-    /// Where it is.
-@JsonValue(r'initiated')
-initiated(r'initiated'),
-    /// Where it is.
-@JsonValue(r'authorized')
-authorized(r'authorized'),
-    /// Where it is.
-@JsonValue(r'captured')
-captured(r'captured'),
-    /// Where it is.
-@JsonValue(r'failed')
-failed(r'failed'),
-    /// Where it is.
-@JsonValue(r'cancelled')
-cancelled(r'cancelled'),
-    /// Where it is.
-@JsonValue(r'refunded')
-refunded(r'refunded'),
-    /// Where it is.
-@JsonValue(r'partially_refunded')
-partiallyRefunded(r'partially_refunded'),
-    /// Where it is.
-@JsonValue(r'unknown_default_open_api')
-unknownDefaultOpenApi(r'unknown_default_open_api');
-
-const PaymentResponseDtoStatusEnum(this.value);
-
-final String value;
-
-@override
-String toString() => value;
-}
-
 

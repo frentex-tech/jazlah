@@ -1,2 +1,4 @@
 export { PaymentsModule } from './payments.module';
-export { OrderWithPaymentResponseDto } from './api/dto/order-with-payment-response.dto';
+export { PAYMENT_METHOD_NAMES } from './domain/payment-method-names.constants';
+export { PAYMENT_STATUS_NAMES } from './domain/payment-status-names.constants';
+export { PaymentResponseDto } from './api/dto/payment-response.dto';

@@ -26,7 +26,6 @@ import 'package:jazla_api/src/api/customer_cart_api.dart';
 import 'package:jazla_api/src/api/customer_checkout_api.dart';
 import 'package:jazla_api/src/api/customer_media_api.dart';
 import 'package:jazla_api/src/api/customer_orders_api.dart';
-import 'package:jazla_api/src/api/customer_payments_api.dart';
 import 'package:jazla_api/src/api/customer_profile_api.dart';
 import 'package:jazla_api/src/api/customer_scheduling_api.dart';
 import 'package:jazla_api/src/api/customer_vendor_applications_api.dart';
@@ -209,12 +208,6 @@ class JazlaApi {
   /// by doing that all interceptors will not be executed
   CustomerOrdersApi getCustomerOrdersApi() {
     return CustomerOrdersApi(dio);
-  }
-
-  /// Get CustomerPaymentsApi instance, base route and serializer can be overridden by a given but be careful,
-  /// by doing that all interceptors will not be executed
-  CustomerPaymentsApi getCustomerPaymentsApi() {
-    return CustomerPaymentsApi(dio);
   }
 
   /// Get CustomerProfileApi instance, base route and serializer can be overridden by a given but be careful,

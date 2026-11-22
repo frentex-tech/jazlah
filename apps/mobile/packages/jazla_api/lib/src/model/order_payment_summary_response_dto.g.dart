@@ -24,19 +24,17 @@ OrderPaymentSummaryResponseDto _$OrderPaymentSummaryResponseDtoFromJson(
     method: $checkedConvert(
       'method',
       (v) => $enumDecode(
-        _$OrderPaymentSummaryResponseDtoMethodEnumEnumMap,
+        _$PaymentMethodEnumMap,
         v,
-        unknownValue:
-            OrderPaymentSummaryResponseDtoMethodEnum.unknownDefaultOpenApi,
+        unknownValue: PaymentMethod.unknownDefaultOpenApi,
       ),
     ),
     status: $checkedConvert(
       'status',
       (v) => $enumDecodeNullable(
-        _$OrderPaymentSummaryResponseDtoStatusEnumEnumMap,
+        _$PaymentStatusEnumMap,
         v,
-        unknownValue:
-            OrderPaymentSummaryResponseDtoStatusEnum.unknownDefaultOpenApi,
+        unknownValue: PaymentStatus.unknownDefaultOpenApi,
       ),
     ),
     paymentId: $checkedConvert('paymentId', (v) => v as String?),
@@ -53,33 +51,30 @@ OrderPaymentSummaryResponseDto _$OrderPaymentSummaryResponseDtoFromJson(
 Map<String, dynamic> _$OrderPaymentSummaryResponseDtoToJson(
   OrderPaymentSummaryResponseDto instance,
 ) => <String, dynamic>{
-  'method': _$OrderPaymentSummaryResponseDtoMethodEnumEnumMap[instance.method]!,
-  'status': _$OrderPaymentSummaryResponseDtoStatusEnumEnumMap[instance.status],
+  'method': _$PaymentMethodEnumMap[instance.method]!,
+  'status': _$PaymentStatusEnumMap[instance.status],
   'paymentId': instance.paymentId,
   'walletHalalas': instance.walletHalalas,
   'walletRestoredHalalas': instance.walletRestoredHalalas,
   'cardLast4': instance.cardLast4,
 };
 
-const _$OrderPaymentSummaryResponseDtoMethodEnumEnumMap = {
-  OrderPaymentSummaryResponseDtoMethodEnum.mada: 'mada',
-  OrderPaymentSummaryResponseDtoMethodEnum.card: 'card',
-  OrderPaymentSummaryResponseDtoMethodEnum.applepay: 'applepay',
-  OrderPaymentSummaryResponseDtoMethodEnum.cod: 'cod',
-  OrderPaymentSummaryResponseDtoMethodEnum.wallet: 'wallet',
-  OrderPaymentSummaryResponseDtoMethodEnum.unknownDefaultOpenApi:
-      'unknown_default_open_api',
+const _$PaymentMethodEnumMap = {
+  PaymentMethod.mada: 'mada',
+  PaymentMethod.card: 'card',
+  PaymentMethod.applepay: 'applepay',
+  PaymentMethod.cod: 'cod',
+  PaymentMethod.wallet: 'wallet',
+  PaymentMethod.unknownDefaultOpenApi: 'unknown_default_open_api',
 };
 
-const _$OrderPaymentSummaryResponseDtoStatusEnumEnumMap = {
-  OrderPaymentSummaryResponseDtoStatusEnum.initiated: 'initiated',
-  OrderPaymentSummaryResponseDtoStatusEnum.authorized: 'authorized',
-  OrderPaymentSummaryResponseDtoStatusEnum.captured: 'captured',
-  OrderPaymentSummaryResponseDtoStatusEnum.failed: 'failed',
-  OrderPaymentSummaryResponseDtoStatusEnum.cancelled: 'cancelled',
-  OrderPaymentSummaryResponseDtoStatusEnum.refunded: 'refunded',
-  OrderPaymentSummaryResponseDtoStatusEnum.partiallyRefunded:
-      'partially_refunded',
-  OrderPaymentSummaryResponseDtoStatusEnum.unknownDefaultOpenApi:
-      'unknown_default_open_api',
+const _$PaymentStatusEnumMap = {
+  PaymentStatus.initiated: 'initiated',
+  PaymentStatus.authorized: 'authorized',
+  PaymentStatus.captured: 'captured',
+  PaymentStatus.failed: 'failed',
+  PaymentStatus.cancelled: 'cancelled',
+  PaymentStatus.refunded: 'refunded',
+  PaymentStatus.partiallyRefunded: 'partially_refunded',
+  PaymentStatus.unknownDefaultOpenApi: 'unknown_default_open_api',
 };

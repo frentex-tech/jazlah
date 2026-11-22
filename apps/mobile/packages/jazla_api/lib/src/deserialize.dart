@@ -273,6 +273,9 @@ final _regMap = RegExp(r'^Map<String,(.*)>$');
           return ErrorResponseDtoDetails.fromJson(value as Map<String, dynamic>) as ReturnType;
         case 'FieldErrorDto':
           return FieldErrorDto.fromJson(value as Map<String, dynamic>) as ReturnType;
+        case 'FulfilmentMethod':
+          
+          
         case 'GeoJsonPolygonDto':
           return GeoJsonPolygonDto.fromJson(value as Map<String, dynamic>) as ReturnType;
         case 'GeoPointDto':
@@ -341,6 +344,9 @@ final _regMap = RegExp(r'^Map<String,(.*)>$');
           return OtpRequestedResponseDto.fromJson(value as Map<String, dynamic>) as ReturnType;
         case 'PackagingPriceDto':
           return PackagingPriceDto.fromJson(value as Map<String, dynamic>) as ReturnType;
+        case 'PaymentMethod':
+          
+          
         case 'PaymentMethodListResponseDto':
           return PaymentMethodListResponseDto.fromJson(value as Map<String, dynamic>) as ReturnType;
         case 'PaymentMethodOptionResponseDto':
@@ -349,6 +355,9 @@ final _regMap = RegExp(r'^Map<String,(.*)>$');
           return PaymentNextActionResponseDto.fromJson(value as Map<String, dynamic>) as ReturnType;
         case 'PaymentResponseDto':
           return PaymentResponseDto.fromJson(value as Map<String, dynamic>) as ReturnType;
+        case 'PaymentStatus':
+          
+          
         case 'PaymentWebhookAckResponseDto':
           return PaymentWebhookAckResponseDto.fromJson(value as Map<String, dynamic>) as ReturnType;
         case 'PickupPointResponseDto':

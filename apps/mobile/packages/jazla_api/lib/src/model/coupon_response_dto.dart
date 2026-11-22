@@ -164,7 +164,7 @@ class CouponResponseDto {
 
 
 
-      /// When it starts, ISO 8601 with an offset.
+      /// When it starts (UTC).
   @JsonKey(
     
     name: r'startsAt',
@@ -173,11 +173,11 @@ class CouponResponseDto {
   )
 
 
-  final String startsAt;
+  final DateTime startsAt;
 
 
 
-      /// When it ends, after startsAt (VALIDATION_FAILED `endBeforeStart` otherwise).
+      /// When it ends (UTC).
   @JsonKey(
     
     name: r'endsAt',
@@ -186,7 +186,7 @@ class CouponResponseDto {
   )
 
 
-  final String endsAt;
+  final DateTime endsAt;
 
 
 

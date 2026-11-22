@@ -1,7 +1,8 @@
-import { Body, Controller, Get, Param, Post } from '@nestjs/common';
+import { Body, Controller, Get, Headers, Param, Post } from '@nestjs/common';
 import {
   ApiBearerAuth,
   ApiCreatedResponse,
+  ApiHeader,
   ApiOkResponse,
   ApiOperation,
   ApiTags,
@@ -51,7 +52,18 @@ export class AdminWalletController {
     operationId: 'adminAdjustCustomerWallet',
     summary: 'Credit or debit a customer’s wallet',
     description:
-      'Admin dashboard, customer screen (and staging demos). Recorded in the wallet ledger and the audit log with the reason. WALLET_INSUFFICIENT (`details.balanceHalalas`) for a debit beyond the balance; NOT_FOUND for an unknown customer. Until WAL-API-1 lands: NOT_IMPLEMENTED.',
+      'Admin dashboard, customer screen (and staging demos). A retry with the same `Idempotency-Key` answers the first result and moves nothing. Recorded in the wallet ledger and the audit log with the reason. WALLET_INSUFFICIENT (`details.balanceHalalas`) for a debit beyond the balance; NOT_FOUND for an unknown customer. Until WAL-API-1 lands: NOT_IMPLEMENTED.',
+  })
+  @ApiHeader({
+    name: 'Idempotency-Key',
+    required: true,
+    description:
+      'A UUID the app makes once per attempt and sends again on a retry of the same attempt: the same key answers the first success again (the body is not compared); a refusal is not kept, so the same key may be sent again after fixing it. Missing or not a UUID: VALIDATION_FAILED on `Idempotency-Key`.',
+    schema: {
+      type: 'string',
+      format: 'uuid',
+      example: '3c1f8e2a-5b7d-4c9e-a1f0-6d2b8c4e7a90',
+    },
   })
   @ApiCreatedResponse({
     type: WalletResponseDto,
@@ -68,8 +80,9 @@ export class AdminWalletController {
   )
   adjustCustomerWallet(
     @Param() params: IdParamDto,
+    @Headers('idempotency-key') idempotencyKey: string | undefined,
     @Body() body: AdjustWalletDto,
   ): Promise<WalletResponseDto> {
-    return notImplemented('WAL-API-1', params, body);
+    return notImplemented('WAL-API-1', params, idempotencyKey, body);
   }
 }

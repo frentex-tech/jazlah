@@ -11,6 +11,7 @@ import 'package:dio/dio.dart';
 
 import 'package:jazla_api/src/model/checkout_day_list_response_dto.dart';
 import 'package:jazla_api/src/model/error_response_dto.dart';
+import 'package:jazla_api/src/model/fulfilment_method.dart';
 
 class CustomerSchedulingApi {
 
@@ -19,7 +20,7 @@ class CustomerSchedulingApi {
   const CustomerSchedulingApi(this._dio);
 
   /// Days I can choose
-  /// Customer app, checkout day picker. Every day of the booking horizon from today (Riyadh), for the cart’s store and kinds of order: the cut-offs and lead days, closed days, the store’s capacity and, for pickup, its hours decide each day. Refetch after changing the method or the address. CART_EMPTY for an empty cart; FULFILMENT_NOT_SUPPORTED when the cart’s products do not allow the method. ORDERING_PAUSED while orders are paused (&#x60;details.messageAr&#x60;, &#x60;details.messageEn&#x60;: the admin’s message). Until SCH-API-2 lands: NOT_IMPLEMENTED.
+  /// Customer app, checkout day picker. Every day of the booking horizon from today (Riyadh), for the cart’s store and kinds of order: the cut-offs and lead days, closed days, the store’s capacity and, for pickup, its hours decide each day. Refetch after changing the method or the address. Unpaid orders past &#x60;expiresAt&#x60; no longer count against a day. CART_EMPTY for an empty cart; FULFILMENT_NOT_SUPPORTED when the cart’s products do not allow the method. ORDERING_PAUSED while orders are paused (&#x60;details.messageAr&#x60;, &#x60;details.messageEn&#x60;: the admin’s message). Until SCH-API-2 lands: NOT_IMPLEMENTED.
   ///
   /// Parameters:
   /// * [method] - `delivery` or `pickup`.
@@ -33,7 +34,7 @@ class CustomerSchedulingApi {
   /// Returns a [Future] containing a [Response] with a [CheckoutDayListResponseDto] as data
   /// Throws [DioException] if API call or serialization fails
   Future<Response<CheckoutDayListResponseDto>> customerListCheckoutDays({ 
-    required String method,
+    required FulfilmentMethod method,
     CancelToken? cancelToken,
     Map<String, dynamic>? headers,
     Map<String, dynamic>? extra,

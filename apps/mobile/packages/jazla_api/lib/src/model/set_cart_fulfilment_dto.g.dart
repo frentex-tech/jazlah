@@ -14,9 +14,9 @@ SetCartFulfilmentDto _$SetCartFulfilmentDtoFromJson(
     method: $checkedConvert(
       'method',
       (v) => $enumDecode(
-        _$SetCartFulfilmentDtoMethodEnumEnumMap,
+        _$FulfilmentMethodEnumMap,
         v,
-        unknownValue: SetCartFulfilmentDtoMethodEnum.unknownDefaultOpenApi,
+        unknownValue: FulfilmentMethod.unknownDefaultOpenApi,
       ),
     ),
     addressId: $checkedConvert('addressId', (v) => v as String?),
@@ -28,14 +28,13 @@ SetCartFulfilmentDto _$SetCartFulfilmentDtoFromJson(
 Map<String, dynamic> _$SetCartFulfilmentDtoToJson(
   SetCartFulfilmentDto instance,
 ) => <String, dynamic>{
-  'method': _$SetCartFulfilmentDtoMethodEnumEnumMap[instance.method]!,
+  'method': _$FulfilmentMethodEnumMap[instance.method]!,
   'addressId': ?instance.addressId,
   'date': instance.date,
 };
 
-const _$SetCartFulfilmentDtoMethodEnumEnumMap = {
-  SetCartFulfilmentDtoMethodEnum.delivery: 'delivery',
-  SetCartFulfilmentDtoMethodEnum.pickup: 'pickup',
-  SetCartFulfilmentDtoMethodEnum.unknownDefaultOpenApi:
-      'unknown_default_open_api',
+const _$FulfilmentMethodEnumMap = {
+  FulfilmentMethod.delivery: 'delivery',
+  FulfilmentMethod.pickup: 'pickup',
+  FulfilmentMethod.unknownDefaultOpenApi: 'unknown_default_open_api',
 };

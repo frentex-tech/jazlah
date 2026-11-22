@@ -9789,7 +9789,7 @@
     },
     "/v1/customer/checkout/days": {
       "get": {
-        "description": "Customer app, checkout day picker. Every day of the booking horizon from today (Riyadh), for the cart’s store and kinds of order: the cut-offs and lead days, closed days, the store’s capacity and, for pickup, its hours decide each day. Refetch after changing the method or the address. CART_EMPTY for an empty cart; FULFILMENT_NOT_SUPPORTED when the cart’s products do not allow the method. ORDERING_PAUSED while orders are paused (`details.messageAr`, `details.messageEn`: the admin’s message). Until SCH-API-2 lands: NOT_IMPLEMENTED.",
+        "description": "Customer app, checkout day picker. Every day of the booking horizon from today (Riyadh), for the cart’s store and kinds of order: the cut-offs and lead days, closed days, the store’s capacity and, for pickup, its hours decide each day. Refetch after changing the method or the address. Unpaid orders past `expiresAt` no longer count against a day. CART_EMPTY for an empty cart; FULFILMENT_NOT_SUPPORTED when the cart’s products do not allow the method. ORDERING_PAUSED while orders are paused (`details.messageAr`, `details.messageEn`: the admin’s message). Until SCH-API-2 lands: NOT_IMPLEMENTED.",
         "operationId": "customerListCheckoutDays",
         "parameters": [
           {
@@ -9799,10 +9799,10 @@
             "description": "`delivery` or `pickup`.",
             "schema": {
               "example": "delivery",
-              "type": "string",
-              "enum": [
-                "delivery",
-                "pickup"
+              "allOf": [
+                {
+                  "$ref": "#/components/schemas/FulfilmentMethod"
+                }
               ]
             }
           }
@@ -10652,7 +10652,7 @@
     },
     "/v1/customer/cart/items": {
       "post": {
-        "description": "Customer app, product page \"add to cart\". Prices the selection with the catalog’s rules; the same configuration (size, options, note) adds to its line’s quantity. A product of another store: CART_VENDOR_MISMATCH (`details.vendorId`, `details.vendorName`: the cart’s store) unless `replaceCart` is true. Selection refusals, in this order: PRODUCT_UNAVAILABLE, OPTION_NOT_IN_PRODUCT, SIZE_UNAVAILABLE, INCOMPATIBLE_CUTTING_PACKAGING, OPTION_REQUIRED. ORDERING_PAUSED while orders are paused (`details.messageAr`, `details.messageEn`: the admin’s message). Until CRT-API-1 lands: NOT_IMPLEMENTED.",
+        "description": "Customer app, product page \"add to cart\". Prices the selection with the catalog’s rules; the same configuration (size, options, note) adds to its line’s quantity (past 99: VALIDATION_FAILED on `quantity`). A product of another store: CART_VENDOR_MISMATCH (`details.vendorId`, `details.vendorName`: the cart’s store) unless `replaceCart` is true. Selection refusals, in this order: PRODUCT_UNAVAILABLE, OPTION_NOT_IN_PRODUCT, SIZE_UNAVAILABLE, INCOMPATIBLE_CUTTING_PACKAGING, OPTION_REQUIRED. ORDERING_PAUSED while orders are paused (`details.messageAr`, `details.messageEn`: the admin’s message). Until CRT-API-1 lands: NOT_IMPLEMENTED.",
         "operationId": "customerAddCartItem",
         "parameters": [],
         "requestBody": {
@@ -11455,7 +11455,7 @@
             }
           },
           "409": {
-            "description": "Error. code: CART_EMPTY, DAY_FULL, ORDERING_PAUSED, TRANSACTION_CONFLICT.",
+            "description": "Error. code: CART_EMPTY, DAY_FULL, DAY_NOT_AVAILABLE, ORDERING_PAUSED, TRANSACTION_CONFLICT.",
             "content": {
               "application/json": {
                 "schema": {
@@ -11465,7 +11465,7 @@
             }
           },
           "422": {
-            "description": "Error. code: FULFILMENT_NOT_SUPPORTED, ADDRESS_NOT_COVERED, DAY_NOT_AVAILABLE.",
+            "description": "Error. code: FULFILMENT_NOT_SUPPORTED, ADDRESS_NOT_COVERED.",
             "content": {
               "application/json": {
                 "schema": {
@@ -12500,7 +12500,7 @@
     },
     "/v1/admin/customers/{id}/wallet/adjustments": {
       "post": {
-        "description": "Admin dashboard, customer screen (and staging demos). Recorded in the wallet ledger and the audit log with the reason. WALLET_INSUFFICIENT (`details.balanceHalalas`) for a debit beyond the balance; NOT_FOUND for an unknown customer. Until WAL-API-1 lands: NOT_IMPLEMENTED.",
+        "description": "Admin dashboard, customer screen (and staging demos). A retry with the same `Idempotency-Key` answers the first result and moves nothing. Recorded in the wallet ledger and the audit log with the reason. WALLET_INSUFFICIENT (`details.balanceHalalas`) for a debit beyond the balance; NOT_FOUND for an unknown customer. Until WAL-API-1 lands: NOT_IMPLEMENTED.",
         "operationId": "adminAdjustCustomerWallet",
         "parameters": [
           {
@@ -12512,6 +12512,17 @@
               "format": "uuid",
               "example": "7f3a2c1e-0b9d-4e5f-8a6b-1c2d3e4f5a6b",
               "type": "string"
+            }
+          },
+          {
+            "name": "Idempotency-Key",
+            "in": "header",
+            "description": "A UUID the app makes once per attempt and sends again on a retry of the same attempt: the same key answers the first success again (the body is not compared); a refusal is not kept, so the same key may be sent again after fixing it. Missing or not a UUID: VALIDATION_FAILED on `Idempotency-Key`.",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "example": "3c1f8e2a-5b7d-4c9e-a1f0-6d2b8c4e7a90"
             }
           }
         ],
@@ -12577,17 +12588,7 @@
             }
           },
           "409": {
-            "description": "Error. code: TRANSACTION_CONFLICT.",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ErrorResponseDto"
-                }
-              }
-            }
-          },
-          "422": {
-            "description": "Error. code: WALLET_INSUFFICIENT.",
+            "description": "Error. code: WALLET_INSUFFICIENT, TRANSACTION_CONFLICT.",
             "content": {
               "application/json": {
                 "schema": {
@@ -12645,297 +12646,6 @@
         "summary": "Credit or debit a customer’s wallet",
         "tags": [
           "Admin wallets"
-        ]
-      }
-    },
-    "/v1/customer/checkout/payment-methods": {
-      "get": {
-        "description": "Customer app, checkout payment step (or paying an unpaid order again with `orderId`): the methods for the cart’s (or the order’s) total and kinds, and the wallet balance. NOT_FOUND for an order that is not the customer’s; ORDER_NOT_PAYABLE for one no longer waiting for payment; CART_EMPTY without `orderId` and an empty cart. Until PAY-API-1 lands: NOT_IMPLEMENTED.",
-        "operationId": "customerListPaymentMethods",
-        "parameters": [
-          {
-            "name": "orderId",
-            "required": false,
-            "in": "query",
-            "description": "An unpaid order of the customer (UUID), to pay again; left out: the cart.",
-            "schema": {
-              "format": "uuid",
-              "example": "7f3a2c1e-0b9d-4e5f-8a6b-1c2d3e4f5a6b",
-              "type": "string"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "The methods.",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/PaymentMethodListResponseDto"
-                }
-              }
-            }
-          },
-          "400": {
-            "description": "Error. code: VALIDATION_FAILED.",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ErrorResponseDto"
-                }
-              }
-            }
-          },
-          "401": {
-            "description": "Error. code: UNAUTHORIZED, ACCESS_TOKEN_EXPIRED.",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ErrorResponseDto"
-                }
-              }
-            }
-          },
-          "403": {
-            "description": "Error. code: FORBIDDEN.",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ErrorResponseDto"
-                }
-              }
-            }
-          },
-          "404": {
-            "description": "Error. code: NOT_FOUND.",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ErrorResponseDto"
-                }
-              }
-            }
-          },
-          "409": {
-            "description": "Error. code: ORDER_NOT_PAYABLE, CART_EMPTY.",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ErrorResponseDto"
-                }
-              }
-            }
-          },
-          "429": {
-            "description": "Error. code: RATE_LIMITED.",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ErrorResponseDto"
-                }
-              }
-            }
-          },
-          "500": {
-            "description": "Error. code: INTERNAL_ERROR.",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ErrorResponseDto"
-                }
-              }
-            }
-          },
-          "501": {
-            "description": "Error. code: NOT_IMPLEMENTED.",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ErrorResponseDto"
-                }
-              }
-            }
-          },
-          "503": {
-            "description": "Error. code: SERVICE_UNAVAILABLE.",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ErrorResponseDto"
-                }
-              }
-            }
-          }
-        },
-        "security": [
-          {
-            "bearer": []
-          }
-        ],
-        "summary": "How I can pay",
-        "tags": [
-          "Customer payments"
-        ]
-      }
-    },
-    "/v1/customer/orders/{id}/payments": {
-      "post": {
-        "description": "Customer app, after a failed or abandoned payment, while the order is `pending_payment` (see `expiresAt`). One open payment per order: while the latest is still `initiated` with the same method, it is answered again (with its `nextAction`) and nothing new is made; with another method, PAYMENT_IN_PROGRESS (`details.paymentId`) until it ends. `wallet` or a wallet part is taken at once; cash on delivery follows the confirmation setting. ORDER_NOT_PAYABLE: the order is paid, cancelled or expired. PAYMENT_METHOD_NOT_AVAILABLE (`details.method`); WALLET_INSUFFICIENT (`details.balanceHalalas`). NOT_FOUND for another customer’s order. Until PAY-API-1 lands: NOT_IMPLEMENTED.",
-        "operationId": "customerCreateOrderPayment",
-        "parameters": [
-          {
-            "name": "id",
-            "required": true,
-            "in": "path",
-            "description": "The id (a UUID) of the item the path names; another value is VALIDATION_FAILED on `id`.",
-            "schema": {
-              "format": "uuid",
-              "example": "7f3a2c1e-0b9d-4e5f-8a6b-1c2d3e4f5a6b",
-              "type": "string"
-            }
-          },
-          {
-            "name": "Idempotency-Key",
-            "in": "header",
-            "description": "A UUID the app makes once per attempt and sends again on a retry of the same attempt: the same key answers the first success again (the body is not compared); a refusal is not kept, so the same key may be sent again after fixing it. Missing or not a UUID: VALIDATION_FAILED on `Idempotency-Key`.",
-            "required": true,
-            "schema": {
-              "type": "string",
-              "format": "uuid",
-              "example": "3c1f8e2a-5b7d-4c9e-a1f0-6d2b8c4e7a90"
-            }
-          }
-        ],
-        "requestBody": {
-          "required": true,
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/CreatePaymentDto"
-              }
-            }
-          }
-        },
-        "responses": {
-          "201": {
-            "description": "The order and the payment attempt.",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/OrderWithPaymentResponseDto"
-                }
-              }
-            }
-          },
-          "400": {
-            "description": "Error. code: VALIDATION_FAILED.",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ErrorResponseDto"
-                }
-              }
-            }
-          },
-          "401": {
-            "description": "Error. code: UNAUTHORIZED, ACCESS_TOKEN_EXPIRED.",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ErrorResponseDto"
-                }
-              }
-            }
-          },
-          "403": {
-            "description": "Error. code: FORBIDDEN.",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ErrorResponseDto"
-                }
-              }
-            }
-          },
-          "404": {
-            "description": "Error. code: NOT_FOUND.",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ErrorResponseDto"
-                }
-              }
-            }
-          },
-          "409": {
-            "description": "Error. code: ORDER_NOT_PAYABLE, PAYMENT_IN_PROGRESS, TRANSACTION_CONFLICT.",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ErrorResponseDto"
-                }
-              }
-            }
-          },
-          "422": {
-            "description": "Error. code: PAYMENT_METHOD_NOT_AVAILABLE, WALLET_INSUFFICIENT.",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ErrorResponseDto"
-                }
-              }
-            }
-          },
-          "429": {
-            "description": "Error. code: RATE_LIMITED.",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ErrorResponseDto"
-                }
-              }
-            }
-          },
-          "500": {
-            "description": "Error. code: INTERNAL_ERROR.",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ErrorResponseDto"
-                }
-              }
-            }
-          },
-          "501": {
-            "description": "Error. code: NOT_IMPLEMENTED.",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ErrorResponseDto"
-                }
-              }
-            }
-          },
-          "503": {
-            "description": "Error. code: SERVICE_UNAVAILABLE.",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ErrorResponseDto"
-                }
-              }
-            }
-          }
-        },
-        "security": [
-          {
-            "bearer": []
-          }
-        ],
-        "summary": "Pay an unpaid order again",
-        "tags": [
-          "Customer payments"
         ]
       }
     },
@@ -13056,7 +12766,7 @@
     },
     "/v1/customer/orders": {
       "get": {
-        "description": "Customer app, orders tab: newest first, `current` or `past`. An order past `expiresAt` and still unpaid is cancelled when read (workers are off on staging), so the answer is always current. Until ORD-API-3 lands: NOT_IMPLEMENTED.",
+        "description": "Customer app, orders tab: newest first, `current` or `past`. An order past `expiresAt` and still unpaid is cancelled when read (workers are off on staging), so the answer is always current; capacity, coupon use and wallet reads treat such orders as already released. Until ORD-API-3 lands: NOT_IMPLEMENTED.",
         "operationId": "customerListOrders",
         "parameters": [
           {
@@ -13257,7 +12967,7 @@
             }
           },
           "409": {
-            "description": "Error. code: CART_EMPTY, PRICE_CHANGED, ITEM_UNAVAILABLE, DAY_FULL, ORDERING_PAUSED, TRANSACTION_CONFLICT.",
+            "description": "Error. code: CART_EMPTY, PRICE_CHANGED, ITEM_UNAVAILABLE, MIN_ORDER_NOT_MET, FULFILMENT_REQUIRED, DAY_FULL, DAY_NOT_AVAILABLE, WALLET_INSUFFICIENT, PROFILE_INCOMPLETE, ORDERING_PAUSED, TRANSACTION_CONFLICT.",
             "content": {
               "application/json": {
                 "schema": {
@@ -13267,7 +12977,7 @@
             }
           },
           "422": {
-            "description": "Error. code: MIN_ORDER_NOT_MET, COUPON_NOT_FOUND, COUPON_EXPIRED, COUPON_NOT_APPLICABLE, COUPON_MIN_ORDER, COUPON_LIMIT_REACHED, FULFILMENT_REQUIRED, ADDRESS_NOT_COVERED, DAY_NOT_AVAILABLE, PAYMENT_METHOD_NOT_AVAILABLE, WALLET_INSUFFICIENT, PROFILE_INCOMPLETE.",
+            "description": "Error. code: COUPON_NOT_FOUND, COUPON_EXPIRED, COUPON_NOT_APPLICABLE, COUPON_MIN_ORDER, COUPON_LIMIT_REACHED, ADDRESS_NOT_COVERED, PAYMENT_METHOD_NOT_AVAILABLE.",
             "content": {
               "application/json": {
                 "schema": {
@@ -13330,7 +13040,7 @@
     },
     "/v1/customer/orders/{id}": {
       "get": {
-        "description": "Customer app, order detail, and the payment result: poll it after the payment page closes (every 2 s, up to 60 s): paid once the status is neither `pending_payment` nor `cancelled`. Carries the store’s phone and location. Cancelling is Sprint 4 (CAN-API-1). An order past `expiresAt` and still unpaid is cancelled when read (workers are off on staging), so the answer is always current. NOT_FOUND for another customer’s order. Until ORD-API-3 lands: NOT_IMPLEMENTED.",
+        "description": "Customer app, order detail, and the payment result: poll it after the payment page closes (every 2 s, up to 60 s): paid once the status is neither `pending_payment` nor `cancelled`. Carries the store’s phone and location. Cancelling is Sprint 4 (CAN-API-1). An order past `expiresAt` and still unpaid is cancelled when read (workers are off on staging), so the answer is always current; capacity, coupon use and wallet reads treat such orders as already released. NOT_FOUND for another customer’s order. Until ORD-API-3 lands: NOT_IMPLEMENTED.",
         "operationId": "customerGetOrder",
         "parameters": [
           {
@@ -13450,7 +13160,7 @@
     },
     "/v1/vendor/orders": {
       "get": {
-        "description": "Vendor dashboard, orders list: the vendor’s own orders, newest first. An order past `expiresAt` and still unpaid is cancelled when read (workers are off on staging), so the answer is always current. Until ORD-API-3 lands: NOT_IMPLEMENTED.",
+        "description": "Vendor dashboard, orders list: the vendor’s own orders, newest first. An order past `expiresAt` and still unpaid is cancelled when read (workers are off on staging), so the answer is always current; capacity, coupon use and wallet reads treat such orders as already released. Until ORD-API-3 lands: NOT_IMPLEMENTED.",
         "operationId": "vendorListOrders",
         "parameters": [
           {
@@ -13497,13 +13207,10 @@
             "description": "Only orders with this method (`cod` with status `new`: the cash-on-delivery review queue).",
             "schema": {
               "example": "cod",
-              "type": "string",
-              "enum": [
-                "mada",
-                "card",
-                "applepay",
-                "cod",
-                "wallet"
+              "allOf": [
+                {
+                  "$ref": "#/components/schemas/PaymentMethod"
+                }
               ]
             }
           },
@@ -13623,7 +13330,7 @@
     },
     "/v1/vendor/orders/{id}": {
       "get": {
-        "description": "Vendor dashboard, order detail, with `allowedTransitions` for the caller. An order past `expiresAt` and still unpaid is cancelled when read (workers are off on staging), so the answer is always current. NOT_FOUND for an unknown order or another vendor’s. Until ORD-API-3 lands: NOT_IMPLEMENTED.",
+        "description": "Vendor dashboard, order detail, with `allowedTransitions` for the caller. An order past `expiresAt` and still unpaid is cancelled when read (workers are off on staging), so the answer is always current; capacity, coupon use and wallet reads treat such orders as already released. NOT_FOUND for an unknown order or another vendor’s. Until ORD-API-3 lands: NOT_IMPLEMENTED.",
         "operationId": "vendorGetOrder",
         "parameters": [
           {
@@ -13883,7 +13590,7 @@
     },
     "/v1/admin/orders": {
       "get": {
-        "description": "Admin dashboard, orders list: every order, with a vendor filter, newest first. An order past `expiresAt` and still unpaid is cancelled when read (workers are off on staging), so the answer is always current. Until ORD-API-3 lands: NOT_IMPLEMENTED.",
+        "description": "Admin dashboard, orders list: every order, with a vendor filter, newest first. An order past `expiresAt` and still unpaid is cancelled when read (workers are off on staging), so the answer is always current; capacity, coupon use and wallet reads treat such orders as already released. Until ORD-API-3 lands: NOT_IMPLEMENTED.",
         "operationId": "adminListOrders",
         "parameters": [
           {
@@ -13930,13 +13637,10 @@
             "description": "Only orders with this method (`cod` with status `new`: the cash-on-delivery review queue).",
             "schema": {
               "example": "cod",
-              "type": "string",
-              "enum": [
-                "mada",
-                "card",
-                "applepay",
-                "cod",
-                "wallet"
+              "allOf": [
+                {
+                  "$ref": "#/components/schemas/PaymentMethod"
+                }
               ]
             }
           },
@@ -14067,7 +13771,7 @@
     },
     "/v1/admin/orders/{id}": {
       "get": {
-        "description": "Admin dashboard, order detail, with `allowedTransitions` for the caller. An order past `expiresAt` and still unpaid is cancelled when read (workers are off on staging), so the answer is always current. NOT_FOUND for an unknown order. Until ORD-API-3 lands: NOT_IMPLEMENTED.",
+        "description": "Admin dashboard, order detail, with `allowedTransitions` for the caller. An order past `expiresAt` and still unpaid is cancelled when read (workers are off on staging), so the answer is always current; capacity, coupon use and wallet reads treat such orders as already released. NOT_FOUND for an unknown order. Until ORD-API-3 lands: NOT_IMPLEMENTED.",
         "operationId": "adminGetOrder",
         "parameters": [
           {
@@ -14324,6 +14028,297 @@
           "Admin orders"
         ]
       }
+    },
+    "/v1/customer/checkout/payment-methods": {
+      "get": {
+        "description": "Customer app, checkout payment step (or paying an unpaid order again with `orderId`): the methods for the cart’s (or the order’s) total and kinds, and the wallet balance. NOT_FOUND for an order that is not the customer’s; ORDER_NOT_PAYABLE for one no longer waiting for payment; CART_EMPTY without `orderId` and an empty cart. Until PAY-API-1 lands: NOT_IMPLEMENTED.",
+        "operationId": "customerListPaymentMethods",
+        "parameters": [
+          {
+            "name": "orderId",
+            "required": false,
+            "in": "query",
+            "description": "An unpaid order of the customer (UUID), to pay again; left out: the cart.",
+            "schema": {
+              "format": "uuid",
+              "example": "7f3a2c1e-0b9d-4e5f-8a6b-1c2d3e4f5a6b",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "The methods.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PaymentMethodListResponseDto"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Error. code: VALIDATION_FAILED.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Error. code: UNAUTHORIZED, ACCESS_TOKEN_EXPIRED.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Error. code: FORBIDDEN.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Error. code: NOT_FOUND.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Error. code: ORDER_NOT_PAYABLE, CART_EMPTY.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Error. code: RATE_LIMITED.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Error. code: INTERNAL_ERROR.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                }
+              }
+            }
+          },
+          "501": {
+            "description": "Error. code: NOT_IMPLEMENTED.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "Error. code: SERVICE_UNAVAILABLE.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "How I can pay",
+        "tags": [
+          "Customer checkout"
+        ]
+      }
+    },
+    "/v1/customer/orders/{id}/payments": {
+      "post": {
+        "description": "Customer app, after a failed or abandoned payment, while the order is `pending_payment` (see `expiresAt`). One open payment per order: while the latest is still `initiated` with the same method, it is answered again (with its `nextAction`) and nothing new is made; with another method, PAYMENT_IN_PROGRESS (`details.paymentId`) until it ends. An `initiated` payment ends when the provider reports it, or 10 minutes after it started (then `cancelled`, checked when read, so another method can still be chosen before the order expires). `wallet` or a wallet part is taken at once; cash on delivery follows the confirmation setting. ORDER_NOT_PAYABLE: the order is paid, cancelled or expired. PAYMENT_METHOD_NOT_AVAILABLE (`details.method`); WALLET_INSUFFICIENT (`details.balanceHalalas`). NOT_FOUND for another customer’s order. Until PAY-API-1 lands: NOT_IMPLEMENTED.",
+        "operationId": "customerCreateOrderPayment",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "description": "The id (a UUID) of the item the path names; another value is VALIDATION_FAILED on `id`.",
+            "schema": {
+              "format": "uuid",
+              "example": "7f3a2c1e-0b9d-4e5f-8a6b-1c2d3e4f5a6b",
+              "type": "string"
+            }
+          },
+          {
+            "name": "Idempotency-Key",
+            "in": "header",
+            "description": "A UUID the app makes once per attempt and sends again on a retry of the same attempt: the same key answers the first success again (the body is not compared); a refusal is not kept, so the same key may be sent again after fixing it. Missing or not a UUID: VALIDATION_FAILED on `Idempotency-Key`.",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "example": "3c1f8e2a-5b7d-4c9e-a1f0-6d2b8c4e7a90"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreatePaymentDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "The order and the payment attempt.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/OrderWithPaymentResponseDto"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Error. code: VALIDATION_FAILED.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Error. code: UNAUTHORIZED, ACCESS_TOKEN_EXPIRED.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Error. code: FORBIDDEN.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Error. code: NOT_FOUND.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Error. code: ORDER_NOT_PAYABLE, PAYMENT_IN_PROGRESS, WALLET_INSUFFICIENT, TRANSACTION_CONFLICT.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Error. code: PAYMENT_METHOD_NOT_AVAILABLE.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Error. code: RATE_LIMITED.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Error. code: INTERNAL_ERROR.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                }
+              }
+            }
+          },
+          "501": {
+            "description": "Error. code: NOT_IMPLEMENTED.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "Error. code: SERVICE_UNAVAILABLE.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Pay an unpaid order again",
+        "tags": [
+          "Customer checkout"
+        ]
+      }
     }
   },
   "info": {
@@ -14438,12 +14433,8 @@
       "description": "The days the cart can be delivered or picked up. Customer app."
     },
     {
-      "name": "Customer payments",
-      "description": "Payment methods, and paying an unpaid order again. Customer app."
-    },
-    {
       "name": "Customer checkout",
-      "description": "Placing the cart as an order. Customer app."
+      "description": "Payment methods, placing the cart as an order, and paying an unpaid order again. Customer app."
     },
     {
       "name": "Customer orders",
@@ -19040,7 +19031,7 @@
         "type": "object",
         "properties": {
           "deliveryWindow": {
-            "description": "The delivery window every delivery day uses, Riyadh time. Left out: unchanged.",
+            "description": "The delivery window every delivery day uses, Riyadh time. Left out: unchanged; null: VALIDATION_FAILED.",
             "allOf": [
               {
                 "$ref": "#/components/schemas/TimeWindowDto"
@@ -19048,7 +19039,7 @@
             ]
           },
           "cutoffs": {
-            "description": "The cut-off and lead days of each kind of order. Left out: unchanged.",
+            "description": "The cut-off and lead days of each kind of order. Left out: unchanged; null: VALIDATION_FAILED.",
             "allOf": [
               {
                 "$ref": "#/components/schemas/CutoffsDto"
@@ -19056,7 +19047,7 @@
             ]
           },
           "defaultCapacity": {
-            "description": "Each vendor’s daily capacity unless it has its own (PUT /v1/admin/vendors/{id}/capacity). Left out: unchanged.",
+            "description": "Each vendor’s daily capacity unless it has its own (PUT /v1/admin/vendors/{id}/capacity). Left out: unchanged; null: VALIDATION_FAILED.",
             "allOf": [
               {
                 "$ref": "#/components/schemas/DefaultCapacityDto"
@@ -19064,7 +19055,7 @@
             ]
           },
           "cod": {
-            "description": "Cash on delivery. Left out: unchanged.",
+            "description": "Cash on delivery. Left out: unchanged; null: VALIDATION_FAILED.",
             "allOf": [
               {
                 "$ref": "#/components/schemas/CodSettingsDto"
@@ -19076,32 +19067,32 @@
             "minimum": 1,
             "maximum": 60,
             "example": 14,
-            "description": "How many days ahead can be booked, counting today: 14 offers today to today + 13. 1 to 60. Left out: unchanged."
+            "description": "How many days ahead can be booked, counting today: 14 offers today to today + 13. 1 to 60. Left out: unchanged; null: VALIDATION_FAILED."
           },
           "minOrderHalalas": {
             "type": "integer",
             "minimum": 0,
             "maximum": 10000000,
             "example": 10000,
-            "description": "The smallest order, in halalas (VAT included), compared with the subtotal before any discount. 0 to 10000000. Left out: unchanged."
+            "description": "The smallest order, in halalas (VAT included), compared with the subtotal before any discount. 0 to 10000000. Left out: unchanged; null: VALIDATION_FAILED."
           },
           "deliveryFeeHalalas": {
             "type": "integer",
             "minimum": 0,
             "maximum": 1000000,
             "example": 2500,
-            "description": "The delivery fee, in halalas (VAT included), added to delivery orders only and never discounted. 0 to 1000000. Left out: unchanged."
+            "description": "The delivery fee, in halalas (VAT included), added to delivery orders only and never discounted. 0 to 1000000. Left out: unchanged; null: VALIDATION_FAILED."
           },
           "complaintWindowHours": {
             "type": "integer",
             "minimum": 1,
             "maximum": 720,
             "example": 48,
-            "description": "How long after delivery a complaint can be opened (complaints: Sprint 5). 1 to 720. Left out: unchanged."
+            "description": "How long after delivery a complaint can be opened (complaints: Sprint 5). 1 to 720. Left out: unchanged; null: VALIDATION_FAILED."
           },
           "closedDays": {
             "maxItems": 366,
-            "description": "The whole list of closed days, at most 366, each date once; replaces the saved list. Left out: unchanged.",
+            "description": "The whole list of closed days, at most 366; replaces the saved list. A date twice: VALIDATION_FAILED `isNotRepeated` on `closedDays.<i>.date`. Left out: unchanged; null: VALIDATION_FAILED.",
             "type": "array",
             "items": {
               "$ref": "#/components/schemas/ClosedDayDto"
@@ -19186,6 +19177,13 @@
           "codEnabled",
           "codMaxOrderHalalas",
           "paused"
+        ]
+      },
+      "FulfilmentMethod": {
+        "type": "string",
+        "enum": [
+          "delivery",
+          "pickup"
         ]
       },
       "CheckoutDayResponseDto": {
@@ -19637,13 +19635,13 @@
         "type": "object",
         "properties": {
           "method": {
-            "type": "string",
-            "enum": [
-              "delivery",
-              "pickup"
-            ],
             "example": "delivery",
-            "description": "Delivered or picked up."
+            "description": "Delivered or picked up.",
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/FulfilmentMethod"
+              }
+            ]
           },
           "addressId": {
             "type": "string",
@@ -19860,7 +19858,7 @@
             ],
             "nullable": true,
             "example": "vacuum",
-            "description": "The chosen packaging (`packagings[].packaging`); null or left out: none."
+            "description": "The chosen packaging (`packagings[].packaging`; `none` is the product’s own \"no packaging\" option); null or left out: the product offers no packaging."
           },
           "exclusionItemIds": {
             "example": [
@@ -19944,7 +19942,7 @@
             ],
             "nullable": true,
             "example": "vacuum",
-            "description": "The chosen packaging (`packagings[].packaging`); null or left out: none."
+            "description": "The chosen packaging (`packagings[].packaging`; `none` is the product’s own \"no packaging\" option); null or left out: the product offers no packaging."
           },
           "exclusionItemIds": {
             "example": [
@@ -20044,13 +20042,13 @@
         "type": "object",
         "properties": {
           "method": {
-            "type": "string",
-            "enum": [
-              "delivery",
-              "pickup"
-            ],
             "example": "delivery",
-            "description": "`delivery` or `pickup`; one the cart’s products allow (FULFILMENT_NOT_SUPPORTED otherwise)."
+            "description": "`delivery` or `pickup`; one the cart’s products allow (FULFILMENT_NOT_SUPPORTED otherwise).",
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/FulfilmentMethod"
+              }
+            ]
           },
           "addressId": {
             "type": "string",
@@ -20138,14 +20136,16 @@
             }
           },
           "startsAt": {
+            "format": "date-time",
             "type": "string",
             "example": "2026-12-01T00:00:00+03:00",
-            "description": "When it starts, ISO 8601 with an offset."
+            "description": "When it starts (UTC)."
           },
           "endsAt": {
+            "format": "date-time",
             "type": "string",
             "example": "2026-12-10T00:00:00+03:00",
-            "description": "When it ends, after startsAt (VALIDATION_FAILED `endBeforeStart` otherwise)."
+            "description": "When it ends (UTC)."
           },
           "usageLimit": {
             "type": "integer",
@@ -20304,12 +20304,12 @@
           "startsAt": {
             "type": "string",
             "example": "2026-12-01T00:00:00+03:00",
-            "description": "When it starts, ISO 8601 with an offset."
+            "description": "When it starts: an ISO 8601 date and time with `Z` or an offset (VALIDATION_FAILED `isInstant` otherwise)."
           },
           "endsAt": {
             "type": "string",
             "example": "2026-12-10T00:00:00+03:00",
-            "description": "When it ends, after startsAt (VALIDATION_FAILED `endBeforeStart` otherwise)."
+            "description": "When it ends, after startsAt (VALIDATION_FAILED `endBeforeStart` otherwise); with `Z` or an offset."
           },
           "usageLimit": {
             "type": "integer",
@@ -20354,7 +20354,7 @@
           "code": {
             "type": "string",
             "example": "EID15",
-            "description": "The code customers type, 3 to 32 letters, digits, `_` or `-`; stored upper case, unique in any case (COUPON_CODE_TAKEN). Left out: unchanged."
+            "description": "The code customers type, 3 to 32 letters, digits, `_` or `-`; stored upper case, unique in any case (COUPON_CODE_TAKEN). Left out: unchanged; null: VALIDATION_FAILED."
           },
           "type": {
             "type": "string",
@@ -20363,14 +20363,14 @@
               "fixed"
             ],
             "example": "percent",
-            "description": "`percent` or `fixed`. Left out: unchanged."
+            "description": "`percent` or `fixed`. Left out: unchanged; null: VALIDATION_FAILED."
           },
           "value": {
             "type": "integer",
             "minimum": 1,
             "maximum": 10000000,
             "example": 15,
-            "description": "percent: 1 to 100 (VALIDATION_FAILED `percent` above); fixed: halalas, 1 to 10000000. Left out: unchanged."
+            "description": "percent: 1 to 100 (VALIDATION_FAILED `percent` above); fixed: halalas, 1 to 10000000. Left out: unchanged; null: VALIDATION_FAILED."
           },
           "maxDiscountHalalas": {
             "type": "integer",
@@ -20392,7 +20392,7 @@
             "example": [
               "7f3a2c1e-0b9d-4e5f-8a6b-1c2d3e4f5a6b"
             ],
-            "description": "The stores it is for, at most 200; empty: every store. Left out: unchanged.",
+            "description": "The stores it is for, at most 200; empty: every store. Left out: unchanged; null: VALIDATION_FAILED.",
             "type": "array",
             "items": {
               "type": "string",
@@ -20403,7 +20403,7 @@
             "example": [
               "2b1c0d9e-8f7a-4b6c-9d5e-4f3a2b1c0d9e"
             ],
-            "description": "The categories whose lines it discounts, at most 200; empty: every line. Left out: unchanged.",
+            "description": "The categories whose lines it discounts, at most 200; empty: every line. Left out: unchanged; null: VALIDATION_FAILED.",
             "type": "array",
             "items": {
               "type": "string",
@@ -20413,12 +20413,12 @@
           "startsAt": {
             "type": "string",
             "example": "2026-12-01T00:00:00+03:00",
-            "description": "When it starts, ISO 8601 with an offset. Left out: unchanged."
+            "description": "When it starts: an ISO 8601 date and time with `Z` or an offset (VALIDATION_FAILED `isInstant` otherwise). Left out: unchanged; null: VALIDATION_FAILED."
           },
           "endsAt": {
             "type": "string",
             "example": "2026-12-10T00:00:00+03:00",
-            "description": "When it ends, after startsAt (VALIDATION_FAILED `endBeforeStart` otherwise). Left out: unchanged."
+            "description": "When it ends, after startsAt (VALIDATION_FAILED `endBeforeStart` otherwise); with `Z` or an offset. Left out: unchanged; null: VALIDATION_FAILED."
           },
           "usageLimit": {
             "type": "integer",
@@ -20439,7 +20439,7 @@
           "isActive": {
             "type": "boolean",
             "example": true,
-            "description": "Switched on; false: no one can use it. Left out: unchanged."
+            "description": "Switched on; false: no one can use it. Left out: unchanged; null: VALIDATION_FAILED."
           }
         }
       },
@@ -20595,93 +20595,17 @@
           "reason"
         ]
       },
-      "PaymentMethodOptionResponseDto": {
+      "PaymentWebhookAckResponseDto": {
         "type": "object",
         "properties": {
-          "method": {
-            "type": "string",
-            "enum": [
-              "mada",
-              "card",
-              "applepay",
-              "cod",
-              "wallet"
-            ],
-            "example": "cod",
-            "description": "The method."
-          },
-          "isAvailable": {
+          "received": {
             "type": "boolean",
             "example": true,
-            "description": "Whether it can be chosen now; `false`: shown disabled with `reason`."
-          },
-          "reason": {
-            "type": "string",
-            "enum": [
-              "insufficient_balance"
-            ],
-            "nullable": true,
-            "example": "insufficient_balance",
-            "description": "Why not, when not available; null otherwise."
+            "description": "Always true: the event was recorded (a repeat of an event already processed changes nothing)."
           }
         },
         "required": [
-          "method",
-          "isAvailable",
-          "reason"
-        ]
-      },
-      "PaymentMethodListResponseDto": {
-        "type": "object",
-        "properties": {
-          "items": {
-            "description": "The methods, in display order. Cash on delivery is left out when it is off, over its limit or not allowed for the order type.",
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/PaymentMethodOptionResponseDto"
-            }
-          },
-          "walletBalanceHalalas": {
-            "type": "integer",
-            "example": 5000,
-            "description": "The customer’s wallet balance, in halalas; any part of it can pay with another method."
-          },
-          "totalHalalas": {
-            "type": "integer",
-            "example": 196500,
-            "description": "The total these methods are for, in halalas."
-          }
-        },
-        "required": [
-          "items",
-          "walletBalanceHalalas",
-          "totalHalalas"
-        ]
-      },
-      "CreatePaymentDto": {
-        "type": "object",
-        "properties": {
-          "method": {
-            "type": "string",
-            "enum": [
-              "mada",
-              "card",
-              "applepay",
-              "cod",
-              "wallet"
-            ],
-            "example": "mada",
-            "description": "The method."
-          },
-          "walletAmountHalalas": {
-            "type": "integer",
-            "minimum": 0,
-            "example": 5000,
-            "description": "How much of the total to take from the wallet, in halalas, 0 up to the total (the whole total only with `wallet`); left out: 0. More than the balance: WALLET_INSUFFICIENT."
-          }
-        },
-        "required": [
-          "method"
+          "received"
         ]
       },
       "OrderStatus": {
@@ -20768,13 +20692,143 @@
           "phone": {
             "type": "string",
             "example": "+966500000001",
-            "description": "The customer’s mobile, `+9665…`."
+            "description": "The customer’s mobile: in full for admins, masked for the vendor (`+9665•••••01`)."
           }
         },
         "required": [
           "id",
           "name",
           "phone"
+        ]
+      },
+      "PaymentMethod": {
+        "type": "string",
+        "enum": [
+          "mada",
+          "card",
+          "applepay",
+          "cod",
+          "wallet"
+        ],
+        "description": "The method chosen (beside any wallet part)."
+      },
+      "OrderSummaryResponseDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "example": "7f3a2c1e-0b9d-4e5f-8a6b-1c2d3e4f5a6b",
+            "description": "The order (UUID)."
+          },
+          "number": {
+            "type": "string",
+            "example": "JZ-261122-0042",
+            "description": "The order number customers and staff quote: `JZ-` + the Riyadh date `YYMMDD` + `-` + a 4-digit sequence of that day."
+          },
+          "status": {
+            "example": "confirmed",
+            "description": "Where the order is.",
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/OrderStatus"
+              }
+            ]
+          },
+          "orderType": {
+            "example": "carcass",
+            "description": "The kind of order, from its lines; `mixed` for several kinds.",
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/OrderType"
+              }
+            ]
+          },
+          "fulfilment": {
+            "example": "delivery",
+            "description": "Delivered or picked up.",
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/FulfilmentMethod"
+              }
+            ]
+          },
+          "fulfilmentDate": {
+            "type": "string",
+            "example": "2026-11-24",
+            "description": "The delivery or pickup day, Riyadh calendar `yyyy-MM-dd`."
+          },
+          "vendor": {
+            "description": "The store that fulfils it.",
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/OrderVendorResponseDto"
+              }
+            ]
+          },
+          "customer": {
+            "description": "Who placed it.",
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/OrderCustomerResponseDto"
+              }
+            ]
+          },
+          "paymentMethod": {
+            "example": "mada",
+            "description": "The method chosen (beside any wallet part).",
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/PaymentMethod"
+              }
+            ]
+          },
+          "totalHalalas": {
+            "type": "integer",
+            "example": 196500,
+            "description": "What the customer pays in all, in halalas, VAT included."
+          },
+          "createdAt": {
+            "format": "date-time",
+            "type": "string",
+            "example": "2026-11-22T10:00:00.000Z",
+            "description": "When it was placed (UTC)."
+          }
+        },
+        "required": [
+          "id",
+          "number",
+          "status",
+          "orderType",
+          "fulfilment",
+          "fulfilmentDate",
+          "vendor",
+          "customer",
+          "paymentMethod",
+          "totalHalalas",
+          "createdAt"
+        ]
+      },
+      "OrderPageResponseDto": {
+        "type": "object",
+        "properties": {
+          "items": {
+            "description": "The orders on this page.",
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/OrderSummaryResponseDto"
+            }
+          },
+          "nextCursor": {
+            "type": "string",
+            "nullable": true,
+            "example": "eyJjIjoiMjAyNi0xMS0yMlQxMDowMDowMC4wMDBaIn0",
+            "description": "Send as `cursor` for the next page; null on the last."
+          }
+        },
+        "required": [
+          "items",
+          "nextCursor"
         ]
       },
       "OrderItemResponseDto": {
@@ -20944,35 +20998,40 @@
           "driverInstructions"
         ]
       },
+      "PaymentStatus": {
+        "type": "string",
+        "enum": [
+          "initiated",
+          "authorized",
+          "captured",
+          "failed",
+          "cancelled",
+          "refunded",
+          "partially_refunded"
+        ],
+        "description": "The latest payment’s status; null when nothing is charged online (cash on delivery, wallet only)."
+      },
       "OrderPaymentSummaryResponseDto": {
         "type": "object",
         "properties": {
           "method": {
-            "type": "string",
-            "enum": [
-              "mada",
-              "card",
-              "applepay",
-              "cod",
-              "wallet"
-            ],
             "example": "mada",
-            "description": "The method chosen for what the wallet does not cover."
+            "description": "The method chosen for what the wallet does not cover.",
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/PaymentMethod"
+              }
+            ]
           },
           "status": {
-            "type": "string",
-            "enum": [
-              "initiated",
-              "authorized",
-              "captured",
-              "failed",
-              "cancelled",
-              "refunded",
-              "partially_refunded"
-            ],
             "nullable": true,
             "example": "captured",
-            "description": "The latest payment’s status; null when nothing is charged online (cash on delivery, wallet only)."
+            "description": "The latest payment’s status; null when nothing is charged online (cash on delivery, wallet only).",
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/PaymentStatus"
+              }
+            ]
           },
           "paymentId": {
             "type": "string",
@@ -21150,13 +21209,13 @@
             ]
           },
           "fulfilment": {
-            "type": "string",
-            "enum": [
-              "delivery",
-              "pickup"
-            ],
             "example": "delivery",
-            "description": "Delivered or picked up."
+            "description": "Delivered or picked up.",
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/FulfilmentMethod"
+              }
+            ]
           },
           "fulfilmentDate": {
             "type": "string",
@@ -21180,16 +21239,13 @@
             ]
           },
           "paymentMethod": {
-            "type": "string",
-            "enum": [
-              "mada",
-              "card",
-              "applepay",
-              "cod",
-              "wallet"
-            ],
             "example": "mada",
-            "description": "The method chosen (beside any wallet part)."
+            "description": "The method chosen (beside any wallet part).",
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/PaymentMethod"
+              }
+            ]
           },
           "totalHalalas": {
             "type": "integer",
@@ -21348,6 +21404,111 @@
           "allowedTransitions"
         ]
       },
+      "TransitionOrderDto": {
+        "type": "object",
+        "properties": {
+          "to": {
+            "example": "preparing",
+            "description": "The status to move to; one of the order’s `allowedTransitions` (ORDER_TRANSITION_NOT_ALLOWED otherwise).",
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/OrderStatus"
+              }
+            ]
+          },
+          "note": {
+            "type": "string",
+            "example": "العميل ما رد على الاتصال",
+            "description": "A note kept in the history, up to 500 characters; required when moving to `cancelled` (VALIDATION_FAILED on `note` without it): for a rejected cash-on-delivery order, the reason the customer sees."
+          }
+        },
+        "required": [
+          "to"
+        ]
+      },
+      "PaymentMethodOptionResponseDto": {
+        "type": "object",
+        "properties": {
+          "method": {
+            "example": "cod",
+            "description": "The method.",
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/PaymentMethod"
+              }
+            ]
+          },
+          "isAvailable": {
+            "type": "boolean",
+            "example": true,
+            "description": "Whether it can be chosen now; `false`: shown disabled with `reason`."
+          },
+          "reason": {
+            "type": "string",
+            "enum": [
+              "INSUFFICIENT_BALANCE"
+            ],
+            "nullable": true,
+            "example": "INSUFFICIENT_BALANCE",
+            "description": "Why not, when not available; null otherwise."
+          }
+        },
+        "required": [
+          "method",
+          "isAvailable",
+          "reason"
+        ]
+      },
+      "PaymentMethodListResponseDto": {
+        "type": "object",
+        "properties": {
+          "items": {
+            "description": "The methods, in display order. Cash on delivery is left out when it is off, over its limit or not allowed for the order type.",
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/PaymentMethodOptionResponseDto"
+            }
+          },
+          "walletBalanceHalalas": {
+            "type": "integer",
+            "example": 5000,
+            "description": "The customer’s wallet balance, in halalas; any part of it can pay with another method."
+          },
+          "totalHalalas": {
+            "type": "integer",
+            "example": 196500,
+            "description": "The total these methods are for, in halalas."
+          }
+        },
+        "required": [
+          "items",
+          "walletBalanceHalalas",
+          "totalHalalas"
+        ]
+      },
+      "CreatePaymentDto": {
+        "type": "object",
+        "properties": {
+          "paymentMethod": {
+            "example": "mada",
+            "description": "The method, from GET /v1/customer/checkout/payment-methods?orderId=.",
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/PaymentMethod"
+              }
+            ]
+          },
+          "walletAmountHalalas": {
+            "type": "integer",
+            "minimum": 0,
+            "example": 5000,
+            "description": "Part of the total to take from the wallet with another method, in halalas, 0 to less than the total; left out: 0. With `wallet` leave it out: the whole total is taken. More than the balance: WALLET_INSUFFICIENT."
+          }
+        },
+        "required": [
+          "paymentMethod"
+        ]
+      },
       "PaymentNextActionResponseDto": {
         "type": "object",
         "properties": {
@@ -21386,30 +21547,22 @@
             "description": "The payment (UUID)."
           },
           "method": {
-            "type": "string",
-            "enum": [
-              "mada",
-              "card",
-              "applepay",
-              "cod",
-              "wallet"
-            ],
             "example": "mada",
-            "description": "How it is paid."
+            "description": "How it is paid.",
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/PaymentMethod"
+              }
+            ]
           },
           "status": {
-            "type": "string",
-            "enum": [
-              "initiated",
-              "authorized",
-              "captured",
-              "failed",
-              "cancelled",
-              "refunded",
-              "partially_refunded"
-            ],
             "example": "initiated",
-            "description": "Where it is."
+            "description": "Where it is.",
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/PaymentStatus"
+              }
+            ]
           },
           "amountHalalas": {
             "type": "integer",
@@ -21455,7 +21608,7 @@
           },
           "payment": {
             "nullable": true,
-            "description": "The payment attempt; null when no payment record is made (cash on delivery).",
+            "description": "The payment attempt; null when nothing is paid online (cash on delivery, wallet only): no payment record is made.",
             "type": "object",
             "allOf": [
               {
@@ -21469,183 +21622,23 @@
           "payment"
         ]
       },
-      "PaymentWebhookAckResponseDto": {
-        "type": "object",
-        "properties": {
-          "received": {
-            "type": "boolean",
-            "example": true,
-            "description": "Always true: the event was recorded (a repeat of an event already processed changes nothing)."
-          }
-        },
-        "required": [
-          "received"
-        ]
-      },
-      "OrderSummaryResponseDto": {
-        "type": "object",
-        "properties": {
-          "id": {
-            "type": "string",
-            "format": "uuid",
-            "example": "7f3a2c1e-0b9d-4e5f-8a6b-1c2d3e4f5a6b",
-            "description": "The order (UUID)."
-          },
-          "number": {
-            "type": "string",
-            "example": "JZ-261122-0042",
-            "description": "The order number customers and staff quote: `JZ-` + the Riyadh date `YYMMDD` + `-` + a 4-digit sequence of that day."
-          },
-          "status": {
-            "example": "confirmed",
-            "description": "Where the order is.",
-            "allOf": [
-              {
-                "$ref": "#/components/schemas/OrderStatus"
-              }
-            ]
-          },
-          "orderType": {
-            "example": "carcass",
-            "description": "The kind of order, from its lines; `mixed` for several kinds.",
-            "allOf": [
-              {
-                "$ref": "#/components/schemas/OrderType"
-              }
-            ]
-          },
-          "fulfilment": {
-            "type": "string",
-            "enum": [
-              "delivery",
-              "pickup"
-            ],
-            "example": "delivery",
-            "description": "Delivered or picked up."
-          },
-          "fulfilmentDate": {
-            "type": "string",
-            "example": "2026-11-24",
-            "description": "The delivery or pickup day, Riyadh calendar `yyyy-MM-dd`."
-          },
-          "vendor": {
-            "description": "The store that fulfils it.",
-            "allOf": [
-              {
-                "$ref": "#/components/schemas/OrderVendorResponseDto"
-              }
-            ]
-          },
-          "customer": {
-            "description": "Who placed it.",
-            "allOf": [
-              {
-                "$ref": "#/components/schemas/OrderCustomerResponseDto"
-              }
-            ]
-          },
-          "paymentMethod": {
-            "type": "string",
-            "enum": [
-              "mada",
-              "card",
-              "applepay",
-              "cod",
-              "wallet"
-            ],
-            "example": "mada",
-            "description": "The method chosen (beside any wallet part)."
-          },
-          "totalHalalas": {
-            "type": "integer",
-            "example": 196500,
-            "description": "What the customer pays in all, in halalas, VAT included."
-          },
-          "createdAt": {
-            "format": "date-time",
-            "type": "string",
-            "example": "2026-11-22T10:00:00.000Z",
-            "description": "When it was placed (UTC)."
-          }
-        },
-        "required": [
-          "id",
-          "number",
-          "status",
-          "orderType",
-          "fulfilment",
-          "fulfilmentDate",
-          "vendor",
-          "customer",
-          "paymentMethod",
-          "totalHalalas",
-          "createdAt"
-        ]
-      },
-      "OrderPageResponseDto": {
-        "type": "object",
-        "properties": {
-          "items": {
-            "description": "The orders on this page.",
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/OrderSummaryResponseDto"
-            }
-          },
-          "nextCursor": {
-            "type": "string",
-            "nullable": true,
-            "example": "eyJjIjoiMjAyNi0xMS0yMlQxMDowMDowMC4wMDBaIn0",
-            "description": "Send as `cursor` for the next page; null on the last."
-          }
-        },
-        "required": [
-          "items",
-          "nextCursor"
-        ]
-      },
-      "TransitionOrderDto": {
-        "type": "object",
-        "properties": {
-          "to": {
-            "example": "preparing",
-            "description": "The status to move to; one of the order’s `allowedTransitions` (ORDER_TRANSITION_NOT_ALLOWED otherwise).",
-            "allOf": [
-              {
-                "$ref": "#/components/schemas/OrderStatus"
-              }
-            ]
-          },
-          "note": {
-            "type": "string",
-            "example": "العميل ما رد على الاتصال",
-            "description": "A note kept in the history, up to 500 characters; required when cancelling (rejecting a cash-on-delivery order: the reason the customer sees)."
-          }
-        },
-        "required": [
-          "to"
-        ]
-      },
       "PlaceOrderDto": {
         "type": "object",
         "properties": {
           "paymentMethod": {
-            "type": "string",
-            "enum": [
-              "mada",
-              "card",
-              "applepay",
-              "cod",
-              "wallet"
-            ],
             "example": "mada",
-            "description": "The method, from GET /v1/customer/checkout/payment-methods."
+            "description": "The method, from GET /v1/customer/checkout/payment-methods.",
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/PaymentMethod"
+              }
+            ]
           },
           "walletAmountHalalas": {
             "type": "integer",
             "minimum": 0,
             "example": 5000,
-            "description": "How much of the total to take from the wallet, in halalas, 0 up to the total (the whole total only with `wallet`); left out: 0. More than the balance: WALLET_INSUFFICIENT."
+            "description": "Part of the total to take from the wallet with another method, in halalas, 0 to less than the total; left out: 0. With `wallet` leave it out: the whole total is taken. More than the balance: WALLET_INSUFFICIENT."
           },
           "notes": {
             "type": "string",

@@ -184,8 +184,8 @@ src/
                               (api/ only so far). The Sprint 3 contract (2026-11-23): controllers and DTOs whose
                               routes answer NOT_IMPLEMENTED (common/errors/not-implemented.ts) until each task
                               (SCH-API-1/2, CRT-API-1/3, WAL-API-1, PAY-API-1, ORD-API-1/2/3) lands; a task adds
-                              the layers it needs. Payment and order enums live in orders/domain (payments imports
-                              orders, never the reverse); settings holds ORDER_TYPES and FULFILMENT_METHODS
+                              the layers it needs. Payment enums in payments/domain, order enums in orders/domain;
+                              checkout holds the routes that join cart, orders, payments and wallet
 test/
   *.e2e-spec.ts               health, errors, request-id, database, queue, event-bus, api-docs, http-security,
                               rate-limit, startup, logging, redis-logging, shutdown, media (fake storage),

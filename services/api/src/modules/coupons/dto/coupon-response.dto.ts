@@ -76,16 +76,15 @@ export class CouponResponseDto {
 
   @ApiProperty({
     example: '2026-12-01T00:00:00+03:00',
-    description: 'When it starts, ISO 8601 with an offset.',
+    description: 'When it starts (UTC).',
   })
-  startsAt!: string;
+  startsAt!: Date;
 
   @ApiProperty({
     example: '2026-12-10T00:00:00+03:00',
-    description:
-      'When it ends, after startsAt (VALIDATION_FAILED `endBeforeStart` otherwise).',
+    description: 'When it ends (UTC).',
   })
-  endsAt!: string;
+  endsAt!: Date;
 
   @ApiProperty({
     type: 'integer',

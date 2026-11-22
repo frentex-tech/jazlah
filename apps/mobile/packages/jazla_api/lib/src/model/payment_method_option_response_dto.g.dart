@@ -14,10 +14,9 @@ PaymentMethodOptionResponseDto _$PaymentMethodOptionResponseDtoFromJson(
     method: $checkedConvert(
       'method',
       (v) => $enumDecode(
-        _$PaymentMethodOptionResponseDtoMethodEnumEnumMap,
+        _$PaymentMethodEnumMap,
         v,
-        unknownValue:
-            PaymentMethodOptionResponseDtoMethodEnum.unknownDefaultOpenApi,
+        unknownValue: PaymentMethod.unknownDefaultOpenApi,
       ),
     ),
     isAvailable: $checkedConvert('isAvailable', (v) => v as bool),
@@ -37,24 +36,23 @@ PaymentMethodOptionResponseDto _$PaymentMethodOptionResponseDtoFromJson(
 Map<String, dynamic> _$PaymentMethodOptionResponseDtoToJson(
   PaymentMethodOptionResponseDto instance,
 ) => <String, dynamic>{
-  'method': _$PaymentMethodOptionResponseDtoMethodEnumEnumMap[instance.method]!,
+  'method': _$PaymentMethodEnumMap[instance.method]!,
   'isAvailable': instance.isAvailable,
   'reason': _$PaymentMethodOptionResponseDtoReasonEnumEnumMap[instance.reason],
 };
 
-const _$PaymentMethodOptionResponseDtoMethodEnumEnumMap = {
-  PaymentMethodOptionResponseDtoMethodEnum.mada: 'mada',
-  PaymentMethodOptionResponseDtoMethodEnum.card: 'card',
-  PaymentMethodOptionResponseDtoMethodEnum.applepay: 'applepay',
-  PaymentMethodOptionResponseDtoMethodEnum.cod: 'cod',
-  PaymentMethodOptionResponseDtoMethodEnum.wallet: 'wallet',
-  PaymentMethodOptionResponseDtoMethodEnum.unknownDefaultOpenApi:
-      'unknown_default_open_api',
+const _$PaymentMethodEnumMap = {
+  PaymentMethod.mada: 'mada',
+  PaymentMethod.card: 'card',
+  PaymentMethod.applepay: 'applepay',
+  PaymentMethod.cod: 'cod',
+  PaymentMethod.wallet: 'wallet',
+  PaymentMethod.unknownDefaultOpenApi: 'unknown_default_open_api',
 };
 
 const _$PaymentMethodOptionResponseDtoReasonEnumEnumMap = {
-  PaymentMethodOptionResponseDtoReasonEnum.insufficientBalance:
-      'insufficient_balance',
+  PaymentMethodOptionResponseDtoReasonEnum.INSUFFICIENT_BALANCE:
+      'INSUFFICIENT_BALANCE',
   PaymentMethodOptionResponseDtoReasonEnum.unknownDefaultOpenApi:
       'unknown_default_open_api',
 };

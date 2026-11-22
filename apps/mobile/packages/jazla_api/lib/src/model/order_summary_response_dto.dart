@@ -7,6 +7,8 @@ import 'package:jazla_api/src/model/order_vendor_response_dto.dart';
 import 'package:jazla_api/src/model/order_status.dart';
 import 'package:jazla_api/src/model/order_type.dart';
 import 'package:jazla_api/src/model/order_customer_response_dto.dart';
+import 'package:jazla_api/src/model/payment_method.dart';
+import 'package:jazla_api/src/model/fulfilment_method.dart';
 import 'package:json_annotation/json_annotation.dart';
 
 part 'order_summary_response_dto.g.dart';
@@ -105,11 +107,11 @@ class OrderSummaryResponseDto {
     name: r'fulfilment',
     required: true,
     includeIfNull: false,
-  unknownEnumValue: OrderSummaryResponseDtoFulfilmentEnum.unknownDefaultOpenApi,
+  unknownEnumValue: FulfilmentMethod.unknownDefaultOpenApi,
   )
 
 
-  final OrderSummaryResponseDtoFulfilmentEnum fulfilment;
+  final FulfilmentMethod fulfilment;
 
 
 
@@ -158,11 +160,11 @@ class OrderSummaryResponseDto {
     name: r'paymentMethod',
     required: true,
     includeIfNull: false,
-  unknownEnumValue: OrderSummaryResponseDtoPaymentMethodEnum.unknownDefaultOpenApi,
+  unknownEnumValue: PaymentMethod.unknownDefaultOpenApi,
   )
 
 
-  final OrderSummaryResponseDtoPaymentMethodEnum paymentMethod;
+  final PaymentMethod paymentMethod;
 
 
 
@@ -232,55 +234,4 @@ class OrderSummaryResponseDto {
   }
 
 }
-
-/// Delivered or picked up.
-enum OrderSummaryResponseDtoFulfilmentEnum {
-    /// Delivered or picked up.
-@JsonValue(r'delivery')
-delivery(r'delivery'),
-    /// Delivered or picked up.
-@JsonValue(r'pickup')
-pickup(r'pickup'),
-    /// Delivered or picked up.
-@JsonValue(r'unknown_default_open_api')
-unknownDefaultOpenApi(r'unknown_default_open_api');
-
-const OrderSummaryResponseDtoFulfilmentEnum(this.value);
-
-final String value;
-
-@override
-String toString() => value;
-}
-
-
-/// The method chosen (beside any wallet part).
-enum OrderSummaryResponseDtoPaymentMethodEnum {
-    /// The method chosen (beside any wallet part).
-@JsonValue(r'mada')
-mada(r'mada'),
-    /// The method chosen (beside any wallet part).
-@JsonValue(r'card')
-card(r'card'),
-    /// The method chosen (beside any wallet part).
-@JsonValue(r'applepay')
-applepay(r'applepay'),
-    /// The method chosen (beside any wallet part).
-@JsonValue(r'cod')
-cod(r'cod'),
-    /// The method chosen (beside any wallet part).
-@JsonValue(r'wallet')
-wallet(r'wallet'),
-    /// The method chosen (beside any wallet part).
-@JsonValue(r'unknown_default_open_api')
-unknownDefaultOpenApi(r'unknown_default_open_api');
-
-const OrderSummaryResponseDtoPaymentMethodEnum(this.value);
-
-final String value;
-
-@override
-String toString() => value;
-}
-
 

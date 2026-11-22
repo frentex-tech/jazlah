@@ -1744,7 +1744,7 @@ export interface paths {
         };
         /**
          * Days I can choose
-         * @description Customer app, checkout day picker. Every day of the booking horizon from today (Riyadh), for the cart’s store and kinds of order: the cut-offs and lead days, closed days, the store’s capacity and, for pickup, its hours decide each day. Refetch after changing the method or the address. CART_EMPTY for an empty cart; FULFILMENT_NOT_SUPPORTED when the cart’s products do not allow the method. ORDERING_PAUSED while orders are paused (`details.messageAr`, `details.messageEn`: the admin’s message). Until SCH-API-2 lands: NOT_IMPLEMENTED.
+         * @description Customer app, checkout day picker. Every day of the booking horizon from today (Riyadh), for the cart’s store and kinds of order: the cut-offs and lead days, closed days, the store’s capacity and, for pickup, its hours decide each day. Refetch after changing the method or the address. Unpaid orders past `expiresAt` no longer count against a day. CART_EMPTY for an empty cart; FULFILMENT_NOT_SUPPORTED when the cart’s products do not allow the method. ORDERING_PAUSED while orders are paused (`details.messageAr`, `details.messageEn`: the admin’s message). Until SCH-API-2 lands: NOT_IMPLEMENTED.
          */
         get: operations["customerListCheckoutDays"];
         put?: never;
@@ -1838,7 +1838,7 @@ export interface paths {
         put?: never;
         /**
          * Add to my cart
-         * @description Customer app, product page "add to cart". Prices the selection with the catalog’s rules; the same configuration (size, options, note) adds to its line’s quantity. A product of another store: CART_VENDOR_MISMATCH (`details.vendorId`, `details.vendorName`: the cart’s store) unless `replaceCart` is true. Selection refusals, in this order: PRODUCT_UNAVAILABLE, OPTION_NOT_IN_PRODUCT, SIZE_UNAVAILABLE, INCOMPATIBLE_CUTTING_PACKAGING, OPTION_REQUIRED. ORDERING_PAUSED while orders are paused (`details.messageAr`, `details.messageEn`: the admin’s message). Until CRT-API-1 lands: NOT_IMPLEMENTED.
+         * @description Customer app, product page "add to cart". Prices the selection with the catalog’s rules; the same configuration (size, options, note) adds to its line’s quantity (past 99: VALIDATION_FAILED on `quantity`). A product of another store: CART_VENDOR_MISMATCH (`details.vendorId`, `details.vendorName`: the cart’s store) unless `replaceCart` is true. Selection refusals, in this order: PRODUCT_UNAVAILABLE, OPTION_NOT_IN_PRODUCT, SIZE_UNAVAILABLE, INCOMPATIBLE_CUTTING_PACKAGING, OPTION_REQUIRED. ORDERING_PAUSED while orders are paused (`details.messageAr`, `details.messageEn`: the admin’s message). Until CRT-API-1 lands: NOT_IMPLEMENTED.
          */
         post: operations["customerAddCartItem"];
         delete?: never;
@@ -2074,49 +2074,9 @@ export interface paths {
         put?: never;
         /**
          * Credit or debit a customer’s wallet
-         * @description Admin dashboard, customer screen (and staging demos). Recorded in the wallet ledger and the audit log with the reason. WALLET_INSUFFICIENT (`details.balanceHalalas`) for a debit beyond the balance; NOT_FOUND for an unknown customer. Until WAL-API-1 lands: NOT_IMPLEMENTED.
+         * @description Admin dashboard, customer screen (and staging demos). A retry with the same `Idempotency-Key` answers the first result and moves nothing. Recorded in the wallet ledger and the audit log with the reason. WALLET_INSUFFICIENT (`details.balanceHalalas`) for a debit beyond the balance; NOT_FOUND for an unknown customer. Until WAL-API-1 lands: NOT_IMPLEMENTED.
          */
         post: operations["adminAdjustCustomerWallet"];
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/v1/customer/checkout/payment-methods": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /**
-         * How I can pay
-         * @description Customer app, checkout payment step (or paying an unpaid order again with `orderId`): the methods for the cart’s (or the order’s) total and kinds, and the wallet balance. NOT_FOUND for an order that is not the customer’s; ORDER_NOT_PAYABLE for one no longer waiting for payment; CART_EMPTY without `orderId` and an empty cart. Until PAY-API-1 lands: NOT_IMPLEMENTED.
-         */
-        get: operations["customerListPaymentMethods"];
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/v1/customer/orders/{id}/payments": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        /**
-         * Pay an unpaid order again
-         * @description Customer app, after a failed or abandoned payment, while the order is `pending_payment` (see `expiresAt`). One open payment per order: while the latest is still `initiated` with the same method, it is answered again (with its `nextAction`) and nothing new is made; with another method, PAYMENT_IN_PROGRESS (`details.paymentId`) until it ends. `wallet` or a wallet part is taken at once; cash on delivery follows the confirmation setting. ORDER_NOT_PAYABLE: the order is paid, cancelled or expired. PAYMENT_METHOD_NOT_AVAILABLE (`details.method`); WALLET_INSUFFICIENT (`details.balanceHalalas`). NOT_FOUND for another customer’s order. Until PAY-API-1 lands: NOT_IMPLEMENTED.
-         */
-        post: operations["customerCreateOrderPayment"];
         delete?: never;
         options?: never;
         head?: never;
@@ -2152,7 +2112,7 @@ export interface paths {
         };
         /**
          * My orders
-         * @description Customer app, orders tab: newest first, `current` or `past`. An order past `expiresAt` and still unpaid is cancelled when read (workers are off on staging), so the answer is always current. Until ORD-API-3 lands: NOT_IMPLEMENTED.
+         * @description Customer app, orders tab: newest first, `current` or `past`. An order past `expiresAt` and still unpaid is cancelled when read (workers are off on staging), so the answer is always current; capacity, coupon use and wallet reads treat such orders as already released. Until ORD-API-3 lands: NOT_IMPLEMENTED.
          */
         get: operations["customerListOrders"];
         put?: never;
@@ -2176,7 +2136,7 @@ export interface paths {
         };
         /**
          * One of my orders
-         * @description Customer app, order detail, and the payment result: poll it after the payment page closes (every 2 s, up to 60 s): paid once the status is neither `pending_payment` nor `cancelled`. Carries the store’s phone and location. Cancelling is Sprint 4 (CAN-API-1). An order past `expiresAt` and still unpaid is cancelled when read (workers are off on staging), so the answer is always current. NOT_FOUND for another customer’s order. Until ORD-API-3 lands: NOT_IMPLEMENTED.
+         * @description Customer app, order detail, and the payment result: poll it after the payment page closes (every 2 s, up to 60 s): paid once the status is neither `pending_payment` nor `cancelled`. Carries the store’s phone and location. Cancelling is Sprint 4 (CAN-API-1). An order past `expiresAt` and still unpaid is cancelled when read (workers are off on staging), so the answer is always current; capacity, coupon use and wallet reads treat such orders as already released. NOT_FOUND for another customer’s order. Until ORD-API-3 lands: NOT_IMPLEMENTED.
          */
         get: operations["customerGetOrder"];
         put?: never;
@@ -2196,7 +2156,7 @@ export interface paths {
         };
         /**
          * Orders
-         * @description Vendor dashboard, orders list: the vendor’s own orders, newest first. An order past `expiresAt` and still unpaid is cancelled when read (workers are off on staging), so the answer is always current. Until ORD-API-3 lands: NOT_IMPLEMENTED.
+         * @description Vendor dashboard, orders list: the vendor’s own orders, newest first. An order past `expiresAt` and still unpaid is cancelled when read (workers are off on staging), so the answer is always current; capacity, coupon use and wallet reads treat such orders as already released. Until ORD-API-3 lands: NOT_IMPLEMENTED.
          */
         get: operations["vendorListOrders"];
         put?: never;
@@ -2216,7 +2176,7 @@ export interface paths {
         };
         /**
          * One order
-         * @description Vendor dashboard, order detail, with `allowedTransitions` for the caller. An order past `expiresAt` and still unpaid is cancelled when read (workers are off on staging), so the answer is always current. NOT_FOUND for an unknown order or another vendor’s. Until ORD-API-3 lands: NOT_IMPLEMENTED.
+         * @description Vendor dashboard, order detail, with `allowedTransitions` for the caller. An order past `expiresAt` and still unpaid is cancelled when read (workers are off on staging), so the answer is always current; capacity, coupon use and wallet reads treat such orders as already released. NOT_FOUND for an unknown order or another vendor’s. Until ORD-API-3 lands: NOT_IMPLEMENTED.
          */
         get: operations["vendorGetOrder"];
         put?: never;
@@ -2256,7 +2216,7 @@ export interface paths {
         };
         /**
          * Orders
-         * @description Admin dashboard, orders list: every order, with a vendor filter, newest first. An order past `expiresAt` and still unpaid is cancelled when read (workers are off on staging), so the answer is always current. Until ORD-API-3 lands: NOT_IMPLEMENTED.
+         * @description Admin dashboard, orders list: every order, with a vendor filter, newest first. An order past `expiresAt` and still unpaid is cancelled when read (workers are off on staging), so the answer is always current; capacity, coupon use and wallet reads treat such orders as already released. Until ORD-API-3 lands: NOT_IMPLEMENTED.
          */
         get: operations["adminListOrders"];
         put?: never;
@@ -2276,7 +2236,7 @@ export interface paths {
         };
         /**
          * One order
-         * @description Admin dashboard, order detail, with `allowedTransitions` for the caller. An order past `expiresAt` and still unpaid is cancelled when read (workers are off on staging), so the answer is always current. NOT_FOUND for an unknown order. Until ORD-API-3 lands: NOT_IMPLEMENTED.
+         * @description Admin dashboard, order detail, with `allowedTransitions` for the caller. An order past `expiresAt` and still unpaid is cancelled when read (workers are off on staging), so the answer is always current; capacity, coupon use and wallet reads treat such orders as already released. NOT_FOUND for an unknown order. Until ORD-API-3 lands: NOT_IMPLEMENTED.
          */
         get: operations["adminGetOrder"];
         put?: never;
@@ -2301,6 +2261,46 @@ export interface paths {
          * @description Admin dashboard, order actions. Moves the order along its state machine: `to` must be one of the order’s `allowedTransitions` for this caller, else ORDER_TRANSITION_NOT_ALLOWED (`details.from`, `details.to`). Recorded in the history with the note; every move is published to the dashboards and the customer. Rejecting a cash-on-delivery order under review is `{ to: "cancelled", note: <reason> }`. NOT_FOUND for an unknown order. Until ORD-API-2 lands: NOT_IMPLEMENTED.
          */
         post: operations["adminTransitionOrder"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/customer/checkout/payment-methods": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * How I can pay
+         * @description Customer app, checkout payment step (or paying an unpaid order again with `orderId`): the methods for the cart’s (or the order’s) total and kinds, and the wallet balance. NOT_FOUND for an order that is not the customer’s; ORDER_NOT_PAYABLE for one no longer waiting for payment; CART_EMPTY without `orderId` and an empty cart. Until PAY-API-1 lands: NOT_IMPLEMENTED.
+         */
+        get: operations["customerListPaymentMethods"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/customer/orders/{id}/payments": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Pay an unpaid order again
+         * @description Customer app, after a failed or abandoned payment, while the order is `pending_payment` (see `expiresAt`). One open payment per order: while the latest is still `initiated` with the same method, it is answered again (with its `nextAction`) and nothing new is made; with another method, PAYMENT_IN_PROGRESS (`details.paymentId`) until it ends. An `initiated` payment ends when the provider reports it, or 10 minutes after it started (then `cancelled`, checked when read, so another method can still be chosen before the order expires). `wallet` or a wallet part is taken at once; cash on delivery follows the confirmation setting. ORDER_NOT_PAYABLE: the order is paid, cancelled or expired. PAYMENT_METHOD_NOT_AVAILABLE (`details.method`); WALLET_INSUFFICIENT (`details.balanceHalalas`). NOT_FOUND for another customer’s order. Until PAY-API-1 lands: NOT_IMPLEMENTED.
+         */
+        post: operations["customerCreateOrderPayment"];
         delete?: never;
         options?: never;
         head?: never;
@@ -4738,35 +4738,35 @@ export interface components {
             updatedAt: string;
         };
         UpdateOperationsSettingsDto: {
-            /** @description The delivery window every delivery day uses, Riyadh time. Left out: unchanged. */
+            /** @description The delivery window every delivery day uses, Riyadh time. Left out: unchanged; null: VALIDATION_FAILED. */
             deliveryWindow?: components["schemas"]["TimeWindowDto"];
-            /** @description The cut-off and lead days of each kind of order. Left out: unchanged. */
+            /** @description The cut-off and lead days of each kind of order. Left out: unchanged; null: VALIDATION_FAILED. */
             cutoffs?: components["schemas"]["CutoffsDto"];
-            /** @description Each vendor’s daily capacity unless it has its own (PUT /v1/admin/vendors/{id}/capacity). Left out: unchanged. */
+            /** @description Each vendor’s daily capacity unless it has its own (PUT /v1/admin/vendors/{id}/capacity). Left out: unchanged; null: VALIDATION_FAILED. */
             defaultCapacity?: components["schemas"]["DefaultCapacityDto"];
-            /** @description Cash on delivery. Left out: unchanged. */
+            /** @description Cash on delivery. Left out: unchanged; null: VALIDATION_FAILED. */
             cod?: components["schemas"]["CodSettingsDto"];
             /**
-             * @description How many days ahead can be booked, counting today: 14 offers today to today + 13. 1 to 60. Left out: unchanged.
+             * @description How many days ahead can be booked, counting today: 14 offers today to today + 13. 1 to 60. Left out: unchanged; null: VALIDATION_FAILED.
              * @example 14
              */
             bookingHorizonDays?: number;
             /**
-             * @description The smallest order, in halalas (VAT included), compared with the subtotal before any discount. 0 to 10000000. Left out: unchanged.
+             * @description The smallest order, in halalas (VAT included), compared with the subtotal before any discount. 0 to 10000000. Left out: unchanged; null: VALIDATION_FAILED.
              * @example 10000
              */
             minOrderHalalas?: number;
             /**
-             * @description The delivery fee, in halalas (VAT included), added to delivery orders only and never discounted. 0 to 1000000. Left out: unchanged.
+             * @description The delivery fee, in halalas (VAT included), added to delivery orders only and never discounted. 0 to 1000000. Left out: unchanged; null: VALIDATION_FAILED.
              * @example 2500
              */
             deliveryFeeHalalas?: number;
             /**
-             * @description How long after delivery a complaint can be opened (complaints: Sprint 5). 1 to 720. Left out: unchanged.
+             * @description How long after delivery a complaint can be opened (complaints: Sprint 5). 1 to 720. Left out: unchanged; null: VALIDATION_FAILED.
              * @example 48
              */
             complaintWindowHours?: number;
-            /** @description The whole list of closed days, at most 366, each date once; replaces the saved list. Left out: unchanged. */
+            /** @description The whole list of closed days, at most 366; replaces the saved list. A date twice: VALIDATION_FAILED `isNotRepeated` on `closedDays.<i>.date`. Left out: unchanged; null: VALIDATION_FAILED. */
             closedDays?: components["schemas"]["ClosedDayDto"][];
         };
         SetOrderingPauseDto: {
@@ -4817,6 +4817,8 @@ export interface components {
             /** @description Whether new orders are paused, with the message to show. */
             paused: components["schemas"]["OrderingPauseResponseDto"];
         };
+        /** @enum {string} */
+        FulfilmentMethod: "delivery" | "pickup";
         CheckoutDayResponseDto: {
             /**
              * @description The day, Riyadh calendar `yyyy-MM-dd`.
@@ -5036,9 +5038,8 @@ export interface components {
             /**
              * @description Delivered or picked up.
              * @example delivery
-             * @enum {string}
              */
-            method: "delivery" | "pickup";
+            method: components["schemas"]["FulfilmentMethod"];
             /**
              * Format: uuid
              * @description The saved address for delivery; null for pickup.
@@ -5151,7 +5152,7 @@ export interface components {
              */
             cuttingStyleId?: string | null;
             /**
-             * @description The chosen packaging (`packagings[].packaging`); null or left out: none.
+             * @description The chosen packaging (`packagings[].packaging`; `none` is the product’s own "no packaging" option); null or left out: the product offers no packaging.
              * @example vacuum
              * @enum {string|null}
              */
@@ -5206,7 +5207,7 @@ export interface components {
              */
             cuttingStyleId?: string | null;
             /**
-             * @description The chosen packaging (`packagings[].packaging`); null or left out: none.
+             * @description The chosen packaging (`packagings[].packaging`; `none` is the product’s own "no packaging" option); null or left out: the product offers no packaging.
              * @example vacuum
              * @enum {string|null}
              */
@@ -5264,9 +5265,8 @@ export interface components {
             /**
              * @description `delivery` or `pickup`; one the cart’s products allow (FULFILMENT_NOT_SUPPORTED otherwise).
              * @example delivery
-             * @enum {string}
              */
-            method: "delivery" | "pickup";
+            method: components["schemas"]["FulfilmentMethod"];
             /**
              * Format: uuid
              * @description One of the customer’s saved addresses (UUID); required for delivery, ignored for pickup.
@@ -5327,12 +5327,14 @@ export interface components {
              */
             categoryIds: string[];
             /**
-             * @description When it starts, ISO 8601 with an offset.
+             * Format: date-time
+             * @description When it starts (UTC).
              * @example 2026-12-01T00:00:00+03:00
              */
             startsAt: string;
             /**
-             * @description When it ends, after startsAt (VALIDATION_FAILED `endBeforeStart` otherwise).
+             * Format: date-time
+             * @description When it ends (UTC).
              * @example 2026-12-10T00:00:00+03:00
              */
             endsAt: string;
@@ -5426,12 +5428,12 @@ export interface components {
              */
             categoryIds: string[];
             /**
-             * @description When it starts, ISO 8601 with an offset.
+             * @description When it starts: an ISO 8601 date and time with `Z` or an offset (VALIDATION_FAILED `isInstant` otherwise).
              * @example 2026-12-01T00:00:00+03:00
              */
             startsAt: string;
             /**
-             * @description When it ends, after startsAt (VALIDATION_FAILED `endBeforeStart` otherwise).
+             * @description When it ends, after startsAt (VALIDATION_FAILED `endBeforeStart` otherwise); with `Z` or an offset.
              * @example 2026-12-10T00:00:00+03:00
              */
             endsAt: string;
@@ -5453,18 +5455,18 @@ export interface components {
         };
         UpdateCouponDto: {
             /**
-             * @description The code customers type, 3 to 32 letters, digits, `_` or `-`; stored upper case, unique in any case (COUPON_CODE_TAKEN). Left out: unchanged.
+             * @description The code customers type, 3 to 32 letters, digits, `_` or `-`; stored upper case, unique in any case (COUPON_CODE_TAKEN). Left out: unchanged; null: VALIDATION_FAILED.
              * @example EID15
              */
             code?: string;
             /**
-             * @description `percent` or `fixed`. Left out: unchanged.
+             * @description `percent` or `fixed`. Left out: unchanged; null: VALIDATION_FAILED.
              * @example percent
              * @enum {string}
              */
             type?: "percent" | "fixed";
             /**
-             * @description percent: 1 to 100 (VALIDATION_FAILED `percent` above); fixed: halalas, 1 to 10000000. Left out: unchanged.
+             * @description percent: 1 to 100 (VALIDATION_FAILED `percent` above); fixed: halalas, 1 to 10000000. Left out: unchanged; null: VALIDATION_FAILED.
              * @example 15
              */
             value?: number;
@@ -5479,26 +5481,26 @@ export interface components {
              */
             minOrderHalalas?: number | null;
             /**
-             * @description The stores it is for, at most 200; empty: every store. Left out: unchanged.
+             * @description The stores it is for, at most 200; empty: every store. Left out: unchanged; null: VALIDATION_FAILED.
              * @example [
              *       "7f3a2c1e-0b9d-4e5f-8a6b-1c2d3e4f5a6b"
              *     ]
              */
             vendorIds?: string[];
             /**
-             * @description The categories whose lines it discounts, at most 200; empty: every line. Left out: unchanged.
+             * @description The categories whose lines it discounts, at most 200; empty: every line. Left out: unchanged; null: VALIDATION_FAILED.
              * @example [
              *       "2b1c0d9e-8f7a-4b6c-9d5e-4f3a2b1c0d9e"
              *     ]
              */
             categoryIds?: string[];
             /**
-             * @description When it starts, ISO 8601 with an offset. Left out: unchanged.
+             * @description When it starts: an ISO 8601 date and time with `Z` or an offset (VALIDATION_FAILED `isInstant` otherwise). Left out: unchanged; null: VALIDATION_FAILED.
              * @example 2026-12-01T00:00:00+03:00
              */
             startsAt?: string;
             /**
-             * @description When it ends, after startsAt (VALIDATION_FAILED `endBeforeStart` otherwise). Left out: unchanged.
+             * @description When it ends, after startsAt (VALIDATION_FAILED `endBeforeStart` otherwise); with `Z` or an offset. Left out: unchanged; null: VALIDATION_FAILED.
              * @example 2026-12-10T00:00:00+03:00
              */
             endsAt?: string;
@@ -5513,7 +5515,7 @@ export interface components {
              */
             perUserLimit?: number | null;
             /**
-             * @description Switched on; false: no one can use it. Left out: unchanged.
+             * @description Switched on; false: no one can use it. Left out: unchanged; null: VALIDATION_FAILED.
              * @example true
              */
             isActive?: boolean;
@@ -5610,51 +5612,12 @@ export interface components {
              */
             reason: string;
         };
-        PaymentMethodOptionResponseDto: {
+        PaymentWebhookAckResponseDto: {
             /**
-             * @description The method.
-             * @example cod
-             * @enum {string}
-             */
-            method: "mada" | "card" | "applepay" | "cod" | "wallet";
-            /**
-             * @description Whether it can be chosen now; `false`: shown disabled with `reason`.
+             * @description Always true: the event was recorded (a repeat of an event already processed changes nothing).
              * @example true
              */
-            isAvailable: boolean;
-            /**
-             * @description Why not, when not available; null otherwise.
-             * @example insufficient_balance
-             * @enum {string|null}
-             */
-            reason: "insufficient_balance" | null;
-        };
-        PaymentMethodListResponseDto: {
-            /** @description The methods, in display order. Cash on delivery is left out when it is off, over its limit or not allowed for the order type. */
-            items: components["schemas"]["PaymentMethodOptionResponseDto"][];
-            /**
-             * @description The customer’s wallet balance, in halalas; any part of it can pay with another method.
-             * @example 5000
-             */
-            walletBalanceHalalas: number;
-            /**
-             * @description The total these methods are for, in halalas.
-             * @example 196500
-             */
-            totalHalalas: number;
-        };
-        CreatePaymentDto: {
-            /**
-             * @description The method.
-             * @example mada
-             * @enum {string}
-             */
-            method: "mada" | "card" | "applepay" | "cod" | "wallet";
-            /**
-             * @description How much of the total to take from the wallet, in halalas, 0 up to the total (the whole total only with `wallet`); left out: 0. More than the balance: WALLET_INSUFFICIENT.
-             * @example 5000
-             */
-            walletAmountHalalas?: number;
+            received: boolean;
         };
         /**
          * @description Where the order is.
@@ -5696,10 +5659,77 @@ export interface components {
              */
             name: string | null;
             /**
-             * @description The customer’s mobile, `+9665…`.
+             * @description The customer’s mobile: in full for admins, masked for the vendor (`+9665•••••01`).
              * @example +966500000001
              */
             phone: string;
+        };
+        /**
+         * @description The method chosen (beside any wallet part).
+         * @enum {string}
+         */
+        PaymentMethod: "mada" | "card" | "applepay" | "cod" | "wallet";
+        OrderSummaryResponseDto: {
+            /**
+             * Format: uuid
+             * @description The order (UUID).
+             * @example 7f3a2c1e-0b9d-4e5f-8a6b-1c2d3e4f5a6b
+             */
+            id: string;
+            /**
+             * @description The order number customers and staff quote: `JZ-` + the Riyadh date `YYMMDD` + `-` + a 4-digit sequence of that day.
+             * @example JZ-261122-0042
+             */
+            number: string;
+            /**
+             * @description Where the order is.
+             * @example confirmed
+             */
+            status: components["schemas"]["OrderStatus"];
+            /**
+             * @description The kind of order, from its lines; `mixed` for several kinds.
+             * @example carcass
+             */
+            orderType: components["schemas"]["OrderType"];
+            /**
+             * @description Delivered or picked up.
+             * @example delivery
+             */
+            fulfilment: components["schemas"]["FulfilmentMethod"];
+            /**
+             * @description The delivery or pickup day, Riyadh calendar `yyyy-MM-dd`.
+             * @example 2026-11-24
+             */
+            fulfilmentDate: string;
+            /** @description The store that fulfils it. */
+            vendor: components["schemas"]["OrderVendorResponseDto"];
+            /** @description Who placed it. */
+            customer: components["schemas"]["OrderCustomerResponseDto"];
+            /**
+             * @description The method chosen (beside any wallet part).
+             * @example mada
+             */
+            paymentMethod: components["schemas"]["PaymentMethod"];
+            /**
+             * @description What the customer pays in all, in halalas, VAT included.
+             * @example 196500
+             */
+            totalHalalas: number;
+            /**
+             * Format: date-time
+             * @description When it was placed (UTC).
+             * @example 2026-11-22T10:00:00.000Z
+             */
+            createdAt: string;
+        };
+        OrderPageResponseDto: {
+            /** @description The orders on this page. */
+            items: components["schemas"]["OrderSummaryResponseDto"][];
+            /**
+             * @description Send as `cursor` for the next page; null on the last.
+             * @example eyJjIjoiMjAyNi0xMS0yMlQxMDowMDowMC4wMDBaIn0
+             */
+            nextCursor: string | null;
         };
         OrderItemResponseDto: {
             /**
@@ -5793,19 +5823,22 @@ export interface components {
              */
             driverInstructions: string | null;
         };
+        /**
+         * @description The latest payment’s status; null when nothing is charged online (cash on delivery, wallet only).
+         * @enum {string}
+         */
+        PaymentStatus: "initiated" | "authorized" | "captured" | "failed" | "cancelled" | "refunded" | "partially_refunded";
         OrderPaymentSummaryResponseDto: {
             /**
              * @description The method chosen for what the wallet does not cover.
              * @example mada
-             * @enum {string}
              */
-            method: "mada" | "card" | "applepay" | "cod" | "wallet";
+            method: components["schemas"]["PaymentMethod"];
             /**
              * @description The latest payment’s status; null when nothing is charged online (cash on delivery, wallet only).
              * @example captured
-             * @enum {string|null}
              */
-            status: "initiated" | "authorized" | "captured" | "failed" | "cancelled" | "refunded" | "partially_refunded" | null;
+            status: components["schemas"]["PaymentStatus"] | null;
             /**
              * Format: uuid
              * @description The latest payment (UUID); null as status is.
@@ -5918,9 +5951,8 @@ export interface components {
             /**
              * @description Delivered or picked up.
              * @example delivery
-             * @enum {string}
              */
-            fulfilment: "delivery" | "pickup";
+            fulfilment: components["schemas"]["FulfilmentMethod"];
             /**
              * @description The delivery or pickup day, Riyadh calendar `yyyy-MM-dd`.
              * @example 2026-11-24
@@ -5933,9 +5965,8 @@ export interface components {
             /**
              * @description The method chosen (beside any wallet part).
              * @example mada
-             * @enum {string}
              */
-            paymentMethod: "mada" | "card" | "applepay" | "cod" | "wallet";
+            paymentMethod: components["schemas"]["PaymentMethod"];
             /**
              * @description What the customer pays in all, in halalas, VAT included.
              * @example 196500
@@ -6011,6 +6042,62 @@ export interface components {
              */
             allowedTransitions: components["schemas"]["OrderStatus"][];
         };
+        TransitionOrderDto: {
+            /**
+             * @description The status to move to; one of the order’s `allowedTransitions` (ORDER_TRANSITION_NOT_ALLOWED otherwise).
+             * @example preparing
+             */
+            to: components["schemas"]["OrderStatus"];
+            /**
+             * @description A note kept in the history, up to 500 characters; required when moving to `cancelled` (VALIDATION_FAILED on `note` without it): for a rejected cash-on-delivery order, the reason the customer sees.
+             * @example العميل ما رد على الاتصال
+             */
+            note?: string;
+        };
+        PaymentMethodOptionResponseDto: {
+            /**
+             * @description The method.
+             * @example cod
+             */
+            method: components["schemas"]["PaymentMethod"];
+            /**
+             * @description Whether it can be chosen now; `false`: shown disabled with `reason`.
+             * @example true
+             */
+            isAvailable: boolean;
+            /**
+             * @description Why not, when not available; null otherwise.
+             * @example INSUFFICIENT_BALANCE
+             * @enum {string|null}
+             */
+            reason: "INSUFFICIENT_BALANCE" | null;
+        };
+        PaymentMethodListResponseDto: {
+            /** @description The methods, in display order. Cash on delivery is left out when it is off, over its limit or not allowed for the order type. */
+            items: components["schemas"]["PaymentMethodOptionResponseDto"][];
+            /**
+             * @description The customer’s wallet balance, in halalas; any part of it can pay with another method.
+             * @example 5000
+             */
+            walletBalanceHalalas: number;
+            /**
+             * @description The total these methods are for, in halalas.
+             * @example 196500
+             */
+            totalHalalas: number;
+        };
+        CreatePaymentDto: {
+            /**
+             * @description The method, from GET /v1/customer/checkout/payment-methods?orderId=.
+             * @example mada
+             */
+            paymentMethod: components["schemas"]["PaymentMethod"];
+            /**
+             * @description Part of the total to take from the wallet with another method, in halalas, 0 to less than the total; left out: 0. With `wallet` leave it out: the whole total is taken. More than the balance: WALLET_INSUFFICIENT.
+             * @example 5000
+             */
+            walletAmountHalalas?: number;
+        };
         PaymentNextActionResponseDto: {
             /**
              * @description Always `redirect` for now.
@@ -6039,15 +6126,13 @@ export interface components {
             /**
              * @description How it is paid.
              * @example mada
-             * @enum {string}
              */
-            method: "mada" | "card" | "applepay" | "cod" | "wallet";
+            method: components["schemas"]["PaymentMethod"];
             /**
              * @description Where it is.
              * @example initiated
-             * @enum {string}
              */
-            status: "initiated" | "authorized" | "captured" | "failed" | "cancelled" | "refunded" | "partially_refunded";
+            status: components["schemas"]["PaymentStatus"];
             /**
              * @description How much this attempt charges, in halalas (the order total less the wallet part).
              * @example 191500
@@ -6065,101 +6150,17 @@ export interface components {
         OrderWithPaymentResponseDto: {
             /** @description The order as it is now. */
             order: components["schemas"]["OrderResponseDto"];
-            /** @description The payment attempt; null when no payment record is made (cash on delivery). */
+            /** @description The payment attempt; null when nothing is paid online (cash on delivery, wallet only): no payment record is made. */
             payment: components["schemas"]["PaymentResponseDto"] | null;
-        };
-        PaymentWebhookAckResponseDto: {
-            /**
-             * @description Always true: the event was recorded (a repeat of an event already processed changes nothing).
-             * @example true
-             */
-            received: boolean;
-        };
-        OrderSummaryResponseDto: {
-            /**
-             * Format: uuid
-             * @description The order (UUID).
-             * @example 7f3a2c1e-0b9d-4e5f-8a6b-1c2d3e4f5a6b
-             */
-            id: string;
-            /**
-             * @description The order number customers and staff quote: `JZ-` + the Riyadh date `YYMMDD` + `-` + a 4-digit sequence of that day.
-             * @example JZ-261122-0042
-             */
-            number: string;
-            /**
-             * @description Where the order is.
-             * @example confirmed
-             */
-            status: components["schemas"]["OrderStatus"];
-            /**
-             * @description The kind of order, from its lines; `mixed` for several kinds.
-             * @example carcass
-             */
-            orderType: components["schemas"]["OrderType"];
-            /**
-             * @description Delivered or picked up.
-             * @example delivery
-             * @enum {string}
-             */
-            fulfilment: "delivery" | "pickup";
-            /**
-             * @description The delivery or pickup day, Riyadh calendar `yyyy-MM-dd`.
-             * @example 2026-11-24
-             */
-            fulfilmentDate: string;
-            /** @description The store that fulfils it. */
-            vendor: components["schemas"]["OrderVendorResponseDto"];
-            /** @description Who placed it. */
-            customer: components["schemas"]["OrderCustomerResponseDto"];
-            /**
-             * @description The method chosen (beside any wallet part).
-             * @example mada
-             * @enum {string}
-             */
-            paymentMethod: "mada" | "card" | "applepay" | "cod" | "wallet";
-            /**
-             * @description What the customer pays in all, in halalas, VAT included.
-             * @example 196500
-             */
-            totalHalalas: number;
-            /**
-             * Format: date-time
-             * @description When it was placed (UTC).
-             * @example 2026-11-22T10:00:00.000Z
-             */
-            createdAt: string;
-        };
-        OrderPageResponseDto: {
-            /** @description The orders on this page. */
-            items: components["schemas"]["OrderSummaryResponseDto"][];
-            /**
-             * @description Send as `cursor` for the next page; null on the last.
-             * @example eyJjIjoiMjAyNi0xMS0yMlQxMDowMDowMC4wMDBaIn0
-             */
-            nextCursor: string | null;
-        };
-        TransitionOrderDto: {
-            /**
-             * @description The status to move to; one of the order’s `allowedTransitions` (ORDER_TRANSITION_NOT_ALLOWED otherwise).
-             * @example preparing
-             */
-            to: components["schemas"]["OrderStatus"];
-            /**
-             * @description A note kept in the history, up to 500 characters; required when cancelling (rejecting a cash-on-delivery order: the reason the customer sees).
-             * @example العميل ما رد على الاتصال
-             */
-            note?: string;
         };
         PlaceOrderDto: {
             /**
              * @description The method, from GET /v1/customer/checkout/payment-methods.
              * @example mada
-             * @enum {string}
              */
-            paymentMethod: "mada" | "card" | "applepay" | "cod" | "wallet";
+            paymentMethod: components["schemas"]["PaymentMethod"];
             /**
-             * @description How much of the total to take from the wallet, in halalas, 0 up to the total (the whole total only with `wallet`); left out: 0. More than the balance: WALLET_INSUFFICIENT.
+             * @description Part of the total to take from the wallet with another method, in halalas, 0 to less than the total; left out: 0. With `wallet` leave it out: the whole total is taken. More than the balance: WALLET_INSUFFICIENT.
              * @example 5000
              */
             walletAmountHalalas?: number;
@@ -13720,7 +13721,7 @@ export interface operations {
         parameters: {
             query: {
                 /** @description `delivery` or `pickup`. */
-                method: "delivery" | "pickup";
+                method: components["schemas"]["FulfilmentMethod"];
             };
             header?: never;
             path?: never;
@@ -15055,7 +15056,7 @@ export interface operations {
                     "application/json": components["schemas"]["ErrorResponseDto"];
                 };
             };
-            /** @description Error. code: CART_EMPTY, DAY_FULL, ORDERING_PAUSED, TRANSACTION_CONFLICT. */
+            /** @description Error. code: CART_EMPTY, DAY_FULL, DAY_NOT_AVAILABLE, ORDERING_PAUSED, TRANSACTION_CONFLICT. */
             409: {
                 headers: {
                     [name: string]: unknown;
@@ -15064,7 +15065,7 @@ export interface operations {
                     "application/json": components["schemas"]["ErrorResponseDto"];
                 };
             };
-            /** @description Error. code: FULFILMENT_NOT_SUPPORTED, ADDRESS_NOT_COVERED, DAY_NOT_AVAILABLE. */
+            /** @description Error. code: FULFILMENT_NOT_SUPPORTED, ADDRESS_NOT_COVERED. */
             422: {
                 headers: {
                     [name: string]: unknown;
@@ -15857,7 +15858,10 @@ export interface operations {
     adminAdjustCustomerWallet: {
         parameters: {
             query?: never;
-            header?: never;
+            header: {
+                /** @description A UUID the app makes once per attempt and sends again on a retry of the same attempt: the same key answers the first success again (the body is not compared); a refusal is not kept, so the same key may be sent again after fixing it. Missing or not a UUID: VALIDATION_FAILED on `Idempotency-Key`. */
+                "Idempotency-Key": string;
+            };
             path: {
                 /** @description The id (a UUID) of the item the path names; another value is VALIDATION_FAILED on `id`. */
                 id: string;
@@ -15915,241 +15919,8 @@ export interface operations {
                     "application/json": components["schemas"]["ErrorResponseDto"];
                 };
             };
-            /** @description Error. code: TRANSACTION_CONFLICT. */
+            /** @description Error. code: WALLET_INSUFFICIENT, TRANSACTION_CONFLICT. */
             409: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ErrorResponseDto"];
-                };
-            };
-            /** @description Error. code: WALLET_INSUFFICIENT. */
-            422: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ErrorResponseDto"];
-                };
-            };
-            /** @description Error. code: RATE_LIMITED. */
-            429: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ErrorResponseDto"];
-                };
-            };
-            /** @description Error. code: INTERNAL_ERROR. */
-            500: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ErrorResponseDto"];
-                };
-            };
-            /** @description Error. code: NOT_IMPLEMENTED. */
-            501: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ErrorResponseDto"];
-                };
-            };
-            /** @description Error. code: SERVICE_UNAVAILABLE. */
-            503: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ErrorResponseDto"];
-                };
-            };
-        };
-    };
-    customerListPaymentMethods: {
-        parameters: {
-            query?: {
-                /** @description An unpaid order of the customer (UUID), to pay again; left out: the cart. */
-                orderId?: string;
-            };
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description The methods. */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["PaymentMethodListResponseDto"];
-                };
-            };
-            /** @description Error. code: VALIDATION_FAILED. */
-            400: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ErrorResponseDto"];
-                };
-            };
-            /** @description Error. code: UNAUTHORIZED, ACCESS_TOKEN_EXPIRED. */
-            401: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ErrorResponseDto"];
-                };
-            };
-            /** @description Error. code: FORBIDDEN. */
-            403: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ErrorResponseDto"];
-                };
-            };
-            /** @description Error. code: NOT_FOUND. */
-            404: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ErrorResponseDto"];
-                };
-            };
-            /** @description Error. code: ORDER_NOT_PAYABLE, CART_EMPTY. */
-            409: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ErrorResponseDto"];
-                };
-            };
-            /** @description Error. code: RATE_LIMITED. */
-            429: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ErrorResponseDto"];
-                };
-            };
-            /** @description Error. code: INTERNAL_ERROR. */
-            500: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ErrorResponseDto"];
-                };
-            };
-            /** @description Error. code: NOT_IMPLEMENTED. */
-            501: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ErrorResponseDto"];
-                };
-            };
-            /** @description Error. code: SERVICE_UNAVAILABLE. */
-            503: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ErrorResponseDto"];
-                };
-            };
-        };
-    };
-    customerCreateOrderPayment: {
-        parameters: {
-            query?: never;
-            header: {
-                /** @description A UUID the app makes once per attempt and sends again on a retry of the same attempt: the same key answers the first success again (the body is not compared); a refusal is not kept, so the same key may be sent again after fixing it. Missing or not a UUID: VALIDATION_FAILED on `Idempotency-Key`. */
-                "Idempotency-Key": string;
-            };
-            path: {
-                /** @description The id (a UUID) of the item the path names; another value is VALIDATION_FAILED on `id`. */
-                id: string;
-            };
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                "application/json": components["schemas"]["CreatePaymentDto"];
-            };
-        };
-        responses: {
-            /** @description The order and the payment attempt. */
-            201: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["OrderWithPaymentResponseDto"];
-                };
-            };
-            /** @description Error. code: VALIDATION_FAILED. */
-            400: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ErrorResponseDto"];
-                };
-            };
-            /** @description Error. code: UNAUTHORIZED, ACCESS_TOKEN_EXPIRED. */
-            401: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ErrorResponseDto"];
-                };
-            };
-            /** @description Error. code: FORBIDDEN. */
-            403: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ErrorResponseDto"];
-                };
-            };
-            /** @description Error. code: NOT_FOUND. */
-            404: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ErrorResponseDto"];
-                };
-            };
-            /** @description Error. code: ORDER_NOT_PAYABLE, PAYMENT_IN_PROGRESS, TRANSACTION_CONFLICT. */
-            409: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ErrorResponseDto"];
-                };
-            };
-            /** @description Error. code: PAYMENT_METHOD_NOT_AVAILABLE, WALLET_INSUFFICIENT. */
-            422: {
                 headers: {
                     [name: string]: unknown;
                 };
@@ -16432,7 +16203,7 @@ export interface operations {
                     "application/json": components["schemas"]["ErrorResponseDto"];
                 };
             };
-            /** @description Error. code: CART_EMPTY, PRICE_CHANGED, ITEM_UNAVAILABLE, DAY_FULL, ORDERING_PAUSED, TRANSACTION_CONFLICT. */
+            /** @description Error. code: CART_EMPTY, PRICE_CHANGED, ITEM_UNAVAILABLE, MIN_ORDER_NOT_MET, FULFILMENT_REQUIRED, DAY_FULL, DAY_NOT_AVAILABLE, WALLET_INSUFFICIENT, PROFILE_INCOMPLETE, ORDERING_PAUSED, TRANSACTION_CONFLICT. */
             409: {
                 headers: {
                     [name: string]: unknown;
@@ -16441,7 +16212,7 @@ export interface operations {
                     "application/json": components["schemas"]["ErrorResponseDto"];
                 };
             };
-            /** @description Error. code: MIN_ORDER_NOT_MET, COUPON_NOT_FOUND, COUPON_EXPIRED, COUPON_NOT_APPLICABLE, COUPON_MIN_ORDER, COUPON_LIMIT_REACHED, FULFILMENT_REQUIRED, ADDRESS_NOT_COVERED, DAY_NOT_AVAILABLE, PAYMENT_METHOD_NOT_AVAILABLE, WALLET_INSUFFICIENT, PROFILE_INCOMPLETE. */
+            /** @description Error. code: COUPON_NOT_FOUND, COUPON_EXPIRED, COUPON_NOT_APPLICABLE, COUPON_MIN_ORDER, COUPON_LIMIT_REACHED, ADDRESS_NOT_COVERED, PAYMENT_METHOD_NOT_AVAILABLE. */
             422: {
                 headers: {
                     [name: string]: unknown;
@@ -16593,7 +16364,7 @@ export interface operations {
                 /** @description Only orders in this status. */
                 status?: components["schemas"]["OrderStatus"];
                 /** @description Only orders with this method (`cod` with status `new`: the cash-on-delivery review queue). */
-                paymentMethod?: "mada" | "card" | "applepay" | "cod" | "wallet";
+                paymentMethod?: components["schemas"]["PaymentMethod"];
                 /** @description Only orders for this delivery or pickup day, `yyyy-MM-dd`. */
                 fulfilmentDate?: string;
                 /** @description The order number, or part of the customer’s name or mobile; 1 to 100 characters after trimming. */
@@ -16892,7 +16663,7 @@ export interface operations {
                 /** @description Only orders in this status. */
                 status?: components["schemas"]["OrderStatus"];
                 /** @description Only orders with this method (`cod` with status `new`: the cash-on-delivery review queue). */
-                paymentMethod?: "mada" | "card" | "applepay" | "cod" | "wallet";
+                paymentMethod?: components["schemas"]["PaymentMethod"];
                 /** @description Only orders for this delivery or pickup day, `yyyy-MM-dd`. */
                 fulfilmentDate?: string;
                 /** @description The order number, or part of the customer’s name or mobile; 1 to 100 characters after trimming. */
@@ -17138,6 +16909,230 @@ export interface operations {
             };
             /** @description Error. code: ORDER_TRANSITION_NOT_ALLOWED, TRANSACTION_CONFLICT. */
             409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponseDto"];
+                };
+            };
+            /** @description Error. code: RATE_LIMITED. */
+            429: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponseDto"];
+                };
+            };
+            /** @description Error. code: INTERNAL_ERROR. */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponseDto"];
+                };
+            };
+            /** @description Error. code: NOT_IMPLEMENTED. */
+            501: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponseDto"];
+                };
+            };
+            /** @description Error. code: SERVICE_UNAVAILABLE. */
+            503: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponseDto"];
+                };
+            };
+        };
+    };
+    customerListPaymentMethods: {
+        parameters: {
+            query?: {
+                /** @description An unpaid order of the customer (UUID), to pay again; left out: the cart. */
+                orderId?: string;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description The methods. */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PaymentMethodListResponseDto"];
+                };
+            };
+            /** @description Error. code: VALIDATION_FAILED. */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponseDto"];
+                };
+            };
+            /** @description Error. code: UNAUTHORIZED, ACCESS_TOKEN_EXPIRED. */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponseDto"];
+                };
+            };
+            /** @description Error. code: FORBIDDEN. */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponseDto"];
+                };
+            };
+            /** @description Error. code: NOT_FOUND. */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponseDto"];
+                };
+            };
+            /** @description Error. code: ORDER_NOT_PAYABLE, CART_EMPTY. */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponseDto"];
+                };
+            };
+            /** @description Error. code: RATE_LIMITED. */
+            429: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponseDto"];
+                };
+            };
+            /** @description Error. code: INTERNAL_ERROR. */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponseDto"];
+                };
+            };
+            /** @description Error. code: NOT_IMPLEMENTED. */
+            501: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponseDto"];
+                };
+            };
+            /** @description Error. code: SERVICE_UNAVAILABLE. */
+            503: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponseDto"];
+                };
+            };
+        };
+    };
+    customerCreateOrderPayment: {
+        parameters: {
+            query?: never;
+            header: {
+                /** @description A UUID the app makes once per attempt and sends again on a retry of the same attempt: the same key answers the first success again (the body is not compared); a refusal is not kept, so the same key may be sent again after fixing it. Missing or not a UUID: VALIDATION_FAILED on `Idempotency-Key`. */
+                "Idempotency-Key": string;
+            };
+            path: {
+                /** @description The id (a UUID) of the item the path names; another value is VALIDATION_FAILED on `id`. */
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["CreatePaymentDto"];
+            };
+        };
+        responses: {
+            /** @description The order and the payment attempt. */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["OrderWithPaymentResponseDto"];
+                };
+            };
+            /** @description Error. code: VALIDATION_FAILED. */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponseDto"];
+                };
+            };
+            /** @description Error. code: UNAUTHORIZED, ACCESS_TOKEN_EXPIRED. */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponseDto"];
+                };
+            };
+            /** @description Error. code: FORBIDDEN. */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponseDto"];
+                };
+            };
+            /** @description Error. code: NOT_FOUND. */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponseDto"];
+                };
+            };
+            /** @description Error. code: ORDER_NOT_PAYABLE, PAYMENT_IN_PROGRESS, WALLET_INSUFFICIENT, TRANSACTION_CONFLICT. */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponseDto"];
+                };
+            };
+            /** @description Error. code: PAYMENT_METHOD_NOT_AVAILABLE. */
+            422: {
                 headers: {
                     [name: string]: unknown;
                 };

@@ -13,9 +13,9 @@ PlaceOrderDto _$PlaceOrderDtoFromJson(Map<String, dynamic> json) =>
         paymentMethod: $checkedConvert(
           'paymentMethod',
           (v) => $enumDecode(
-            _$PlaceOrderDtoPaymentMethodEnumEnumMap,
+            _$PaymentMethodEnumMap,
             v,
-            unknownValue: PlaceOrderDtoPaymentMethodEnum.unknownDefaultOpenApi,
+            unknownValue: PaymentMethod.unknownDefaultOpenApi,
           ),
         ),
         walletAmountHalalas: $checkedConvert(
@@ -29,18 +29,16 @@ PlaceOrderDto _$PlaceOrderDtoFromJson(Map<String, dynamic> json) =>
 
 Map<String, dynamic> _$PlaceOrderDtoToJson(PlaceOrderDto instance) =>
     <String, dynamic>{
-      'paymentMethod':
-          _$PlaceOrderDtoPaymentMethodEnumEnumMap[instance.paymentMethod]!,
+      'paymentMethod': _$PaymentMethodEnumMap[instance.paymentMethod]!,
       'walletAmountHalalas': ?instance.walletAmountHalalas,
       'notes': ?instance.notes,
     };
 
-const _$PlaceOrderDtoPaymentMethodEnumEnumMap = {
-  PlaceOrderDtoPaymentMethodEnum.mada: 'mada',
-  PlaceOrderDtoPaymentMethodEnum.card: 'card',
-  PlaceOrderDtoPaymentMethodEnum.applepay: 'applepay',
-  PlaceOrderDtoPaymentMethodEnum.cod: 'cod',
-  PlaceOrderDtoPaymentMethodEnum.wallet: 'wallet',
-  PlaceOrderDtoPaymentMethodEnum.unknownDefaultOpenApi:
-      'unknown_default_open_api',
+const _$PaymentMethodEnumMap = {
+  PaymentMethod.mada: 'mada',
+  PaymentMethod.card: 'card',
+  PaymentMethod.applepay: 'applepay',
+  PaymentMethod.cod: 'cod',
+  PaymentMethod.wallet: 'wallet',
+  PaymentMethod.unknownDefaultOpenApi: 'unknown_default_open_api',
 };

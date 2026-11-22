@@ -25,17 +25,17 @@ PaymentResponseDto _$PaymentResponseDtoFromJson(
     method: $checkedConvert(
       'method',
       (v) => $enumDecode(
-        _$PaymentResponseDtoMethodEnumEnumMap,
+        _$PaymentMethodEnumMap,
         v,
-        unknownValue: PaymentResponseDtoMethodEnum.unknownDefaultOpenApi,
+        unknownValue: PaymentMethod.unknownDefaultOpenApi,
       ),
     ),
     status: $checkedConvert(
       'status',
       (v) => $enumDecode(
-        _$PaymentResponseDtoStatusEnumEnumMap,
+        _$PaymentStatusEnumMap,
         v,
-        unknownValue: PaymentResponseDtoStatusEnum.unknownDefaultOpenApi,
+        unknownValue: PaymentStatus.unknownDefaultOpenApi,
       ),
     ),
     amountHalalas: $checkedConvert('amountHalalas', (v) => (v as num).toInt()),
@@ -53,31 +53,29 @@ PaymentResponseDto _$PaymentResponseDtoFromJson(
 Map<String, dynamic> _$PaymentResponseDtoToJson(PaymentResponseDto instance) =>
     <String, dynamic>{
       'id': instance.id,
-      'method': _$PaymentResponseDtoMethodEnumEnumMap[instance.method]!,
-      'status': _$PaymentResponseDtoStatusEnumEnumMap[instance.status]!,
+      'method': _$PaymentMethodEnumMap[instance.method]!,
+      'status': _$PaymentStatusEnumMap[instance.status]!,
       'amountHalalas': instance.amountHalalas,
       'nextAction': instance.nextAction?.toJson(),
       'createdAt': instance.createdAt.toIso8601String(),
     };
 
-const _$PaymentResponseDtoMethodEnumEnumMap = {
-  PaymentResponseDtoMethodEnum.mada: 'mada',
-  PaymentResponseDtoMethodEnum.card: 'card',
-  PaymentResponseDtoMethodEnum.applepay: 'applepay',
-  PaymentResponseDtoMethodEnum.cod: 'cod',
-  PaymentResponseDtoMethodEnum.wallet: 'wallet',
-  PaymentResponseDtoMethodEnum.unknownDefaultOpenApi:
-      'unknown_default_open_api',
+const _$PaymentMethodEnumMap = {
+  PaymentMethod.mada: 'mada',
+  PaymentMethod.card: 'card',
+  PaymentMethod.applepay: 'applepay',
+  PaymentMethod.cod: 'cod',
+  PaymentMethod.wallet: 'wallet',
+  PaymentMethod.unknownDefaultOpenApi: 'unknown_default_open_api',
 };
 
-const _$PaymentResponseDtoStatusEnumEnumMap = {
-  PaymentResponseDtoStatusEnum.initiated: 'initiated',
-  PaymentResponseDtoStatusEnum.authorized: 'authorized',
-  PaymentResponseDtoStatusEnum.captured: 'captured',
-  PaymentResponseDtoStatusEnum.failed: 'failed',
-  PaymentResponseDtoStatusEnum.cancelled: 'cancelled',
-  PaymentResponseDtoStatusEnum.refunded: 'refunded',
-  PaymentResponseDtoStatusEnum.partiallyRefunded: 'partially_refunded',
-  PaymentResponseDtoStatusEnum.unknownDefaultOpenApi:
-      'unknown_default_open_api',
+const _$PaymentStatusEnumMap = {
+  PaymentStatus.initiated: 'initiated',
+  PaymentStatus.authorized: 'authorized',
+  PaymentStatus.captured: 'captured',
+  PaymentStatus.failed: 'failed',
+  PaymentStatus.cancelled: 'cancelled',
+  PaymentStatus.refunded: 'refunded',
+  PaymentStatus.partiallyRefunded: 'partially_refunded',
+  PaymentStatus.unknownDefaultOpenApi: 'unknown_default_open_api',
 };

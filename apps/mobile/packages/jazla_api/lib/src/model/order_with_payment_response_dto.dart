@@ -38,7 +38,7 @@ class OrderWithPaymentResponseDto {
 
 
 
-      /// The payment attempt; null when no payment record is made (cash on delivery).
+      /// The payment attempt; null when nothing is paid online (cash on delivery, wallet only): no payment record is made.
   @JsonKey(
     
     name: r'payment',

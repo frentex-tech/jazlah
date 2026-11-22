@@ -11,9 +11,8 @@ export function notImplemented(
   task: string,
   ...ignored: unknown[]
 ): Promise<never> {
+  void ignored;
   return Promise.reject(
-    new AppError(ErrorCode.NOT_IMPLEMENTED, {
-      details: { task, ignored: ignored.length },
-    }),
+    new AppError(ErrorCode.NOT_IMPLEMENTED, { details: { task } }),
   );
 }

@@ -4,6 +4,7 @@
 
 // ignore_for_file: unused_element
 import 'package:jazla_api/src/model/pickup_point_response_dto.dart';
+import 'package:jazla_api/src/model/fulfilment_method.dart';
 import 'package:jazla_api/src/model/time_window_dto.dart';
 import 'package:json_annotation/json_annotation.dart';
 
@@ -37,11 +38,11 @@ class CartFulfilmentResponseDto {
     name: r'method',
     required: true,
     includeIfNull: false,
-  unknownEnumValue: CartFulfilmentResponseDtoMethodEnum.unknownDefaultOpenApi,
+  unknownEnumValue: FulfilmentMethod.unknownDefaultOpenApi,
   )
 
 
-  final CartFulfilmentResponseDtoMethodEnum method;
+  final FulfilmentMethod method;
 
 
 
@@ -125,25 +126,4 @@ class CartFulfilmentResponseDto {
   }
 
 }
-
-/// Delivered or picked up.
-enum CartFulfilmentResponseDtoMethodEnum {
-    /// Delivered or picked up.
-@JsonValue(r'delivery')
-delivery(r'delivery'),
-    /// Delivered or picked up.
-@JsonValue(r'pickup')
-pickup(r'pickup'),
-    /// Delivered or picked up.
-@JsonValue(r'unknown_default_open_api')
-unknownDefaultOpenApi(r'unknown_default_open_api');
-
-const CartFulfilmentResponseDtoMethodEnum(this.value);
-
-final String value;
-
-@override
-String toString() => value;
-}
-
 

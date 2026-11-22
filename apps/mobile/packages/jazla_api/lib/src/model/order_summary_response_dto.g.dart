@@ -47,10 +47,9 @@ OrderSummaryResponseDto _$OrderSummaryResponseDtoFromJson(
     fulfilment: $checkedConvert(
       'fulfilment',
       (v) => $enumDecode(
-        _$OrderSummaryResponseDtoFulfilmentEnumEnumMap,
+        _$FulfilmentMethodEnumMap,
         v,
-        unknownValue:
-            OrderSummaryResponseDtoFulfilmentEnum.unknownDefaultOpenApi,
+        unknownValue: FulfilmentMethod.unknownDefaultOpenApi,
       ),
     ),
     fulfilmentDate: $checkedConvert('fulfilmentDate', (v) => v as String),
@@ -65,10 +64,9 @@ OrderSummaryResponseDto _$OrderSummaryResponseDtoFromJson(
     paymentMethod: $checkedConvert(
       'paymentMethod',
       (v) => $enumDecode(
-        _$OrderSummaryResponseDtoPaymentMethodEnumEnumMap,
+        _$PaymentMethodEnumMap,
         v,
-        unknownValue:
-            OrderSummaryResponseDtoPaymentMethodEnum.unknownDefaultOpenApi,
+        unknownValue: PaymentMethod.unknownDefaultOpenApi,
       ),
     ),
     totalHalalas: $checkedConvert('totalHalalas', (v) => (v as num).toInt()),
@@ -84,14 +82,11 @@ Map<String, dynamic> _$OrderSummaryResponseDtoToJson(
   'number': instance.number,
   'status': _$OrderStatusEnumMap[instance.status]!,
   'orderType': _$OrderTypeEnumMap[instance.orderType]!,
-  'fulfilment':
-      _$OrderSummaryResponseDtoFulfilmentEnumEnumMap[instance.fulfilment]!,
+  'fulfilment': _$FulfilmentMethodEnumMap[instance.fulfilment]!,
   'fulfilmentDate': instance.fulfilmentDate,
   'vendor': instance.vendor.toJson(),
   'customer': instance.customer.toJson(),
-  'paymentMethod':
-      _$OrderSummaryResponseDtoPaymentMethodEnumEnumMap[instance
-          .paymentMethod]!,
+  'paymentMethod': _$PaymentMethodEnumMap[instance.paymentMethod]!,
   'totalHalalas': instance.totalHalalas,
   'createdAt': instance.createdAt.toIso8601String(),
 };
@@ -122,19 +117,17 @@ const _$OrderTypeEnumMap = {
   OrderType.unknownDefaultOpenApi: 'unknown_default_open_api',
 };
 
-const _$OrderSummaryResponseDtoFulfilmentEnumEnumMap = {
-  OrderSummaryResponseDtoFulfilmentEnum.delivery: 'delivery',
-  OrderSummaryResponseDtoFulfilmentEnum.pickup: 'pickup',
-  OrderSummaryResponseDtoFulfilmentEnum.unknownDefaultOpenApi:
-      'unknown_default_open_api',
+const _$FulfilmentMethodEnumMap = {
+  FulfilmentMethod.delivery: 'delivery',
+  FulfilmentMethod.pickup: 'pickup',
+  FulfilmentMethod.unknownDefaultOpenApi: 'unknown_default_open_api',
 };
 
-const _$OrderSummaryResponseDtoPaymentMethodEnumEnumMap = {
-  OrderSummaryResponseDtoPaymentMethodEnum.mada: 'mada',
-  OrderSummaryResponseDtoPaymentMethodEnum.card: 'card',
-  OrderSummaryResponseDtoPaymentMethodEnum.applepay: 'applepay',
-  OrderSummaryResponseDtoPaymentMethodEnum.cod: 'cod',
-  OrderSummaryResponseDtoPaymentMethodEnum.wallet: 'wallet',
-  OrderSummaryResponseDtoPaymentMethodEnum.unknownDefaultOpenApi:
-      'unknown_default_open_api',
+const _$PaymentMethodEnumMap = {
+  PaymentMethod.mada: 'mada',
+  PaymentMethod.card: 'card',
+  PaymentMethod.applepay: 'applepay',
+  PaymentMethod.cod: 'cod',
+  PaymentMethod.wallet: 'wallet',
+  PaymentMethod.unknownDefaultOpenApi: 'unknown_default_open_api',
 };

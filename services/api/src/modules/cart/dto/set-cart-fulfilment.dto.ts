@@ -7,12 +7,13 @@ import {
   Matches,
   ValidateIf,
 } from 'class-validator';
-import { FULFILMENT_METHODS } from '@modules/settings';
+import { FULFILMENT_METHODS } from '@modules/orders';
 
 /** How and when the cart is to be fulfilled. */
 export class SetCartFulfilmentDto {
   @ApiProperty({
     enum: FULFILMENT_METHODS,
+    enumName: 'FulfilmentMethod',
     example: 'delivery',
     description:
       '`delivery` or `pickup`; one the cart’s products allow (FULFILMENT_NOT_SUPPORTED otherwise).',

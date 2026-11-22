@@ -90,7 +90,8 @@ describe('Sprint 3 contract (e2e)', () => {
     });
   });
 
-  it('places an order only with a token, a valid body and the Idempotency-Key header', async () => {
+  // The Idempotency-Key header is checked by ORD-API-1 itself; the stub only names its task.
+  it('places an order only with a token and a valid body', async () => {
     const unsigned = await http()
       .post('/v1/customer/orders')
       .send({ paymentMethod: 'mada' })
@@ -114,6 +115,36 @@ describe('Sprint 3 contract (e2e)', () => {
     });
     expect(stub.body).toMatchObject({ details: { task: 'ORD-API-1' } });
   });
+
+  it('refuses null for a settings or coupon key that cannot be null (PATCH)', async () => {
+    const settings = await http()
+      .patch('/v1/admin/settings/operations')
+      .set(...token(admin))
+      .send({ minOrderHalalas: null, cod: null })
+      .expect(400);
+    const coupon = await http()
+      .patch(`/v1/admin/coupons/${ID}`)
+      .set(...token(admin))
+      .send({ code: null, isActive: null })
+      .expect(400);
+
+    expect(settings.body).toMatchObject({ code: 'VALIDATION_FAILED' });
+    expect(coupon.body).toMatchObject({ code: 'VALIDATION_FAILED' });
+  });
+
+  it.each(['/v1/vendor/orders', `/v1/vendor/orders/${ID}`])(
+    'refuses GET %s without a vendor token',
+    async (path) => {
+      const unsigned = await http().get(path).expect(401);
+      const asCustomer = await http()
+        .get(path)
+        .set(...token(customer))
+        .expect(403);
+
+      expect(codeOf(unsigned.body)).toBe('UNAUTHORIZED');
+      expect(codeOf(asCustomer.body)).toBe('FORBIDDEN');
+    },
+  );
 
   it('keeps admin routes from customers and takes webhooks without a token', async () => {
     const asCustomer = await http()

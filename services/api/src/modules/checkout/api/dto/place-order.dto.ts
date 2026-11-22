@@ -9,12 +9,13 @@ import {
   Min,
 } from 'class-validator';
 import { trimText } from '@common/dto/trim-text';
-import { PAYMENT_METHOD_NAMES } from '@modules/orders';
+import { PAYMENT_METHOD_NAMES } from '@modules/payments';
 
 /** Places the cart as an order: how to pay; the lines, coupon, address and day come from the cart. */
 export class PlaceOrderDto {
   @ApiProperty({
     enum: PAYMENT_METHOD_NAMES,
+    enumName: 'PaymentMethod',
     example: 'mada',
     description: 'The method, from GET /v1/customer/checkout/payment-methods.',
   })
@@ -26,7 +27,7 @@ export class PlaceOrderDto {
     minimum: 0,
     example: 5000,
     description:
-      'How much of the total to take from the wallet, in halalas, 0 up to the total (the whole total only with `wallet`); left out: 0. More than the balance: WALLET_INSUFFICIENT.',
+      'Part of the total to take from the wallet with another method, in halalas, 0 to less than the total; left out: 0. With `wallet` leave it out: the whole total is taken. More than the balance: WALLET_INSUFFICIENT.',
   })
   @IsOptional()
   @IsInt()

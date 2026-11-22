@@ -19,7 +19,8 @@ export class OrderCustomerResponseDto {
 
   @ApiProperty({
     example: '+966500000001',
-    description: 'The customer’s mobile, `+9665…`.',
+    description:
+      'The customer’s mobile: in full for admins, masked for the vendor (`+9665•••••01`).',
   })
   phone!: string;
 }

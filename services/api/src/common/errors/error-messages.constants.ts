@@ -193,11 +193,11 @@ export const ERROR_MESSAGES: Readonly<Record<ErrorCode, LocalizedText>> = {
     en: 'Some prices in your cart have changed.',
   },
   [ErrorCode.ITEM_UNAVAILABLE]: {
-    ar: 'فيه منتج في سلتك ما عاد متوفر، شيله وكمّل',
+    ar: 'فيه منتج في سلتك ما عاد متوفر، احذفه من السلة وكمّل',
     en: 'An item in your cart is no longer available.',
   },
   [ErrorCode.MIN_ORDER_NOT_MET]: {
-    ar: 'باقي لك شوي توصل للحد الأدنى للطلب',
+    ar: 'طلبك أقل من الحد الأدنى، أضف منتجات وكمّل',
     en: 'Your order is below the minimum.',
   },
   [ErrorCode.COUPON_NOT_FOUND]: {
@@ -217,7 +217,7 @@ export const ERROR_MESSAGES: Readonly<Record<ErrorCode, LocalizedText>> = {
     en: 'Your cart is below this coupon’s minimum.',
   },
   [ErrorCode.COUPON_LIMIT_REACHED]: {
-    ar: 'الكود استُخدم للحد المسموح',
+    ar: 'الكود وصل للحد المسموح من الاستخدام',
     en: 'This coupon has reached its limit.',
   },
   [ErrorCode.COUPON_CODE_TAKEN]: {
@@ -261,7 +261,7 @@ export const ERROR_MESSAGES: Readonly<Record<ErrorCode, LocalizedText>> = {
     en: 'This payment method is not available for your order.',
   },
   [ErrorCode.ORDER_NOT_PAYABLE]: {
-    ar: 'هالطلب ما يحتاج دفع الحين',
+    ar: 'ما تقدر تدفع لهالطلب الحين، حدّث الصفحة',
     en: 'This order cannot be paid now.',
   },
   [ErrorCode.PAYMENT_IN_PROGRESS]: {
@@ -269,7 +269,7 @@ export const ERROR_MESSAGES: Readonly<Record<ErrorCode, LocalizedText>> = {
     en: 'A payment for this order is still in progress.',
   },
   [ErrorCode.ORDER_TRANSITION_NOT_ALLOWED]: {
-    ar: 'ما يمكن تغيير حالة الطلب لهالخطوة، حدّث الصفحة',
+    ar: 'ما ينفع تغيّر حالة الطلب لهالخطوة، حدّث الصفحة',
     en: 'This order cannot be moved to that status.',
   },
 };

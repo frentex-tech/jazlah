@@ -42,7 +42,7 @@ class UpdateOperationsSettingsDto {
      this.closedDays,
   });
 
-      /// The delivery window every delivery day uses, Riyadh time. Left out: unchanged.
+      /// The delivery window every delivery day uses, Riyadh time. Left out: unchanged; null: VALIDATION_FAILED.
   @JsonKey(
     
     name: r'deliveryWindow',
@@ -55,7 +55,7 @@ class UpdateOperationsSettingsDto {
 
 
 
-      /// The cut-off and lead days of each kind of order. Left out: unchanged.
+      /// The cut-off and lead days of each kind of order. Left out: unchanged; null: VALIDATION_FAILED.
   @JsonKey(
     
     name: r'cutoffs',
@@ -68,7 +68,7 @@ class UpdateOperationsSettingsDto {
 
 
 
-      /// Each vendor’s daily capacity unless it has its own (PUT /v1/admin/vendors/{id}/capacity). Left out: unchanged.
+      /// Each vendor’s daily capacity unless it has its own (PUT /v1/admin/vendors/{id}/capacity). Left out: unchanged; null: VALIDATION_FAILED.
   @JsonKey(
     
     name: r'defaultCapacity',
@@ -81,7 +81,7 @@ class UpdateOperationsSettingsDto {
 
 
 
-      /// Cash on delivery. Left out: unchanged.
+      /// Cash on delivery. Left out: unchanged; null: VALIDATION_FAILED.
   @JsonKey(
     
     name: r'cod',
@@ -94,7 +94,7 @@ class UpdateOperationsSettingsDto {
 
 
 
-      /// How many days ahead can be booked, counting today: 14 offers today to today + 13. 1 to 60. Left out: unchanged.
+      /// How many days ahead can be booked, counting today: 14 offers today to today + 13. 1 to 60. Left out: unchanged; null: VALIDATION_FAILED.
           // minimum: 1
           // maximum: 60
   @JsonKey(
@@ -109,7 +109,7 @@ class UpdateOperationsSettingsDto {
 
 
 
-      /// The smallest order, in halalas (VAT included), compared with the subtotal before any discount. 0 to 10000000. Left out: unchanged.
+      /// The smallest order, in halalas (VAT included), compared with the subtotal before any discount. 0 to 10000000. Left out: unchanged; null: VALIDATION_FAILED.
           // minimum: 0
           // maximum: 10000000
   @JsonKey(
@@ -124,7 +124,7 @@ class UpdateOperationsSettingsDto {
 
 
 
-      /// The delivery fee, in halalas (VAT included), added to delivery orders only and never discounted. 0 to 1000000. Left out: unchanged.
+      /// The delivery fee, in halalas (VAT included), added to delivery orders only and never discounted. 0 to 1000000. Left out: unchanged; null: VALIDATION_FAILED.
           // minimum: 0
           // maximum: 1000000
   @JsonKey(
@@ -139,7 +139,7 @@ class UpdateOperationsSettingsDto {
 
 
 
-      /// How long after delivery a complaint can be opened (complaints: Sprint 5). 1 to 720. Left out: unchanged.
+      /// How long after delivery a complaint can be opened (complaints: Sprint 5). 1 to 720. Left out: unchanged; null: VALIDATION_FAILED.
           // minimum: 1
           // maximum: 720
   @JsonKey(
@@ -154,7 +154,7 @@ class UpdateOperationsSettingsDto {
 
 
 
-      /// The whole list of closed days, at most 366, each date once; replaces the saved list. Left out: unchanged.
+      /// The whole list of closed days, at most 366; replaces the saved list. A date twice: VALIDATION_FAILED `isNotRepeated` on `closedDays.<i>.date`. Left out: unchanged; null: VALIDATION_FAILED.
   @JsonKey(
     
     name: r'closedDays',

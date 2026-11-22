@@ -13,6 +13,7 @@ import 'package:jazla_api/src/model/error_response_dto.dart';
 import 'package:jazla_api/src/model/order_page_response_dto.dart';
 import 'package:jazla_api/src/model/order_response_dto.dart';
 import 'package:jazla_api/src/model/order_status.dart';
+import 'package:jazla_api/src/model/payment_method.dart';
 import 'package:jazla_api/src/model/transition_order_dto.dart';
 
 class AdminOrdersApi {
@@ -22,7 +23,7 @@ class AdminOrdersApi {
   const AdminOrdersApi(this._dio);
 
   /// One order
-  /// Admin dashboard, order detail, with &#x60;allowedTransitions&#x60; for the caller. An order past &#x60;expiresAt&#x60; and still unpaid is cancelled when read (workers are off on staging), so the answer is always current. NOT_FOUND for an unknown order. Until ORD-API-3 lands: NOT_IMPLEMENTED.
+  /// Admin dashboard, order detail, with &#x60;allowedTransitions&#x60; for the caller. An order past &#x60;expiresAt&#x60; and still unpaid is cancelled when read (workers are off on staging), so the answer is always current; capacity, coupon use and wallet reads treat such orders as already released. NOT_FOUND for an unknown order. Until ORD-API-3 lands: NOT_IMPLEMENTED.
   ///
   /// Parameters:
   /// * [id] - The id (a UUID) of the item the path names; another value is VALIDATION_FAILED on `id`.
@@ -99,7 +100,7 @@ _responseData = rawData == null ? null : deserialize<OrderResponseDto, OrderResp
   }
 
   /// Orders
-  /// Admin dashboard, orders list: every order, with a vendor filter, newest first. An order past &#x60;expiresAt&#x60; and still unpaid is cancelled when read (workers are off on staging), so the answer is always current. Until ORD-API-3 lands: NOT_IMPLEMENTED.
+  /// Admin dashboard, orders list: every order, with a vendor filter, newest first. An order past &#x60;expiresAt&#x60; and still unpaid is cancelled when read (workers are off on staging), so the answer is always current; capacity, coupon use and wallet reads treat such orders as already released. Until ORD-API-3 lands: NOT_IMPLEMENTED.
   ///
   /// Parameters:
   /// * [cursor] - The `nextCursor` of the previous page; omit it for the first page. Opaque: never build or change it.
@@ -122,7 +123,7 @@ _responseData = rawData == null ? null : deserialize<OrderResponseDto, OrderResp
     String? cursor,
     num? limit = 20,
     OrderStatus? status,
-    String? paymentMethod,
+    PaymentMethod? paymentMethod,
     String? fulfilmentDate,
     String? q,
     String? vendorId,

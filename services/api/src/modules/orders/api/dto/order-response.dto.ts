@@ -1,8 +1,9 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { TimeWindowDto } from '@common/dto/time-window.dto';
-import { FULFILMENT_METHODS, ORDER_TYPES } from '@modules/settings';
+import { PAYMENT_METHOD_NAMES } from '@modules/payments';
+import { FULFILMENT_METHODS } from '../../domain/fulfilment-methods.constants';
 import { ORDER_STATUSES } from '../../domain/order-statuses.constants';
-import { PAYMENT_METHOD_NAMES } from '../../domain/payment-method-names.constants';
+import { ORDER_TYPES } from '../../domain/order-types.constants';
 import { OrderAddressResponseDto } from './order-address-response.dto';
 import { OrderCustomerResponseDto } from './order-customer-response.dto';
 import { OrderHistoryEntryResponseDto } from './order-history-entry-response.dto';
@@ -47,6 +48,7 @@ export class OrderResponseDto {
 
   @ApiProperty({
     enum: FULFILMENT_METHODS,
+    enumName: 'FulfilmentMethod',
     example: 'delivery',
     description: 'Delivered or picked up.',
   })
@@ -72,6 +74,7 @@ export class OrderResponseDto {
 
   @ApiProperty({
     enum: PAYMENT_METHOD_NAMES,
+    enumName: 'PaymentMethod',
     example: 'mada',
     description: 'The method chosen (beside any wallet part).',
   })

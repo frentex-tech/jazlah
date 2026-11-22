@@ -8,14 +8,14 @@ part of 'create_payment_dto.dart';
 
 CreatePaymentDto _$CreatePaymentDtoFromJson(Map<String, dynamic> json) =>
     $checkedCreate('CreatePaymentDto', json, ($checkedConvert) {
-      $checkKeys(json, requiredKeys: const ['method']);
+      $checkKeys(json, requiredKeys: const ['paymentMethod']);
       final val = CreatePaymentDto(
-        method: $checkedConvert(
-          'method',
+        paymentMethod: $checkedConvert(
+          'paymentMethod',
           (v) => $enumDecode(
-            _$CreatePaymentDtoMethodEnumEnumMap,
+            _$PaymentMethodEnumMap,
             v,
-            unknownValue: CreatePaymentDtoMethodEnum.unknownDefaultOpenApi,
+            unknownValue: PaymentMethod.unknownDefaultOpenApi,
           ),
         ),
         walletAmountHalalas: $checkedConvert(
@@ -28,15 +28,15 @@ CreatePaymentDto _$CreatePaymentDtoFromJson(Map<String, dynamic> json) =>
 
 Map<String, dynamic> _$CreatePaymentDtoToJson(CreatePaymentDto instance) =>
     <String, dynamic>{
-      'method': _$CreatePaymentDtoMethodEnumEnumMap[instance.method]!,
+      'paymentMethod': _$PaymentMethodEnumMap[instance.paymentMethod]!,
       'walletAmountHalalas': ?instance.walletAmountHalalas,
     };
 
-const _$CreatePaymentDtoMethodEnumEnumMap = {
-  CreatePaymentDtoMethodEnum.mada: 'mada',
-  CreatePaymentDtoMethodEnum.card: 'card',
-  CreatePaymentDtoMethodEnum.applepay: 'applepay',
-  CreatePaymentDtoMethodEnum.cod: 'cod',
-  CreatePaymentDtoMethodEnum.wallet: 'wallet',
-  CreatePaymentDtoMethodEnum.unknownDefaultOpenApi: 'unknown_default_open_api',
+const _$PaymentMethodEnumMap = {
+  PaymentMethod.mada: 'mada',
+  PaymentMethod.card: 'card',
+  PaymentMethod.applepay: 'applepay',
+  PaymentMethod.cod: 'cod',
+  PaymentMethod.wallet: 'wallet',
+  PaymentMethod.unknownDefaultOpenApi: 'unknown_default_open_api',
 };

@@ -25,7 +25,7 @@ class CustomerCartApi {
   const CustomerCartApi(this._dio);
 
   /// Add to my cart
-  /// Customer app, product page \&quot;add to cart\&quot;. Prices the selection with the catalog’s rules; the same configuration (size, options, note) adds to its line’s quantity. A product of another store: CART_VENDOR_MISMATCH (&#x60;details.vendorId&#x60;, &#x60;details.vendorName&#x60;: the cart’s store) unless &#x60;replaceCart&#x60; is true. Selection refusals, in this order: PRODUCT_UNAVAILABLE, OPTION_NOT_IN_PRODUCT, SIZE_UNAVAILABLE, INCOMPATIBLE_CUTTING_PACKAGING, OPTION_REQUIRED. ORDERING_PAUSED while orders are paused (&#x60;details.messageAr&#x60;, &#x60;details.messageEn&#x60;: the admin’s message). Until CRT-API-1 lands: NOT_IMPLEMENTED.
+  /// Customer app, product page \&quot;add to cart\&quot;. Prices the selection with the catalog’s rules; the same configuration (size, options, note) adds to its line’s quantity (past 99: VALIDATION_FAILED on &#x60;quantity&#x60;). A product of another store: CART_VENDOR_MISMATCH (&#x60;details.vendorId&#x60;, &#x60;details.vendorName&#x60;: the cart’s store) unless &#x60;replaceCart&#x60; is true. Selection refusals, in this order: PRODUCT_UNAVAILABLE, OPTION_NOT_IN_PRODUCT, SIZE_UNAVAILABLE, INCOMPATIBLE_CUTTING_PACKAGING, OPTION_REQUIRED. ORDERING_PAUSED while orders are paused (&#x60;details.messageAr&#x60;, &#x60;details.messageEn&#x60;: the admin’s message). Until CRT-API-1 lands: NOT_IMPLEMENTED.
   ///
   /// Parameters:
   /// * [addCartItemDto] 

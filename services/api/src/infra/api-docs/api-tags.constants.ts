@@ -136,14 +136,10 @@ export const API_TAGS = {
     description:
       'The days the cart can be delivered or picked up. Customer app.',
   },
-  customerPayments: {
-    name: 'Customer payments',
-    description:
-      'Payment methods, and paying an unpaid order again. Customer app.',
-  },
   customerCheckout: {
     name: 'Customer checkout',
-    description: 'Placing the cart as an order. Customer app.',
+    description:
+      'Payment methods, placing the cart as an order, and paying an unpaid order again. Customer app.',
   },
   customerOrders: {
     name: 'Customer orders',

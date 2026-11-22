@@ -74,7 +74,7 @@ class AddCartItemDto {
 
 
 
-      /// The chosen packaging (`packagings[].packaging`); null or left out: none.
+      /// The chosen packaging (`packagings[].packaging`; `none` is the product’s own \"no packaging\" option); null or left out: the product offers no packaging.
   @JsonKey(
     
     name: r'packaging',
@@ -177,21 +177,21 @@ class AddCartItemDto {
 
 }
 
-/// The chosen packaging (`packagings[].packaging`); null or left out: none.
+/// The chosen packaging (`packagings[].packaging`; `none` is the product’s own \"no packaging\" option); null or left out: the product offers no packaging.
 enum AddCartItemDtoPackagingEnum {
-    /// The chosen packaging (`packagings[].packaging`); null or left out: none.
+    /// The chosen packaging (`packagings[].packaging`; `none` is the product’s own \"no packaging\" option); null or left out: the product offers no packaging.
 @JsonValue(r'trays')
 trays(r'trays'),
-    /// The chosen packaging (`packagings[].packaging`); null or left out: none.
+    /// The chosen packaging (`packagings[].packaging`; `none` is the product’s own \"no packaging\" option); null or left out: the product offers no packaging.
 @JsonValue(r'bags')
 bags(r'bags'),
-    /// The chosen packaging (`packagings[].packaging`); null or left out: none.
+    /// The chosen packaging (`packagings[].packaging`; `none` is the product’s own \"no packaging\" option); null or left out: the product offers no packaging.
 @JsonValue(r'vacuum')
 vacuum(r'vacuum'),
-    /// The chosen packaging (`packagings[].packaging`); null or left out: none.
+    /// The chosen packaging (`packagings[].packaging`; `none` is the product’s own \"no packaging\" option); null or left out: the product offers no packaging.
 @JsonValue(r'none')
 none(r'none'),
-    /// The chosen packaging (`packagings[].packaging`); null or left out: none.
+    /// The chosen packaging (`packagings[].packaging`; `none` is the product’s own \"no packaging\" option); null or left out: the product offers no packaging.
 @JsonValue(r'unknown_default_open_api')
 unknownDefaultOpenApi(r'unknown_default_open_api');
 

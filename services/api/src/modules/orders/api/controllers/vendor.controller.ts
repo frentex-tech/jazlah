@@ -38,7 +38,7 @@ export class VendorOrdersController {
     operationId: 'vendorListOrders',
     summary: 'Orders',
     description:
-      'Vendor dashboard, orders list: the vendor’s own orders, newest first. An order past `expiresAt` and still unpaid is cancelled when read (workers are off on staging), so the answer is always current. Until ORD-API-3 lands: NOT_IMPLEMENTED.',
+      'Vendor dashboard, orders list: the vendor’s own orders, newest first. An order past `expiresAt` and still unpaid is cancelled when read (workers are off on staging), so the answer is always current; capacity, coupon use and wallet reads treat such orders as already released. Until ORD-API-3 lands: NOT_IMPLEMENTED.',
   })
   @ApiOkResponse({
     type: OrderPageResponseDto,
@@ -62,7 +62,7 @@ export class VendorOrdersController {
     operationId: 'vendorGetOrder',
     summary: 'One order',
     description:
-      'Vendor dashboard, order detail, with `allowedTransitions` for the caller. An order past `expiresAt` and still unpaid is cancelled when read (workers are off on staging), so the answer is always current. NOT_FOUND for an unknown order or another vendor’s. Until ORD-API-3 lands: NOT_IMPLEMENTED.',
+      'Vendor dashboard, order detail, with `allowedTransitions` for the caller. An order past `expiresAt` and still unpaid is cancelled when read (workers are off on staging), so the answer is always current; capacity, coupon use and wallet reads treat such orders as already released. NOT_FOUND for an unknown order or another vendor’s. Until ORD-API-3 lands: NOT_IMPLEMENTED.',
   })
   @ApiOkResponse({
     type: OrderResponseDto,

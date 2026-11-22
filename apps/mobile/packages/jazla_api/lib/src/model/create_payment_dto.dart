@@ -3,6 +3,7 @@
 //
 
 // ignore_for_file: unused_element
+import 'package:jazla_api/src/model/payment_method.dart';
 import 'package:json_annotation/json_annotation.dart';
 
 part 'create_payment_dto.g.dart';
@@ -18,26 +19,26 @@ class CreatePaymentDto {
   /// Returns a new [CreatePaymentDto] instance.
   CreatePaymentDto({
 
-    required  this.method,
+    required  this.paymentMethod,
 
      this.walletAmountHalalas,
   });
 
-      /// The method.
+      /// The method, from GET /v1/customer/checkout/payment-methods?orderId=.
   @JsonKey(
     
-    name: r'method',
+    name: r'paymentMethod',
     required: true,
     includeIfNull: false,
-  unknownEnumValue: CreatePaymentDtoMethodEnum.unknownDefaultOpenApi,
+  unknownEnumValue: PaymentMethod.unknownDefaultOpenApi,
   )
 
 
-  final CreatePaymentDtoMethodEnum method;
+  final PaymentMethod paymentMethod;
 
 
 
-      /// How much of the total to take from the wallet, in halalas, 0 up to the total (the whole total only with `wallet`); left out: 0. More than the balance: WALLET_INSUFFICIENT.
+      /// Part of the total to take from the wallet with another method, in halalas, 0 to less than the total; left out: 0. With `wallet` leave it out: the whole total is taken. More than the balance: WALLET_INSUFFICIENT.
           // minimum: 0
   @JsonKey(
     
@@ -55,12 +56,12 @@ class CreatePaymentDto {
 
     @override
     bool operator ==(Object other) => identical(this, other) || other is CreatePaymentDto &&
-      other.method == method &&
+      other.paymentMethod == paymentMethod &&
       other.walletAmountHalalas == walletAmountHalalas;
 
     @override
     int get hashCode =>
-        method.hashCode +
+        paymentMethod.hashCode +
         walletAmountHalalas.hashCode;
 
   factory CreatePaymentDto.fromJson(Map<String, dynamic> json) => _$CreatePaymentDtoFromJson(json);
@@ -73,34 +74,4 @@ class CreatePaymentDto {
   }
 
 }
-
-/// The method.
-enum CreatePaymentDtoMethodEnum {
-    /// The method.
-@JsonValue(r'mada')
-mada(r'mada'),
-    /// The method.
-@JsonValue(r'card')
-card(r'card'),
-    /// The method.
-@JsonValue(r'applepay')
-applepay(r'applepay'),
-    /// The method.
-@JsonValue(r'cod')
-cod(r'cod'),
-    /// The method.
-@JsonValue(r'wallet')
-wallet(r'wallet'),
-    /// The method.
-@JsonValue(r'unknown_default_open_api')
-unknownDefaultOpenApi(r'unknown_default_open_api');
-
-const CreatePaymentDtoMethodEnum(this.value);
-
-final String value;
-
-@override
-String toString() => value;
-}
-
 

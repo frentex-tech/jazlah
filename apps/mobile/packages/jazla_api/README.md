@@ -144,13 +144,13 @@ Class | Method | HTTP request | Description
 [*CustomerCartApi*](doc/CustomerCartApi.md) | [**customerRemoveCoupon**](doc/CustomerCartApi.md#customerremovecoupon) | **DELETE** /v1/customer/cart/coupon | Remove the coupon
 [*CustomerCartApi*](doc/CustomerCartApi.md) | [**customerSetCartFulfilment**](doc/CustomerCartApi.md#customersetcartfulfilment) | **PATCH** /v1/customer/cart/fulfilment | Choose delivery or pickup, and the day
 [*CustomerCartApi*](doc/CustomerCartApi.md) | [**customerUpdateCartItem**](doc/CustomerCartApi.md#customerupdatecartitem) | **PATCH** /v1/customer/cart/items/{id} | Change a line’s quantity
+[*CustomerCheckoutApi*](doc/CustomerCheckoutApi.md) | [**customerCreateOrderPayment**](doc/CustomerCheckoutApi.md#customercreateorderpayment) | **POST** /v1/customer/orders/{id}/payments | Pay an unpaid order again
+[*CustomerCheckoutApi*](doc/CustomerCheckoutApi.md) | [**customerListPaymentMethods**](doc/CustomerCheckoutApi.md#customerlistpaymentmethods) | **GET** /v1/customer/checkout/payment-methods | How I can pay
 [*CustomerCheckoutApi*](doc/CustomerCheckoutApi.md) | [**customerPlaceOrder**](doc/CustomerCheckoutApi.md#customerplaceorder) | **POST** /v1/customer/orders | Place my order
 [*CustomerMediaApi*](doc/CustomerMediaApi.md) | [**customerConfirmMediaUpload**](doc/CustomerMediaApi.md#customerconfirmmediaupload) | **POST** /v1/customer/media/{id}/confirm | Confirm an uploaded file
 [*CustomerMediaApi*](doc/CustomerMediaApi.md) | [**customerRequestMediaUpload**](doc/CustomerMediaApi.md#customerrequestmediaupload) | **POST** /v1/customer/media/uploads | Get a ticket to upload one file
 [*CustomerOrdersApi*](doc/CustomerOrdersApi.md) | [**customerGetOrder**](doc/CustomerOrdersApi.md#customergetorder) | **GET** /v1/customer/orders/{id} | One of my orders
 [*CustomerOrdersApi*](doc/CustomerOrdersApi.md) | [**customerListOrders**](doc/CustomerOrdersApi.md#customerlistorders) | **GET** /v1/customer/orders | My orders
-[*CustomerPaymentsApi*](doc/CustomerPaymentsApi.md) | [**customerCreateOrderPayment**](doc/CustomerPaymentsApi.md#customercreateorderpayment) | **POST** /v1/customer/orders/{id}/payments | Pay an unpaid order again
-[*CustomerPaymentsApi*](doc/CustomerPaymentsApi.md) | [**customerListPaymentMethods**](doc/CustomerPaymentsApi.md#customerlistpaymentmethods) | **GET** /v1/customer/checkout/payment-methods | How I can pay
 [*CustomerProfileApi*](doc/CustomerProfileApi.md) | [**customerSetMarketingConsent**](doc/CustomerProfileApi.md#customersetmarketingconsent) | **PUT** /v1/customer/profile/marketing-consent | Grant or withdraw my marketing consent
 [*CustomerProfileApi*](doc/CustomerProfileApi.md) | [**customerUpdateProfile**](doc/CustomerProfileApi.md#customerupdateprofile) | **PATCH** /v1/customer/profile | Update my profile
 [*CustomerSchedulingApi*](doc/CustomerSchedulingApi.md) | [**customerListCheckoutDays**](doc/CustomerSchedulingApi.md#customerlistcheckoutdays) | **GET** /v1/customer/checkout/days | Days I can choose
@@ -245,6 +245,7 @@ Class | Method | HTTP request | Description
  - [ErrorResponseDto](doc/ErrorResponseDto.md)
  - [ErrorResponseDtoDetails](doc/ErrorResponseDtoDetails.md)
  - [FieldErrorDto](doc/FieldErrorDto.md)
+ - [FulfilmentMethod](doc/FulfilmentMethod.md)
  - [GeoJsonPolygonDto](doc/GeoJsonPolygonDto.md)
  - [GeoPointDto](doc/GeoPointDto.md)
  - [IncompatiblePairResponseDto](doc/IncompatiblePairResponseDto.md)
@@ -278,10 +279,12 @@ Class | Method | HTTP request | Description
  - [OrderingPauseResponseDto](doc/OrderingPauseResponseDto.md)
  - [OtpRequestedResponseDto](doc/OtpRequestedResponseDto.md)
  - [PackagingPriceDto](doc/PackagingPriceDto.md)
+ - [PaymentMethod](doc/PaymentMethod.md)
  - [PaymentMethodListResponseDto](doc/PaymentMethodListResponseDto.md)
  - [PaymentMethodOptionResponseDto](doc/PaymentMethodOptionResponseDto.md)
  - [PaymentNextActionResponseDto](doc/PaymentNextActionResponseDto.md)
  - [PaymentResponseDto](doc/PaymentResponseDto.md)
+ - [PaymentStatus](doc/PaymentStatus.md)
  - [PaymentWebhookAckResponseDto](doc/PaymentWebhookAckResponseDto.md)
  - [PickupPointResponseDto](doc/PickupPointResponseDto.md)
  - [PlaceOrderDto](doc/PlaceOrderDto.md)

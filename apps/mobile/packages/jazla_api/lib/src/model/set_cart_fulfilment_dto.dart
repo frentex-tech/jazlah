@@ -3,6 +3,7 @@
 //
 
 // ignore_for_file: unused_element
+import 'package:jazla_api/src/model/fulfilment_method.dart';
 import 'package:json_annotation/json_annotation.dart';
 
 part 'set_cart_fulfilment_dto.g.dart';
@@ -31,11 +32,11 @@ class SetCartFulfilmentDto {
     name: r'method',
     required: true,
     includeIfNull: false,
-  unknownEnumValue: SetCartFulfilmentDtoMethodEnum.unknownDefaultOpenApi,
+  unknownEnumValue: FulfilmentMethod.unknownDefaultOpenApi,
   )
 
 
-  final SetCartFulfilmentDtoMethodEnum method;
+  final FulfilmentMethod method;
 
 
 
@@ -89,25 +90,4 @@ class SetCartFulfilmentDto {
   }
 
 }
-
-/// `delivery` or `pickup`; one the cart’s products allow (FULFILMENT_NOT_SUPPORTED otherwise).
-enum SetCartFulfilmentDtoMethodEnum {
-    /// `delivery` or `pickup`; one the cart’s products allow (FULFILMENT_NOT_SUPPORTED otherwise).
-@JsonValue(r'delivery')
-delivery(r'delivery'),
-    /// `delivery` or `pickup`; one the cart’s products allow (FULFILMENT_NOT_SUPPORTED otherwise).
-@JsonValue(r'pickup')
-pickup(r'pickup'),
-    /// `delivery` or `pickup`; one the cart’s products allow (FULFILMENT_NOT_SUPPORTED otherwise).
-@JsonValue(r'unknown_default_open_api')
-unknownDefaultOpenApi(r'unknown_default_open_api');
-
-const SetCartFulfilmentDtoMethodEnum(this.value);
-
-final String value;
-
-@override
-String toString() => value;
-}
-
 

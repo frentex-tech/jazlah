@@ -38,7 +38,7 @@ export class AdminOrdersController {
     operationId: 'adminListOrders',
     summary: 'Orders',
     description:
-      'Admin dashboard, orders list: every order, with a vendor filter, newest first. An order past `expiresAt` and still unpaid is cancelled when read (workers are off on staging), so the answer is always current. Until ORD-API-3 lands: NOT_IMPLEMENTED.',
+      'Admin dashboard, orders list: every order, with a vendor filter, newest first. An order past `expiresAt` and still unpaid is cancelled when read (workers are off on staging), so the answer is always current; capacity, coupon use and wallet reads treat such orders as already released. Until ORD-API-3 lands: NOT_IMPLEMENTED.',
   })
   @ApiOkResponse({
     type: OrderPageResponseDto,
@@ -62,7 +62,7 @@ export class AdminOrdersController {
     operationId: 'adminGetOrder',
     summary: 'One order',
     description:
-      'Admin dashboard, order detail, with `allowedTransitions` for the caller. An order past `expiresAt` and still unpaid is cancelled when read (workers are off on staging), so the answer is always current. NOT_FOUND for an unknown order. Until ORD-API-3 lands: NOT_IMPLEMENTED.',
+      'Admin dashboard, order detail, with `allowedTransitions` for the caller. An order past `expiresAt` and still unpaid is cancelled when read (workers are off on staging), so the answer is always current; capacity, coupon use and wallet reads treat such orders as already released. NOT_FOUND for an unknown order. Until ORD-API-3 lands: NOT_IMPLEMENTED.',
   })
   @ApiOkResponse({
     type: OrderResponseDto,

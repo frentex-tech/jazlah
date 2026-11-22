@@ -1,5 +1,6 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { PAYMENT_METHOD_NAMES, PAYMENT_STATUS_NAMES } from '@modules/orders';
+import { PAYMENT_METHOD_NAMES } from '../../domain/payment-method-names.constants';
+import { PAYMENT_STATUS_NAMES } from '../../domain/payment-status-names.constants';
 import { PaymentNextActionResponseDto } from './payment-next-action-response.dto';
 
 /** One payment attempt of an order. */
@@ -13,6 +14,7 @@ export class PaymentResponseDto {
 
   @ApiProperty({
     enum: PAYMENT_METHOD_NAMES,
+    enumName: 'PaymentMethod',
     example: 'mada',
     description: 'How it is paid.',
   })
@@ -20,6 +22,7 @@ export class PaymentResponseDto {
 
   @ApiProperty({
     enum: PAYMENT_STATUS_NAMES,
+    enumName: 'PaymentStatus',
     example: 'initiated',
     description: 'Where it is.',
   })

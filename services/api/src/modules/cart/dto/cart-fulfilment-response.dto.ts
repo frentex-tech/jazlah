@@ -1,12 +1,12 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { TimeWindowDto } from '@common/dto/time-window.dto';
-import { PickupPointResponseDto } from '@modules/orders';
-import { FULFILMENT_METHODS } from '@modules/settings';
+import { FULFILMENT_METHODS, PickupPointResponseDto } from '@modules/orders';
 
 /** The fulfilment chosen for the cart. */
 export class CartFulfilmentResponseDto {
   @ApiProperty({
     enum: FULFILMENT_METHODS,
+    enumName: 'FulfilmentMethod',
     example: 'delivery',
     description: 'Delivered or picked up.',
   })

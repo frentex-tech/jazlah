@@ -131,21 +131,21 @@ Business refusals have their own code, never VALIDATION_FAILED. Until a route's 
 | `OPTION_REQUIRED` | 422 | Choose a cut. | **Show** on the cut picker. |
 | `PRICE_CHANGED` | 409 | Some prices in your cart have changed. | Customer app: **go** to the cart, show old and new prices; PATCH the line to accept. |
 | `ITEM_UNAVAILABLE` | 409 | An item in your cart is no longer available. | Customer app: **go** to the cart and offer to remove the lines in `details.lineIds`. |
-| `MIN_ORDER_NOT_MET` | 422 | Your order is below the minimum. | **Go** to the cart and show `details.remainingHalalas`. |
+| `MIN_ORDER_NOT_MET` | 409 | Your order is below the minimum. | **Go** to the cart and show `details.remainingHalalas`. |
 | `COUPON_NOT_FOUND` | 422 | This coupon code is not valid. | **Show** on the coupon field. |
 | `COUPON_EXPIRED` | 422 | This coupon has expired. | **Show** on the coupon field. |
 | `COUPON_NOT_APPLICABLE` | 422 | This coupon does not apply to your cart. | **Show** on the coupon field. |
 | `COUPON_MIN_ORDER` | 422 | Your cart is below this coupon’s minimum. | **Show** on the coupon field with `details.minOrderHalalas`. |
 | `COUPON_LIMIT_REACHED` | 422 | This coupon has reached its limit. | **Show** on the coupon field. |
 | `COUPON_CODE_TAKEN` | 409 | A coupon with this code already exists. | Admin dashboard: **show** on the code field. |
-| `FULFILMENT_REQUIRED` | 422 | Choose delivery or pickup and a day first. | Customer app: **go** to the fulfilment step. |
+| `FULFILMENT_REQUIRED` | 409 | Choose delivery or pickup and a day first. | Customer app: **go** to the fulfilment step. |
 | `FULFILMENT_NOT_SUPPORTED` | 422 | Some items do not support this option. | **Show**; offer the other method. |
 | `ADDRESS_NOT_COVERED` | 422 | We do not deliver to this address yet. | **Go** to the fulfilment step; offer another address or pickup. |
 | `DAY_FULL` | 409 | This day is fully booked. | **Go** to the day picker and refetch the days. |
-| `DAY_NOT_AVAILABLE` | 422 | This day is not available. | **Go** to the day picker and refetch the days; `details.reason` says why. |
+| `DAY_NOT_AVAILABLE` | 409 | This day is not available. | **Go** to the day picker and refetch the days; `details.reason` says why. |
 | `ORDERING_PAUSED` | 409 | Ordering is paused for now. | **Show** `details.messageAr` / `messageEn` (the admin’s message); keep the cart. |
-| `PROFILE_INCOMPLETE` | 422 | Add your name to your profile first. | Customer app: **open** the name step, then place again. |
-| `WALLET_INSUFFICIENT` | 422 | Your wallet balance is not enough. | **Stay** on the payment step and refetch the methods. |
+| `PROFILE_INCOMPLETE` | 409 | Add your name to your profile first. | Customer app: **open** the name step, then place again. |
+| `WALLET_INSUFFICIENT` | 409 | Your wallet balance is not enough. | **Stay** on the payment step and refetch the methods. |
 | `PAYMENT_METHOD_NOT_AVAILABLE` | 422 | This payment method is not available for your order. | **Stay** on the payment step and refetch the methods. |
 | `ORDER_NOT_PAYABLE` | 409 | This order cannot be paid now. | **Reload** the order: it is paid, cancelled or expired. |
 | `PAYMENT_IN_PROGRESS` | 409 | A payment for this order is still in progress. | **Reopen** the open payment, or wait and reload the order. |

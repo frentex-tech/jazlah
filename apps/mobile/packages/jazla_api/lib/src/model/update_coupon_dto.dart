@@ -43,7 +43,7 @@ class UpdateCouponDto {
      this.isActive,
   });
 
-      /// The code customers type, 3 to 32 letters, digits, `_` or `-`; stored upper case, unique in any case (COUPON_CODE_TAKEN). Left out: unchanged.
+      /// The code customers type, 3 to 32 letters, digits, `_` or `-`; stored upper case, unique in any case (COUPON_CODE_TAKEN). Left out: unchanged; null: VALIDATION_FAILED.
   @JsonKey(
     
     name: r'code',
@@ -56,7 +56,7 @@ class UpdateCouponDto {
 
 
 
-      /// `percent` or `fixed`. Left out: unchanged.
+      /// `percent` or `fixed`. Left out: unchanged; null: VALIDATION_FAILED.
   @JsonKey(
     
     name: r'type',
@@ -70,7 +70,7 @@ class UpdateCouponDto {
 
 
 
-      /// percent: 1 to 100 (VALIDATION_FAILED `percent` above); fixed: halalas, 1 to 10000000. Left out: unchanged.
+      /// percent: 1 to 100 (VALIDATION_FAILED `percent` above); fixed: halalas, 1 to 10000000. Left out: unchanged; null: VALIDATION_FAILED.
           // minimum: 1
           // maximum: 10000000
   @JsonKey(
@@ -115,7 +115,7 @@ class UpdateCouponDto {
 
 
 
-      /// The stores it is for, at most 200; empty: every store. Left out: unchanged.
+      /// The stores it is for, at most 200; empty: every store. Left out: unchanged; null: VALIDATION_FAILED.
   @JsonKey(
     
     name: r'vendorIds',
@@ -128,7 +128,7 @@ class UpdateCouponDto {
 
 
 
-      /// The categories whose lines it discounts, at most 200; empty: every line. Left out: unchanged.
+      /// The categories whose lines it discounts, at most 200; empty: every line. Left out: unchanged; null: VALIDATION_FAILED.
   @JsonKey(
     
     name: r'categoryIds',
@@ -141,7 +141,7 @@ class UpdateCouponDto {
 
 
 
-      /// When it starts, ISO 8601 with an offset. Left out: unchanged.
+      /// When it starts: an ISO 8601 date and time with `Z` or an offset (VALIDATION_FAILED `isInstant` otherwise). Left out: unchanged; null: VALIDATION_FAILED.
   @JsonKey(
     
     name: r'startsAt',
@@ -154,7 +154,7 @@ class UpdateCouponDto {
 
 
 
-      /// When it ends, after startsAt (VALIDATION_FAILED `endBeforeStart` otherwise). Left out: unchanged.
+      /// When it ends, after startsAt (VALIDATION_FAILED `endBeforeStart` otherwise); with `Z` or an offset. Left out: unchanged; null: VALIDATION_FAILED.
   @JsonKey(
     
     name: r'endsAt',
@@ -197,7 +197,7 @@ class UpdateCouponDto {
 
 
 
-      /// Switched on; false: no one can use it. Left out: unchanged.
+      /// Switched on; false: no one can use it. Left out: unchanged; null: VALIDATION_FAILED.
   @JsonKey(
     
     name: r'isActive',
@@ -253,15 +253,15 @@ class UpdateCouponDto {
 
 }
 
-/// `percent` or `fixed`. Left out: unchanged.
+/// `percent` or `fixed`. Left out: unchanged; null: VALIDATION_FAILED.
 enum UpdateCouponDtoTypeEnum {
-    /// `percent` or `fixed`. Left out: unchanged.
+    /// `percent` or `fixed`. Left out: unchanged; null: VALIDATION_FAILED.
 @JsonValue(r'percent')
 percent(r'percent'),
-    /// `percent` or `fixed`. Left out: unchanged.
+    /// `percent` or `fixed`. Left out: unchanged; null: VALIDATION_FAILED.
 @JsonValue(r'fixed')
 fixed(r'fixed'),
-    /// `percent` or `fixed`. Left out: unchanged.
+    /// `percent` or `fixed`. Left out: unchanged; null: VALIDATION_FAILED.
 @JsonValue(r'unknown_default_open_api')
 unknownDefaultOpenApi(r'unknown_default_open_api');
 

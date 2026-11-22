@@ -10,8 +10,8 @@ import {
 } from 'class-validator';
 import { PageQueryDto } from '@common/dto/page-query.dto';
 import { trimText } from '@common/dto/trim-text';
+import { PAYMENT_METHOD_NAMES } from '@modules/payments';
 import { ORDER_STATUSES } from '../../domain/order-statuses.constants';
-import { PAYMENT_METHOD_NAMES } from '../../domain/payment-method-names.constants';
 
 /** The vendor’s orders, filtered. */
 export class ListVendorOrdersQueryDto extends PageQueryDto {
@@ -27,6 +27,7 @@ export class ListVendorOrdersQueryDto extends PageQueryDto {
 
   @ApiPropertyOptional({
     enum: PAYMENT_METHOD_NAMES,
+    enumName: 'PaymentMethod',
     example: 'cod',
     description:
       'Only orders with this method (`cod` with status `new`: the cash-on-delivery review queue).',

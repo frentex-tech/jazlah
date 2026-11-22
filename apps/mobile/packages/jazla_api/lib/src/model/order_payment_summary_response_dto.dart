@@ -3,6 +3,8 @@
 //
 
 // ignore_for_file: unused_element
+import 'package:jazla_api/src/model/payment_status.dart';
+import 'package:jazla_api/src/model/payment_method.dart';
 import 'package:json_annotation/json_annotation.dart';
 
 part 'order_payment_summary_response_dto.g.dart';
@@ -37,11 +39,11 @@ class OrderPaymentSummaryResponseDto {
     name: r'method',
     required: true,
     includeIfNull: false,
-  unknownEnumValue: OrderPaymentSummaryResponseDtoMethodEnum.unknownDefaultOpenApi,
+  unknownEnumValue: PaymentMethod.unknownDefaultOpenApi,
   )
 
 
-  final OrderPaymentSummaryResponseDtoMethodEnum method;
+  final PaymentMethod method;
 
 
 
@@ -51,11 +53,11 @@ class OrderPaymentSummaryResponseDto {
     name: r'status',
     required: true,
     includeIfNull: true,
-  unknownEnumValue: OrderPaymentSummaryResponseDtoStatusEnum.unknownDefaultOpenApi,
+  unknownEnumValue: PaymentStatus.unknownDefaultOpenApi,
   )
 
 
-  final OrderPaymentSummaryResponseDtoStatusEnum? status;
+  final PaymentStatus? status;
 
 
 
@@ -141,70 +143,4 @@ class OrderPaymentSummaryResponseDto {
   }
 
 }
-
-/// The method chosen for what the wallet does not cover.
-enum OrderPaymentSummaryResponseDtoMethodEnum {
-    /// The method chosen for what the wallet does not cover.
-@JsonValue(r'mada')
-mada(r'mada'),
-    /// The method chosen for what the wallet does not cover.
-@JsonValue(r'card')
-card(r'card'),
-    /// The method chosen for what the wallet does not cover.
-@JsonValue(r'applepay')
-applepay(r'applepay'),
-    /// The method chosen for what the wallet does not cover.
-@JsonValue(r'cod')
-cod(r'cod'),
-    /// The method chosen for what the wallet does not cover.
-@JsonValue(r'wallet')
-wallet(r'wallet'),
-    /// The method chosen for what the wallet does not cover.
-@JsonValue(r'unknown_default_open_api')
-unknownDefaultOpenApi(r'unknown_default_open_api');
-
-const OrderPaymentSummaryResponseDtoMethodEnum(this.value);
-
-final String value;
-
-@override
-String toString() => value;
-}
-
-
-/// The latest payment’s status; null when nothing is charged online (cash on delivery, wallet only).
-enum OrderPaymentSummaryResponseDtoStatusEnum {
-    /// The latest payment’s status; null when nothing is charged online (cash on delivery, wallet only).
-@JsonValue(r'initiated')
-initiated(r'initiated'),
-    /// The latest payment’s status; null when nothing is charged online (cash on delivery, wallet only).
-@JsonValue(r'authorized')
-authorized(r'authorized'),
-    /// The latest payment’s status; null when nothing is charged online (cash on delivery, wallet only).
-@JsonValue(r'captured')
-captured(r'captured'),
-    /// The latest payment’s status; null when nothing is charged online (cash on delivery, wallet only).
-@JsonValue(r'failed')
-failed(r'failed'),
-    /// The latest payment’s status; null when nothing is charged online (cash on delivery, wallet only).
-@JsonValue(r'cancelled')
-cancelled(r'cancelled'),
-    /// The latest payment’s status; null when nothing is charged online (cash on delivery, wallet only).
-@JsonValue(r'refunded')
-refunded(r'refunded'),
-    /// The latest payment’s status; null when nothing is charged online (cash on delivery, wallet only).
-@JsonValue(r'partially_refunded')
-partiallyRefunded(r'partially_refunded'),
-    /// The latest payment’s status; null when nothing is charged online (cash on delivery, wallet only).
-@JsonValue(r'unknown_default_open_api')
-unknownDefaultOpenApi(r'unknown_default_open_api');
-
-const OrderPaymentSummaryResponseDtoStatusEnum(this.value);
-
-final String value;
-
-@override
-String toString() => value;
-}
-
 

@@ -22,7 +22,6 @@ lib/src/api/customer_cart_api.dart
 lib/src/api/customer_checkout_api.dart
 lib/src/api/customer_media_api.dart
 lib/src/api/customer_orders_api.dart
-lib/src/api/customer_payments_api.dart
 lib/src/api/customer_profile_api.dart
 lib/src/api/customer_scheduling_api.dart
 lib/src/api/customer_vendor_applications_api.dart
@@ -95,6 +94,7 @@ lib/src/model/error_code.dart
 lib/src/model/error_response_dto.dart
 lib/src/model/error_response_dto_details.dart
 lib/src/model/field_error_dto.dart
+lib/src/model/fulfilment_method.dart
 lib/src/model/geo_json_polygon_dto.dart
 lib/src/model/geo_point_dto.dart
 lib/src/model/incompatible_pair_response_dto.dart
@@ -128,10 +128,12 @@ lib/src/model/order_with_payment_response_dto.dart
 lib/src/model/ordering_pause_response_dto.dart
 lib/src/model/otp_requested_response_dto.dart
 lib/src/model/packaging_price_dto.dart
+lib/src/model/payment_method.dart
 lib/src/model/payment_method_list_response_dto.dart
 lib/src/model/payment_method_option_response_dto.dart
 lib/src/model/payment_next_action_response_dto.dart
 lib/src/model/payment_response_dto.dart
+lib/src/model/payment_status.dart
 lib/src/model/payment_webhook_ack_response_dto.dart
 lib/src/model/pickup_point_response_dto.dart
 lib/src/model/place_order_dto.dart

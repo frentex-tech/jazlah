@@ -19,7 +19,7 @@ export class TransitionOrderDto {
   @ApiPropertyOptional({
     example: 'العميل ما رد على الاتصال',
     description:
-      'A note kept in the history, up to 500 characters; required when cancelling (rejecting a cash-on-delivery order: the reason the customer sees).',
+      'A note kept in the history, up to 500 characters; required when moving to `cancelled` (VALIDATION_FAILED on `note` without it): for a rejected cash-on-delivery order, the reason the customer sees.',
   })
   @IsOptional()
   @Transform(trimText)

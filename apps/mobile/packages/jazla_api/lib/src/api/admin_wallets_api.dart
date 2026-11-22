@@ -20,10 +20,11 @@ class AdminWalletsApi {
   const AdminWalletsApi(this._dio);
 
   /// Credit or debit a customer’s wallet
-  /// Admin dashboard, customer screen (and staging demos). Recorded in the wallet ledger and the audit log with the reason. WALLET_INSUFFICIENT (&#x60;details.balanceHalalas&#x60;) for a debit beyond the balance; NOT_FOUND for an unknown customer. Until WAL-API-1 lands: NOT_IMPLEMENTED.
+  /// Admin dashboard, customer screen (and staging demos). A retry with the same &#x60;Idempotency-Key&#x60; answers the first result and moves nothing. Recorded in the wallet ledger and the audit log with the reason. WALLET_INSUFFICIENT (&#x60;details.balanceHalalas&#x60;) for a debit beyond the balance; NOT_FOUND for an unknown customer. Until WAL-API-1 lands: NOT_IMPLEMENTED.
   ///
   /// Parameters:
   /// * [id] - The id (a UUID) of the item the path names; another value is VALIDATION_FAILED on `id`.
+  /// * [idempotencyKey] - A UUID the app makes once per attempt and sends again on a retry of the same attempt: the same key answers the first success again (the body is not compared); a refusal is not kept, so the same key may be sent again after fixing it. Missing or not a UUID: VALIDATION_FAILED on `Idempotency-Key`.
   /// * [adjustWalletDto] 
   /// * [cancelToken] - A [CancelToken] that can be used to cancel the operation
   /// * [headers] - Can be used to add additional headers to the request
@@ -36,6 +37,7 @@ class AdminWalletsApi {
   /// Throws [DioException] if API call or serialization fails
   Future<Response<WalletResponseDto>> adminAdjustCustomerWallet({ 
     required String id,
+    required String idempotencyKey,
     required AdjustWalletDto adjustWalletDto,
     CancelToken? cancelToken,
     Map<String, dynamic>? headers,
@@ -48,6 +50,7 @@ class AdminWalletsApi {
     final _options = Options(
       method: r'POST',
       headers: <String, dynamic>{
+        r'Idempotency-Key': idempotencyKey,
         ...?headers,
       },
       extra: <String, dynamic>{
