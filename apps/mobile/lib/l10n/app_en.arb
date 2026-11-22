@@ -564,5 +564,9 @@
   "errPaymentInProgress": "A payment for this order has not finished yet.",
   "payCheckStatus": "Check payment status",
   "payCancelPage": "Cancel payment",
-  "productSizeNoId": "This size can't be added to the cart right now."
+  "productSizeNoId": "This size can't be added to the cart right now.",
+  "payPageErrorTitle": "The payment page could not be opened",
+  "payPageErrorBody": "Check your connection and try again.",
+  "payPageClose": "Close",
+  "payContinue": "Continue payment"
 }

@@ -3481,6 +3481,30 @@ abstract class AppLocalizations {
   /// In ar, this message translates to:
   /// **'لا يمكن إضافة هذا المقاس إلى السلة حاليًا.'**
   String get productSizeNoId;
+
+  /// No description provided for @payPageErrorTitle.
+  ///
+  /// In ar, this message translates to:
+  /// **'تعذّر فتح صفحة الدفع'**
+  String get payPageErrorTitle;
+
+  /// No description provided for @payPageErrorBody.
+  ///
+  /// In ar, this message translates to:
+  /// **'تحقق من اتصالك ثم أعد المحاولة.'**
+  String get payPageErrorBody;
+
+  /// No description provided for @payPageClose.
+  ///
+  /// In ar, this message translates to:
+  /// **'إغلاق'**
+  String get payPageClose;
+
+  /// No description provided for @payContinue.
+  ///
+  /// In ar, this message translates to:
+  /// **'متابعة الدفع'**
+  String get payContinue;
 }
 
 class _AppLocalizationsDelegate extends LocalizationsDelegate<AppLocalizations> {

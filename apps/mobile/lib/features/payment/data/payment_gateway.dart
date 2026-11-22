@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:jazlah/app/theme/theme.dart';
 import 'package:jazlah/core/widgets/widgets.dart';
@@ -23,10 +25,17 @@ abstract interface class PaymentGateway {
 class HostedPagePaymentGateway implements PaymentGateway {
   const HostedPagePaymentGateway();
 
+  /// The hosted page's route name: the payment screen closes it once the outcome is known.
+  static const routeName = 'hosted-pay';
+
   @override
   Future<GatewayResult> startPayment(BuildContext context, PaymentAction action) async {
     final result = await Navigator.of(context).push<GatewayResult>(
-      MaterialPageRoute(fullscreenDialog: true, builder: (_) => _HostedPage(action: action)),
+      MaterialPageRoute(
+        fullscreenDialog: true,
+        settings: const RouteSettings(name: routeName),
+        builder: (_) => _HostedPage(action: action),
+      ),
     );
     return result ?? GatewayResult.cancelled;
   }
@@ -54,11 +63,15 @@ class _HostedPageState extends State<_HostedPage> {
     ..setNavigationDelegate(
       NavigationDelegate(
         onNavigationRequest: (r) => hostedNavigation(r.url, widget.action, _back),
+        onPageStarted: (_) => _failed ? setState(() => _failed = false) : null,
+        // A sub-resource failing (an image, a tracker) is not the page failing.
+        onWebResourceError: (e) => e.isForMainFrame ?? true ? setState(() => _failed = true) : null,
       ),
     )
     ..loadRequest(Uri.parse(widget.action.url));
 
   var _done = false;
+  var _failed = false;
 
   void _back() {
     if (_done || !mounted) return;
@@ -78,7 +91,32 @@ class _HostedPageState extends State<_HostedPage> {
               cartLabel: l10n.cart,
               onBack: () => Navigator.of(context).pop(GatewayResult.cancelled),
             ),
-            Expanded(child: WebViewWidget(controller: _web)),
+            Expanded(
+              child: _failed
+                  ? Center(
+                      child: Column(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          JEmptyState(
+                            kind: JEmptyStateKind.error,
+                            title: l10n.payPageErrorTitle,
+                            body: l10n.payPageErrorBody,
+                            actionLabel: l10n.retry,
+                            onAction: () {
+                              setState(() => _failed = false);
+                              unawaited(_web.reload());
+                            },
+                          ),
+                          JButton(
+                            label: l10n.payPageClose,
+                            variant: JButtonVariant.ghost,
+                            onPressed: () => Navigator.of(context).pop(GatewayResult.cancelled),
+                          ),
+                        ],
+                      ),
+                    )
+                  : WebViewWidget(controller: _web),
+            ),
           ],
         ),
       ),

@@ -72,6 +72,10 @@ class _PaymentScreenState extends ConsumerState<PaymentScreen> {
   /// until the payment is failed or cancelled (lead review M2); leaving keeps the order for the next start.
   bool _unsettled = false;
 
+  /// The open payment's next action, to reopen its hosted page («متابعة الدفع») without a new payment. Null when
+  /// opened again (the order answer carries no next action).
+  PaymentAction? _action;
+
   /// Polls before the screen stops waiting (about 60 s) and lets the customer leave.
   static const _maxPolls = 30;
 
@@ -118,6 +122,7 @@ class _PaymentScreenState extends ConsumerState<PaymentScreen> {
   Future<void> _run(PaymentAction action) async {
     final flow = _flow;
     _paymentId = action.paymentId;
+    _action = action;
     _unsettled = false;
     setState(() => _phase = _Phase.processing);
     final result = await ref.read(paymentGatewayProvider).startPayment(context, action);
@@ -226,7 +231,7 @@ class _PaymentScreenState extends ConsumerState<PaymentScreen> {
     _unsettled = false;
     if (!failed) unawaited(_prefs.setPendingPayment(null));
     // The gateway's page may still be open (resumed after 3DS): the outcome replaces it.
-    Navigator.of(context).popUntil((r) => r is! PopupRoute);
+    Navigator.of(context).popUntil((r) => r is! PopupRoute && r.settings.name != HostedPagePaymentGateway.routeName);
     if (paid) {
       final options = ref.read(paymentMethodsProvider(widget.orderId)).value?.options ?? const [];
       context.go(Routes.orderPlaced, extra: placedArgs(o, options));
@@ -341,19 +346,31 @@ class _PaymentScreenState extends ConsumerState<PaymentScreen> {
         body: body,
         onBack: _phase == _Phase.processing ? null : () => popOrHome(context),
         overlay: _toast == null ? null : JToast(message: _toast!, kind: JToastKind.error),
-        button: JButton(
-          label: _unsettled
-              ? l10n.payCheckStatus
-              : _phase == _Phase.failed
-              ? l10n.retry
-              : l10n.reviewConfirm,
-          expand: true,
-          loading: busy,
-          onPressed: _unsettled
-              ? () => _check(asked: true)
-              : chosen == null || o == null
-              ? null
-              : () => _pay(chosen),
+        button: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            // The open payment's hosted page again: the same url, no new payment.
+            if (_unsettled && _action != null && !busy) ...[
+              JButton(label: l10n.payContinue, expand: true, onPressed: () => _run(_action!)),
+              const SizedBox(height: JSpace.s8),
+            ],
+            JButton(
+              label: _unsettled
+                  ? l10n.payCheckStatus
+                  : _phase == _Phase.failed
+                  ? l10n.retry
+                  : l10n.reviewConfirm,
+              expand: true,
+              variant: _unsettled && _action != null ? JButtonVariant.secondary : JButtonVariant.primary,
+              loading: busy,
+              onPressed: _unsettled
+                  ? () => _check(asked: true)
+                  : chosen == null || o == null
+                  ? null
+                  : () => _pay(chosen),
+            ),
+          ],
         ),
       ),
     );

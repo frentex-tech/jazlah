@@ -99,6 +99,20 @@ class _Silent implements PaymentGateway {
   Future<GatewayResult> startPayment(BuildContext context, PaymentAction action) async => GatewayResult.finished;
 }
 
+/// The hosted page as the webview gateway pushes it (a named page route), left open: a 3DS step in the bank app.
+class _HostedStub implements PaymentGateway {
+  @override
+  Future<GatewayResult> startPayment(BuildContext context, PaymentAction action) async {
+    final r = await Navigator.of(context).push<GatewayResult>(
+      MaterialPageRoute(
+        settings: const RouteSettings(name: HostedPagePaymentGateway.routeName),
+        builder: (_) => const Scaffold(body: Text('hosted page')),
+      ),
+    );
+    return r ?? GatewayResult.cancelled;
+  }
+}
+
 /// The app's start: the gate redirects a signed-in user like the router does.
 class _ColdStart extends StatefulWidget {
   const _ColdStart();
@@ -504,5 +518,36 @@ void main() {
     expect(payments.keys[1], payments.keys[0]);
     expect(find.text(_sheet), findsOneWidget);
     expect(find.text('تحقق 3DS لمبلغ 123.00 ر.س. هذه صفحة المزوّد التجريبي.'), findsOneWidget); // mada, as before
+  });
+
+  testWidgets('a decline arriving on resume closes the hosted page under it', (t) async {
+    await _pump(t, gateway: _HostedStub());
+    expect(find.text('hosted page'), findsOneWidget);
+    _orders.decide('pay-o-1-1', approve: false);
+    await _resume(t);
+    expect(find.text('hosted page'), findsNothing);
+    expect(find.text(_declined), findsOneWidget);
+  });
+
+  testWidgets('a capture arriving on resume closes the hosted page and shows the placed order', (t) async {
+    await _pump(t, gateway: _HostedStub());
+    _orders.decide('pay-o-1-1', approve: true);
+    await _resume(t);
+    expect(find.text('hosted page'), findsNothing);
+    expect(find.text('تم استلام طلبك'), findsOneWidget);
+  });
+
+  testWidgets("«متابعة الدفع» reopens the open payment's page without a new payment", (t) async {
+    await _pump(t);
+    await t.tapAt(const Offset(195, 60)); // the hosted page closed mid-way
+    await _settle(t);
+    await t.pump(const Duration(seconds: 5));
+    await t.tap(find.text('متابعة الدفع'));
+    await _settle(t);
+    expect(find.text(_sheet), findsOneWidget);
+    await t.tap(find.text('موافقة'));
+    await _settle(t);
+    expect(find.text('تم استلام طلبك'), findsOneWidget);
+    expect((_payments as _Payments).retries, 0);
   });
 }

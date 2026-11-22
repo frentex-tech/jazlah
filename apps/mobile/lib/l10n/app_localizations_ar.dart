@@ -1891,4 +1891,16 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get productSizeNoId => 'لا يمكن إضافة هذا المقاس إلى السلة حاليًا.';
+
+  @override
+  String get payPageErrorTitle => 'تعذّر فتح صفحة الدفع';
+
+  @override
+  String get payPageErrorBody => 'تحقق من اتصالك ثم أعد المحاولة.';
+
+  @override
+  String get payPageClose => 'إغلاق';
+
+  @override
+  String get payContinue => 'متابعة الدفع';
 }
