@@ -59,7 +59,7 @@
 
 ## الخطوة 3: اعمل الخدمتين بإيدك (من غير Blueprint)
 
-**ليه مش Blueprint؟** على الخطة المجانية، **New ← Blueprint** بيطلب كارت دفع. اللي مش بيطلب كارت هو **New ← Web Service** بس. وعشان كده بنعمل الخدمتين بإيدينا. القاعدة والـRedis موجودين خلاص على Neon وUpstash. ملف `render.yaml` في الريبو **مرجع للقيم بس**، ومش بيتعمله apply.
+**ليه مش Blueprint؟** على الخطة المجانية، **New ← Blueprint** بيطلب كارت دفع. اللي مش بيطلب كارت هو **New ← Web Service** بس. وعشان كده بنعمل الخدمتين بإيدينا. القاعدة والـRedis موجودين خلاص على Neon وUpstash. ملف `render.yaml` في الريبو **مرجع للقيم بس**، ومش بيتطبّق على Render لوحده.
 
 **قبل ما تبدأ، جهّز 3 مفاتيح عشوائية.** هتحطهم في الـAPI. افتح Terminal على جهازك، واكتب الأمر ده **3 مرات**، وكل مرة انسخ الناتج في مدير الباسووردات (كل مرة بيطلع مفتاح مختلف، ولازم يكونوا مختلفين):
 
@@ -69,12 +69,12 @@ openssl rand -base64 32
 
 الناتج 44 حرف وآخره `=`. سمّيهم في مدير الباسووردات: **مفتاح 1** و**مفتاح 2** و**مفتاح 3**.
 
-**علامة 🔒 في الجداول تحت يعني سر.** الصقه في Render بس، ومتبعتهوش لحد، ومتصوّرش الصفحة اللي هو فيها. التلات أسرار اللي **إنت بتكتبهم من عندك** هم:
+**علامة 🔒 في الجداول تحت يعني سر.** الصقه في Render بس، ومتبعتهوش لحد، ومتصوّرش الصفحة اللي هو فيها. عندك **6 أسرار**، كلهم في الـAPI. **3 بتجيبهم** من Neon وUpstash والخطوة 2:
 - 🔒 `DATABASE_URL`
 - 🔒 `REDIS_URL`
 - 🔒 `AUTH_REVIEW_ACCOUNTS`
 
-والتلات مفاتيح العشوائية بتلصقهم زي ما هم.
+و**3 مفاتيح** من الـTerminal (مفتاح 1 و2 و3)، بتلصقهم زي ما هم.
 
 ### 3.1 الـAPI: `jazlah-api-staging`
 
@@ -87,11 +87,11 @@ openssl rand -base64 32
 | **Branch** | `develop` |
 | **Region** | `Frankfurt (EU Central)` |
 | **Root Directory** | `services/api` |
-| **Dockerfile Path** | `./Dockerfile` |
+| **Dockerfile Path** | `./Dockerfile` (لو مش ظاهر فوق، هتلاقيه في **Advanced**) |
 | **Docker Build Context Directory** | `.` |
 | **Instance Type** | **Free** |
 
-**Dockerfile Path** و**Docker Build Context Directory** بيتحسبوا من جوه الـRoot Directory. Render بيكتب `services/api/` قبلهم لوحده، فإنت اكتب `./Dockerfile` و`.` بس.
+**Dockerfile Path** و**Docker Build Context Directory** بيتحسبوا من جوه الـRoot Directory. فاكتب `./Dockerfile` و`.` بس، من غير `services/api/`.
 
 بعدين انزل لـ**Environment Variables** ← **Add Environment Variable**، وضيف ده كله:
 
@@ -108,7 +108,7 @@ openssl rand -base64 32
 | `DATABASE_CONNECTION_TIMEOUT_MS` | `15000` | انسخها زي ما هي |
 | `REDIS_URL` | 🔒 من Upstash: افتح `jazlah-staging` ← **Connect** ← انسخ العنوان اللي بيبدأ بـ`rediss://` (بـ`s` زيادة، يعني مشفّر). | **إنت** |
 | `REDIS_KEY_PREFIX` | `jazla-staging` | انسخها زي ما هي |
-| `STORAGE_PROVIDER` | `disabled` | انسخها زي ما هي (لحد الخطوة 7) |
+| `STORAGE_PROVIDER` | `disabled` | انسخها زي ما هي (بتتغيّر في الخطوة 7.5) |
 | `SMS_PROVIDERS` | `log` | انسخها زي ما هي |
 | `AUTH_ACCESS_TOKEN_SECRET` | 🔒 **مفتاح 1** | **إنت** (من الـTerminal) |
 | `AUTH_ACCESS_TOKEN_KEY_ID` | `staging-1` | انسخها زي ما هي |
@@ -135,7 +135,7 @@ sh -c './node_modules/.bin/prisma migrate deploy && { [ "$SEED_ON_START" != "tru
 
 الأمر ده بيعمل 3 حاجات بالترتيب: يعمل الجداول (migrations)، وبعدين يعبّي البيانات التجريبية (seed)، وبعدين يشغّل الـAPI. لو الجداول فشلت، الـAPI مش بيشتغل، وRender بيسيب النسخة القديمة شغالة. ولو التعبئة فشلت، الـAPI بيشتغل عادي.
 
-اضغط **Deploy Web Service**. أول مرة بتاخد من 5 لـ15 دقيقة.
+اضغط **Deploy Web Service** (أو **Create Web Service**). أول مرة بتاخد من 5 لـ15 دقيقة.
 
 ### 3.2 الداشبورد: `jazlah-dashboard-staging`
 
@@ -163,23 +163,23 @@ sh -c './node_modules/.bin/prisma migrate deploy && { [ "$SEED_ON_START" != "tru
 | `OTP_LENGTH` | `6` | انسخها زي ما هي |
 | `CLIENT_IP_HEADER` | `x-forwarded-for` | انسخها زي ما هي |
 | `NEXT_PUBLIC_MAP_TILES` | `https://tile.openstreetmap.org/{z}/{x}/{y}.png` | انسخها زي ما هي |
-| `MEDIA_ORIGINS` | `https://storage-disabled.invalid` | انسخها زي ما هي (لحد الخطوة 7) |
+| `MEDIA_ORIGINS` | `https://storage-disabled.invalid` | انسخها زي ما هي (بتتغيّر في الخطوة 7.5) |
 | `API_URL` | **متضيفهاش دلوقتي.** بتتضاف في الخطوة 4 | **إنت**، بعدين |
 
 **ممنوع تضيف** `DASHBOARD_TEST_BUILD` ولا `DASHBOARD_API_MOCK`.
 
 **Advanced** ← **Auto-Deploy**: `On Commit`. سيب **Health Check Path** فاضي.
 
-اضغط **Deploy Web Service**.
+اضغط **Deploy Web Service** (أو **Create Web Service**).
 
 ## الخطوة 4: اربط العنوانين ببعض
 
 بعد ما الاتنين يبقوا **Live** (أخضر):
 
 1. افتح `jazlah-api-staging`. هتلاقي عنوانه فوق تحت الاسم، شكله `https://jazlah-api-staging-xxxx.onrender.com`. انسخه.
-2. افتح `jazlah-dashboard-staging` ← **Environment** ← `API_URL` ← **Edit**. الصق عنوان الـAPI **من غير `/` في الآخر** ← **Save Changes**.
+2. افتح `jazlah-dashboard-staging` ← **Environment** ← **Add Environment Variable**. الاسم `API_URL`، والقيمة عنوان الـAPI **من غير `/` في الآخر** ← **Save Changes**.
 3. انسخ عنوان الداشبورد (شكله `https://jazlah-dashboard-staging-xxxx.onrender.com`).
-4. افتح `jazlah-api-staging` ← **Environment** ← `CORS_ORIGINS` ← **Edit**. الصق عنوان الداشبورد، من غير `/` في الآخر ← **Save Changes**.
+4. افتح `jazlah-api-staging` ← **Environment** ← **Add Environment Variable**. الاسم `CORS_ORIGINS`، والقيمة عنوان الداشبورد من غير `/` في الآخر ← **Save Changes**.
 5. كل خدمة هتعيد تشغيل نفسها لوحدها (دقيقتين تقريبًا).
 6. **ابعت العنوانين للفريق** (مش سر). هيحطوهم في `docs/frontend/README.md` وفي إعدادات الموبايل.
 
@@ -292,7 +292,11 @@ sh -c './node_modules/.bin/prisma migrate deploy && { [ "$SEED_ON_START" != "tru
 | `STORAGE_ACCESS_KEY_ID` | الـAccess key ID |
 | `STORAGE_SECRET_ACCESS_KEY` | الـSecret access key |
 
-بعدين **ابعت للفريق اسم الباكت العام بس** (مش المفاتيح). الفريق هيعمل PR يغيّر `STORAGE_PROVIDER` لـ`s3` و`MEDIA_ORIGINS` في `render.yaml`. أول ما يندمج، الرفع يشتغل والصور التجريبية تترفع لوحدها مع أول تشغيل.
+وفي نفس الصفحة غيّر `STORAGE_PROVIDER` من `disabled` لـ`s3` ← **Save Changes**. **متغيّرهاش تاني لـ`disabled`.**
+
+وبعدين افتح `jazlah-dashboard-staging` ← **Environment** ← `MEDIA_ORIGINS` ← **Edit**. حط `https://<اسم الباكت العام>.s3.eu-central-1.amazonaws.com` (من غير `/` في الآخر) ← اختار **Save, rebuild, and deploy** (لازم rebuild، لأن القيمة دي بتتحفظ وقت البناء).
+
+أول ما الاتنين يشتغلوا، الرفع يشتغل، والصور التجريبية تترفع لوحدها مع أول تشغيل للـAPI. **ابعت للفريق اسم الباكت العام بس** (مش المفاتيح)، علشان يحدّثوا `render.yaml` كمرجع.
 
 ## الخطوة 8: تابع الاستهلاك (مرة في الأسبوع)
 

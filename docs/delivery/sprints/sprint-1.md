@@ -83,7 +83,7 @@ This task also covers:
 - `config/` typed config validated with zod (fails fast on bad env)
 - `common/`: global `ValidationPipe` (whitelist, transform), exception filter returning `{code, message, details}` with messages localized by `Accept-Language` (ar default, en), pagination DTO + helper (`page`, `pageSize`, `total`), `@CurrentUser()` decorator stub
 - Swagger at `/docs` and `/docs-json` with bearer auth scheme and tags per audience (`public`, `customer`, `vendor`, `kitchen`, `admin`, `webhooks`)
-- `GET /v1/public/health` (liveness) and `/v1/public/health/ready` (DB, Redis, storage checks via `@nestjs/terminus`)
+- `GET /v1/health` (liveness) and `/v1/health/ready` (DB, Redis, storage checks via `@nestjs/terminus`)
 - `helmet`, CORS allow-list from env, `pino` structured logging with request id, graceful shutdown
 
 *Database: Prisma + PostGIS + migrations + seed*

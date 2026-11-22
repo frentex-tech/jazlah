@@ -89,8 +89,8 @@ services:
       # --- Object storage ------------------------------------------------------------------
       # disabled until the owner's AWS S3 buckets exist: uploads answer 503, the rest works
       # (DECISIONS.md, "Staging without object storage"). To switch, the owner adds the
-      # STORAGE_* values on the Environment page (guide, step 7), then a PR sets s3 here
-      # and MEDIA_ORIGINS below. Never switch back to disabled.
+      # STORAGE_* values, sets s3 here and MEDIA_ORIGINS below on Render (guide, step 7.5);
+      # a PR then updates this reference. Never switch back to disabled.
       - key: STORAGE_PROVIDER
         value: disabled
 
@@ -98,7 +98,8 @@ services:
       # Codes are written to the log, no SMS is sent (Msegat is not connected).
       - key: SMS_PROVIDERS
         value: log
-      # Generated once by Render (base64 of 32 random bytes) and kept on later syncs.
+      # Made by the owner with `openssl rand -base64 32` (guide, step 3); never changed after
+      # the first start.
       - key: AUTH_ACCESS_TOKEN_SECRET
         generateValue: true
       - key: AUTH_ACCESS_TOKEN_KEY_ID
@@ -110,7 +111,8 @@ services:
         sync: false
 
       # --- Vendors -------------------------------------------------------------------------
-      # 32 random bytes in base64, as the API requires; generated once and kept.
+      # 32 random bytes in base64 (`openssl rand -base64 32`, guide, step 3); never changed,
+      # or stored IBANs can't be read.
       - key: VENDORS_IBAN_KEY
         generateValue: true
       - key: VENDORS_IBAN_KEY_ID
@@ -151,6 +153,6 @@ services:
       - key: NEXT_PUBLIC_MAP_TILES
         value: https://tile.openstreetmap.org/{z}/{x}/{y}.png
       # The CSP's media hosts, fixed at build time. A placeholder while storage is disabled
-      # (a build refuses an empty value); the S3 switch PR sets the bucket's origin here.
+      # (a build refuses an empty value); the owner sets the bucket's origin (guide, step 7.5).
       - key: MEDIA_ORIGINS
         value: https://storage-disabled.invalid
