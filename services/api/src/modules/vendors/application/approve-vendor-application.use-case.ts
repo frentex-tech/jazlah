@@ -81,8 +81,8 @@ export class ApproveVendorApplicationUseCase {
       ) {
         throw new AppError(ErrorCode.VENDOR_CR_EXISTS);
       }
-      // shortcut: two approvals of two applications with one number at the same moment
-      // both pass this read; the unique index fails one (500). Lock if it ever happens.
+      // Two approvals of one number at the same moment both pass this read; the unique
+      // index refuses the second, mapped to VENDOR_CR_EXISTS by the repository.
       const vendor = await this.vendors.createFromApplication(
         application,
         input.commissionBasisPoints,

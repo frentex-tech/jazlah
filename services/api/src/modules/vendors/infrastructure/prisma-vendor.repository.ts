@@ -1,4 +1,5 @@
 import { Injectable } from '@nestjs/common';
+import { ErrorCode } from '@common/errors/error-code.enum';
 import type { LocalizedText } from '@common/i18n/localized-text.type';
 import type { Page } from '@common/pagination/page.type';
 import type { PageRequest } from '@common/pagination/page-request.type';
@@ -6,6 +7,7 @@ import { toPage } from '@common/pagination/to-page';
 import { DbContext } from '@infra/database/db-context';
 import { keysetAfter } from '@infra/database/keyset-after';
 import { KEYSET_ORDER } from '@infra/database/keyset-order.constants';
+import { mapConstraintViolation } from '@infra/database/map-constraint-violation';
 import { mapPrismaError } from '@infra/database/map-prisma-error';
 import type { VendorRepository } from '../domain/ports/vendor.repository.port';
 import type { Vendor } from '../domain/vendor.entity';
@@ -62,7 +64,9 @@ export class PrismaVendorRepository implements VendorRepository {
         }),
       );
     } catch (error) {
-      mapPrismaError(error);
+      mapConstraintViolation(error, {
+        vendors_commercial_registration_number_key: ErrorCode.VENDOR_CR_EXISTS,
+      });
     }
   }
 

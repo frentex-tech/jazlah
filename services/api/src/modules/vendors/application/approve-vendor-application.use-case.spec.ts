@@ -108,6 +108,32 @@ describe('ApproveVendorApplicationUseCase', () => {
     ).toBe('pending');
   });
 
+  it('answers VENDOR_CR_EXISTS when the number is approved between its check and the insert, leaving the application pending', async () => {
+    const kit = buildVendorsUseCases();
+    const first = await submitted(kit);
+    const second = await kit.submitApplication.execute(
+      applicationInput(kit, { applicantId: OTHER_CUSTOMER }),
+    );
+    await kit.approveApplication.execute({
+      applicationId: first.id,
+      reviewerId: ADMIN,
+      commissionBasisPoints: 1000,
+    });
+    // The concurrent approval: its read ran before the first insert committed.
+    jest
+      .spyOn(kit.vendors, 'existsWithRegistration')
+      .mockResolvedValueOnce(false);
+
+    await expect(
+      kit.approveApplication.execute({
+        applicationId: second.id,
+        reviewerId: ADMIN,
+        commissionBasisPoints: 1000,
+      }),
+    ).rejects.toMatchObject({ code: ErrorCode.VENDOR_CR_EXISTS });
+    expect(kit.vendors.rows).toHaveLength(1);
+  });
+
   it('refuses an application already reviewed with VENDOR_APPLICATION_NOT_PENDING', async () => {
     const kit = buildVendorsUseCases();
     const application = await submitted(kit);
