@@ -8092,6 +8092,143 @@
         ]
       }
     },
+    "/v1/admin/review-queue": {
+      "get": {
+        "description": "Admin dashboard, the product review queue and its side-nav badge. New products waiting for review (`kind: product`, `pending_review`) and pending edits of published products (`kind: change_request`) in one list, newest submission first, each with its vendor’s name and `submittedAt`; `count` is how many wait in all for the filter. Filter with `kind` and `vendorId`. Open an item with GET /v1/admin/products/{id} (and the request’s content in GET /v1/admin/product-change-requests); decide it with the approve and reject endpoints of its kind. Keyset paging: send `nextCursor` back as `cursor` until it is null.",
+        "operationId": "adminListReviewQueue",
+        "parameters": [
+          {
+            "name": "cursor",
+            "required": false,
+            "in": "query",
+            "description": "The `nextCursor` of the previous page; omit it for the first page. Opaque: never build or change it.",
+            "schema": {
+              "example": "WyIyMDI2LTExLTE1VDEwOjAwOjAwLjAwMFoiLCI3ZjNhIl0",
+              "type": "string"
+            }
+          },
+          {
+            "name": "limit",
+            "required": false,
+            "in": "query",
+            "description": "How many items to return, 1 to 50.",
+            "schema": {
+              "minimum": 1,
+              "maximum": 50,
+              "default": 20,
+              "example": 20,
+              "type": "number"
+            }
+          },
+          {
+            "name": "kind",
+            "required": false,
+            "in": "query",
+            "description": "`product`: only new products waiting for review; `change_request`: only edits of published products. Left out: both.",
+            "schema": {
+              "example": "product",
+              "type": "string",
+              "enum": [
+                "product",
+                "change_request"
+              ]
+            }
+          },
+          {
+            "name": "vendorId",
+            "required": false,
+            "in": "query",
+            "description": "Only the items of this vendor (its id, a UUID). Left out: every vendor.",
+            "schema": {
+              "format": "uuid",
+              "example": "7f3a2c1e-0b9d-4e5f-8a6b-1c2d3e4f5a6b",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "One page of the queue and the total waiting.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ReviewQueuePageResponseDto"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Error. code: VALIDATION_FAILED.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Error. code: UNAUTHORIZED, ACCESS_TOKEN_EXPIRED.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Error. code: FORBIDDEN.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Error. code: RATE_LIMITED.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Error. code: INTERNAL_ERROR.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "Error. code: SERVICE_UNAVAILABLE.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "The one review queue: new products and edits, newest first, with a count",
+        "tags": [
+          "Admin products"
+        ]
+      }
+    },
     "/v1/admin/product-change-requests": {
       "get": {
         "description": "Admin dashboard, the review queue of edits. A vendor’s content edit of a published product does not change it: it becomes a change request, `pending` here until an admin approves it (its content becomes the live product) or rejects it with a reason (the live product stays). When the vendor edits again before a decision, the pending request is closed as `superseded` and a new one takes its place, so a product has at most one pending request and a request’s content never changes. Each item carries the proposed content (ids, with image URLs; prices in halalas, VAT included); compare it with the live product from GET /v1/admin/products/{id}. Only pending requests, newest first. Keyset paging: send `nextCursor` back as `cursor` until it is null; no total count.",
@@ -13202,6 +13339,91 @@
         "required": [
           "items",
           "nextCursor"
+        ]
+      },
+      "ReviewQueueItemResponseDto": {
+        "type": "object",
+        "properties": {
+          "kind": {
+            "type": "string",
+            "enum": [
+              "product",
+              "change_request"
+            ],
+            "example": "product",
+            "description": "`product`: a new product waiting for review (approve or reject it with its product id); `change_request`: an edit of a published product (approve or reject it with `changeRequestId`)."
+          },
+          "productId": {
+            "type": "string",
+            "format": "uuid",
+            "example": "7f3a2c1e-0b9d-4e5f-8a6b-1c2d3e4f5a6b",
+            "description": "The product id (UUID): open it with GET /v1/admin/products/{id}."
+          },
+          "changeRequestId": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true,
+            "example": null,
+            "description": "The change request’s id (UUID) for `change_request`, its content in GET /v1/admin/product-change-requests; null for `product`."
+          },
+          "vendor": {
+            "description": "The vendor who sent it, with the store name.",
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/ProductVendorResponseDto"
+              }
+            ]
+          },
+          "name": {
+            "description": "The product’s live name in Arabic and English (an edit may propose another).",
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/LocalizedTextResponseDto"
+              }
+            ]
+          },
+          "submittedAt": {
+            "format": "date-time",
+            "type": "string",
+            "example": "2026-11-21T09:30:00.000Z",
+            "description": "When it entered the queue, UTC ISO 8601: the product’s submission, or the vendor’s edit that opened the request."
+          }
+        },
+        "required": [
+          "kind",
+          "productId",
+          "changeRequestId",
+          "vendor",
+          "name",
+          "submittedAt"
+        ]
+      },
+      "ReviewQueuePageResponseDto": {
+        "type": "object",
+        "properties": {
+          "items": {
+            "description": "The items of this page, newest submission first; empty when none wait.",
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ReviewQueueItemResponseDto"
+            }
+          },
+          "nextCursor": {
+            "type": "string",
+            "nullable": true,
+            "description": "Send as `cursor` for the next page; null on the last page.",
+            "example": null
+          },
+          "count": {
+            "type": "integer",
+            "example": 7,
+            "description": "How many items wait in all for this filter (every page, not this page): the side-nav badge."
+          }
+        },
+        "required": [
+          "items",
+          "nextCursor",
+          "count"
         ]
       },
       "ProductChangeRequestPageResponseDto": {

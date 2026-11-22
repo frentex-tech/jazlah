@@ -41,6 +41,10 @@ import { DeleteCuttingPackagingIncompatibilityUseCase } from '../../application/
 import { GetProductUseCase } from '../../application/get-product.use-case';
 import { ListCuttingPackagingIncompatibilitiesUseCase } from '../../application/list-cutting-packaging-incompatibilities.use-case';
 import { ListProductChangeRequestsUseCase } from '../../application/list-product-change-requests.use-case';
+import { ListReviewQueueUseCase } from '../../application/list-review-queue.use-case';
+import { ListReviewQueueQueryDto } from '../dto/list-review-queue-query.dto';
+import { ReviewQueuePageResponseDto } from '../dto/review-queue-page-response.dto';
+import { toReviewQueueItemResponse } from '../to-review-queue-item-response';
 import { ListProductsUseCase } from '../../application/list-products.use-case';
 import { ListReferenceItemsUseCase } from '../../application/list-reference-items.use-case';
 import { PublishPlatformProductUseCase } from '../../application/publish-platform-product.use-case';
@@ -101,6 +105,7 @@ export class AdminCatalogController {
     private readonly approveProduct: ApproveProductUseCase,
     private readonly rejectProduct: RejectProductUseCase,
     private readonly listChangeRequests: ListProductChangeRequestsUseCase,
+    private readonly listReviewQueue: ListReviewQueueUseCase,
     private readonly approveChangeRequest: ApproveProductChangeRequestUseCase,
     private readonly rejectChangeRequest: RejectProductChangeRequestUseCase,
     private readonly createProduct: CreateProductUseCase,
@@ -437,6 +442,40 @@ export class AdminCatalogController {
         reason: body.reason,
       }),
     );
+  }
+
+  @Get('review-queue')
+  @ApiTags(API_TAGS.adminProducts.name)
+  @ApiOperation({
+    operationId: 'adminListReviewQueue',
+    summary:
+      'The one review queue: new products and edits, newest first, with a count',
+    description:
+      'Admin dashboard, the product review queue and its side-nav badge. New products waiting for review (`kind: product`, `pending_review`) and pending edits of published products (`kind: change_request`) in one list, newest submission first, each with its vendor’s name and `submittedAt`; `count` is how many wait in all for the filter. Filter with `kind` and `vendorId`. Open an item with GET /v1/admin/products/{id} (and the request’s content in GET /v1/admin/product-change-requests); decide it with the approve and reject endpoints of its kind. Keyset paging: send `nextCursor` back as `cursor` until it is null.',
+  })
+  @ApiOkResponse({
+    type: ReviewQueuePageResponseDto,
+    description: 'One page of the queue and the total waiting.',
+  })
+  @ApiErrorResponses(
+    ErrorCode.VALIDATION_FAILED,
+    ErrorCode.SERVICE_UNAVAILABLE,
+    ...ADMIN_AUTH_ERRORS,
+  )
+  async reviewQueue(
+    @Query() query: ListReviewQueueQueryDto,
+  ): Promise<ReviewQueuePageResponseDto> {
+    const { page, count, vendorNames } = await this.listReviewQueue.execute(
+      { kind: query.kind, vendorId: query.vendorId },
+      toPageRequest(query),
+    );
+    return {
+      items: page.items.map((item) =>
+        toReviewQueueItemResponse(item, vendorNames),
+      ),
+      nextCursor: toNextCursor(page),
+      count,
+    };
   }
 
   @Get('product-change-requests')

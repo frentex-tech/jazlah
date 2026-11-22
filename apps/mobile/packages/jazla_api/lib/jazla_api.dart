@@ -105,6 +105,8 @@ export 'package:jazla_api/src/model/request_admin_upload_dto.dart';
 export 'package:jazla_api/src/model/request_customer_upload_dto.dart';
 export 'package:jazla_api/src/model/request_otp_dto.dart';
 export 'package:jazla_api/src/model/request_vendor_upload_dto.dart';
+export 'package:jazla_api/src/model/review_queue_item_response_dto.dart';
+export 'package:jazla_api/src/model/review_queue_page_response_dto.dart';
 export 'package:jazla_api/src/model/set_marketing_consent_dto.dart';
 export 'package:jazla_api/src/model/set_product_availability_dto.dart';
 export 'package:jazla_api/src/model/set_product_fulfilment_dto.dart';

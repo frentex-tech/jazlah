@@ -148,6 +148,8 @@ describe('API documentation (e2e)', () => {
         'RequestCustomerUploadDto',
         'RequestOtpDto',
         'RequestVendorUploadDto',
+        'ReviewQueueItemResponseDto',
+        'ReviewQueuePageResponseDto',
         'SetMarketingConsentDto',
         'SetProductAvailabilityDto',
         'SetProductFulfilmentDto',

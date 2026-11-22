@@ -1451,6 +1451,26 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/v1/admin/review-queue": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * The one review queue: new products and edits, newest first, with a count
+         * @description Admin dashboard, the product review queue and its side-nav badge. New products waiting for review (`kind: product`, `pending_review`) and pending edits of published products (`kind: change_request`) in one list, newest submission first, each with its vendor’s name and `submittedAt`; `count` is how many wait in all for the filter. Filter with `kind` and `vendorId`. Open an item with GET /v1/admin/products/{id} (and the request’s content in GET /v1/admin/product-change-requests); decide it with the approve and reject endpoints of its kind. Keyset paging: send `nextCursor` back as `cursor` until it is null.
+         */
+        get: operations["adminListReviewQueue"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/v1/admin/product-change-requests": {
         parameters: {
             query?: never;
@@ -3758,6 +3778,50 @@ export interface components {
              * @example null
              */
             nextCursor: string | null;
+        };
+        ReviewQueueItemResponseDto: {
+            /**
+             * @description `product`: a new product waiting for review (approve or reject it with its product id); `change_request`: an edit of a published product (approve or reject it with `changeRequestId`).
+             * @example product
+             * @enum {string}
+             */
+            kind: "product" | "change_request";
+            /**
+             * Format: uuid
+             * @description The product id (UUID): open it with GET /v1/admin/products/{id}.
+             * @example 7f3a2c1e-0b9d-4e5f-8a6b-1c2d3e4f5a6b
+             */
+            productId: string;
+            /**
+             * Format: uuid
+             * @description The change request’s id (UUID) for `change_request`, its content in GET /v1/admin/product-change-requests; null for `product`.
+             * @example null
+             */
+            changeRequestId: string | null;
+            /** @description The vendor who sent it, with the store name. */
+            vendor: components["schemas"]["ProductVendorResponseDto"];
+            /** @description The product’s live name in Arabic and English (an edit may propose another). */
+            name: components["schemas"]["LocalizedTextResponseDto"];
+            /**
+             * Format: date-time
+             * @description When it entered the queue, UTC ISO 8601: the product’s submission, or the vendor’s edit that opened the request.
+             * @example 2026-11-21T09:30:00.000Z
+             */
+            submittedAt: string;
+        };
+        ReviewQueuePageResponseDto: {
+            /** @description The items of this page, newest submission first; empty when none wait. */
+            items: components["schemas"]["ReviewQueueItemResponseDto"][];
+            /**
+             * @description Send as `cursor` for the next page; null on the last page.
+             * @example null
+             */
+            nextCursor: string | null;
+            /**
+             * @description How many items wait in all for this filter (every page, not this page): the side-nav badge.
+             * @example 7
+             */
+            count: number;
         };
         ProductChangeRequestPageResponseDto: {
             /** @description The pending change requests of this page, newest first; empty when none wait. */
@@ -10124,6 +10188,89 @@ export interface operations {
             };
             /** @description Error. code: PRODUCT_NOT_EDITABLE, TRANSACTION_CONFLICT. */
             409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponseDto"];
+                };
+            };
+            /** @description Error. code: RATE_LIMITED. */
+            429: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponseDto"];
+                };
+            };
+            /** @description Error. code: INTERNAL_ERROR. */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponseDto"];
+                };
+            };
+            /** @description Error. code: SERVICE_UNAVAILABLE. */
+            503: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponseDto"];
+                };
+            };
+        };
+    };
+    adminListReviewQueue: {
+        parameters: {
+            query?: {
+                /** @description The `nextCursor` of the previous page; omit it for the first page. Opaque: never build or change it. */
+                cursor?: string;
+                /** @description How many items to return, 1 to 50. */
+                limit?: number;
+                /** @description `product`: only new products waiting for review; `change_request`: only edits of published products. Left out: both. */
+                kind?: "product" | "change_request";
+                /** @description Only the items of this vendor (its id, a UUID). Left out: every vendor. */
+                vendorId?: string;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description One page of the queue and the total waiting. */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ReviewQueuePageResponseDto"];
+                };
+            };
+            /** @description Error. code: VALIDATION_FAILED. */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponseDto"];
+                };
+            };
+            /** @description Error. code: UNAUTHORIZED, ACCESS_TOKEN_EXPIRED. */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponseDto"];
+                };
+            };
+            /** @description Error. code: FORBIDDEN. */
+            403: {
                 headers: {
                     [name: string]: unknown;
                 };

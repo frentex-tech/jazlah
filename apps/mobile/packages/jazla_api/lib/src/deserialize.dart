@@ -68,6 +68,8 @@ import 'package:jazla_api/src/model/request_admin_upload_dto.dart';
 import 'package:jazla_api/src/model/request_customer_upload_dto.dart';
 import 'package:jazla_api/src/model/request_otp_dto.dart';
 import 'package:jazla_api/src/model/request_vendor_upload_dto.dart';
+import 'package:jazla_api/src/model/review_queue_item_response_dto.dart';
+import 'package:jazla_api/src/model/review_queue_page_response_dto.dart';
 import 'package:jazla_api/src/model/set_marketing_consent_dto.dart';
 import 'package:jazla_api/src/model/set_product_availability_dto.dart';
 import 'package:jazla_api/src/model/set_product_fulfilment_dto.dart';
@@ -256,6 +258,10 @@ final _regMap = RegExp(r'^Map<String,(.*)>$');
           return RequestOtpDto.fromJson(value as Map<String, dynamic>) as ReturnType;
         case 'RequestVendorUploadDto':
           return RequestVendorUploadDto.fromJson(value as Map<String, dynamic>) as ReturnType;
+        case 'ReviewQueueItemResponseDto':
+          return ReviewQueueItemResponseDto.fromJson(value as Map<String, dynamic>) as ReturnType;
+        case 'ReviewQueuePageResponseDto':
+          return ReviewQueuePageResponseDto.fromJson(value as Map<String, dynamic>) as ReturnType;
         case 'SetMarketingConsentDto':
           return SetMarketingConsentDto.fromJson(value as Map<String, dynamic>) as ReturnType;
         case 'SetProductAvailabilityDto':

@@ -104,6 +104,8 @@ lib/src/model/request_admin_upload_dto.dart
 lib/src/model/request_customer_upload_dto.dart
 lib/src/model/request_otp_dto.dart
 lib/src/model/request_vendor_upload_dto.dart
+lib/src/model/review_queue_item_response_dto.dart
+lib/src/model/review_queue_page_response_dto.dart
 lib/src/model/set_marketing_consent_dto.dart
 lib/src/model/set_product_availability_dto.dart
 lib/src/model/set_product_fulfilment_dto.dart
