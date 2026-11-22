@@ -18,7 +18,7 @@ function seed(): Map<string, Stored> {
   const base = { maxDiscountHalalas: null, minOrderHalalas: null, vendorIds: [], categoryIds: [], usageLimit: null, perUserLimit: 1, isActive: true, firstOrderOnly: false };
   const rows: (Partial<Stored> & Pick<Stored, 'code' | 'type' | 'value' | 'startsAt' | 'endsAt'>)[] = [
     { code: 'RAMADAN25', type: 'percent', value: 25, maxDiscountHalalas: 5000, minOrderHalalas: 10000, startsAt: at(-10), endsAt: at(20), usageLimit: 500, usage: { uses: 132, distinctUsers: 120, totalDiscountHalalas: 528000 } },
-    { code: 'WELCOME50', type: 'fixed', value: 5000, minOrderHalalas: 20000, startsAt: at(-40), endsAt: at(320), firstOrderOnly: true, usage: { uses: 48, distinctUsers: 48, totalDiscountHalalas: 240000 } },
+    { code: 'WELCOME50', type: 'fixed', value: 5000, minOrderHalalas: 20000, startsAt: at(-40), endsAt: at(320), usage: { uses: 48, distinctUsers: 48, totalDiscountHalalas: 240000 } },
     { code: 'FALAH15', type: 'percent', value: 15, vendorIds: falah ? [falah] : [], categoryIds: sheep ? [sheep] : [], startsAt: at(-5), endsAt: at(25), usageLimit: 100, perUserLimit: 2, usage: { uses: 100, distinctUsers: 61, totalDiscountHalalas: 187500 } },
     { code: 'EID10', type: 'percent', value: 10, startsAt: at(15), endsAt: at(19), usageLimit: 1000, usage: { uses: 0, distinctUsers: 0, totalDiscountHalalas: 0 } },
     { code: 'NATIONAL94', type: 'fixed', value: 9400, startsAt: at(-70), endsAt: at(-60), usageLimit: 940, usage: { uses: 940, distinctUsers: 902, totalDiscountHalalas: 8836000 } },
@@ -68,7 +68,7 @@ export const mockCoupons: CouponsBackend = {
     if (!parsed.success) return invalid(String(parsed.error.issues[0]?.path[0] ?? ''), 'invalid');
     if (codeUsed(parsed.data.code)) return taken;
     const now = new Date().toISOString();
-    const c: Stored = { ...(parsed.data as CouponInput), id: crypto.randomUUID(), usageCount: 0, createdAt: now, updatedAt: now, usage: { uses: 0, distinctUsers: 0, totalDiscountHalalas: 0 } };
+    const c: Stored = { ...(parsed.data as CouponInput), firstOrderOnly: false, id: crypto.randomUUID(), usageCount: 0, createdAt: now, updatedAt: now, usage: { uses: 0, distinctUsers: 0, totalDiscountHalalas: 0 } };
     coupons.set(c.id, c);
     return { ok: true, data: out(c) };
   },

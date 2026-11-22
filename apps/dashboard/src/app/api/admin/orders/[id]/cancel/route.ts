@@ -9,6 +9,8 @@ import { invalidBody, langOf } from '@/lib/route';
 export async function POST(req: NextRequest, { params }: IdCtx) {
   const { id } = await params;
   if (!isId(id)) return notFound();
+  const { cancel } = ordersBackend();
+  if (!cancel) return notFound(); // Sprint 4 route, not on the Sprint 3 API
   const parsed = CancelSchema.safeParse(await req.json().catch(() => null));
-  return withPanelSession(req, 'admin', async (token) => (parsed.success ? ordersBackend().cancel(token, langOf(req), id, parsed.data) : invalidBody(parsed.error)));
+  return withPanelSession(req, 'admin', async (token) => (parsed.success ? cancel(token, langOf(req), id, parsed.data) : invalidBody(parsed.error)));
 }

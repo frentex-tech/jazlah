@@ -54,8 +54,8 @@ export const OperationsSchema = z.object({
 /** What the page saves: everything but `paused`, which only the pause flow changes (a stale tab must not resume). */
 export const PageSchema = OperationsSchema.omit({ paused: true });
 
-/** PUT body: only the keys sent change (the header switch sends `paused` alone). */
-export const OperationsPatchSchema = OperationsSchema.partial();
+/** The page's PUT body: only the keys sent change. `paused` has its own route (PausedSchema). */
+export const OperationsPatchSchema = PageSchema.partial();
 
 export const VendorDefaultSchema = z.object({ ordersPerDay: int(1, 100000).nullable(), carcassesPerDay: int(1, 100000).nullable() }) satisfies z.ZodType<Omit<VendorCapacity, 'days'>>;
 export const DayLimitSchema = z.object({ ordersLimit: int(1, 100000).nullable(), carcassesLimit: int(1, 100000).nullable() });

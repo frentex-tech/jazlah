@@ -1,5 +1,6 @@
 'use client';
 
+import { CalendarBlank } from '@phosphor-icons/react';
 import type { ColumnDef } from '@tanstack/react-table';
 import { useLocale, useTranslations } from 'next-intl';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
@@ -83,13 +84,18 @@ export function OrdersList({ panel, live }: { panel: OrdersPanel; live: boolean 
   reload.current = load;
   useEffect(() => {
     const feed = live ? streamFeed(panel) : pollFeed(panel);
-    return feed.subscribe((o) => {
-      setAnnounce(t('fresh', { number: o.number }));
-      if (!onFirstPage.current) return;
-      setFresh((s) => new Set(s).add(o.id));
-      setTimeout(() => setFresh((s) => (s.delete(o.id), new Set(s))), 6000);
-      void reload.current(true);
-    });
+    return feed.subscribe(
+      (o) => {
+        setAnnounce(t('fresh', { number: o.number }));
+        if (!onFirstPage.current) return;
+        setFresh((s) => new Set(s).add(o.id));
+        setTimeout(() => setFresh((s) => (s.delete(o.id), new Set(s))), 6000);
+        void reload.current(true);
+      },
+      undefined,
+      // A status changed elsewhere: the page reloads quietly, without the new-order tint.
+      () => onFirstPage.current && void reload.current(true),
+    );
   }, [panel, live, t]);
 
   const columns = useMemo<ColumnDef<OrderSummary, unknown>[]>(
@@ -170,22 +176,26 @@ export function OrdersList({ panel, live }: { panel: OrdersPanel; live: boolean 
                 ))}
               </Select>
             )}
-            <Select aria-label={t('method')} value={method} onChange={(e) => setMethod(e.target.value as PaymentMethod | '')} className="flex-1">
+            <Select aria-label={t('method')} value={method} onChange={(e) => setMethod(e.target.value as PaymentMethod | '')} className="min-w-[170px] flex-1">
               <option value="">{t('method')}</option>
               {METHODS.map((m) => (
                 <option key={m} value={m}>{t(`methods.${m}`)}</option>
               ))}
             </Select>
-            {/* The native date picker; while empty its mm/dd/yyyy hides under «التاريخ», as drawn. */}
+            {/*
+              135:47501: «calendar-blank» at the start, then «التاريخ» (or the date). The native picker opens from anywhere
+              on the field: its own glyph is stretched over the field and made invisible.
+            */}
             <span className="relative flex shrink-0">
               <input
                 type="date"
                 aria-label={t('date')}
                 value={date}
                 onChange={(e) => setDate(e.target.value)}
-                className={`peer h-11 w-[160px] rounded-sm border bg-paper px-s12 text-body-m outline-none focus:border-2 focus:border-ember ${date ? 'border-ink-2 text-ink' : 'border-line text-transparent focus:text-ink'}`}
+                className={`peer relative h-11 w-[160px] rounded-sm border bg-paper pe-s12 ps-[38px] text-body-m outline-none focus:border-2 focus:border-ember [&::-webkit-calendar-picker-indicator]:absolute [&::-webkit-calendar-picker-indicator]:inset-0 [&::-webkit-calendar-picker-indicator]:size-full [&::-webkit-calendar-picker-indicator]:cursor-pointer [&::-webkit-calendar-picker-indicator]:opacity-0 ${date ? 'border-ink-2 text-ink' : 'border-line text-transparent focus:text-ink'}`}
               />
-              {!date && <span aria-hidden className="pointer-events-none absolute start-s12 top-1/2 -translate-y-1/2 text-body-m text-ink-2 peer-focus:hidden">{t('date')}</span>}
+              <CalendarBlank size={18} aria-hidden className="pointer-events-none absolute start-s12 top-1/2 -translate-y-1/2 text-ink-2" />
+              {!date && <span aria-hidden className="pointer-events-none absolute start-[38px] top-1/2 -translate-y-1/2 text-body-m text-ink-2 peer-focus:hidden">{t('date')}</span>}
             </span>
           </FiltersBar>
           {empty ? (

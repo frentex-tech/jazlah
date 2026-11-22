@@ -28,7 +28,11 @@ export type OperationsSettings = {
   cod: { enabled: boolean; maxOrderHalalas: number | null; allowedOrderTypes: OrderType[]; confirmation: 'auto' | 'review' };
   paused: Paused;
   complaintWindowHours: number;
-  /** The frame's weekly hours (118:11181); not an `ops.*` key in the sprint file (API gap): the section shows only when present. */
+  /**
+   * The frame's weekly hours (118:11181); not an `ops.*` key in the sprint file: the section shows only when present.
+   * shortcut: platform hours have no consumer in the plan (SCH-API-2 uses the vendor's); keep, move or drop once the API
+   * session answers A12 (#70).
+   */
   workingHours?: { day: Weekday; open: boolean; start: string; end: string }[];
 };
 
