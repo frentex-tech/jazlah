@@ -21,7 +21,7 @@ Never commit the filled files. Staging and production keys come from the team's 
 `config/staging.json` points the app at the staging API on Render (`docs/deploy/render-staging.md`):
 
 ```json
-{ "API_BASE_URL": "https://jazlah-api-staging-xxxx.onrender.com", "USE_MOCKS": "false" }
+{ "API_BASE_URL": "https://jazla-api-staging.onrender.com", "USE_MOCKS": "false" }
 ```
 
 - Copy `staging.example.json`, set `API_BASE_URL` to the API address the owner sends (step 4 of the guide), with no `/v1` and no trailing slash, and leave the other keys empty.
