@@ -6,7 +6,7 @@ import { ADMIN, PNG, RUN, apiGet, publicCard, signInTo, toast } from './helpers'
 // and one size switched off (PATCH availability with `sizes`). It offers quarters in a tray, a pair the seeded rules
 // forbid, and mandi cut in a vacuum bag, a pair the admin forbids from the form's matrix (a global rule, POST
 // /v1/admin/cutting-packaging-incompatibilities): publishing is not refused, the public product lists both pairs for the
-// app to block (#290). Needs a freshly seeded API: on a second run the matrix click would allow the pair again.
+// app to block (#290). On a second run against the same API the rule is already there and is left as is.
 const NAME = `ذبيحة نعيمي ${RUN}`;
 const NAME_EN = `Acceptance Naimi carcass ${RUN}`;
 
@@ -42,9 +42,14 @@ test('create, save, publish and edit a price of a JAZLA product', async ({ page 
 
   // The incompatibility rule, made from the UI: mandi cut cannot go in a vacuum bag, for every product.
   await expect(page.getByRole('button', { name: 'أرباع مع علبة مبرّدة: غير متوافق' })).toBeVisible(); // the seeded rule
-  await page.getByRole('button', { name: 'تقطيع مندي مع كيس مفرّغ: متوافق' }).click();
-  await page.getByRole('dialog', { name: 'تغيير قاعدة التوافق لكل المنتجات؟' }).getByRole('button', { name: 'تغيير القاعدة' }).click();
-  await expect(page.getByRole('button', { name: 'تقطيع مندي مع كيس مفرّغ: غير متوافق' })).toBeVisible({ timeout: 15_000 });
+  const forbidden = page.getByRole('button', { name: 'تقطيع مندي مع كيس مفرّغ: غير متوافق' });
+  const allowed = page.getByRole('button', { name: 'تقطيع مندي مع كيس مفرّغ: متوافق' });
+  await expect(forbidden.or(allowed)).toBeVisible();
+  if (await allowed.isVisible()) {
+    await allowed.click();
+    await page.getByRole('dialog', { name: 'تغيير قاعدة التوافق لكل المنتجات؟' }).getByRole('button', { name: 'تغيير القاعدة' }).click();
+  }
+  await expect(forbidden).toBeVisible({ timeout: 15_000 });
 
   await page.getByRole('button', { name: 'حفظ كمسودة' }).click();
   await toast(page, `تم حفظ ${NAME}`);

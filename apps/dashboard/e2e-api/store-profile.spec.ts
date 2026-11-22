@@ -3,6 +3,7 @@ import { PNG, RUN, VENDOR, apiGet, signInTo } from './helpers';
 
 // VND-DSH-1 against the real API: the seeded vendor (ملحمة النخبة) saves its store page (descriptions and a new logo,
 // uploaded with a presigned POST), and the change is on the public store endpoint GET /v1/public/vendors/{id}.
+// It changes the seeded vendor's description and logo (the later specs do not read them).
 type PublicVendor = { id: string; description: { ar: string | null; en: string | null }; logoUrl: string | null };
 
 test('a store profile save shows on the public store endpoint', async ({ page }) => {

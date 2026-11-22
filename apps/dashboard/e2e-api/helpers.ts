@@ -6,6 +6,7 @@ export const API_URL = process.env.API_URL ?? 'http://localhost:3000';
 export const ADMIN = { phone: '0500000004', code: '444444' };
 export const VENDOR = { phone: '0500000002', code: '222222' }; // owner of ملحمة النخبة
 export const APPLICANT = { phone: '0500000041', code: '414141' }; // a phone the seed does not know
+export const CUSTOMER = { phone: '0500000042', code: '424242' }; // customer only: no staff access, never applies
 /** Digits unique to this run, for names (Arabic names stay Arabic plus digits). */
 export const RUN = String(Date.now()).slice(-6);
 export const PNG = Buffer.from('iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8z8BQDwAEhQGAhKmMIQAAAABJRU5ErkJggg==', 'base64');
@@ -29,6 +30,18 @@ export async function signInTo(page: Page, panel: 'admin' | 'vendor', who: { pho
   await signIn(page, who);
   // The vendor panel opens on its orders (/vendor redirects to /vendor/orders): wait for the page it lands on.
   await expect(page).toHaveURL(new RegExp(panel === 'vendor' ? '/vendor/orders$' : '/admin$'));
+}
+
+/** A customer access token for `who`, from the API's own sign-in (the account is made on its first sign-in). */
+export async function customerToken(who: { phone: string; code: string }) {
+  const post = (path: string, body: unknown) =>
+    fetch(`${API_URL}${path}`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) });
+  const id = { phone: who.phone, audience: 'customer' };
+  // The API's resend wait (1 s in the CI job) may refuse a code asked for right after another spec's.
+  await expect(async () => expect((await post('/v1/public/auth/otp/request', id)).status).toBe(200)).toPass({ intervals: [1_500], timeout: 15_000 });
+  const r = await post('/v1/public/auth/otp/verify', { ...id, code: who.code, devicePlatform: 'web' });
+  expect(r.status, await r.clone().text()).toBe(200);
+  return ((await r.json()) as { accessToken: string }).accessToken;
 }
 
 export async function apiGet<T>(path: string): Promise<T> {

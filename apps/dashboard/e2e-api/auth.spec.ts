@@ -1,8 +1,8 @@
 import { expect, test } from '@playwright/test';
-import { ADMIN, APPLICANT, signIn, signInTo } from './helpers';
+import { ADMIN, CUSTOMER, customerToken, signIn, signInTo } from './helpers';
 
 // ACC-DSH-1 against the real API: the seeded super-admin signs in and out (the sign-out redirect is relative, #22), and
-// a phone without staff access is refused with the no-access line (the API answers OTP_INVALID, as for a wrong code).
+// a customer-only phone is refused with the no-access line (the API answers OTP_INVALID, as for a wrong code).
 
 test('the seeded super-admin signs in, and signs out with a relative redirect that ends the session', async ({ page }) => {
   await signInTo(page, 'admin', ADMIN);
@@ -17,8 +17,9 @@ test('the seeded super-admin signs in, and signs out with a relative redirect th
 });
 
 test('a phone without dashboard access gets the no-access line on the staff sign-in', async ({ page }) => {
+  await customerToken(CUSTOMER); // a customer account, with no staff access
   await page.goto('/login');
-  await signIn(page, APPLICANT); // a review account the seed gives no staff access (customer only)
+  await signIn(page, CUSTOMER);
   await expect(page.getByRole('alert').filter({ hasText: /\S/ })).toHaveText('الرمز غير صحيح أو الرقم غير مصرّح له، حاول مرة أخرى');
   await expect(page).toHaveURL(/\/login$/);
 });
