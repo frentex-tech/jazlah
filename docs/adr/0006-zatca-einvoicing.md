@@ -19,7 +19,7 @@ Jazlah sells its own products and partner vendors' products in the same order fl
 
 ### 1. Jazlah is the seller of record for every order
 - The customer gets **one tax invoice per order**, issued by Jazlah under the client's VAT number. It covers the items from every vendor, the delivery fee and the discounts.
-- **Partner vendors supply Jazlah.** They do not sell to the customer on the platform. Jazlah settles with each vendor: the items subtotal after the vendor's own discounts, minus the commission. This is the commission base already in STATUS.
+- **Partner vendors supply Jazlah.** They do not sell to the customer on the platform. Jazlah settles with each vendor: the items subtotal net of VAT, after the vendor's own discounts, minus the commission (see Consequences).
 - **Vendors do not onboard with ZATCA through the platform.** If a vendor is VAT-registered, it invoices Jazlah outside the platform. The platform gives it a settlement statement to invoice from.
 - **Rejected: vendor-issued invoices.** Every vendor would need its own VAT registration and its own ZATCA onboarding (its own EGS and CSID). Vendors below the VAT threshold could only issue non-tax receipts, so a single checkout would give the customer mixed documents, one per vendor.
 

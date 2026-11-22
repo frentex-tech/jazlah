@@ -30,7 +30,7 @@
 
 - **Jazlah is vendor #1** (`isPlatform=true`), so one code path serves Jazlah and partner products and orders.
 - **Daily capacity** is counted **per vendor** from a platform default, with admin overrides per vendor or date.
-- **Commission base:** items subtotal after vendor-scoped discounts. The delivery fee and platform-wide coupons belong to Jazlah.
+- **Commission base:** items subtotal net of VAT, after vendor-scoped discounts (net of VAT since ADR-0006, 2026-11-22). The delivery fee and platform-wide coupons belong to Jazlah.
 - **Guest cart merge:** if the vendors differ, the guest cart replaces the server cart.
 - **Dashboards** use phone OTP for staff (`audience=staff`), with no self-signup except the vendor application.
 - **Chat** allows phone numbers at launch (feed deals close off-platform), behind a setting.
