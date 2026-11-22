@@ -19,6 +19,7 @@ export class ReviewQueuePageResponseDto {
   nextCursor!: string | null;
 
   @ApiProperty({
+    type: 'integer',
     example: 7,
     description:
       'How many items wait in all for this filter (every page, not this page): the side-nav badge.',

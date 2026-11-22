@@ -46,7 +46,7 @@ export class PrismaReviewQueueRepository implements ReviewQueueRepository {
           WHERE r."status" = 'pending'
         ) q
         WHERE (${filter.kind ?? null}::text IS NULL OR q."kind" = ${filter.kind ?? null}::text)
-          AND (${filter.vendorId ?? null}::uuid IS NULL OR q."vendorId" = ${filter.vendorId ?? null}::text)
+          AND (${filter.vendorId ?? null}::uuid IS NULL OR q."vendorId"::uuid = ${filter.vendorId ?? null}::uuid)
           AND (${cursorAt}::timestamptz IS NULL
                OR (q."submittedAt", q."id"::uuid) < (${cursorAt}::timestamptz, ${cursorId}::uuid))
         ORDER BY q."submittedAt" DESC, q."id"::uuid DESC

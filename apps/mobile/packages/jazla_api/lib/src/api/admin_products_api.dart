@@ -16,6 +16,7 @@ import 'package:jazla_api/src/model/product_card_page_response_dto.dart';
 import 'package:jazla_api/src/model/product_content_dto.dart';
 import 'package:jazla_api/src/model/product_response_dto.dart';
 import 'package:jazla_api/src/model/reason_dto.dart';
+import 'package:jazla_api/src/model/review_queue_page_response_dto.dart';
 import 'package:jazla_api/src/model/set_product_availability_dto.dart';
 import 'package:jazla_api/src/model/set_product_fulfilment_dto.dart';
 
@@ -462,8 +463,99 @@ _responseData = rawData == null ? null : deserialize<ProductCardPageResponseDto,
     );
   }
 
+  /// The one review queue: new products and edits, newest first, with a count
+  /// Admin dashboard, the product review queue and its side-nav badge. New products waiting for review (&#x60;kind: product&#x60;, &#x60;pending_review&#x60;) and pending edits of published products (&#x60;kind: change_request&#x60;) in one list, newest submission first, each with its vendor’s name and &#x60;submittedAt&#x60;; &#x60;count&#x60; is how many wait in all for the filter. Filter with &#x60;kind&#x60; and &#x60;vendorId&#x60;. Open an item with GET /v1/admin/products/{id} (and the request’s content in GET /v1/admin/product-change-requests); decide it with the approve and reject endpoints of its kind. Keyset paging: send &#x60;nextCursor&#x60; back as &#x60;cursor&#x60; until it is null.
+  ///
+  /// Parameters:
+  /// * [cursor] - The `nextCursor` of the previous page; omit it for the first page. Opaque: never build or change it.
+  /// * [limit] - How many items to return, 1 to 50.
+  /// * [kind] - `product`: only new products waiting for review; `change_request`: only edits of published products. Left out: both.
+  /// * [vendorId] - Only the items of this vendor (its id, a UUID). Left out: every vendor.
+  /// * [cancelToken] - A [CancelToken] that can be used to cancel the operation
+  /// * [headers] - Can be used to add additional headers to the request
+  /// * [extras] - Can be used to add flags to the request
+  /// * [validateStatus] - A [ValidateStatus] callback that can be used to determine request success based on the HTTP status of the response
+  /// * [onSendProgress] - A [ProgressCallback] that can be used to get the send progress
+  /// * [onReceiveProgress] - A [ProgressCallback] that can be used to get the receive progress
+  ///
+  /// Returns a [Future] containing a [Response] with a [ReviewQueuePageResponseDto] as data
+  /// Throws [DioException] if API call or serialization fails
+  Future<Response<ReviewQueuePageResponseDto>> adminListReviewQueue({ 
+    String? cursor,
+    num? limit = 20,
+    String? kind,
+    String? vendorId,
+    CancelToken? cancelToken,
+    Map<String, dynamic>? headers,
+    Map<String, dynamic>? extra,
+    ValidateStatus? validateStatus,
+    ProgressCallback? onSendProgress,
+    ProgressCallback? onReceiveProgress,
+  }) async {
+    final _path = r'/v1/admin/review-queue';
+    final _options = Options(
+      method: r'GET',
+      headers: <String, dynamic>{
+        ...?headers,
+      },
+      extra: <String, dynamic>{
+        'secure': <Map<String, String>>[
+          {
+            'type': 'http',
+            'scheme': 'bearer',
+            'name': 'bearer',
+          },
+        ],
+        ...?extra,
+      },
+      validateStatus: validateStatus,
+    );
+
+    final _queryParameters = <String, dynamic>{
+      if (cursor != null) r'cursor': cursor,
+      if (limit != null) r'limit': limit,
+      if (kind != null) r'kind': kind,
+      if (vendorId != null) r'vendorId': vendorId,
+    };
+
+    final _response = await _dio.request<Object>(
+      _path,
+      options: _options,
+      queryParameters: _queryParameters,
+      cancelToken: cancelToken,
+      onSendProgress: onSendProgress,
+      onReceiveProgress: onReceiveProgress,
+    );
+
+    ReviewQueuePageResponseDto? _responseData;
+
+    try {
+final rawData = _response.data;
+_responseData = rawData == null ? null : deserialize<ReviewQueuePageResponseDto, ReviewQueuePageResponseDto>(rawData, 'ReviewQueuePageResponseDto', growable: true);
+    } catch (error, stackTrace) {
+      throw DioException(
+        requestOptions: _response.requestOptions,
+        response: _response,
+        type: DioExceptionType.unknown,
+        error: error,
+        stackTrace: stackTrace,
+      );
+    }
+
+    return Response<ReviewQueuePageResponseDto>(
+      data: _responseData,
+      headers: _response.headers,
+      isRedirect: _response.isRedirect,
+      requestOptions: _response.requestOptions,
+      redirects: _response.redirects,
+      statusCode: _response.statusCode,
+      statusMessage: _response.statusMessage,
+      extra: _response.extra,
+    );
+  }
+
   /// Publish a JAZLA draft directly
-  /// Admin dashboard, JAZLA products. Moves a platform vendor &#x60;draft&#x60; straight to &#x60;published&#x60;, without review; customers see it at once if it is available and its category active. Recorded in the audit log. No body. Errors: PRODUCT_NOT_SUBMITTABLE without a size or an image, or with a cutting style offered with a packaging it cannot be combined with (&#x60;details.reasons&#x60;, &#x60;details.pairs&#x60;); PRODUCT_NOT_EDITABLE when the product is not a draft (&#x60;details.status&#x60;); NOT_FOUND for an unknown id or a product of another vendor (admins act on other vendors’ products only through review), and with &#x60;details.reason&#x60; PLATFORM_VENDOR_MISSING while JAZLA’s own vendor has not been set up.
+  /// Admin dashboard, JAZLA products. Moves a platform vendor &#x60;draft&#x60; straight to &#x60;published&#x60;, without review; customers see it at once if it is available and its category active. Recorded in the audit log. No body. Errors: PRODUCT_NOT_SUBMITTABLE without a size or an image (&#x60;details.reasons&#x60;); PRODUCT_NOT_EDITABLE when the product is not a draft (&#x60;details.status&#x60;); NOT_FOUND for an unknown id or a product of another vendor (admins act on other vendors’ products only through review), and with &#x60;details.reason&#x60; PLATFORM_VENDOR_MISSING while JAZLA’s own vendor has not been set up.
   ///
   /// Parameters:
   /// * [id] - The id (a UUID) of the item the path names; another value is VALIDATION_FAILED on `id`.
@@ -637,7 +729,7 @@ _responseData = rawData == null ? null : deserialize<ProductResponseDto, Product
   }
 
   /// Switch a JAZLA product on or off, at once
-  /// Admin dashboard, JAZLA products, the availability switch. Applies at once, also on a published product: an unavailable product leaves the public catalog until it is switched on again. Errors: PRODUCT_NOT_EDITABLE for a product under review (&#x60;details.status&#x60;); NOT_FOUND for an unknown id or a product of another vendor (admins act on other vendors’ products only through review), and with &#x60;details.reason&#x60; PLATFORM_VENDOR_MISSING while JAZLA’s own vendor has not been set up.
+  /// Admin dashboard, JAZLA products, the availability switches: the product, and optionally some of its sizes. Applies at once, also on a published product: an unavailable product leaves the public list until it is switched on again (its page shows it out of stock); an unavailable size stays on the page, not orderable. Errors: VALIDATION_FAILED for a size not of this product (&#x60;isSizeOfProduct&#x60;) or named twice (&#x60;isNotRepeated&#x60;); PRODUCT_NOT_EDITABLE for a product under review (&#x60;details.status&#x60;); NOT_FOUND for an unknown id or a product of another vendor (admins act on other vendors’ products only through review), and with &#x60;details.reason&#x60; PLATFORM_VENDOR_MISSING while JAZLA’s own vendor has not been set up.
   ///
   /// Parameters:
   /// * [id] - The id (a UUID) of the item the path names; another value is VALIDATION_FAILED on `id`.
@@ -831,7 +923,7 @@ _responseData = rawData == null ? null : deserialize<ProductResponseDto, Product
   }
 
   /// Replace a JAZLA product’s content
-  /// Admin dashboard, JAZLA products, edit form. Replaces the whole content of a platform vendor product (send every field, lists in display order); availability, fulfilment and prices have their own endpoints. Applies at once, also when published: no change request. An edit of a published product is recorded in the audit log and must meet the submission rules (at least one size and one image, no cutting style offered with a packaging it cannot be combined with). Keep an existing size by sending its &#x60;id&#x60;; a size left out is removed; a size without &#x60;id&#x60; is new. Existing sizes, cutting styles and packagings must carry their current prices (VALIDATION_FAILED &#x60;isLivePrice&#x60;): change them with PATCH …/{id}/prices. Errors: VALIDATION_FAILED also for an inactive reference, a size id not of this product or a repeat; MEDIA_NOT_FOUND / MEDIA_NOT_READY for a new image not uploaded and confirmed by this admin; PRODUCT_NOT_SUBMITTABLE (published only) with &#x60;details.reasons&#x60; and &#x60;details.pairs&#x60;; PRODUCT_NOT_EDITABLE for a product under review; NOT_FOUND for an unknown id or a product of another vendor (admins act on other vendors’ products only through review), and with &#x60;details.reason&#x60; PLATFORM_VENDOR_MISSING while JAZLA’s own vendor has not been set up.
+  /// Admin dashboard, JAZLA products, edit form. Replaces the whole content of a platform vendor product (send every field, lists in display order); availability, fulfilment and prices have their own endpoints. Applies at once, also when published: no change request. An edit of a published product is recorded in the audit log and must meet the submission rules (at least one size and one image). Keep an existing size by sending its &#x60;id&#x60;; a size left out is removed; a size without &#x60;id&#x60; is new. Existing sizes, cutting styles and packagings must carry their current prices (VALIDATION_FAILED &#x60;isLivePrice&#x60;): change them with PATCH …/{id}/prices. Errors: VALIDATION_FAILED also for an inactive reference, a size id not of this product or a repeat; MEDIA_NOT_FOUND / MEDIA_NOT_READY for a new image not uploaded and confirmed by this admin; PRODUCT_NOT_SUBMITTABLE (published only) with &#x60;details.reasons&#x60;; PRODUCT_NOT_EDITABLE for a product under review; NOT_FOUND for an unknown id or a product of another vendor (admins act on other vendors’ products only through review), and with &#x60;details.reason&#x60; PLATFORM_VENDOR_MISSING while JAZLA’s own vendor has not been set up.
   ///
   /// Parameters:
   /// * [id] - The id (a UUID) of the item the path names; another value is VALIDATION_FAILED on `id`.

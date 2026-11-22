@@ -742,6 +742,42 @@ describe('Catalog (e2e)', () => {
       expect([first.count, second.nextCursor]).toEqual([2, null]);
       expect(invalid.body).toMatchObject({ code: 'VALIDATION_FAILED' });
       expect(asVendor.body).toMatchObject({ code: 'FORBIDDEN' });
+
+      const upper = (await queue('').expect(200)).body as QueuePage;
+      const upperCase = (
+        await catalog.http
+          .get(`/v1/admin/review-queue?vendorId=${vendorId.toUpperCase()}`)
+          .set(...bearer(admin))
+          .expect(200)
+      ).body as QueuePage;
+      const products = (await queue('&kind=product').expect(200))
+        .body as QueuePage;
+      expect(upperCase).toEqual(upper);
+      expect(products).toMatchObject({
+        count: 1,
+        items: [{ kind: 'product', productId: draft }],
+      });
+
+      // Same submission time: the id breaks the tie, and paging loses neither item.
+      const at = new Date('2026-11-01T09:00:00.000Z');
+      await prisma.product.update({
+        where: { id: draft },
+        data: { submittedAt: at },
+      });
+      await prisma.productChangeRequest.update({
+        where: { id: (edited.body as ProductBody).changeRequest!.id },
+        data: { createdAt: at },
+      });
+      const tiedFirst = (await queue('&limit=1').expect(200)).body as QueuePage;
+      const tiedSecond = (
+        await queue(`&limit=1&cursor=${tiedFirst.nextCursor ?? ''}`).expect(200)
+      ).body as QueuePage;
+      expect(
+        [...tiedFirst.items, ...tiedSecond.items]
+          .map((item) => item.kind)
+          .sort(),
+      ).toEqual(['change_request', 'product']);
+      expect(tiedSecond.nextCursor).toBeNull();
     });
 
     it('queues a submitted product, then approves it (public) or rejects it with a reason', async () => {

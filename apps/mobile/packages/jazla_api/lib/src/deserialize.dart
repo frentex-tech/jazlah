@@ -24,6 +24,7 @@ import 'package:jazla_api/src/model/error_response_dto_details.dart';
 import 'package:jazla_api/src/model/field_error_dto.dart';
 import 'package:jazla_api/src/model/geo_json_polygon_dto.dart';
 import 'package:jazla_api/src/model/geo_point_dto.dart';
+import 'package:jazla_api/src/model/incompatible_pair_response_dto.dart';
 import 'package:jazla_api/src/model/liveness_response_dto.dart';
 import 'package:jazla_api/src/model/localized_description_dto.dart';
 import 'package:jazla_api/src/model/localized_name_dto.dart';
@@ -52,7 +53,9 @@ import 'package:jazla_api/src/model/product_size_dto.dart';
 import 'package:jazla_api/src/model/product_size_response_dto.dart';
 import 'package:jazla_api/src/model/product_vendor_response_dto.dart';
 import 'package:jazla_api/src/model/public_category_list_response_dto.dart';
+import 'package:jazla_api/src/model/public_product_cutting_response_dto.dart';
 import 'package:jazla_api/src/model/public_product_response_dto.dart';
+import 'package:jazla_api/src/model/public_product_size_response_dto.dart';
 import 'package:jazla_api/src/model/public_vendor_page_response_dto.dart';
 import 'package:jazla_api/src/model/public_vendor_response_dto.dart';
 import 'package:jazla_api/src/model/readiness_checks_dto.dart';
@@ -65,10 +68,13 @@ import 'package:jazla_api/src/model/request_admin_upload_dto.dart';
 import 'package:jazla_api/src/model/request_customer_upload_dto.dart';
 import 'package:jazla_api/src/model/request_otp_dto.dart';
 import 'package:jazla_api/src/model/request_vendor_upload_dto.dart';
+import 'package:jazla_api/src/model/review_queue_item_response_dto.dart';
+import 'package:jazla_api/src/model/review_queue_page_response_dto.dart';
 import 'package:jazla_api/src/model/set_marketing_consent_dto.dart';
 import 'package:jazla_api/src/model/set_product_availability_dto.dart';
 import 'package:jazla_api/src/model/set_product_fulfilment_dto.dart';
 import 'package:jazla_api/src/model/signed_in_response_dto.dart';
+import 'package:jazla_api/src/model/size_availability_dto.dart';
 import 'package:jazla_api/src/model/size_price_dto.dart';
 import 'package:jazla_api/src/model/submit_vendor_application_dto.dart';
 import 'package:jazla_api/src/model/update_coverage_zone_dto.dart';
@@ -164,6 +170,8 @@ final _regMap = RegExp(r'^Map<String,(.*)>$');
           return GeoJsonPolygonDto.fromJson(value as Map<String, dynamic>) as ReturnType;
         case 'GeoPointDto':
           return GeoPointDto.fromJson(value as Map<String, dynamic>) as ReturnType;
+        case 'IncompatiblePairResponseDto':
+          return IncompatiblePairResponseDto.fromJson(value as Map<String, dynamic>) as ReturnType;
         case 'LivenessResponseDto':
           return LivenessResponseDto.fromJson(value as Map<String, dynamic>) as ReturnType;
         case 'LocalizedDescriptionDto':
@@ -220,8 +228,12 @@ final _regMap = RegExp(r'^Map<String,(.*)>$');
           return ProductVendorResponseDto.fromJson(value as Map<String, dynamic>) as ReturnType;
         case 'PublicCategoryListResponseDto':
           return PublicCategoryListResponseDto.fromJson(value as Map<String, dynamic>) as ReturnType;
+        case 'PublicProductCuttingResponseDto':
+          return PublicProductCuttingResponseDto.fromJson(value as Map<String, dynamic>) as ReturnType;
         case 'PublicProductResponseDto':
           return PublicProductResponseDto.fromJson(value as Map<String, dynamic>) as ReturnType;
+        case 'PublicProductSizeResponseDto':
+          return PublicProductSizeResponseDto.fromJson(value as Map<String, dynamic>) as ReturnType;
         case 'PublicVendorPageResponseDto':
           return PublicVendorPageResponseDto.fromJson(value as Map<String, dynamic>) as ReturnType;
         case 'PublicVendorResponseDto':
@@ -246,6 +258,10 @@ final _regMap = RegExp(r'^Map<String,(.*)>$');
           return RequestOtpDto.fromJson(value as Map<String, dynamic>) as ReturnType;
         case 'RequestVendorUploadDto':
           return RequestVendorUploadDto.fromJson(value as Map<String, dynamic>) as ReturnType;
+        case 'ReviewQueueItemResponseDto':
+          return ReviewQueueItemResponseDto.fromJson(value as Map<String, dynamic>) as ReturnType;
+        case 'ReviewQueuePageResponseDto':
+          return ReviewQueuePageResponseDto.fromJson(value as Map<String, dynamic>) as ReturnType;
         case 'SetMarketingConsentDto':
           return SetMarketingConsentDto.fromJson(value as Map<String, dynamic>) as ReturnType;
         case 'SetProductAvailabilityDto':
@@ -254,6 +270,8 @@ final _regMap = RegExp(r'^Map<String,(.*)>$');
           return SetProductFulfilmentDto.fromJson(value as Map<String, dynamic>) as ReturnType;
         case 'SignedInResponseDto':
           return SignedInResponseDto.fromJson(value as Map<String, dynamic>) as ReturnType;
+        case 'SizeAvailabilityDto':
+          return SizeAvailabilityDto.fromJson(value as Map<String, dynamic>) as ReturnType;
         case 'SizePriceDto':
           return SizePriceDto.fromJson(value as Map<String, dynamic>) as ReturnType;
         case 'SubmitVendorApplicationDto':

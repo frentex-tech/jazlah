@@ -11,7 +11,13 @@ ProductSizeResponseDto _$ProductSizeResponseDtoFromJson(
 ) => $checkedCreate('ProductSizeResponseDto', json, ($checkedConvert) {
   $checkKeys(
     json,
-    requiredKeys: const ['id', 'approxWeightGrams', 'priceHalalas', 'tag'],
+    requiredKeys: const [
+      'id',
+      'approxWeightGrams',
+      'priceHalalas',
+      'tag',
+      'isAvailable',
+    ],
   );
   final val = ProductSizeResponseDto(
     id: $checkedConvert('id', (v) => v as String?),
@@ -23,6 +29,7 @@ ProductSizeResponseDto _$ProductSizeResponseDtoFromJson(
           ? null
           : LocalizedTextResponseDto.fromJson(v as Map<String, dynamic>),
     ),
+    isAvailable: $checkedConvert('isAvailable', (v) => v as bool?),
   );
   return val;
 });
@@ -34,4 +41,5 @@ Map<String, dynamic> _$ProductSizeResponseDtoToJson(
   'approxWeightGrams': instance.approxWeightGrams,
   'priceHalalas': instance.priceHalalas,
   'tag': instance.tag?.toJson(),
+  'isAvailable': instance.isAvailable,
 };
