@@ -66,7 +66,7 @@ export function CouponPage({ id }: { id?: string }) {
   }, []);
 
   const coupon = typeof state === 'object' ? state.coupon : null;
-  const header = (actions?: React.ReactNode) => <PageHeader breadcrumb={t('formBreadcrumb')} title={coupon?.code ?? t(id ? 'editTitle' : 'newTitle')} actions={actions} start />;
+  const header = (actions?: React.ReactNode) => <PageHeader breadcrumb={t('formBreadcrumb')} title={coupon?.code ?? t(id ? 'editTitle' : 'newTitle')} actions={actions} />;
   const card = 'h-[360px]';
   const back = <Link href={LIST} className={buttonVariants({ variant: 'secondary' })}>{t('back')}</Link>;
 
@@ -182,7 +182,7 @@ export function CouponPage({ id }: { id?: string }) {
         }}
       >
         {coupon && usage && (
-          <FormSection title={t('usage.title')} body={t('usage.body')}>
+          <FormSection hug title={t('usage.title')} body={t('usage.body')}>
             <dl className="grid grid-cols-3 gap-s16">
               {[
                 ['uses', coupon.usageLimit === null ? t('usageNoLimit', { used: usage.uses }) : t('usageOf', { used: usage.uses, limit: coupon.usageLimit })],
@@ -198,7 +198,7 @@ export function CouponPage({ id }: { id?: string }) {
           </FormSection>
         )}
 
-        <FormSection title={t('form.discount.title')} body={t('form.discount.body')} invalid={invalid('code', 'type', 'value', 'maxDiscountHalalas')}>
+        <FormSection hug title={t('form.discount.title')} body={t('form.discount.body')} invalid={invalid('code', 'type', 'value', 'maxDiscountHalalas')}>
           <div className={grid}>
             {text('code', t('form.code'), t('form.codeHint'), { dir: 'ltr', className: 'uppercase rtl:text-end', maxLength: 32, autoComplete: 'off' })}
             <FormField label={t('form.type')}>
@@ -213,7 +213,7 @@ export function CouponPage({ id }: { id?: string }) {
           </div>
         </FormSection>
 
-        <FormSection title={t('form.conditions.title')} body={t('form.conditions.body')} invalid={invalid('minOrderHalalas', 'vendorIds', 'categoryIds')}>
+        <FormSection hug title={t('form.conditions.title')} body={t('form.conditions.body')} invalid={invalid('minOrderHalalas', 'vendorIds', 'categoryIds')}>
           <div className={grid}>{text('minOrderHalalas', t('form.minOrder'), t('form.optionalHint'), { inputMode: 'decimal' })}</div>
           {(
             [
@@ -232,10 +232,14 @@ export function CouponPage({ id }: { id?: string }) {
               {listError(k) && <p role="alert" className="text-body-m text-danger">{err(listError(k)!)}</p>}
             </fieldset>
           ))}
-          <Switch label={t('form.firstOrderOnly')} checked={d.firstOrderOnly} onChange={(v) => edit('firstOrderOnly', v)} />
+          {/* Decision 25: the first-order discount is off for now; shown disabled and never sent. */}
+          <div className="flex items-center gap-s12">
+            <Switch label={t('form.firstOrderOnly')} checked={false} disabled onChange={() => {}} />
+            <Badge type="neutral" size="M">{t('form.firstOrderOnlySoon')}</Badge>
+          </div>
         </FormSection>
 
-        <FormSection title={t('form.period.title')} body={t('form.period.body')} invalid={invalid('startsAt', 'endsAt', 'usageLimit', 'perUserLimit')}>
+        <FormSection hug title={t('form.period.title')} body={t('form.period.body')} invalid={invalid('startsAt', 'endsAt', 'usageLimit', 'perUserLimit')}>
           <div className={grid}>
             {text('startsAt', t('form.startsAt'), t('form.riyadh'), { type: 'datetime-local', dir: 'ltr', className: 'rtl:text-end' })}
             {text('endsAt', t('form.endsAt'), t('form.riyadh'), { type: 'datetime-local', dir: 'ltr', className: 'rtl:text-end' })}
@@ -244,7 +248,7 @@ export function CouponPage({ id }: { id?: string }) {
           </div>
         </FormSection>
 
-        <FormSection title={t('form.state.title')} body={t('form.state.body')}>
+        <FormSection hug title={t('form.state.title')} body={t('form.state.body')}>
           <Switch label={t('form.isActive')} checked={d.isActive} onChange={(v) => edit('isActive', v)} />
         </FormSection>
 

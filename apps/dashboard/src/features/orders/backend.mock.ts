@@ -145,6 +145,11 @@ export const mockOrders: OrdersBackend = {
     if (!r.ok) return r;
     if (!canTransition(r.data, to, panel)) return { ok: false, code: 'ORDER_TRANSITION_NOT_ALLOWED', status: 409, details: { from: r.data.status, to } };
     move(r.data, to, panel, note ?? null);
+    // A plain cancel (COD reject): nothing was captured, so nothing to refund; the note is the reason.
+    if (to === 'cancelled') {
+      r.data.cancelReason = note ?? null;
+      if (r.data.payment.status !== 'captured') r.data.payment.status = 'cancelled';
+    }
     return ok(r.data);
   },
   async cancel(token, _lang, id, { reason, refundTo }) {

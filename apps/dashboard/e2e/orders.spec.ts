@@ -1,4 +1,4 @@
-import { expect, test, type APIRequestContext, type Page } from '@playwright/test';
+import { expect, test, type BrowserContext, type Page } from '@playwright/test';
 import { signInAs } from './helpers';
 
 // Mock (src/features/orders/backend.mock.ts): seeds follow 135:47501 (JZ-261110-0482 «سعد العتيبي», مجازر الفلاح, preparing;
@@ -14,10 +14,17 @@ async function find(page: Page, q: string) {
   const p = await page.evaluate(async (u) => (await fetch(u)).json(), `/api/admin/orders?q=${q}`);
   return (p as { items: Placed[] }).items[0]!;
 }
-async function place(request: APIRequestContext, body: { vendor?: string; customer?: string; method?: string } = {}) {
-  const res = await request.post('/api/mock-orders', { data: body });
-  expect(res.status()).toBe(201);
-  return (await res.json()) as Placed;
+/** Places an order through the mock route from one of our pages, so the session cookies and our origin go along (the route checks both). */
+async function place(context: BrowserContext, body: { vendor?: string; customer?: string; method?: string } = {}) {
+  const tab = await context.newPage();
+  await tab.goto('/login/vendor.jpg');
+  const res = await tab.evaluate(async (b) => {
+    const r = await fetch('/api/mock-orders', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(b) });
+    return { status: r.status, body: r.ok ? ((await r.json()) as unknown) : null };
+  }, body);
+  await tab.close();
+  expect(res.status).toBe(201);
+  return res.body as Placed;
 }
 
 test('the admin list filters by status, store, method and date, and shows the empty state', async ({ page, context }) => {
@@ -60,7 +67,7 @@ test('the admin list filters by status, store, method and date, and shows the em
   await expect(table(page).getByText('منيرة الشمري')).toBeVisible();
 });
 
-test('a new order appears live, tinted, without a refresh; a vendor only gets its own', async ({ page, context, request }) => {
+test('a new order appears live, tinted, without a refresh; a vendor only gets its own', async ({ page, context }) => {
   await signInAs(context, ['admin', 'vendor']);
   const vendorPage = await context.newPage();
   await vendorPage.goto('/vendor');
@@ -69,8 +76,8 @@ test('a new order appears live, tinted, without a refresh; a vendor only gets it
   await page.goto('/admin/orders');
   await expect(table(page).getByText('JZ-261110-0482')).toBeVisible();
 
-  const mine = await place(request, { customer: 'طلب مباشر للفلاح' });
-  const theirs = await place(request, { vendor: 'Riyadh Carcasses', customer: 'طلب مباشر للرياض' });
+  const mine = await place(context, { customer: 'طلب مباشر للفلاح' });
+  const theirs = await place(context, { vendor: 'Riyadh Carcasses', customer: 'طلب مباشر للرياض' });
   const row = table(page).getByRole('row').filter({ hasText: mine.number });
   await expect(row).toBeVisible();
   await expect(row).toHaveClass(/row-new/);
@@ -79,7 +86,7 @@ test('a new order appears live, tinted, without a refresh; a vendor only gets it
   await expect(table(vendorPage).getByText(theirs.number)).toHaveCount(0);
 });
 
-test('a refused live stream falls back to polling, then reopens the stream', async ({ page, context, request }) => {
+test('a refused live stream falls back to polling, then reopens the stream', async ({ page, context }) => {
   await signInAs(context, ['admin']);
   // The first stream answers 401 (an expired access cookie on reconnect): the browser closes it for good.
   let refused = 0;
@@ -88,13 +95,13 @@ test('a refused live stream falls back to polling, then reopens the stream', asy
   const reopened = page.waitForRequest((r) => r.url().endsWith('/api/admin/orders/events') && ++streams === 2);
   await page.goto('/admin/orders');
   await reopened; // after the first poll succeeds
-  const o = await place(request, { customer: 'بعد إعادة الاتصال' });
+  const o = await place(context, { customer: 'بعد إعادة الاتصال' });
   await expect(table(page).getByText(o.number)).toBeVisible();
 });
 
-test('the vendor opens an order and moves it to the next status', async ({ page, context, request }) => {
+test('the vendor opens an order and moves it to the next status', async ({ page, context }) => {
   await signInAs(context, ['vendor']);
-  const o = await place(request);
+  const o = await place(context);
   await page.goto('/vendor/orders');
   await page.getByRole('link', { name: `فتح الطلب ${o.number}` }).click();
   await expect(page.getByRole('heading', { level: 1, name: `الطلب ${o.number}` })).toBeVisible();
@@ -102,7 +109,7 @@ test('the vendor opens an order and moves it to the next status', async ({ page,
   await expect(page.getByText('500 جم · تقطيع: ستيك · تغليف: كيس فاكيوم · بدون: الدهن')).toBeVisible();
   await expect(page.getByText('موقع التسليم')).toBeVisible();
   // Vendors have no cancel, refund or reschedule.
-  await expect(page.getByRole('button', { name: 'إلغاء واسترداد' })).toHaveCount(0);
+  await expect(page.getByRole('button', { name: 'إلغاء واسترجاع' })).toHaveCount(0);
   await expect(page.getByRole('button', { name: 'إعادة جدولة' })).toHaveCount(0);
 
   const actions = page.getByRole('group', { name: 'تحديث حالة الطلب' });
@@ -115,9 +122,9 @@ test('the vendor opens an order and moves it to the next status', async ({ page,
   await expect(actions).toHaveCount(0);
 });
 
-test('an admin confirms a cash-on-delivery order from the review', async ({ page, context, request }) => {
+test('an admin confirms a cash-on-delivery order from the review', async ({ page, context }) => {
   await signInAs(context, ['admin']);
-  const o = await place(request, { method: 'cod' });
+  const o = await place(context, { method: 'cod' });
   await page.goto(`/admin/orders/${o.id}`);
   await expect(page.getByText('دفع عند الاستلام: راجع الطلب قبل إرساله للمتجر.')).toBeVisible();
   await page.getByRole('button', { name: 'تأكيد الطلب' }).click();
@@ -126,11 +133,25 @@ test('an admin confirms a cash-on-delivery order from the review', async ({ page
   await expect(page.getByRole('group', { name: 'تحديث حالة الطلب' }).getByRole('button', { name: 'بدء التجهيز' })).toBeVisible();
 });
 
-test('an admin cancels a paid order and refunds it to the wallet', async ({ page, context, request }) => {
+test('an admin rejects a cash-on-delivery order with a plain move to cancelled', async ({ page, context }) => {
   await signInAs(context, ['admin']);
-  const o = await place(request);
+  const o = await place(context, { method: 'cod' });
   await page.goto(`/admin/orders/${o.id}`);
-  await page.getByRole('button', { name: 'إلغاء واسترداد' }).first().click();
+  await page.getByRole('button', { name: 'رفض الطلب' }).click();
+  const dialog = page.getByRole('dialog');
+  await dialog.getByLabel('سبب الإلغاء').fill('العنوان خارج التغطية');
+  const sent = page.waitForRequest((r) => r.method() === 'POST' && r.url().endsWith(`/api/admin/orders/${o.id}/transition`));
+  await dialog.getByRole('button', { name: 'رفض الطلب' }).click();
+  expect((await sent).postDataJSON()).toEqual({ to: 'cancelled', note: 'العنوان خارج التغطية' });
+  await toast(page, `أُلغي الطلب ${o.number}`);
+  await expect(page.locator('[aria-current=step]')).toContainText('ملغي');
+});
+
+test('an admin cancels a paid order and refunds it to the wallet', async ({ page, context }) => {
+  await signInAs(context, ['admin']);
+  const o = await place(context);
+  await page.goto(`/admin/orders/${o.id}`);
+  await page.getByRole('button', { name: 'إلغاء واسترجاع' }).first().click();
   const dialog = page.getByRole('dialog', { name: `إلغاء الطلب ${o.number}؟` });
   await expect(dialog.getByText('سيُسترجع مبلغ 193.00 ر.س إلى بطاقة مدى ••4821 خلال 3 إلى 5 أيام عمل.')).toBeVisible();
   await dialog.getByRole('button', { name: 'محفظة العميل' }).click();
@@ -142,13 +163,13 @@ test('an admin cancels a paid order and refunds it to the wallet', async ({ page
   await toast(page, `أُلغي الطلب ${o.number}`);
   await expect(page.getByText('193.00 ر.س · تم')).toBeVisible();
   await expect(page.getByText('نفاد المنتج')).toBeVisible();
-  await expect(page.getByRole('button', { name: 'إلغاء واسترداد' }).first()).toBeDisabled();
+  await expect(page.getByRole('button', { name: 'إلغاء واسترجاع' }).first()).toBeDisabled();
   await expect(page.locator('[aria-current=step]')).toContainText('ملغي');
 });
 
-test('an admin reschedules to an available day only', async ({ page, context, request }) => {
+test('an admin reschedules to an available day only', async ({ page, context }) => {
   await signInAs(context, ['admin']);
-  const o = await place(request);
+  const o = await place(context);
   await page.goto(`/admin/orders/${o.id}`);
   await page.getByRole('button', { name: 'إعادة جدولة' }).click();
   const dialog = page.getByRole('dialog', { name: 'إعادة جدولة التوصيل' });
