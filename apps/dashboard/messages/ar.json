@@ -1100,6 +1100,10 @@
     }
   },
   "reviewQueue": {
+    "filters": {
+      "allKinds": "كل الأنواع",
+      "allStores": "كل المتاجر"
+    },
     "breadcrumb": "الكتالوج / طلبات المراجعة",
     "title": "مراجعة المنتجات",
     "tabs": {

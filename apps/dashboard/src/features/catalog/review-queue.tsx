@@ -18,7 +18,7 @@ import type { Vendor } from '@/features/admin-vendors/types';
 import { Link } from '@/i18n/navigation';
 import { dayOf } from '@/lib/date';
 import { sar } from '@/lib/money';
-import { ApiError, panelFetch } from '@/lib/panel-fetch';
+import { PERMISSION_DENIED, PRODUCT_NOT_SUBMITTABLE, ApiError, panelFetch } from '@/lib/panel-fetch';
 import { loadAll } from './client';
 import { firstKeptPage } from './skip-pages';
 import { editedContent, liveContent } from './product-form/values';
@@ -102,12 +102,16 @@ export function ReviewQueue() {
   const cursors = paging.key === key ? paging.cursors : [undefined];
   const setCursors = (c: (string | undefined)[]) => setPaging({ key, cursors: c });
   const cursor = cursors.at(-1);
+  // Only the latest request may set the list: a slow answer under an old tab, filter or page must not overwrite newer results.
+  const latest = useRef(0);
   const load = useCallback(async () => {
+    const req = ++latest.current;
     setData('loading');
     try {
       if (tab === 'pending') {
         const q = new URLSearchParams({ limit: String(PAGE), ...(kind && { kind }), ...(vendorId && { vendorId }), ...(cursor && { cursor }) });
         const page = await panelFetch<ReviewPage>('admin', `${BASE}/review-queue?${q}`);
+        if (req !== latest.current) return;
         setNext(page.nextCursor);
         setData(page.items.map(ofQueue));
       } else {
@@ -117,11 +121,12 @@ export function ReviewQueue() {
         const url = `${BASE}/products?status=${tab === 'approved' ? 'published' : 'rejected'}`;
         const get = (c: string | null | undefined) => panelFetch<Page<ProductCard>>('admin', `${url}&${new URLSearchParams({ limit: String(PAGE), ...(c && { cursor: c }) })}`);
         const cards = await firstKeptPage(get, cursor, (c) => c.vendor.id !== platform);
+        if (req !== latest.current) return;
         setNext(cards.nextCursor);
         setData(cards.items.map(ofCard));
       }
     } catch (e) {
-      setData(e instanceof ApiError && e.code === 'PERMISSION_DENIED' ? 'denied' : 'error');
+      if (req === latest.current) setData(e instanceof ApiError && e.code === PERMISSION_DENIED ? 'denied' : 'error');
     }
   }, [tab, kind, vendorId, cursor, vendors]);
   useEffect(() => void load(), [load]);
@@ -206,11 +211,11 @@ export function ReviewQueue() {
           {tab === 'pending' && (
             <div className="flex gap-s12">
               <Select aria-label={t('cols.type')} value={kind} onChange={(e) => setKind(e.target.value as ReviewItem['kind'] | '')}>
-                <option value="">{t('cols.type')}</option>
+                <option value="">{t('filters.allKinds')}</option>
                 {(Object.keys(KINDS) as ReviewItem['kind'][]).map((k) => <option key={k} value={k}>{t(`type.${KINDS[k]}`)}</option>)}
               </Select>
               <Select aria-label={t('cols.vendor')} value={vendorId} onChange={(e) => setVendorId(e.target.value)}>
-                <option value="">{t('cols.vendor')}</option>
+                <option value="">{t('filters.allStores')}</option>
                 {stores.filter((v) => !v.isPlatform).map((v) => <option key={v.id} value={v.id}>{nameOf(v.name)}</option>)}
               </Select>
             </div>
@@ -241,19 +246,24 @@ export function ReviewQueue() {
           </div>
         </div>
       )}
-      <ReviewDialog item={open} pending={tab === 'pending'} lists={lists} onClose={() => setOpen(null)} onDecided={decided} onStale={stale} />
+      <ReviewDialog item={open} pending={tab === 'pending'} lists={lists} onClose={() => setOpen(null)} onDecided={decided} onStale={stale} onDenied={() => {
+        setOpen(null);
+        setData('denied');
+      }} />
     </>
   );
 }
 
 /** The review dialog (131:23859): the product as the customer would see it, then approve, or reject with a reason. */
-function ReviewDialog({ item, pending, lists, onClose, onDecided, onStale }: {
+function ReviewDialog({ item, pending, lists, onClose, onDecided, onStale, onDenied }: {
   item: Item | null;
   pending: boolean;
   lists: { categories: RefItem[]; cuttingStyles: RefItem[] };
   onClose: () => void;
   onDecided: (item: Item, message: string) => void;
   onStale: () => void;
+  /** PERMISSION_DENIED on a decision: the page shows its not-allowed state (the session stays). */
+  onDenied: () => void;
 }) {
   const t = useTranslations('reviewQueue.dialog');
   const tf = useTranslations('catalog.form');
@@ -295,8 +305,9 @@ function ReviewDialog({ item, pending, lists, onClose, onDecided, onStale }: {
     } catch (e) {
       const code = e instanceof ApiError ? e.code : '';
       if (code === 'VALIDATION_FAILED') setError(t('required'));
+      else if (code === PERMISSION_DENIED) onDenied();
       else if (code === 'PRODUCT_NOT_EDITABLE' || code === 'NOT_FOUND' || code === 'PRODUCT_CHANGE_REQUEST_SUPERSEDED') onStale();
-      else if (code === 'PRODUCT_NOT_SUBMITTABLE') toast('error', t('notSubmittable'));
+      else if (code === PRODUCT_NOT_SUBMITTABLE) toast('error', t('notSubmittable'));
       else toast('error', t('failed'));
     } finally {
       setBusy(null);

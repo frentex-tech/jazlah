@@ -178,7 +178,7 @@ test('the review queue: new products and edits in one list, filtered by kind and
   await page.getByLabel('نوع الطلب').selectOption({ label: 'تعديل منتج' });
   await expect(rowOf(page, queue(page), 'فخذ غنم نعيمي')).toHaveCount(0);
   await expect(rowOf(page, queue(page), 'كتف غنم للتحمير')).toHaveCount(1);
-  await page.getByLabel('نوع الطلب').selectOption({ label: 'نوع الطلب' });
+  await page.getByLabel('نوع الطلب').selectOption({ label: 'كل الأنواع' });
   await page.getByLabel('المتجر').selectOption({ label: 'مجازر الفلاح' });
   await expect(rowOf(page, queue(page), 'فخذ غنم نعيمي')).toHaveCount(0);
   await expect(rowOf(page, queue(page), 'كتف غنم للتحمير')).toHaveCount(0);

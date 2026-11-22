@@ -14,7 +14,11 @@ export const pdf = (name: string) => ({ name, mimeType: 'application/pdf', buffe
 /** Phone and code on the sign-in form that is on the page (staff /login, or the application's customer sign-in). */
 export async function signIn(page: Page, who: { phone: string; code: string }) {
   await page.getByLabel('رقم الجوال').fill(who.phone);
-  await page.getByRole('button', { name: 'إرسال الرمز' }).click();
+  // The API's resend wait (1 s in the CI job) refuses a code asked for right after the previous test's: ask again.
+  await expect(async () => {
+    await page.getByRole('button', { name: 'إرسال الرمز' }).click();
+    await expect(page.getByLabel('رمز التحقق')).toBeVisible({ timeout: 2_000 });
+  }).toPass({ intervals: [1_500], timeout: 15_000 });
   await page.getByLabel('رمز التحقق').fill(who.code);
   await page.getByRole('button', { name: 'تأكيد' }).click();
 }

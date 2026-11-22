@@ -49,7 +49,8 @@ test('a vendor submits a product, an admin approves it from the queue, and it is
   const { count, items } = (await counted.json()) as { count: number; items: unknown[] };
   expect(items).toHaveLength(1);
   expect(count).toBeGreaterThanOrEqual(2);
-  await expect(page.getByRole('navigation', { name: 'القائمة الرئيسية' }).getByRole('link', { name: /المنتجات/ })).toContainText(String(count));
+  const products = page.getByRole('navigation', { name: 'القائمة الرئيسية' }).getByRole('link', { name: /المنتجات/ });
+  await expect(products.getByText(String(count), { exact: true })).toBeVisible();
   await page.getByRole('button', { name: `مراجعة ${NAME}` }).click();
   const dialog = page.getByRole('dialog', { name: `مراجعة: ${NAME}` });
   await expect(dialog.getByText('120.00 ر.س')).toBeVisible();

@@ -14,7 +14,7 @@ import { StateCard } from '@/components/ui/state-card';
 import { Switch } from '@/components/ui/switch';
 import { toast } from '@/components/ui/toast';
 import { Link } from '@/i18n/navigation';
-import { ApiError, panelFetch } from '@/lib/panel-fetch';
+import { PERMISSION_DENIED, ApiError, panelFetch } from '@/lib/panel-fetch';
 import { cn } from '@/lib/utils';
 import { fieldErrors, loadAll, uploadImage } from './client';
 import { CATEGORY_IMAGE_MAX, bySortOrder, IMAGE_TYPES, type RefItem } from './types';
@@ -42,7 +42,7 @@ export function Categories() {
     try {
       setData((await loadAll<RefItem>('admin', URL_LIST)).sort(bySortOrder));
     } catch (e) {
-      setData(e instanceof ApiError && e.code === 'PERMISSION_DENIED' ? 'denied' : 'error');
+      setData(e instanceof ApiError && e.code === PERMISSION_DENIED ? 'denied' : 'error');
     }
   }, []);
   useEffect(() => void load(), [load]);

@@ -11,7 +11,7 @@ import { FormField, InputField, TextInput } from '@/components/ui/form-field';
 import { Spinner } from '@/components/ui/spinner';
 import { StatePanel } from '@/components/ui/state-panel';
 import { useRouter } from '@/i18n/navigation';
-import { ApiError, panelFetch } from '@/lib/panel-fetch';
+import { VENDOR_CR_EXISTS, ApiError, panelFetch } from '@/lib/panel-fetch';
 import { cn } from '@/lib/utils';
 import { clearDrafts, readDraft, writeDraft } from './drafts';
 import type { GeoPoint } from './pin-map';
@@ -195,7 +195,7 @@ export function ApplyWizard({ phone, owner, reapply }: { phone: string; owner: s
         return router.replace('/vendor/application');
       }
       if (e.code === 'VENDOR_ACCESS_ALREADY_HELD') return setSubmitError(t('errors.alreadyHeld'));
-      if (e.code === 'VENDOR_CR_EXISTS') return showErrors({ cr: 'errors.crExists' });
+      if (e.code === VENDOR_CR_EXISTS) return showErrors({ cr: 'errors.crExists' });
       if ((e.code === 'MEDIA_NOT_FOUND' || e.code === 'MEDIA_NOT_READY') && e.details) {
         const id = (e.details as { mediaId?: string }).mediaId;
         const kind = DOC_KINDS.find((k) => v.docs[k]?.mediaId === id);

@@ -17,7 +17,7 @@ import { Tabs } from '@/components/ui/tabs';
 import { toast } from '@/components/ui/toast';
 import { VendorCapacityTab } from '@/features/operations/vendor-capacity';
 import { Link } from '@/i18n/navigation';
-import { ApiError, panelFetch } from '@/lib/panel-fetch';
+import { PERMISSION_DENIED, VENDOR_CR_EXISTS, ApiError, panelFetch } from '@/lib/panel-fetch';
 import { bpsOf, percentOf, type Application, type ApplicationDetail, type Review, type Vendor } from './types';
 import { dayOf } from '@/lib/date';
 
@@ -56,7 +56,7 @@ export function VendorReview({ id: routeId }: { id: string }) {
       setReview(await panelFetch<Review>('admin', `/api/admin/vendors/${idRef.current}`));
     } catch (e) {
       const code = e instanceof ApiError ? e.code : 'NETWORK';
-      setReview(code === 'PERMISSION_DENIED' ? 'denied' : code === 'NOT_FOUND' ? 'notFound' : 'error');
+      setReview(code === PERMISSION_DENIED ? 'denied' : code === 'NOT_FOUND' ? 'notFound' : 'error');
     }
   }, []);
   useEffect(() => {
@@ -125,8 +125,8 @@ export function VendorReview({ id: routeId }: { id: string }) {
       const code = e instanceof ApiError ? e.code : 'NETWORK';
       if (code === 'VALIDATION_FAILED') return setFieldError(dialog === 'approve' ? t('approveDialog.invalid') : t('reasonRequired'));
       setDialog(null);
-      if (code === 'PERMISSION_DENIED') return setReview('denied');
-      if (code === 'VENDOR_CR_EXISTS') setCrTaken(true);
+      if (code === PERMISSION_DENIED) return setReview('denied');
+      if (code === VENDOR_CR_EXISTS) setCrTaken(true);
       const known = { VENDOR_APPLICATION_NOT_PENDING: 'notPending', VENDOR_ACCESS_ALREADY_HELD: 'accessHeld', VENDOR_CR_EXISTS: 'crExists', CONFLICT: 'conflict' }[code];
       toast('error', t(`toast.${known ?? 'failed'}`));
       if (code === 'VENDOR_APPLICATION_NOT_PENDING' || code === 'CONFLICT') void fetchReview(true);

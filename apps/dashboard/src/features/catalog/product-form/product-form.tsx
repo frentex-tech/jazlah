@@ -11,7 +11,7 @@ import { FormSection } from '@/components/ui/form-section';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Switch } from '@/components/ui/switch';
 import { toast } from '@/components/ui/toast';
-import { ApiError } from '@/lib/panel-fetch';
+import { PRODUCT_NOT_SUBMITTABLE, ApiError } from '@/lib/panel-fetch';
 import { cn } from '@/lib/utils';
 import { fieldErrors } from '../client';
 import { MAX_IMAGES, PACKAGINGS, type Packaging, type Product, type RefItem, type Rule } from '../types';
@@ -126,6 +126,8 @@ export function ProductForm({ product, options, upload, setRule, actions, delete
       if (saved) setS((old) => ({ ...old, sizes: old.sizes.map((r, i) => ({ ...r, id: saved.sizes[i]?.id ?? r.id })) }));
       const mapped = errorsOf(cause, values);
       if (mapped) setErrors(mapped);
+      // Incomplete without a reason the form knows: the owner's sentence, not the generic failure.
+      else if (cause instanceof ApiError && cause.code === PRODUCT_NOT_SUBMITTABLE) toast('error', tg('vendorProducts.failed.incomplete'));
       else toast('error', t('saveFailed'));
     } finally {
       setBusy(null);
@@ -330,7 +332,7 @@ function errorsOf(e: unknown, values: ProductFormValues): Errors | null {
   const f = fieldErrors(e);
   if (f) return f;
   if (!(e instanceof ApiError)) return null;
-  if (e.code === 'PRODUCT_NOT_SUBMITTABLE') {
+  if (e.code === PRODUCT_NOT_SUBMITTABLE) {
     const reasons = ((e.details as { reasons?: string[] } | undefined)?.reasons ?? []) as string[];
     const out: Errors = {};
     if (reasons.includes('NO_SIZE')) out.sizes = 'NO_SIZE';

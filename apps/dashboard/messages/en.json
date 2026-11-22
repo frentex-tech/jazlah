@@ -1100,6 +1100,10 @@
     }
   },
   "reviewQueue": {
+    "filters": {
+      "allKinds": "All kinds",
+      "allStores": "All stores"
+    },
     "breadcrumb": "Catalog / Review requests",
     "title": "Product review",
     "tabs": {

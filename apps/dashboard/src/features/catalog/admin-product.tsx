@@ -7,7 +7,7 @@ import { Button, buttonVariants } from '@/components/ui/button';
 import { StateCard } from '@/components/ui/state-card';
 import { toast } from '@/components/ui/toast';
 import { Link } from '@/i18n/navigation';
-import { ApiError, panelFetch } from '@/lib/panel-fetch';
+import { PERMISSION_DENIED, ApiError, panelFetch } from '@/lib/panel-fetch';
 import { loadAll, uploadImage } from './client';
 import { ProductForm, ProductFormSkeleton, SubmitError, type FormOptions, type ProductFormValues } from './product-form/product-form';
 import { availabilityChange, priceChanges, priceField } from './product-form/values';
@@ -59,7 +59,7 @@ export function AdminProduct({ id }: { id?: string }) {
       setState(review?.vendor && !review.vendor.isPlatform ? 'foreign' : { product, options });
     } catch (e) {
       const code = e instanceof ApiError ? e.code : '';
-      setState(code === 'PERMISSION_DENIED' ? 'denied' : code === 'NOT_FOUND' ? 'missing' : 'error');
+      setState(code === PERMISSION_DENIED ? 'denied' : code === 'NOT_FOUND' ? 'missing' : 'error');
     }
   }, [id]);
   useEffect(() => void load(), [load]);

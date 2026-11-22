@@ -1,4 +1,10 @@
+import type { Schemas } from '@/api/client';
 import type { Session } from './session';
+
+// The API's codes the pages compare against, typed by the generated ErrorCode (a renamed code fails the typecheck).
+export const PERMISSION_DENIED: Schemas['ErrorCode'] = 'PERMISSION_DENIED';
+export const VENDOR_CR_EXISTS: Schemas['ErrorCode'] = 'VENDOR_CR_EXISTS';
+export const PRODUCT_NOT_SUBMITTABLE: Schemas['ErrorCode'] = 'PRODUCT_NOT_SUBMITTABLE';
 
 // A refused permission is 403 PERMISSION_DENIED: the session stays (not in panel-session's SIGNED_OUT) and the Sprint 2
 // pages (stores, catalog, review) show their not-allowed state. shortcut: no API route returns it until ADM-API-1 adds
