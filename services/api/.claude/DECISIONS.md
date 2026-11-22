@@ -190,6 +190,7 @@ Decided 2026-11-14 by the backend owner (task brief and its corrections) unless 
 - **Later task: cleanup of expired rows.** Nothing deletes expired `otp_challenges`, used or expired `refresh_tokens`, or ended `auth_sessions`. A scheduled job like media's is a task of its own.
 - **Shared code changed for this** (*session*, accepted by the backend owner): `AppError` carries `retryAfterSeconds`, which the filter sends as Retry-After; the guard lives in `src/common/guards/` behind the `AccessTokenVerifier` interface in `src/common/auth/` (R1); `src/common/auth/` is plain TypeScript and was added to `DOMAIN_SAFE_COMMON`, so a module's `domain/` uses `Audience`, `StaffAudience` and `AuthenticatedUser` instead of redeclaring them (`StaffAudience` was declared twice, in auth and users, until the review of #234). `@nestjs/jwt` 12.0.3, pinned exactly (the newest release at least two weeks old).
 - *Session:* **use cases take `Pick<TransactionRunner, 'run'>`** with `@Inject(TransactionRunner)`, so a unit test passes a plain object; the auth test kit's runner puts the in-memory repositories back when the work throws, so rollbacks are tested without a database.
+- **A missing permission is PERMISSION_DENIED, not FORBIDDEN** (2026-11-22, project owner, lead review of Sprint 2, B7): 403 with `details.permission`. FORBIDDEN keeps its meaning (wrong audience or lost access: sign in again), so the dashboard can show "not allowed" without signing an admin out. Added to the catalogue now so clients map it; the permission checks that raise it come with ADM-API-1 (#111).
 
 ### Vendors (issue #235)
 
@@ -242,7 +243,6 @@ Decided 2026-11-16 by the backend owner (task brief, `.claude/plans/catalog.md`)
 - *Session:* `cutting_packaging_incompatibilities_pair_key` breaks the `<table>_<columns>_key` naming: the full name passes PostgreSQL's 63-byte limit.
 - *Session:* building blocks moved out of vendors unchanged, for the catalog: the bilingual DTOs, `ReasonDto`, `organisationOf`, `ADMIN_AUTH_ERRORS`, `OptionalLocalizedText`, the fakes' `keysetPage`, `InMemoryAuditLog`; `VENDOR_AUTH_ERRORS` added beside `ADMIN_AUTH_ERRORS`. The vendors e2e no longer deletes the platform vendor, which the catalog suite uses at the same time.
 
-- **A missing permission is PERMISSION_DENIED, not FORBIDDEN** (2026-11-22, project owner, lead review of Sprint 2, B7): 403 with `details.permission`. FORBIDDEN keeps its meaning (wrong audience or lost access: sign in again), so the dashboard can show "not allowed" without signing an admin out. Added to the catalogue now so clients map it; the permission checks that raise it come with ADM-API-1 (#111).
 
 ### Customers and account deletion (issue #239)
 
