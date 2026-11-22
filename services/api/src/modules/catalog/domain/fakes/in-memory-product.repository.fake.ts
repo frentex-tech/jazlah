@@ -346,7 +346,7 @@ export class InMemoryProductRepository implements ProductRepository {
   private matchesWords(row: StoredProduct, text: string): boolean {
     const words = searchTextOf(text)
       .split(/\s+/)
-      .filter((word) => word !== '');
+      .filter((word) => [...word].length >= 2);
     const names = searchTextOf(`${row.content.name.ar} ${row.content.name.en}`);
     return words.length > 0 && words.every((word) => names.includes(word));
   }

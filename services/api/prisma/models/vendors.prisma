@@ -36,6 +36,8 @@ enum VendorApplicationDocumentKind {
 /// `vendors_business_fields_check`).
 model Vendor {
   id                           String       @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  /// The store's names. Renaming either rewrites the search text of every product of the
+  /// store (trigger `vendors_products_search_text_trigger`, catalog search).
   nameAr                       String       @map("name_ar")
   nameEn                       String       @map("name_en")
   /// Nullable: null until the vendor writes one.

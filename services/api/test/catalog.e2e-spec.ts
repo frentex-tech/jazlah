@@ -1538,6 +1538,7 @@ describe('Catalog (e2e)', () => {
 
         expect(await search(ctx.vendorId, '50%')).toEqual([percent]);
         expect(await search(ctx.vendorId, 'cut_a')).toEqual([underscore]);
+        expect(await search(ctx.vendorId, 'off 50%')).toEqual([percent]);
       });
 
       it('answers an empty page for a q of only diacritics and tatweel', async () => {
@@ -1550,6 +1551,15 @@ describe('Catalog (e2e)', () => {
           .expect(200);
 
         expect(res.body).toEqual({ items: [], nextCursor: null });
+      });
+
+      it('answers an empty page when no word of two letters or more is left', async () => {
+        const ctx = await setUp('search-short-words');
+        await named(ctx, 'لحم غنم', 'Lamb meat');
+
+        expect(await search(ctx.vendorId, 'a b')).toEqual([]);
+        expect(await search(ctx.vendorId, 'ًـ ٌ')).toEqual([]);
+        expect(await search(ctx.vendorId, 'غنم ل')).toHaveLength(1);
       });
 
       it('refuses a q shorter than 2 or longer than 100 characters', async () => {

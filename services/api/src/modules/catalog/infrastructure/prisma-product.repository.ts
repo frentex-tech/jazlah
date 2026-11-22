@@ -297,8 +297,8 @@ export class PrismaProductRepository implements ProductRepository {
       filter.text === undefined
         ? undefined
         : await this.searchWords(filter.text);
-    // A query of only diacritics or tatweel normalises to nothing: it names no product,
-    // so the answer is an empty page, never every product (`LIKE '%%'`).
+    // A query of only diacritics, tatweel or one-letter words leaves no word: it names no
+    // product, so the answer is an empty page, never every product (`LIKE '%%'`).
     if (words?.length === 0) {
       return { items: [], nextCursor: null };
     }
@@ -339,7 +339,7 @@ export class PrismaProductRepository implements ProductRepository {
   /**
    * The text search's words: the query normalised by the same SQL function as the
    * stored `search_text` (`catalog_search_text`, one definition, in the migrations), split
-   * on white space, each with its LIKE wildcards escaped so `%` and `_` match themselves.
+   * on white space, words of one letter dropped, each with its LIKE wildcards escaped so `%` and `_` match themselves.
    */
   private async searchWords(text: string): Promise<string[]> {
     try {
@@ -354,10 +354,13 @@ export class PrismaProductRepository implements ProductRepository {
         typeof row.normalized === 'string'
           ? row.normalized
           : '';
-      return normalized
-        .split(/\s+/)
-        .filter((word) => word !== '')
-        .map(escapeLikePattern);
+      return (
+        normalized
+          .split(/\s+/)
+          // A one-letter word would match nearly every product: it narrows nothing.
+          .filter((word) => [...word].length >= 2)
+          .map(escapeLikePattern)
+      );
     } catch (error) {
       mapPrismaError(error);
     }
