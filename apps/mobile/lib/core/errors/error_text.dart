@@ -22,6 +22,12 @@ String errorText(BuildContext context, Object error) {
         'PRICE_CHANGED' => l10n.errPriceChanged,
         'ITEM_UNAVAILABLE' => l10n.errItemUnavailable,
         'MIN_ORDER_NOT_MET' => l10n.errMinOrderNotMet,
+        'DAY_NOT_AVAILABLE' => l10n.errDayNotAvailable,
+        'FULFILMENT_REQUIRED' => l10n.errFulfilmentRequired,
+        'CART_EMPTY' => l10n.errCartEmpty,
+        'WALLET_INSUFFICIENT' => l10n.errWalletInsufficient,
+        'ORDER_NOT_PAYABLE' => l10n.errOrderNotPayable,
+        'PAYMENT_IN_PROGRESS' => l10n.errPaymentInProgress,
         _ => l10n.errorGeneric,
       };
 }

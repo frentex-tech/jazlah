@@ -97,7 +97,7 @@ Future<(List<dynamic>, PlacedOrder)> _o(WidgetTester t, {String gateway = 'fake'
       paymentGatewayProvider.overrideWithValue(switch (gateway) {
         'hang' => _Hanging(),
         'decline' => _Declining(orders),
-        _ => FakePaymentGateway(orders.decide),
+        _ => MockHostedPageGateway(orders.hostedPage),
       }),
     ],
     placed,
@@ -123,7 +123,7 @@ void main() {
       overrides: o,
     );
     (o, p) = await _o(t, none: true);
-    await shoot(t, '170-29357', PaymentScreen(orderId: p.order.id), overrides: o);
+    await shoot(t, 'pay-no-usable-method', PaymentScreen(orderId: p.order.id), overrides: o);
     (o, p) = await _o(t);
     await shoot(
       t,

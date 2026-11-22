@@ -18,11 +18,11 @@ final paymentRepositoryProvider = Provider<PaymentRepository?>((ref) {
   return cart is MockCartRepository && orders is MockOrderRepository ? MockPaymentRepository(cart, orders) : null;
 });
 
-/// The gateway step: the fake provider on the mock server; null in real builds until PAY-MOB-2 #79.
-// shortcut: fake gateway until PAY-MOB-2 #79 hooks up the gateway SDK (not-built-yet.md).
-final paymentGatewayProvider = Provider<PaymentGateway?>((ref) {
+/// The gateway step: the hosted page in a webview (real builds, ready for the API's redirect); the mock provider's
+/// page with USE_MOCKS. PAY-MOB-2 #79 may add a gateway SDK behind the same port.
+final paymentGatewayProvider = Provider<PaymentGateway>((ref) {
   final orders = ref.watch(orderRepositoryProvider);
-  return orders is MockOrderRepository ? FakePaymentGateway(orders.decide) : null;
+  return orders is MockOrderRepository ? MockHostedPageGateway(orders.hostedPage) : const HostedPagePaymentGateway();
 });
 
 /// The methods for the cart (null) or for an unpaid order.

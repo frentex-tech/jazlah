@@ -147,7 +147,7 @@ class MockCheckoutRepository implements CheckoutRepository {
       if (!address.covered) throw const ApiError(code: FulfilmentError.addressNotCovered);
     }
     if (day == null || !day.available) {
-      throw ApiError(code: day?.reason == DayReason.full ? FulfilmentError.dayFull : 'VALIDATION_FAILED');
+      throw dayRefusal(day);
     }
     cart.fulfilment = choice;
     return cart.get();

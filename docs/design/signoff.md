@@ -236,7 +236,7 @@ Everything else follows the ten frames (118-9638, 118-9741, 118-9829, 118-10052,
 
 | Screen (node) | Figma | Build | Why |
 |---|---|---|---|
-| Pickup card (118-9741) | «اتصال بالمتجر» button | Left out, and no directions button | The app has no URL launcher, so neither a call nor opening the maps app would work; the pickup point has no phone yet. |
+| Pickup card (118-9741) | «اتصال بالمتجر» secondary button | The same secondary L button «اتصال بالمتجر», shown only when the pickup point carries the store's phone (none does yet); plus a secondary L «الاتجاهات» that opens directions to the pickup point in maps | No phone in the pickup point yet (SCH-API-2 #69); directions work with the point alone. **Figma needs the directions button.** |
 | Delivery address (118-9638) | No way to add an address | «+ إضافة عنوان» link in the title row, opening the existing add-address flow and coming back | The task asks for adding an address inline. |
 | Window card (all) | «يصل بين 4 و 6 مساءً» | The day's window from the server (the default 16:00 to 22:00 reads «يصل بين 4 و 10 مساءً») | Data, not design: the SCH-API-1 default window. |
 | Uncovered address (118-9638) | Second line «بريدة، خارج نطاق التوصيل الحالي» | The address line (city, street) and the «خارج نطاق التغطية» pill | The pill already says it; the address has no such text. |
@@ -253,7 +253,7 @@ Everything else follows 170-28952, 170-29025 and 170-29472. The processing, paym
 | Order placed (170-29472) | «رقم الطلب #10482» | «رقم الطلب JZ-261110-0001» | ORD-API-1 numbers orders JZ-YYMMDD-XXXX. **Figma needs the number format.** |
 | Order placed (170-29472) | «كسبت 338 نقطة بهذا الطلب» and «انشر قصة استلامك واكسب 50 نقطة» strips | Left out (the free space goes to the spacers) | Loyalty points and stories are Sprint 6 (LOY-MOB-1 #174, STY-MOB-1 #177); a number with nothing behind it would mislead. |
 | Order placed (170-29472) | Payment line «مدى · تنتهي بـ 4821» | The method the order was placed with | In this build only cash on delivery and wallet-only orders reach the screen; card orders go to the payment step (PAY-MOB-1 #78). |
-| Review (170-28952, 170-29025) | The two states draw the same picture (mada chosen) | The first method the order may use is chosen until the customer picks another | Figma shows a method chosen by default. |
+| Review and payment (170-28952, 170-29025, 170-29357) | 170-28952 draws mada chosen; 170-29357 draws «اختر طريقة دفع للمتابعة» | Nothing is preselected (owner, design QA M2): the screen opens in the 170-29357 state, «تأكيد الطلب» disabled until a method is picked; 170-28952 / 170-29025 are the states after a pick | The «methods available, none chosen» state must be reachable; a preselected card risks an unintended charge method. |
 | Review (170-28952) | Window «4:00 – 6:00 م» | The day's window from the server (the default 16:00 to 22:00 reads «4:00 – 10:00 م») | Data, not design (SCH-API-1 default window). |
 | Review (170-28952) | No notes or coupon field, terms as one line | Same: no order notes field (each cart line has its notes), the coupon stays in the cart (the «الخصم (CODE)» row shows in the totals when one is applied), terms accepted by confirming | The task lists notes, coupon and terms acceptance; Figma covers them this way. |
 | Review (170-28952) | Terms line on one line | Wraps to two lines | Readex Pro is wider than Thmanyah. |
@@ -265,9 +265,10 @@ Everything else follows 170-29134, 170-29244 and 170-29357 (and 170-28952 for th
 | Screen (node) | Figma | Build | Why |
 |---|---|---|---|
 | Processing (170-29134) | Back button drawn | Back hidden and system back refused while a payment is in flight | The outcome must be seen; leaving mid-payment would hide it. |
-| Processing (170-29134) | No page over the screen | The fake provider's page (a sheet, «بوابة الدفع التجريبية», «موافقة» / «رفض») until PAY-MOB-2 #79 brings the gateway's own page | 3DS needs a gateway step; there is no frame for it. |
+| Processing (170-29134) | No page over the screen | The provider's hosted page (3DS) in an in-app webview over the screen; with the mock switch, the fake provider's page as a sheet («بوابة الدفع التجريبية», «موافقة» / «رفض» / «إلغاء الدفع») | 3DS needs a gateway step; there is no frame for it. |
+| Payment still open (no frame) | — | While the latest payment may still capture (the wait stopped after 60 s, the hosted page was closed, or opened again), the button reads «تحقق من حالة الدفع» and only re-reads the status, and «متابعة الدفع» above it reopens the open payment's hosted page (same url, no new payment) when the app still has it; the methods are frozen. The hosted page shows the error panel (retry, «إغلاق») when it fails to load | No double charge (lead review M2). |
 | Payment failed (170-29244) | The toast | The same toast at the top for 4 seconds; «إعادة المحاولة» stays; a line «أُعيد … ر.س إلى محفظتك.» in the method card when a wallet part came back | The wallet amount is given back on a failure (PAY-API-1). |
-| No method (170-29357) | Mada drawn checked next to «اختر طريقة دفع للمتابعة» | No radio checked when the line shows | A checked method contradicts the message. |
+| No method (170-29357) | Mada drawn checked next to «اختر طريقة دفع للمتابعة» | No radio checked when the line shows; the radio, checkbox and switch rows grow past 44 when a label wraps instead of clipping it | A checked method contradicts the message; long labels (an unavailable method's reason, English) must stay readable. |
 | Review (170-28952) | Wallet row «محفظة جزلة · الرصيد غير كافٍ» only | Plus a switch «استخدام رصيد المحفظة · 50.00 ر.س» when the wallet covers part of the total, with «المتبقي …» under it; the wallet-only row hides while it is on | The task asks for a wallet toggle with its amount; the wallet part must be sent at placement. **Figma needs the switch.** |
 | Order placed (170-29472) | No status line | «تم تأكيد طلبك.» or, for cash on delivery under review, «سنراجع طلبك ونؤكده قريبًا.» under the number | COD follows the confirmation setting. |
 | Expired order | No frame | Error toast «أُلغي الطلب لانتهاء مهلة الدفع (15 دقيقة).» and the cart | Figma has no room for a countdown; ORD-API-2 cancels after 15 minutes. |
@@ -279,12 +280,12 @@ Everything else follows 135-63663, 135-63749, 135-63826, 135-63940, 135-64028, 1
 | Screen (node) | Figma | Build | Why |
 |---|---|---|---|
 | Order detail (135-64128) | Tracking card with the driver, ETA and map link; freshness certificate with photos | Not built: before shipping both cards show 135-64189's «لم يبدأ التوصيل بعد» and «بانتظار الذبح والتجهيز»; after that they are left out | Tracking and freshness are DLV-MOB-1 #101 (Sprint 4); a driver or ETA with nothing behind it would mislead. |
-| Order detail (135-64128, 135-64189) | Header, tracking and freshness only | Adds «حالة الطلب» (the design system status timeline, from the status history with each step's time), the pickup point for pickup orders, «المنتجات», the totals card and «الدفع» | The task asks for the timeline, items, totals, payment and pickup details; no frame draws them. **Figma needs these sections.** |
+| Order detail (135-64128, 135-64189) | Header, tracking and freshness only | After the drawn cards: «حالة الطلب» (the status timeline from the status history, each step's time, title inside the card), the pickup point for pickup orders, «المنتجات», the totals card and «الدفع» | The task asks for the timeline, items, totals, payment and pickup details; no frame draws them. **Figma needs these sections.** |
 | Order detail (135-64128, 135-64189) | «إلغاء الطلب» and «الإبلاغ عن مشكلة» | Both hidden; an unpaid order shows «إكمال الدفع» instead | No customer cancel route in the Sprint 3 contract; complaints are CMP (Sprint 5). The payment step opens from the order. |
 | Tracking (135-64472, 135-64553, 135-64644, 135-64730) | Tracking screen with the timeline, driver, photos and temperature | Not built | Its timeline is on the order detail; the rest (driver, map, photos, temperature, tracking errors) is DLV-MOB-1 #101, which builds the screen. |
 | Orders list (135-63663) | Filters on one row | The same chips, wrapping to a second row when they do not fit | A long translation or a narrow screen. |
-| Orders list (135-63663) | «1,180.00» | «1180.00» | The app's one money format has no thousands separator (all screens). |
-| Orders empty (135-63826) | No filters | No filters on «الكل»; on «الجارية» or «المكتملة» they stay so the customer can switch back | An empty scope must not trap the customer. |
+| Orders empty (135-63826) | `package` icon | The design system's `receipt` icon (State panel kind=orders) | Figma disagrees with itself: the frame shows `package`, the DS panel `receipt`. **Figma needs one icon.** |
+| Orders loading and error (135-63749, 135-63940) | No filters | No filters (fixed after design QA M4); an empty «الجارية» or «المكتملة» keeps them so the customer can switch back | An empty scope must not trap the customer. |
 
 ## Checks run on the file (2026-11-13)
 - Script lint over all 587 screens after the last changes: no empty or "undefined" text, no text outside its screen, no missing icon.

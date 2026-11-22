@@ -10,6 +10,7 @@ import 'package:jazlah/features/catalog/presentation/catalog_widgets.dart';
 import 'package:jazlah/features/checkout/domain/fulfilment.dart';
 import 'package:jazlah/features/checkout/domain/order.dart';
 import 'package:jazlah/features/checkout/presentation/review_screen.dart';
+import 'package:jazlah/features/payment/domain/payment_method.dart';
 import 'package:jazlah/features/payment/presentation/payment_widgets.dart';
 import 'package:jazlah/features/product/domain/product.dart';
 import 'package:jazlah/l10n/app_localizations.dart';
@@ -63,10 +64,13 @@ class OrderPlacedScreen extends StatelessWidget {
                 Text(l10n.placedTitle, style: JText.h1, textAlign: TextAlign.center),
                 const SizedBox(height: JSpace.s12),
                 Text(l10n.placedNumber(o.number), style: JText.h3, textAlign: TextAlign.center),
-                // COD under review stays new until the admin confirms it (ops.cod.confirmation).
+                // Only COD under review stays new until the admin confirms it (ops.cod.confirmation); a paid order is
+                // confirmed and never reads «سنراجع طلبك…».
                 const SizedBox(height: JSpace.s4),
                 Text(
-                  o.status == OrderStatus.created ? l10n.placedUnderReview : l10n.placedConfirmed,
+                  o.status == OrderStatus.created && o.paymentMethod == PaymentMethodCode.cod
+                      ? l10n.placedUnderReview
+                      : l10n.placedConfirmed,
                   style: JText.bodyM.copyWith(color: JColors.ink2),
                   textAlign: TextAlign.center,
                 ),
