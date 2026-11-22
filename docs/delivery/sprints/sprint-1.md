@@ -6,7 +6,7 @@
 
 **Exit criteria (demo on staging):**
 - The client has approved the full launch design in writing (DSN-DES-2); every launch screen is listed in `docs/design/screens.md` with its Figma link.
-- `GET /v1/public/health/ready` is green on staging; Swagger at `/docs`. Merging to `develop` auto-deploys; a failing test blocks the PR.
+- `GET /v1/health/ready` is green on staging; Swagger at `/docs`. Merging to `develop` auto-deploys; a failing test blocks the PR.
 - Web, dashboard and the Flutter staging build open, switch AR/EN and render RTL correctly with the design-system components.
 - New customer: phone → OTP (fixed code on staging) → profile → add an address on the map, in the app and on the web.
 - Admin draws a Riyadh polygon. A point inside shows as covered and a point outside shows the out-of-coverage message.
@@ -274,7 +274,7 @@ This task also covers:
 
 **Acceptance:**
 - [ ] A merge to `develop` is live on staging within 15 minutes, without manual steps
-- [ ] `/v1/public/health/ready` on staging is green
+- [ ] `/v1/health/ready` on staging is green
 - [ ] Rollback to the previous image is documented and tested once
 
 ## EPIC APP — Client app scaffolds
