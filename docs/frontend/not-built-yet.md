@@ -34,7 +34,7 @@ The batch of API changes decided after the design comparison (issue #243) is bui
 
 ## Not built: the order side of the product
 
-None of these has an endpoint yet:
+The Sprint 3 contract (cart, checkout, payments, orders, settings, coupons, wallet) is in `openapi.json` and [orders.md](orders.md); its routes answer NOT_IMPLEMENTED until each task lands. The rows below say what is still missing beyond it.
 
 | Area | What the screens may show | Status |
 |---|---|---|

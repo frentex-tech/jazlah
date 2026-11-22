@@ -60,7 +60,8 @@ src/
   create-admin.ts             pnpm admin:create <phone>: grants admin access (create-admin.module.ts)
   create-platform-vendor.ts   pnpm vendor:create-platform: creates the platform vendor (create-platform-vendor.module.ts)
   app.module.ts               imports config, logger, database, redis, queue, event bus, rate limit, auth (after
-                              rate limit: guard order), health, media, vendors, catalog, customers, coverage;
+                              rate limit: guard order), health, media, vendors, catalog, customers, coverage, settings,
+                              scheduling, cart, coupons, wallet, payments, orders, checkout;
                               registers the global filter and pipe
   generate-openapi.ts         pnpm openapi:generate / openapi:check (Nest preview mode: nothing connects)
   config/                     env.schema.ts (zod), validate-env.ts, load-env.ts (the one reader of process.env),
@@ -179,6 +180,12 @@ src/
                               public browsing. api/ (vendor, admin, public controllers), application/,
                               domain/ (Product rules, ProductStatusMachine, ports, fakes), infrastructure/
                               (Prisma repositories, MediaService and VendorDirectory adapters)
+    settings/ scheduling/ cart/ coupons/   CRUD-shaped; wallet/ payments/ orders/ checkout/ four layers
+                              (api/ only so far). The Sprint 3 contract (2026-11-23): controllers and DTOs whose
+                              routes answer NOT_IMPLEMENTED (common/errors/not-implemented.ts) until each task
+                              (SCH-API-1/2, CRT-API-1/3, WAL-API-1, PAY-API-1, ORD-API-1/2/3) lands; a task adds
+                              the layers it needs. Payment and order enums live in orders/domain (payments imports
+                              orders, never the reverse); settings holds ORDER_TYPES and FULFILMENT_METHODS
 test/
   *.e2e-spec.ts               health, errors, request-id, database, queue, event-bus, api-docs, http-security,
                               rate-limit, startup, logging, redis-logging, shutdown, media (fake storage),

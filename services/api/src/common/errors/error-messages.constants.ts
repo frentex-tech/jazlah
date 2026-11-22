@@ -156,4 +156,120 @@ export const ERROR_MESSAGES: Readonly<Record<ErrorCode, LocalizedText>> = {
     ar: 'حدود المنطقة غير صحيحة، تأكد إن الشكل مقفول وإن خطوطه ما تتقاطع',
     en: 'The zone boundary is not a valid shape. Make sure it is closed and its edges do not cross.',
   },
+  [ErrorCode.NOT_IMPLEMENTED]: {
+    ar: 'هالخدمة جاية قريب، جرّب بعدين',
+    en: 'This is not available yet.',
+  },
+  [ErrorCode.CART_EMPTY]: {
+    ar: 'السلة فاضية، أضف منتجات أول',
+    en: 'Your cart is empty.',
+  },
+  [ErrorCode.CART_VENDOR_MISMATCH]: {
+    ar: 'سلتك فيها منتجات من متجر ثاني، تبي تفضّيها وتبدأ من هالمتجر؟',
+    en: 'Your cart has products from another store.',
+  },
+  [ErrorCode.PRODUCT_UNAVAILABLE]: {
+    ar: 'هالمنتج غير متوفر الحين',
+    en: 'This product is not available right now.',
+  },
+  [ErrorCode.SIZE_UNAVAILABLE]: {
+    ar: 'هالحجم خلص، اختر حجم ثاني',
+    en: 'This size is out of stock.',
+  },
+  [ErrorCode.OPTION_NOT_IN_PRODUCT]: {
+    ar: 'أحد الخيارات ما عاد موجود، حدّث الصفحة واختر من جديد',
+    en: 'One of the chosen options is not offered for this product.',
+  },
+  [ErrorCode.INCOMPATIBLE_CUTTING_PACKAGING]: {
+    ar: 'هالتقطيع ما يمشي مع هالتغليف، غيّر واحد منهم',
+    en: 'This cut cannot be packed this way.',
+  },
+  [ErrorCode.OPTION_REQUIRED]: {
+    ar: 'اختر طريقة التقطيع',
+    en: 'Choose a cut.',
+  },
+  [ErrorCode.PRICE_CHANGED]: {
+    ar: 'تغيّر سعر بعض المنتجات في سلتك، راجعها قبل تكمل',
+    en: 'Some prices in your cart have changed.',
+  },
+  [ErrorCode.ITEM_UNAVAILABLE]: {
+    ar: 'فيه منتج في سلتك ما عاد متوفر، شيله وكمّل',
+    en: 'An item in your cart is no longer available.',
+  },
+  [ErrorCode.MIN_ORDER_NOT_MET]: {
+    ar: 'باقي لك شوي توصل للحد الأدنى للطلب',
+    en: 'Your order is below the minimum.',
+  },
+  [ErrorCode.COUPON_NOT_FOUND]: {
+    ar: 'الكود غير صحيح، تأكد منه',
+    en: 'This coupon code is not valid.',
+  },
+  [ErrorCode.COUPON_EXPIRED]: {
+    ar: 'انتهت صلاحية الكود',
+    en: 'This coupon has expired.',
+  },
+  [ErrorCode.COUPON_NOT_APPLICABLE]: {
+    ar: 'الكود ما ينطبق على سلتك',
+    en: 'This coupon does not apply to your cart.',
+  },
+  [ErrorCode.COUPON_MIN_ORDER]: {
+    ar: 'الكود يحتاج طلب أكبر، زد سلتك وجرّب',
+    en: 'Your cart is below this coupon’s minimum.',
+  },
+  [ErrorCode.COUPON_LIMIT_REACHED]: {
+    ar: 'الكود استُخدم للحد المسموح',
+    en: 'This coupon has reached its limit.',
+  },
+  [ErrorCode.COUPON_CODE_TAKEN]: {
+    ar: 'فيه كوبون بنفس الكود، اختر كود ثاني',
+    en: 'A coupon with this code already exists.',
+  },
+  [ErrorCode.FULFILMENT_REQUIRED]: {
+    ar: 'اختر التوصيل أو الاستلام والموعد أول',
+    en: 'Choose delivery or pickup and a day first.',
+  },
+  [ErrorCode.FULFILMENT_NOT_SUPPORTED]: {
+    ar: 'بعض المنتجات ما تدعم هالطريقة، اختر الطريقة الثانية',
+    en: 'Some items do not support this option.',
+  },
+  [ErrorCode.ADDRESS_NOT_COVERED]: {
+    ar: 'للأسف ما نوصّل لهالعنوان حاليًا',
+    en: 'We do not deliver to this address yet.',
+  },
+  [ErrorCode.DAY_FULL]: {
+    ar: 'هاليوم اكتمل، اختر يوم ثاني',
+    en: 'This day is fully booked.',
+  },
+  [ErrorCode.DAY_NOT_AVAILABLE]: {
+    ar: 'هاليوم غير متاح، اختر يوم ثاني',
+    en: 'This day is not available.',
+  },
+  [ErrorCode.ORDERING_PAUSED]: {
+    ar: 'الطلبات متوقفة مؤقتًا، جرّب بعدين',
+    en: 'Ordering is paused for now.',
+  },
+  [ErrorCode.PROFILE_INCOMPLETE]: {
+    ar: 'أضف اسمك في الملف الشخصي قبل تطلب',
+    en: 'Add your name to your profile first.',
+  },
+  [ErrorCode.WALLET_INSUFFICIENT]: {
+    ar: 'رصيد المحفظة ما يكفي',
+    en: 'Your wallet balance is not enough.',
+  },
+  [ErrorCode.PAYMENT_METHOD_NOT_AVAILABLE]: {
+    ar: 'طريقة الدفع هذي غير متاحة لطلبك، اختر طريقة ثانية',
+    en: 'This payment method is not available for your order.',
+  },
+  [ErrorCode.ORDER_NOT_PAYABLE]: {
+    ar: 'هالطلب ما يحتاج دفع الحين',
+    en: 'This order cannot be paid now.',
+  },
+  [ErrorCode.PAYMENT_IN_PROGRESS]: {
+    ar: 'فيه عملية دفع مفتوحة لهالطلب، كمّلها أو انتظر شوي',
+    en: 'A payment for this order is still in progress.',
+  },
+  [ErrorCode.ORDER_TRANSITION_NOT_ALLOWED]: {
+    ar: 'ما يمكن تغيير حالة الطلب لهالخطوة، حدّث الصفحة',
+    en: 'This order cannot be moved to that status.',
+  },
 };

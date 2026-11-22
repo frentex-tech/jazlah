@@ -48,6 +48,7 @@ Status is the HTTP status the code always comes with. The English message is the
 
 | Code | Status | English message | The app should |
 |---|---|---|---|
+| `NOT_IMPLEMENTED` | 501 | This is not available yet. | **Show** "coming soon"; `details.task` names the task that builds the route. Do not retry. |
 | `VALIDATION_FAILED` | 400 | The request data is invalid. | **Show**, at the fields in `details`. |
 | `BAD_REQUEST` | 400 | The request could not be processed. | **Bug**. It means malformed JSON, or a value the database refused. |
 | `NOT_FOUND` | 404 | The requested resource was not found. | **Reload**: the item was deleted, or never belonged to this user. Go back to the list. |
@@ -114,6 +115,41 @@ Status is the HTTP status the code always comes with. The English message is the
 | `MEDIA_UPLOAD_EXPIRED` | 410 | The upload was not confirmed in time. Please upload the file again. | Start the upload again from the request step. |
 | `MEDIA_UPLOAD_REJECTED` | 422 | The uploaded file was rejected because it does not meet the requirements. Please upload another file. | **Show**, and let the user pick another file. `details.reason` is one of `OBJECT_MISSING` (nothing was uploaded), `EMPTY_FILE`, `TOO_LARGE`, `TYPE_NOT_ALLOWED` or `CONTENT_TYPE_MISMATCH` (the file is not the declared type). |
 | `MEDIA_NOT_READY` | 409 | The file is not ready yet. | A file was used (on a product, in an application) before its upload was confirmed. Confirm it first, then repeat. |
+
+### Cart, checkout, payments and orders (Sprint 3)
+
+Business refusals have their own code, never VALIDATION_FAILED. Until a route's task lands it answers NOT_IMPLEMENTED.
+
+| Code | Status | English message | The app should |
+|---|---|---|---|
+| `CART_EMPTY` | 409 | Your cart is empty. | Customer app: **go** to the cart. |
+| `CART_VENDOR_MISMATCH` | 409 | Your cart has products from another store. | Customer app: **ask** "replace your cart?" naming `details.vendorName`; on yes, send again with `replaceCart: true`. |
+| `PRODUCT_UNAVAILABLE` | 409 | This product is not available right now. | **Show**, and refresh the product page. |
+| `SIZE_UNAVAILABLE` | 409 | This size is out of stock. | **Show**; disable the size and pick another. |
+| `OPTION_NOT_IN_PRODUCT` | 422 | One of the chosen options is not offered for this product. | **Reload** the product, then let the customer choose again. |
+| `INCOMPATIBLE_CUTTING_PACKAGING` | 422 | This cut cannot be packed this way. | **Show** on the options; the pair is in `incompatiblePairs`. |
+| `OPTION_REQUIRED` | 422 | Choose a cut. | **Show** on the cut picker. |
+| `PRICE_CHANGED` | 409 | Some prices in your cart have changed. | Customer app: **go** to the cart, show old and new prices; PATCH the line to accept. |
+| `ITEM_UNAVAILABLE` | 409 | An item in your cart is no longer available. | Customer app: **go** to the cart and offer to remove the lines in `details.lineIds`. |
+| `MIN_ORDER_NOT_MET` | 422 | Your order is below the minimum. | **Go** to the cart and show `details.remainingHalalas`. |
+| `COUPON_NOT_FOUND` | 422 | This coupon code is not valid. | **Show** on the coupon field. |
+| `COUPON_EXPIRED` | 422 | This coupon has expired. | **Show** on the coupon field. |
+| `COUPON_NOT_APPLICABLE` | 422 | This coupon does not apply to your cart. | **Show** on the coupon field. |
+| `COUPON_MIN_ORDER` | 422 | Your cart is below this coupon’s minimum. | **Show** on the coupon field with `details.minOrderHalalas`. |
+| `COUPON_LIMIT_REACHED` | 422 | This coupon has reached its limit. | **Show** on the coupon field. |
+| `COUPON_CODE_TAKEN` | 409 | A coupon with this code already exists. | Admin dashboard: **show** on the code field. |
+| `FULFILMENT_REQUIRED` | 422 | Choose delivery or pickup and a day first. | Customer app: **go** to the fulfilment step. |
+| `FULFILMENT_NOT_SUPPORTED` | 422 | Some items do not support this option. | **Show**; offer the other method. |
+| `ADDRESS_NOT_COVERED` | 422 | We do not deliver to this address yet. | **Go** to the fulfilment step; offer another address or pickup. |
+| `DAY_FULL` | 409 | This day is fully booked. | **Go** to the day picker and refetch the days. |
+| `DAY_NOT_AVAILABLE` | 422 | This day is not available. | **Go** to the day picker and refetch the days; `details.reason` says why. |
+| `ORDERING_PAUSED` | 409 | Ordering is paused for now. | **Show** `details.messageAr` / `messageEn` (the admin’s message); keep the cart. |
+| `PROFILE_INCOMPLETE` | 422 | Add your name to your profile first. | Customer app: **open** the name step, then place again. |
+| `WALLET_INSUFFICIENT` | 422 | Your wallet balance is not enough. | **Stay** on the payment step and refetch the methods. |
+| `PAYMENT_METHOD_NOT_AVAILABLE` | 422 | This payment method is not available for your order. | **Stay** on the payment step and refetch the methods. |
+| `ORDER_NOT_PAYABLE` | 409 | This order cannot be paid now. | **Reload** the order: it is paid, cancelled or expired. |
+| `PAYMENT_IN_PROGRESS` | 409 | A payment for this order is still in progress. | **Reopen** the open payment, or wait and reload the order. |
+| `ORDER_TRANSITION_NOT_ALLOWED` | 409 | This order cannot be moved to that status. | Dashboard: **reload** the order; its `allowedTransitions` changed. |
 
 ## Which codes an endpoint returns
 

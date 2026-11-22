@@ -77,6 +77,11 @@ Class | Method | HTTP request | Description
 [*AdminCatalogListsApi*](doc/AdminCatalogListsApi.md) | [**adminListCatalogListEntries**](doc/AdminCatalogListsApi.md#adminlistcataloglistentries) | **GET** /v1/admin/lists/{list} | The entries of a list, newest first
 [*AdminCatalogListsApi*](doc/AdminCatalogListsApi.md) | [**adminListCuttingPackagingIncompatibilities**](doc/AdminCatalogListsApi.md#adminlistcuttingpackagingincompatibilities) | **GET** /v1/admin/cutting-packaging-incompatibilities | The cutting and packaging rules, newest first
 [*AdminCatalogListsApi*](doc/AdminCatalogListsApi.md) | [**adminUpdateCatalogListEntry**](doc/AdminCatalogListsApi.md#adminupdatecataloglistentry) | **PATCH** /v1/admin/lists/{list}/{id} | Rename an entry, switch it on or off, or reorder a category
+[*AdminCouponsApi*](doc/AdminCouponsApi.md) | [**adminCreateCoupon**](doc/AdminCouponsApi.md#admincreatecoupon) | **POST** /v1/admin/coupons | Create a coupon
+[*AdminCouponsApi*](doc/AdminCouponsApi.md) | [**adminGetCoupon**](doc/AdminCouponsApi.md#admingetcoupon) | **GET** /v1/admin/coupons/{id} | One coupon
+[*AdminCouponsApi*](doc/AdminCouponsApi.md) | [**adminGetCouponUsage**](doc/AdminCouponsApi.md#admingetcouponusage) | **GET** /v1/admin/coupons/{id}/usage | How a coupon was used
+[*AdminCouponsApi*](doc/AdminCouponsApi.md) | [**adminListCoupons**](doc/AdminCouponsApi.md#adminlistcoupons) | **GET** /v1/admin/coupons | Coupons
+[*AdminCouponsApi*](doc/AdminCouponsApi.md) | [**adminUpdateCoupon**](doc/AdminCouponsApi.md#adminupdatecoupon) | **PATCH** /v1/admin/coupons/{id} | Change a coupon
 [*AdminCoverageZonesApi*](doc/AdminCoverageZonesApi.md) | [**adminCreateCoverageZone**](doc/AdminCoverageZonesApi.md#admincreatecoveragezone) | **POST** /v1/admin/coverage-zones | Add a coverage zone
 [*AdminCoverageZonesApi*](doc/AdminCoverageZonesApi.md) | [**adminDeleteCoverageZone**](doc/AdminCoverageZonesApi.md#admindeletecoveragezone) | **DELETE** /v1/admin/coverage-zones/{id} | Delete a coverage zone
 [*AdminCoverageZonesApi*](doc/AdminCoverageZonesApi.md) | [**adminGetCoverageZone**](doc/AdminCoverageZonesApi.md#admingetcoveragezone) | **GET** /v1/admin/coverage-zones/{id} | One coverage zone
@@ -84,6 +89,12 @@ Class | Method | HTTP request | Description
 [*AdminCoverageZonesApi*](doc/AdminCoverageZonesApi.md) | [**adminUpdateCoverageZone**](doc/AdminCoverageZonesApi.md#adminupdatecoveragezone) | **PATCH** /v1/admin/coverage-zones/{id} | Edit a zone, redraw it, or switch it on or off
 [*AdminMediaApi*](doc/AdminMediaApi.md) | [**adminConfirmMediaUpload**](doc/AdminMediaApi.md#adminconfirmmediaupload) | **POST** /v1/admin/media/{id}/confirm | Confirm an uploaded file
 [*AdminMediaApi*](doc/AdminMediaApi.md) | [**adminRequestMediaUpload**](doc/AdminMediaApi.md#adminrequestmediaupload) | **POST** /v1/admin/media/uploads | Get a ticket to upload one file
+[*AdminOperationsSettingsApi*](doc/AdminOperationsSettingsApi.md) | [**adminGetOperationsSettings**](doc/AdminOperationsSettingsApi.md#admingetoperationssettings) | **GET** /v1/admin/settings/operations | The operations settings
+[*AdminOperationsSettingsApi*](doc/AdminOperationsSettingsApi.md) | [**adminSetOrderingPause**](doc/AdminOperationsSettingsApi.md#adminsetorderingpause) | **PUT** /v1/admin/settings/operations/pause | Pause or resume new orders
+[*AdminOperationsSettingsApi*](doc/AdminOperationsSettingsApi.md) | [**adminUpdateOperationsSettings**](doc/AdminOperationsSettingsApi.md#adminupdateoperationssettings) | **PATCH** /v1/admin/settings/operations | Change the operations settings
+[*AdminOrdersApi*](doc/AdminOrdersApi.md) | [**adminGetOrder**](doc/AdminOrdersApi.md#admingetorder) | **GET** /v1/admin/orders/{id} | One order
+[*AdminOrdersApi*](doc/AdminOrdersApi.md) | [**adminListOrders**](doc/AdminOrdersApi.md#adminlistorders) | **GET** /v1/admin/orders | Orders
+[*AdminOrdersApi*](doc/AdminOrdersApi.md) | [**adminTransitionOrder**](doc/AdminOrdersApi.md#admintransitionorder) | **POST** /v1/admin/orders/{id}/transition | Move an order to another status
 [*AdminProductChangeRequestsApi*](doc/AdminProductChangeRequestsApi.md) | [**adminApproveProductChangeRequest**](doc/AdminProductChangeRequestsApi.md#adminapproveproductchangerequest) | **POST** /v1/admin/product-change-requests/{id}/approve | Approve a change request: it becomes the live product
 [*AdminProductChangeRequestsApi*](doc/AdminProductChangeRequestsApi.md) | [**adminListProductChangeRequests**](doc/AdminProductChangeRequestsApi.md#adminlistproductchangerequests) | **GET** /v1/admin/product-change-requests | Pending change requests on published products, newest first
 [*AdminProductChangeRequestsApi*](doc/AdminProductChangeRequestsApi.md) | [**adminRejectProductChangeRequest**](doc/AdminProductChangeRequestsApi.md#adminrejectproductchangerequest) | **POST** /v1/admin/product-change-requests/{id}/reject | Reject a change request with a reason
@@ -102,6 +113,10 @@ Class | Method | HTTP request | Description
 [*AdminVendorApplicationsApi*](doc/AdminVendorApplicationsApi.md) | [**adminGetVendorApplication**](doc/AdminVendorApplicationsApi.md#admingetvendorapplication) | **GET** /v1/admin/vendor-applications/{id} | One vendor application, with a link to each document
 [*AdminVendorApplicationsApi*](doc/AdminVendorApplicationsApi.md) | [**adminListVendorApplications**](doc/AdminVendorApplicationsApi.md#adminlistvendorapplications) | **GET** /v1/admin/vendor-applications | Vendor applications, newest first
 [*AdminVendorApplicationsApi*](doc/AdminVendorApplicationsApi.md) | [**adminRejectVendorApplication**](doc/AdminVendorApplicationsApi.md#adminrejectvendorapplication) | **POST** /v1/admin/vendor-applications/{id}/reject | Reject a pending application with a reason
+[*AdminVendorCapacityApi*](doc/AdminVendorCapacityApi.md) | [**adminClearVendorDayCapacity**](doc/AdminVendorCapacityApi.md#adminclearvendordaycapacity) | **DELETE** /v1/admin/vendors/{id}/capacity/{date} | Remove one day’s limits
+[*AdminVendorCapacityApi*](doc/AdminVendorCapacityApi.md) | [**adminGetVendorCapacity**](doc/AdminVendorCapacityApi.md#admingetvendorcapacity) | **GET** /v1/admin/vendors/{id}/capacity | A vendor’s capacity
+[*AdminVendorCapacityApi*](doc/AdminVendorCapacityApi.md) | [**adminSetVendorCapacity**](doc/AdminVendorCapacityApi.md#adminsetvendorcapacity) | **PUT** /v1/admin/vendors/{id}/capacity | Set a vendor’s daily limits
+[*AdminVendorCapacityApi*](doc/AdminVendorCapacityApi.md) | [**adminSetVendorDayCapacity**](doc/AdminVendorCapacityApi.md#adminsetvendordaycapacity) | **PUT** /v1/admin/vendors/{id}/capacity/{date} | Set one day’s limits
 [*AdminVendorsApi*](doc/AdminVendorsApi.md) | [**adminGetVendor**](doc/AdminVendorsApi.md#admingetvendor) | **GET** /v1/admin/vendors/{id} | One vendor
 [*AdminVendorsApi*](doc/AdminVendorsApi.md) | [**adminListVendorCommissionChanges**](doc/AdminVendorsApi.md#adminlistvendorcommissionchanges) | **GET** /v1/admin/vendors/{id}/commission-history | A vendor’s commission history, newest first
 [*AdminVendorsApi*](doc/AdminVendorsApi.md) | [**adminListVendors**](doc/AdminVendorsApi.md#adminlistvendors) | **GET** /v1/admin/vendors | Vendors, newest first
@@ -109,6 +124,8 @@ Class | Method | HTTP request | Description
 [*AdminVendorsApi*](doc/AdminVendorsApi.md) | [**adminSetVendorCommission**](doc/AdminVendorsApi.md#adminsetvendorcommission) | **PUT** /v1/admin/vendors/{id}/commission | Set a vendor’s commission for future orders
 [*AdminVendorsApi*](doc/AdminVendorsApi.md) | [**adminSuspendVendor**](doc/AdminVendorsApi.md#adminsuspendvendor) | **POST** /v1/admin/vendors/{id}/suspend | Suspend an active vendor
 [*AdminVendorsApi*](doc/AdminVendorsApi.md) | [**adminUpdateVendorProfile**](doc/AdminVendorsApi.md#adminupdatevendorprofile) | **PATCH** /v1/admin/vendors/{id}/profile | Change a vendor’s store profile
+[*AdminWalletsApi*](doc/AdminWalletsApi.md) | [**adminAdjustCustomerWallet**](doc/AdminWalletsApi.md#adminadjustcustomerwallet) | **POST** /v1/admin/customers/{id}/wallet/adjustments | Credit or debit a customer’s wallet
+[*AdminWalletsApi*](doc/AdminWalletsApi.md) | [**adminGetCustomerWallet**](doc/AdminWalletsApi.md#admingetcustomerwallet) | **GET** /v1/admin/customers/{id}/wallet | A customer’s wallet balance
 [*CustomerAccountApi*](doc/CustomerAccountApi.md) | [**customerDeleteAccount**](doc/CustomerAccountApi.md#customerdeleteaccount) | **DELETE** /v1/customer/me | Delete my account
 [*CustomerAccountApi*](doc/CustomerAccountApi.md) | [**customerGetMe**](doc/CustomerAccountApi.md#customergetme) | **GET** /v1/customer/me | Who is signed in, with my profile
 [*CustomerAccountApi*](doc/CustomerAccountApi.md) | [**customerLogoutAll**](doc/CustomerAccountApi.md#customerlogoutall) | **POST** /v1/customer/auth/logout-all | Sign out of every customer session of this user
@@ -118,12 +135,29 @@ Class | Method | HTTP request | Description
 [*CustomerAddressesApi*](doc/CustomerAddressesApi.md) | [**customerListAddresses**](doc/CustomerAddressesApi.md#customerlistaddresses) | **GET** /v1/customer/addresses | My saved addresses
 [*CustomerAddressesApi*](doc/CustomerAddressesApi.md) | [**customerSetDefaultAddress**](doc/CustomerAddressesApi.md#customersetdefaultaddress) | **POST** /v1/customer/addresses/{id}/default | Make an address my default
 [*CustomerAddressesApi*](doc/CustomerAddressesApi.md) | [**customerUpdateAddress**](doc/CustomerAddressesApi.md#customerupdateaddress) | **PATCH** /v1/customer/addresses/{id} | Change a saved address
+[*CustomerCartApi*](doc/CustomerCartApi.md) | [**customerAddCartItem**](doc/CustomerCartApi.md#customeraddcartitem) | **POST** /v1/customer/cart/items | Add to my cart
+[*CustomerCartApi*](doc/CustomerCartApi.md) | [**customerApplyCoupon**](doc/CustomerCartApi.md#customerapplycoupon) | **POST** /v1/customer/cart/coupon | Apply a coupon
+[*CustomerCartApi*](doc/CustomerCartApi.md) | [**customerClearCart**](doc/CustomerCartApi.md#customerclearcart) | **DELETE** /v1/customer/cart | Empty my cart
+[*CustomerCartApi*](doc/CustomerCartApi.md) | [**customerGetCart**](doc/CustomerCartApi.md#customergetcart) | **GET** /v1/customer/cart | My cart
+[*CustomerCartApi*](doc/CustomerCartApi.md) | [**customerMergeCart**](doc/CustomerCartApi.md#customermergecart) | **POST** /v1/customer/cart/merge | Move my guest cart into my account
+[*CustomerCartApi*](doc/CustomerCartApi.md) | [**customerRemoveCartItem**](doc/CustomerCartApi.md#customerremovecartitem) | **DELETE** /v1/customer/cart/items/{id} | Remove a line
+[*CustomerCartApi*](doc/CustomerCartApi.md) | [**customerRemoveCoupon**](doc/CustomerCartApi.md#customerremovecoupon) | **DELETE** /v1/customer/cart/coupon | Remove the coupon
+[*CustomerCartApi*](doc/CustomerCartApi.md) | [**customerSetCartFulfilment**](doc/CustomerCartApi.md#customersetcartfulfilment) | **PATCH** /v1/customer/cart/fulfilment | Choose delivery or pickup, and the day
+[*CustomerCartApi*](doc/CustomerCartApi.md) | [**customerUpdateCartItem**](doc/CustomerCartApi.md#customerupdatecartitem) | **PATCH** /v1/customer/cart/items/{id} | Change a line’s quantity
+[*CustomerCheckoutApi*](doc/CustomerCheckoutApi.md) | [**customerPlaceOrder**](doc/CustomerCheckoutApi.md#customerplaceorder) | **POST** /v1/customer/orders | Place my order
 [*CustomerMediaApi*](doc/CustomerMediaApi.md) | [**customerConfirmMediaUpload**](doc/CustomerMediaApi.md#customerconfirmmediaupload) | **POST** /v1/customer/media/{id}/confirm | Confirm an uploaded file
 [*CustomerMediaApi*](doc/CustomerMediaApi.md) | [**customerRequestMediaUpload**](doc/CustomerMediaApi.md#customerrequestmediaupload) | **POST** /v1/customer/media/uploads | Get a ticket to upload one file
+[*CustomerOrdersApi*](doc/CustomerOrdersApi.md) | [**customerGetOrder**](doc/CustomerOrdersApi.md#customergetorder) | **GET** /v1/customer/orders/{id} | One of my orders
+[*CustomerOrdersApi*](doc/CustomerOrdersApi.md) | [**customerListOrders**](doc/CustomerOrdersApi.md#customerlistorders) | **GET** /v1/customer/orders | My orders
+[*CustomerPaymentsApi*](doc/CustomerPaymentsApi.md) | [**customerCreateOrderPayment**](doc/CustomerPaymentsApi.md#customercreateorderpayment) | **POST** /v1/customer/orders/{id}/payments | Pay an unpaid order again
+[*CustomerPaymentsApi*](doc/CustomerPaymentsApi.md) | [**customerListPaymentMethods**](doc/CustomerPaymentsApi.md#customerlistpaymentmethods) | **GET** /v1/customer/checkout/payment-methods | How I can pay
 [*CustomerProfileApi*](doc/CustomerProfileApi.md) | [**customerSetMarketingConsent**](doc/CustomerProfileApi.md#customersetmarketingconsent) | **PUT** /v1/customer/profile/marketing-consent | Grant or withdraw my marketing consent
 [*CustomerProfileApi*](doc/CustomerProfileApi.md) | [**customerUpdateProfile**](doc/CustomerProfileApi.md#customerupdateprofile) | **PATCH** /v1/customer/profile | Update my profile
+[*CustomerSchedulingApi*](doc/CustomerSchedulingApi.md) | [**customerListCheckoutDays**](doc/CustomerSchedulingApi.md#customerlistcheckoutdays) | **GET** /v1/customer/checkout/days | Days I can choose
 [*CustomerVendorApplicationsApi*](doc/CustomerVendorApplicationsApi.md) | [**customerGetLatestVendorApplication**](doc/CustomerVendorApplicationsApi.md#customergetlatestvendorapplication) | **GET** /v1/customer/vendor-applications/latest | My newest vendor application
 [*CustomerVendorApplicationsApi*](doc/CustomerVendorApplicationsApi.md) | [**customerSubmitVendorApplication**](doc/CustomerVendorApplicationsApi.md#customersubmitvendorapplication) | **POST** /v1/customer/vendor-applications | Apply to become a vendor
+[*CustomerWalletApi*](doc/CustomerWalletApi.md) | [**customerGetWallet**](doc/CustomerWalletApi.md#customergetwallet) | **GET** /v1/customer/wallet | My wallet balance
+[*CustomerWalletApi*](doc/CustomerWalletApi.md) | [**customerListWalletTransactions**](doc/CustomerWalletApi.md#customerlistwallettransactions) | **GET** /v1/customer/wallet/transactions | My wallet history
 [*HealthApi*](doc/HealthApi.md) | [**healthCheckLiveness**](doc/HealthApi.md#healthcheckliveness) | **GET** /v1/health | Liveness
 [*HealthApi*](doc/HealthApi.md) | [**healthCheckReadiness**](doc/HealthApi.md#healthcheckreadiness) | **GET** /v1/health/ready | Readiness
 [*KitchenAccountApi*](doc/KitchenAccountApi.md) | [**kitchenGetMe**](doc/KitchenAccountApi.md#kitchengetme) | **GET** /v1/kitchen/me | Who is signed in
@@ -136,6 +170,7 @@ Class | Method | HTTP request | Description
 [*PublicCatalogApi*](doc/PublicCatalogApi.md) | [**publicListCategories**](doc/PublicCatalogApi.md#publiclistcategories) | **GET** /v1/public/categories | The active categories, in the order admins set
 [*PublicCatalogApi*](doc/PublicCatalogApi.md) | [**publicListProducts**](doc/PublicCatalogApi.md#publiclistproducts) | **GET** /v1/public/products | Products, newest first, with filters
 [*PublicCoverageApi*](doc/PublicCoverageApi.md) | [**publicCheckCoverage**](doc/PublicCoverageApi.md#publiccheckcoverage) | **GET** /v1/public/coverage/check | Do we deliver to this point?
+[*PublicSettingsApi*](doc/PublicSettingsApi.md) | [**publicGetClientSettings**](doc/PublicSettingsApi.md#publicgetclientsettings) | **GET** /v1/public/settings/client | Settings for the apps
 [*PublicVendorsApi*](doc/PublicVendorsApi.md) | [**publicGetVendor**](doc/PublicVendorsApi.md#publicgetvendor) | **GET** /v1/public/vendors/{id} | One active vendor
 [*PublicVendorsApi*](doc/PublicVendorsApi.md) | [**publicListVendors**](doc/PublicVendorsApi.md#publiclistvendors) | **GET** /v1/public/vendors | The active vendors, newest first
 [*VendorAccountApi*](doc/VendorAccountApi.md) | [**vendorGetMe**](doc/VendorAccountApi.md#vendorgetme) | **GET** /v1/vendor/me | Who is signed in
@@ -144,6 +179,9 @@ Class | Method | HTTP request | Description
 [*VendorCatalogListsApi*](doc/VendorCatalogListsApi.md) | [**vendorListCuttingPackagingIncompatibilities**](doc/VendorCatalogListsApi.md#vendorlistcuttingpackagingincompatibilities) | **GET** /v1/vendor/cutting-packaging-incompatibilities | The cutting and packaging pairs a customer cannot choose
 [*VendorMediaApi*](doc/VendorMediaApi.md) | [**vendorConfirmMediaUpload**](doc/VendorMediaApi.md#vendorconfirmmediaupload) | **POST** /v1/vendor/media/{id}/confirm | Confirm an uploaded file
 [*VendorMediaApi*](doc/VendorMediaApi.md) | [**vendorRequestMediaUpload**](doc/VendorMediaApi.md#vendorrequestmediaupload) | **POST** /v1/vendor/media/uploads | Get a ticket to upload one file
+[*VendorOrdersApi*](doc/VendorOrdersApi.md) | [**vendorGetOrder**](doc/VendorOrdersApi.md#vendorgetorder) | **GET** /v1/vendor/orders/{id} | One order
+[*VendorOrdersApi*](doc/VendorOrdersApi.md) | [**vendorListOrders**](doc/VendorOrdersApi.md#vendorlistorders) | **GET** /v1/vendor/orders | Orders
+[*VendorOrdersApi*](doc/VendorOrdersApi.md) | [**vendorTransitionOrder**](doc/VendorOrdersApi.md#vendortransitionorder) | **POST** /v1/vendor/orders/{id}/transition | Move an order to another status
 [*VendorProductsApi*](doc/VendorProductsApi.md) | [**vendorChangeProductPrices**](doc/VendorProductsApi.md#vendorchangeproductprices) | **PATCH** /v1/vendor/products/{id}/prices | Change size, cutting and packaging prices
 [*VendorProductsApi*](doc/VendorProductsApi.md) | [**vendorCreateProduct**](doc/VendorProductsApi.md#vendorcreateproduct) | **POST** /v1/vendor/products | Create a draft product
 [*VendorProductsApi*](doc/VendorProductsApi.md) | [**vendorGetProduct**](doc/VendorProductsApi.md#vendorgetproduct) | **GET** /v1/vendor/products/{id} | One of my products
@@ -154,31 +192,55 @@ Class | Method | HTTP request | Description
 [*VendorProductsApi*](doc/VendorProductsApi.md) | [**vendorUpdateProductContent**](doc/VendorProductsApi.md#vendorupdateproductcontent) | **PUT** /v1/vendor/products/{id} | Replace a product’s content
 [*VendorProfileApi*](doc/VendorProfileApi.md) | [**vendorGetProfile**](doc/VendorProfileApi.md#vendorgetprofile) | **GET** /v1/vendor/profile | My store profile
 [*VendorProfileApi*](doc/VendorProfileApi.md) | [**vendorUpdateProfile**](doc/VendorProfileApi.md#vendorupdateprofile) | **PATCH** /v1/vendor/profile | Change my store profile
+[*WebhooksPaymentsApi*](doc/WebhooksPaymentsApi.md) | [**webhooksReceivePaymentEvent**](doc/WebhooksPaymentsApi.md#webhooksreceivepaymentevent) | **POST** /v1/webhooks/payments/{provider} | A payment provider’s event
 
 
 ## Documentation For Models
 
+ - [AddCartItemDto](doc/AddCartItemDto.md)
+ - [AdjustWalletDto](doc/AdjustWalletDto.md)
  - [AdminVendorPageResponseDto](doc/AdminVendorPageResponseDto.md)
  - [AdminVendorResponseDto](doc/AdminVendorResponseDto.md)
+ - [ApplyCouponDto](doc/ApplyCouponDto.md)
  - [AuthTokensResponseDto](doc/AuthTokensResponseDto.md)
+ - [CartCouponResponseDto](doc/CartCouponResponseDto.md)
+ - [CartFulfilmentResponseDto](doc/CartFulfilmentResponseDto.md)
+ - [CartIssueResponseDto](doc/CartIssueResponseDto.md)
+ - [CartItemInputDto](doc/CartItemInputDto.md)
+ - [CartLineResponseDto](doc/CartLineResponseDto.md)
+ - [CartResponseDto](doc/CartResponseDto.md)
+ - [CartVendorResponseDto](doc/CartVendorResponseDto.md)
  - [ChangeProductPricesDto](doc/ChangeProductPricesDto.md)
+ - [CheckoutDayListResponseDto](doc/CheckoutDayListResponseDto.md)
+ - [CheckoutDayResponseDto](doc/CheckoutDayResponseDto.md)
+ - [ClientSettingsResponseDto](doc/ClientSettingsResponseDto.md)
+ - [ClosedDayDto](doc/ClosedDayDto.md)
+ - [CodSettingsDto](doc/CodSettingsDto.md)
  - [CommissionDto](doc/CommissionDto.md)
+ - [CouponPageResponseDto](doc/CouponPageResponseDto.md)
+ - [CouponResponseDto](doc/CouponResponseDto.md)
+ - [CouponUsageResponseDto](doc/CouponUsageResponseDto.md)
  - [CoverageCheckResponseDto](doc/CoverageCheckResponseDto.md)
  - [CoverageZonePageResponseDto](doc/CoverageZonePageResponseDto.md)
  - [CoverageZoneResponseDto](doc/CoverageZoneResponseDto.md)
  - [CoveringZoneResponseDto](doc/CoveringZoneResponseDto.md)
+ - [CreateCouponDto](doc/CreateCouponDto.md)
  - [CreateCoverageZoneDto](doc/CreateCoverageZoneDto.md)
  - [CreateCustomerAddressDto](doc/CreateCustomerAddressDto.md)
  - [CreateCuttingPackagingIncompatibilityDto](doc/CreateCuttingPackagingIncompatibilityDto.md)
+ - [CreatePaymentDto](doc/CreatePaymentDto.md)
  - [CreateProductDto](doc/CreateProductDto.md)
  - [CreateReferenceItemDto](doc/CreateReferenceItemDto.md)
  - [CustomerAddressListResponseDto](doc/CustomerAddressListResponseDto.md)
  - [CustomerAddressResponseDto](doc/CustomerAddressResponseDto.md)
  - [CustomerMeResponseDto](doc/CustomerMeResponseDto.md)
  - [CustomerProfileResponseDto](doc/CustomerProfileResponseDto.md)
+ - [CutoffRuleDto](doc/CutoffRuleDto.md)
+ - [CutoffsDto](doc/CutoffsDto.md)
  - [CuttingPackagingIncompatibilityPageResponseDto](doc/CuttingPackagingIncompatibilityPageResponseDto.md)
  - [CuttingPackagingIncompatibilityResponseDto](doc/CuttingPackagingIncompatibilityResponseDto.md)
  - [CuttingPriceDto](doc/CuttingPriceDto.md)
+ - [DefaultCapacityDto](doc/DefaultCapacityDto.md)
  - [ErrorCode](doc/ErrorCode.md)
  - [ErrorResponseDto](doc/ErrorResponseDto.md)
  - [ErrorResponseDtoDetails](doc/ErrorResponseDtoDetails.md)
@@ -192,11 +254,37 @@ Class | Method | HTTP request | Description
  - [LocalizedTextResponseDto](doc/LocalizedTextResponseDto.md)
  - [MarketingConsentResponseDto](doc/MarketingConsentResponseDto.md)
  - [MediaFileResponseDto](doc/MediaFileResponseDto.md)
+ - [MergeCartDto](doc/MergeCartDto.md)
+ - [MergeCartResponseDto](doc/MergeCartResponseDto.md)
  - [NamedReferenceListResponseDto](doc/NamedReferenceListResponseDto.md)
  - [NamedReferenceResponseDto](doc/NamedReferenceResponseDto.md)
+ - [OperationsSettingsResponseDto](doc/OperationsSettingsResponseDto.md)
  - [OptionalLocalizedTextResponseDto](doc/OptionalLocalizedTextResponseDto.md)
+ - [OrderAddressResponseDto](doc/OrderAddressResponseDto.md)
+ - [OrderCustomerResponseDto](doc/OrderCustomerResponseDto.md)
+ - [OrderHistoryEntryResponseDto](doc/OrderHistoryEntryResponseDto.md)
+ - [OrderItemResponseDto](doc/OrderItemResponseDto.md)
+ - [OrderItemSizeResponseDto](doc/OrderItemSizeResponseDto.md)
+ - [OrderOptionResponseDto](doc/OrderOptionResponseDto.md)
+ - [OrderPageResponseDto](doc/OrderPageResponseDto.md)
+ - [OrderPaymentSummaryResponseDto](doc/OrderPaymentSummaryResponseDto.md)
+ - [OrderRefundResponseDto](doc/OrderRefundResponseDto.md)
+ - [OrderResponseDto](doc/OrderResponseDto.md)
+ - [OrderStatus](doc/OrderStatus.md)
+ - [OrderSummaryResponseDto](doc/OrderSummaryResponseDto.md)
+ - [OrderType](doc/OrderType.md)
+ - [OrderVendorResponseDto](doc/OrderVendorResponseDto.md)
+ - [OrderWithPaymentResponseDto](doc/OrderWithPaymentResponseDto.md)
+ - [OrderingPauseResponseDto](doc/OrderingPauseResponseDto.md)
  - [OtpRequestedResponseDto](doc/OtpRequestedResponseDto.md)
  - [PackagingPriceDto](doc/PackagingPriceDto.md)
+ - [PaymentMethodListResponseDto](doc/PaymentMethodListResponseDto.md)
+ - [PaymentMethodOptionResponseDto](doc/PaymentMethodOptionResponseDto.md)
+ - [PaymentNextActionResponseDto](doc/PaymentNextActionResponseDto.md)
+ - [PaymentResponseDto](doc/PaymentResponseDto.md)
+ - [PaymentWebhookAckResponseDto](doc/PaymentWebhookAckResponseDto.md)
+ - [PickupPointResponseDto](doc/PickupPointResponseDto.md)
+ - [PlaceOrderDto](doc/PlaceOrderDto.md)
  - [PrincipalResponseDto](doc/PrincipalResponseDto.md)
  - [ProductCardPageResponseDto](doc/ProductCardPageResponseDto.md)
  - [ProductCardResponseDto](doc/ProductCardResponseDto.md)
@@ -231,16 +319,25 @@ Class | Method | HTTP request | Description
  - [RequestVendorUploadDto](doc/RequestVendorUploadDto.md)
  - [ReviewQueueItemResponseDto](doc/ReviewQueueItemResponseDto.md)
  - [ReviewQueuePageResponseDto](doc/ReviewQueuePageResponseDto.md)
+ - [SetCartFulfilmentDto](doc/SetCartFulfilmentDto.md)
  - [SetMarketingConsentDto](doc/SetMarketingConsentDto.md)
+ - [SetOrderingPauseDto](doc/SetOrderingPauseDto.md)
  - [SetProductAvailabilityDto](doc/SetProductAvailabilityDto.md)
  - [SetProductFulfilmentDto](doc/SetProductFulfilmentDto.md)
+ - [SetVendorCapacityDto](doc/SetVendorCapacityDto.md)
+ - [SetVendorDayCapacityDto](doc/SetVendorDayCapacityDto.md)
  - [SignedInResponseDto](doc/SignedInResponseDto.md)
  - [SizeAvailabilityDto](doc/SizeAvailabilityDto.md)
  - [SizePriceDto](doc/SizePriceDto.md)
  - [SubmitVendorApplicationDto](doc/SubmitVendorApplicationDto.md)
+ - [TimeWindowDto](doc/TimeWindowDto.md)
+ - [TransitionOrderDto](doc/TransitionOrderDto.md)
+ - [UpdateCartItemDto](doc/UpdateCartItemDto.md)
+ - [UpdateCouponDto](doc/UpdateCouponDto.md)
  - [UpdateCoverageZoneDto](doc/UpdateCoverageZoneDto.md)
  - [UpdateCustomerAddressDto](doc/UpdateCustomerAddressDto.md)
  - [UpdateCustomerProfileDto](doc/UpdateCustomerProfileDto.md)
+ - [UpdateOperationsSettingsDto](doc/UpdateOperationsSettingsDto.md)
  - [UpdateReferenceItemDto](doc/UpdateReferenceItemDto.md)
  - [UpdateVendorProfileAsAdminDto](doc/UpdateVendorProfileAsAdminDto.md)
  - [UpdateVendorProfileDto](doc/UpdateVendorProfileDto.md)
@@ -251,12 +348,17 @@ Class | Method | HTTP request | Description
  - [VendorApplicationDocumentResponseDto](doc/VendorApplicationDocumentResponseDto.md)
  - [VendorApplicationPageResponseDto](doc/VendorApplicationPageResponseDto.md)
  - [VendorApplicationResponseDto](doc/VendorApplicationResponseDto.md)
+ - [VendorCapacityDayResponseDto](doc/VendorCapacityDayResponseDto.md)
+ - [VendorCapacityResponseDto](doc/VendorCapacityResponseDto.md)
  - [VendorCommissionChangePageResponseDto](doc/VendorCommissionChangePageResponseDto.md)
  - [VendorCommissionChangeResponseDto](doc/VendorCommissionChangeResponseDto.md)
  - [VendorIncompatibilityListResponseDto](doc/VendorIncompatibilityListResponseDto.md)
  - [VendorIncompatibilityResponseDto](doc/VendorIncompatibilityResponseDto.md)
  - [VendorProfileResponseDto](doc/VendorProfileResponseDto.md)
  - [VerifyOtpDto](doc/VerifyOtpDto.md)
+ - [WalletResponseDto](doc/WalletResponseDto.md)
+ - [WalletTransactionPageResponseDto](doc/WalletTransactionPageResponseDto.md)
+ - [WalletTransactionResponseDto](doc/WalletTransactionResponseDto.md)
 
 
 ## Documentation For Authorization

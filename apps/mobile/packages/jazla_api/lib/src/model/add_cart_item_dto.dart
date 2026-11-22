@@ -1,0 +1,206 @@
+//
+// AUTO-GENERATED FILE, DO NOT MODIFY!
+//
+
+// ignore_for_file: unused_element
+import 'package:json_annotation/json_annotation.dart';
+
+part 'add_cart_item_dto.g.dart';
+
+
+@JsonSerializable(
+  checked: true,
+  createToJson: true,
+  disallowUnrecognizedKeys: false,
+  explicitToJson: true,
+)
+class AddCartItemDto {
+  /// Returns a new [AddCartItemDto] instance.
+  AddCartItemDto({
+
+    required  this.productId,
+
+    required  this.sizeId,
+
+     this.cuttingStyleId,
+
+     this.packaging,
+
+     this.exclusionItemIds,
+
+     this.notes,
+
+    required  this.quantity,
+
+     this.replaceCart,
+  });
+
+      /// The product (UUID), from the public catalog.
+  @JsonKey(
+    
+    name: r'productId',
+    required: true,
+    includeIfNull: false,
+  )
+
+
+  final String productId;
+
+
+
+      /// The chosen size (`sizes[].id` of the public product).
+  @JsonKey(
+    
+    name: r'sizeId',
+    required: true,
+    includeIfNull: false,
+  )
+
+
+  final String sizeId;
+
+
+
+      /// The chosen cutting style (`cuttings[].cuttingStyleId`); null or left out: none (OPTION_REQUIRED when the product offers cuttings).
+  @JsonKey(
+    
+    name: r'cuttingStyleId',
+    required: false,
+    includeIfNull: false,
+  )
+
+
+  final String? cuttingStyleId;
+
+
+
+      /// The chosen packaging (`packagings[].packaging`); null or left out: none.
+  @JsonKey(
+    
+    name: r'packaging',
+    required: false,
+    includeIfNull: false,
+  unknownEnumValue: AddCartItemDtoPackagingEnum.unknownDefaultOpenApi,
+  )
+
+
+  final AddCartItemDtoPackagingEnum? packaging;
+
+
+
+      /// The \"without\" items chosen (`exclusions[].id`), each once, at most 20; left out: none.
+  @JsonKey(
+    
+    name: r'exclusionItemIds',
+    required: false,
+    includeIfNull: false,
+  )
+
+
+  final List<String>? exclusionItemIds;
+
+
+
+      /// A note on the line, up to 200 characters; lines differing only by note stay separate.
+  @JsonKey(
+    
+    name: r'notes',
+    required: false,
+    includeIfNull: false,
+  )
+
+
+  final String? notes;
+
+
+
+      /// How many, 1 to 99.
+          // minimum: 1
+          // maximum: 99
+  @JsonKey(
+    
+    name: r'quantity',
+    required: true,
+    includeIfNull: false,
+  )
+
+
+  final int quantity;
+
+
+
+      /// `true`: when the cart holds another store’s products, empty it first (after the customer agreed); left out or false: CART_VENDOR_MISMATCH instead.
+  @JsonKey(
+    
+    name: r'replaceCart',
+    required: false,
+    includeIfNull: false,
+  )
+
+
+  final bool? replaceCart;
+
+
+
+
+
+    @override
+    bool operator ==(Object other) => identical(this, other) || other is AddCartItemDto &&
+      other.productId == productId &&
+      other.sizeId == sizeId &&
+      other.cuttingStyleId == cuttingStyleId &&
+      other.packaging == packaging &&
+      other.exclusionItemIds == exclusionItemIds &&
+      other.notes == notes &&
+      other.quantity == quantity &&
+      other.replaceCart == replaceCart;
+
+    @override
+    int get hashCode =>
+        productId.hashCode +
+        sizeId.hashCode +
+        (cuttingStyleId == null ? 0 : cuttingStyleId.hashCode) +
+        (packaging == null ? 0 : packaging.hashCode) +
+        exclusionItemIds.hashCode +
+        notes.hashCode +
+        quantity.hashCode +
+        replaceCart.hashCode;
+
+  factory AddCartItemDto.fromJson(Map<String, dynamic> json) => _$AddCartItemDtoFromJson(json);
+
+  Map<String, dynamic> toJson() => _$AddCartItemDtoToJson(this);
+
+  @override
+  String toString() {
+    return toJson().toString();
+  }
+
+}
+
+/// The chosen packaging (`packagings[].packaging`); null or left out: none.
+enum AddCartItemDtoPackagingEnum {
+    /// The chosen packaging (`packagings[].packaging`); null or left out: none.
+@JsonValue(r'trays')
+trays(r'trays'),
+    /// The chosen packaging (`packagings[].packaging`); null or left out: none.
+@JsonValue(r'bags')
+bags(r'bags'),
+    /// The chosen packaging (`packagings[].packaging`); null or left out: none.
+@JsonValue(r'vacuum')
+vacuum(r'vacuum'),
+    /// The chosen packaging (`packagings[].packaging`); null or left out: none.
+@JsonValue(r'none')
+none(r'none'),
+    /// The chosen packaging (`packagings[].packaging`); null or left out: none.
+@JsonValue(r'unknown_default_open_api')
+unknownDefaultOpenApi(r'unknown_default_open_api');
+
+const AddCartItemDtoPackagingEnum(this.value);
+
+final String value;
+
+@override
+String toString() => value;
+}
+
+
