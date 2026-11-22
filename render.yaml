@@ -1,7 +1,6 @@
 # NOT APPLIED. A REFERENCE FOR THE VALUES ONLY: the two services were created by hand as
-# Web Services (Free) with these exact settings (docs/deploy/render-staging.md, step 3),
-# because a Blueprint would also create a Render database and Key Value, and those live on
-# Neon and Upstash. Change a value here and on Render together.
+# Web Services (Free) with these exact settings (docs/deploy/render-staging.md, step 3).
+# Change a value here and on Render together.
 #
 # JAZLA STAGING on Render's FREE plans (issues #245, #8).
 # How to use it, step by step (Arabic, for the owner): docs/deploy/render-staging.md.

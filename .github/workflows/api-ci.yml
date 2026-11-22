@@ -187,9 +187,14 @@ jobs:
           docker build -t jazla-api:ci .
           psql -h localhost -p 5434 -U jazla -d jazla -v ON_ERROR_STOP=1 -c 'CREATE DATABASE jazla_image'
           image_db=postgresql://jazla:jazla@localhost:5434/jazla_image
-          if docker run --rm -e DATABASE_URL=postgresql://none:none@127.0.0.1:1/none \
-            jazla-api:ci sh scripts/render-start.sh; then
-            echo "render-start.sh went on after a failed migration"; exit 1
+          # With SEED_ON_START=true, a script that went on would print the seed's failure line.
+          if out=$(docker run --rm -e SEED_ON_START=true \
+            -e DATABASE_URL=postgresql://none:none@127.0.0.1:1/none \
+            jazla-api:ci sh scripts/render-start.sh 2>&1); then
+            echo "$out"; echo "render-start.sh exited 0 after a failed migration"; exit 1
+          fi
+          if echo "$out" | grep -q 'Seed failed'; then
+            echo "$out"; echo "render-start.sh went on after a failed migration"; exit 1
           fi
           echo "render-start.sh stops when the migrations fail."
           env_file="$RUNNER_TEMP/image.env"
@@ -210,7 +215,8 @@ jobs:
             env | grep '^STORAGE_'
           } > "$env_file"
           docker run -d --name jazla-api-ci --network host --env-file "$env_file" jazla-api:ci sh scripts/render-start.sh
-          for i in $(seq 1 60); do
+          # Migrations on an empty database, the seed and the start: give them two minutes.
+          for i in $(seq 1 120); do
             curl -sf http://localhost:3100/v1/health/ready && break
             sleep 1
           done || true
