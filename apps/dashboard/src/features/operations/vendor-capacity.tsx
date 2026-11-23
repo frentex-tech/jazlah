@@ -16,7 +16,7 @@ import { StateCard } from '@/components/ui/state-card';
 import { toast } from '@/components/ui/toast';
 import { fieldErrors } from '@/features/catalog/client';
 import { dayOf, riyadhToday } from '@/lib/date';
-import { ApiError, panelFetch } from '@/lib/panel-fetch';
+import { ApiError, failedState, NOT_IMPLEMENTED, panelFetch, PERMISSION_DENIED } from '@/lib/panel-fetch';
 import { DayLimitSchema, errorKey, intOf, isDate, VendorDefaultSchema, zodErrors, type FieldErrors } from './schema';
 import type { DayCapacity, OperationsSettings, VendorCapacity } from './types';
 
@@ -32,9 +32,10 @@ const text = (n: number | null) => (n === null ? '' : String(n));
 export function VendorCapacityTab({ vendorId }: { vendorId: string }) {
   const t = useTranslations('vendorCapacity');
   const te = useTranslations('operations.errors');
+  const ts = useTranslations('state');
   const locale = useLocale();
-  const [cap, setCap] = useState<VendorCapacity | 'loading' | 'error' | 'denied'>('loading');
-  const [platform, setPlatform] = useState<OperationsSettings['capacity'] | null>(null);
+  const [cap, setCap] = useState<VendorCapacity | 'loading' | 'error' | 'denied' | 'soon'>('loading');
+  const [platform, setPlatform] = useState<OperationsSettings['defaultCapacity'] | null>(null);
   const [form, setForm] = useState({ ordersPerDay: '', carcassesPerDay: '' });
   const [errors, setErrors] = useState<FieldErrors>({});
   const [saving, setSaving] = useState(false);
@@ -46,19 +47,19 @@ export function VendorCapacityTab({ vendorId }: { vendorId: string }) {
     setForm({ ordersPerDay: text(c.ordersPerDay), carcassesPerDay: text(c.carcassesPerDay) });
   }, []);
   const failed = useCallback((e: unknown) => {
-    if (e instanceof ApiError && e.code === 'NOT_ALLOWED') setCap('denied');
-    else toast('error', t('failed'));
-  }, [t]);
+    if (e instanceof ApiError && e.code === PERMISSION_DENIED) setCap('denied');
+    else toast('error', e instanceof ApiError && e.code === NOT_IMPLEMENTED ? ts('soon.toast') : t('failed'));
+  }, [t, ts]);
 
   const load = useCallback(async () => {
     setCap('loading');
     try {
       show(await panelFetch<VendorCapacity>('admin', url));
     } catch (e) {
-      setCap(e instanceof ApiError && e.code === 'NOT_ALLOWED' ? 'denied' : 'error');
+      setCap(failedState(e));
     }
     // The platform default is only a hint here: without it the hint is generic.
-    panelFetch<OperationsSettings>('admin', '/api/admin/settings/operations').then((s) => setPlatform(s.capacity), () => setPlatform(null));
+    panelFetch<OperationsSettings>('admin', '/api/admin/settings/operations').then((s) => setPlatform(s.defaultCapacity), () => setPlatform(null));
   }, [url, show]);
   useEffect(() => void load(), [load]);
 
@@ -90,6 +91,7 @@ export function VendorCapacityTab({ vendorId }: { vendorId: string }) {
     );
   }
   if (cap === 'error') return <StateCard kind="error" className="h-[374px]" title={t('error.title')} body={t('error.body')} action={<Button onClick={() => void load()}>{t('error.action')}</Button>} />;
+  if (cap === 'soon') return <StateCard kind="soon" className="h-[404px]" title={ts('soon.title')} body={ts('soon.body')} />;
   if (cap === 'denied') return <StateCard kind="denied" className="h-[404px]" title={t('denied.title')} body={t('denied.body')} action={<BackButton label={t('denied.action')} panel="admin" />} />;
 
   const err = (k: string) => (errors[k] ? te(errorKey(k, errors[k]!)) : undefined);
@@ -137,7 +139,7 @@ export function VendorCapacityTab({ vendorId }: { vendorId: string }) {
       <FormSection hug title={t('days.title')} body={t('days.body')}>
         <DataTable
           columns={columns}
-          data={cap.days}
+          data={cap.days.filter((x) => x.ordersLimit !== null || x.carcassesLimit !== null)} // the API answers every day of the horizon
           status="ready"
           label={t('days.title')}
           hasPrev={false}

@@ -16,13 +16,13 @@ import { StateCard } from '@/components/ui/state-card';
 import type { Vendor } from '@/features/admin-vendors/types';
 import { Link } from '@/i18n/navigation';
 import { sar } from '@/lib/money';
-import { ApiError, panelFetch } from '@/lib/panel-fetch';
+import { failedState, panelFetch } from '@/lib/panel-fetch';
 import type { OrdersPanel } from './backend';
 import { pollFeed, streamFeed } from './feed';
 import { BADGE, dateOf, nameOf } from './format';
 import { METHODS, STATUSES, type OrderStatus, type OrderSummary, type Page, type PaymentMethod } from './types';
 
-type Data = { rows: OrderSummary[]; next: string | null } | 'loading' | 'error' | 'denied';
+type Data = { rows: OrderSummary[]; next: string | null } | 'loading' | 'error' | 'denied' | 'soon';
 
 /**
  * ORD-DSH-1: the orders board of both panels (135:47501 and its states). Vendors get their own orders (the API scopes
@@ -42,6 +42,8 @@ export function OrdersList({ panel, live }: { panel: OrdersPanel; live: boolean 
   const [vendors, setVendors] = useState<Vendor[]>([]);
   const [paging, setPaging] = useState<{ key: string; cursors: (string | undefined)[] }>({ key: '', cursors: [undefined] });
   const [data, setData] = useState<Data>('loading');
+  // The feed runs once a list has loaded, and stops while the board shows «coming soon» or «not allowed».
+  const [feeding, setFeeding] = useState(false);
   const [fresh, setFresh] = useState<Set<string>>(new Set());
   const [announce, setAnnounce] = useState('');
 
@@ -49,7 +51,7 @@ export function OrdersList({ panel, live }: { panel: OrdersPanel; live: boolean 
     const id = setTimeout(() => setQ(search.trim().slice(0, 100)), 300);
     return () => clearTimeout(id);
   }, [search]);
-  // shortcut: the store filter offers the first page of active stores, API gap (no store names lookup for orders) (#88).
+  // shortcut: the store filter offers the first page of active stores, API gap (no store names lookup for orders) (#83).
   useEffect(() => {
     if (panel !== 'admin') return;
     panelFetch<Page<Vendor>>('admin', '/api/admin/vendors?status=active').then((p) => setVendors(p.items), () => {});
@@ -65,12 +67,15 @@ export function OrdersList({ panel, live }: { panel: OrdersPanel; live: boolean 
     async (quiet = false) => {
       const req = ++latest.current;
       if (!quiet) setData('loading');
-      const query = new URLSearchParams({ ...(status && { status }), ...(method && { method }), ...(vendorId && { vendorId }), ...(date && { date }), ...(q && { q }), ...(cursor && { cursor }) });
+      const query = new URLSearchParams({ ...(status && { status }), ...(method && { paymentMethod: method }), ...(vendorId && { vendorId }), ...(date && { fulfilmentDate: date }), ...(q && { q }), ...(cursor && { cursor }) });
       try {
         const p = await panelFetch<Page<OrderSummary>>(panel, `/api/${panel}/orders?${query}`);
         if (req === latest.current) setData({ rows: p.items, next: p.nextCursor });
+        setFeeding(true);
       } catch (e) {
-        if (!quiet && req === latest.current) setData(e instanceof ApiError && e.code === 'NOT_ALLOWED' ? 'denied' : 'error');
+        const state = failedState(e);
+        if (state !== 'error') setFeeding(false);
+        if (!quiet && req === latest.current) setData(state);
       }
     },
     [panel, status, method, vendorId, date, q, cursor],
@@ -83,6 +88,7 @@ export function OrdersList({ panel, live }: { panel: OrdersPanel; live: boolean 
   const reload = useRef(load);
   reload.current = load;
   useEffect(() => {
+    if (!feeding) return;
     const feed = live ? streamFeed(panel) : pollFeed(panel);
     return feed.subscribe(
       (o) => {
@@ -96,7 +102,7 @@ export function OrdersList({ panel, live }: { panel: OrdersPanel; live: boolean 
       // A status changed elsewhere: the page reloads quietly, without the new-order tint.
       () => onFirstPage.current && void reload.current(true),
     );
-  }, [panel, live, t]);
+  }, [panel, live, t, feeding]);
 
   const columns = useMemo<ColumnDef<OrderSummary, unknown>[]>(
     () => [
@@ -110,14 +116,14 @@ export function OrdersList({ panel, live }: { panel: OrdersPanel; live: boolean 
           </Link>
         ),
       },
-      { id: 'customer', header: t('cols.customer'), meta: { width: 200, skeleton: 110 }, cell: ({ row }) => row.original.customer.name },
+      { id: 'customer', header: t('cols.customer'), meta: { width: 200, skeleton: 110 }, cell: ({ row }) => row.original.customer.name ?? '—' },
       ...(panel === 'admin'
         ? [{ id: 'vendor', header: t('cols.vendor'), meta: { width: 190, skeleton: 100 }, cell: ({ row }) => nameOf(row.original.vendor.name, locale) } as ColumnDef<OrderSummary, unknown>]
         : []),
       { id: 'status', header: t('cols.status'), meta: { width: 130, skeleton: 80 }, cell: ({ row }) => <Badge type={BADGE[row.original.status]}>{t(`statuses.${row.original.status}`)}</Badge> },
       { id: 'payment', header: t('cols.payment'), meta: { width: 130, skeleton: 80 }, cell: ({ row }) => t(`methods.${row.original.paymentMethod}`) },
       { id: 'amount', header: t('cols.amount'), meta: { width: 130, skeleton: 80 }, cell: ({ row }) => sar(row.original.totalHalalas, locale) },
-      { id: 'date', header: t('cols.date'), meta: { width: 150, skeleton: 100 }, cell: ({ row }) => dateOf(row.original.deliveryDate, locale) },
+      { id: 'date', header: t('cols.date'), meta: { width: 150, skeleton: 100 }, cell: ({ row }) => dateOf(row.original.fulfilmentDate, locale) },
     ],
     [t, locale, panel],
   );
@@ -145,7 +151,7 @@ export function OrdersList({ panel, live }: { panel: OrdersPanel; live: boolean 
         breadcrumb={t('breadcrumb')}
         title={t('title')}
         actions={
-          // shortcut: no orders export in the API, API gap: shown disabled (#88).
+          // shortcut: no orders export in the API, API gap: shown disabled (#114).
           <Button variant="secondary" disabled>{t('export')}</Button>
         }
       />
@@ -155,6 +161,8 @@ export function OrdersList({ panel, live }: { panel: OrdersPanel; live: boolean 
         <PanelLoading />
       ) : data === 'denied' ? (
         <StateCard kind="denied" title={ts('denied.title')} body={ts('denied.body')} action={<BackButton label={ts('denied.action')} panel={panel} />} />
+      ) : data === 'soon' ? (
+        <StateCard kind="soon" title={ts('soon.title')} body={ts('soon.body')} />
       ) : data === 'error' ? (
         <StateCard kind="error" title={ts('error.title')} body={ts('error.body')} action={<Button onClick={() => void load()}>{ts('error.action')}</Button>} />
       ) : empty && !filtered ? (

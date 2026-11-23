@@ -14,7 +14,7 @@ import { StateCard } from '@/components/ui/state-card';
 import { Link } from '@/i18n/navigation';
 import { dayOf } from '@/lib/date';
 import { sar } from '@/lib/money';
-import { ApiError, panelFetch } from '@/lib/panel-fetch';
+import { failedState, panelFetch } from '@/lib/panel-fetch';
 import { COUPON_STATUSES, type Coupon, type CouponStatus, type Page } from './types';
 
 export const STATUS_BADGE: Record<CouponStatus, BadgeType> = { active: 'success', scheduled: 'info', expired: 'warning', inactive: 'neutral' };
@@ -27,12 +27,13 @@ export const discountOf = (c: Pick<Coupon, 'type' | 'value'>, locale: string) =>
  */
 export function CouponsList() {
   const t = useTranslations('coupons');
+  const ts = useTranslations('state');
   const locale = useLocale();
   const [search, setSearch] = useState('');
   const [q, setQ] = useState('');
   const [status, setStatus] = useState<CouponStatus | ''>('');
   const [paging, setPaging] = useState<{ key: string; cursors: (string | undefined)[] }>({ key: '', cursors: [undefined] });
-  const [data, setData] = useState<{ rows: Coupon[]; next: string | null } | 'loading' | 'error' | 'denied'>('loading');
+  const [data, setData] = useState<{ rows: Coupon[]; next: string | null } | 'loading' | 'error' | 'denied' | 'soon'>('loading');
 
   useEffect(() => {
     const id = setTimeout(() => setQ(search.trim().slice(0, 32)), 300);
@@ -52,7 +53,7 @@ export function CouponsList() {
       const p = await panelFetch<Page<Coupon>>('admin', `/api/admin/coupons?${query}`);
       if (req === latest.current) setData({ rows: p.items, next: p.nextCursor });
     } catch (e) {
-      if (req === latest.current) setData(e instanceof ApiError && e.code === 'NOT_ALLOWED' ? 'denied' : 'error');
+      if (req === latest.current) setData(failedState(e));
     }
   }, [status, q, cursor]);
   useEffect(() => void load(), [load]);
@@ -110,9 +111,9 @@ export function CouponsList() {
       <PageHeader
         breadcrumb={t('breadcrumb')}
         title={t('title')}
-        actions={data !== 'denied' && <Link href="/admin/marketing/coupons/new" className={buttonVariants()}>{t('new')}</Link>}
+        actions={data !== 'denied' && data !== 'soon' && <Link href="/admin/marketing/coupons/new" className={buttonVariants()}>{t('new')}</Link>}
       />
-      <FiltersBar search={search} onSearch={setSearch} searchLabel={t('search')} clearLabel={t('clear')} applied={data === 'denied' ? [] : applied}>
+      <FiltersBar search={search} onSearch={setSearch} searchLabel={t('search')} clearLabel={t('clear')} applied={data === 'denied' || data === 'soon' ? [] : applied}>
         <Select aria-label={t('status')} value={status} onChange={(e) => setStatus(e.target.value as CouponStatus | '')} className="w-[220px]">
           <option value="">{t('status')}</option>
           {COUPON_STATUSES.map((s) => (
@@ -129,6 +130,8 @@ export function CouponsList() {
           body={t('denied.body')}
           action={<Link href="/admin" className={buttonVariants({ variant: 'secondary' })}>{t('denied.action')}</Link>}
         />
+      ) : data === 'soon' ? (
+        <StateCard kind="soon" className={card} title={ts('soon.title')} body={ts('soon.body')} />
       ) : data === 'error' ? (
         <StateCard kind="error" className={card} title={t('error.title')} body={t('error.body')} action={<Button onClick={() => void load()}>{t('error.action')}</Button>} />
       ) : data !== 'loading' && data.rows.length === 0 && cursors.length === 1 && !data.next ? (

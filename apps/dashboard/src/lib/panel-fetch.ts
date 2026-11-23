@@ -5,11 +5,14 @@ import type { Session } from './session';
 export const PERMISSION_DENIED: Schemas['ErrorCode'] = 'PERMISSION_DENIED';
 export const VENDOR_CR_EXISTS: Schemas['ErrorCode'] = 'VENDOR_CR_EXISTS';
 export const PRODUCT_NOT_SUBMITTABLE: Schemas['ErrorCode'] = 'PRODUCT_NOT_SUBMITTABLE';
+/** A route whose task has not landed yet (501): the page shows «قريبًا», never data of its own. */
+export const NOT_IMPLEMENTED: Schemas['ErrorCode'] = 'NOT_IMPLEMENTED';
+export const ORDER_TRANSITION_NOT_ALLOWED: Schemas['ErrorCode'] = 'ORDER_TRANSITION_NOT_ALLOWED';
+export const COUPON_CODE_TAKEN: Schemas['ErrorCode'] = 'COUPON_CODE_TAKEN';
 
-// A refused permission is 403 PERMISSION_DENIED: the session stays (not in panel-session's SIGNED_OUT) and the Sprint 2
-// pages (stores, catalog, review) show their not-allowed state. shortcut: no API route returns it until ADM-API-1 adds
-// the permission checks (#111), so only the mocks' `-limited` token shows it; the Sprint 3 pages (operations, orders,
-// coupons) still read their mocks' `NOT_ALLOWED` until they are wired (#88).
+// A refused permission is 403 PERMISSION_DENIED: the session stays (not in panel-session's SIGNED_OUT) and the pages
+// show their not-allowed state. shortcut: no API route returns it until ADM-API-1 adds the permission checks (#111), so
+// only the mocks' `-limited` token shows it.
 export class ApiError extends Error {
   constructor(
     readonly code: string,
@@ -17,6 +20,12 @@ export class ApiError extends Error {
   ) {
     super(code);
   }
+}
+
+/** What a failed page load shows: not allowed (403 PERMISSION_DENIED), coming soon (501 NOT_IMPLEMENTED), else the error state. */
+export function failedState(e: unknown): 'denied' | 'soon' | 'error' {
+  const code = e instanceof ApiError ? e.code : '';
+  return code === PERMISSION_DENIED ? 'denied' : code === NOT_IMPLEMENTED ? 'soon' : 'error';
 }
 
 /**

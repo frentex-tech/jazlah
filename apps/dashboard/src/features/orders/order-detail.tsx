@@ -18,18 +18,18 @@ import { toast } from '@/components/ui/toast';
 import { Link } from '@/i18n/navigation';
 import { timeOf } from '@/lib/date';
 import { sar } from '@/lib/money';
-import { ApiError, panelFetch } from '@/lib/panel-fetch';
+import { ApiError, failedState, NOT_IMPLEMENTED, ORDER_TRANSITION_NOT_ALLOWED, panelFetch, PERMISSION_DENIED } from '@/lib/panel-fetch';
 import type { OrdersPanel } from './backend';
 import { code39 } from './barcode';
 import { dateOf, hm, nameOf } from './format';
-import { awaitsCodReview, canReschedule, canTransition, nextStatuses } from './state-machine';
+import { awaitsCodReview, canReschedule } from './state-machine';
 import type { DayOption, Order, OrderStatus } from './types';
 
 const PinMap = dynamic(() => import('@/features/vendor-onboarding/pin-map').then((m) => m.PinMap), { ssr: false });
 
 const card = 'flex w-full flex-col gap-s16 rounded-md border border-line bg-paper p-s20';
 type Dialog = 'cancel' | 'codReject' | 'reschedule' | null;
-type State = Order | 'loading' | 'error' | 'denied' | 'notFound';
+type State = Order | 'loading' | 'error' | 'denied' | 'notFound' | 'soon';
 
 /** What a cancel gives back (PAY-API-1 / WAL-API-1), as the mock does: the wallet part always to the wallet, the gateway part only once captured. */
 export const refundOf = (o: Order) => ({ paid: o.payment.status === 'captured' ? o.totalHalalas - o.payment.walletHalalas : 0, wallet: o.payment.walletHalalas });
@@ -44,6 +44,7 @@ export function OrderDetail({ panel, id, adminActions = false }: { panel: Orders
   const t = useTranslations('orderDetail');
   const to = useTranslations('orders');
   const ts = useTranslations('state');
+  const tc = useTranslations('catalog.form');
   const locale = useLocale();
   const [order, setOrder] = useState<State>('loading');
   const [view, setView] = useState<'detail' | 'label'>('detail');
@@ -61,8 +62,7 @@ export function OrderDetail({ panel, id, adminActions = false }: { panel: Orders
       try {
         setOrder(await panelFetch<Order>(panel, `/api/${panel}/orders/${id}`));
       } catch (e) {
-        const code = e instanceof ApiError ? e.code : 'NETWORK';
-        setOrder(code === 'NOT_ALLOWED' ? 'denied' : code === 'NOT_FOUND' ? 'notFound' : 'error');
+        setOrder(e instanceof ApiError && e.code === 'NOT_FOUND' ? 'notFound' : failedState(e));
       }
     },
     [panel, id],
@@ -71,9 +71,8 @@ export function OrderDetail({ panel, id, adminActions = false }: { panel: Orders
 
   const o = typeof order === 'object' ? order : null;
   const admin = panel === 'admin';
-  // shortcut: cancel & refund and reschedule are Sprint 4 routes; without them (the Sprint 3 API) both show disabled, as
-  // drawn. Enable them when CAN-API-1 / DLV-API-1 land (#88).
-  const cancellable = !!o && admin && adminActions && canTransition(o, 'cancelled', 'admin');
+  // Cancel & refund and reschedule are Sprint 4 routes, not in the contract: on the API both show disabled, as drawn.
+  const cancellable = !!o && admin && adminActions && o.allowedTransitions.includes('cancelled');
   const openLabel = () => (view === 'label' ? window.print() : setView('label'));
   const header = (
     <PageHeader
@@ -109,6 +108,7 @@ export function OrderDetail({ panel, id, adminActions = false }: { panel: Orders
         {header}
         {order === 'error' && <StateCard kind="error" title={ts('error.title')} body={ts('error.body')} action={<Button onClick={() => void fetchOrder()}>{ts('error.action')}</Button>} />}
         {order === 'denied' && <StateCard kind="denied" title={ts('denied.title')} body={ts('denied.body')} action={<BackButton label={ts('denied.action')} panel={panel} />} />}
+        {order === 'soon' && <StateCard kind="soon" title={ts('soon.title')} body={ts('soon.body')} action={<BackButton label={ts('denied.action')} panel={panel} />} />}
         {order === 'notFound' && (
           <StateCard
             kind="orders"
@@ -132,7 +132,7 @@ export function OrderDetail({ panel, id, adminActions = false }: { panel: Orders
       panelFetch<DayOption[]>('admin', `/api/admin/orders/${id}/reschedule`).then(
         (list) => {
           setDays(list);
-          setDay(list.find((x) => x.available && x.date !== o!.deliveryDate)?.date ?? '');
+          setDay(list.find((x) => x.isAvailable && x.date !== o!.fulfilmentDate)?.date ?? '');
         },
         () => setDays('error'),
       );
@@ -155,9 +155,10 @@ export function OrderDetail({ panel, id, adminActions = false }: { panel: Orders
         return openDialog('reschedule');
       }
       setDialog(null);
-      if (code === 'NOT_ALLOWED') return setOrder('denied');
-      toast('error', t(code === 'ORDER_TRANSITION_NOT_ALLOWED' ? 'toast.conflict' : 'toast.failed'));
-      if (code === 'ORDER_TRANSITION_NOT_ALLOWED' || code === 'NOT_FOUND') void fetchOrder(true);
+      if (code === PERMISSION_DENIED) return setOrder('denied');
+      toast('error', code === NOT_IMPLEMENTED ? ts('soon.toast') : t(code === ORDER_TRANSITION_NOT_ALLOWED ? 'toast.conflict' : 'toast.failed'));
+      // The moves changed (another user, the customer, an expiry): reload for the new allowedTransitions.
+      if (code === ORDER_TRANSITION_NOT_ALLOWED || code === 'NOT_FOUND') void fetchOrder(true);
     } finally {
       setBusy(null);
     }
@@ -187,14 +188,19 @@ export function OrderDetail({ panel, id, adminActions = false }: { panel: Orders
         ? t('cancel.wallet', { amount: sar(paid + wallet, locale) })
         : t('cancel.nothing');
   const chosen = typeof days === 'object' ? days.find((x) => x.date === day) : undefined;
-  const transitions = nextStatuses(o, panel).filter((s) => s !== 'cancelled' && !(s === 'confirmed' && awaitsCodReview(o)));
-  const place = o.fulfilment === 'pickup' ? o.pickupSnapshot : o.addressSnapshot;
-  const placeText = o.addressSnapshot
-    ? [o.addressSnapshot.district, o.addressSnapshot.line, o.addressSnapshot.city].filter(Boolean).join('، ')
-    : o.pickupSnapshot
-      ? `${nameOf(o.pickupSnapshot.name, locale)} · ${o.pickupSnapshot.address}`
+  // The moves come from the order (`allowedTransitions` for this caller); cancel has its own dialogs. An admin's COD
+  // confirm sits in the review card; any other caller offered `confirmed` gets it as a plain move.
+  const codReview = admin && awaitsCodReview(o);
+  const canConfirm = codReview && o.allowedTransitions.includes('confirmed');
+  const canReject = codReview && o.allowedTransitions.includes('cancelled');
+  const transitions = o.allowedTransitions.filter((s) => s !== 'cancelled' && !(s === 'confirmed' && codReview));
+  const place = o.fulfilment === 'pickup' ? o.pickupPoint : o.address;
+  const placeText = o.address
+    ? [o.address.district, o.address.street, o.address.building, o.address.city].filter(Boolean).join('، ')
+    : o.pickupPoint
+      ? [nameOf(o.pickupPoint.name, locale), o.pickupPoint.address && nameOf(o.pickupPoint.address, locale)].filter(Boolean).join(' · ')
       : '';
-  const slot = o.window ? t('payment.slotValue', { date: dateOf(o.deliveryDate, locale), start: hm(o.window.start, locale), end: hm(o.window.end, locale) }) : dateOf(o.deliveryDate, locale);
+  const slot = o.window ? t('payment.slotValue', { date: dateOf(o.fulfilmentDate, locale), start: hm(o.window.start, locale), end: hm(o.window.end, locale) }) : dateOf(o.fulfilmentDate, locale);
   const actionsRow = (
     <div className="flex flex-wrap gap-s12">
       <Button size="S" onClick={openLabel}>{t('printLabelA6')}</Button>
@@ -226,10 +232,10 @@ export function OrderDetail({ panel, id, adminActions = false }: { panel: Orders
                 </div>
                 {o.items.map((i) => {
                   const opts = [
-                    i.size && nameOf(i.size.name, locale),
-                    i.cut && t('items.cut', { value: nameOf(i.cut, locale) }),
-                    i.packaging && t('items.packaging', { value: nameOf(i.packaging, locale) }),
-                    i.exclusions.length > 0 && t('items.without', { value: i.exclusions.map((x) => nameOf(x, locale)).join('، ') }),
+                    i.size.tag ? nameOf(i.size.tag, locale) : i.size.approxWeightGrams > 0 && t('items.grams', { value: i.size.approxWeightGrams }),
+                    i.cutting && t('items.cut', { value: nameOf(i.cutting.name, locale) }),
+                    i.packaging && i.packaging !== 'none' && t('items.packaging', { value: tc(`packaging.${i.packaging}`) }),
+                    i.exclusions.length > 0 && t('items.without', { value: i.exclusions.map((x) => nameOf(x.name, locale)).join('، ') }),
                   ].filter(Boolean);
                   return (
                     <div key={i.id} role="row" className="flex min-h-16 items-center border-t border-line px-s24 text-body-m text-ink">
@@ -263,13 +269,13 @@ export function OrderDetail({ panel, id, adminActions = false }: { panel: Orders
                 <Row label={t('payment.method')} value={methodName} />
                 {o.payment.walletHalalas > 0 && o.paymentMethod !== 'wallet' && <Row label={t('payment.fromWallet')} value={sar(o.payment.walletHalalas, locale)} />}
                 {o.refunds.map((r) => (
-                  <Row key={r.id} label={t(`payment.refund.${r.to}`)} value={`${sar(r.amountHalalas, locale)} · ${t(`payment.refundStatus.${r.status}`)}`} />
+                  <Row key={r.id} label={t(`payment.refund.${r.destination}`)} value={`${sar(r.amountHalalas, locale)} · ${t(`payment.refundStatus.${r.status}`)}`} />
                 ))}
                 <Row
                   label={t('payment.customer')}
                   value={
                     <>
-                      {o.customer.name} ·{' '}
+                      {o.customer.name ?? '—'} ·{' '}
                       <a href={`tel:${o.customer.phone.replace(/\s/g, '')}`} className="underline-offset-2 hover:underline">
                         <bdi dir="ltr">{o.customer.phone}</bdi>
                       </a>
@@ -289,12 +295,12 @@ export function OrderDetail({ panel, id, adminActions = false }: { panel: Orders
             <section className={card}>
               <h2 className="text-h3 text-ink">{t('status.title')}</h2>
               <StatusTimeline label={t('status.title')} steps={stepsOf(o, (k) => to(`statuses.${k}`), (k) => t(`status.steps.${k}`), locale)} />
-              {admin && awaitsCodReview(o) && (
+              {(canConfirm || canReject) && (
                 <>
                   <Notice tone="sand" role="status" text={t('cod.notice')} />
                   <div className="flex gap-s12">
-                    <Button size="S" className="flex-1" loading={busy === 'confirmed'} disabled={!!busy} onClick={() => void move('confirmed')}>{t('cod.confirm')}</Button>
-                    <Button size="S" variant="secondary" className="flex-1" disabled={!!busy} onClick={() => openDialog('codReject')}>{t('cod.reject')}</Button>
+                    {canConfirm && <Button size="S" className="flex-1" loading={busy === 'confirmed'} disabled={!!busy} onClick={() => void move('confirmed')}>{t('cod.confirm')}</Button>}
+                    {canReject && <Button size="S" variant="secondary" className="flex-1" disabled={!!busy} onClick={() => openDialog('codReject')}>{t('cod.reject')}</Button>}
                   </div>
                 </>
               )}
@@ -318,7 +324,7 @@ export function OrderDetail({ panel, id, adminActions = false }: { panel: Orders
                   </div>
                 )}
                 <p className="text-body-m text-ink-2">{placeText}</p>
-                {o.addressSnapshot?.notes && <p className="text-body-m text-ink-2">{t('location.notes', { value: o.addressSnapshot.notes })}</p>}
+                {o.address?.driverInstructions && <p className="text-body-m text-ink-2">{t('location.notes', { value: o.address.driverInstructions })}</p>}
               </section>
             )}
           </aside>
@@ -331,7 +337,7 @@ export function OrderDetail({ panel, id, adminActions = false }: { panel: Orders
         title={dialog === 'reschedule' ? t('rescheduleDialog.title') : dialog === 'codReject' ? t('codReject.title', { number: o.number }) : t('cancel.title', { number: o.number })}
         body={
           dialog === 'reschedule'
-            ? chosen
+            ? chosen?.window
               ? t('rescheduleDialog.body', { date: dateOf(chosen.date, locale), start: hm(chosen.window.start, locale), end: hm(chosen.window.end, locale) })
               : t('rescheduleDialog.pick')
             : dialog === 'codReject'
@@ -356,9 +362,9 @@ export function OrderDetail({ panel, id, adminActions = false }: { panel: Orders
                 <Select id={fid} value={day} onChange={(e) => setDay(e.target.value)} className="w-full">
                   <option value="" disabled>{t('rescheduleDialog.pick')}</option>
                   {days.map((x) => (
-                    <option key={x.date} value={x.date} disabled={!x.available || x.date === o.deliveryDate}>
+                    <option key={x.date} value={x.date} disabled={!x.isAvailable || x.date === o.fulfilmentDate}>
                       {dateOf(x.date, locale)}
-                      {x.date === o.deliveryDate ? ` (${t('rescheduleDialog.current')})` : x.reason ? ` (${t(`rescheduleDialog.reasons.${x.reason}`)})` : ''}
+                      {x.date === o.fulfilmentDate ? ` (${t('rescheduleDialog.current')})` : x.reason ? ` (${t(`rescheduleDialog.reasons.${x.reason}`)})` : ''}
                     </option>
                   ))}
                 </Select>
@@ -423,7 +429,7 @@ function stepsOf(o: Order, statusLabel: (s: OrderStatus) => string, stepLabel: (
 function OrderLabel({ order: o, slot, onBack }: { order: Order; slot: string; onBack: () => void }) {
   const t = useTranslations('orderDetail.label');
   const locale = useLocale();
-  const grams = o.items.reduce((a, i) => a + (i.size?.weightGrams ?? 0) * i.quantity, 0);
+  const grams = o.items.reduce((a, i) => a + i.size.approxWeightGrams * i.quantity, 0);
   const bars = code39(o.number);
   return (
     <div className="flex min-h-[520px] w-full flex-col items-center justify-center gap-s16 bg-bg">
@@ -431,7 +437,7 @@ function OrderLabel({ order: o, slot, onBack }: { order: Order; slot: string; on
         <h2 className="text-h3 text-ink print:hidden">{t('title')}</h2>
         <dl className="flex flex-col gap-s16">
           <Row label={t('number')} value={<bdi dir="ltr">{o.number}</bdi>} />
-          <Row label={t('customer')} value={o.customer.name} />
+          <Row label={t('customer')} value={o.customer.name ?? '—'} />
           <Row label={t('store')} value={nameOf(o.vendor.name, locale)} />
           <Row label={t(o.fulfilment === 'pickup' ? 'pickupSlot' : 'slot')} value={slot} />
           {grams > 0 && <Row label={t('weight')} value={t('kg', { value: Number((grams / 1000).toFixed(2)) })} />}

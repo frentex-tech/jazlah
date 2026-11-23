@@ -1,8 +1,9 @@
-import { LockSimple, MagnifyingGlass, Receipt, ShoppingBag, WarningCircle, WifiSlash } from '@phosphor-icons/react/dist/ssr';
+import { Hourglass, LockSimple, MagnifyingGlass, Receipt, ShoppingBag, WarningCircle, WifiSlash } from '@phosphor-icons/react/dist/ssr';
 import type { Icon } from '@phosphor-icons/react';
 import { cn } from '@/lib/utils';
 
-// Figma DS «State panel» (16:877): empty / error / offline / denied states.
+// Figma DS «State panel» (16:877): empty / error / offline / denied states, and «coming soon» (an API route that answers
+// NOT_IMPLEMENTED until its task lands; no frame: the panel with the info tint).
 const kinds = {
   cart: { icon: ShoppingBag, circle: 'bg-sand', color: 'text-ink-2' },
   orders: { icon: Receipt, circle: 'bg-sand', color: 'text-ink-2' },
@@ -10,6 +11,7 @@ const kinds = {
   error: { icon: WarningCircle, circle: 'bg-danger-bg', color: 'text-danger' },
   offline: { icon: WifiSlash, circle: 'bg-warning-bg', color: 'text-warning' },
   denied: { icon: LockSimple, circle: 'bg-sand', color: 'text-ink-2' },
+  soon: { icon: Hourglass, circle: 'bg-info-bg', color: 'text-info' },
 } satisfies Record<string, { icon: Icon; circle: string; color: string }>;
 
 export type StatePanelKind = keyof typeof kinds;

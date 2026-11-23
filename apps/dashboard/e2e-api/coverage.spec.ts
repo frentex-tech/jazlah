@@ -1,4 +1,5 @@
 import { expect, test, type Page } from '@playwright/test';
+import { ADMIN, signIn } from './helpers';
 
 // LOC-DSH-1 acceptance against the real API. The seed has «وسط وشمال الرياض» (46.55–46.85 E, 24.60–24.85 N) around
 // the map's centre; the zone drawn here is west of it, so only the new zone can cover its middle.
@@ -31,11 +32,9 @@ async function testPointMatchesApi(page: Page, x: number, y: number) {
 
 test.beforeEach(async ({ page }) => {
   // The seed's admin review account (docs/frontend/auth.md).
+  // signIn asks again when the API's resend wait refuses a code right after the previous spec's.
   await page.goto('/login');
-  await page.getByLabel('رقم الجوال').fill('0500000004');
-  await page.getByRole('button', { name: 'إرسال الرمز' }).click();
-  await page.getByLabel('رمز التحقق').fill('444444');
-  await page.getByRole('button', { name: 'تأكيد' }).click();
+  await signIn(page, ADMIN);
   await expect(page).toHaveURL(/\/admin$/);
 });
 

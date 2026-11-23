@@ -1,5 +1,5 @@
 import { expect, test, type Locator, type Page } from '@playwright/test';
-import { signInAs } from './helpers';
+import { follow, signInAs } from './helpers';
 
 // Mock (src/features/catalog/vendor-backend.ts on the admin catalog store): the vendor session is «مجازر الفلاح»
 // (ريب آي بقري طازج published, تي بون بقري rejected, ستيك مخلّل بالثوم draft). The queue starts with فخذ غنم نعيمي
@@ -58,8 +58,7 @@ test('review cycle: submit, rejected with a reason, notes, resubmit, approved', 
   const before = await pendingCount(page);
   await page.goto('/vendor/products');
   await expect(mine(page).getByText('ستيك مخلّل بالثوم')).toBeVisible(); // hydrated before the click
-  await page.getByRole('link', { name: 'إضافة منتج' }).click();
-  await expect(page).toHaveURL(/\/vendor\/products\/new$/, { timeout: 15_000 });
+  await follow(page, page.getByRole('link', { name: 'إضافة منتج' }), /\/vendor\/products\/new$/);
   await page.getByLabel('اسم المنتج', { exact: true }).fill(`فخذ عجل طازج ${RUN}`);
   await page.getByLabel('اسم المنتج بالإنجليزية').fill(`Fresh veal leg ${RUN}`);
   await page.getByLabel('التصنيف', { exact: true }).selectOption({ label: 'الأبقار' });

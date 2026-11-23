@@ -17,20 +17,18 @@ import { Switch } from '@/components/ui/switch';
 import { toast } from '@/components/ui/toast';
 import { fieldErrors } from '@/features/catalog/client';
 import { riyadhToday } from '@/lib/date';
-import { ApiError, panelFetch } from '@/lib/panel-fetch';
+import { ApiError, failedState, NOT_IMPLEMENTED, panelFetch, PERMISSION_DENIED } from '@/lib/panel-fetch';
 import { cn } from '@/lib/utils';
 import { ClosedDays } from './closed-days';
 import { PauseDialog, pauseErrors, usePause } from './pause';
 import { errorKey, fromDraft, PageSchema, PausedSchema, toDraft, zodErrors, type Draft, type FieldErrors } from './schema';
 import { SettingsTabs } from './settings-tabs';
-import { ORDER_TYPES, type OperationsSettings, type Paused } from './types';
+import { CUTOFF_KEY, ORDER_TYPES, type OperationsSettings, type Paused } from './types';
 
 const URL = '/api/admin/settings/operations';
 const grid = 'grid grid-cols-[repeat(2,342px)] gap-x-s24 gap-y-s20';
-/** Options of the weekly hours selects: every half hour. */
-const HALF_HOURS = Array.from({ length: 48 }, (_, i) => `${String(Math.floor(i / 2)).padStart(2, '0')}:${i % 2 ? '30' : '00'}`);
 
-/** «8:00 ص» / «8:00 AM», as the frame's hour selects. */
+/** «8:00 ص» / «8:00 AM», as the frame writes times. */
 export function clock(hhmm: string, locale: string) {
   const [h, m] = hhmm.split(':').map(Number) as [number, number];
   const day = h < 12;
@@ -53,20 +51,22 @@ function set<T>(o: T, path: string, value: unknown): T {
 export function OperationsSettingsPage() {
   const t = useTranslations('operations');
   const te = useTranslations('operations.errors');
+  const ts = useTranslations('state');
   const locale = useLocale();
   const pause = usePause();
-  const [state, setState] = useState<OperationsSettings | 'loading' | 'error' | 'denied'>('loading');
+  const [state, setState] = useState<OperationsSettings | 'loading' | 'error' | 'denied' | 'soon'>('loading');
   const [draft, setDraft] = useState<Draft | null>(null);
   const [errors, setErrors] = useState<FieldErrors>({});
   const [saving, setSaving] = useState(false);
   const [confirming, setConfirming] = useState(false);
-  // The card's messages: what pausing from the card sends. They follow the shared pause state (header or page), and
-  // the page save never sends them: only the pause flow changes `paused`.
+  // The card's messages: what pausing from the card sends. They follow the shared pause state (header or page; the API
+  // answers them null while not paused, so the last ones stay), and the page save never sends them.
   const [msg, setMsg] = useState({ messageAr: '', messageEn: '' });
   const { sync } = pause;
   useEffect(() => {
     if (!pause.paused) return;
-    setMsg({ messageAr: pause.paused.messageAr, messageEn: pause.paused.messageEn });
+    const { messageAr, messageEn } = pause.paused;
+    setMsg((m) => ({ messageAr: messageAr ?? m.messageAr, messageEn: messageEn ?? m.messageEn }));
     setErrors((e) => Object.fromEntries(Object.entries(e).filter(([k]) => !k.startsWith('paused.'))));
   }, [pause.paused]);
 
@@ -79,7 +79,7 @@ export function OperationsSettingsPage() {
       setErrors({});
       sync(s.paused);
     } catch (e) {
-      setState(e instanceof ApiError && e.code === 'NOT_ALLOWED' ? 'denied' : 'error');
+      setState(failedState(e));
     }
   }, [sync]);
   useEffect(() => void load(), [load]);
@@ -96,6 +96,7 @@ export function OperationsSettingsPage() {
         {header}
         {state === 'error' && <StateCard kind="error" className="h-[374px]" title={t('error.title')} body={t('error.body')} action={<Button onClick={() => void load()}>{t('error.action')}</Button>} />}
         {state === 'denied' && <StateCard kind="denied" className="h-[404px]" title={t('denied.title')} body={t('denied.body')} action={<BackButton label={t('denied.action')} panel="admin" />} />}
+        {state === 'soon' && <StateCard kind="soon" className="h-[404px]" title={ts('soon.title')} body={ts('soon.body')} action={<BackButton label={ts('denied.action')} panel="admin" />} />}
         {state === 'loading' && (
           <div role="status" aria-label={t('loading')} className="flex w-full flex-col gap-s24">
             {[200, 400, 280, 440, 320].map((h) => <Skeleton key={h} style={{ height: h }} />)}
@@ -129,8 +130,8 @@ export function OperationsSettingsPage() {
     if (fields) {
       setErrors(fields);
       toast('error', t('invalid'));
-    } else if (e instanceof ApiError && e.code === 'NOT_ALLOWED') setState('denied');
-    else toast('error', t('failed'));
+    } else if (e instanceof ApiError && e.code === PERMISSION_DENIED) setState('denied');
+    else toast('error', e instanceof ApiError && e.code === NOT_IMPLEMENTED ? ts('soon.toast') : t('failed'));
   }
 
   async function save() {
@@ -141,7 +142,7 @@ export function OperationsSettingsPage() {
     }
     setSaving(true);
     try {
-      const s = await panelFetch<OperationsSettings>('admin', URL, { method: 'PUT', body: JSON.stringify(parsed.data) });
+      const s = await panelFetch<OperationsSettings>('admin', URL, { method: 'PATCH', body: JSON.stringify(parsed.data) });
       setState(s);
       setDraft(toDraft(s));
       setErrors({});
@@ -192,46 +193,12 @@ export function OperationsSettingsPage() {
           }}
         />
 
-        {d.workingHours && (
-        <FormSection hug title={t('hours.title')} body={t('hours.body')} invalid={invalid('workingHours')}>
-          {d.workingHours.map((h, i) => {
-            const day = t(`hours.days.${h.day}`);
-            const hourSelect = (k: 'start' | 'end') => (
-              <Select
-                aria-label={t(`hours.${k}Label`, { day })}
-                className="w-[200px]"
-                disabled={!h.open}
-                value={h.open ? h[k] : ''}
-                onChange={(e) => edit(`workingHours.${i}.${k}`, e.target.value)}
-              >
-                {!h.open && <option value="">—</option>}
-                {HALF_HOURS.map((v) => <option key={v} value={v}>{clock(v, locale)}</option>)}
-              </Select>
-            );
-            return (
-              <div key={h.day} className="flex flex-col gap-s8">
-                <div className="flex items-center gap-s16">
-                  <div className="w-[210px] whitespace-nowrap">
-                    <Switch label={t(h.open ? 'hours.open' : 'hours.closed', { day })} checked={h.open} onChange={(v) => edit(`workingHours.${i}.open`, v)} />
-                  </div>
-                  <span className="w-s32 text-body-m text-ink-2">{t('hours.from')}</span>
-                  {hourSelect('start')}
-                  <span className="w-s32 text-body-m text-ink-2">{t('hours.to')}</span>
-                  {hourSelect('end')}
-                </div>
-                {err(`workingHours.${i}.end`) && <p role="alert" className="text-body-m text-danger">{err(`workingHours.${i}.end`)}</p>}
-              </div>
-            );
-          })}
-        </FormSection>
-        )}
-
-        <FormSection hug title={t('capacity.title')} body={t('capacity.body')} invalid={invalid('capacity', 'cutoffs')}>
+        <FormSection hug title={t('capacity.title')} body={t('capacity.body')} invalid={invalid('defaultCapacity', 'cutoffs')}>
           <div className={grid}>
-            {numInput('capacity.ordersPerDay', t('capacity.orders'), t('capacity.hint'))}
-            {numInput('capacity.carcassesPerDay', t('capacity.carcasses'), t('capacity.hint'))}
-            {ORDER_TYPES.map((k) => <div key={k}>{timeInput(`cutoffs.${k}.time`, t('capacity.cutoff', { type: t(`types.${k}`) }))}</div>)}
-            {ORDER_TYPES.map((k) => <div key={k}>{numInput(`cutoffs.${k}.leadDays`, t('capacity.lead', { type: t(`types.${k}`) }), t('capacity.leadHint'))}</div>)}
+            {numInput('defaultCapacity.ordersPerDay', t('capacity.orders'), t('capacity.hint'))}
+            {numInput('defaultCapacity.carcassesPerDay', t('capacity.carcasses'), t('capacity.hint'))}
+            {ORDER_TYPES.map((k) => <div key={k}>{timeInput(`cutoffs.${CUTOFF_KEY[k]}.time`, t('capacity.cutoff', { type: t(`types.${k}`) }))}</div>)}
+            {ORDER_TYPES.map((k) => <div key={k}>{numInput(`cutoffs.${CUTOFF_KEY[k]}.leadDays`, t('capacity.lead', { type: t(`types.${k}`) }), t('capacity.leadHint'))}</div>)}
           </div>
           <p className="flex items-center gap-s8 text-body-m text-ink-2">
             <Info size={20} aria-hidden className="shrink-0 text-info" />
@@ -295,7 +262,7 @@ export function OperationsSettingsPage() {
                   key={k}
                   label={t(`types.${k}`)}
                   checked={d.cod.allowedOrderTypes.includes(k)}
-                  onChange={(v) => edit('cod.allowedOrderTypes', v ? ORDER_TYPES.filter((o) => o === k || d.cod.allowedOrderTypes.includes(o)) : d.cod.allowedOrderTypes.filter((o) => o !== k))}
+                  onChange={(v) => edit('cod.allowedOrderTypes', v ? [...d.cod.allowedOrderTypes, k] : d.cod.allowedOrderTypes.filter((o) => o !== k))}
                 />
               ))}
             </div>
@@ -324,7 +291,7 @@ export function OperationsSettingsPage() {
             setConfirming(false);
             toast('success', t(p.isPaused ? 'pause.pausedToast' : 'pause.resumedToast'));
           } catch (e) {
-            const fields = pauseErrors(e, (k) => t(`pause.${k}`));
+            const fields = pauseErrors(e, (k) => t(`pause.${k}`), ts('soon.toast'));
             setConfirming(false);
             if (fields) setErrors(fields);
           }
@@ -337,7 +304,7 @@ export function OperationsSettingsPage() {
 /** The pause card of 118:11181 (open, success badge, play icon) and 118:11833 (paused: warning card, pause icon). */
 function PauseCard({ paused, draft, error, invalid, onMessage, onToggle }: {
   paused: Paused;
-  draft: Pick<Paused, 'messageAr' | 'messageEn'>;
+  draft: { messageAr: string; messageEn: string };
   error: (path: string) => string | undefined;
   invalid: boolean;
   onMessage: (k: 'messageAr' | 'messageEn', v: string) => void;

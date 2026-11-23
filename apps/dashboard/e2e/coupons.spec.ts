@@ -1,5 +1,5 @@
 import { expect, test, type Page } from '@playwright/test';
-import { signInAs } from './helpers';
+import { follow, signInAs } from './helpers';
 
 // Mock (src/features/coupons/backend.mock.ts): six coupons around today, one per status, FALAH15 scoped to a store and a
 // category. One server and one mock store for the whole run: codes made here are unique to the run.
@@ -39,8 +39,7 @@ test('create with validation errors, then a duplicate code, then success', async
   await signInAs(context, ['admin']);
   await page.goto('/admin/marketing/coupons');
   await expect(table(page).getByRole('link', { name: 'RAMADAN25', exact: true })).toBeVisible(); // hydrated before the click
-  await page.getByRole('link', { name: 'كوبون جديد' }).click();
-  await expect(page).toHaveURL(/\/admin\/marketing\/coupons\/new$/, { timeout: 15_000 });
+  await follow(page, page.getByRole('link', { name: 'كوبون جديد' }), /\/admin\/marketing\/coupons\/new$/);
   await expect(page.getByRole('heading', { level: 1, name: 'كوبون جديد' })).toBeVisible();
 
   await page.getByLabel('رمز الكوبون').fill('a b');
@@ -89,8 +88,8 @@ test('create with validation errors, then a duplicate code, then success', async
 test('edit, usage stats and deactivate', async ({ page, context }) => {
   await signInAs(context, ['admin']);
   await page.goto('/admin/marketing/coupons');
-  await table(page).getByRole('link', { name: 'FALAH15', exact: true }).click();
-  await expect(page.getByRole('heading', { level: 1, name: 'FALAH15' })).toBeVisible({ timeout: 15_000 });
+  await follow(page, table(page).getByRole('link', { name: 'FALAH15', exact: true }), /\/admin\/marketing\/coupons\/c0000000-/);
+  await expect(page.getByRole('heading', { level: 1, name: 'FALAH15' })).toBeVisible();
   const usage = page.locator('section').filter({ has: page.getByRole('heading', { name: 'الاستخدام' }) });
   await expect(usage).toContainText('100 / 100');
   await expect(usage).toContainText('61');
@@ -115,7 +114,7 @@ test('edit, usage stats and deactivate', async ({ page, context }) => {
   await expect(table(page).getByRole('row').filter({ hasText: 'FALAH15' })).toContainText('موقوف');
 
   // Back on for the other runs.
-  await table(page).getByRole('link', { name: 'FALAH15', exact: true }).click();
+  await follow(page, table(page).getByRole('link', { name: 'FALAH15', exact: true }), /\/admin\/marketing\/coupons\/c0000000-/);
   await page.getByRole('switch', { name: 'الكوبون مفعّل' }).click();
   await page.getByRole('button', { name: 'حفظ التغييرات' }).click();
   await toast(page, 'تم حفظ الكوبون FALAH15');
@@ -146,7 +145,7 @@ test('English mirrors the list and the form', async ({ page, context }) => {
   await expect(page.locator('html')).toHaveAttribute('dir', 'ltr');
   await expect(page.getByRole('heading', { level: 1, name: 'Coupons' })).toBeVisible();
   await expect(page.getByRole('table', { name: 'Coupons' }).getByRole('row').filter({ hasText: 'WELCOME50' })).toContainText('Fixed amount · SAR 50.00');
-  await page.getByRole('link', { name: 'New coupon' }).click();
-  await expect(page.getByLabel('Discount (%)')).toBeVisible({ timeout: 15_000 });
+  await follow(page, page.getByRole('link', { name: 'New coupon' }), /\/en\/admin\/marketing\/coupons\/new$/);
+  await expect(page.getByLabel('Discount (%)')).toBeVisible();
   await expect(page.getByText('No store chosen: applies to every store')).toBeVisible();
 });

@@ -19,7 +19,7 @@ import { fieldErrors, loadAll } from '@/features/catalog/client';
 import { bySortOrder, type RefItem } from '@/features/catalog/types';
 import { Link, useRouter } from '@/i18n/navigation';
 import { sar } from '@/lib/money';
-import { ApiError, panelFetch } from '@/lib/panel-fetch';
+import { ApiError, COUPON_CODE_TAKEN, failedState, NOT_IMPLEMENTED, panelFetch, PERMISSION_DENIED } from '@/lib/panel-fetch';
 import { STATUS_BADGE } from './coupons-list';
 import { CouponSchema, emptyDraft, errorKey, fromDraft, localOf, toDraft, zodErrors, type Draft, type FieldErrors } from './schema';
 import { COUPON_TYPES, type Coupon, type CouponUsage } from './types';
@@ -37,9 +37,10 @@ type Loaded = { coupon: Coupon | null; usage: CouponUsage | null };
 export function CouponPage({ id }: { id?: string }) {
   const t = useTranslations('coupons');
   const te = useTranslations('coupons.errors');
+  const ts = useTranslations('state');
   const locale = useLocale();
   const router = useRouter();
-  const [state, setState] = useState<Loaded | 'loading' | 'error' | 'denied' | 'missing'>('loading');
+  const [state, setState] = useState<Loaded | 'loading' | 'error' | 'denied' | 'missing' | 'soon'>('loading');
   const [options, setOptions] = useState<Options>({ vendors: [], categories: [] });
   const [draft, setDraft] = useState<Draft>(() => emptyDraft());
   const [errors, setErrors] = useState<FieldErrors>({});
@@ -54,8 +55,7 @@ export function CouponPage({ id }: { id?: string }) {
       setDraft(coupon ? toDraft(coupon) : emptyDraft());
       setErrors({});
     } catch (e) {
-      const code = e instanceof ApiError ? e.code : '';
-      setState(code === 'NOT_ALLOWED' ? 'denied' : code === 'NOT_FOUND' ? 'missing' : 'error');
+      setState(e instanceof ApiError && e.code === 'NOT_FOUND' ? 'missing' : failedState(e));
     }
   }, [id]);
   useEffect(() => void load(), [load]);
@@ -76,6 +76,7 @@ export function CouponPage({ id }: { id?: string }) {
         {header()}
         {state === 'error' && <StateCard kind="error" className={card} title={t('formError.title')} body={t('formError.body')} action={<Button onClick={() => void load()}>{t('error.action')}</Button>} />}
         {state === 'denied' && <StateCard kind="denied" className={card} title={t('denied.title')} body={t('denied.body')} action={back} />}
+        {state === 'soon' && <StateCard kind="soon" className={card} title={ts('soon.title')} body={ts('soon.body')} action={back} />}
         {state === 'missing' && <StateCard kind="search" className={card} title={t('missing.title')} body={t('missing.body')} action={back} />}
         {state === 'loading' && (
           <div role="status" aria-label={t('loading')} className="flex w-full flex-col gap-s24">
@@ -102,14 +103,14 @@ export function CouponPage({ id }: { id?: string }) {
 
   function failed(e: unknown) {
     const fields = fieldErrors(e);
-    if (e instanceof ApiError && e.code === 'COUPON_CODE_TAKEN') {
+    if (e instanceof ApiError && e.code === COUPON_CODE_TAKEN) {
       setErrors({ code: 'taken' });
       toast('error', t('invalid'));
     } else if (fields) {
       setErrors(fields);
       toast('error', t('invalid'));
-    } else if (e instanceof ApiError && e.code === 'NOT_ALLOWED') setState('denied');
-    else toast('error', t('failed'));
+    } else if (e instanceof ApiError && e.code === PERMISSION_DENIED) setState('denied');
+    else toast('error', e instanceof ApiError && e.code === NOT_IMPLEMENTED ? ts('soon.toast') : t('failed'));
   }
 
   async function save() {
@@ -186,7 +187,7 @@ export function CouponPage({ id }: { id?: string }) {
             <dl className="grid grid-cols-3 gap-s16">
               {[
                 ['uses', coupon.usageLimit === null ? t('usageNoLimit', { used: usage.uses }) : t('usageOf', { used: usage.uses, limit: coupon.usageLimit })],
-                ['users', String(usage.distinctUsers)],
+                ['users', String(usage.distinctCustomers)],
                 ['discount', sar(usage.totalDiscountHalalas, locale)],
               ].map(([k, v]) => (
                 <div key={k} className="flex flex-col gap-s4 rounded-md border border-line bg-paper px-s16 py-s12">
@@ -232,9 +233,9 @@ export function CouponPage({ id }: { id?: string }) {
               {listError(k) && <p role="alert" className="text-body-m text-danger">{err(listError(k)!)}</p>}
             </fieldset>
           ))}
-          {/* Decision 25: the first-order discount is off for now; shown disabled and never sent. */}
+          {/* Decision 25: the first-order discount is off for now (not in the contract); shown disabled, never sent. */}
           <div className="flex items-center gap-s12">
-            <Switch label={t('form.firstOrderOnly')} checked={coupon?.firstOrderOnly ?? false} disabled describedBy="first-order-soon" onChange={() => {}} />
+            <Switch label={t('form.firstOrderOnly')} checked={false} disabled describedBy="first-order-soon" onChange={() => {}} />
             <span id="first-order-soon">
               <Badge type="neutral" size="M">{t('form.firstOrderOnlySoon')}</Badge>
             </span>

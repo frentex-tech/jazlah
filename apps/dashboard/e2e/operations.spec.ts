@@ -21,9 +21,6 @@ test('every section edits, saves and reloads', async ({ page, context }) => {
   await open(page);
   await expect(page.getByRole('link', { name: 'التشغيل' })).toHaveAttribute('aria-current', 'page');
 
-  // Working hours: Friday opens with its own hours.
-  await page.getByRole('switch', { name: 'الجمعة · مغلق' }).click();
-  await page.getByLabel('الجمعة: من').selectOption('14:00');
   // Capacity, cutoffs and lead days.
   await page.getByLabel('الحد الأقصى للطلبات يوميًا').fill('150');
   await page.getByLabel('آخر وقت للطلب: ذبيحة').fill('13:00');
@@ -44,8 +41,6 @@ test('every section edits, saves and reloads', async ({ page, context }) => {
   await toast(page, 'تم حفظ الإعدادات التشغيلية');
 
   await page.reload();
-  await expect(page.getByRole('switch', { name: 'الجمعة · مفتوح' })).toBeChecked();
-  await expect(page.getByLabel('الجمعة: من')).toHaveValue('14:00');
   await expect(page.getByLabel('الحد الأقصى للطلبات يوميًا')).toHaveValue('150');
   await expect(page.getByLabel('آخر وقت للطلب: ذبيحة')).toHaveValue('13:00');
   await expect(page.getByLabel('أيام التجهيز المسبق: مناسبة')).toHaveValue('4');
@@ -82,7 +77,7 @@ test('validation on the page and the API errors on their fields', async ({ page,
 
   // The API refuses a field the page let through: its VALIDATION_FAILED lands on that field.
   await page.route('**/api/admin/settings/operations', (route) =>
-    route.request().method() === 'PUT'
+    route.request().method() === 'PATCH'
       ? route.fulfill({ status: 400, json: { code: 'VALIDATION_FAILED', details: [{ field: 'deliveryFeeHalalas', constraints: ['max'] }, { field: 'cutoffs.carcass.leadDays', constraints: ['max'] }] } })
       : route.fallback(),
   );
@@ -134,7 +129,9 @@ test('pause from the header with a message: banner on every admin page, then res
   const header = page.getByRole('banner');
   await headerSwitch(page).click();
   const dialog = page.getByRole('dialog', { name: 'إيقاف استقبال الطلبات؟' });
-  await dialog.getByLabel('الرسالة التي تظهر للعملاء').fill('');
+  // The API answers no message while ordering is open: the dialog starts empty and wants both.
+  await expect(dialog.getByLabel('الرسالة التي تظهر للعملاء')).toHaveValue('');
+  await dialog.getByLabel('الرسالة بالإنجليزية').fill('Closed for stock count until evening');
   await dialog.getByRole('button', { name: 'إيقاف الآن' }).click();
   await expect(dialog.getByText('اكتب الرسالة (200 حرف على الأكثر)')).toBeVisible();
   await dialog.getByLabel('الرسالة التي تظهر للعملاء').fill('متوقفون للجرد حتى المساء');
@@ -177,6 +174,7 @@ test('a page save keeps the pause: paused from the header, another section saved
 
   // An empty card message is refused on the card itself, before any dialog.
   await card.getByLabel('الرسالة التي تظهر للعملاء').fill('');
+  await card.getByLabel('الرسالة بالإنجليزية').fill('Paused');
   await card.getByRole('switch', { name: 'إيقاف استقبال الطلبات' }).click();
   await expect(card.getByText('اكتب الرسالة (200 حرف على الأكثر)')).toBeVisible();
   await expect(page.getByRole('dialog')).toHaveCount(0);
@@ -246,5 +244,12 @@ test('not allowed and load error states', async ({ page, context }) => {
   await context.addCookies([{ url: `http://localhost:${process.env.PORT ?? 3001}`, httpOnly: true, name: 'jz_at_admin', value: 'mock-at-admin-limited' }]);
   await page.goto('/admin/settings/operations');
   await expect(page.getByText('ليست لديك صلاحية تعديل الإعدادات التشغيلية')).toBeVisible();
-  await expect(page.getByRole('banner').getByRole('switch')).toHaveCount(0);
+  // The pause state is public (client settings): the switch stays; changing it is refused.
+  await headerSwitch(page).click();
+  const dialog = page.getByRole('dialog', { name: 'إيقاف استقبال الطلبات؟' });
+  await dialog.getByLabel('الرسالة التي تظهر للعملاء').fill('جرد');
+  await dialog.getByLabel('الرسالة بالإنجليزية').fill('Stock count');
+  await dialog.getByRole('button', { name: 'إيقاف الآن' }).click();
+  await toast(page, 'ليست لديك صلاحية إيقاف الطلبات');
+  await expect(headerSwitch(page)).not.toBeChecked();
 });
