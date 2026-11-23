@@ -151,8 +151,9 @@ jobs:
       STORAGE_PRIVATE_BUCKET: jazla-private
       STORAGE_PUBLIC_BASE_URL: http://localhost:9002/jazla-public
       SMS_PROVIDERS: log
-      # The seed's admin and vendor (docs/frontend/auth.md), and a fresh applicant for the vendor application spec.
-      AUTH_REVIEW_ACCOUNTS: '+966500000004:444444,+966500000002:222222,+966500000041:414141'
+      # The seed's admin and vendor (docs/frontend/auth.md), a fresh applicant for the vendor application spec, and a
+      # customer-only phone for the no-access and IBAN/CR specs.
+      AUTH_REVIEW_ACCOUNTS: '+966500000004:444444,+966500000002:222222,+966500000041:414141,+966500000042:424242'
       # Each test signs in again: no 60 s resend wait and no 3-per-10-minutes phone limit for this run.
       AUTH_OTP_RESEND_WAIT_SECONDS: '1'
       AUTH_OTP_PHONE_LIMIT: '100'

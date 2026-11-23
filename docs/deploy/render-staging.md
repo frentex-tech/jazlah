@@ -16,6 +16,16 @@
 
 خدمتين Render بتعملهم بإيدك (الخطوة 3). ملف `render.yaml` مرجع للقيم بس.
 
+**روابط الدخول** (`DASH` = `https://jazla-dashboard-staging.onrender.com`):
+
+| مين | الرابط |
+|---|---|
+| الأدمن | `DASH/login` |
+| التاجر | `DASH/login?panel=vendor` |
+| المطبخ | `DASH/login?panel=kitchen` |
+
+من غير `?panel=` الصفحة بتفتح على لوحة الأدمن.
+
 كل دمج في فرع `develop` بينزل لوحده على Render، بعد ما الـCI يبقى أخضر.
 
 **حدود الخطة المجانية (مهم تعرفها):**
@@ -305,6 +315,16 @@ openssl rand -base64 32
 - **Neon:** افتح `jazlah-staging` ← **Monitoring** أو صفحة **Usage**. لو الـCU-hours قرّبت من 80، قول للفريق.
 - **Upstash بيأرشف القاعدة المجانية** لو فضلت 30 يوم من غير استخدام. لو حصل، ادخل Upstash واعمل **Restore**، وأعد تشغيل `jazla-api-staging` (**Manual Deploy**).
 - **في Upstash سيب Eviction مقفول** (ده الافتراضي). لو اتفتح، Redis ممكن يمسح بيانات لوحده.
+
+## الرجوع لنسخة قديمة (Rollback)
+
+لو دمج جديد بوّظ حاجة على التجربة:
+
+1. افتح الخدمة ← **Events** (أو **Deploys**) ← اختار آخر نسخة كانت شغالة ← **Rollback** ← **Rollback to this deploy**. بياخد دقيقة تقريبًا.
+2. **مهم: Render بيقفل الـAuto-Deploy لوحده بعد أي Rollback.** من غير الخطوة دي، ولا دمج بعد كده هينزل. افتح **Settings** ← **Auto-Deploy** ← اختار **After CI Checks Pass** ← **Save Changes**.
+3. لما الإصلاح يندمج، هينزل لوحده. أو من **Manual Deploy** ← **Deploy latest commit**.
+
+الـRollback بيرجّع الكود بس، مش قاعدة البيانات. لو النسخة الجديدة كان فيها migration، القاعدة بتفضل على الجديد، فقول للفريق قبل ما ترجع.
 
 ---
 

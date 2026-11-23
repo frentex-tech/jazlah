@@ -17,7 +17,9 @@ export async function POST(req: NextRequest) {
     ended.map((p) => req.cookies.get(refreshCookie(p))?.value).filter((t): t is string => !!t).map((t) => backend.logout(t, ip)),
   );
   const prefix = form?.get('locale') === 'en' ? '/en' : '';
-  const res = NextResponse.redirect(new URL(`${prefix}${customerOnly ? '/vendor/apply' : '/login'}`, req.url), 303);
+  // A relative Location: behind the host's proxy req.url is the internal address (https://localhost:10000), which
+  // the browser refuses to follow from a form post (CSP form-action 'self'), #22.
+  const res = new NextResponse(null, { status: 303, headers: { Location: `${prefix}${customerOnly ? '/vendor/apply' : '/login'}` } });
   if (customerOnly) {
     clearPanel(res, 'customer');
     writePanels(res, parseSessions(req.cookies.get(PANELS_COOKIE)?.value).filter((p) => p !== 'customer'));

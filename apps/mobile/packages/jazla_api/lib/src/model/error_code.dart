@@ -116,6 +116,93 @@ enum ErrorCode {
       @JsonValue(r'INVALID_POLYGON')
       INVALID_POLYGON(r'INVALID_POLYGON'),
           /// Stable error code. Clients branch on it; it is never renamed or reused.
+      @JsonValue(r'NOT_IMPLEMENTED')
+      NOT_IMPLEMENTED(r'NOT_IMPLEMENTED'),
+          /// Stable error code. Clients branch on it; it is never renamed or reused.
+      @JsonValue(r'CART_EMPTY')
+      CART_EMPTY(r'CART_EMPTY'),
+          /// Stable error code. Clients branch on it; it is never renamed or reused.
+      @JsonValue(r'CART_VENDOR_MISMATCH')
+      CART_VENDOR_MISMATCH(r'CART_VENDOR_MISMATCH'),
+          /// Stable error code. Clients branch on it; it is never renamed or reused.
+      @JsonValue(r'PRODUCT_UNAVAILABLE')
+      PRODUCT_UNAVAILABLE(r'PRODUCT_UNAVAILABLE'),
+          /// Stable error code. Clients branch on it; it is never renamed or reused.
+      @JsonValue(r'SIZE_UNAVAILABLE')
+      SIZE_UNAVAILABLE(r'SIZE_UNAVAILABLE'),
+          /// Stable error code. Clients branch on it; it is never renamed or reused.
+      @JsonValue(r'OPTION_NOT_IN_PRODUCT')
+      OPTION_NOT_IN_PRODUCT(r'OPTION_NOT_IN_PRODUCT'),
+          /// Stable error code. Clients branch on it; it is never renamed or reused.
+      @JsonValue(r'INCOMPATIBLE_CUTTING_PACKAGING')
+      INCOMPATIBLE_CUTTING_PACKAGING(r'INCOMPATIBLE_CUTTING_PACKAGING'),
+          /// Stable error code. Clients branch on it; it is never renamed or reused.
+      @JsonValue(r'OPTION_REQUIRED')
+      OPTION_REQUIRED(r'OPTION_REQUIRED'),
+          /// Stable error code. Clients branch on it; it is never renamed or reused.
+      @JsonValue(r'PRICE_CHANGED')
+      PRICE_CHANGED(r'PRICE_CHANGED'),
+          /// Stable error code. Clients branch on it; it is never renamed or reused.
+      @JsonValue(r'ITEM_UNAVAILABLE')
+      ITEM_UNAVAILABLE(r'ITEM_UNAVAILABLE'),
+          /// Stable error code. Clients branch on it; it is never renamed or reused.
+      @JsonValue(r'MIN_ORDER_NOT_MET')
+      MIN_ORDER_NOT_MET(r'MIN_ORDER_NOT_MET'),
+          /// Stable error code. Clients branch on it; it is never renamed or reused.
+      @JsonValue(r'COUPON_NOT_FOUND')
+      COUPON_NOT_FOUND(r'COUPON_NOT_FOUND'),
+          /// Stable error code. Clients branch on it; it is never renamed or reused.
+      @JsonValue(r'COUPON_EXPIRED')
+      COUPON_EXPIRED(r'COUPON_EXPIRED'),
+          /// Stable error code. Clients branch on it; it is never renamed or reused.
+      @JsonValue(r'COUPON_NOT_APPLICABLE')
+      COUPON_NOT_APPLICABLE(r'COUPON_NOT_APPLICABLE'),
+          /// Stable error code. Clients branch on it; it is never renamed or reused.
+      @JsonValue(r'COUPON_MIN_ORDER')
+      COUPON_MIN_ORDER(r'COUPON_MIN_ORDER'),
+          /// Stable error code. Clients branch on it; it is never renamed or reused.
+      @JsonValue(r'COUPON_LIMIT_REACHED')
+      COUPON_LIMIT_REACHED(r'COUPON_LIMIT_REACHED'),
+          /// Stable error code. Clients branch on it; it is never renamed or reused.
+      @JsonValue(r'COUPON_CODE_TAKEN')
+      COUPON_CODE_TAKEN(r'COUPON_CODE_TAKEN'),
+          /// Stable error code. Clients branch on it; it is never renamed or reused.
+      @JsonValue(r'FULFILMENT_REQUIRED')
+      FULFILMENT_REQUIRED(r'FULFILMENT_REQUIRED'),
+          /// Stable error code. Clients branch on it; it is never renamed or reused.
+      @JsonValue(r'FULFILMENT_NOT_SUPPORTED')
+      FULFILMENT_NOT_SUPPORTED(r'FULFILMENT_NOT_SUPPORTED'),
+          /// Stable error code. Clients branch on it; it is never renamed or reused.
+      @JsonValue(r'ADDRESS_NOT_COVERED')
+      ADDRESS_NOT_COVERED(r'ADDRESS_NOT_COVERED'),
+          /// Stable error code. Clients branch on it; it is never renamed or reused.
+      @JsonValue(r'DAY_FULL')
+      DAY_FULL(r'DAY_FULL'),
+          /// Stable error code. Clients branch on it; it is never renamed or reused.
+      @JsonValue(r'DAY_NOT_AVAILABLE')
+      DAY_NOT_AVAILABLE(r'DAY_NOT_AVAILABLE'),
+          /// Stable error code. Clients branch on it; it is never renamed or reused.
+      @JsonValue(r'ORDERING_PAUSED')
+      ORDERING_PAUSED(r'ORDERING_PAUSED'),
+          /// Stable error code. Clients branch on it; it is never renamed or reused.
+      @JsonValue(r'PROFILE_INCOMPLETE')
+      PROFILE_INCOMPLETE(r'PROFILE_INCOMPLETE'),
+          /// Stable error code. Clients branch on it; it is never renamed or reused.
+      @JsonValue(r'WALLET_INSUFFICIENT')
+      WALLET_INSUFFICIENT(r'WALLET_INSUFFICIENT'),
+          /// Stable error code. Clients branch on it; it is never renamed or reused.
+      @JsonValue(r'PAYMENT_METHOD_NOT_AVAILABLE')
+      PAYMENT_METHOD_NOT_AVAILABLE(r'PAYMENT_METHOD_NOT_AVAILABLE'),
+          /// Stable error code. Clients branch on it; it is never renamed or reused.
+      @JsonValue(r'ORDER_NOT_PAYABLE')
+      ORDER_NOT_PAYABLE(r'ORDER_NOT_PAYABLE'),
+          /// Stable error code. Clients branch on it; it is never renamed or reused.
+      @JsonValue(r'PAYMENT_IN_PROGRESS')
+      PAYMENT_IN_PROGRESS(r'PAYMENT_IN_PROGRESS'),
+          /// Stable error code. Clients branch on it; it is never renamed or reused.
+      @JsonValue(r'ORDER_TRANSITION_NOT_ALLOWED')
+      ORDER_TRANSITION_NOT_ALLOWED(r'ORDER_TRANSITION_NOT_ALLOWED'),
+          /// Stable error code. Clients branch on it; it is never renamed or reused.
       @JsonValue(r'unknown_default_open_api')
       unknownDefaultOpenApi(r'unknown_default_open_api');
 

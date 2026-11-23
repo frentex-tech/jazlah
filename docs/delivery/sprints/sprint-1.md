@@ -225,7 +225,7 @@ This task also covers:
 - [ ] The CI drift check fails when `openapi.json` is stale
 
 ### FND-INF-4 — Spike: Saudi-region hosting (ADR-0003) & third-party accounts
-`type: Task · area: infra · size: S · prio: P0 · reqs: NFR-HST, NFR-AVL · labels: spike, needs-client`
+`type: Task · area: infra · size: S · prio: P0 · reqs: NFR-HST, NFR-AVL · labels: spike`
 
 **What:** pick where staging and production run, with cost estimates, for the client to approve.
 
@@ -611,7 +611,7 @@ Coverage polygons managed by the admin, location detection in the apps, and serv
 The tax and invoicing decisions that shape the order, VAT and finance data model. Implementation is in Sprint 6.
 
 ### INV-DOC-1 — Spike: ZATCA Phase 2 approach & seller of record (ADR-0006)
-`type: Task · area: docs · size: S · prio: P0 · reqs: FR-PAY-05 · labels: spike, needs-client`
+`type: Task · area: docs · size: S · prio: P0 · reqs: FR-PAY-05 · labels: spike`
 
 **What:** decide how to integrate with ZATCA, and who issues invoices for partner orders.
 
