@@ -49,7 +49,7 @@ export function OrdersList({ panel, live }: { panel: OrdersPanel; live: boolean 
     const id = setTimeout(() => setQ(search.trim().slice(0, 100)), 300);
     return () => clearTimeout(id);
   }, [search]);
-  // shortcut: the store filter offers the first page of active stores, API gap (no store names lookup for orders) (#88).
+  // shortcut: the store filter offers the first page of active stores, API gap (no store names lookup for orders) (#83).
   useEffect(() => {
     if (panel !== 'admin') return;
     panelFetch<Page<Vendor>>('admin', '/api/admin/vendors?status=active').then((p) => setVendors(p.items), () => {});
@@ -145,7 +145,7 @@ export function OrdersList({ panel, live }: { panel: OrdersPanel; live: boolean 
         breadcrumb={t('breadcrumb')}
         title={t('title')}
         actions={
-          // shortcut: no orders export in the API, API gap: shown disabled (#88).
+          // shortcut: no orders export in the API, API gap: shown disabled (#114).
           <Button variant="secondary" disabled>{t('export')}</Button>
         }
       />

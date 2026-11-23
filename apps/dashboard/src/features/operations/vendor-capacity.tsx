@@ -139,7 +139,7 @@ export function VendorCapacityTab({ vendorId }: { vendorId: string }) {
       <FormSection hug title={t('days.title')} body={t('days.body')}>
         <DataTable
           columns={columns}
-          data={cap.days}
+          data={cap.days.filter((x) => x.ordersLimit !== null || x.carcassesLimit !== null)} // the API answers every day of the horizon
           status="ready"
           label={t('days.title')}
           hasPrev={false}
