@@ -1,0 +1,27 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  html { @apply bg-bg text-ink; }
+  body { @apply font-body text-body-m antialiased; }
+  :focus-visible { @apply outline outline-2 outline-offset-2 outline-ember; }
+}
+
+/* A row that just arrived on a live list (orders board): a gold tint that fades out; steady under reduced motion. */
+@keyframes row-new {
+  from { background-color: theme('colors.gold-bg'); }
+  to { background-color: transparent; }
+}
+.row-new { animation: row-new 4s ease-out; }
+@media (prefers-reduced-motion: reduce) {
+  .row-new { animation: none; background-color: theme('colors.gold-bg'); }
+}
+
+/* The order label (135:49613) prints alone, on an A6 sheet. */
+@media print {
+  @page { size: A6; margin: 0; }
+  body * { visibility: hidden; }
+  .print-label, .print-label * { visibility: visible; }
+  .print-label { position: fixed; inset-block-start: 0; inset-inline-start: 0; width: 105mm; height: 148mm; border: 0; border-radius: 0; box-shadow: none; }
+}

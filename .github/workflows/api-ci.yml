@@ -1,0 +1,242 @@
+# CI of the JAZLA API (services/api): every check of services/api/CLAUDE.md, "Commands",
+# against PostgreSQL + PostGIS and Redis service containers matching docker-compose.yml,
+# and MinIO started from docker-compose.yml itself (it needs the repository's scripts).
+name: API CI
+
+on:
+  pull_request:
+    paths:
+      - 'services/api/**'
+      - 'docs/frontend/**'
+      - '.github/workflows/api-ci.yml'
+  push:
+    paths:
+      - 'services/api/**'
+      - 'docs/frontend/**'
+      - '.github/workflows/api-ci.yml'
+
+permissions:
+  contents: read
+
+concurrency:
+  group: api-ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  api:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    defaults:
+      run:
+        working-directory: services/api
+
+    services:
+      # The images and host ports of docker-compose.yml, so the URLs of .env.example work.
+      postgres:
+        image: postgis/postgis:17-3.5
+        env:
+          POSTGRES_USER: jazla
+          POSTGRES_PASSWORD: jazla
+          POSTGRES_DB: jazla
+        ports:
+          - 5434:5432
+        options: >-
+          --health-cmd "pg_isready -U jazla -d jazla"
+          --health-interval 2s
+          --health-timeout 3s
+          --health-retries 30
+      # The compose file's command: BullMQ requires noeviction.
+      redis:
+        image: redis:7-alpine
+        command: redis-server --appendonly yes --appendfsync everysec --maxmemory-policy noeviction
+        ports:
+          - 6380:6379
+        options: >-
+          --health-cmd "redis-cli ping"
+          --health-interval 2s
+          --health-timeout 3s
+          --health-retries 30
+
+    env:
+      # Local-container credentials, the same placeholders as .env.example: not secrets.
+      NODE_ENV: test
+      DATABASE_URL: postgresql://jazla:jazla@localhost:5434/jazla
+      REDIS_URL: redis://localhost:6380/0
+      PGPASSWORD: jazla
+      # The local MinIO of docker-compose.yml, as in .env.example.
+      STORAGE_ENDPOINT: http://localhost:9002
+      STORAGE_REGION: us-east-1
+      STORAGE_FORCE_PATH_STYLE: 'true'
+      STORAGE_ACCESS_KEY_ID: jazla
+      STORAGE_SECRET_ACCESS_KEY: jazla-local-storage
+      STORAGE_PUBLIC_BUCKET: jazla-public
+      STORAGE_PRIVATE_BUCKET: jazla-private
+      STORAGE_PUBLIC_BASE_URL: http://localhost:9002/jazla-public
+
+    steps:
+      - name: Check out
+        uses: actions/checkout@v7
+
+      - name: Set up pnpm
+        uses: pnpm/action-setup@v6
+        with:
+          version: 10.33.2
+
+      - name: Set up Node (version from .nvmrc)
+        uses: actions/setup-node@v7
+        with:
+          node-version-file: services/api/.nvmrc
+          cache: pnpm
+          cache-dependency-path: services/api/pnpm-lock.yaml
+
+      - name: Install (lockfile frozen)
+        run: pnpm install --frozen-lockfile
+
+      - name: Generate the Prisma client
+        run: pnpm db:generate
+
+      # pnpm lint runs ESLint with --fix: fail on any warning, and on any file it changed.
+      - name: Lint
+        run: |
+          pnpm lint --max-warnings 0
+          git diff --exit-code -- .
+
+      - name: Lint rules
+        run: pnpm lint:rules
+
+      # The instruction files loaded into every Claude Code session stay under 50,000
+      # characters; the script lists each file's size.
+      - name: Instruction size
+        run: pnpm instructions:check
+
+      - name: Type check and type tests
+        run: pnpm test:types
+
+      - name: Unit tests
+        run: pnpm test
+
+      # docker-compose.yml creates jazla_test from this file on first start; a service
+      # container cannot mount it, so it runs here.
+      - name: Create the test database
+        run: psql -h localhost -p 5434 -U jazla -d jazla -v ON_ERROR_STOP=1 -f docker/postgres/00-create-test-database.sql
+
+      - name: Migrations
+        run: pnpm db:deploy
+
+      # The migrations, replayed on an empty shadow database, must produce exactly the
+      # Prisma schema: exit code 2 names each difference.
+      - name: Migration drift
+        env:
+          SHADOW_DATABASE_URL: postgresql://jazla:jazla@localhost:5434/jazla_shadow
+        run: |
+          psql -h localhost -p 5434 -U jazla -d jazla -v ON_ERROR_STOP=1 -c 'CREATE DATABASE jazla_shadow'
+          pnpm db:drift
+
+      # A service container starts before checkout and cannot run the bucket setup in
+      # docker/minio/, so MinIO comes from docker-compose.yml; --wait returns once its
+      # buckets exist (its healthcheck).
+      - name: Start MinIO
+        run: docker compose up -d --wait minio
+
+      # The development seed on the migrated jazla database, twice: the second run must
+      # leave every table with the same number of rows (the seed is idempotent).
+      - name: Seed, twice
+        run: |
+          count_rows() {
+            psql -h localhost -p 5434 -U jazla -d jazla -v ON_ERROR_STOP=1 -At -c "
+              SELECT table_name || ' ' || (xpath('/row/c/text()', query_to_xml(
+                format('SELECT count(*) AS c FROM %I.%I', table_schema, table_name),
+                false, true, '')))[1]::text
+              FROM information_schema.tables
+              WHERE table_schema = 'public' AND table_type = 'BASE TABLE'
+              ORDER BY table_name"
+          }
+          pnpm db:seed
+          count_rows > "$RUNNER_TEMP/seed-first.txt"
+          pnpm db:seed
+          count_rows > "$RUNNER_TEMP/seed-second.txt"
+          cat "$RUNNER_TEMP/seed-first.txt"
+          diff "$RUNNER_TEMP/seed-first.txt" "$RUNNER_TEMP/seed-second.txt"
+
+      # Applies the migrations to jazla_test itself, then runs the e2e suites.
+      - name: e2e tests
+        run: pnpm test:e2e --detectOpenHandles
+
+      - name: Build
+        run: pnpm build
+
+      # tsconfig.build.json leaves test-only code out, but still compiles any file that
+      # production code imports: fail if a test-only file reached the build output.
+      - name: No test-only code in dist/
+        run: |
+          found=$(find dist \( -name 'testing.*' -o -name 'fake.provider.*' -o -name '*.fake.*' -o -name '*.spec.*' -o -name '*.e2e-spec.*' \) -print)
+          if [ -n "$found" ]; then
+            echo "Test-only files in dist/:"
+            echo "$found"
+            exit 1
+          fi
+          echo "dist/ holds no testing.*, fake provider, in-memory fake or spec file."
+
+      # The production image (services/api/Dockerfile), built but never pushed, then run the
+      # way Render runs it: Render's Docker Command `sh scripts/render-start.sh` on an empty
+      # database (migrations, the seed, then the API as staging with production rules),
+      # until both health endpoints answer. A failed migration must stop the script before
+      # the API starts. Placeholder secrets are made here and never leave the run.
+      - name: Production image
+        run: |
+          docker build -t jazla-api:ci .
+          psql -h localhost -p 5434 -U jazla -d jazla -v ON_ERROR_STOP=1 -c 'CREATE DATABASE jazla_image'
+          image_db=postgresql://jazla:jazla@localhost:5434/jazla_image
+          # With SEED_ON_START=true, a script that went on would print the seed's failure line.
+          if out=$(docker run --rm -e SEED_ON_START=true \
+            -e DATABASE_URL=postgresql://none:none@127.0.0.1:1/none \
+            jazla-api:ci sh scripts/render-start.sh 2>&1); then
+            echo "$out"; echo "render-start.sh exited 0 after a failed migration"; exit 1
+          fi
+          if echo "$out" | grep -q 'Seed failed'; then
+            echo "$out"; echo "render-start.sh went on after a failed migration"; exit 1
+          fi
+          echo "render-start.sh stops when the migrations fail."
+          env_file="$RUNNER_TEMP/image.env"
+          {
+            echo NODE_ENV=production
+            echo DEPLOYMENT_ENV=staging
+            echo PORT=3100
+            echo "DATABASE_URL=$image_db"
+            echo REDIS_URL=redis://localhost:6380/2
+            echo REDIS_KEY_PREFIX=jazla-image-ci
+            echo TRUST_PROXY_HOPS=1
+            echo QUEUE_WORKERS_ENABLED=true
+            echo SEED_ON_START=true
+            echo SMS_PROVIDERS=log
+            echo "AUTH_ACCESS_TOKEN_SECRET=$(openssl rand -base64 48)"
+            echo "AUTH_OTP_SECRET=$(openssl rand -base64 48)"
+            echo "VENDORS_IBAN_KEY=$(openssl rand -base64 32)"
+            env | grep '^STORAGE_'
+          } > "$env_file"
+          docker run -d --name jazla-api-ci --network host --env-file "$env_file" jazla-api:ci sh scripts/render-start.sh
+          # Migrations on an empty database, the seed and the start: give them two minutes.
+          for i in $(seq 1 120); do
+            curl -sf http://localhost:3100/v1/health/ready && break
+            sleep 1
+          done || true
+          docker logs jazla-api-ci 2>&1 | tail -20
+          curl -sf http://localhost:3100/v1/health
+          curl -sf http://localhost:3100/v1/health/ready
+          if docker logs jazla-api-ci 2>&1 | grep -q 'Seed failed'; then
+            echo "The seed failed in the image"; exit 1
+          fi
+          echo "render-start.sh migrated, seeded and started the API."
+          docker inspect --format '{{.Config.User}}' jazla-api-ci | grep -qx node
+          echo "Runs as the non-root user node."
+          docker rm -f jazla-api-ci
+
+      - name: OpenAPI document is up to date
+        run: pnpm openapi:check
+
+      - name: Registry
+        run: node .claude/hooks/check-registry.mjs
+
+      # Every endpoint path and error code docs/frontend/ names exists in openapi.json.
+      - name: Frontend guides match the OpenAPI document
+        run: pnpm docs:check

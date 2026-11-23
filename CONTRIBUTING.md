@@ -58,7 +58,7 @@ The squash-merge commit uses the PR title, so the PR title must follow this form
 
 - One issue per PR. The body must include `Closes #<issue>`.
 - Fill in the PR template (what changed, how it was tested, screenshots for UI, AR + EN checked).
-- At least **1 approval** from the other developer before merge. CI must be green.
+- No second reviewer: the author self-reviews (diff, tests, lint, screenshots), then merges the PR themselves (squash) once CI is green.
 - Keep PRs small, ideally under 400 changed lines.
 
 ## 4. Board workflow
@@ -68,7 +68,7 @@ The squash-merge commit uses the PR title, so the PR title must follow this form
 | **Backlog** | Planned, not in the current sprint | — |
 | **Todo** | In the current sprint, ready to start | Sprint planning |
 | **In Progress** | Branch created, work started | Developer |
-| **In Review** | PR open, waiting for review | Developer |
+| **In Review** | PR open, self-review and CI in progress | Developer |
 | **QA** | Merged to `develop`, being verified on staging | Reviewer |
 | **Done** | Verified on staging, meets the DoD | Reviewer |
 
@@ -78,12 +78,17 @@ Issue types: **Epic** (module), **Feature** (user-facing sub-issue), **Task** (t
 ## 5. Definition of Done
 
 - [ ] Acceptance criteria in the issue are met
-- [ ] Code reviewed and merged into `develop` via PR
+- [ ] Self-reviewed and merged
 - [ ] Unit tests for business logic, and API e2e tests for new endpoints
 - [ ] Arabic (RTL) and English both work, with no hard-coded strings
 - [ ] API changes are documented in Swagger/OpenAPI
 - [ ] No secrets in code, inputs validated, permissions checked
 - [ ] Verified on staging and moved to **Done**
+
+**When an issue closes** (owner, 2026-11-23):
+- An issue closes when **its own acceptance criteria** are met, each proven by a test that runs in CI. A Figma element that needs another task's API (often a later sprint) does not block it: list it in `docs/frontend/not-built-yet.md` under the issue that owns it.
+- **Frontend tasks built ahead of the API** close when the screen is wired to the generated client of a merged `openapi.json` contract and has HTTP-layer tests with openapi-shaped responses. The staging check of that flow belongs to the backend task that implements the endpoint and to the sprint's release issue.
+- **Client inputs never block a task:** external providers are built behind their port with a fake or sandbox provider, and the live hookup is its own task. Spikes waiting on the client are decided by the owner in an ADR.
 
 ## 6. Releases
 

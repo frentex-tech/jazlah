@@ -1,0 +1,152 @@
+# NOT APPLIED. A REFERENCE FOR THE VALUES ONLY: the two services were created by hand as
+# Web Services (Free) with these exact settings (docs/deploy/render-staging.md, step 3).
+# Change a value here and on Render together.
+#
+# JAZLA STAGING on Render's FREE plans (issues #245, #8).
+# How to use it, step by step (Arabic, for the owner): docs/deploy/render-staging.md.
+#
+# Checked against Render's documentation (render.com/docs/free, /blueprint-spec, /deploys,
+# /monorepo-support, /native-runtimes, /web-services) on 2026-11-21.
+# Free-plan limits and what they change: services/api/.claude/DECISIONS.md, "Staging on
+# Render's free plans" and "Staging database and Redis outside Render". PostgreSQL is on
+# Neon and Redis on Upstash (both free, Frankfurt), created by the owner; Render runs the
+# two web services only. Addresses are *.onrender.com only: no custom domain, no DNS.
+# Nothing here holds a secret: by hand, the owner types each `sync: false` and
+# `generateValue` value (the guide's secrets marked 🔒).
+
+services:
+  # The API, built from services/api/Dockerfile. Queue workers are off (QUEUE_WORKERS_ENABLED).
+  - type: web
+    name: jazla-api-staging
+    runtime: docker
+    # Free: sleeps after 15 minutes without traffic, about a minute to wake up.
+    plan: free
+    region: frankfurt
+    branch: develop
+    # Deploy a commit to develop only once its GitHub checks have passed ("After CI Checks Pass").
+    autoDeployTrigger: checksPass
+    # With rootDir set, Render reads dockerContext and dockerfilePath relative to it
+    # (render.com/docs/monorepo-support, "Root-relative settings").
+    rootDir: services/api
+    dockerContext: .
+    dockerfilePath: ./Dockerfile
+    healthCheckPath: /v1/health
+    # The free plan has no pre-deploy command and no Shell, so the start script does both:
+    # the migrations (a failure stops the start), the seed when SEED_ON_START=true (a
+    # failure is logged), then the API (services/api/scripts/render-start.sh).
+    # Render's Docker Command field keeps quotes as typed, so no `sh -c '...'` there.
+    dockerCommand: sh scripts/render-start.sh
+    envVars:
+      # --- Environment -------------------------------------------------------------------
+      - key: NODE_ENV
+        value: production
+      # Staging is production except for the `log` SMS provider and disabled storage.
+      - key: DEPLOYMENT_ENV
+        value: staging
+      - key: LOG_LEVEL
+        value: info
+      # Render's proxy in front of the service. Checked on the first deploy (guide, step 6).
+      - key: TRUST_PROXY_HOPS
+        value: "1"
+      # Off: an idle BullMQ worker spends Upstash's 500,000 free commands a month in about
+      # a week (DECISIONS.md, "Staging database and Redis outside Render"). The only queue
+      # is media cleanup, with nothing to clean while storage is disabled.
+      # shortcut: no job runs on staging, turn on with a paid Redis plan when a queue's work
+      # must be reviewed there.
+      - key: QUEUE_WORKERS_ENABLED
+        value: "false"
+      - key: API_DOCS_ENABLED
+        value: "true"
+      - key: SEED_ON_START
+        value: "true"
+      # The dashboard's address (https://jazla-dashboard-staging.onrender.com), typed
+      # after the first deploy (guide, step 4). Empty turns CORS off: the dashboard calls
+      # the API from its server, and the mobile app needs no CORS.
+      - key: CORS_ORIGINS
+        sync: false
+
+      # --- PostgreSQL (Neon) and Redis (Upstash), typed by the owner (guide, step 3) --------
+      # Neon's DIRECT connection string (no `-pooler` in the host): migrations need it.
+      # postgresql://...neon.tech/...?sslmode=require
+      - key: DATABASE_URL
+        sync: false
+      # A Neon compute asleep for 5 minutes takes up to a few seconds to wake. This is the
+      # API's pool only; `prisma migrate deploy` reads `connect_timeout` from the URL (guide, step 3).
+      - key: DATABASE_CONNECTION_TIMEOUT_MS
+        value: "15000"
+      # Upstash's TLS address: rediss://default:...@....upstash.io:6379
+      - key: REDIS_URL
+        sync: false
+      - key: REDIS_KEY_PREFIX
+        value: jazla-staging
+
+      # --- Object storage ------------------------------------------------------------------
+      # disabled until the owner's AWS S3 buckets exist: uploads answer 503, the rest works
+      # (DECISIONS.md, "Staging without object storage"). To switch, the owner adds the
+      # STORAGE_* values, sets s3 here and MEDIA_ORIGINS below on Render (guide, step 7.5);
+      # a PR then updates this reference. Never switch back to disabled.
+      - key: STORAGE_PROVIDER
+        value: disabled
+
+      # --- Sign-in -------------------------------------------------------------------------
+      # Codes are written to the log, no SMS is sent (Msegat is not connected).
+      - key: SMS_PROVIDERS
+        value: log
+      # Made by the owner with `openssl rand -base64 32` (guide, step 3); never changed after
+      # the first start.
+      - key: AUTH_ACCESS_TOKEN_SECRET
+        generateValue: true
+      - key: AUTH_ACCESS_TOKEN_KEY_ID
+        value: staging-1
+      - key: AUTH_OTP_SECRET
+        generateValue: true
+      # phone:code pairs of the review accounts, chosen by the owner (guide, step 2).
+      - key: AUTH_REVIEW_ACCOUNTS
+        sync: false
+
+      # --- Vendors -------------------------------------------------------------------------
+      # 32 random bytes in base64 (`openssl rand -base64 32`, guide, step 3); never changed,
+      # or stored IBANs can't be read.
+      - key: VENDORS_IBAN_KEY
+        generateValue: true
+      - key: VENDORS_IBAN_KEY_ID
+        value: staging-1
+
+  # The dashboard (admin, vendor and kitchen panels), Next.js on Render's Node runtime.
+  - type: web
+    name: jazla-dashboard-staging
+    runtime: node
+    plan: free
+    region: frankfurt
+    branch: develop
+    autoDeployTrigger: checksPass
+    rootDir: apps/dashboard
+    # The guard refuses a build or start with the mock flags (README «Builds», #145).
+    buildCommand: sh scripts/deploy-guard.sh && pnpm install --frozen-lockfile && pnpm build
+    startCommand: sh scripts/deploy-guard.sh && pnpm exec next start -p $PORT
+    envVars:
+      # As apps/dashboard/.nvmrc; NODE_VERSION wins over any file (render.com/docs/node-version).
+      - key: NODE_VERSION
+        value: "24"
+      - key: NEXT_TELEMETRY_DISABLED
+        value: "1"
+      # The API's address (https://jazla-api-staging.onrender.com, no trailing slash),
+      # typed after the first deploy (guide, step 4). Read at run time: no rebuild needed.
+      - key: API_URL
+        sync: false
+      # Must equal the API's AUTH_OTP_LENGTH (6).
+      - key: OTP_LENGTH
+        value: "6"
+      # The right-most X-Forwarded-For entry is the one Render's proxy added (README, "Sign-in
+      # and session"). Checked on the first deploy (guide, step 6).
+      # shortcut: free web services can't receive private traffic, so the dashboard calls the
+      # API's public address and the API sees the dashboard's outbound IP for every staff call
+      # (shared sign-in and rate limits); fix with a paid plan and the private network (#7).
+      - key: CLIENT_IP_HEADER
+        value: x-forwarded-for
+      - key: NEXT_PUBLIC_MAP_TILES
+        value: https://tile.openstreetmap.org/{z}/{x}/{y}.png
+      # The CSP's media hosts, fixed at build time. A placeholder while storage is disabled
+      # (a build refuses an empty value); the owner sets the bucket's origin (guide, step 7.5).
+      - key: MEDIA_ORIGINS
+        value: https://storage-disabled.invalid

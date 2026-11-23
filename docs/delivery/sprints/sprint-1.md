@@ -1,12 +1,14 @@
 # Sprint 1 — Full product design + foundation, accounts & coverage
 
-> **Goal:** two tracks in parallel. **Design track:** the complete launch design (every screen of the customer app, customer web and admin/vendor/kitchen dashboards) in the approved Jazlah identity, signed off by the client. **Engineering track:** a production-shaped skeleton of the API and the three apps, CI and staging, then accounts (OTP), addresses and coverage zones.
+> **Goal:** two tracks in parallel. **Design track:** the complete launch design (every screen of the customer app and the admin/vendor/kitchen dashboards; the customer website was dropped on 2026-11-18) in the approved Jazlah identity, signed off by the client. **Engineering track:** a production-shaped skeleton of the API, the mobile app and the dashboard app, CI and staging, then accounts (OTP), addresses and coverage zones.
 
 **Release:** v0.1.0
 
+**Closing rule:** see CONTRIBUTING.md §5, "When an issue closes". A frontend task built ahead of the API closes when it is wired to the merged contract with tests. The staging check goes with the backend task and the release.
+
 **Exit criteria (demo on staging):**
 - The client has approved the full launch design in writing (DSN-DES-2); every launch screen is listed in `docs/design/screens.md` with its Figma link.
-- `GET /v1/public/health/ready` is green on staging; Swagger at `/docs`. Merging to `develop` auto-deploys; a failing test blocks the PR.
+- `GET /v1/health/ready` is green on staging; Swagger at `/docs`. Merging to `develop` auto-deploys; a failing test blocks the PR.
 - Web, dashboard and the Flutter staging build open, switch AR/EN and render RTL correctly with the design-system components.
 - New customer: phone → OTP (fixed code on staging) → profile → add an address on the map, in the app and on the web.
 - Admin draws a Riyadh polygon. A point inside shows as covered and a point outside shows the out-of-coverage message.
@@ -20,7 +22,7 @@
 - MP-3: ACC-API-1 and LOC-API-1 merge before the account and location client tasks, which also wait for DSN-DES-2.
 - MP-4: REL-INF-1 → `release/v0.1.0` → `main`.
 
-**Parallel tracks:** Design: DSN-DES-1, ACC-DES-1, VND-DES-1, STF-DES-1, SCH-DES-1, OPX-DES-1, OCC-DES-1, FED-DES-1, DSN-DES-2 · Backend: FND-API-*, ACC-API-*, LOC-API-1 · DevOps: FND-INF-* · Mobile: APP-MOB-1, then ACC-MOB-*, LOC-MOB-1 · Web: APP-WEB-1, then ACC-WEB-1, LOC-WEB-1 · Dashboard: APP-DSH-1, then ACC-DSH-1, LOC-DSH-1
+**Parallel tracks:** Design: DSN-DES-1, ACC-DES-1, VND-DES-1, STF-DES-1, SCH-DES-1, OPX-DES-1, OCC-DES-1, FED-DES-1, DSN-DES-2 · Backend: FND-API-*, ACC-API-*, LOC-API-1 · DevOps: FND-INF-* · Mobile: APP-MOB-1, then ACC-MOB-*, LOC-MOB-1 · Dashboard: APP-DSH-1, APP-WEB-1 (Tailwind preset), then ACC-DSH-1, LOC-DSH-1
 
 ## EPIC FND — Platform foundation
 - reqs: NFR-SEC, NFR-SCL, NFR-HST, NFR-OBS
@@ -35,6 +37,7 @@ This task also covers:
 - **Local development environment (docker-compose):** one command that starts every backing service the API needs locally.
 
 **Output:**
+- **Re-scoped 2026-11-17:** decided otherwise: `services/api` is a standalone project with its own Docker Compose and no Turborepo (`services/api/.claude/DECISIONS.md`, 2026-11-13). Each app sets up its own tooling in its scaffold task (APP-MOB-1, APP-WEB-1, APP-DSH-1).
 
 *Monorepo tooling (pnpm workspaces + Turborepo + shared config)*
 - `package.json` (root, private, `packageManager: pnpm@9`), `pnpm-workspace.yaml` (`apps/web`, `apps/dashboard`, `services/api`, `packages/*`), `turbo.json` with `lint`, `typecheck`, `test`, `build`, `dev` pipelines
@@ -75,13 +78,14 @@ This task also covers:
 - **Database: Prisma + PostGIS + migrations + seed:** the persistence layer and the conventions every model follows.
 
 **Output:**
+- **Re-scoped 2026-11-17:** built as issue #227 (PR #228); the seed came with #241. The geo helpers (`pointFromLatLng`, `isPointInPolygon`, `toGeoJSON`) and their Riyadh-polygon test moved to LOC-API-1, the first task that uses them. The API is a standalone project (`services/api/.claude/DECISIONS.md`), so paths below are indicative.
 
 *Scaffold NestJS API core*
 - `services/api` NestJS 11 app, `/v1` URI versioning, global prefix
 - `config/` typed config validated with zod (fails fast on bad env)
 - `common/`: global `ValidationPipe` (whitelist, transform), exception filter returning `{code, message, details}` with messages localized by `Accept-Language` (ar default, en), pagination DTO + helper (`page`, `pageSize`, `total`), `@CurrentUser()` decorator stub
 - Swagger at `/docs` and `/docs-json` with bearer auth scheme and tags per audience (`public`, `customer`, `vendor`, `kitchen`, `admin`, `webhooks`)
-- `GET /v1/public/health` (liveness) and `/v1/public/health/ready` (DB, Redis, storage checks via `@nestjs/terminus`)
+- `GET /v1/health` (liveness) and `/v1/health/ready` (DB, Redis, storage checks via `@nestjs/terminus`)
 - `helmet`, CORS allow-list from env, `pino` structured logging with request id, graceful shutdown
 
 *Database: Prisma + PostGIS + migrations + seed*
@@ -145,6 +149,7 @@ This task also covers:
 - **Settings store & audit log:** typed platform settings (used by operations, payments, occasions, Adha…) and an audit trail of sensitive actions.
 
 **Output:**
+- **Re-scoped 2026-11-17:** queue, event bus, storage, uploads and audit log built as issues #227 and #229 (PR #228, #230). The realtime gateway and its acceptance moved to ORD-API-3; the settings store and its acceptance moved to SCH-API-1.
 
 *Redis, BullMQ queues, domain events, realtime gateway*
 - `RedisModule` (ioredis) with a cache helper (`getOrSet`, `invalidate(prefix)`)
@@ -203,7 +208,7 @@ This task also covers:
 
 *API client generation (TypeScript + Dart)*
 - `packages/api-client`: `openapi-typescript` types + `openapi-fetch` client factory (`createApiClient({baseUrl, getToken, locale})`)
-- `scripts/gen-api-client.sh`: boots the API in spec-only mode (or reads `services/api/openapi.json`) → regenerates TS and Dart (`openapi-generator dart-dio` into `apps/mobile/lib/core/api/generated`)
+- `scripts/gen-api-client.sh`: boots the API in spec-only mode (or reads `services/api/openapi.json`) → regenerates TS and Dart (`openapi-generator dart-dio` into the package `apps/mobile/packages/jazla_api`)
 - API build writes `services/api/openapi.json`, which is committed so diffs are reviewable
 - CI check: spec changed but clients not regenerated → fail
 
@@ -222,7 +227,7 @@ This task also covers:
 - [ ] The CI drift check fails when `openapi.json` is stale
 
 ### FND-INF-4 — Spike: Saudi-region hosting (ADR-0003) & third-party accounts
-`type: Task · area: infra · size: S · prio: P0 · reqs: NFR-HST, NFR-AVL · labels: spike, needs-client`
+`type: Task · area: infra · size: S · prio: P0 · reqs: NFR-HST, NFR-AVL · labels: spike`
 
 **What:** pick where staging and production run, with cost estimates, for the client to approve.
 
@@ -259,19 +264,19 @@ This task also covers:
 **What:** a staging environment that always runs the latest `develop`.
 
 **Output:**
-- Dockerfiles for `services/api`, `apps/web` and `apps/dashboard` (multi-stage, non-root)
-- Staging: managed Postgres+PostGIS, Redis, object storage bucket(s), API + web + dashboard services, HTTPS on `api.staging.<domain>`, `staging.<domain>`, `admin.staging.<domain>`
+- Dockerfiles for `services/api` and `apps/dashboard` (multi-stage, non-root)
+- Staging: managed Postgres+PostGIS, Redis, object storage bucket(s), API + dashboard services, HTTPS on `api.staging.<domain>` and `staging.<domain>` (dashboard, which also serves the public page)
 - `.github/workflows/deploy-staging.yml` on push to `develop` (per app, path filtered), running `prisma migrate deploy` before the API rollout
 - Secrets in GitHub Environments (`staging`) and the provider's secret manager. Nothing in the repo.
 - `infra/deploy/README.md`: how to deploy, roll back, read logs
 
 **How:** keep manifests in `infra/deploy/staging/`. Production mirrors this later (HRD-INF-1).
 
-**Where:** `infra/deploy/`, `services/api/Dockerfile`, `apps/web/Dockerfile`, `apps/dashboard/Dockerfile`, `.github/workflows/deploy-staging.yml`
+**Where:** `infra/deploy/`, `services/api/Dockerfile`, `apps/dashboard/Dockerfile`, `.github/workflows/deploy-staging.yml`
 
 **Acceptance:**
 - [ ] A merge to `develop` is live on staging within 15 minutes, without manual steps
-- [ ] `/v1/public/health/ready` on staging is green
+- [ ] `/v1/health/ready` on staging is green
 - [ ] Rollback to the previous image is documented and tested once
 
 ## EPIC APP — Client app scaffolds
@@ -289,7 +294,7 @@ This task also covers:
 **Output:**
 
 *Scaffold Flutter customer app*
-- `apps/mobile` Flutter (stable) app, bundle ids `sa.jazlah.app` (+ `.dev`, `.staging`), flavors dev/staging/prod with `main_<flavor>.dart` and per-flavor Firebase config
+- `apps/mobile` Flutter (stable) app, bundle ids `sa.jazlah.app` (+ `.dev`, `.staging`), flavors dev/staging/prod with `main_<flavor>.dart` and per-flavor config files (`config/<flavor>.json`, git-ignored). **Changed 2026-11-18:** the per-flavor Firebase files land with NOT-MOB-1 (FCM/APNs setup per flavor), because the Firebase projects (FND-INF-5) do not exist yet
 - Structure from `docs/architecture.md §4`: `app/`, `core/`, `features/`, `l10n/`
 - Riverpod, go_router with deep-link scheme `jazlah://` and universal links placeholder, `flutter_localizations` + ARB files (ar default, en), RTL by locale
 - `core/api`: generated dart-dio client wired with an interceptor that adds the token and `Accept-Language` and refreshes on 401 (single-flight)
@@ -316,37 +321,6 @@ This task also covers:
 - [ ] The gallery renders every widget in AR and EN
 - [ ] Widget tests for the button and OTP field
 
-### APP-WEB-1 — Scaffold customer website + shared Tailwind design system
-`type: Task · area: web · size: L · prio: P0 · reqs: NFR-LNG, NFR-CMP · depends: FND-INF-3, APP-DSH-1`
-
-**What:** the customer website shell.
-
-This task also covers:
-- **Implement design system for web and dashboard (Tailwind preset):** shared Tailwind preset and base components for both Next.js apps.
-
-**Output:**
-
-*Scaffold Next.js customer website*
-- `apps/web` Next.js 15 (App Router, TypeScript), `next-intl` with `/ar` (default) and `/en`, `<html dir>` per locale
-- Tailwind with logical-property usage, layout (header with logo, location slot, cart slot, account slot; footer), error/404 pages localized
-- `lib/api` wrapping `packages/api-client` for server and client components
-- `lib/auth`: session approach. The refresh token goes in an httpOnly cookie set by a Next route handler (`/api/session`). The access token stays in memory.
-- `.github/workflows/ci-web.yml`: lint, typecheck, build, Playwright smoke (home renders in ar and en)
-
-*Implement design system for web and dashboard (Tailwind preset)*
-- `packages/config/tailwind-preset.ts` from `tokens.json`, fonts loaded via `next/font`, web base components (`apps/web/src/components/ui`), shadcn theme variables for the dashboard
-
-**How:**
-- Start on provisional tokens. The Tailwind preset reads `docs/design/tokens.json`, so the final brand tokens drop in without component changes.
-
-**Where:** `apps/web/`, `packages/config/`, `apps/web/src/components/ui/`, `apps/dashboard/src/components/ui/`
-
-**Acceptance:**
-- [ ] `/ar` renders RTL, `/en` renders LTR, and the locale switch keeps the current path
-- [ ] CI web job is green
-- [ ] Both apps use the same colors and fonts from the preset
-- [ ] RTL spacing uses logical utilities only (lint rule or review checklist)
-
 ### APP-DSH-1 — Scaffold dashboard (admin / vendor / kitchen shells)
 `type: Task · area: dashboard · size: M · prio: P0 · reqs: NFR-LNG · depends: FND-INF-3, FND-API-3`
 
@@ -364,6 +338,24 @@ This task also covers:
 - [ ] Visiting `/admin` without a session redirects to `/login`
 - [ ] DataTable demo page paginates against a mocked endpoint
 - [ ] CI dashboard job is green
+
+### APP-WEB-1 — Shared Tailwind preset for the dashboard (from tokens.json)
+`type: Task · area: dashboard · size: S · prio: P0 · reqs: NFR-LNG, NFR-CMP · depends: FND-INF-3, APP-DSH-1`
+
+**What:** the design tokens as a Tailwind preset for the dashboard app. The customer website part of this task was removed on 2026-11-18 (no customer website); the key is kept so the issue stays.
+
+**Output:**
+- `packages/config/tailwind-preset.ts` from `docs/design/tokens.json`, fonts loaded via `next/font`, shadcn theme variables for the dashboard
+
+**How:**
+- The preset reads `docs/design/tokens.json`, so a token change needs no component change.
+- Fonts: the build font from `docs/design/tokens.json` (`font.*.family`: Readex Pro and El Messiri for now). Do not bundle Thmanyah until its licence is checked (owner's decision, 2026-11-18).
+
+**Where:** `packages/config/`, `apps/dashboard/src/components/ui/`
+
+**Acceptance:**
+- [ ] The dashboard uses the colors and fonts from the preset
+- [ ] RTL spacing uses logical utilities only (lint rule or review checklist)
 
 ## EPIC DSN — Design system & UX foundations
 - reqs: NFR-USB, NFR-LNG
@@ -478,6 +470,7 @@ This task also covers:
 - **Account deletion (PDPL / store compliance):** customers can delete their account from inside the app.
 
 **Output:**
+- **Re-scoped 2026-11-17:** profile, consent, addresses and account deletion built as issue #239 (PR #240). Devices (push tokens) moved to NOT-API-1; `isCovered` on addresses moved to LOC-API-1.
 
 *Customer profile & device registration*
 - `GET /v1/customer/me`, `PATCH /v1/customer/me` `{name, email?, locale: ar|en}`, `POST /v1/customer/devices` `{fcmToken, platform, appVersion}`, `DELETE /v1/customer/devices/:token`; `Device` model
@@ -552,29 +545,6 @@ This task also covers:
 - [ ] Locked addresses show a disabled edit/delete with an explanation
 - [ ] Out-of-coverage addresses can be saved but are flagged
 
-### ACC-WEB-1 — Web: OTP sign-in, profile, language & addresses
-`type: Feature · area: web · size: L · prio: P0 · reqs: FR-ACC-01, FR-ACC-02, FR-ACC-04, FR-ACC-05, FR-ACC-03 · depends: ACC-API-1, ACC-API-2, APP-WEB-1, LOC-WEB-1, DSN-DES-2`
-
-**What:** customer login and account pages on the website.
-
-This task also covers:
-- **Web: address management:** addresses page on the website.
-
-**Output:**
-
-*Web: OTP sign-in, profile & language*
-- login modal/page (phone → OTP), `/[locale]/profile` (edit, delete account), session via `/api/session` route handler (httpOnly refresh cookie, in-memory access token, silent refresh), locale switch in header
-
-*Web: address management*
-- `/[locale]/addresses` with a map picker (Google Maps JS), list, default, lock and coverage indicators
-
-**Where:** `apps/web/src/app/[locale]/(account)/profile`, `apps/web/src/lib/auth/`, `apps/web/src/app/[locale]/(account)/addresses`
-
-**Acceptance:**
-- [ ] Refreshing the page keeps the user signed in
-- [ ] Playwright: login with the staging fixed code
-- [ ] Add/edit/delete work and respect the lock rule
-
 ### ACC-DSH-1 — Dashboard: staff OTP login & role routing
 `type: Feature · area: dashboard · size: S · prio: P0 · reqs: FR-ACC-01 · depends: ACC-API-1, APP-DSH-1, DSN-DES-2`
 
@@ -598,7 +568,8 @@ Coverage polygons managed by the admin, location detection in the apps, and serv
 **What:** store service areas as polygons and answer "is this point covered?".
 
 **Output:**
-- `CoverageZone` model (nameAr, nameEn, city, polygon geometry(Polygon,4326) with GIST index, isActive)
+- **Moved in 2026-11-17:** from FND-API-1, the geo helpers (`pointFromLatLng`, `isPointInPolygon`, `toGeoJSON`) with a unit test on a sample Riyadh polygon; from ACC-API-2, `isCovered` on every returned address.
+- `CoverageZone` model (nameAr, nameEn, city, polygon geometry(Polygon,4326) with GIST index, isActive, color `#RRGGBB` for the dashboard map, default `#6A1A20`)
 - Admin: `GET/POST/PATCH/DELETE /v1/admin/coverage-zones` (GeoJSON in/out), audited
 - Public: `GET /v1/public/coverage/check?lat=&lng=` → `{covered, zone?: {id, name, city}}`
 - `CoverageService.isCovered(point)` and `findZone(point)` exported for addresses, checkout and kitchen assignment
@@ -637,24 +608,12 @@ Coverage polygons managed by the admin, location detection in the apps, and serv
 - [ ] Denying permission falls back to manual selection without a dead end
 - [ ] Out-of-coverage locations show the banner and the pickup suggestion
 
-### LOC-WEB-1 — Web: location selector & coverage notice
-`type: Feature · area: web · size: S · prio: P0 · reqs: FR-LOC-01, FR-LOC-02 · depends: LOC-API-1, APP-WEB-1, DSN-DES-2`
-
-**What:** location selection in the website header.
-
-**Output:** header location chip → modal (browser geolocation, map, saved addresses if logged in), coverage notice banner, selection stored in a cookie for SSR
-
-**Where:** `apps/web/src/components/location/`
-
-**Acceptance:**
-- [ ] The selection persists across pages and reloads
-
 ## EPIC INV — ZATCA e-invoicing
 - reqs: FR-PAY-05
 The tax and invoicing decisions that shape the order, VAT and finance data model. Implementation is in Sprint 6.
 
 ### INV-DOC-1 — Spike: ZATCA Phase 2 approach & seller of record (ADR-0006)
-`type: Task · area: docs · size: S · prio: P0 · reqs: FR-PAY-05 · labels: spike, needs-client`
+`type: Task · area: docs · size: S · prio: P0 · reqs: FR-PAY-05 · labels: spike`
 
 **What:** decide how to integrate with ZATCA, and who issues invoices for partner orders.
 
@@ -778,7 +737,7 @@ Design for this module is done up-front in Sprint 1 (design-first).
 Sprint-end merge points. Each task cuts a release branch, verifies the sprint's exit criteria on staging, merges to `main`, tags, back-merges to `develop` and updates STATUS.md.
 
 ### REL-INF-1 — Release v0.1.0 (Sprint 1 merge point)
-`type: Task · area: infra · size: XS · prio: P0 · depends: FND-INF-5, APP-MOB-1, APP-WEB-1, APP-DSH-1, ACC-MOB-1, ACC-MOB-3, ACC-WEB-1, ACC-DSH-1, LOC-DSH-1, LOC-WEB-1, DSN-DES-2`
+`type: Task · area: infra · size: XS · prio: P0 · depends: FND-INF-5, APP-MOB-1, APP-WEB-1, APP-DSH-1, ACC-MOB-1, ACC-MOB-3, ACC-DSH-1, LOC-DSH-1, DSN-DES-2`
 
 **What:** close Sprint 1 with the first tagged release.
 

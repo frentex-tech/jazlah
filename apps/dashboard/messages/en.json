@@ -1,0 +1,1741 @@
+{
+  "meta": {
+    "title": "JAZLA · Dashboard"
+  },
+  "panel": {
+    "admin": "Admin",
+    "vendor": "Vendor",
+    "kitchen": "Kitchen"
+  },
+  "nav": {
+    "label": "Main menu",
+    "signOut": "Sign out",
+    "admin": {
+      "overview": "Overview",
+      "orders": "Orders",
+      "stores": "Stores",
+      "products": "Products",
+      "customers": "Customers",
+      "delivery": "Delivery",
+      "cooking": "Cooking tasks",
+      "finance": "Finance",
+      "stories": "Stories",
+      "loyalty": "Loyalty & points",
+      "charity": "Sahm Al-Khair",
+      "marketing": "Marketing",
+      "settings": "Settings"
+    },
+    "vendor": {
+      "orders": "Orders board",
+      "products": "My products",
+      "earnings": "Earnings",
+      "store": "Store profile",
+      "visits": "Visits & livestock",
+      "settings": "Settings"
+    },
+    "kitchen": {
+      "orders": "Current orders"
+    }
+  },
+  "topBar": {
+    "search": "Search by order number or customer",
+    "notifications": "Notifications"
+  },
+  "pages": {
+    "admin": {
+      "breadcrumb": "Admin / Overview",
+      "title": "Overview",
+      "range": "Last 7 days",
+      "export": "Export report"
+    },
+    "vendor": {
+      "breadcrumb": "Orders / Live board",
+      "title": "Live orders"
+    },
+    "kitchen": {
+      "breadcrumb": "Kitchen / Current orders",
+      "title": "Kitchen board · Today",
+      "export": "Export",
+      "print": "Print prep cards"
+    }
+  },
+  "table": {
+    "showing": "{count, plural, one {# row} other {# rows}} on this page",
+    "prev": "Previous page",
+    "next": "Next page",
+    "actions": "Actions",
+    "filter": "Search",
+    "clearAll": "Clear all",
+    "paging": "Pages"
+  },
+  "state": {
+    "empty": {
+      "title": "No orders yet",
+      "body": "Your past and current orders will show here.",
+      "action": "Start the first order"
+    },
+    "noResults": {
+      "title": "No results",
+      "body": "Try other words or change the filters.",
+      "action": "Clear filters"
+    },
+    "error": {
+      "title": "Something went wrong",
+      "body": "We couldn't load the data. Try again.",
+      "action": "Try again"
+    },
+    "offline": {
+      "title": "No internet connection",
+      "body": "Check your connection, then try again.",
+      "action": "Try again"
+    },
+    "denied": {
+      "title": "You don't have access",
+      "body": "Ask your account manager for access.",
+      "action": "Back"
+    },
+    "soon": {
+      "title": "Coming soon",
+      "body": "This isn't available yet. It will work here as soon as it's switched on.",
+      "toast": "This action isn't available yet. It's coming soon."
+    },
+    "loading": "Loading",
+    "notFound": {
+      "title": "Page not found",
+      "body": "The page may still be in the works, or its address changed.",
+      "action": "Back to home",
+      "home": "Go to sign-in"
+    }
+  },
+  "dialog": {
+    "cancel": "Cancel",
+    "confirm": "Confirm",
+    "delete": "Delete"
+  },
+  "upload": {
+    "choose": "Choose a file",
+    "uploading": "Uploading…",
+    "done": "Uploaded",
+    "failed": "The file couldn't be uploaded. Try again.",
+    "remove": "Remove"
+  },
+  "form": {
+    "required": "This field is required",
+    "save": "Save",
+    "tooShort": "At least 2 characters",
+    "tooLong": "Too long",
+    "invalid": "Invalid value"
+  },
+  "login": {
+    "phoneLabel": "Mobile number",
+    "phonePlaceholder": "5X XXX XXXX",
+    "phoneHint": "We'll send you a verification code",
+    "send": "Send code",
+    "otpTitle": "Enter the verification code",
+    "otpSent": "We sent a {length}-digit code to {number}",
+    "otpLabel": "Verification code",
+    "confirm": "Confirm",
+    "resendIn": "Resend in {time}",
+    "resend": "Resend code",
+    "errors": {
+      "phoneInvalid": "The mobile number is incomplete",
+      "otpInvalid": "Wrong code, or this number has no access. Try again.",
+      "otpExpired": "The code has expired. Ask for a new one.",
+      "rateLimited": "Too many attempts. Try again in {seconds} seconds.",
+      "disabled": "This account is disabled. Contact the JAZLA team.",
+      "suspended": "Your store is suspended. Contact the JAZLA team.",
+      "unavailable": "We couldn't connect. Try again."
+    },
+    "choose": {
+      "title": "Choose a dashboard",
+      "body": "Your number has access to more than one dashboard. Choose the one to open.",
+      "open": "Open",
+      "addAnother": "Sign in to another dashboard",
+      "desc": {
+        "admin": "Orders, stores, delivery, finance and settings",
+        "vendor": "Your store’s orders, products and earnings",
+        "kitchen": "Cooking jobs for today and the days ahead"
+      }
+    },
+    "admin": {
+      "brand": "Staff dashboard",
+      "title": "Staff sign-in",
+      "subtitle": "Enter the mobile number registered with the admin team.",
+      "footer": "This dashboard is for authorised staff only.",
+      "panelName": "admin dashboard",
+      "heroTitle": "JAZLA dashboard",
+      "heroBody": "Orders, stores, delivery and finance in one place. Authorised staff only.",
+      "p1": "Live orders board",
+      "p1b": "Follow every order from receipt to delivery",
+      "p2": "Reports & finance",
+      "p2b": "Store sales and settlements in real time",
+      "p3": "Role-based access",
+      "p3b": "Admin · Vendor · Kitchen"
+    },
+    "vendor": {
+      "brand": "Vendor dashboard",
+      "title": "Vendor sign-in",
+      "subtitle": "Enter your business mobile number registered with JAZLA.",
+      "footer": "No vendor account yet?",
+      "apply": "Apply to join",
+      "panelName": "vendor dashboard",
+      "heroTitle": "Vendor dashboard",
+      "heroBody": "Receive your orders, set slaughter times and follow your earnings in one place.",
+      "p1": "Live orders",
+      "p1b": "Instant alert for every new order",
+      "p2": "Earnings & payouts",
+      "p2b": "Weekly settlement to your bank account",
+      "p3": "Products & stock",
+      "p3b": "Update prices and availability"
+    },
+    "kitchen": {
+      "brand": "Kitchen dashboard",
+      "title": "Kitchen sign-in",
+      "subtitle": "Enter the mobile number registered for your kitchen.",
+      "footer": "Kitchen accounts are created by the JAZLA team. Contact them if your number isn't registered.",
+      "panelName": "kitchen dashboard",
+      "heroTitle": "Kitchen dashboard",
+      "heroBody": "Receive cooking tasks, update their status and hand them over on time.",
+      "p1": "Today and upcoming",
+      "p1b": "Sound alert for every new task",
+      "p2": "Every dish in detail",
+      "p2b": "Number of guests and customer notes",
+      "p3": "On-time handover",
+      "p3b": "Call the courier when it's ready"
+    },
+    "customer": {
+      "brand": "Sell on JAZLA",
+      "title": "Join as a vendor",
+      "subtitle": "We verify your mobile number first. You'll sign in to your dashboard with it once approved.",
+      "footer": "Already a vendor?",
+      "apply": "Sign in",
+      "heroTitle": "Sell on JAZLA",
+      "heroBody": "Join the butcheries, slaughterhouses and farms selling to JAZLA customers in Riyadh and Taif.",
+      "p1": "Your store in the app",
+      "p1b": "Shown to JAZLA customers once approved",
+      "p2": "Weekly payouts",
+      "p2b": "Weekly settlement to your bank account",
+      "p3": "Five steps",
+      "p3b": "Reviewed within 2 to 3 working days"
+    }
+  },
+  "coverage": {
+    "breadcrumb": "Admin / Settings / Coverage zones",
+    "title": "Coverage zones",
+    "newZone": "New zone",
+    "mapLabel": "Coverage zones map",
+    "nameAr": "Arabic name",
+    "nameEn": "English name",
+    "city": "City",
+    "color": "Zone color",
+    "status": "Status",
+    "active": "Active",
+    "inactive": "Inactive",
+    "activeToggle": "Zone is active",
+    "selectZone": "Edit {zone}",
+    "hints": {
+      "draw": "Click the map to place the boundary points, then click the first point to close the zone.",
+      "edit": "Drag the points to change the boundary, or click a point to remove it.",
+      "test": "Click anywhere on the map to see whether it is covered."
+    },
+    "test": {
+      "start": "Test a point",
+      "stop": "Stop testing",
+      "covered": "Covered: {zone}",
+      "notCovered": "Not covered",
+      "loading": "Checking…"
+    },
+    "form": {
+      "newTitle": "New zone",
+      "editTitle": "Zone details",
+      "body": "Customers see the name when their address is checked. Inactive zones don't count as covered.",
+      "editShape": "Edit boundary",
+      "delete": "Delete zone"
+    },
+    "errors": {
+      "invalidPolygon": "The boundary isn't valid. Draw at least three points without crossing lines.",
+      "notFound": "This zone no longer exists, so we reloaded the list.",
+      "validation": "Check the highlighted fields."
+    },
+    "empty": {
+      "title": "No coverage zones",
+      "body": "Draw the first zone on the map to start taking orders from it."
+    },
+    "deleteDialog": {
+      "title": "Delete the zone?",
+      "body": "Orders from “{zone}” won't be accepted after it is deleted."
+    },
+    "colors": {
+      "ember": "Ember",
+      "info": "Blue",
+      "success": "Green",
+      "warning": "Orange",
+      "gold-text": "Gold",
+      "brand": "Dark wine",
+      "custom": "Custom color {hex}"
+    },
+    "cityHint": "Write the city name in Arabic, e.g. الرياض.",
+    "restored": "We restored what you drew before signing in. Check it, then save."
+  },
+  "apply": {
+    "bar": {
+      "brand": "Vendor sign-up",
+      "signIn": "Already a vendor? Sign in",
+      "signOut": "Sign out"
+    },
+    "steps": {
+      "business": "Business details",
+      "documents": "Documents",
+      "bank": "Bank account",
+      "location": "Location",
+      "review": "Photos & review"
+    },
+    "stepsLabel": "Application steps",
+    "stepOf": "Step {n} of 5 · {name}",
+    "stepDone": "{name}, done",
+    "next": "Next",
+    "back": "Back",
+    "submit": "Submit application",
+    "saveLater": "Save and finish later",
+    "savedLater": "Your details are saved on this device, except the IBAN. Finish the application any time.",
+    "restored": "We restored what you typed before, except the IBAN, which we ask for again. Check it, then continue.",
+    "fix": "{count, plural, one {Fix the field highlighted in red, then continue.} other {Fix the fields highlighted in red, then continue.}}",
+    "loading": "Loading the application",
+    "business": {
+      "title": "Business details",
+      "body": "As on your commercial registration. You can change the store name and description later from your dashboard.",
+      "type": "Business type",
+      "types": {
+        "butchery": "Butchery",
+        "slaughterhouse": "Slaughterhouse",
+        "farm": "Farm"
+      },
+      "nameAr": "Store name in Arabic",
+      "nameArHint": "The name customers see",
+      "nameEn": "Store name in English",
+      "nameEnHint": "Shown in the English interface",
+      "cr": "Commercial registration number",
+      "crHint": "10 digits",
+      "vat": "VAT number (optional)",
+      "vatHint": "15 digits, starting and ending with 3",
+      "city": "City",
+      "cityHint": "Riyadh or Taif for now",
+      "email": "Email",
+      "emailHint": "We send the confirmation and the review result there",
+      "phone": "Mobile number",
+      "phoneHint": "Verified. You'll sign in to your dashboard with it once approved",
+      "description": "Short description (optional)",
+      "descriptionPlaceholder": "Fresh local meat every day",
+      "descriptionHint": "One line shown under the store name"
+    },
+    "documents": {
+      "title": "Documents",
+      "body": "Upload clear, valid copies. The first three are required to submit.",
+      "required": "Required",
+      "optional": "Optional",
+      "hint": "PDF or photo, up to 10 MB",
+      "upload": "Upload file",
+      "replace": "Replace",
+      "remove": "Remove",
+      "kinds": {
+        "commercial_registration": "Commercial registration",
+        "health_certificate": "Health certificate",
+        "facility_photo": "Photo of the facility from outside",
+        "municipality_licence": "Municipality licence",
+        "national_id": "Owner's national ID"
+      },
+      "previous": "File from your previous application",
+      "file": "{name} · {size}",
+      "mb": "{size} MB",
+      "kb": "{size} KB",
+      "missing": "Upload this document",
+      "tooLarge": "The file is larger than 10 MB",
+      "wrongType": "PDF, JPG or PNG only",
+      "failed": "The upload failed. Try again.",
+      "expired": "This file is no longer valid. Upload it again."
+    },
+    "bank": {
+      "title": "Bank account",
+      "body": "The account we pay your earnings into every week. It must be in the name of the business or its owner.",
+      "bank": "Bank",
+      "bankHint": "Read from the IBAN",
+      "holder": "Account holder name",
+      "holderHint": "As at the bank",
+      "iban": "IBAN",
+      "ibanHint": "SA followed by 22 characters",
+      "note": "The IBAN is stored encrypted; after saving only its last 4 digits are shown, to you and the JAZLA team."
+    },
+    "location": {
+      "title": "Facility location",
+      "body": "Couriers collect orders here, and delivery areas are measured from it.",
+      "mapLabel": "Facility location map",
+      "drag": "Drag the pin to the facility door",
+      "district": "District",
+      "address": "Address details",
+      "addressHint": "A landmark that helps the courier",
+      "pinRequired": "Move the pin to the facility door on the map"
+    },
+    "review": {
+      "title": "Photos & review",
+      "body": "Photos are optional and can be added later. After you submit, the JAZLA team reviews the application.",
+      "cover": "Cover photo (optional)",
+      "logo": "Store logo (optional)",
+      "addPhoto": "Add photo",
+      "summary": "Check your application before submitting",
+      "store": "Business",
+      "cr": "Commercial registration",
+      "docs": "Documents",
+      "docsValue": "{required} of 3 required, {optional} optional",
+      "bank": "Bank account",
+      "location": "Location",
+      "agree": "I confirm the details are correct and accept the JAZLA vendor terms",
+      "agreeRequired": "Accept the statement to submit"
+    },
+    "errors": {
+      "required": "This field is required",
+      "name": "Use 2 to 100 characters",
+      "cr": "The commercial registration has 10 digits",
+      "vat": "15 digits, starting and ending with 3",
+      "city": "Use 2 to 50 characters",
+      "holder": "The name as at the bank, 2 to 100 characters",
+      "iban": "Not a valid Saudi IBAN. It starts with SA followed by 22 characters",
+      "description": "Up to 1000 characters",
+      "location": "Move the pin to the facility",
+      "documents": "Upload the three required documents",
+      "alreadyHeld": "Your number already works for a JAZLA store. Sign in to the vendor dashboard.",
+      "crExists": "A JAZLA store is already registered with this commercial registration number",
+      "submit": "The application could not be sent. Try again.",
+      "rateLimited": "Too many attempts. Wait a little, then send the application again."
+    }
+  },
+  "application": {
+    "number": "Application {number} · sent {date}",
+    "badges": {
+      "pending": "In review",
+      "approved": "Approved",
+      "rejected": "Not approved"
+    },
+    "pending": {
+      "title": "We received your application",
+      "body": "We review applications within 2 to 3 working days, and you'll get a text message once approved.",
+      "view": "View the application",
+      "hide": "Hide the application"
+    },
+    "approved": {
+      "title": "Your store is approved on JAZLA",
+      "body": "Your vendor dashboard is ready. Sign in with {phone}, then add your products and working hours so customers can see your store.",
+      "payout": "Payouts",
+      "payoutValue": "Weekly to {iban}",
+      "enter": "Go to the vendor dashboard"
+    },
+    "rejected": {
+      "title": "We couldn't approve the application",
+      "body": "You can fix the note and submit again. Your previous details are kept.",
+      "reason": "Review note",
+      "reapply": "Edit and submit again"
+    },
+    "timeline": {
+      "label": "Application progress",
+      "received": "Application received",
+      "review": "Document review",
+      "reviewing": "In progress",
+      "result": "Result",
+      "resultSoon": "Within 2 to 3 working days",
+      "resultDone": "{status} · {date}"
+    },
+    "support": "Contact vendor support",
+    "summary": {
+      "store": "Business",
+      "cr": "Commercial registration",
+      "vat": "VAT number",
+      "city": "City",
+      "docs": "Documents",
+      "docsValue": "{count} documents",
+      "bank": "Bank account",
+      "holder": "Account holder"
+    }
+  },
+  "store": {
+    "breadcrumb": "Settings / Store profile",
+    "title": "Store profile",
+    "placeholder": "Type here",
+    "identity": {
+      "title": "Store identity",
+      "body": "The name, description and photos as customers see them on the store page.",
+      "name": "Store name",
+      "nameHint": "As customers see it",
+      "tagline": "Short tagline",
+      "taglineHint": "Up to 40 characters",
+      "description": "Store description",
+      "descriptionEn": "Store description in English",
+      "descriptionHint": "Shown on the store page, up to 1000 characters",
+      "logo": "Store logo",
+      "cover": "Cover photo",
+      "change": "Change the {name}",
+      "imageTooLarge": "The image is larger than 2 MB",
+      "imageType": "JPG, PNG or WebP only"
+    },
+    "contact": {
+      "title": "Contact details",
+      "body": "Used by the JAZLA team to reach you; never shown to customers.",
+      "phone": "Mobile number",
+      "phoneHint": "The person handling orders",
+      "email": "Email",
+      "emailHint": "For order notifications",
+      "vat": "VAT number",
+      "vatHint": "15 digits, starting and ending with 3",
+      "phoneInvalid": "Not a valid Saudi mobile or landline number",
+      "emailInvalid": "The email format is not valid"
+    },
+    "location": {
+      "title": "Location",
+      "body": "The branch orders leave from and customers collect at.",
+      "mapLabel": "Store location map",
+      "address": "Address",
+      "addressHint": "Street, district and city"
+    },
+    "hours": {
+      "title": "Working hours",
+      "body": "When you receive and prepare orders.",
+      "weekdays": "Saturday to Thursday · 8:00 AM to 11:00 PM",
+      "friday": "Friday · 1:00 PM to 11:00 PM",
+      "holidays": "Public holidays"
+    },
+    "bank": {
+      "title": "Bank account",
+      "body": "Net earnings are paid here weekly. Contact support to change it.",
+      "iban": "IBAN",
+      "ibanHint": "Can't be changed here"
+    },
+    "save": "Save changes",
+    "discard": "Discard",
+    "saved": "Changes saved.",
+    "fix": "Fix the fields highlighted in red, then save.",
+    "error": {
+      "title": "We couldn't load the store profile",
+      "body": "Check your connection, then try again.",
+      "retry": "Try again"
+    },
+    "suspended": "Your store is suspended by the JAZLA team and the details are read-only. Contact support to reactivate it."
+  },
+  "vendors": {
+    "breadcrumb": "Stores / All stores",
+    "title": "Stores",
+    "export": "Export",
+    "invite": "Invite vendor",
+    "search": "Search by store name or CR number",
+    "clear": "Clear all",
+    "category": "Category",
+    "city": "City",
+    "status": "Store status",
+    "appliedOn": "Applied on",
+    "tabsLabel": "Store status",
+    "tabs": {
+      "pending": "Pending review",
+      "active": "Active",
+      "suspended": "Suspended"
+    },
+    "chip": {
+      "status": "Status: {value}",
+      "city": "City: {value}"
+    },
+    "cols": {
+      "store": "Store",
+      "city": "City",
+      "status": "Status",
+      "applied": "Applied on",
+      "products": "Products",
+      "commission": "Commission"
+    },
+    "badges": {
+      "pending": "Pending review",
+      "approved": "Approved",
+      "rejected": "Rejected",
+      "active": "Active",
+      "suspended": "Suspended"
+    },
+    "noCommission": "Not set",
+    "unknown": "—",
+    "open": "Review {name}",
+    "empty": {
+      "title": "No matching stores",
+      "body": "No applications match these filters. Try clearing them.",
+      "action": "Clear filters",
+      "noneTitle": "No stores here yet",
+      "noneBody": "Stores with this status will show here."
+    },
+    "error": {
+      "title": "Couldn't load the stores",
+      "body": "Something went wrong while loading the list. Try again.",
+      "action": "Try again"
+    },
+    "denied": {
+      "title": "You can't manage stores",
+      "body": "This page is for the platform manager and onboarding officers only.",
+      "action": "Back to the overview"
+    }
+  },
+  "review": {
+    "breadcrumb": {
+      "application": "Stores / Applications / {name}",
+      "vendor": "Stores / All stores / {name}",
+      "loading": "Stores / Applications"
+    },
+    "title": "Review: {name}",
+    "titleLoading": "Store review",
+    "summary": {
+      "title": "Store details",
+      "store": "Store",
+      "cr": "Commercial registration",
+      "vat": "VAT number",
+      "holder": "Account holder",
+      "phone": "Phone",
+      "iban": "IBAN",
+      "none": "—"
+    },
+    "location": "Location",
+    "docs": {
+      "title": "Documents",
+      "kindsLabel": "Document type",
+      "zoomIn": "Zoom in",
+      "zoomOut": "Zoom out",
+      "rotate": "Rotate",
+      "download": "Download",
+      "match": "Document matches",
+      "matched": "Matched",
+      "reupload": "Ask for a new upload",
+      "cantShow": "This file can't be shown here",
+      "open": "Open the file",
+      "kinds": {
+        "commercial_registration": "Commercial registration",
+        "municipality_licence": "Municipality licence",
+        "health_certificate": "Health certificate",
+        "national_id": "National ID",
+        "facility_photo": "Facility photo"
+      }
+    },
+    "photos": "Store photos",
+    "decision": {
+      "title": "Review decision",
+      "cr": "Commercial registration is valid",
+      "docs": "Documents match",
+      "location": "Location matches the photos",
+      "approve": "Approve store",
+      "reject": "Reject application"
+    },
+    "active": {
+      "title": "Store is active",
+      "status": "Status",
+      "since": "Active since {date}",
+      "commission": "Commission",
+      "suspend": "Suspend store"
+    },
+    "suspended": {
+      "title": "Store is suspended",
+      "since": "Suspended since {date}",
+      "reason": "Reason",
+      "reinstate": "Reactivate store"
+    },
+    "rejected": {
+      "title": "Application rejected",
+      "on": "Rejected on {date}",
+      "reason": "Reason"
+    },
+    "approveDialog": {
+      "title": "Approve {name}",
+      "body": "Set the platform commission on every order of this store.",
+      "label": "Commission (%)",
+      "hint": "0 to 100 percent of the order value",
+      "invalid": "Enter a percentage from 0 to 100, with at most two decimals",
+      "confirm": "Approve and activate"
+    },
+    "rejectDialog": {
+      "title": "Reject application",
+      "body": "The vendor gets the reason and can edit the application and apply again.",
+      "presetsLabel": "Common reasons",
+      "presets": {
+        "expired": "Expired document",
+        "unclear": "Unclear photos",
+        "mismatch": "Details don't match"
+      },
+      "presetText": {
+        "expired": "One of the documents has expired. Upload a valid copy.",
+        "unclear": "Some photos are unclear. Upload clearer ones.",
+        "mismatch": "The details don't match the documents. Correct them and apply again."
+      },
+      "label": "Rejection reason",
+      "hint": "The vendor sees it as written",
+      "confirm": "Confirm rejection"
+    },
+    "suspendDialog": {
+      "title": "Suspend store",
+      "body": "The store and its products are hidden from customers; current orders carry on.",
+      "label": "Suspension reason",
+      "hint": "Kept in the audit log, seen by admins only",
+      "confirm": "Suspend store"
+    },
+    "reinstateDialog": {
+      "title": "Reactivate {name}",
+      "body": "The store shows to customers again and its team can sign in again.",
+      "confirm": "Reactivate"
+    },
+    "crExists": "Already registered to another JAZLA store",
+    "reasonRequired": "Write the reason",
+    "reasonTooLong": "500 characters at most",
+    "toast": {
+      "approved": "{name} is approved and active",
+      "rejected": "{name}'s application was rejected",
+      "suspended": "{name} is suspended",
+      "reinstated": "{name} is active again",
+      "notPending": "Another admin reviewed this application; this is where it stands now",
+      "accessHeld": "The applicant now works for another vendor; nothing changed",
+      "crExists": "Not approved: another store is registered with the same commercial registration number. Reject the application with the reason.",
+      "conflict": "The store's status changed; this is where it stands now",
+      "failed": "Couldn't complete that. Try again."
+    },
+    "error": {
+      "title": "Couldn't load the application",
+      "body": "Something went wrong while loading the store and its documents.",
+      "action": "Try again"
+    },
+    "denied": {
+      "title": "You can't review applications",
+      "body": "Ask the platform manager for the onboarding officer role.",
+      "action": "Back"
+    },
+    "notFound": {
+      "title": "Store not found",
+      "body": "The link may be wrong, or the application was removed.",
+      "action": "Back to stores"
+    },
+    "tabs": {
+      "label": "Store sections",
+      "details": "Store details",
+      "capacity": "Capacity"
+    }
+  },
+  "catalog": {
+    "categories": {
+      "breadcrumb": "Catalog / Categories",
+      "title": "Categories",
+      "add": "Add category",
+      "reorder": "Reorder categories",
+      "saveOrder": "Save order",
+      "cancelOrder": "Cancel",
+      "orderSaved": "Category order saved",
+      "orderFailed": "The order was not fully saved; the table shows what was. Try again.",
+      "denied": {
+        "title": "You are not allowed to manage categories",
+        "body": "Categories are managed by the catalog manager only.",
+        "action": "Back to the dashboard"
+      },
+      "error": {
+        "title": "Could not load the categories",
+        "body": "Something went wrong while loading. Try again.",
+        "action": "Try again"
+      },
+      "empty": {
+        "title": "No categories yet",
+        "body": "Create the first category so vendors can file their products under it."
+      },
+      "cols": {
+        "category": "Category",
+        "slug": "English name",
+        "products": "Products",
+        "order": "Order",
+        "status": "Status",
+        "actions": "Actions"
+      },
+      "visible": "Visible",
+      "hidden": "Hidden",
+      "moveUp": "Move {name} up",
+      "moveDown": "Move {name} down",
+      "edit": "Edit {name}",
+      "imageRule": "A JPEG, PNG or WebP image up to 2 MB",
+      "saved": "Category {name} saved",
+      "saveFailed": "Could not save the category. Try again.",
+      "editTitle": "Edit category {name}",
+      "addTitle": "Add category",
+      "image": "Category image",
+      "nameAr": "Category name (Arabic)",
+      "nameArHint": "Shown to customers",
+      "nameEn": "English name",
+      "nameEnHint": "Shown in the app in English",
+      "visibleSwitch": "Visible in the store",
+      "removeImage": "Remove image"
+    },
+    "products": {
+      "breadcrumb": "Catalog / All products",
+      "title": "Products",
+      "add": "Add product",
+      "categories": "Categories",
+      "search": "Search by product or store",
+      "clear": "Clear all",
+      "category": "Category",
+      "vendor": "Store",
+      "statusFilter": "Product status",
+      "status": {
+        "draft": "Draft",
+        "pending_review": "In review",
+        "published": "Published",
+        "rejected": "Rejected",
+        "unavailable": "Unavailable"
+      },
+      "chip": {
+        "status": "Status: {value}",
+        "vendor": "Store: {value}",
+        "category": "Category: {value}"
+      },
+      "cols": {
+        "product": "Product",
+        "vendor": "Store",
+        "category": "Category",
+        "price": "From",
+        "status": "Status",
+        "date": "Added on",
+        "available": "Available"
+      },
+      "availableLabel": "{name} can be ordered",
+      "availableOn": "{name} can be ordered now",
+      "availableOff": "{name} switched off",
+      "notEditable": "A product under review cannot be changed.",
+      "availabilityFailed": "Could not change availability. Try again.",
+      "open": "Open {name}",
+      "empty": {
+        "title": "No matching products",
+        "body": "No product matches these filters. Try clearing them.",
+        "action": "Clear filters",
+        "noneTitle": "No products yet",
+        "noneBody": "JAZLA's and the stores' products will show here."
+      },
+      "error": {
+        "title": "Could not load the products",
+        "body": "Something went wrong while loading. Try again.",
+        "action": "Try again"
+      },
+      "denied": {
+        "title": "You are not allowed to view products",
+        "body": "Ask the platform manager for the catalog manager role.",
+        "action": "Back to the dashboard"
+      },
+      "notJazla": "Only JAZLA products can be switched here.",
+      "review": "Review requests"
+    },
+    "product": {
+      "newTitle": "New product",
+      "breadcrumbEdit": "Catalog / Edit product",
+      "breadcrumbNew": "Catalog / New product",
+      "loading": "Loading the product",
+      "published": "{name} published",
+      "saved": "{name} saved",
+      "denied": {
+        "title": "You are not allowed to manage products",
+        "body": "Ask the platform manager for the catalog manager role.",
+        "action": "Back to the dashboard"
+      },
+      "missing": {
+        "title": "Product not found",
+        "body": "The link may be wrong, or the product belongs to another store.",
+        "action": "Back to products"
+      },
+      "error": {
+        "title": "Could not load the product",
+        "body": "Check your connection and try again.",
+        "action": "Try again"
+      },
+      "publish": "Save and publish",
+      "saveDraft": "Save as draft",
+      "save": "Save changes",
+      "delete": "Delete product",
+      "editTitle": "Edit product",
+      "foreign": {
+        "title": "Another store's product",
+        "body": "Stores' products are reviewed from the review queue, not edited here."
+      }
+    },
+    "form": {
+      "placeholder": "Type here",
+      "choose": "Choose",
+      "none": "None",
+      "sar": "SAR",
+      "free": "Free",
+      "saveFailed": "Could not save the product. Try again.",
+      "basics": {
+        "title": "Basic information",
+        "body": "The product's name and description as customers see them.",
+        "nameAr": "Product name (Arabic)",
+        "nameEn": "Product name (English)",
+        "nameHint": "2 to 100 characters",
+        "descAr": "Description (Arabic)",
+        "descEn": "Description (English)",
+        "descHint": "Up to 1000 characters",
+        "category": "Category",
+        "categoryHint": "Decides where the product shows",
+        "meatType": "Meat type",
+        "meatTypeHint": "Optional"
+      },
+      "images": {
+        "title": "Images",
+        "body": "The first image is the cover. Add up to {max} high-quality images and drag them to reorder.",
+        "add": "Add image",
+        "rule": "A JPEG, PNG or WebP image up to 5 MB",
+        "cover": "Cover image, 1 of {count}",
+        "image": "Image {n} of {count}",
+        "remove": "Remove image {n}"
+      },
+      "sizes": {
+        "available": "Size {n} can be ordered",
+        "title": "Sizes and prices",
+        "body": "Each size has its own price in Saudi riyals.",
+        "tagAr": "Size {n} label (Arabic)",
+        "tagArPlaceholder": "صغير",
+        "tagEn": "Size {n} label (English)",
+        "tagEnPlaceholder": "e.g. Small",
+        "grams": "Size {n} weight in grams",
+        "gramsPlaceholder": "Weight",
+        "gramsUnit": "g",
+        "price": "Size {n} price",
+        "remove": "Remove size {n}",
+        "add": "Add size"
+      },
+      "cuts": {
+        "title": "Cutting styles",
+        "body": "Choose the cutting styles offered for this product, and their extra price if any.",
+        "extra": "Extra price for {name}"
+      },
+      "packs": {
+        "title": "Packaging",
+        "body": "Packaging options and their price over the base price.",
+        "extra": "Extra price for {name}"
+      },
+      "packaging": {
+        "vacuum": "Vacuum bag",
+        "trays": "Chilled tray",
+        "bags": "Bags",
+        "none": "No packaging"
+      },
+      "exclusions": {
+        "title": "Exclusions",
+        "body": "What a customer may ask to leave out."
+      },
+      "matrix": {
+        "title": "Compatibility matrix",
+        "body": "Set which cutting style suits which packaging. {cuts} cutting styles × {packs} packagings; a rule applies to every product.",
+        "bodyReadOnly": "Which cutting style suits which packaging, as JAZLA sets it. {cuts} cutting styles × {packs} packagings.",
+        "cell": "{cut} with {packaging}: {state}",
+        "compatible": "Compatible",
+        "incompatible": "Incompatible",
+        "legendIncompatible": "Incompatible: shown disabled to customers, with the reason",
+        "failed": "Could not change the rule. Try again.",
+        "confirmTitle": "Change the rule for every product?",
+        "confirmForbid": "{cut} with {packaging} becomes incompatible on every product of the platform, not only this one, including vendor products under review.",
+        "confirmAllow": "{cut} with {packaging} becomes compatible on every product of the platform, not only this one, including vendor products under review.",
+        "confirm": "Change the rule"
+      },
+      "fulfilment": {
+        "title": "Preparation and delivery",
+        "body": "How this product reaches the customer.",
+        "delivery": "Delivery available",
+        "pickup": "Store pickup",
+        "onOrder": "Slaughtered on order",
+        "prep": "Preparation time",
+        "prepHint": "From order confirmation",
+        "minQty": "Minimum quantity",
+        "minQtyHint": "In the size's unit"
+      },
+      "availability": {
+        "title": "Availability",
+        "body": "Days the product can be ordered, and the daily quantity.",
+        "available": "Can be ordered",
+        "days": {
+          "sun": "Sun",
+          "mon": "Mon",
+          "tue": "Tue",
+          "wed": "Wed",
+          "thu": "Thu",
+          "fri": "Fri",
+          "sat": "Sat"
+        },
+        "daily": "Daily quantity",
+        "dailyHint": "Orders stop when it runs out",
+        "pause": "Paused until",
+        "pauseHint": "Leave empty if not needed"
+      },
+      "required": {
+        "name": {
+          "ar": "The product name is required",
+          "en": "The English name is required"
+        },
+        "categoryId": "Choose a category",
+        "fulfilment": "Turn on delivery or pickup",
+        "priceHalalas": "Price required",
+        "approxWeightGrams": "Weight required",
+        "tag": "Write the label in both languages"
+      },
+      "constraint": {
+        "too_small": "Below the minimum",
+        "too_big": "The value is too large",
+        "minLength": "At least 2 characters",
+        "maxLength": "The text is too long",
+        "isLivePrice": "The current price changed; reload the page",
+        "isActiveCategory": "This category is no longer available",
+        "isActiveMeatType": "This meat type is no longer available",
+        "isActiveCuttingStyle": "This cutting style is no longer available",
+        "isActiveExclusionItem": "This exclusion is no longer available",
+        "isNotRepeated": "Repeated",
+        "isSizeOfProduct": "This size is no longer on the product; reload the page",
+        "NO_SIZE": "Add at least one size before publishing",
+        "NO_IMAGE": "Add at least one image before publishing",
+        "MEDIA_NOT_READY": "An image did not finish uploading; upload it again"
+      }
+    }
+  },
+  "vendorProducts": {
+    "breadcrumb": "Products / All products",
+    "title": "My products",
+    "add": "Add product",
+    "search": "Search by product name",
+    "cols": {
+      "availability": "Availability",
+      "date": "Last update"
+    },
+    "availability": {
+      "available": "Available",
+      "hidden": "Not listed",
+      "out": "Out of stock"
+    },
+    "chip": "Availability: {value}",
+    "rejectedNotice": "{count, plural, one {# rejected product is} other {# rejected products are}} waiting for your edits. Open the product to read the review notes.",
+    "empty": {
+      "title": "No products yet",
+      "body": "Add your first product with its sizes and cuts; customers see it after review.",
+      "action": "Add your first product"
+    },
+    "error": {
+      "title": "Couldn't load your products",
+      "body": "Something went wrong while loading the list. Try again.",
+      "action": "Try again"
+    },
+    "blocked": {
+      "title": "Your store is suspended",
+      "body": "The JAZLA team suspended your store, so products can't be managed now. Contact support to reactivate it, then sign in again.",
+      "action": "Sign in",
+      "formTitle": "You can't edit products now",
+      "formBody": "Your store is temporarily suspended. Contact support to reactivate it."
+    },
+    "done": {
+      "submit": "{name} sent for review",
+      "on": "{name} can be ordered now",
+      "off": "Orders of {name} paused"
+    },
+    "failed": {
+      "incomplete": "The product is incomplete: add an image and at least one size",
+      "notEditable": "A product under review can't be changed.",
+      "other": "Couldn't do that. Try again."
+    },
+    "menu": {
+      "label": "Actions for {name}",
+      "edit": "Edit",
+      "view": "View",
+      "notes": "Review notes",
+      "submit": "Send for review",
+      "on": "Make available",
+      "off": "Pause orders"
+    },
+    "product": {
+      "newTitle": "New product",
+      "editTitle": "Edit product",
+      "breadcrumbEdit": "My products / Edit product",
+      "breadcrumbNew": "My products / New product",
+      "loading": "Loading the product",
+      "missing": {
+        "title": "Product not found",
+        "body": "The link may be gone, or the product belongs to another store.",
+        "action": "Back to my products"
+      },
+      "error": {
+        "title": "Couldn't load the product",
+        "body": "Check your connection and try again.",
+        "action": "Try again"
+      },
+      "submit": "Send for review",
+      "saveDraft": "Save as draft",
+      "save": "Save changes",
+      "delete": "Delete product",
+      "submitted": "{name} sent for review",
+      "sentForReview": "Your edit of {name} was sent for review; the live product stays as it is until approved",
+      "saved": "{name} saved",
+      "underReview": "The product is under review and can't be edited until a decision. We'll let you know within one working day.",
+      "rejected": "The product was rejected. Read the review notes, edit it, then send it again.",
+      "notes": "Review notes",
+      "editPending": "Your edit sent on {date} is waiting for review and is shown here. The live product stays as it is until approved.",
+      "editRejected": "Your last edit was rejected: {reason}",
+      "reReview": "This will be re-reviewed: changes to the name, description, images, category or options go to the JAZLA team, and the live product stays as it is until approved. Prices, availability and fulfilment apply at once."
+    },
+    "notes": {
+      "breadcrumb": "My products / {name} / Notes",
+      "heading": "Review notes",
+      "title": "Review team notes",
+      "product": "Product",
+      "name": "Name",
+      "category": "Category",
+      "loading": "Loading the review notes",
+      "by": "JAZLA team · {date} · {time}",
+      "team": "JAZLA team",
+      "intro": "We couldn't publish the product because of the notes below. Fix them and send it again; we review within one working day.",
+      "reason": "Review team note",
+      "fix": "Edit product",
+      "resubmit": "Edit and resend",
+      "delete": "Delete product",
+      "state": {
+        "pending": "The product was sent for review after your edits. We'll let you know the decision within one working day.",
+        "approved": "Approved and published in the store.",
+        "draft": "The product hasn't been sent for review yet."
+      },
+      "missing": {
+        "title": "Product not found",
+        "body": "The link may be gone, or the product belongs to another store.",
+        "action": "Back to my products"
+      },
+      "error": {
+        "title": "Couldn't load the review notes",
+        "body": "Check your connection and try again.",
+        "action": "Try again"
+      }
+    }
+  },
+  "reviewQueue": {
+    "filters": {
+      "allKinds": "All kinds",
+      "allStores": "All stores"
+    },
+    "breadcrumb": "Catalog / Review requests",
+    "title": "Product review",
+    "tabs": {
+      "pending": "In review",
+      "approved": "Approved",
+      "rejected": "Rejected"
+    },
+    "cols": {
+      "product": "Product",
+      "vendor": "Store",
+      "type": "Request",
+      "sent": "Sent",
+      "waiting": "Waiting"
+    },
+    "type": {
+      "new": "New product",
+      "edit": "Product edit"
+    },
+    "waited": {
+      "hours": "{n, plural, =0 {Under an hour} one {# hour} other {# hours}}",
+      "days": "{n, plural, one {# day} other {# days}}"
+    },
+    "open": "Review",
+    "view": "View",
+    "openLabel": "Review {name}",
+    "stale": "The request changed since you opened it (another admin decided or the vendor edited again). The list was reloaded.",
+    "empty": {
+      "pending": "No products waiting for review",
+      "body": "Every submitted product has been reviewed. We'll let you know when a new request arrives.",
+      "action": "View approved products",
+      "approved": "No approved products yet",
+      "rejected": "No rejected products",
+      "decidedBody": "Stores' products show here once reviewed."
+    },
+    "error": {
+      "title": "Couldn't load the review queue",
+      "body": "Something went wrong while loading. Try again.",
+      "action": "Try again"
+    },
+    "denied": {
+      "title": "You don't have permission to review products",
+      "body": "Product review is available to catalog supervisors.",
+      "action": "Back to overview"
+    },
+    "dialog": {
+      "title": "Review: {name}",
+      "vendor": "Store",
+      "category": "Category",
+      "price": "Price from",
+      "sizes": "Sizes",
+      "cuts": "Cuts",
+      "packs": "Packaging",
+      "changes": "Changes",
+      "reasonShown": "Rejection reason",
+      "grams": "{n} g",
+      "part": {
+        "details": "Name and description",
+        "category": "Category",
+        "images": "Images",
+        "sizes": "Sizes",
+        "cuts": "Cuts",
+        "packs": "Packaging",
+        "exclusions": "“Without” options"
+      },
+      "presets": "Ready reasons",
+      "preset": {
+        "image": "Unclear image",
+        "description": "Incomplete description",
+        "price": "Unrealistic price"
+      },
+      "presetText": {
+        "image": "The product image is unclear; take a photo in better light",
+        "description": "The description is incomplete; add the weight, the origin and the cut",
+        "price": "The price doesn't match the weight; check the size prices"
+      },
+      "reason": "Rejection reason (shown to the vendor)",
+      "hint": "One clear sentence is enough",
+      "required": "Write the reason for the vendor to read.",
+      "tooLong": "The reason is longer than 500 characters.",
+      "approve": "Approve and publish",
+      "reject": "Reject with reason",
+      "close": "Close",
+      "approved": "{name} approved and published",
+      "rejected": "{name} rejected; the reason was sent to the vendor",
+      "notSubmittable": "The product is incomplete: add an image and at least one size",
+      "failed": "Couldn't save the decision. Try again."
+    }
+  },
+  "operations": {
+    "breadcrumb": "Settings / Operations",
+    "title": "Operations settings",
+    "loading": "Loading the operations settings",
+    "tabs": {
+      "label": "Settings pages",
+      "operations": "Operations",
+      "coverage": "Coverage zones"
+    },
+    "pause": {
+      "section": "Taking orders",
+      "badgeOpen": "Orders open",
+      "badgePaused": "Orders paused",
+      "titleOpen": "Taking orders",
+      "titlePaused": "Ordering is paused now",
+      "bodyOpen": "The store takes orders as usual. Pause at once when needed and customers will see a message.",
+      "bodyPaused": "Customers see the pause message and cannot complete an order. Switch it off to take orders again at once.",
+      "switch": "Pause orders",
+      "headerSwitch": "Pause all orders",
+      "messageAr": "Message customers see (Arabic)",
+      "messageEn": "Message in English",
+      "messageHint": "Shown at the top of checkout while paused (FR-SCH-07)",
+      "confirmTitle": "Pause orders?",
+      "confirmBody": "Customers will see the pause message at once and cannot complete an order until you resume.",
+      "confirm": "Pause now",
+      "resumeTitle": "Resume orders?",
+      "resumeBody": "The pause message goes away and customers can complete orders at once.",
+      "resume": "Resume now",
+      "pausedToast": "Orders are paused",
+      "resumedToast": "Orders resumed",
+      "banner": "Ordering is paused. Customers see: “{message}”",
+      "failed": "Could not change ordering. Try again.",
+      "denied": "You are not allowed to pause orders."
+    },
+    "capacity": {
+      "title": "Daily capacity and order cutoffs",
+      "body": "The most orders and carcasses a day, and the last time to order for each type.",
+      "orders": "Most orders a day",
+      "carcasses": "Most carcasses a day",
+      "hint": "The day closes on its own once reached",
+      "cutoff": "Order cutoff: {type}",
+      "lead": "Days ahead: {type}",
+      "leadHint": "0 = same-day orders allowed",
+      "timezone": "All times are Riyadh time (Asia/Riyadh, UTC+3) and computed on the server."
+    },
+    "types": {
+      "ready_meat": "Ready meat",
+      "carcass": "Carcass",
+      "cooked": "Cooking",
+      "occasion": "Occasion"
+    },
+    "riyadh": "Riyadh time",
+    "closed": {
+      "title": "Closed days",
+      "body": "Close given days for delivery and pickup (holidays, Eid, operations).",
+      "legend": "Legend",
+      "legendItems": {
+        "closed": "Closed: store holiday",
+        "full": "Full: no capacity left",
+        "cutoff": "Ordering time is over for this day"
+      },
+      "month": "Closed days this month",
+      "none": "No closed days this month",
+      "add": "Add closed day",
+      "prev": "Previous month",
+      "next": "Next month",
+      "remove": "Remove {day}",
+      "closeDay": "Close {day}",
+      "closedMark": "closed",
+      "scope": {
+        "delivery": "Delivery only",
+        "pickup": "Pickup only"
+      },
+      "scopes": {
+        "both": "Delivery and pickup",
+        "delivery": "Delivery only",
+        "pickup": "Pickup only"
+      },
+      "dialog": {
+        "title": "Add a closed day",
+        "date": "Date",
+        "scope": "What closes",
+        "reasonAr": "Reason in Arabic",
+        "reasonEn": "Reason in English",
+        "confirm": "Add",
+        "taken": "This day is closed already"
+      }
+    },
+    "delivery": {
+      "title": "Delivery windows",
+      "body": "One daily delivery window, and how many days ahead customers can book.",
+      "start": "Delivery window start",
+      "end": "Delivery window end",
+      "horizon": "Days open for booking",
+      "horizonHint": "Shown to the customer in the days strip",
+      "preview": "What the customer sees",
+      "previewText": "Arrives between {from} and {to} {period, select, am {AM} other {PM}}"
+    },
+    "fees": {
+      "title": "Minimum order and delivery fee",
+      "body": "Shown to the customer in the cart and at checkout, VAT included.",
+      "minOrder": "Minimum order (SAR)",
+      "minOrderHint": "An order below it cannot be completed",
+      "fee": "Delivery fee (SAR)",
+      "feeHint": "Added only when delivery is chosen"
+    },
+    "cod": {
+      "title": "Cash on delivery",
+      "body": "When the customer may pay cash on delivery.",
+      "enabled": "Allow cash on delivery",
+      "max": "Largest order (SAR)",
+      "maxHint": "Leave empty for no limit",
+      "confirmation": "Order confirmation",
+      "confirmationHint": {
+        "auto": "The order is confirmed on its own",
+        "review": "The team reviews the order before confirming it"
+      },
+      "auto": "Automatic",
+      "review": "Team review",
+      "types": "Order types allowed"
+    },
+    "complaints": {
+      "title": "Complaint window",
+      "body": "How long after an order the customer can file a complaint.",
+      "hours": "Complaint window (hours)",
+      "hint": "Counted from delivery"
+    },
+    "save": "Save changes",
+    "cancel": "Cancel",
+    "saved": "Operations settings saved",
+    "failed": "Could not save the settings. Try again.",
+    "invalid": "Check the fields marked in red.",
+    "error": {
+      "title": "Could not load the operations settings",
+      "body": "The data could not be loaded. Try again.",
+      "action": "Try again"
+    },
+    "denied": {
+      "title": "You are not allowed to edit the operations settings",
+      "body": "Contact the account manager for access.",
+      "action": "Back"
+    },
+    "errors": {
+      "time": "Enter a valid 24-hour time",
+      "endBeforeStart": "The end must be after the start",
+      "positive": "The limit must be more than zero",
+      "leadDays": "Enter 0 to 30 days",
+      "amount": "Enter a valid amount in SAR",
+      "horizon": "Enter 1 to 60 days",
+      "hours": "Enter 1 to 720 hours",
+      "message": "Write the message (200 characters at most)",
+      "reason": "Write the reason (100 characters at most)",
+      "notPast": "A past day cannot be chosen",
+      "closedDay": "Choose a valid date",
+      "invalid": "Invalid value"
+    }
+  },
+  "vendorCapacity": {
+    "loading": "Loading the store capacity",
+    "failed": "Could not save the capacity. Try again.",
+    "saved": "Store default capacity saved",
+    "daySaved": "Date capacity saved",
+    "dayRemoved": "Date removed",
+    "platformHint": "Leave empty to use the platform capacity ({n})",
+    "platformHintGeneric": "Leave empty to use the platform capacity",
+    "useDefault": "Default",
+    "date": "Date",
+    "ordersLimit": "Orders limit",
+    "carcassesLimit": "Carcasses limit",
+    "booked": "Booked",
+    "bookedValue": "{orders} orders · {carcasses} carcasses",
+    "default": {
+      "title": "Store default capacity",
+      "body": "Replaces the platform's daily capacity for this store.",
+      "ordersPerDay": "Most orders a day",
+      "carcassesPerDay": "Most carcasses a day",
+      "save": "Save capacity"
+    },
+    "days": {
+      "title": "Specific dates",
+      "body": "A different capacity for one day (occasion, Eid, maintenance). It comes before the default.",
+      "emptyTitle": "No specific dates",
+      "emptyBody": "Every day follows the default capacity. Add a date for a different one.",
+      "add": "Add date",
+      "remove": "Remove {date}"
+    },
+    "dialog": {
+      "title": "Capacity for a date",
+      "body": "Leave a limit empty to use the store's default capacity.",
+      "date": "Date",
+      "ordersLimit": "Orders limit",
+      "carcassesLimit": "Carcasses limit",
+      "limitHint": "Empty = default capacity",
+      "confirm": "Save"
+    },
+    "error": {
+      "title": "Could not load the store capacity",
+      "body": "The data could not be loaded. Try again.",
+      "action": "Try again"
+    },
+    "denied": {
+      "title": "You are not allowed to edit the store capacity",
+      "body": "Contact the account manager for access.",
+      "action": "Back"
+    }
+  },
+  "orders": {
+    "breadcrumb": "Orders / All orders",
+    "title": "Orders",
+    "export": "Export",
+    "search": "Search",
+    "clear": "Clear all",
+    "status": "Status",
+    "vendor": "Store",
+    "method": "Payment method",
+    "date": "Date",
+    "chip": {
+      "status": "Status: {value}",
+      "vendor": "Store: {value}",
+      "method": "Payment: {value}",
+      "date": "Date: {value}"
+    },
+    "cols": {
+      "number": "Order no.",
+      "customer": "Customer",
+      "vendor": "Store",
+      "status": "Status",
+      "payment": "Payment",
+      "amount": "Amount",
+      "date": "Date"
+    },
+    "statuses": {
+      "pending_payment": "Awaiting payment",
+      "new": "To confirm",
+      "confirmed": "New",
+      "preparing": "Preparing",
+      "ready": "Ready",
+      "picked_up": "With the driver",
+      "out_for_delivery": "On the way",
+      "delivered": "Delivered",
+      "collected": "Collected",
+      "cancelled": "Cancelled",
+      "delivery_failed": "Delivery failed",
+      "returned": "Returned"
+    },
+    "methods": {
+      "mada": "mada card",
+      "card": "Credit card",
+      "applepay": "Apple Pay",
+      "cod": "Cash on delivery",
+      "wallet": "Wallet"
+    },
+    "open": "Open order {number}",
+    "fresh": "New order {number} arrived",
+    "empty": {
+      "title": "No matching orders",
+      "body": "Try changing the filters or the date range.",
+      "action": "Clear filters",
+      "noneTitle": "No orders yet",
+      "noneBody": "Your past and current orders will show here."
+    }
+  },
+  "orderDetail": {
+    "breadcrumb": "Orders / {number}",
+    "breadcrumbLoading": "Orders",
+    "title": "Order {number}",
+    "titleLoading": "Order",
+    "cancelRefund": "Cancel & refund",
+    "printLabel": "Print label",
+    "printLabelA6": "Print A6 label",
+    "reschedule": "Reschedule",
+    "items": {
+      "title": "Products ({count})",
+      "image": "Image",
+      "product": "Product",
+      "qty": "Qty",
+      "price": "Price",
+      "grams": "{value} g",
+      "cut": "Cut: {value}",
+      "packaging": "Packaging: {value}",
+      "without": "Without: {value}"
+    },
+    "payment": {
+      "title": "Payment & delivery",
+      "subtotal": "Subtotal",
+      "discount": "Discount",
+      "delivery": "Delivery fee",
+      "total": "Total (VAT included)",
+      "method": "Payment method",
+      "fromWallet": "From the wallet",
+      "customer": "Customer",
+      "store": "Store",
+      "slot": "Delivery slot",
+      "pickupSlot": "Pickup day",
+      "slotValue": "{date}, {start} to {end}",
+      "notes": "Customer notes",
+      "cancelReason": "Cancellation reason",
+      "refund": {
+        "wallet": "Refund to the wallet",
+        "original": "Refund to the payment method"
+      },
+      "refundStatus": {
+        "pending": "in progress",
+        "succeeded": "done",
+        "failed": "failed"
+      }
+    },
+    "status": {
+      "title": "Order status",
+      "actions": "Update the order status",
+      "steps": {
+        "confirmed": "Order received",
+        "preparing": "Preparing",
+        "ready": "Slaughtered & prepared",
+        "out_for_delivery": "On the way",
+        "delivered": "Delivered",
+        "collected": "Collected by the customer"
+      }
+    },
+    "next": {
+      "confirmed": "Confirm order",
+      "preparing": "Start preparing",
+      "ready": "Ready",
+      "picked_up": "Picked up by the driver",
+      "out_for_delivery": "On the way",
+      "delivered": "Delivered",
+      "collected": "Collected by the customer",
+      "delivery_failed": "Delivery failed",
+      "returned": "Returned"
+    },
+    "cod": {
+      "notice": "Cash on delivery: review the order before it goes to the store.",
+      "confirm": "Confirm order",
+      "reject": "Reject order"
+    },
+    "codReject": {
+      "title": "Reject order {number}?",
+      "body": "The order is cancelled and the customer is told. Nothing has been paid yet.",
+      "confirm": "Reject order"
+    },
+    "cancel": {
+      "title": "Cancel order {number}?",
+      "original": "{amount} will go back to the {method} within 3 to 5 working days.",
+      "split": "{amount} will go back to the {method} within 3 to 5 working days, and {wallet} to the customer's wallet right away.",
+      "wallet": "{amount} will be added to the customer's wallet right away.",
+      "nothing": "Nothing has been paid, so there is nothing to refund.",
+      "confirm": "Confirm cancellation",
+      "back": "Go back",
+      "refundTo": "Refund to",
+      "toOriginal": "{method}",
+      "toWallet": "Customer wallet",
+      "reason": "Cancellation reason",
+      "reasonRequired": "Write the cancellation reason",
+      "reasonTooLong": "The reason is longer than 500 characters"
+    },
+    "rescheduleDialog": {
+      "title": "Reschedule delivery",
+      "body": "The customer will be told the new slot: {date}, {start} to {end}.",
+      "pick": "Choose an available day",
+      "day": "New day",
+      "current": "current slot",
+      "confirm": "Save slot",
+      "reasons": {
+        "PAST_CUTOFF": "past the cutoff",
+        "CLOSED": "closed",
+        "FULL": "full",
+        "OUTSIDE_HORIZON": "outside the booking window",
+        "VENDOR_CLOSED": "store closed"
+      }
+    },
+    "location": {
+      "delivery": "Delivery location",
+      "pickup": "Pickup location",
+      "notes": "Address note: {value}"
+    },
+    "label": {
+      "title": "A6 order label (preview)",
+      "number": "Order no.",
+      "customer": "Customer",
+      "store": "Store",
+      "slot": "Delivery slot",
+      "pickupSlot": "Pickup day",
+      "weight": "Weight",
+      "kg": "{value} kg",
+      "barcode": "Barcode of order number {number}",
+      "print": "Print",
+      "back": "Back to details"
+    },
+    "toast": {
+      "transitioned": "Order status updated to “{status}”",
+      "codConfirmed": "Order {number} confirmed",
+      "cancelled": "Order {number} cancelled",
+      "rescheduled": "New slot saved",
+      "conflict": "The order changed, the page was refreshed",
+      "dayGone": "That day is no longer available, choose another",
+      "failed": "The action failed, try again"
+    },
+    "notFound": {
+      "title": "Order not found",
+      "body": "The link may be wrong, or the order is not your store's.",
+      "adminBody": "The link may be wrong. Look the order up by its number in the orders list.",
+      "action": "Back to orders"
+    }
+  },
+  "coupons": {
+    "breadcrumb": "Marketing / Coupons",
+    "formBreadcrumb": "Marketing / Coupons",
+    "title": "Coupons",
+    "new": "New coupon",
+    "search": "Search by coupon code",
+    "clear": "Clear all",
+    "status": "Coupon status",
+    "statuses": {
+      "active": "Active",
+      "scheduled": "Scheduled",
+      "expired": "Expired",
+      "inactive": "Inactive"
+    },
+    "types": {
+      "percent": "Percentage",
+      "fixed": "Fixed amount"
+    },
+    "chip": {
+      "status": "Status: {value}"
+    },
+    "cols": {
+      "code": "Code",
+      "discount": "Discount",
+      "status": "Status",
+      "usage": "Usage",
+      "dates": "Period"
+    },
+    "minOrder": "Min. {amount}",
+    "usageOf": "{used} / {limit}",
+    "usageNoLimit": "{used} / no limit",
+    "dateRange": "{from} – {to}",
+    "open": "Open {code}",
+    "empty": {
+      "title": "No matching coupons",
+      "body": "No coupons match this search or status. Try clearing them.",
+      "action": "Clear filters",
+      "noneTitle": "No coupons yet",
+      "noneBody": "Create your first discount coupon to see it here."
+    },
+    "error": {
+      "title": "Couldn't load the coupons",
+      "body": "Something went wrong while loading the list. Please try again.",
+      "action": "Try again"
+    },
+    "formError": {
+      "title": "Couldn't load the coupon",
+      "body": "Something went wrong while loading this coupon. Please try again."
+    },
+    "denied": {
+      "title": "You don't have permission to manage coupons",
+      "body": "This page is available to the platform manager and the marketing officer only.",
+      "action": "Back to the overview"
+    },
+    "missing": {
+      "title": "Coupon not found",
+      "body": "It may have been removed, or the link is wrong."
+    },
+    "back": "Back to coupons",
+    "loading": "Loading the coupon",
+    "newTitle": "New coupon",
+    "editTitle": "Edit coupon",
+    "deactivate": "Deactivate coupon",
+    "save": "Save changes",
+    "create": "Create coupon",
+    "cancel": "Cancel",
+    "saved": "Coupon {code} saved",
+    "created": "Coupon {code} created",
+    "deactivated": "Coupon {code} deactivated",
+    "invalid": "Check the highlighted fields",
+    "failed": "Couldn't save. Please try again.",
+    "confirm": {
+      "title": "Deactivate coupon {code}?",
+      "body": "Customers will no longer be able to use it in the cart. Its usage history stays, and you can turn it back on from the form.",
+      "action": "Deactivate"
+    },
+    "usage": {
+      "title": "Usage",
+      "body": "How this coupon has been used in orders so far.",
+      "uses": "Times used",
+      "users": "Distinct customers",
+      "discount": "Total discount"
+    },
+    "form": {
+      "discount": {
+        "title": "Discount",
+        "body": "The code customers type in the cart, the discount type and its value."
+      },
+      "conditions": {
+        "title": "Conditions",
+        "body": "When the coupon applies. Leave a field empty to include everything."
+      },
+      "period": {
+        "title": "Period and limits",
+        "body": "When the coupon is valid and how many times it can be used."
+      },
+      "state": {
+        "title": "Status",
+        "body": "An inactive coupon is refused in the cart even within its period."
+      },
+      "code": "Coupon code",
+      "codeHint": "3 to 32 Latin letters, digits, \"-\" or \"_\", no spaces",
+      "type": "Discount type",
+      "percent": "Discount (%)",
+      "percentHint": "From 1 to 100",
+      "amount": "Discount amount (SAR)",
+      "amountHint": "Taken off the eligible products' total",
+      "maxDiscount": "Maximum discount (SAR)",
+      "minOrder": "Minimum order (SAR)",
+      "optionalHint": "Optional",
+      "vendors": "Stores",
+      "vendorsHint": "No store chosen: applies to every store",
+      "categories": "Categories",
+      "categoriesHint": "No category chosen: applies to every category",
+      "selected": "{count} selected",
+      "firstOrderOnly": "First order only",
+      "firstOrderOnlySoon": "Not available yet",
+      "startsAt": "Starts",
+      "endsAt": "Ends",
+      "riyadh": "Riyadh time",
+      "usageLimit": "Total usage limit",
+      "perUserLimit": "Limit per customer",
+      "unlimitedHint": "Leave empty for no limit",
+      "isActive": "Coupon active",
+      "unavailable": "Unavailable"
+    },
+    "errors": {
+      "code": "Enter a code of 3 to 32 Latin letters, digits, \"-\" or \"_\"",
+      "taken": "This code is already used by another coupon",
+      "percent": "Enter a percentage from 1 to 100",
+      "amount": "Enter a valid amount in SAR",
+      "limit": "Enter a number greater than zero",
+      "date": "Choose the date and time",
+      "endBeforeStart": "The end must be after the start",
+      "invalid": "Invalid value"
+    }
+  }
+}

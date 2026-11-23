@@ -4,6 +4,8 @@
 
 **Release:** v0.3.0 (**first end-to-end order demo to the client**)
 
+**Closing rule:** see CONTRIBUTING.md §5, "When an issue closes". A frontend task built ahead of the API closes when it is wired to the merged contract with tests. The staging check goes with the backend task and the release.
+
 **Exit criteria (demo on staging):**
 - Adding a product from a second vendor prompts "replace cart?". Below the minimum order, checkout is blocked and the remaining amount is shown.
 - Changing the carcass cutoff in the dashboard immediately changes the first available day. Closed and full days are disabled, each with its reason. Pausing orders shows the admin's message.
@@ -15,7 +17,7 @@
 - MP-2: SCH-DSH-1 (operations settings) merges before the checkout client tasks. PAY-API-2 (real gateway, `needs-client`) is **not** a release gate: clients are built against the payment port, and the live SDK hookup is PAY-MOB-2 in Sprint 4.
 - MP-4: REL-INF-3.
 
-**Parallel tracks:** Backend: CRT/SCH/PAY/ORD/WAL-API · Mobile: CRT-MOB-1, SCH-MOB-1, ORD-MOB-*, PAY-MOB-1 · Web: CRT-WEB-1, SCH-WEB-1, ORD-WEB-* · Dashboard: CRT-DSH-1, SCH-DSH-1, ORD-DSH-1 · QA: SCH-QA-1
+**Parallel tracks:** Backend: CRT/SCH/PAY/ORD/WAL-API · Mobile: CRT-MOB-1, SCH-MOB-1, ORD-MOB-*, PAY-MOB-1 · Dashboard: CRT-DSH-1, SCH-DSH-1, ORD-DSH-1 · QA: SCH-QA-1
 
 ## EPIC CRT — Cart & coupons
 - reqs: FR-CRT-01, FR-CRT-02, FR-CRT-03, FR-CRT-04, FR-ADM-09
@@ -30,6 +32,7 @@ This task also covers:
 - **Guest cart merge on login:** a cart built as a guest moves to the account after login.
 
 **Output:**
+- **Moved in 2026-11-17 from CAT-API-1:** the authoritative `PricingService.priceLine({productId, sizeId, cutId?, packagingId?, exclusionIds[], quantity})` (unit = size + cut extra + packaging extra, prices include VAT, pure function), with table-driven tests and 100% branch coverage. **Built 2026-11-21** in `src/modules/catalog/` (exported `PricingService`, shared cases in `docs/frontend/fixtures/pricing-cases.json`): the cart uses it.
 
 *Cart service (single-vendor rule, totals)*
 - `Cart` (userId unique, vendorId?, couponId?, fulfilment?, addressId?, deliveryDate?) and `CartItem` (productId, sizeId, cutId?, packagingId?, exclusionIds[], notes, quantity, unitPriceSnapshot)
@@ -99,18 +102,6 @@ This task also covers:
 - [ ] Guest adds 2 items → logs in → items are in the server cart
 - [ ] Checkout button is disabled below the minimum order with the remaining amount shown
 
-### CRT-WEB-1 — Web: cart
-`type: Feature · area: web · size: M · prio: P0 · reqs: FR-CRT-01, FR-CRT-02, FR-CRT-03, FR-CRT-04 · depends: CRT-API-1, CRT-API-3, STF-WEB-2`
-
-**What:** the cart on the website.
-
-**Output:** cart drawer + `/[locale]/cart` page with the same behaviours as mobile, guest cart in `localStorage`, merge on login
-
-**Where:** `apps/web/src/app/[locale]/(shop)/cart`, `apps/web/src/features/cart/`
-
-**Acceptance:**
-- [ ] Playwright: add → vendor switch dialog → apply coupon
-
 ## EPIC SCH — Fulfilment, scheduling & operations settings
 - reqs: FR-SCH-01, FR-SCH-02, FR-SCH-03, FR-SCH-04, FR-SCH-05, FR-SCH-06, FR-SCH-07, FR-ADM-05
 Delivery vs pickup, one daily delivery window, cutoffs per order type in Riyadh time, booking horizon, closed days, daily capacity and the pause switch.
@@ -120,7 +111,9 @@ Delivery vs pickup, one daily delivery window, cutoffs per order type in Riyadh 
 
 **What:** every operating rule, editable by the admin without a deploy.
 
-**Output:** setting keys with zod schemas and seeded defaults:
+**Output:**
+- **Moved in 2026-11-17 from FND-API-4:** the typed settings store (`Setting` model, `SettingsService.get<T>(key)` with a zod schema per key, cached, a registry so unknown keys can't be written), with its acceptance: writing a setting with an invalid shape returns 400.
+- Setting keys with zod schemas and seeded defaults:
 - `ops.deliveryWindow {start:"16:00", end:"22:00"}`
 - `ops.cutoffs {ready_meat:{time:"12:00", leadDays:0}, carcass:{time:"20:00", leadDays:1}, cooked:{time:"18:00", leadDays:1}, occasion:{leadDays:3}, adha:{…}}`
 - `ops.bookingHorizonDays 14`
@@ -211,18 +204,6 @@ This task also covers:
 **Acceptance:**
 - [ ] Days are refetched when the method or address changes
 - [ ] Disabled days explain why
-
-### SCH-WEB-1 — Web: checkout step 1 (method, address, day)
-`type: Feature · area: web · size: M · prio: P0 · reqs: FR-SCH-01, FR-SCH-02, FR-SCH-05, FR-SCH-07 · depends: SCH-API-2, ACC-WEB-1, CRT-WEB-1, SCH-DES-1`
-
-**What:** the same step on the website.
-
-**Output:** `/[locale]/checkout` step 1 with the same behaviour as mobile
-
-**Where:** `apps/web/src/app/[locale]/(shop)/checkout`
-
-**Acceptance:**
-- [ ] Playwright: pick delivery + first available day
 
 ### SCH-QA-1 — Scheduling test plan & e2e suite
 `type: Task · area: qa · size: S · prio: P0 · reqs: FR-SCH-03, FR-SCH-05, FR-SCH-06, FR-SCH-07 · depends: SCH-API-2`
@@ -378,6 +359,7 @@ This task also covers:
 - **Customer order history & detail:** customers see their orders.
 
 **Output:**
+- **Moved in 2026-11-17 from FND-API-4:** the socket.io realtime gateway (JWT on handshake, Redis adapter, rooms `user:{id}`, `vendor:{id}`, `kitchen:{id}`, `admin:orders`, `chat:{conversationId}`, `RealtimeService.emitTo`), with its acceptance: a valid token joins its room and receives a test event; a connection without a token is rejected.
 
 *Order routing to admin / vendor & realtime events*
 - `GET /v1/vendor/orders` (own orders, filters: status, date, method) and `GET /v1/vendor/orders/:id`; `GET /v1/admin/orders` (all; Jazlah's own orders are handled here because Jazlah is the platform vendor); realtime `order.created` / `order.updated` to `vendor:{id}` and `admin:orders`; `POST /v1/vendor/orders/:id/transition` and `/v1/admin/orders/:id/transition` (actor-checked)
@@ -415,40 +397,6 @@ This task also covers:
 
 **Acceptance:**
 - [ ] A status change from the dashboard updates the open detail screen without refresh
-
-### ORD-WEB-1 — Web: review, place order & pay
-`type: Feature · area: web · size: L · prio: P0 · reqs: FR-ORD-01, FR-PAY-01, FR-PAY-02, FR-PAY-03 · depends: ORD-API-1, SCH-WEB-1, PAY-API-1`
-
-**What:** final checkout step on the website.
-
-This task also covers:
-- **Web: payment step:** pay on the website.
-
-**Output:**
-
-*Web: review & place order*
-- checkout review step with the same behaviour and error handling as mobile
-
-*Web: payment step*
-- payment step with the gateway's hosted fields/form, Apple Pay on Safari (domain association file served from `/.well-known/`), return URL page that polls the order status
-
-**Where:** `apps/web/src/app/[locale]/(shop)/checkout`, `apps/web/src/app/[locale]/(shop)/checkout/payment`, `apps/web/public/.well-known/`
-
-**Acceptance:**
-- [ ] Playwright: full checkout with COD on staging
-- [ ] Sandbox card payment works; refreshing on the return page is safe
-
-### ORD-WEB-2 — Web: my orders & order detail
-`type: Feature · area: web · size: M · prio: P0 · reqs: FR-ORD-03, FR-ORD-04 · depends: ORD-API-3`
-
-**What:** order history on the website.
-
-**Output:** `/[locale]/orders` and `/[locale]/orders/[id]` with a live timeline
-
-**Where:** `apps/web/src/app/[locale]/(account)/orders`
-
-**Acceptance:**
-- [ ] Live update works with the socket client
 
 ### ORD-DSH-1 — Dashboard: basic orders board (admin & vendor)
 `type: Feature · area: dashboard · size: M · prio: P0 · reqs: FR-ORD-02, FR-ORD-03 · depends: ORD-API-3`
@@ -493,7 +441,7 @@ This task also covers:
 Sprint-end merge points. Each task cuts a release branch, verifies the sprint's exit criteria on staging, merges to `main`, tags, back-merges to `develop` and updates STATUS.md.
 
 ### REL-INF-3 — Release v0.3.0 (Sprint 3 merge point, first end-to-end order demo)
-`type: Task · area: infra · size: XS · prio: P0 · depends: CRT-MOB-1, CRT-WEB-1, CRT-DSH-1, SCH-DSH-1, SCH-MOB-1, SCH-WEB-1, SCH-QA-1, PAY-MOB-1, ORD-WEB-1, ORD-MOB-2, ORD-WEB-2, ORD-DSH-1`
+`type: Task · area: infra · size: XS · prio: P0 · depends: CRT-MOB-1, CRT-DSH-1, SCH-DSH-1, SCH-MOB-1, SCH-QA-1, PAY-MOB-1, ORD-MOB-2, ORD-DSH-1`
 
 **What:** close Sprint 3 and demo a full order to the client.
 

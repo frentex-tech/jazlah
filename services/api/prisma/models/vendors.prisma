@@ -1,0 +1,208 @@
+// Domain: vendors. Owned by the vendors module (src/modules/vendors/): the merchants who
+// sell on the platform, the applications they come from, and their commission history.
+
+/// Whether a vendor may trade: an admin suspends and reinstates it.
+enum VendorStatus {
+  active
+  suspended
+
+  @@map("vendor_status")
+}
+
+/// Where an application is in its review: pending until an admin approves or rejects it.
+enum VendorApplicationStatus {
+  pending
+  approved
+  rejected
+
+  @@map("vendor_application_status")
+}
+
+/// What a document attached to an application shows.
+enum VendorApplicationDocumentKind {
+  commercial_registration
+  health_certificate
+  facility_photo
+  municipality_licence
+  national_id
+
+  @@map("vendor_application_document_kind")
+}
+
+/// A merchant selling on the platform, created when an admin approves its application,
+/// or the platform's own vendor (`is_platform`, at most one row: partial unique index
+/// `vendors_is_platform_key`), created by `pnpm vendor:create-platform`. The business and
+/// bank fields are null only for the platform vendor (check constraint
+/// `vendors_business_fields_check`).
+model Vendor {
+  id                           String       @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  /// The store's names. Renaming either rewrites the store search text of every product of
+  /// the store (trigger `vendors_products_search_text_trigger`, catalog search).
+  nameAr                       String       @map("name_ar")
+  nameEn                       String       @map("name_en")
+  /// Nullable: null until the vendor writes one.
+  descriptionAr                String?      @map("description_ar")
+  /// Nullable: null until the vendor writes one.
+  descriptionEn                String?      @map("description_en")
+  /// Nullable: null until the vendor sets a logo, and when its file is deleted. A ready
+  /// `vendor.logo` file.
+  logoMediaId                  String?      @map("logo_media_id") @db.Uuid
+  /// Nullable: null until the vendor or an admin sets a cover photo, and when its file is
+  /// deleted. A ready `vendor.cover` file.
+  coverMediaId                 String?      @map("cover_media_id") @db.Uuid
+  /// Nullable: null until the vendor or an admin sets one (vendors approved before it
+  /// existed have none). E.164, a Saudi mobile or landline (check constraint
+  /// `vendors_contact_phone_check`). Not public.
+  contactPhone                 String?      @map("contact_phone")
+  /// Nullable: null until the vendor or an admin sets one. Stored lowercase (check
+  /// constraint `vendors_contact_email_check`). Not public.
+  contactEmail                 String?      @map("contact_email")
+  /// Nullable: null when the application gave none and no one set it since. 15 digits,
+  /// starting and ending with 3 (check constraint `vendors_vat_number_check`). Not public.
+  vatNumber                    String?      @map("vat_number")
+  /// Nullable: null for the platform vendor and vendors approved before the city was
+  /// asked. The city name as typed, 2 to 50 characters (check constraint
+  /// `vendors_city_check`); only an admin changes it. Public.
+  city                         String?
+  isPlatform                  Boolean      @default(false) @map("is_platform")
+  status                       VendorStatus @default(active)
+  /// Nullable: null while the vendor is active (check constraint `vendors_suspension_check`).
+  suspendedAt                  DateTime?    @map("suspended_at") @db.Timestamptz(3)
+  /// Nullable: null while the vendor is active. The admin's reason, shown to admins.
+  suspensionReason             String?      @map("suspension_reason")
+  /// The commission on future orders, in basis points (1250 = 12.5%); 0 to 10000 (check
+  /// constraint `vendors_commission_check`). Every change is in vendor_commission_changes.
+  commissionBasisPoints        Int          @map("commission_basis_points")
+  /// Nullable: null only for the platform vendor. 10 digits.
+  commercialRegistrationNumber String?      @map("commercial_registration_number")
+  /// Nullable: null only for the platform vendor. The IBAN, AES-256-GCM encrypted
+  /// (base64url of IV, ciphertext and tag); never sent or logged.
+  ibanEncrypted                String?      @map("iban_encrypted")
+  /// Nullable: null only for the platform vendor. The id of the key ibanEncrypted was
+  /// made with (VENDORS_IBAN_KEY_ID when it was written).
+  ibanKeyId                    String?      @map("iban_key_id")
+  /// Nullable: null only for the platform vendor. The IBAN's last four characters, for
+  /// the masked form.
+  ibanLast4                    String?      @map("iban_last4")
+  /// Nullable: null only for the platform vendor. The name on the bank account.
+  accountHolderName            String?      @map("account_holder_name")
+  /// Nullable: null only for the platform vendor. Degrees, -90 to 90 (check constraint
+  /// `vendors_location_check`).
+  latitude                     Float?
+  /// Nullable: null only for the platform vendor. Degrees, -180 to 180.
+  longitude                    Float?
+  /// Nullable: null only for the platform vendor. The approved application it came from.
+  applicationId                String?      @map("application_id") @db.Uuid
+  createdAt                    DateTime     @default(now()) @map("created_at") @db.Timestamptz(3)
+  updatedAt                    DateTime     @updatedAt @map("updated_at") @db.Timestamptz(3)
+
+  logo              Media?                   @relation("VendorLogo", fields: [logoMediaId], references: [id], onDelete: SetNull)
+  cover             Media?                   @relation("VendorCover", fields: [coverMediaId], references: [id], onDelete: SetNull)
+  application       VendorApplication?       @relation(fields: [applicationId], references: [id], onDelete: Restrict)
+  commissionChanges VendorCommissionChange[]
+  access            UserAccess[]
+  products          Product[]
+
+  @@unique([applicationId], map: "vendors_application_id_key")
+  /// One vendor per commercial registration number (null for the platform vendor).
+  @@unique([commercialRegistrationNumber], map: "vendors_commercial_registration_number_key")
+  @@index([logoMediaId])
+  @@index([coverMediaId])
+  @@index([city, createdAt, id])
+  @@index([status, createdAt, id])
+  @@index([createdAt, id])
+  @@map("vendors")
+}
+
+/// A customer's request to become a vendor. At most one pending application per applicant
+/// (partial unique index `vendor_applications_applicant_id_pending_key`); a rejected
+/// applicant may apply again. The review fields are set exactly when the status is not
+/// pending, and the rejection reason exactly when it is rejected (check constraint
+/// `vendor_applications_review_check`).
+model VendorApplication {
+  id                           String                  @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  applicantId                  String                  @map("applicant_id") @db.Uuid
+  nameAr                       String                  @map("name_ar")
+  nameEn                       String                  @map("name_en")
+  /// Nullable: null when the applicant wrote none.
+  descriptionAr                String?                 @map("description_ar")
+  /// Nullable: null when the applicant wrote none.
+  descriptionEn                String?                 @map("description_en")
+  /// 10 digits.
+  commercialRegistrationNumber String                  @map("commercial_registration_number")
+  /// Nullable: null when the applicant gave none (it is optional). 15 digits, starting and
+  /// ending with 3 (check constraint `vendor_applications_vat_number_check`).
+  vatNumber                    String?                 @map("vat_number")
+  /// Nullable: null only for applications submitted before the city was asked; required
+  /// on new ones. 2 to 50 characters (check constraint `vendor_applications_city_check`).
+  city                         String?
+  /// The IBAN, AES-256-GCM encrypted (as vendors.iban_encrypted); never sent or logged.
+  ibanEncrypted                String                  @map("iban_encrypted")
+  ibanKeyId                    String                  @map("iban_key_id")
+  ibanLast4                    String                  @map("iban_last4")
+  accountHolderName            String                  @map("account_holder_name")
+  /// Degrees, -90 to 90 (check constraint `vendor_applications_location_check`).
+  latitude                     Float
+  /// Degrees, -180 to 180.
+  longitude                    Float
+  status                       VendorApplicationStatus @default(pending)
+  /// Nullable: null unless the application was rejected. The admin's reason, shown to the
+  /// applicant.
+  rejectionReason              String?                 @map("rejection_reason")
+  /// Nullable: null while pending. The admin who approved or rejected it.
+  reviewedById                 String?                 @map("reviewed_by_id") @db.Uuid
+  /// Nullable: null while pending.
+  reviewedAt                   DateTime?               @map("reviewed_at") @db.Timestamptz(3)
+  createdAt                    DateTime                @default(now()) @map("created_at") @db.Timestamptz(3)
+  updatedAt                    DateTime                @updatedAt @map("updated_at") @db.Timestamptz(3)
+
+  applicant  User                        @relation("VendorApplicant", fields: [applicantId], references: [id], onDelete: Restrict)
+  reviewedBy User?                       @relation("VendorApplicationReviewer", fields: [reviewedById], references: [id], onDelete: Restrict)
+  documents  VendorApplicationDocument[]
+  vendor     Vendor?
+
+  @@index([applicantId, createdAt, id])
+  @@index([reviewedById])
+  @@index([status, createdAt, id])
+  @@index([createdAt, id])
+  @@map("vendor_applications")
+}
+
+/// A file attached to an application: a ready `vendor.document` upload of the applicant.
+model VendorApplicationDocument {
+  id            String                        @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  applicationId String                        @map("application_id") @db.Uuid
+  kind          VendorApplicationDocumentKind
+  mediaId       String                        @map("media_id") @db.Uuid
+  createdAt     DateTime                      @default(now()) @map("created_at") @db.Timestamptz(3)
+
+  application VendorApplication @relation(fields: [applicationId], references: [id], onDelete: Cascade)
+  media       Media             @relation(fields: [mediaId], references: [id], onDelete: Restrict)
+
+  // Also the index of the application's foreign key (application_id is its first column).
+  @@unique([applicationId, mediaId], map: "vendor_application_documents_application_id_media_id_key")
+  @@index([mediaId])
+  @@map("vendor_application_documents")
+}
+
+/// The history of a vendor's commission, insert-only: one row when the vendor is created
+/// and one per change, never updated or deleted.
+model VendorCommissionChange {
+  id                            String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  vendorId                      String   @map("vendor_id") @db.Uuid
+  /// The new commission, basis points 0 to 10000 (check constraint
+  /// `vendor_commission_changes_commission_check`).
+  commissionBasisPoints         Int      @map("commission_basis_points")
+  /// Nullable: null for the vendor's first commission.
+  previousCommissionBasisPoints Int?     @map("previous_commission_basis_points")
+  /// Nullable: null when the system set it (the platform vendor's creation).
+  changedById                   String?  @map("changed_by_id") @db.Uuid
+  createdAt                     DateTime @default(now()) @map("created_at") @db.Timestamptz(3)
+
+  vendor    Vendor @relation(fields: [vendorId], references: [id], onDelete: Restrict)
+  changedBy User?  @relation(fields: [changedById], references: [id], onDelete: Restrict)
+
+  @@index([vendorId, createdAt, id])
+  @@index([changedById])
+  @@map("vendor_commission_changes")
+}

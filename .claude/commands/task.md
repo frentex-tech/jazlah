@@ -33,7 +33,11 @@ Work on Jazlah task **$ARGUMENTS** from start to PR. Follow these steps in order
    - what was built
    - the acceptance checklist results
    - the PR link
-   - what the other developer should review
    - what this unblocks next (`tools/dev/task.py info` on its dependents, or the issue's "Unblocks" line)
 
-Never push to `develop` or `main` directly, never merge the PR yourself, and never skip the reviewer.
+7b. **Merge (no second reviewer)**
+   - Once CI is green and the reviewer verdict is APPROVE, merge the PR yourself: `gh pr merge <n> --squash --delete-branch`.
+   - Then move the card: design and docs-only tasks to **Done**, code tasks to **QA** (`python3 tools/dev/task.py move $ARGUMENTS Done|QA`). The dashboard updates on merge.
+   - Exception: a task that waits for a client decision (`needs-client`) is not closed or moved to Done until the client has answered.
+
+Never push to `develop` or `main` directly, and never skip the reviewer.

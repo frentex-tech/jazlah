@@ -14,7 +14,6 @@ Jazlah sells its own products, and partner butchers and slaughterhouses list the
 | Path | What | Stack |
 |---|---|---|
 | [`apps/mobile`](apps/mobile) | Customer app (iOS / Android) | Flutter |
-| [`apps/web`](apps/web) | Customer website | Next.js |
 | [`apps/dashboard`](apps/dashboard) | Admin, vendor and kitchen dashboards (role-based) | Next.js |
 | [`services/api`](services/api) | Backend API, jobs, webhooks, realtime | NestJS · PostgreSQL/PostGIS · Redis |
 | [`infra`](infra) | Environments, deployment, monitoring | Docker · Saudi-region cloud |

@@ -1,0 +1,395 @@
+'use client';
+
+import * as Dialog from '@radix-ui/react-dialog';
+import type { ColumnDef } from '@tanstack/react-table';
+import { useLocale, useTranslations } from 'next-intl';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { PageHeader } from '@/components/shell/page-header';
+import { Badge } from '@/components/ui/badge';
+import { Button, buttonVariants } from '@/components/ui/button';
+import { Chip } from '@/components/ui/chip';
+import { Select } from '@/components/ui/select';
+import { DataTable } from '@/components/ui/data-table';
+import { InputField } from '@/components/ui/form-field';
+import { StateCard } from '@/components/ui/state-card';
+import { Tabs } from '@/components/ui/tabs';
+import { toast } from '@/components/ui/toast';
+import type { Vendor } from '@/features/admin-vendors/types';
+import { Link } from '@/i18n/navigation';
+import { dayOf } from '@/lib/date';
+import { sar } from '@/lib/money';
+import { PERMISSION_DENIED, PRODUCT_NOT_SUBMITTABLE, ApiError, panelFetch } from '@/lib/panel-fetch';
+import { loadAll } from './client';
+import { firstKeptPage } from './skip-pages';
+import { editedContent, liveContent } from './product-form/values';
+import type { Page, Product, ProductCard, ProductContentResponse, RefItem, ReviewItem, ReviewPage } from './types';
+
+const BASE = '/api/admin/catalog';
+/** Tells the side nav to count the queue again (lib: components/shell/side-nav.tsx). */
+export const REVIEW_CHANGED = 'jazlah:review-changed';
+const TABS = ['pending', 'approved', 'rejected'] as const;
+type Tab = (typeof TABS)[number];
+const PRESETS = ['image', 'description', 'price'] as const;
+const KINDS = { product: 'new', change_request: 'edit' } as const;
+
+/** One row: a queue item (a new product, or an edit of a published one), or a decided product of the other tabs. */
+type Item = { key: string; kind: 'new' | 'edit'; productId: string; changeRequestId: string | null; name: { ar: string; en: string }; vendor: { ar: string; en: string } | null; sentAt: string; cover: string | null };
+const PAGE = 20;
+
+const ofQueue = (x: ReviewItem): Item => ({
+  key: x.changeRequestId ?? x.productId, kind: KINDS[x.kind], productId: x.productId, changeRequestId: x.changeRequestId, name: x.name,
+  vendor: x.vendor.name, sentAt: x.submittedAt, cover: null, // the queue item has no image: the row shows the placeholder
+});
+const ofCard = (c: ProductCard): Item => ({
+  key: c.id, kind: 'new', productId: c.id, changeRequestId: null, name: c.name, vendor: c.vendor.name, sentAt: c.createdAt, cover: c.coverUrl,
+});
+
+/** Hours or days since `iso`, for «الانتظار». */
+export function waited(iso: string, now = Date.now()) {
+  const hours = Math.max(0, Math.floor((now - new Date(iso).getTime()) / 3_600_000));
+  return hours < 24 ? { unit: 'hours' as const, n: hours } : { unit: 'days' as const, n: Math.floor(hours / 24) };
+}
+
+/** The parts of a published product an edit changes (its live content against the proposed one). */
+function changedParts(live: ProductContentResponse, next: ProductContentResponse): string[] {
+  const k = (x: unknown) => JSON.stringify(x);
+  const parts: [string, unknown, unknown][] = [
+    ['details', [live.name, live.description], [next.name, next.description]],
+    ['category', [live.categoryId, live.meatTypeId], [next.categoryId, next.meatTypeId]],
+    ['images', live.images.map((i) => i.mediaId), next.images.map((i) => i.mediaId)],
+    ['sizes', live.sizes.map((s) => [s.id, s.approxWeightGrams, s.tag]), next.sizes.map((s) => [s.id, s.approxWeightGrams, s.tag])],
+    ['cuts', live.cuttings.map((c) => c.cuttingStyleId), next.cuttings.map((c) => c.cuttingStyleId)],
+    ['packs', live.packagings.map((c) => c.packaging), next.packagings.map((c) => c.packaging)],
+    ['exclusions', live.exclusionItemIds, next.exclusionItemIds],
+  ];
+  return parts.filter(([, a, b]) => k(a) !== k(b)).map(([p]) => p);
+}
+
+/**
+ * CAT-DSH-2: «مراجعة المنتجات» (131:22954 default, 131:23123 loading, 131:23351 empty, 131:23527 error, 131:23693 not
+ * allowed, 131:23859 review dialog). The pending tab is GET /v1/admin/review-queue: new products and edits of published
+ * ones in one list, newest submission first, filtered by `kind` and `vendorId`. New products are decided with POST
+ * /v1/admin/products/{id}/approve|reject, edits with POST /v1/admin/product-change-requests/{id}/approve|reject.
+ */
+export function ReviewQueue() {
+  const t = useTranslations('reviewQueue');
+  const locale = useLocale();
+  const [tab, setTab] = useState<Tab>('pending');
+  const [kind, setKind] = useState<ReviewItem['kind'] | ''>('');
+  const [vendorId, setVendorId] = useState('');
+  const [data, setData] = useState<Item[] | 'loading' | 'error' | 'denied'>('loading');
+  const [lists, setLists] = useState<{ categories: RefItem[]; cuttingStyles: RefItem[] }>({ categories: [], cuttingStyles: [] });
+  const [open, setOpen] = useState<Item | null>(null);
+  const nameOf = useCallback((n: { ar: string; en: string } | null | undefined) => (n ? (locale === 'en' ? n.en : n.ar) : '—'), [locale]);
+
+  useEffect(() => {
+    loadAll<RefItem>('admin', `${BASE}/lists/categories`).then((categories) => setLists((l) => ({ ...l, categories })), () => {});
+    loadAll<RefItem>('admin', `${BASE}/lists/cutting-styles`).then((cuttingStyles) => setLists((l) => ({ ...l, cuttingStyles })), () => {});
+  }, []);
+  // The stores (the store filter, JAZLA's id for the decided tabs), read once; a failure is not kept, so a retry reads again.
+  const [stores, setStores] = useState<Vendor[]>([]);
+  const vendorList = useRef<Promise<Vendor[]> | null>(null);
+  const vendors = useCallback(() => (vendorList.current ??= loadAll<Vendor>('admin', '/api/admin/vendors').catch((e) => {
+    vendorList.current = null;
+    throw e;
+  })), []);
+  useEffect(() => void vendors().then(setStores, () => {}), [vendors]);
+
+  // The cursors of the pages seen, for «previous»; a new tab or filter starts again at the first page.
+  const [paging, setPaging] = useState<{ key: string; cursors: (string | undefined)[] }>({ key: '', cursors: [undefined] });
+  const [next, setNext] = useState<string | null>(null);
+  const key = `${tab}|${kind}|${vendorId}`;
+  const cursors = paging.key === key ? paging.cursors : [undefined];
+  const setCursors = (c: (string | undefined)[]) => setPaging({ key, cursors: c });
+  const cursor = cursors.at(-1);
+  // Only the latest request may set the list: a slow answer under an old tab, filter or page must not overwrite newer results.
+  const latest = useRef(0);
+  const load = useCallback(async () => {
+    const req = ++latest.current;
+    setData('loading');
+    try {
+      if (tab === 'pending') {
+        const q = new URLSearchParams({ limit: String(PAGE), ...(kind && { kind }), ...(vendorId && { vendorId }), ...(cursor && { cursor }) });
+        const page = await panelFetch<ReviewPage>('admin', `${BASE}/review-queue?${q}`);
+        if (req !== latest.current) return;
+        setNext(page.nextCursor);
+        setData(page.items.map(ofQueue));
+      } else {
+        const platform = (await vendors()).find((v) => v.isPlatform)?.id;
+        // The decided lists are the vendors' products; JAZLA's own are published without review. A page of JAZLA's only
+        // is skipped (up to 5 pages), so a tab never stops on an empty page while more exist.
+        const url = `${BASE}/products?status=${tab === 'approved' ? 'published' : 'rejected'}`;
+        const get = (c: string | null | undefined) => panelFetch<Page<ProductCard>>('admin', `${url}&${new URLSearchParams({ limit: String(PAGE), ...(c && { cursor: c }) })}`);
+        const cards = await firstKeptPage(get, cursor, (c) => c.vendor.id !== platform);
+        if (req !== latest.current) return;
+        setNext(cards.nextCursor);
+        setData(cards.items.map(ofCard));
+      }
+    } catch (e) {
+      if (req === latest.current) setData(e instanceof ApiError && e.code === PERMISSION_DENIED ? 'denied' : 'error');
+    }
+  }, [tab, kind, vendorId, cursor, vendors]);
+  useEffect(() => void load(), [load]);
+
+  const columns = useMemo<ColumnDef<Item, unknown>[]>(
+    () => [
+      {
+        id: 'product',
+        header: t('cols.product'),
+        meta: { width: 300, skeleton: 150 },
+        cell: ({ row: { original: r } }) => {
+          const cover = r.cover;
+          return (
+            <span className="flex min-w-0 items-center gap-s12 text-label-m text-ink">
+              {cover ? (
+                // eslint-disable-next-line @next/next/no-img-element -- the API's public CDN URL, shown as is
+                <img src={cover} alt="" className="size-11 shrink-0 rounded-sm object-cover" />
+              ) : (
+                <span aria-hidden className="size-11 shrink-0 rounded-sm bg-sand" />
+              )}
+              <span className="truncate">{nameOf(r.name)}</span>
+            </span>
+          );
+        },
+      },
+      { id: 'vendor', header: t('cols.vendor'), meta: { width: 160, skeleton: 90 }, cell: ({ row }) => nameOf(row.original.vendor) },
+      {
+        id: 'type',
+        header: t('cols.type'),
+        meta: { width: 140, skeleton: 80 },
+        cell: ({ row }) => <Badge type={row.original.kind === 'new' ? 'neutral' : 'info'}>{t(`type.${row.original.kind}`)}</Badge>,
+      },
+      { id: 'sent', header: t('cols.sent'), meta: { width: 140, skeleton: 90 }, cell: ({ row }) => dayOf(row.original.sentAt, locale) },
+      {
+        id: 'waiting',
+        header: t('cols.waiting'),
+        meta: { width: 120, skeleton: 60 },
+        cell: ({ row }) => {
+          if (tab !== 'pending') return '—';
+          const w = waited(row.original.sentAt);
+          return t(`waited.${w.unit}`, { n: w.n });
+        },
+      },
+      {
+        id: 'action',
+        header: '',
+        meta: { width: 120, skeleton: 60 },
+        cell: ({ row: { original: r } }) => (
+          <Button size="S" variant="secondary" aria-label={t('openLabel', { name: nameOf(r.name) })} onClick={() => setOpen(r)}>
+            {t(tab === 'pending' ? 'open' : 'view')}
+          </Button>
+        ),
+      },
+    ],
+    [t, locale, nameOf, tab],
+  );
+
+  const decided = (item: Item, message: string) => {
+    toast('success', message);
+    setOpen(null);
+    setData((d) => (Array.isArray(d) ? d.filter((x) => x.key !== item.key) : d));
+    window.dispatchEvent(new Event(REVIEW_CHANGED));
+  };
+  const stale = () => {
+    toast('error', t('stale'));
+    setOpen(null);
+    void load();
+    window.dispatchEvent(new Event(REVIEW_CHANGED));
+  };
+
+  const card = 'h-[360px]';
+  return (
+    <>
+      <PageHeader breadcrumb={t('breadcrumb')} title={t('title')} />
+      {data === 'denied' ? (
+        <StateCard kind="denied" className={card} title={t('denied.title')} body={t('denied.body')} action={<Link href="/admin" className={buttonVariants({ variant: 'secondary' })}>{t('denied.action')}</Link>} />
+      ) : data === 'error' ? (
+        <StateCard kind="error" className={card} title={t('error.title')} body={t('error.body')} action={<Button onClick={() => void load()}>{t('error.action')}</Button>} />
+      ) : (
+        <div className="flex flex-col gap-s24">
+          <Tabs tabs={TABS.map((k) => ({ key: k, label: t(`tabs.${k}`) }))} value={tab} onChange={setTab} label={t('title')} controls="review-panel" idPrefix="review-tab" />
+          {tab === 'pending' && (
+            <div className="flex gap-s12">
+              <Select aria-label={t('cols.type')} value={kind} onChange={(e) => setKind(e.target.value as ReviewItem['kind'] | '')}>
+                <option value="">{t('filters.allKinds')}</option>
+                {(Object.keys(KINDS) as ReviewItem['kind'][]).map((k) => <option key={k} value={k}>{t(`type.${KINDS[k]}`)}</option>)}
+              </Select>
+              <Select aria-label={t('cols.vendor')} value={vendorId} onChange={(e) => setVendorId(e.target.value)}>
+                <option value="">{t('filters.allStores')}</option>
+                {stores.filter((v) => !v.isPlatform).map((v) => <option key={v.id} value={v.id}>{nameOf(v.name)}</option>)}
+              </Select>
+            </div>
+          )}
+          <div id="review-panel" role="tabpanel" aria-labelledby={`review-tab-${tab}`}>
+            {data !== 'loading' && data.length === 0 && cursors.length === 1 && !next ? (
+              <StateCard
+                kind="orders"
+                className={card}
+                title={t(`empty.${tab}`)}
+                body={t(tab === 'pending' ? 'empty.body' : 'empty.decidedBody')}
+                action={tab === 'pending' && <Button variant="secondary" onClick={() => setTab('approved')}>{t('empty.action')}</Button>}
+              />
+            ) : (
+              <DataTable
+                tall
+                label={t(`tabs.${tab}`)}
+                columns={columns}
+                data={data === 'loading' ? [] : data}
+                status={data === 'loading' ? 'loading' : 'ready'}
+                loadingRows={4}
+                hasPrev={cursors.length > 1}
+                hasNext={!!next}
+                onPrev={() => setCursors(cursors.slice(0, -1))}
+                onNext={() => next && setCursors([...cursors, next])}
+              />
+            )}
+          </div>
+        </div>
+      )}
+      <ReviewDialog item={open} pending={tab === 'pending'} lists={lists} onClose={() => setOpen(null)} onDecided={decided} onStale={stale} onDenied={() => {
+        setOpen(null);
+        setData('denied');
+      }} />
+    </>
+  );
+}
+
+/** The review dialog (131:23859): the product as the customer would see it, then approve, or reject with a reason. */
+function ReviewDialog({ item, pending, lists, onClose, onDecided, onStale, onDenied }: {
+  item: Item | null;
+  pending: boolean;
+  lists: { categories: RefItem[]; cuttingStyles: RefItem[] };
+  onClose: () => void;
+  onDecided: (item: Item, message: string) => void;
+  onStale: () => void;
+  /** PERMISSION_DENIED on a decision: the page shows its not-allowed state (the session stays). */
+  onDenied: () => void;
+}) {
+  const t = useTranslations('reviewQueue.dialog');
+  const tf = useTranslations('catalog.form');
+  const locale = useLocale();
+  const [product, setProduct] = useState<Product | null>(null);
+  const [reason, setReason] = useState('');
+  const [error, setError] = useState<string>();
+  const [busy, setBusy] = useState<'approve' | 'reject' | null>(null);
+  const nameOf = (n: { ar: string; en: string } | null | undefined) => (n ? (locale === 'en' ? n.en : n.ar) : '—');
+
+  useEffect(() => {
+    setReason('');
+    setError(undefined);
+    setProduct(null);
+    // The row carries no content: the product is read when opened, an edit's proposal is its `changeRequest`.
+    if (item) panelFetch<Product>('admin', `${BASE}/products/${item.productId}`).then(setProduct, () => setProduct(null));
+  }, [item]);
+
+  // An edit previews what approval makes live: the proposed content with the live prices of existing items.
+  // An edit previews its change request (the product's latest one, when it is still this row's).
+  const request = item?.changeRequestId && product?.changeRequest?.id === item.changeRequestId ? product.changeRequest : null;
+  const content = product ? (request ? editedContent({ ...product, changeRequest: request }) : liveContent(product)) : null;
+  const name = nameOf(content?.name ?? item?.name);
+  const category = content && (lists.categories.find((c) => c.id === content.categoryId)?.name ?? (product?.category.id === content.categoryId ? product.category.name : null));
+  // A change request's cuttings have no names: from the cutting styles, or the product's own.
+  const cutName = (id: string) => lists.cuttingStyles.find((c) => c.id === id)?.name ?? product?.cuttings.find((c) => c.cuttingStyleId === id)?.name;
+  const min = content?.sizes.length ? Math.min(...content.sizes.map((s) => s.priceHalalas)) : null;
+  const list = (xs: string[]) => (xs.length ? xs.join(locale === 'en' ? ', ' : '، ') : '—');
+
+  async function decide(action: 'approve' | 'reject') {
+    if (!item) return;
+    const r = reason.trim();
+    if (action === 'reject' && (r.length === 0 || r.length > 500)) return setError(t(r.length ? 'tooLong' : 'required'));
+    const url = item.changeRequestId ? `${BASE}/change-requests/${item.changeRequestId}/${action}` : `${BASE}/products/${item.productId}/${action}`;
+    setBusy(action);
+    try {
+      await panelFetch('admin', url, { method: 'POST', ...(action === 'reject' && { body: JSON.stringify({ reason: r }) }) });
+      onDecided(item, t(action === 'approve' ? 'approved' : 'rejected', { name }));
+    } catch (e) {
+      const code = e instanceof ApiError ? e.code : '';
+      if (code === 'VALIDATION_FAILED') setError(t('required'));
+      else if (code === PERMISSION_DENIED) onDenied();
+      else if (code === 'PRODUCT_NOT_EDITABLE' || code === 'NOT_FOUND' || code === 'PRODUCT_CHANGE_REQUEST_SUPERSEDED') onStale();
+      else if (code === PRODUCT_NOT_SUBMITTABLE) toast('error', t('notSubmittable'));
+      else toast('error', t('failed'));
+    } finally {
+      setBusy(null);
+    }
+  }
+
+  const changes = request && product ? changedParts(liveContent(product), request.content) : [];
+  return (
+    <Dialog.Root open={item !== null} onOpenChange={(o) => !o && !busy && onClose()}>
+      <Dialog.Portal>
+        <Dialog.Overlay className="fixed inset-0 bg-scrim/55" />
+        <Dialog.Content aria-describedby={undefined} className="fixed start-1/2 top-1/2 flex max-h-[90vh] w-[680px] -translate-y-1/2 flex-col gap-s16 overflow-y-auto rounded-lg bg-paper p-s24 shadow-card ltr:-translate-x-1/2 rtl:translate-x-1/2">
+          <Dialog.Title className="text-h2 text-ink">{t('title', { name })}</Dialog.Title>
+          <div className="flex items-start gap-s16">
+            <dl className="flex min-w-0 flex-1 flex-col gap-s12">
+              <Row label={t('vendor')} value={nameOf(item?.vendor)} />
+              <Row label={t('category')} value={nameOf(category)} />
+              <Row label={t('price')} value={min === null ? '—' : sar(min, locale)} />
+              <Row label={t('sizes')} value={list(content?.sizes.map((s) => (s.tag ? nameOf(s.tag) : t('grams', { n: s.approxWeightGrams }))) ?? [])} />
+              <Row label={t('cuts')} value={list(content?.cuttings.map((c) => nameOf(c.name ?? cutName(c.cuttingStyleId))) ?? [])} />
+              <Row label={t('packs')} value={list(content?.packagings.map((k) => tf(`packaging.${k.packaging}`)) ?? [])} />
+              {item?.changeRequestId && <Row label={t('changes')} value={list(changes.map((c) => t(`part.${c}`)))} />}
+              {!pending && product?.rejectionReason && product.status === 'rejected' && <Row label={t('reasonShown')} value={product.rejectionReason} />}
+            </dl>
+            {content?.images[0]?.url ? (
+              // eslint-disable-next-line @next/next/no-img-element -- the API's public CDN URL, shown as is
+              <img src={content.images[0].url} alt="" className="size-40 shrink-0 rounded-md object-cover" />
+            ) : (
+              <span aria-hidden className="size-40 shrink-0 rounded-md bg-sand" />
+            )}
+          </div>
+          {pending && (
+            <>
+              <div role="group" aria-label={t('presets')} className="flex flex-wrap gap-s8">
+                {PRESETS.map((p) => (
+                  <Chip
+                    key={p}
+                    selected={reason === t(`presetText.${p}`)}
+                    onClick={() => {
+                      setReason(t(`presetText.${p}`));
+                      setError(undefined);
+                    }}
+                  >
+                    {t(`preset.${p}`)}
+                  </Chip>
+                ))}
+              </div>
+              <InputField
+                label={t('reason')}
+                hint={t('hint')}
+                error={error}
+                maxLength={500}
+                value={reason}
+                onChange={(e) => {
+                  setReason(e.target.value);
+                  setError(undefined);
+                }}
+              />
+            </>
+          )}
+          <div className="flex gap-s12">
+            {pending && (
+              <>
+                <Button className="flex-1" loading={busy === 'approve'} disabled={!content || (busy !== null && busy !== 'approve')} onClick={() => void decide('approve')}>{t('approve')}</Button>
+                <Button variant="danger" className="flex-1" loading={busy === 'reject'} disabled={!content || (busy !== null && busy !== 'reject')} onClick={() => void decide('reject')}>{t('reject')}</Button>
+              </>
+            )}
+            <Dialog.Close asChild>
+              <Button variant="secondary" className="flex-1" disabled={busy !== null}>{t('close')}</Button>
+            </Dialog.Close>
+          </div>
+        </Dialog.Content>
+      </Dialog.Portal>
+    </Dialog.Root>
+  );
+}
+
+function Row({ label, value }: { label: string; value: React.ReactNode }) {
+  return (
+    <div className="flex items-start justify-between gap-s12">
+      <dt className="shrink-0 text-body-m text-ink-2">{label}</dt>
+      <dd className="text-end text-label-m text-ink">{value}</dd>
+    </div>
+  );
+}

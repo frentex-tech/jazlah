@@ -4,6 +4,8 @@
 
 **Release:** v0.4.0
 
+**Closing rule:** see CONTRIBUTING.md §5, "When an issue closes". A frontend task built ahead of the API closes when it is wired to the merged contract with tests. The staging check goes with the backend task and the release.
+
 **Exit criteria (demo on staging):**
 - Cancelling before "preparing" refunds to the card or the wallet and frees the capacity. A complaint with photos is resolved with a partial refund.
 - Vendor marks an order ready → shipment created (provider sandbox or manual adapter) → webhook updates → delivered, with a push to the customer at each stage. With the provider down, the admin assigns a courier manually and can reschedule.
@@ -16,22 +18,22 @@
 - DLV-API-2 and PAY-MOB-2 depend on client inputs (`needs-client`). If late, release with the manual adapter and the fake provider and carry them over. Nothing else in the sprint waits on them.
 - MP-4: REL-INF-4.
 
-**Parallel tracks:** Backend: CAN/DLV/NOT/VOP/ADM/FIN-API · Dashboard: CAN-DSH-1, DLV-DSH-1, VOP-DSH-1, NOT-DSH-1, ADM-DSH-*, FIN-DSH-1 · Mobile: PAY-MOB-2, CAN-MOB-1, DLV-MOB-1, NOT-MOB-1 · Web: CAN-WEB-1, DLV-WEB-1
+**Parallel tracks:** Backend: CAN/DLV/NOT/VOP/ADM/FIN-API · Dashboard: CAN-DSH-1, DLV-DSH-1, VOP-DSH-1, NOT-DSH-1, ADM-DSH-*, FIN-DSH-1 · Mobile: PAY-MOB-2, CAN-MOB-1, DLV-MOB-1, NOT-MOB-1
 
 ## EPIC PAY — Payments
 - reqs: FR-PAY-01
 Live gateway hookup in the clients once the client's gateway is integrated (PAY-API-2).
 
-### PAY-MOB-2 — Mobile & web: live gateway SDK, Apple Pay certificates & device tests
-`type: Feature · area: mobile · size: M · prio: P0 · reqs: FR-PAY-01 · depends: PAY-API-2, PAY-MOB-1, ORD-WEB-1 · labels: needs-client`
+### PAY-MOB-2 — Mobile: live gateway SDK, Apple Pay certificates & device tests
+`type: Feature · area: mobile · size: M · prio: P0 · reqs: FR-PAY-01 · depends: PAY-API-2, PAY-MOB-1 · labels: needs-client`
 
-**What:** switch the app and website from the fake provider to the chosen gateway.
+**What:** switch the app from the fake provider to the chosen gateway.
 
-**Output:** gateway native SDK / hosted page in the Flutter payment step, Apple Pay merchant ID + certificate per flavor, Apple Pay on the web (domain association file, merchant validation), mada/card 3DS on the web form; real-device test report
+**Output:** gateway native SDK / hosted page in the Flutter payment step, Apple Pay merchant ID + certificate per flavor, mada/card 3DS; real-device test report
 
 **How:** keep the provider choice server-driven (payment-methods endpoint returns provider + method config). No client branching on provider names beyond the SDK adapter.
 
-**Where:** `apps/mobile/lib/features/payment/`, `apps/web/src/app/[locale]/(shop)/checkout/payment`, `apps/web/public/.well-known/`
+**Where:** `apps/mobile/lib/features/payment/`
 
 **Acceptance:**
 - [ ] Sandbox payments succeed on a real iPhone (Apple Pay) and an Android device (mada test card)
@@ -113,28 +115,6 @@ This task also covers:
 **Acceptance:**
 - [ ] Cancel and complaint flows work end-to-end on staging
 - [ ] The list paginates and links to the related order
-
-### CAN-WEB-1 — Web: cancel order, complaints & wallet
-`type: Feature · area: web · size: M · prio: P1 · reqs: FR-CAN-01, FR-CAN-03, FR-WAL-01 · depends: CAN-API-1, ORD-WEB-2, WAL-API-1, OPX-DES-1`
-
-**What:** the same on the website.
-
-This task also covers:
-- **Web: wallet page:** wallet on the website.
-
-**Output:**
-
-*Web: cancel order & raise complaint*
-- cancel dialog and complaint form on the order detail page
-
-*Web: wallet page*
-- `/[locale]/wallet`
-
-**Where:** `apps/web/src/app/[locale]/(account)/orders/[id]`, `apps/web/src/app/[locale]/(account)/wallet`
-
-**Acceptance:**
-- [ ] Works with photo upload via presigned URLs
-- [ ] Matches the mobile data
 
 ## EPIC DLV — Delivery company integration
 - reqs: INT-DLV-01, INT-DLV-02, INT-DLV-03, INT-DLV-04, INT-DLV-05, FR-ORD-05
@@ -239,33 +219,6 @@ This task also covers:
 - [ ] Card only shows from `picked_up` onward
 - [ ] The video plays inline and the card is hidden when there's no record
 
-### DLV-WEB-1 — Web: tracking, freshness & notification center
-`type: Feature · area: web · size: S · prio: P1 · reqs: FR-ORD-05, FR-FRS-01, FR-FRS-02, FR-NOT-03 · depends: ORD-WEB-2, VOP-API-1, NOT-API-1, DLV-API-1`
-
-**What:** tracking card on the website order page.
-
-This task also covers:
-- **Web: freshness block on the order:** the same on the website.
-- **Web: notification center & support links:** inbox and support on the website.
-
-**Output:**
-
-*Web: order tracking*
-- courier info and tracking link on `/[locale]/orders/[id]`
-
-*Web: freshness block on the order*
-- freshness card on `/[locale]/orders/[id]`
-
-*Web: notification center & support links*
-- header bell with the inbox dropdown, contact links in the footer and order page
-
-**Where:** `apps/web/src/app/[locale]/(account)/orders/[id]`, `apps/web/src/components/notifications/`
-
-**Acceptance:**
-- [ ] Same data as mobile
-- [ ] Same data as mobile
-- [ ] Unread count updates on read
-
 ## EPIC NOT — Notifications & support contact
 - reqs: FR-NOT-01, FR-NOT-02, FR-NOT-03
 Push and SMS for status changes, an in-app inbox, marketing campaigns, and support contact.
@@ -279,6 +232,7 @@ This task also covers:
 - **Marketing campaigns & segments:** admins send marketing pushes.
 
 **Output:**
+- **Moved in 2026-11-17 from ACC-API-2:** `POST /v1/customer/devices` `{fcmToken, platform, appVersion}` and `DELETE /v1/customer/devices/:token` with a `Device` model, deleted with the account; acceptance: the same token is not duplicated.
 
 *Notification service (push, SMS, inbox)*
 - `Notification` (userId, type, titleAr/En, bodyAr/En, data {route, id}, readAt) and the inbox endpoints `GET /v1/customer/notifications`, `POST …/read`, unread count
@@ -304,6 +258,26 @@ This task also covers:
 - [ ] e2e (FCM mocked): a status change creates an inbox row and a push call with the right locale
 - [ ] An invalid FCM token is deleted after the error
 - [ ] The preview count matches the delivered count in a seeded test
+
+### NOT-API-2 — Mail integration & vendor application messages
+`type: Feature · area: api · size: M · prio: P0 · reqs: FR-VND-01 · depends: VND-API-2`
+
+**What:** the applicant hears back about a vendor application by email (owner's decision, 2026-11-18). SMS stays for the sign-in code, plus one short SMS on approval.
+
+**Output:**
+- `integrations/mail/` (port, types, errors, service, module, one provider + a fake), as `integrations/README.md` describes; provider and sender address from config
+- The vendor application takes a required contact email, the business type (butcher | slaughterhouse | farm) and the bank name (the last two are in VND-API-1's model and missing from the application input)
+- Emails in ar and en, from templates: application received (with the application number), approved (dashboard link, commission), rejected (the review note and the re-apply link)
+- One SMS on approval, without a link
+- Sent after the transaction commits, through the queue with retries; a failed send never rolls back the review
+
+**Where:** `services/api/src/integrations/mail/`, `services/api/src/modules/vendors/`
+
+**Design:** `docs/design/screens.md`, section «الصفحة العامة وانضمام التاجر», the four messages
+
+**Acceptance:**
+- [ ] e2e with the fake provider: submit, approve and reject each send exactly one email to the applicant's address
+- [ ] A provider failure leaves the application approved and the send retried
 
 ### NOT-MOB-1 — Mobile: push, deep links, notification center & support contact
 `type: Feature · area: mobile · size: M · prio: P0 · reqs: FR-NOT-01, FR-NOT-03 · depends: NOT-API-1, ORD-MOB-2, SCH-API-1, OPX-DES-1`

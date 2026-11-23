@@ -1,0 +1,103 @@
+# Local infrastructure for the JAZLA API: PostgreSQL + PostGIS, Redis and MinIO
+# (S3-compatible object storage). Start with `pnpm infra:up`, stop with `pnpm infra:down`.
+#
+# On first start postgres creates two databases: `jazla` (development) and `jazla_test`
+# (e2e tests). The credentials are for these local containers only.
+#
+# Host ports, both changeable because the usual ones are often taken on a developer
+# machine:
+# - JAZLA_DB_PORT, default 5434 (5432 is often a locally installed PostgreSQL).
+#   DATABASE_URL in `.env` must use the same port.
+# - JAZLA_REDIS_PORT, default 6380 (6379 is often another project's Redis).
+#   REDIS_URL in `.env` must use the same port.
+# - JAZLA_MINIO_PORT, default 9002, the S3 API (9000 is MinIO's default, often taken by
+#   another MinIO or PHP-FPM). STORAGE_ENDPOINT and STORAGE_PUBLIC_BASE_URL in `.env`
+#   must use the same port.
+# - JAZLA_MINIO_CONSOLE_PORT, default 9003, MinIO's web console.
+#
+# On every start MinIO creates the buckets if missing and (re)applies their access rules
+# (docker/minio/init-buckets.sh): jazla-public and jazla-private for development,
+# jazla-public-test and jazla-private-test for the e2e tests.
+name: jazla-api
+
+services:
+  postgres:
+    image: postgis/postgis:17-3.5
+    environment:
+      POSTGRES_USER: jazla
+      POSTGRES_PASSWORD: jazla
+      POSTGRES_DB: jazla
+    ports:
+      - '${JAZLA_DB_PORT:-5434}:5432'
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+      - ./docker/postgres/00-create-test-database.sql:/docker-entrypoint-initdb.d/00-create-test-database.sql:ro
+    healthcheck:
+      test:
+        [
+          'CMD-SHELL',
+          'pg_isready -U jazla -d jazla && pg_isready -U jazla -d jazla_test',
+        ]
+      interval: 2s
+      timeout: 3s
+      retries: 30
+      start_period: 5s
+
+  redis:
+    image: redis:7-alpine
+    # Append-only file, fsync every second: jobs survive a restart of the container.
+    # noeviction: BullMQ requires that Redis never evicts its keys.
+    command:
+      [
+        'redis-server',
+        '--appendonly',
+        'yes',
+        '--appendfsync',
+        'everysec',
+        '--maxmemory-policy',
+        'noeviction',
+      ]
+    ports:
+      - '${JAZLA_REDIS_PORT:-6380}:6379'
+    volumes:
+      - redis-data:/data
+    healthcheck:
+      test: ['CMD', 'redis-cli', 'ping']
+      interval: 2s
+      timeout: 3s
+      retries: 30
+      start_period: 2s
+
+  minio:
+    # The official minio/minio image is no longer published; this is Chainguard's free
+    # build of the MinIO server, pinned by digest (RELEASE.2026-11-12T01-15-23Z). Its shell
+    # and mc run the bucket setup (docker/minio/entrypoint.sh, init-buckets.sh).
+    image: cgr.dev/chainguard/minio@sha256:0f9fda72fbc6bd3560ea903aec2ceefa20f6ba82628d67656f37fb370c39ae9c
+    entrypoint: ['sh', '/init/entrypoint.sh']
+    environment:
+      MINIO_ROOT_USER: jazla
+      MINIO_ROOT_PASSWORD: jazla-local-storage
+      # Browser uploads (presigned POST) and reads from the web apps on any localhost port.
+      # Server-wide: MinIO has no per-bucket CORS. Development only.
+      MINIO_API_CORS_ALLOW_ORIGIN: 'http://localhost:*,http://127.0.0.1:*'
+      # mc's target "local": this server, as the root user (setup and healthcheck).
+      MC_HOST_local: http://jazla:jazla-local-storage@localhost:9000
+      MC_CONFIG_DIR: /tmp/.mc
+    ports:
+      - '${JAZLA_MINIO_PORT:-9002}:9000'
+      - '${JAZLA_MINIO_CONSOLE_PORT:-9003}:9001'
+    volumes:
+      - minio-data:/data
+      - ./docker/minio:/init:ro
+    healthcheck:
+      # Healthy once the server answers and the buckets are set up.
+      test: ['CMD', 'sh', '-c', 'test -f /tmp/buckets-ready && mc ready local']
+      interval: 2s
+      timeout: 3s
+      retries: 30
+      start_period: 5s
+
+volumes:
+  postgres-data:
+  redis-data:
+  minio-data:

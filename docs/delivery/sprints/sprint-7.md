@@ -4,6 +4,8 @@
 
 **Release:** **v1.0.0**
 
+**Closing rule:** see CONTRIBUTING.md §5, "When an issue closes". A frontend task built ahead of the API closes when it is wired to the merged contract with tests. The staging check goes with the backend task and the release.
+
 **Exit criteria:**
 - Production is live on a Saudi-region host with backups verified by a restore drill, monitoring and alerts.
 - Load test: p95 API latency < 500 ms at the expected peak, and the Adha scenario (10× normal) without errors.
@@ -15,7 +17,7 @@
 - Cut `release/v1.0.0` after HRD-QA-1 and HRD-API-1 are done. Production (HRD-INF-1) was provisioned in Sprint 5. UAT (HRD-QA-2) runs on the release branch build.
 - MP-4: REL-INF-7, the launch.
 
-**Parallel tracks:** DevOps: HRD-INF-2, HRD-INF-3 · Backend: HRD-API-1 · QA: HRD-QA-* · Mobile: HRD-MOB-1 · Web: HRD-WEB-1 · Docs/legal: HRD-DOC-1
+**Parallel tracks:** DevOps: HRD-INF-2, HRD-INF-3 · Backend: HRD-API-1 · QA: HRD-QA-* · Mobile: HRD-MOB-1 · Dashboard: HRD-WEB-1 · Docs/legal: HRD-DOC-1
 
 ## EPIC HRD — Hardening & launch
 - reqs: NFR-PER, NFR-AVL, NFR-SEC, NFR-PRV, NFR-HST, NFR-CMP, NFR-USB, NFR-OBS, NFR-STR
@@ -98,18 +100,6 @@ Everything between "feature complete" and "live in the stores".
 **Acceptance:**
 - [ ] Submitted to both stores with complete metadata; every review rejection addressed until approval
 
-### HRD-WEB-1 — Web & dashboard production readiness
-`type: Task · area: web · size: M · prio: P1 · reqs: NFR-PER, NFR-CMP · depends: HRD-INF-1`
-
-**What:** fast, indexable, measurable web apps.
-
-**Output:** Core Web Vitals pass (LCP < 2.5 s on 4G for home and product), image optimization through the CDN, final sitemap/robots/OG tags, GA4 or privacy-friendly analytics on the customer web, error pages, a cross-browser check (last 2 versions of Chrome, Safari, Firefox, Edge) for web and dashboard
-
-**Where:** `apps/web/`, `apps/dashboard/`
-
-**Acceptance:**
-- [ ] Lighthouse performance ≥ 85 on mobile for home and product pages
-
 ### HRD-INF-3 — Go-live runbook & launch
 `type: Task · area: infra · size: S · prio: P0 · reqs: NFR-AVL · depends: HRD-INF-2, HRD-MOB-1, HRD-API-1`
 
@@ -121,6 +111,18 @@ Everything between "feature complete" and "live in the stores".
 
 **Acceptance:**
 - [ ] A real production order is placed, delivered, invoiced and refunded successfully
+
+### HRD-WEB-1 — Dashboard & public page production readiness
+`type: Task · area: dashboard · size: S · prio: P1 · reqs: NFR-PER, NFR-CMP · depends: HRD-INF-1`
+
+**What:** the dashboard app and its public page are fast and measurable. The customer website part was removed on 2026-11-18; the key is kept so the issue stays.
+
+**Output:** image optimization through the CDN, sitemap/robots/OG tags for the public page, error pages, a cross-browser check (last 2 versions of Chrome, Safari, Firefox, Edge) for the dashboard and the public page
+
+**Where:** `apps/dashboard/`
+
+**Acceptance:**
+- [ ] Lighthouse performance ≥ 85 on mobile for the public page
 
 ## EPIC REL — Releases & merge points
 

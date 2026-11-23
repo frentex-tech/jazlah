@@ -1,0 +1,16 @@
+{
+  "extends": "../tsconfig.json",
+  "compilerOptions": {
+    "rootDir": ".",
+    "noEmit": true,
+    "paths": {
+      "@config/*": ["./src/config/*"],
+      "@common/*": ["./src/common/*"],
+      "@infra/*": ["./src/infra/*"],
+      "@integrations/*": ["./src/integrations/*"],
+      "@modules/*": ["./src/modules/*"]
+    }
+  },
+  "include": ["**/*.ts"],
+  "exclude": []
+}
