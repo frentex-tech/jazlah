@@ -14,7 +14,8 @@
     "test:e2e": "playwright test",
     "api:generate": "openapi-typescript ../../services/api/openapi.json -o src/api/schema.d.ts",
     "test:unit": "for f in $(find src -name '*.test.ts' | sort); do node --experimental-strip-types --no-warnings $f || exit 1; done",
-    "test:e2e:api": "playwright test -c playwright.api.config.ts"
+    "test:e2e:api": "playwright test -c playwright.api.config.ts",
+    "test:e2e:contract": "playwright test -c playwright.contract.config.ts"
   },
   "dependencies": {
     "@hookform/resolvers": "^7.0.7",

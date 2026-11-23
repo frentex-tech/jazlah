@@ -1,32 +1,36 @@
 // The in-process mock of backend.ts (DASHBOARD_API_MOCK=1): loaded only through lib/mock-backends.ts, so a production
-// build leaves it out. Seeds follow the rows of 135:47501 and the detail of 135:49134. The vendor session is «مجازر الفلاح»
-// (as the vendor products mock). An access token ending in «-limited» (admin or vendor) is answered NOT_ALLOWED
-// (135:48887, 135:50278). New orders are pushed to `watch` listeners, like ORD-API-3's `order.created`.
+// build leaves it out. Seeds follow the rows of 135:47501 and the detail of 135:49134, in the shapes of openapi.json. The
+// vendor session is «مجازر الفلاح» (as the vendor products mock). An access token ending in «-limited» (admin or vendor) is
+// answered PERMISSION_DENIED (135:48887, 135:50278). New orders are pushed to `watch` listeners, like the realtime
+// `order.created` planned with ORD-API-3.
 import { mockVendors } from '@/features/admin-vendors/backend.mock';
 import { mockOperations } from '@/features/operations/backend.mock';
 import type { ApiResult } from '@/lib/auth/panel-session';
 import { addDays, riyadhToday } from '@/lib/date';
 import type { OrdersBackend, OrdersPanel } from './backend';
-import { canReschedule, canTransition } from './state-machine';
+import { canReschedule, canTransition, nextStatuses } from './state-machine';
 import type { DayOption, Name, Order, OrderItem, OrderStatus, OrderSummary, PaymentMethod } from './types';
+
+/** An order as stored: `allowedTransitions` is worked out for each caller when answered. */
+type Stored = Omit<Order, 'allowedTransitions'>;
 
 const vendorByEn = (en: string) => [...mockVendors.values()].find((v) => v.name.en === en)!;
 const myVendor = () => vendorByEn('Al Falah Butchery');
 const IMG = ['/login/vendor.jpg', '/login/admin.jpg'];
 
 const n = (ar: string, en: string): Name => ({ ar, en });
+const option = (ar: string, en: string) => ({ id: crypto.randomUUID(), name: n(ar, en) });
+const size = (approxWeightGrams: number, tag: Name | null = null) => ({ id: crypto.randomUUID(), approxWeightGrams, tag });
 function item(name: Name, unit: number, quantity: number, i: number, opts: Partial<OrderItem> = {}): OrderItem {
   return {
-    id: crypto.randomUUID(), productId: crypto.randomUUID(), name, imageUrl: IMG[i % 2]!, size: null, cut: null, packaging: null, exclusions: [],
-    quantity, unitPriceHalalas: unit, totalHalalas: unit * quantity, ...opts,
+    id: crypto.randomUUID(), productId: crypto.randomUUID(), name, imageUrl: IMG[i % 2]!, size: size(0), cutting: null, packaging: null, exclusions: [],
+    notes: null, quantity, unitPriceHalalas: unit, totalHalalas: unit * quantity, ...opts,
   };
 }
 const ribeye = (q = 2) =>
-  item(n('ريب آي بقري طازج 500 جم', 'Fresh beef ribeye 500 g'), 8900, q, 0, {
-    size: { name: n('500 جم', '500 g'), weightGrams: 500 }, cut: n('ستيك', 'Steak'), packaging: n('كيس فاكيوم', 'Vacuum bag'), exclusions: [n('الدهن', 'Fat')],
-  });
-const lamb = () => item(n('فخذ ضأن نعيمي', 'Naimi lamb leg'), 5200, 1, 1, { size: { name: n('كيلو', '1 kg'), weightGrams: 1000 }, cut: n('مكعبات', 'Cubes') });
-const strips = () => item(n('ستربس بقري شرائح', 'Beef strips'), 1500, 1, 2, { size: { name: n('250 جم', '250 g'), weightGrams: 250 }, packaging: n('صحن مبرد', 'Chilled tray') });
+  item(n('ريب آي بقري طازج 500 جم', 'Fresh beef ribeye 500 g'), 8900, q, 0, { size: size(500), cutting: option('ستيك', 'Steak'), packaging: 'vacuum', exclusions: [option('الدهن', 'Fat')] });
+const lamb = () => item(n('فخذ ضأن نعيمي', 'Naimi lamb leg'), 5200, 1, 1, { size: size(1000, n('كيلو', '1 kg')), cutting: option('مكعبات', 'Cubes') });
+const strips = () => item(n('ستربس بقري شرائح', 'Beef strips'), 1500, 1, 2, { size: size(250), packaging: 'trays' });
 
 type Seed = { no: number; customer: string; phone: string; vendor: string; status: OrderStatus; method: PaymentMethod; total: number; at: string; pickup?: boolean; items?: OrderItem[] };
 // The rows of 135:47501 (newest first), plus a COD order waiting for review and a pickup order, both «مجازر الفلاح».
@@ -63,54 +67,62 @@ function historyOf(status: OrderStatus, at: string, method: PaymentMethod, picku
 const numberOf = (createdAt: string, no: number) => `JZ-${riyadhToday(new Date(createdAt)).slice(2).replace(/-/g, '')}-${String(no).padStart(4, '0')}`;
 const OPEN: OrderStatus[] = ['pending_payment', 'new', 'confirmed', 'preparing', 'ready'];
 
-function build(s: Seed): Order {
+function build(s: Seed): Stored {
   const v = vendorByEn(s.vendor);
   const pickup = !!s.pickup;
-  const items = s.items ?? [item(n('ذبيحة نعيمي كاملة', 'Whole Naimi carcass'), s.total, 1, s.no)];
+  const items = s.items ?? [item(n('ذبيحة نعيمي كاملة', 'Whole Naimi carcass'), s.total, 1, s.no, { size: size(18000) })];
   const subtotal = items.reduce((a, i) => a + i.totalHalalas, 0);
   const deliveryFee = pickup ? 0 : s.total - subtotal;
-  const paid = s.method !== 'cod' || s.status === 'delivered';
+  // Cash on delivery and wallet only charge nothing online: no payment record (status null).
+  const online = s.method !== 'cod' && s.method !== 'wallet';
   return {
     id: crypto.randomUUID(), number: numberOf(s.at, s.no), status: s.status, orderType: 'ready_meat', fulfilment: pickup ? 'pickup' : 'delivery',
-    vendor: { id: v.id, name: v.name, city: v.city }, customer: { id: crypto.randomUUID(), name: s.customer, phone: s.phone }, paymentMethod: s.method,
-    totalHalalas: s.total, deliveryDate: OPEN.includes(s.status) ? addDays(riyadhToday(), 1) : riyadhToday(new Date(s.at)), createdAt: s.at, items,
-    addressSnapshot: pickup ? null : { line: 'شارع أنس بن مالك', district: 'حي الملقا', city: 'الرياض', location: { latitude: 24.8125, longitude: 46.6114 }, notes: 'البوابة الثانية' },
-    pickupSnapshot: pickup ? { name: v.name, address: `${v.city ?? ''}، طريق الملك فهد`, location: v.location } : null,
+    vendor: { id: v.id, name: v.name, phone: v.contactPhone, location: v.location, city: v.city }, customer: { id: crypto.randomUUID(), name: s.customer, phone: s.phone },
+    paymentMethod: s.method, totalHalalas: s.total, fulfilmentDate: OPEN.includes(s.status) ? addDays(riyadhToday(), 1) : riyadhToday(new Date(s.at)), createdAt: s.at, items,
+    address: pickup
+      ? null
+      : { label: 'المنزل', location: { latitude: 24.8125, longitude: 46.6114 }, city: 'الرياض', district: 'حي الملقا', street: 'شارع أنس بن مالك', building: null, shortNationalAddress: null, driverInstructions: 'البوابة الثانية' },
+    pickupPoint: pickup ? { name: v.name, address: n(`${v.city ?? ''}، طريق الملك فهد`, `King Fahd Road, ${v.city ?? ''}`), location: v.location, phone: v.contactPhone, hours: { start: '08:00', end: '22:00' } } : null,
     window: pickup ? null : { start: '16:00', end: '18:00' },
-    subtotalHalalas: subtotal, discountHalalas: 0, deliveryFeeHalalas: deliveryFee, vatAmountHalalas: Math.round((s.total * 15) / 115),
+    subtotalHalalas: subtotal, discountHalalas: 0, deliveryFeeHalalas: deliveryFee, vatHalalas: Math.round((s.total * 15) / 115), couponCode: null,
     notes: s.no === 482 ? 'الرجاء الاتصال قبل الوصول بربع ساعة' : null,
     cancelReason: s.status === 'cancelled' ? 'طلب العميل الإلغاء' : null,
-    payment: { method: s.method, status: s.status === 'cancelled' ? 'refunded' : paid ? 'captured' : 'authorized', walletHalalas: s.method === 'wallet' ? s.total : 0, cardLast4: ['mada', 'card'].includes(s.method) ? '4821' : null },
-    refunds: s.status === 'cancelled' ? [{ id: crypto.randomUUID(), amountHalalas: s.total, to: 'original', status: 'succeeded', reason: 'طلب العميل الإلغاء', at: s.at }] : [],
+    expiresAt: null,
+    payment: {
+      method: s.method, status: online ? (s.status === 'cancelled' ? 'refunded' : 'captured') : null, paymentId: online ? crypto.randomUUID() : null,
+      walletHalalas: s.method === 'wallet' ? s.total : 0, walletRestoredHalalas: 0, cardLast4: ['mada', 'card'].includes(s.method) ? '4821' : null,
+    },
+    refunds: s.status === 'cancelled' ? [{ id: crypto.randomUUID(), amountHalalas: s.total, destination: 'original', status: 'succeeded', reason: 'طلب العميل الإلغاء', createdAt: s.at }] : [],
     history: historyOf(s.status, s.at, s.method, pickup),
   };
 }
 
-type State = { orders: Map<string, Order>; listeners: Set<(o: OrderSummary) => void>; seq: number };
+type State = { orders: Map<string, Stored>; listeners: Set<(o: OrderSummary) => void>; seq: number };
 const g = globalThis as { __orders?: State };
 const state: State = (g.__orders ??= { orders: new Map(SEEDS.map(build).map((o) => [o.id, o])), listeners: new Set(), seq: 484 });
 
-const denied = { ok: false, code: 'NOT_ALLOWED', status: 403 } as const;
+const denied = { ok: false, code: 'PERMISSION_DENIED', status: 403 } as const;
 const notFound = { ok: false, code: 'NOT_FOUND', status: 404 } as const;
 const limited = (token: string) => token.endsWith('-limited');
 const ok = <T>(data: T): ApiResult<T> => ({ ok: true, data: structuredClone(data) });
-const summary = (o: Order): OrderSummary => ({
-  id: o.id, number: o.number, status: o.status, orderType: o.orderType, fulfilment: o.fulfilment, vendor: { id: o.vendor.id, name: o.vendor.name },
-  customer: { name: o.customer.name }, paymentMethod: o.paymentMethod, totalHalalas: o.totalHalalas, deliveryDate: o.deliveryDate, createdAt: o.createdAt,
+const summary = (o: Stored): OrderSummary => ({
+  id: o.id, number: o.number, status: o.status, orderType: o.orderType, fulfilment: o.fulfilment, fulfilmentDate: o.fulfilmentDate, vendor: o.vendor,
+  customer: o.customer, paymentMethod: o.paymentMethod, totalHalalas: o.totalHalalas, createdAt: o.createdAt,
 });
+/** The order as the caller gets it, with the moves it may make. */
+const out = (o: Stored, panel: OrdersPanel): ApiResult<Order> => ok({ ...o, allowedTransitions: nextStatuses(o, panel) });
 /** The order when this panel may see it: a vendor only its own (ORD-API-3: vendor A can't see vendor B's orders). */
-function visible(token: string, panel: OrdersPanel, id: string): ApiResult<Order> {
+function visible(token: string, panel: OrdersPanel, id: string): ApiResult<Stored> {
   if (limited(token)) return denied;
   const o = state.orders.get(id);
   return o && (panel === 'admin' || o.vendor.id === myVendor().id) ? { ok: true, data: o } : notFound;
 }
-const move = (o: Order, to: OrderStatus, actorType: Order['history'][number]['actorType'], note: string | null = null) => {
+const move = (o: Stored, to: OrderStatus, actorType: Order['history'][number]['actorType'], note: string | null = null) => {
   o.history.push({ from: o.status, to, actorType, note, at: new Date().toISOString() });
   o.status = to;
-  if (to === 'delivered' && o.paymentMethod === 'cod') o.payment.status = 'captured';
 };
 
-async function daysFor(o: Order): Promise<DayOption[]> {
+async function daysFor(o: Stored): Promise<DayOption[]> {
   const r = await mockOperations.get('mock', 'ar');
   if (!r.ok) return [];
   const s = r.data;
@@ -118,19 +130,19 @@ async function daysFor(o: Order): Promise<DayOption[]> {
   return Array.from({ length: s.bookingHorizonDays }, (_, i) => {
     const date = addDays(today, i);
     const closed = s.closedDays.some((c) => c.date === date && (c.scope === 'both' || c.scope === o.fulfilment));
-    const reason = i === 0 ? 'PAST_CUTOFF' : closed ? 'CLOSED' : undefined;
-    return { date, available: !reason, ...(reason && { reason }), window: s.deliveryWindow } as DayOption;
+    const reason = i === 0 ? 'PAST_CUTOFF' : closed ? 'CLOSED' : null;
+    return { date, isAvailable: !reason, reason, window: reason ? null : s.deliveryWindow };
   });
 }
 
 export const mockOrders: OrdersBackend = {
-  async list(token, _lang, panel, { status, method, vendorId, date, q, cursor, limit = 20 }) {
+  async list(token, _lang, panel, { status, paymentMethod, vendorId, fulfilmentDate, q, cursor, limit = 20 }) {
     if (limited(token)) return denied;
     const words = q?.replace('#', '').trim().toLowerCase();
     const rows = [...state.orders.values()]
       .filter((o) => (panel === 'admin' ? !vendorId || o.vendor.id === vendorId : o.vendor.id === myVendor().id))
-      .filter((o) => (!status || o.status === status) && (!method || o.paymentMethod === method) && (!date || o.deliveryDate === date))
-      .filter((o) => !words || o.number.toLowerCase().includes(words) || o.customer.name.includes(words))
+      .filter((o) => (!status || o.status === status) && (!paymentMethod || o.paymentMethod === paymentMethod) && (!fulfilmentDate || o.fulfilmentDate === fulfilmentDate))
+      .filter((o) => !words || o.number.toLowerCase().includes(words) || !!o.customer.name?.includes(words))
       .sort((a, b) => b.createdAt.localeCompare(a.createdAt));
     const start = Number(cursor ?? 0);
     const next = start + limit < rows.length ? String(start + limit) : null;
@@ -138,7 +150,7 @@ export const mockOrders: OrdersBackend = {
   },
   async get(token, _lang, panel, id) {
     const r = visible(token, panel, id);
-    return r.ok ? ok(r.data) : r;
+    return r.ok ? out(r.data, panel) : r;
   },
   async transition(token, _lang, panel, id, { to, note }) {
     const r = visible(token, panel, id);
@@ -148,9 +160,9 @@ export const mockOrders: OrdersBackend = {
     // A plain cancel (COD reject): nothing was captured, so nothing to refund; the note is the reason.
     if (to === 'cancelled') {
       r.data.cancelReason = note ?? null;
-      if (r.data.payment.status !== 'captured') r.data.payment.status = 'cancelled';
+      if (r.data.payment.status && r.data.payment.status !== 'captured') r.data.payment.status = 'cancelled';
     }
-    return ok(r.data);
+    return out(r.data, panel);
   },
   async cancel(token, _lang, id, { reason, refundTo }) {
     const r = visible(token, 'admin', id);
@@ -160,13 +172,14 @@ export const mockOrders: OrdersBackend = {
     // The wallet part always goes back to the wallet (WAL-API-1 reason `refund`); a captured gateway payment where the admin chose.
     const now = new Date().toISOString();
     const paid = o.payment.status === 'captured' ? o.totalHalalas - o.payment.walletHalalas : 0;
-    const refund = (amountHalalas: number, to: 'wallet' | 'original') => ({ id: crypto.randomUUID(), amountHalalas, to, status: to === 'wallet' ? 'succeeded' : 'pending', reason, at: now }) as const;
+    const refund = (amountHalalas: number, destination: 'wallet' | 'original') =>
+      ({ id: crypto.randomUUID(), amountHalalas, destination, status: destination === 'wallet' ? 'succeeded' : 'pending', reason, createdAt: now }) as const;
     if (o.payment.walletHalalas > 0) o.refunds.push(refund(o.payment.walletHalalas, 'wallet'));
     if (paid > 0) o.refunds.push(refund(paid, refundTo));
-    o.payment.status = o.refunds.length ? 'refunded' : 'cancelled';
+    if (o.payment.status) o.payment.status = o.refunds.length ? 'refunded' : 'cancelled';
     o.cancelReason = reason;
     move(o, 'cancelled', 'admin', reason);
-    return ok(o);
+    return out(o, 'admin');
   },
   async rescheduleDays(token, _lang, id) {
     const r = visible(token, 'admin', id);
@@ -177,10 +190,10 @@ export const mockOrders: OrdersBackend = {
     if (!r.ok) return r;
     if (!canReschedule(r.data.status)) return { ok: false, code: 'ORDER_TRANSITION_NOT_ALLOWED', status: 409, details: { from: r.data.status } };
     const day = (await daysFor(r.data)).find((d) => d.date === date);
-    if (!day?.available) return { ok: false, code: 'DAY_NOT_AVAILABLE', status: 409, details: { reason: day?.reason ?? 'OUTSIDE_HORIZON' } };
-    r.data.deliveryDate = date;
+    if (!day?.isAvailable) return { ok: false, code: 'DAY_NOT_AVAILABLE', status: 409, details: { reason: day?.reason ?? 'OUTSIDE_HORIZON' } };
+    r.data.fulfilmentDate = date;
     if (r.data.window) r.data.window = day.window;
-    return ok(r.data);
+    return out(r.data, 'admin');
   },
   watch(token, panel, onOrder) {
     const listener = (o: OrderSummary) => !limited(token) && (panel === 'admin' || o.vendor.id === myVendor().id) && onOrder(structuredClone(o));

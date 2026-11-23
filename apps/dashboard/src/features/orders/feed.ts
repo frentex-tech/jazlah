@@ -17,8 +17,8 @@ export type OrdersFeed = {
  * poll goes through panelFetch, which refreshes the session, and the stream is opened again.
  */
 export const streamFeed = (panel: OrdersPanel, poll: (p: OrdersPanel) => OrdersFeed = pollFeed): OrdersFeed => ({
-  // shortcut: the stream relays `order.created` only, so a status changed elsewhere shows after a reload; relay ORD-API-3's
-  // `order.updated` too once it lands (#88).
+  // shortcut: the stream (the mock's) relays `order.created` only, so a status changed elsewhere shows after a reload;
+  // relay `order.updated` too once ORD-API-3's socket is in the contract (#83).
   subscribe(onOrder, _onPolled, onChanged) {
     let stop = () => {};
     let polled = false;
@@ -46,8 +46,8 @@ export const streamFeed = (panel: OrdersPanel, poll: (p: OrdersPanel) => OrdersF
   },
 });
 
-// shortcut: polls the first list page every 15 s while the backend cannot push (no ORD-API-3 realtime in openapi.json);
-// switch to the socket.io rooms relayed through the events route once ORD-API-3 lands (#88).
+// shortcut: polls the first list page every 15 s, as orders.md says until the dashboard realtime is in the contract;
+// relay ORD-API-3's socket rooms through the events route once it is (#83).
 export const pollFeed = (panel: OrdersPanel, everyMs = 15_000): OrdersFeed => ({
   subscribe(onOrder, onPolled, onChanged) {
     let seen: Map<string, OrderStatus> | null = null;

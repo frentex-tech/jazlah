@@ -94,6 +94,11 @@
       "body": "Ask your account manager for access.",
       "action": "Back"
     },
+    "soon": {
+      "title": "Coming soon",
+      "body": "This isn't available yet. It will work here as soon as it's switched on.",
+      "toast": "This action isn't available yet. It's coming soon."
+    },
     "loading": "Loading",
     "notFound": {
       "title": "Page not found",
@@ -1226,25 +1231,6 @@
       "failed": "Could not change ordering. Try again.",
       "denied": "You are not allowed to pause orders."
     },
-    "hours": {
-      "title": "Working hours",
-      "body": "Set the days and hours delivery and pickup are taken.",
-      "open": "{day} · open",
-      "closed": "{day} · closed",
-      "from": "From",
-      "to": "To",
-      "startLabel": "{day}: from",
-      "endLabel": "{day}: to",
-      "days": {
-        "sat": "Saturday",
-        "sun": "Sunday",
-        "mon": "Monday",
-        "tue": "Tuesday",
-        "wed": "Wednesday",
-        "thu": "Thursday",
-        "fri": "Friday"
-      }
-    },
     "capacity": {
       "title": "Daily capacity and order cutoffs",
       "body": "The most orders and carcasses a day, and the last time to order for each type.",
@@ -1488,6 +1474,7 @@
       "product": "Product",
       "qty": "Qty",
       "price": "Price",
+      "grams": "{value} g",
       "cut": "Cut: {value}",
       "packaging": "Packaging: {value}",
       "without": "Without: {value}"

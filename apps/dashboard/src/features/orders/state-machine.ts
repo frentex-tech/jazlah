@@ -1,7 +1,5 @@
-// ORD-API-2's transition table (allowed from → to, and who may do it), mirrored for the buttons the dashboard shows.
-// The API stays the judge (it answers ORDER_TRANSITION_NOT_ALLOWED); the mock applies the same table.
-// shortcut: a copy of the server's table, API gap (the order answer has no allowed transitions for the caller); drop it
-// for the API's list once ORD-API-2 / ORD-API-3 add one (#88).
+// ORD-API-2's transition table (allowed from → to, and who may do it), for the mock only: it answers each caller's
+// `allowedTransitions` from it, as the API does. The pages read `allowedTransitions` from the order, never this table.
 import type { Actor, OrderStatus } from './types.ts';
 
 type Rule = { to: OrderStatus; by: Actor[]; only?: 'delivery' | 'pickup' };

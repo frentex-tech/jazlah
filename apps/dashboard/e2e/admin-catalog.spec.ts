@@ -1,5 +1,5 @@
 import { expect, test, type Locator, type Page } from '@playwright/test';
-import { signInAs } from './helpers';
+import { follow, signInAs } from './helpers';
 
 // Mock (src/features/catalog/backend.ts): categories of 131:19875, products of 131:21286 (مندي لحم للولائم, ضلوع غنم
 // للمشاوي and لحم مفروم ناعم are JAZLA's own), the cuts, packagings and "without" items of 131:35405. An access token
@@ -78,8 +78,7 @@ test('exit criteria: a JAZLA carcass with 3 sizes, cuts (one priced), packaging 
   await signInAs(context, ['admin']);
   await page.goto('/admin/catalog/products');
   await expect(products(page).getByText('ريب آي بقري طازج')).toBeVisible(); // hydrated before the click
-  await page.getByRole('link', { name: 'إضافة منتج' }).click();
-  await expect(page).toHaveURL(/\/admin\/catalog\/products\/new$/, { timeout: 15_000 });
+  await follow(page, page.getByRole('link', { name: 'إضافة منتج' }), /\/admin\/catalog\/products\/new$/);
   await expect(page.getByRole('heading', { level: 1, name: 'منتج جديد' })).toBeVisible();
 
   await page.getByLabel('اسم المنتج', { exact: true }).fill('ذبيحة نعيمي كاملة');
