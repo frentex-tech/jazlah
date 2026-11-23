@@ -1,6 +1,7 @@
 import 'dart:convert';
 
 import 'package:dio/dio.dart';
+import 'package:flutter_riverpod/misc.dart' show Override;
 import 'package:jazla_api/jazla_api.dart';
 import 'package:jazlah/app/providers.dart';
 
@@ -60,8 +61,12 @@ class FakeHttp implements HttpClientAdapter {
   void close({bool force = false}) {}
 }
 
+/// The JSON body of a request (Dio has already encoded it when the adapter sees it).
+Map<String, dynamic> jsonBody(RequestOptions r) =>
+    (r.data is String ? jsonDecode(r.data as String) : r.data) as Map<String, dynamic>;
+
 /// Overrides the generated client with one on [http].
-dynamic apiOn(FakeHttp http) => apiProvider.overrideWithValue(
+Override apiOn(FakeHttp http) => apiProvider.overrideWithValue(
   JazlaApi(dio: Dio(BaseOptions(baseUrl: 'http://api.test'))..httpClientAdapter = http),
 );
 
@@ -127,4 +132,201 @@ Map<String, Object?> productJson(
   'exclusions': <Object>[],
   'incompatiblePairs': incompatiblePairs,
   'minPriceHalalas': 145000,
+};
+
+// ---- Sprint 3 contract bodies (openapi: CartResponseDto, OrderResponseDto, …) ----
+
+/// openapi: CartLineResponseDto.
+Map<String, Object?> cartLineJson(
+  String id, {
+  String productId = 'p1',
+  String name = 'ريب آي',
+  int quantity = 1,
+  int unitPrice = 8900,
+  bool isAvailable = true,
+}) => {
+  'id': id,
+  'productId': productId,
+  'name': ar(name),
+  'imageUrl': null,
+  'size': {'id': 'sz-1kg', 'approxWeightGrams': 1000, 'tag': null},
+  'cutting': {'id': 'cut-slices', 'name': ar('شرائح')},
+  'packaging': 'trays',
+  'exclusions': <Object>[],
+  'notes': null,
+  'quantity': quantity,
+  'unitPriceHalalas': unitPrice,
+  'totalHalalas': unitPrice * quantity,
+  'isAvailable': isAvailable,
+};
+
+/// openapi: CartResponseDto. The totals are the server's, given as is.
+Map<String, Object?> cartJson({
+  List<Map<String, Object?>> lines = const [],
+  int minOrder = 10000,
+  int? minOrderRemaining,
+  bool? canCheckout,
+  Map<String, Object?>? fulfilment,
+  int deliveryFee = 0,
+}) {
+  final subtotal = lines.fold<int>(0, (s, l) => s + (l['totalHalalas']! as int));
+  final remaining = minOrderRemaining ?? (minOrder - subtotal).clamp(0, minOrder);
+  final total = subtotal + deliveryFee;
+  return {
+    'vendor': lines.isEmpty ? null : {'id': 'v1', 'name': ar('ملحمة النخبة')},
+    'lines': lines,
+    'coupon': null,
+    'fulfilment': fulfilment,
+    'subtotalHalalas': subtotal,
+    'discountHalalas': 0,
+    'deliveryFeeHalalas': deliveryFee,
+    'totalHalalas': total,
+    'vatHalalas': (total * 15 + 57) ~/ 115,
+    'minOrderHalalas': minOrder,
+    'minOrderRemainingHalalas': remaining,
+    'issues': <Object>[],
+    'canCheckout': canCheckout ?? (lines.isNotEmpty && remaining == 0),
+  };
+}
+
+/// openapi: CustomerAddressResponseDto.
+Map<String, Object?> addressJson(String id, {String label = 'المنزل', bool covered = true, bool isDefault = true}) => {
+  'id': id,
+  'label': label,
+  'location': {'latitude': 24.8, 'longitude': 46.6},
+  'city': 'الرياض',
+  'district': 'حي الملقا',
+  'street': null,
+  'building': null,
+  'shortNationalAddress': null,
+  'driverInstructions': null,
+  'isDefault': isDefault,
+  'isCovered': covered,
+  'createdAt': '2026-11-01T06:00:00.000Z',
+  'updatedAt': '2026-11-01T06:00:00.000Z',
+};
+
+/// openapi: CheckoutDayResponseDto.
+Map<String, Object?> dayJson(String date, {String? reason}) => {
+  'date': date,
+  'isAvailable': reason == null,
+  'reason': reason,
+  'window': {'start': '16:00', 'end': '22:00'},
+};
+
+/// openapi: ClientSettingsResponseDto.
+Map<String, Object?> clientSettingsJson({bool paused = false}) => {
+  'deliveryWindow': {'start': '16:00', 'end': '22:00'},
+  'bookingHorizonDays': 14,
+  'minOrderHalalas': 10000,
+  'deliveryFeeHalalas': 1500,
+  'codEnabled': true,
+  'codMaxOrderHalalas': null,
+  'paused': {'isPaused': paused, 'messageAr': null, 'messageEn': null},
+};
+
+/// openapi: PaymentMethodListResponseDto.
+Map<String, Object?> paymentMethodsJson({int walletBalance = 0, int total = 12300}) => {
+  'items': [
+    {'method': 'mada', 'isAvailable': true, 'reason': null},
+    {'method': 'applepay', 'isAvailable': true, 'reason': null},
+    {
+      'method': 'wallet',
+      'isAvailable': walletBalance >= total,
+      'reason': walletBalance >= total ? null : 'INSUFFICIENT_BALANCE',
+    },
+    {'method': 'cod', 'isAvailable': true, 'reason': null},
+  ],
+  'walletBalanceHalalas': walletBalance,
+  'totalHalalas': total,
+};
+
+/// openapi: OrderResponseDto (a delivery order of one line).
+Map<String, Object?> orderJson(
+  String id, {
+  String status = 'pending_payment',
+  String paymentMethod = 'mada',
+  String? paymentStatus,
+  String? paymentId,
+  int walletRestored = 0,
+  List<Map<String, Object?>> history = const [],
+}) => {
+  'id': id,
+  'number': 'JZ-261110-0007',
+  'status': status,
+  'orderType': 'ready_meat',
+  'fulfilment': 'delivery',
+  'fulfilmentDate': '2026-11-11',
+  'vendor': {
+    'id': 'v1',
+    'name': ar('ملحمة النخبة'),
+    'phone': '+966500000001',
+    'location': {'latitude': 24.7, 'longitude': 46.7},
+    'city': 'الرياض',
+  },
+  'customer': {'id': 'u1', 'name': 'سارة', 'phone': '+966500000002'},
+  'paymentMethod': paymentMethod,
+  'totalHalalas': 12300,
+  'createdAt': '2026-11-10T10:00:00.000Z',
+  'items': [
+    {
+      'id': 'i1',
+      'productId': 'p1',
+      'name': ar('كباب لحم غنم'),
+      'imageUrl': null,
+      'size': {'id': 'sz-500g', 'approxWeightGrams': 500, 'tag': null},
+      'cutting': null,
+      'packaging': 'trays',
+      'exclusions': <Object>[],
+      'notes': null,
+      'quantity': 3,
+      'unitPriceHalalas': 3600,
+      'totalHalalas': 10800,
+    },
+  ],
+  'address': {
+    'label': 'المنزل',
+    'location': {'latitude': 24.8, 'longitude': 46.6},
+    'city': 'الرياض',
+    'district': 'حي الملقا',
+    'street': null,
+    'building': null,
+    'shortNationalAddress': null,
+    'driverInstructions': null,
+  },
+  'pickupPoint': null,
+  'window': {'start': '16:00', 'end': '22:00'},
+  'subtotalHalalas': 10800,
+  'discountHalalas': 0,
+  'deliveryFeeHalalas': 1500,
+  'vatHalalas': 1604,
+  'couponCode': null,
+  'notes': null,
+  'cancelReason': null,
+  'expiresAt': status == 'pending_payment' ? '2026-11-10T10:15:00.000Z' : null,
+  'payment': {
+    'method': paymentMethod,
+    'status': paymentStatus,
+    'paymentId': paymentId,
+    'walletHalalas': 0,
+    'walletRestoredHalalas': walletRestored,
+    'cardLast4': null,
+  },
+  'refunds': <Object>[],
+  'history': history,
+  'allowedTransitions': <Object>[],
+};
+
+/// openapi: PaymentResponseDto with a redirect next action.
+Map<String, Object?> paymentJson(String id, {String method = 'mada', int amount = 12300}) => {
+  'id': id,
+  'method': method,
+  'status': 'initiated',
+  'amountHalalas': amount,
+  'nextAction': {
+    'type': 'redirect',
+    'redirectUrl': 'https://pay.fake.test/hosted/$id',
+    'returnUrl': 'jazlah://checkout/pay/return',
+  },
+  'createdAt': '2026-11-10T10:00:00.000Z',
 };
