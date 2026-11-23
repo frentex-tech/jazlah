@@ -1,21 +1,22 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_riverpod/misc.dart';
-
-import 'package:jazlah/core/errors/api_error.dart';
+import 'package:jazlah/app/providers.dart';
 import 'package:jazlah/features/cart/data/cart_repository.dart';
 import 'package:jazlah/features/cart/presentation/cart_providers.dart';
 import 'package:jazlah/features/checkout/data/order_repository.dart';
 import 'package:jazlah/features/checkout/presentation/checkout_providers.dart';
+import 'package:jazlah/features/payment/data/api_payment_repository.dart';
 import 'package:jazlah/features/payment/data/payment_gateway.dart';
 import 'package:jazlah/features/payment/data/payment_repository.dart';
 import 'package:jazlah/features/payment/domain/payment_method.dart';
 
-/// Null in real builds: no payment route yet and nothing invented (checkout is not reached there either).
-// shortcut: mock payments on the mock order server until PAY-API-1 #76 lands (not-built-yet.md).
-final paymentRepositoryProvider = Provider<PaymentRepository?>((ref) {
+/// Payments on the API (PAY-API-1); the mock order server's with USE_MOCKS.
+final paymentRepositoryProvider = Provider<PaymentRepository>((ref) {
   final cart = ref.watch(cartRepositoryProvider);
   final orders = ref.watch(orderRepositoryProvider);
-  return cart is MockCartRepository && orders is MockOrderRepository ? MockPaymentRepository(cart, orders) : null;
+  return cart is MockCartRepository && orders is MockOrderRepository
+      ? MockPaymentRepository(cart, orders)
+      : ApiPaymentRepository(ref.watch(apiProvider));
 });
 
 /// The gateway step: the hosted page in a webview (real builds, ready for the API's redirect); the mock provider's
@@ -28,7 +29,5 @@ final paymentGatewayProvider = Provider<PaymentGateway>((ref) {
 /// The methods for the cart (null) or for an unpaid order.
 final FutureProviderFamily<PaymentMethods, String?> paymentMethodsProvider = FutureProvider.autoDispose
     .family<PaymentMethods, String?>((ref, orderId) {
-      final repo = ref.watch(paymentRepositoryProvider);
-      if (repo == null) throw const ApiError(code: ApiError.unknown);
-      return repo.methods(orderId: orderId);
+      return ref.watch(paymentRepositoryProvider).methods(orderId: orderId);
     }, retry: (_, _) => null);

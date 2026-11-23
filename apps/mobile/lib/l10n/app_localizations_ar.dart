@@ -1900,4 +1900,20 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get payContinue => 'متابعة الدفع';
+
+  @override
+  String orderLineDeliveryDay(String vendor, String day, String place) {
+    return '$vendor · توصيل $day إلى $place';
+  }
+
+  @override
+  String orderLinePickupDay(String vendor, String day, String place) {
+    return '$vendor · استلام $day من $place';
+  }
+
+  @override
+  String get errPaymentMethodNotAvailable => 'طريقة الدفع هذه غير متاحة لطلبك، اختر طريقة أخرى.';
+
+  @override
+  String get errProfileIncomplete => 'أضف اسمك إلى حسابك أولًا.';
 }

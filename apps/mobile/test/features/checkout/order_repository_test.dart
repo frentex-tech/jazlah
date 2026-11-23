@@ -53,7 +53,7 @@ void main() {
     expect(o.status, OrderStatus.created);
     expect(o.number, 'JZ-261110-0001');
     expect(o.deliveryDate, '2026-11-11');
-    expect(o.window.start, '16:00');
+    expect(o.window!.start, '16:00');
     expect(o.items.single.name.en, isNotEmpty);
     expect(o.items.single.quantity, 3);
     expect(o.items.single.lineTotal, 10800);

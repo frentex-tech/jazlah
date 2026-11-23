@@ -1122,5 +1122,35 @@
   "payPageErrorTitle": "تعذّر فتح صفحة الدفع",
   "payPageErrorBody": "تحقق من اتصالك ثم أعد المحاولة.",
   "payPageClose": "إغلاق",
-  "payContinue": "متابعة الدفع"
+  "payContinue": "متابعة الدفع",
+  "orderLineDeliveryDay": "{vendor} · توصيل {day} إلى {place}",
+  "@orderLineDeliveryDay": {
+    "placeholders": {
+      "vendor": {
+        "type": "String"
+      },
+      "day": {
+        "type": "String"
+      },
+      "place": {
+        "type": "String"
+      }
+    }
+  },
+  "orderLinePickupDay": "{vendor} · استلام {day} من {place}",
+  "@orderLinePickupDay": {
+    "placeholders": {
+      "vendor": {
+        "type": "String"
+      },
+      "day": {
+        "type": "String"
+      },
+      "place": {
+        "type": "String"
+      }
+    }
+  },
+  "errPaymentMethodNotAvailable": "طريقة الدفع هذه غير متاحة لطلبك، اختر طريقة أخرى.",
+  "errProfileIncomplete": "أضف اسمك إلى حسابك أولًا."
 }

@@ -77,7 +77,7 @@ void main() {
     expect(days[13].date, '2026-11-23');
     expect(days[13].available, isTrue);
     expect(days[14].reason, DayReason.outsideHorizon);
-    expect(days.every((d) => d.window.start == '16:00' && d.window.end == '22:00'), isTrue);
+    expect(days.every((d) => d.window!.start == '16:00' && d.window!.end == '22:00'), isTrue);
   });
 
   test('a delivery-only closed day stays open for pickup; a closed day for both closes both', () async {

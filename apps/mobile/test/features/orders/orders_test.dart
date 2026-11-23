@@ -19,6 +19,7 @@ import 'package:jazlah/features/cart/data/cart_repository.dart';
 import 'package:jazlah/features/cart/domain/cart.dart';
 import 'package:jazlah/features/cart/presentation/cart_providers.dart';
 import 'package:jazlah/features/cart/presentation/cart_screen.dart';
+import 'package:jazlah/features/checkout/data/api_order_repository.dart';
 import 'package:jazlah/features/checkout/data/checkout_repository.dart';
 import 'package:jazlah/features/checkout/data/order_repository.dart';
 import 'package:jazlah/features/checkout/domain/order.dart';
@@ -34,6 +35,7 @@ import 'package:jazlah/features/product/presentation/product_providers.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import '../../helpers/cart_fakes.dart';
+import '../../helpers/fake_api.dart';
 import '../../helpers/fakes.dart';
 import '../../helpers/pump_screen.dart';
 
@@ -137,7 +139,13 @@ Future<ProviderContainer> _pump(
       addressRepositoryProvider.overrideWithValue(book),
       checkoutRepositoryProvider.overrideWithValue(checkout),
       orderRepositoryProvider.overrideWithValue(_orders),
-      ordersRepositoryProvider.overrideWithValue(mocks ? _orders : null),
+      if (mocks)
+        ordersRepositoryProvider.overrideWithValue(_orders)
+      else ...[
+        // A real build before ORD-API-3: the API answers NOT_IMPLEMENTED.
+        ordersRepositoryProvider.overrideWith((ref) => ApiOrderRepository(ref.watch(apiProvider))),
+        apiOn(FakeHttp((_) => notImplemented('ORD-API-3'))),
+      ],
       orderRealtimeProvider.overrideWithValue(mocks && realtime ? _orders : null),
       ordersClockProvider.overrideWithValue(() => today ?? _now),
     ],
@@ -369,11 +377,11 @@ void main() {
       ],
     );
     addTearDown(c.dispose);
-    final cart = c.read(cartRepositoryProvider)! as MockCartRepository;
+    final cart = c.read(cartRepositoryProvider) as MockCartRepository;
     await cart.add(kebab.withQuantity(3));
-    final day = (await c.read(checkoutRepositoryProvider)!.days(Fulfilment.delivery)).firstWhere((d) => d.available);
+    final day = (await c.read(checkoutRepositoryProvider).days(Fulfilment.delivery)).firstWhere((d) => d.available);
     cart.fulfilment = FulfilmentChoice(method: Fulfilment.delivery, date: day.date, addressId: 'a1');
-    final placed = await c.read(orderRepositoryProvider)!.place(idempotencyKey: 'k', paymentMethod: 'cod');
+    final placed = await c.read(orderRepositoryProvider).place(idempotencyKey: 'k', paymentMethod: 'cod');
     final sub = c.listen(ordersProvider(null), (_, _) {});
     expect((await c.read(ordersProvider(null).future)).map((o) => o.id), contains(placed.order.id));
     c.read(accountDataClearedProvider.notifier).fire();

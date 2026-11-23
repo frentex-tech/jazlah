@@ -567,5 +567,9 @@
   "payPageErrorTitle": "The payment page could not be opened",
   "payPageErrorBody": "Check your connection and try again.",
   "payPageClose": "Close",
-  "payContinue": "Continue payment"
+  "payContinue": "Continue payment",
+  "orderLineDeliveryDay": "{vendor} · delivery {day} to {place}",
+  "orderLinePickupDay": "{vendor} · pickup {day} at {place}",
+  "errPaymentMethodNotAvailable": "This payment method is not available for your order. Choose another one.",
+  "errProfileIncomplete": "Add your name to your profile first."
 }

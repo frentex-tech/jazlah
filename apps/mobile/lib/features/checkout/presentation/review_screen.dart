@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -37,6 +39,7 @@ ReviewExit? reviewExit(String code) => switch (code) {
   FulfilmentError.orderingPaused ||
   OrderError.fulfilmentRequired ||
   'NOT_FOUND' => ReviewExit.fulfilment,
+  OrderError.profileIncomplete || PaymentError.methodNotAvailable => null,
   OrderError.priceChanged ||
   OrderError.itemUnavailable ||
   OrderError.minOrderNotMet ||
@@ -76,7 +79,7 @@ class _ReviewScreenState extends ConsumerState<ReviewScreen> {
     final container = ProviderScope.containerOf(context, listen: false);
     try {
       final placed = await ref
-          .read(orderRepositoryProvider)!
+          .read(orderRepositoryProvider)
           .place(idempotencyKey: _key, paymentMethod: method.method, walletAmount: walletAmount);
       container.invalidate(cartProvider); // the server cleared the cart (and the badge)
       if (!mounted) return;
@@ -90,7 +93,8 @@ class _ReviewScreenState extends ConsumerState<ReviewScreen> {
       final code = ApiError.from(e).code;
       showJToast(context, message: errorText(context, e), kind: JToastKind.error);
       final exit = reviewExit(code);
-      final wallet = code == OrderError.walletInsufficient; // a definite refusal: the balance changed
+      // Definite refusals that the methods answer: the balance changed, or the method cannot pay this order.
+      final wallet = code == OrderError.walletInsufficient || code == PaymentError.methodNotAvailable;
       setState(() {
         _placing = false;
         if (wallet) {
@@ -102,6 +106,11 @@ class _ReviewScreenState extends ConsumerState<ReviewScreen> {
         }
       });
       if (wallet) ref.invalidate(paymentMethodsProvider(null));
+      // The name is missing: the name step, then the customer places again (a refusal keeps nothing).
+      if (code == OrderError.profileIncomplete) {
+        unawaited(context.push(Routes.editProfile));
+        return;
+      }
       if (exit == null) return;
       // Checkout step 1 handles the code (refetch, or on to the cart); opened alone, go to the step.
       if (context.canPop()) {

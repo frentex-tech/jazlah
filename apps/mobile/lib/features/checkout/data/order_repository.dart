@@ -43,7 +43,7 @@ String newIdempotencyKey([Random? random]) {
 /// It is also the mock payment server (PAY-API-1, ORD-API-2): it debits the [wallet], keeps each order's
 /// payments, captures or fails them on the fake provider's decision, and cancels an unpaid order after
 /// [paymentTimeout] (giving the wallet part back).
-// shortcut: mock orders and payments until ORD-API-1 #81, ORD-API-2 #82 and PAY-API-1 #76 land (not-built-yet.md).
+// USE_MOCKS only (demos and tests); real builds use ApiOrderRepository and ApiPaymentRepository.
 class MockOrderRepository implements OrderRepository, OrdersRepository, OrderRealtime {
   MockOrderRepository(
     this.cart,
@@ -324,7 +324,7 @@ class MockOrderRepository implements OrderRepository, OrdersRepository, OrderRea
         paymentId: p.id,
         method: method,
         amount: p.amount,
-        url: '$hostedBase/${p.id}',
+        redirectUrl: '$hostedBase/${p.id}',
         returnUrl: p.returnUrl,
       );
     }

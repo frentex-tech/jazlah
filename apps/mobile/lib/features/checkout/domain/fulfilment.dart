@@ -13,7 +13,6 @@ abstract final class FulfilmentError {
   static const orderingPaused = 'ORDERING_PAUSED';
 
   /// A day that cannot be chosen for another reason than full; `details.reason` is one of [DayReason].
-  // shortcut: lead review A6 proposal until SCH-API-2 #69 names it (not-built-yet.md).
   static const dayNotAvailable = 'DAY_NOT_AVAILABLE';
 }
 
@@ -38,7 +37,7 @@ class TimeWindow {
 /// One day of `GET /v1/customer/checkout/days`.
 @immutable
 class CheckoutDay {
-  const CheckoutDay({required this.date, required this.available, required this.window, this.reason});
+  const CheckoutDay({required this.date, required this.available, this.window, this.reason});
 
   /// Riyadh `yyyy-MM-dd`.
   final String date;
@@ -46,7 +45,9 @@ class CheckoutDay {
 
   /// One of [DayReason] when not [available].
   final String? reason;
-  final TimeWindow window;
+
+  /// The day's delivery window or pickup hours; may be missing on a day that cannot be chosen.
+  final TimeWindow? window;
 
   /// The calendar date to show, at UTC midnight so no device zone can move it to another day.
   DateTime get day => calendarDate(date);

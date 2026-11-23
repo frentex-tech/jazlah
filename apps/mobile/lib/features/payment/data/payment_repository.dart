@@ -28,7 +28,7 @@ class MockWallet {
 /// saved mada card, Apple Pay, the wallet (disabled when it does not cover what is left to pay, with a tender plan
 /// for the cart when it covers part of it) and COD (left out when [codEnabled] is off or the total is above
 /// [codMax], as PAY-API-1 says).
-// shortcut: mock payment methods until PAY-API-1 #76 lands (not-built-yet.md).
+// USE_MOCKS only (demos and tests); real builds use ApiPaymentRepository.
 class MockPaymentRepository implements PaymentRepository {
   MockPaymentRepository(
     this.cart,

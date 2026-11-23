@@ -1,49 +1,46 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_riverpod/misc.dart';
-
-import 'package:jazlah/core/errors/api_error.dart';
+import 'package:jazlah/app/providers.dart';
 import 'package:jazlah/features/addresses/presentation/address_providers.dart';
 import 'package:jazlah/features/cart/data/cart_repository.dart';
 import 'package:jazlah/features/cart/presentation/cart_providers.dart';
+import 'package:jazlah/features/checkout/data/api_checkout_repository.dart';
+import 'package:jazlah/features/checkout/data/api_order_repository.dart';
 import 'package:jazlah/features/checkout/data/checkout_repository.dart';
 import 'package:jazlah/features/checkout/data/order_repository.dart';
 import 'package:jazlah/features/checkout/domain/fulfilment.dart';
 import 'package:jazlah/features/product/domain/product.dart';
 
-/// Null in real builds: there is no settings, days or fulfilment route yet, and nothing is invented there.
-/// (The cart does not offer checkout without the ops settings either, so the screen is not reached.)
-// shortcut: mock checkout on the mock cart until SCH-API-1 #68 and SCH-API-2 #69 land (not-built-yet.md).
-final checkoutRepositoryProvider = Provider<CheckoutRepository?>((ref) {
+/// Checkout step 1 on the API (SCH-API-1 / SCH-API-2); the in-memory scheduler on the mock cart (USE_MOCKS).
+final checkoutRepositoryProvider = Provider<CheckoutRepository>((ref) {
   final cart = ref.watch(cartRepositoryProvider);
   return cart is MockCartRepository
       ? MockCheckoutRepository(cart, addresses: ref.watch(addressRepositoryProvider))
-      : null;
+      : ApiCheckoutRepository(ref.watch(apiProvider));
 });
 
-/// Not paused when unknown (no settings route, or it failed): the server still refuses a paused checkout
-/// with ORDERING_PAUSED, which the screen shows.
-final FutureProvider<OrderingPause> orderingPauseProvider = FutureProvider.autoDispose<OrderingPause>((ref) async {
-  final repo = ref.watch(checkoutRepositoryProvider);
-  return repo == null ? const OrderingPause() : repo.pause();
-}, retry: (_, _) => null);
+/// Not paused when unknown (the settings failed): the server still refuses a paused checkout with ORDERING_PAUSED,
+/// which the screen shows.
+final FutureProvider<OrderingPause> orderingPauseProvider = FutureProvider.autoDispose<OrderingPause>(
+  (ref) => ref.watch(checkoutRepositoryProvider).pause(),
+  retry: (_, _) => null,
+);
 
 /// The days for a method; keyed by the address too, so choosing another address asks again.
 typedef DaysQuery = ({Fulfilment method, String? addressId});
 
 final FutureProviderFamily<List<CheckoutDay>, DaysQuery> checkoutDaysProvider = FutureProvider.autoDispose
     .family<List<CheckoutDay>, DaysQuery>((ref, q) {
-      final repo = ref.watch(checkoutRepositoryProvider);
-      // Without the days route: the error state with retry, never made-up days.
-      if (repo == null) throw const ApiError(code: ApiError.unknown);
-      return repo.days(q.method);
+      return ref.watch(checkoutRepositoryProvider).days(q.method);
     }, retry: (_, _) => null);
 
-/// Null in real builds: no order route yet, and never an invented order (checkout is not reached there).
-// shortcut: mock orders on the mock cart and scheduler until ORD-API-1 #81 lands (not-built-yet.md).
-final orderRepositoryProvider = Provider<OrderRepository?>((ref) {
+/// Placing orders on the API (ORD-API-1); the in-memory order server on the mock cart and scheduler (USE_MOCKS).
+final orderRepositoryProvider = Provider<OrderRepository>((ref) {
   final cart = ref.watch(cartRepositoryProvider);
   final checkout = ref.watch(checkoutRepositoryProvider);
-  if (cart is! MockCartRepository || checkout is! MockCheckoutRepository) return null;
+  if (cart is! MockCartRepository || checkout is! MockCheckoutRepository) {
+    return ApiOrderRepository(ref.watch(apiProvider));
+  }
   final mock = MockOrderRepository(cart, checkout, addresses: ref.watch(addressRepositoryProvider), seedPast: true);
   ref.onDispose(mock.dispose); // a replaced mock (another account) closes its event stream
   return mock;

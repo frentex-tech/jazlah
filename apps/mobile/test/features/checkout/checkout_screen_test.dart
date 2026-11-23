@@ -15,6 +15,7 @@ import 'package:jazlah/features/auth/data/auth_repository.dart';
 import 'package:jazlah/features/auth/presentation/session_controller.dart';
 import 'package:jazlah/features/cart/data/cart_repository.dart';
 import 'package:jazlah/features/cart/presentation/cart_providers.dart';
+import 'package:jazlah/features/checkout/data/api_checkout_repository.dart';
 import 'package:jazlah/features/checkout/data/checkout_repository.dart';
 import 'package:jazlah/features/checkout/domain/fulfilment.dart';
 import 'package:jazlah/features/checkout/presentation/checkout_providers.dart';
@@ -25,6 +26,7 @@ import 'package:jazlah/features/product/presentation/product_providers.dart';
 import 'package:jazlah/l10n/app_localizations.dart';
 
 import '../../helpers/cart_fakes.dart';
+import '../../helpers/fake_api.dart';
 import '../../helpers/fakes.dart';
 import '../../helpers/pump_screen.dart';
 
@@ -103,7 +105,13 @@ Future<ProviderContainer> _pump(
       cartRepositoryProvider.overrideWithValue(_cart),
       cartSettingsProvider.overrideWithValue(MockCartRepository.opsSettings),
       addressRepositoryProvider.overrideWithValue(book),
-      checkoutRepositoryProvider.overrideWithValue(mocks ? _checkout : null),
+      if (mocks)
+        checkoutRepositoryProvider.overrideWithValue(_checkout)
+      else ...[
+        // A real build before SCH-API-1/2: the API answers NOT_IMPLEMENTED.
+        checkoutRepositoryProvider.overrideWith((ref) => ApiCheckoutRepository(ref.watch(apiProvider))),
+        apiOn(FakeHttp((_) => notImplemented('SCH-API-2'))),
+      ],
       urlLauncherProvider.overrideWithValue((uri) async {
         _launched.add(uri);
         return true;
@@ -294,9 +302,10 @@ void main() {
     expect(find.text('route:/checkout/review'), findsNothing);
   });
 
-  testWidgets('real build without the days route: the error state, never made-up days', (t) async {
+  testWidgets('real build before SCH-API-2 (501): the days card reads «قريبًا», never made-up days', (t) async {
     await _pump(t, mocks: false);
     expect(find.text('تعذّر تحميل الأيام المتاحة'), findsOneWidget);
+    expect(find.text('قريبًا'), findsOneWidget);
     expect(find.text('يصل بين 4 و 10 مساءً'), findsNothing);
     expect(_continue(t), isNull);
   });

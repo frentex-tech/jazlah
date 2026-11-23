@@ -44,7 +44,9 @@ String riyadhToday(DateTime now) {
 /// «اليوم، 4:00 م» on the day itself, else «7 نوفمبر 2026» (the card footer).
 String orderWhen(BuildContext context, Order o, DateTime now) {
   final l10n = AppLocalizations.of(context);
-  if (o.deliveryDate == riyadhToday(now)) return l10n.ordersTodayAt(clock12(l10n, o.window.start));
+  if (o.deliveryDate == riyadhToday(now)) {
+    return o.window == null ? l10n.ordersToday : l10n.ordersTodayAt(clock12(l10n, o.window!.start));
+  }
   final d = calendarDate(o.deliveryDate);
   return '${d.day} ${DateFormat('MMMM', context.lang).format(d)} ${d.year}';
 }

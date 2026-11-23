@@ -10,6 +10,8 @@ import 'package:jazlah/core/storage/prefs.dart';
 import 'package:jazlah/l10n/app_localizations.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
+import 'fake_api.dart';
+
 /// Pumps a full screen with Riverpod, go_router and the app's localisations on a 390x844 phone.
 extension PumpScreen on WidgetTester {
   /// Like [pumpScreen], with [screen] pushed over a root page, so it can pop like in the app.
@@ -42,6 +44,8 @@ extension PumpScreen on WidgetTester {
       overrides: [
         envProvider.overrideWithValue(const Env(Flavor.dev)),
         prefsProvider.overrideWithValue(p),
+        // No test reaches the network: an API route not faked by the test answers as before its task lands.
+        apiAdapterProvider.overrideWithValue(FakeHttp((_) => notImplemented('test'))),
         ...overrides.cast(),
       ],
     );

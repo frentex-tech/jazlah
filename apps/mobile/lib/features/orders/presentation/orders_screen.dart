@@ -5,7 +5,6 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import 'package:jazlah/app/router/router.dart';
-import 'package:jazlah/app/shell/main_shell.dart';
 import 'package:jazlah/app/theme/theme.dart';
 import 'package:jazlah/core/widgets/widgets.dart';
 import 'package:jazlah/features/auth/presentation/session_controller.dart';
@@ -32,9 +31,6 @@ class _OrdersScreenState extends ConsumerState<OrdersScreen> {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
-    // shortcut: no order routes in real builds until ORD-API-3 #83: the coming-soon tab, not a retry that can
-    // never work (not-built-yet.md).
-    if (ref.watch(ordersRepositoryProvider) == null) return const PlaceholderTab(tab: MainTab.orders);
     final session = ref.watch(sessionProvider);
     // Still reading the stored session: the loading list, not the sign-in panel.
     final signedIn = session == SessionStatus.signedIn || session == SessionStatus.unknown;
@@ -170,7 +166,8 @@ class _OrderCard extends ConsumerWidget {
                     children: [
                       Text(order.vendorName.of(context.lang), style: JText.labelM),
                       const SizedBox(height: 2),
-                      Text(orderItemsText(context, order), style: JText.bodyM.copyWith(color: JColors.ink2)),
+                      if (order.items.isNotEmpty)
+                        Text(orderItemsText(context, order), style: JText.bodyM.copyWith(color: JColors.ink2)),
                     ],
                   ),
                 ),

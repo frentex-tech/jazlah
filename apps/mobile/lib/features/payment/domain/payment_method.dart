@@ -16,10 +16,9 @@ abstract final class PaymentMethodCode {
   static const Set<String> gateway = {mada, card, applePay};
 }
 
-/// Why a listed method cannot be chosen.
-// shortcut: the app's names until PAY-API-1 #76 fixes the reason codes (not-built-yet.md).
+/// Why a listed method cannot be chosen (`items[].reason` of the payment methods).
 abstract final class PaymentMethodReason {
-  static const walletInsufficient = 'WALLET_INSUFFICIENT';
+  static const walletInsufficient = 'INSUFFICIENT_BALANCE';
 }
 
 /// One method of the list. [cardLast4] is set for a saved card (mada / card).
@@ -64,18 +63,16 @@ abstract final class PaymentStatus {
   static const cancelled = 'cancelled';
 }
 
-/// The payment's next action (lead review A2): open the provider's hosted page at [url] (3DS, Apple Pay, the
-/// fake provider's approve/decline page) and come back when it navigates to [returnUrl]. [paymentId], [method]
-/// and [amount] (halalas) describe the payment.
-// shortcut: A2's proposed shape `{type: 'redirect', url, returnUrl}` until ORD-API-1 #81 and PAY-API-1 #76 fix
-// it (not-built-yet.md).
+/// The payment's next action (`payment.nextAction { type, redirectUrl, returnUrl }`): open the provider's hosted
+/// page at [redirectUrl] (3DS, Apple Pay, the fake provider's approve/decline page) and come back when it navigates
+/// to [returnUrl]. [paymentId], [method] and [amount] (halalas) are the payment's `id`, `method`, `amountHalalas`.
 @immutable
 class PaymentAction {
   const PaymentAction({
     required this.paymentId,
     required this.method,
     required this.amount,
-    required this.url,
+    required this.redirectUrl,
     required this.returnUrl,
     this.type = redirect,
   });
@@ -86,7 +83,7 @@ class PaymentAction {
   final String paymentId;
   final String method;
   final int amount;
-  final String url;
+  final String redirectUrl;
   final String returnUrl;
 }
 
@@ -100,10 +97,11 @@ bool isReturnUrl(String url, String returnUrl) {
 /// Refusals of a new payment on an order.
 abstract final class PaymentError {
   /// The order is no longer waiting for a payment (paid, or cancelled by the 15-minute timeout).
-  // shortcut: the app's name until PAY-API-1 #76 names it (not-built-yet.md).
   static const orderNotPayable = 'ORDER_NOT_PAYABLE';
 
-  /// The order's latest payment is still open at the provider: no second payment until it ends (A7).
-  // shortcut: the app's name until PAY-API-1 #76 decides a second payment on one order (not-built-yet.md).
+  /// The order's latest payment is still open at the provider (`details.paymentId`): no second one until it ends.
   static const paymentInProgress = 'PAYMENT_IN_PROGRESS';
+
+  /// The method cannot pay this order: stay and read the methods again.
+  static const methodNotAvailable = 'PAYMENT_METHOD_NOT_AVAILABLE';
 }

@@ -81,7 +81,7 @@ class _PaymentScreenState extends ConsumerState<PaymentScreen> {
 
   late final Prefs _prefs = ref.read(prefsProvider);
 
-  PaymentRepository? get _repo => ref.read(paymentRepositoryProvider);
+  PaymentRepository get _repo => ref.read(paymentRepositoryProvider);
 
   @override
   void initState() {
@@ -134,7 +134,6 @@ class _PaymentScreenState extends ConsumerState<PaymentScreen> {
   Future<void> _follow(int flow, {bool once = false}) async {
     final l10n = AppLocalizations.of(context);
     final repo = _repo;
-    if (repo == null) return;
     for (var polls = 0; mounted && flow == _flow; polls++) {
       if (polls == _maxPolls) {
         // Still open at the gateway: stop holding the customer; resume or reopening reads it again.
@@ -171,7 +170,6 @@ class _PaymentScreenState extends ConsumerState<PaymentScreen> {
   Future<void> _check({bool asked = false}) async {
     final flow = _flow;
     final repo = _repo;
-    if (repo == null) return;
     if (asked) setState(() => _phase = _Phase.processing);
     try {
       final s = await repo.status(widget.orderId);
@@ -250,7 +248,7 @@ class _PaymentScreenState extends ConsumerState<PaymentScreen> {
   /// A new payment on the same order with the chosen method; one per tap (the button is busy meanwhile).
   Future<void> _pay(PaymentMethodOption method) async {
     final repo = _repo;
-    if (_phase == _Phase.processing || repo == null) return;
+    if (_phase == _Phase.processing) return;
     if (_unsettled) return _check(asked: true); // never a second payment while one may capture
     final flow = _flow;
     _paymentId = ''; // the old payment's failure is not this attempt's
@@ -272,6 +270,9 @@ class _PaymentScreenState extends ConsumerState<PaymentScreen> {
       if (code != ApiError.network && code != ApiError.unknown) _payKey = null;
       if (!mounted || flow != _flow) return;
       if (code == PaymentError.orderNotPayable) return _check();
+      if (code == PaymentError.methodNotAvailable || code == OrderError.walletInsufficient) {
+        ref.invalidate(paymentMethodsProvider(widget.orderId)); // stay and read the methods again
+      }
       if (code == PaymentError.paymentInProgress) {
         // An earlier payment is still open at the provider: follow it instead of starting another.
         _paymentId = null;
@@ -305,8 +306,10 @@ class _PaymentScreenState extends ConsumerState<PaymentScreen> {
             title: l10n.reviewItemsFrom(o.items.length, o.vendorName.of(lang)),
             items: [for (final i in o.items) '${i.name.of(lang)} × ${i.quantity}'].join(lang == 'en' ? ', ' : '، '),
             when: () {
-              final (start, end) = windowText(l10n, o.window);
-              return '${dayText(context, calendarDate(o.deliveryDate))} · $start – $end';
+              final day = dayText(context, calendarDate(o.deliveryDate));
+              if (o.window == null) return day;
+              final (start, end) = windowText(l10n, o.window!);
+              return '$day · $start – $end';
             }(),
             where: o.fulfilment == Fulfilment.delivery
                 ? (o.addressSnapshot == null ? null : l10n.reviewDeliveryTo(addressPlace(context, o.addressSnapshot!)))

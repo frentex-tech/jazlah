@@ -4,8 +4,27 @@ import 'package:dio/dio.dart';
 import 'package:jazla_api/jazla_api.dart';
 import 'package:jazlah/app/providers.dart';
 
+/// An answer with another status than 200 (an error body, a 201…).
+class HttpAnswer {
+  const HttpAnswer(this.status, this.body);
+
+  final int status;
+  final Object body;
+}
+
+/// The error body of the API (`ErrorResponseDto`).
+HttpAnswer apiError(int status, String code, {Object? details}) => HttpAnswer(status, {
+  'code': code,
+  'message': code,
+  'details': ?details,
+  'requestId': 'r',
+});
+
+/// NOT_IMPLEMENTED (501): a Sprint 3 route before its task lands.
+HttpAnswer notImplemented(String task) => apiError(501, 'NOT_IMPLEMENTED', details: {'task': task});
+
 /// The HTTP layer under the real Api* repositories: each request is answered by [handler] with an
-/// openapi-shaped body (null: 404 NOT_FOUND). The app's own repository providers stay as they are (no
+/// openapi-shaped body, an [HttpAnswer], or null (404 NOT_FOUND). The app's own repository providers stay as they are (no
 /// USE_MOCKS in tests), so the screens run on the real API wiring; only the network is fake.
 class FakeHttp implements HttpClientAdapter {
   FakeHttp(this.handler);
@@ -17,9 +36,11 @@ class FakeHttp implements HttpClientAdapter {
   Future<ResponseBody> fetch(RequestOptions o, Stream<List<int>>? body, Future<void>? cancel) async {
     requests.add(o);
     final answer = handler(o);
-    final (status, json) = answer == null
-        ? (404, {'code': 'NOT_FOUND', 'message': 'not found', 'requestId': 'r'})
-        : (200, answer);
+    final (status, json) = switch (answer) {
+      null => (404, {'code': 'NOT_FOUND', 'message': 'not found', 'requestId': 'r'}),
+      HttpAnswer(:final status, :final body) => (status, body),
+      _ => (200, answer),
+    };
     return ResponseBody.fromString(
       jsonEncode(json),
       status,
