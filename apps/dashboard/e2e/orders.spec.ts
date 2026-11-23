@@ -105,10 +105,16 @@ test('while polling, a status changed elsewhere updates the row', async ({ page,
   await page.route('**/api/admin/orders/events', (r) => r.fulfill({ status: 401, body: '{"code":"UNAUTHORIZED"}' }));
   await page.clock.install();
   const o = await place(context);
+  // Count the feed's reads: the status must change only after a read has recorded «جديد»,
+  // or the next read takes «قيد التجهيز» as the first state seen and no reload follows.
+  let reads = 0;
+  page.on('response', (r) => void (new URL(r.url()).pathname === '/api/admin/orders' && reads++));
   await page.goto('/admin/orders');
   const row = table(page).getByRole('row').filter({ hasText: o.number });
   await expect(row.getByText('جديد')).toBeVisible();
-  await page.clock.runFor(16_000); // the polling feed has read the page once
+  await expect.poll(() => reads).toBeGreaterThanOrEqual(1); // the feed's first read
+  await page.clock.runFor(16_000);
+  await expect.poll(() => reads).toBeGreaterThanOrEqual(2); // one polled read
   const moved = await page.evaluate(async (u) => (await fetch(u, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: '{"to":"preparing"}' })).status, `/api/admin/orders/${o.id}/transition`);
   expect(moved).toBe(200);
   await page.clock.runFor(16_000);
