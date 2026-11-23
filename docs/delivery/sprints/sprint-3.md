@@ -4,6 +4,8 @@
 
 **Release:** v0.3.0 (**first end-to-end order demo to the client**)
 
+**Closing rule:** see CONTRIBUTING.md §5, "When an issue closes". A frontend task built ahead of the API closes when it is wired to the merged contract with tests. The staging check goes with the backend task and the release.
+
 **Exit criteria (demo on staging):**
 - Adding a product from a second vendor prompts "replace cart?". Below the minimum order, checkout is blocked and the remaining amount is shown.
 - Changing the carcass cutoff in the dashboard immediately changes the first available day. Closed and full days are disabled, each with its reason. Pausing orders shows the admin's message.

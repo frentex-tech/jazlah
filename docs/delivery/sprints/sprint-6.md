@@ -4,6 +4,8 @@
 
 **Release:** v0.6.0 (**feature-complete for launch**)
 
+**Closing rule:** see CONTRIBUTING.md §5, "When an issue closes". A frontend task built ahead of the API closes when it is wired to the merged contract with tests. The staging check goes with the backend task and the release.
+
 **Exit criteria (demo on staging):**
 - Visit: a customer books a slot at a partner farm → the vendor registers the chosen animal (tag + photo) → the customer pays a deposit and schedules slaughter as an order. The fee and deposit show up correctly in vendor earnings.
 - Feed: seller application → approval → listing with photos → a buyer finds it by type and city and chats with images → report → admin bans from moderation. A buy request gets a seller reply that opens a chat.
