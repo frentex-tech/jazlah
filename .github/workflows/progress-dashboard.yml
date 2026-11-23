@@ -15,9 +15,8 @@ permissions:
   pull-requests: read
   pages: write
   id-token: write
-concurrency:
-  group: progress-dashboard
-  cancel-in-progress: true
+# No concurrency group: a cancelled run leaves a cancelled check on develop's head commit
+# (issue events run on that commit too), and Render's "After CI Checks Pass" then skips the deploy.
 jobs:
   build:
     runs-on: ubuntu-latest
@@ -39,3 +38,6 @@ jobs:
     steps:
       - id: deployment
         uses: actions/deploy-pages@v4
+        # Two runs can overlap; the loser's deploy is refused. The next run publishes again,
+        # so don't turn a stale progress page into a red check that blocks staging.
+        continue-on-error: true
