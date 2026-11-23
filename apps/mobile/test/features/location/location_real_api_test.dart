@@ -12,7 +12,7 @@ import '../../helpers/fake_api.dart';
 import '../../helpers/pump_screen.dart';
 
 /// LOC-MOB-1 #26 on the real API wiring: ApiCoverageRepository over a fake HTTP layer answering
-/// POST /v1/public/coverage/check (openapi CoverageCheckResponseDto). The device permission is the platform's,
+/// GET /v1/public/coverage/check (openapi CoverageCheckResponseDto). The device permission is the platform's,
 /// faked here; the geocoder is the dev sample one (not our API).
 
 class _RefusingDevice extends MockDeviceLocation {
@@ -24,8 +24,10 @@ class _RefusingDevice extends MockDeviceLocation {
 FakeHttp _server() => FakeHttp((r) {
   switch (r.path) {
     case '/v1/public/coverage/check':
-      final lat = double.parse('${r.queryParameters['lat'] ?? (r.data as Map)['lat']}');
-      final lng = double.parse('${r.queryParameters['lng'] ?? (r.data as Map)['lng']}');
+      // openapi: GET with lat and lng in the query; another method or shape fails here.
+      if (r.method != 'GET') return null;
+      final lat = double.parse('${r.queryParameters['lat']}');
+      final lng = double.parse('${r.queryParameters['lng']}');
       final covered = lat > 24 && lat < 25.5 && lng > 46 && lng < 47.5;
       return {
         'covered': covered,

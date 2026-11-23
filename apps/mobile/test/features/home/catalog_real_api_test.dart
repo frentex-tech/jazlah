@@ -1,8 +1,11 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:jazlah/app/router/router.dart';
 import 'package:jazlah/app/shell/main_shell.dart';
 import 'package:jazlah/core/widgets/widgets.dart';
+import 'package:jazlah/features/catalog/domain/catalog.dart';
+import 'package:jazlah/features/catalog/presentation/catalog_providers.dart';
 import 'package:jazlah/features/home/presentation/home_screen.dart';
 import 'package:jazlah/features/location/domain/location.dart';
 import 'package:jazlah/features/location/presentation/location_providers.dart';
@@ -14,7 +17,7 @@ import '../../helpers/pump_screen.dart';
 
 /// STF-MOB-1 #55 on the real API wiring: ApiCatalogRepository and ApiCoverageRepository over a fake HTTP layer
 /// answering openapi-shaped bodies (GET /v1/public/categories, /v1/public/vendors, /v1/public/vendors/{id},
-/// /v1/public/products with its cursor, POST /v1/public/coverage/check).
+/// /v1/public/products with its cursor, GET /v1/public/coverage/check).
 
 class _Located extends SelectedLocationController {
   @override
@@ -104,15 +107,17 @@ void main() {
         child: CategoryScreen(id: 'c1'),
       ),
     );
-    final seen = <String>[];
     for (var i = 0; i < 40; i++) {
-      for (final c in t.widgetList<JProductCard>(find.byType(JProductCard))) {
-        if (!seen.contains(c.title)) seen.add(c.title);
-      }
       await t.drag(_vertical, const Offset(0, -300));
       await t.pump(const Duration(seconds: 1));
     }
-    expect(seen, [for (var i = 1; i <= 25; i++) 'منتج $i']); // all 25, each once, in order
+    // The loaded list itself, not what was seen on screen: a page appended twice would show here.
+    final container = ProviderScope.containerOf(t.element(find.byType(CategoryScreen)));
+    const query = (categoryId: 'c1', vendorId: null, sort: ProductSort.popular);
+    final ids = [for (final p in container.read(productPagesProvider(query)).value!.items) p.id];
+    expect(ids, hasLength(25));
+    expect(ids.toSet(), hasLength(25)); // no repeats
+    expect(ids, [for (var i = 1; i <= 25; i++) 'p$i']); // every one, in order
     final pages = http.to('/v1/public/products');
     expect([for (final r in pages) r.queryParameters['cursor']], [null, '20']);
     expect(pages.first.queryParameters['categoryId'], 'c1');
