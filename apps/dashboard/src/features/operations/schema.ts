@@ -1,21 +1,21 @@
-// The SCH-API-1 rules (sprint-3.md: end > start, leadDays ≥ 0, closed days not in the past), checked on the page, at our
+// The SCH-API-1 rules (openapi.json: end > start, leadDays 0–30, closed days not in the past), checked on the page, at our
 // route and by the mock; error paths are the API's field paths, so client and API errors land on the same field.
 // Relative imports with extensions: the unit test runs under plain node.
 import { z } from 'zod';
 import { halalasOf, sarInput } from '../../lib/money.ts';
-import { ORDER_TYPES, SCOPES, WEEKDAYS, type OperationsSettings, type VendorCapacity } from './types.ts';
+import { SCOPES, type DayLimit, type OperationsPage, type OperationsSettings, type SetPause, type VendorDefault } from './types.ts';
 
 const TIME_RE = /^([01]\d|2[0-3]):[0-5]\d$/;
 /** A real calendar date `YYYY-MM-DD` (no 2026-02-30). */
 export const isDate = (s: string) => /^\d{4}-\d{2}-\d{2}$/.test(s) && !Number.isNaN(Date.parse(`${s}T00:00:00Z`)) && new Date(`${s}T00:00:00Z`).toISOString().startsWith(s);
 const time = z.string().regex(TIME_RE);
 const int = (min: number, max: number) => z.number().int().min(min).max(max);
-const window = <T extends z.ZodRawShape>(shape: T, open: (v: z.infer<z.ZodObject<T>>) => boolean = () => true) =>
-  z.object(shape).superRefine((v, ctx) => {
-    const { start, end } = v as unknown as { start: string; end: string };
-    // `endBeforeStart` reaches the field as the constraint name (lib/route.ts invalidBody), as the API's own rule names.
-    if (open(v) && TIME_RE.test(start) && TIME_RE.test(end) && end <= start) ctx.addIssue({ code: 'custom', path: ['end'], message: 'endBeforeStart' });
-  });
+const window = z.object({ start: time, end: time }).superRefine(({ start, end }, ctx) => {
+  // `endBeforeStart` reaches the field as the constraint name (lib/route.ts invalidBody), as the API's own rule names.
+  if (TIME_RE.test(start) && TIME_RE.test(end) && end <= start) ctx.addIssue({ code: 'custom', path: ['end'], message: 'endBeforeStart' });
+});
+/** A cutoff: null time means only the lead days count. */
+const cutoff = z.object({ time: time.nullable(), leadDays: int(0, 30) });
 
 export const ClosedDaySchema = z.object({
   date: z.string().refine(isDate, 'isDate'),
@@ -23,52 +23,46 @@ export const ClosedDaySchema = z.object({
   reasonAr: z.string().trim().min(1).max(100),
   reasonEn: z.string().trim().min(1).max(100),
 });
-export const PausedSchema = z.object({ isPaused: z.boolean(), messageAr: z.string().trim().min(1).max(200), messageEn: z.string().trim().min(1).max(200) });
+const message = z.string().trim().min(1).max(200);
+/** The pause write: the messages are required when pausing, left out when resuming (the API ignores them). */
+export const PausedSchema = z.union([
+  z.object({ isPaused: z.literal(true), messageAr: message, messageEn: message }),
+  z.object({ isPaused: z.literal(false) }).transform(() => ({ isPaused: false })),
+]) satisfies z.ZodType<SetPause, unknown>;
 
-export const OperationsSchema = z.object({
-  deliveryWindow: window({ start: time, end: time }),
-  cutoffs: z
-    .object({
-      ready_meat: z.object({ time, leadDays: int(0, 30) }),
-      carcass: z.object({ time, leadDays: int(0, 30) }),
-      cooked: z.object({ time, leadDays: int(0, 30) }),
-      occasion: z.object({ time: time.optional(), leadDays: int(0, 30) }),
-    })
-    .loose(), // unknown cutoff keys (adha) pass through untouched
+/** What the page saves: everything but the pause, which only the pause flow changes (a stale tab must not resume). */
+export const PageSchema = z.object({
+  deliveryWindow: window,
+  cutoffs: z.object({ readyMeat: cutoff, carcass: cutoff, cooked: cutoff, occasion: cutoff, adha: cutoff }),
   bookingHorizonDays: int(1, 60),
   closedDays: z.array(ClosedDaySchema).max(366),
-  capacity: z.object({ ordersPerDay: int(1, 100000), carcassesPerDay: int(1, 100000) }),
+  defaultCapacity: z.object({ ordersPerDay: int(1, 100000), carcassesPerDay: int(1, 100000) }),
   minOrderHalalas: int(0, 10_000_000),
   deliveryFeeHalalas: int(0, 1_000_000),
   cod: z.object({
     enabled: z.boolean(),
     maxOrderHalalas: int(1, 10_000_000).nullable(),
-    allowedOrderTypes: z.array(z.enum(ORDER_TYPES)),
+    allowedOrderTypes: z.array(z.enum(['ready_meat', 'carcass', 'cooked', 'occasion', 'adha', 'mixed'])),
     confirmation: z.enum(['auto', 'review']),
   }),
-  paused: PausedSchema,
   complaintWindowHours: int(1, 720),
-  workingHours: z.array(window({ day: z.enum(WEEKDAYS), open: z.boolean(), start: time, end: time }, (d) => d.open)).length(7).optional(),
-}) satisfies z.ZodType<OperationsSettings>;
+}) satisfies z.ZodType<OperationsPage, unknown>;
 
-/** What the page saves: everything but `paused`, which only the pause flow changes (a stale tab must not resume). */
-export const PageSchema = OperationsSchema.omit({ paused: true });
-
-/** The page's PUT body: only the keys sent change. `paused` has its own route (PausedSchema). */
+/** The page's PATCH body: only the keys sent change. The pause has its own route (PausedSchema). */
 export const OperationsPatchSchema = PageSchema.partial();
 
-export const VendorDefaultSchema = z.object({ ordersPerDay: int(1, 100000).nullable(), carcassesPerDay: int(1, 100000).nullable() }) satisfies z.ZodType<Omit<VendorCapacity, 'days'>>;
-export const DayLimitSchema = z.object({ ordersLimit: int(1, 100000).nullable(), carcassesLimit: int(1, 100000).nullable() });
+export const VendorDefaultSchema = z.object({ ordersPerDay: int(1, 100000).nullable(), carcassesPerDay: int(1, 100000).nullable() }) satisfies z.ZodType<VendorDefault>;
+export const DayLimitSchema = z.object({ ordersLimit: int(1, 100000).nullable(), carcassesLimit: int(1, 100000).nullable() }) satisfies z.ZodType<DayLimit>;
 
 /** What the page edits: every typed number as text, amounts in SAR; same keys as the settings. */
-export type Draft = Omit<OperationsSettings, 'paused' | 'bookingHorizonDays' | 'capacity' | 'minOrderHalalas' | 'deliveryFeeHalalas' | 'cod' | 'complaintWindowHours' | 'cutoffs'> & {
-  /** The known order types as typed; other keys kept as received. */
-  cutoffs: { [K in (typeof ORDER_TYPES)[number]]: { time: string; leadDays: string } } & Record<string, unknown>;
+export type Draft = Omit<OperationsPage, 'bookingHorizonDays' | 'defaultCapacity' | 'minOrderHalalas' | 'deliveryFeeHalalas' | 'cod' | 'complaintWindowHours' | 'cutoffs'> & {
+  /** The edited cutoffs as typed (empty time: none); `adha` (Sprint 6) kept as received. */
+  cutoffs: { [K in keyof OperationsPage['cutoffs']]: { time: string; leadDays: string } };
   bookingHorizonDays: string;
-  capacity: { ordersPerDay: string; carcassesPerDay: string };
+  defaultCapacity: { ordersPerDay: string; carcassesPerDay: string };
   minOrderHalalas: string;
   deliveryFeeHalalas: string;
-  cod: Omit<OperationsSettings['cod'], 'maxOrderHalalas'> & { maxOrderHalalas: string };
+  cod: Omit<OperationsPage['cod'], 'maxOrderHalalas'> & { maxOrderHalalas: string };
   complaintWindowHours: string;
 };
 
@@ -80,15 +74,15 @@ export const intOf = (s: string) => {
   return /^\d{1,9}$/.test(v) ? Number(v) : NaN;
 };
 const money = (s: string) => halalasOf(s) ?? NaN;
-/** Only the known order types are mapped; any other cutoff key (adha) is carried as received. */
-const mapCutoffs = <T, U>(o: Record<string, unknown>, f: (v: T) => U) => ({ ...o, ...Object.fromEntries(ORDER_TYPES.map((k) => [k, f(o[k] as T)])) });
+const mapCutoffs = <T, U>(o: Record<keyof OperationsPage['cutoffs'], T>, f: (v: T) => U) =>
+  Object.fromEntries(Object.entries(o).map(([k, v]) => [k, f(v as T)])) as Record<keyof OperationsPage['cutoffs'], U>;
 
-export function toDraft({ paused: _paused, ...s }: OperationsSettings): Draft {
+export function toDraft({ paused: _paused, updatedAt: _updatedAt, ...s }: OperationsSettings): Draft {
   return {
     ...s,
-    cutoffs: mapCutoffs(s.cutoffs, (c: { time?: string; leadDays: number }) => ({ time: c.time ?? '', leadDays: String(c.leadDays) })) as Draft['cutoffs'],
+    cutoffs: mapCutoffs(s.cutoffs, (c) => ({ time: c.time ?? '', leadDays: String(c.leadDays) })),
     bookingHorizonDays: String(s.bookingHorizonDays),
-    capacity: { ordersPerDay: String(s.capacity.ordersPerDay), carcassesPerDay: String(s.capacity.carcassesPerDay) },
+    defaultCapacity: { ordersPerDay: String(s.defaultCapacity.ordersPerDay), carcassesPerDay: String(s.defaultCapacity.carcassesPerDay) },
     minOrderHalalas: sarInput(s.minOrderHalalas),
     deliveryFeeHalalas: sarInput(s.deliveryFeeHalalas),
     cod: { ...s.cod, maxOrderHalalas: s.cod.maxOrderHalalas == null ? '' : sarInput(s.cod.maxOrderHalalas) },
@@ -96,21 +90,17 @@ export function toDraft({ paused: _paused, ...s }: OperationsSettings): Draft {
   };
 }
 
-/** The page's draft as settings, without `paused` (see PageSchema). An empty occasion time is left out (optional). */
-export function fromDraft(d: Draft): Omit<OperationsSettings, 'paused'> {
+/** The page's draft as the PATCH body (see PageSchema). An empty cutoff time is null: no cutoff time. */
+export function fromDraft(d: Draft): OperationsPage {
   return {
     ...d,
-    cutoffs: mapCutoffs(d.cutoffs, (c: { time: string; leadDays: string }) => {
-      const t = latin(c.time);
-      return { ...(t !== '' || c !== d.cutoffs.occasion ? { time: t } : {}), leadDays: intOf(c.leadDays) };
-    }) as OperationsSettings['cutoffs'],
+    cutoffs: mapCutoffs(d.cutoffs, (c) => ({ time: latin(c.time) || null, leadDays: intOf(c.leadDays) })),
     deliveryWindow: { start: latin(d.deliveryWindow.start), end: latin(d.deliveryWindow.end) },
     bookingHorizonDays: intOf(d.bookingHorizonDays),
-    capacity: { ordersPerDay: intOf(d.capacity.ordersPerDay), carcassesPerDay: intOf(d.capacity.carcassesPerDay) },
+    defaultCapacity: { ordersPerDay: intOf(d.defaultCapacity.ordersPerDay), carcassesPerDay: intOf(d.defaultCapacity.carcassesPerDay) },
     minOrderHalalas: money(d.minOrderHalalas),
     deliveryFeeHalalas: money(d.deliveryFeeHalalas),
     cod: { ...d.cod, maxOrderHalalas: d.cod.maxOrderHalalas.trim() === '' ? null : money(d.cod.maxOrderHalalas) },
-    workingHours: d.workingHours?.map((h) => ({ ...h, start: latin(h.start), end: latin(h.end) })),
     complaintWindowHours: intOf(d.complaintWindowHours),
   };
 }
@@ -123,7 +113,7 @@ export const zodErrors = (e: z.ZodError): FieldErrors =>
 export function errorKey(path: string, constraint: string): string {
   if (constraint === 'endBeforeStart' || constraint === 'notPast') return constraint;
   if (/(^|\.)(time|start|end)$/.test(path)) return 'time';
-  if (path.startsWith('capacity.') || path.endsWith('Limit') || path.endsWith('PerDay')) return 'positive';
+  if (path.startsWith('defaultCapacity.') || path.endsWith('Limit') || path.endsWith('PerDay')) return 'positive';
   if (path.endsWith('leadDays')) return 'leadDays';
   if (path.endsWith('Halalas')) return 'amount';
   if (path.startsWith('paused.')) return 'message';

@@ -1,5 +1,5 @@
 // The in-process mock of backend.ts (DASHBOARD_API_MOCK=1): loaded only through lib/mock-backends.ts, so a production
-// build leaves it out. An admin access token ending in «-limited» is answered NOT_ALLOWED, as in the other admin mocks.
+// build leaves it out. An admin access token ending in «-limited» is answered PERMISSION_DENIED, as in the other admin mocks.
 import { mockVendors } from '@/features/admin-vendors/backend.mock';
 import { mock as catalog } from '@/features/catalog/backend.mock';
 import type { CouponsBackend } from './backend';
@@ -15,14 +15,14 @@ function seed(): Map<string, Stored> {
   const at = (days: number) => new Date(Math.floor(now / DAY) * DAY + days * DAY - 3 * 3_600_000).toISOString(); // Riyadh midnight
   const falah = [...mockVendors.values()].find((v) => v.name.en === 'Al Falah Butchery')?.id;
   const sheep = catalog.items.categories[0]?.id;
-  const base = { maxDiscountHalalas: null, minOrderHalalas: null, vendorIds: [], categoryIds: [], usageLimit: null, perUserLimit: 1, isActive: true, firstOrderOnly: false };
+  const base = { maxDiscountHalalas: null, minOrderHalalas: null, vendorIds: [], categoryIds: [], usageLimit: null, perUserLimit: 1, isActive: true };
   const rows: (Partial<Stored> & Pick<Stored, 'code' | 'type' | 'value' | 'startsAt' | 'endsAt'>)[] = [
-    { code: 'RAMADAN25', type: 'percent', value: 25, maxDiscountHalalas: 5000, minOrderHalalas: 10000, startsAt: at(-10), endsAt: at(20), usageLimit: 500, usage: { uses: 132, distinctUsers: 120, totalDiscountHalalas: 528000 } },
-    { code: 'WELCOME50', type: 'fixed', value: 5000, minOrderHalalas: 20000, startsAt: at(-40), endsAt: at(320), usage: { uses: 48, distinctUsers: 48, totalDiscountHalalas: 240000 } },
-    { code: 'FALAH15', type: 'percent', value: 15, vendorIds: falah ? [falah] : [], categoryIds: sheep ? [sheep] : [], startsAt: at(-5), endsAt: at(25), usageLimit: 100, perUserLimit: 2, usage: { uses: 100, distinctUsers: 61, totalDiscountHalalas: 187500 } },
-    { code: 'EID10', type: 'percent', value: 10, startsAt: at(15), endsAt: at(19), usageLimit: 1000, usage: { uses: 0, distinctUsers: 0, totalDiscountHalalas: 0 } },
-    { code: 'NATIONAL94', type: 'fixed', value: 9400, startsAt: at(-70), endsAt: at(-60), usageLimit: 940, usage: { uses: 940, distinctUsers: 902, totalDiscountHalalas: 8836000 } },
-    { code: 'TEST100', type: 'fixed', value: 10000, startsAt: at(-30), endsAt: at(30), usageLimit: 10, perUserLimit: null, isActive: false, usage: { uses: 3, distinctUsers: 1, totalDiscountHalalas: 30000 } },
+    { code: 'RAMADAN25', type: 'percent', value: 25, maxDiscountHalalas: 5000, minOrderHalalas: 10000, startsAt: at(-10), endsAt: at(20), usageLimit: 500, usage: { uses: 132, distinctCustomers: 120, totalDiscountHalalas: 528000 } },
+    { code: 'WELCOME50', type: 'fixed', value: 5000, minOrderHalalas: 20000, startsAt: at(-40), endsAt: at(320), usage: { uses: 48, distinctCustomers: 48, totalDiscountHalalas: 240000 } },
+    { code: 'FALAH15', type: 'percent', value: 15, vendorIds: falah ? [falah] : [], categoryIds: sheep ? [sheep] : [], startsAt: at(-5), endsAt: at(25), usageLimit: 100, perUserLimit: 2, usage: { uses: 100, distinctCustomers: 61, totalDiscountHalalas: 187500 } },
+    { code: 'EID10', type: 'percent', value: 10, startsAt: at(15), endsAt: at(19), usageLimit: 1000, usage: { uses: 0, distinctCustomers: 0, totalDiscountHalalas: 0 } },
+    { code: 'NATIONAL94', type: 'fixed', value: 9400, startsAt: at(-70), endsAt: at(-60), usageLimit: 940, usage: { uses: 940, distinctCustomers: 902, totalDiscountHalalas: 8836000 } },
+    { code: 'TEST100', type: 'fixed', value: 10000, startsAt: at(-30), endsAt: at(30), usageLimit: 10, perUserLimit: null, isActive: false, usage: { uses: 3, distinctCustomers: 1, totalDiscountHalalas: 30000 } },
   ];
   return new Map(
     rows.map((r, i) => {
@@ -37,7 +37,7 @@ function seed(): Map<string, Stored> {
 const g = globalThis as { __coupons?: Map<string, Stored> };
 const coupons: Map<string, Stored> = (g.__coupons ??= seed());
 
-const denied = { ok: false, code: 'NOT_ALLOWED', status: 403 } as const;
+const denied = { ok: false, code: 'PERMISSION_DENIED', status: 403 } as const;
 const notFound = { ok: false, code: 'NOT_FOUND', status: 404 } as const;
 const taken = { ok: false, code: 'COUPON_CODE_TAKEN', status: 409 } as const;
 const invalid = (field: string, constraint: string) => ({ ok: false, code: 'VALIDATION_FAILED', status: 400, details: [{ field, constraints: [constraint] }] }) as const;
@@ -68,7 +68,7 @@ export const mockCoupons: CouponsBackend = {
     if (!parsed.success) return invalid(String(parsed.error.issues[0]?.path[0] ?? ''), 'invalid');
     if (codeUsed(parsed.data.code)) return taken;
     const now = new Date().toISOString();
-    const c: Stored = { ...(parsed.data as CouponInput), firstOrderOnly: false, id: crypto.randomUUID(), usageCount: 0, createdAt: now, updatedAt: now, usage: { uses: 0, distinctUsers: 0, totalDiscountHalalas: 0 } };
+    const c: Stored = { ...(parsed.data as CouponInput), id: crypto.randomUUID(), usageCount: 0, createdAt: now, updatedAt: now, usage: { uses: 0, distinctCustomers: 0, totalDiscountHalalas: 0 } };
     coupons.set(c.id, c);
     return { ok: true, data: out(c) };
   },

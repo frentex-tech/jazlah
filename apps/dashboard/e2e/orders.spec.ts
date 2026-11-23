@@ -1,5 +1,5 @@
 import { expect, test, type BrowserContext, type Page } from '@playwright/test';
-import { signInAs } from './helpers';
+import { follow, signInAs } from './helpers';
 
 // Mock (src/features/orders/backend.mock.ts): seeds follow 135:47501 (JZ-261110-0482 «سعد العتيبي», مجازر الفلاح, preparing;
 // JZ-261110-0481 ذبائح الرياض, delivered …). The vendor session is مجازر الفلاح. One server and one mock store for the
@@ -128,10 +128,10 @@ test('the vendor opens an order and moves it to the next status', async ({ page,
   await signInAs(context, ['vendor']);
   const o = await place(context);
   await page.goto('/vendor/orders');
-  await page.getByRole('link', { name: `فتح الطلب ${o.number}` }).click();
+  await follow(page, page.getByRole('link', { name: `فتح الطلب ${o.number}` }), new RegExp(`/vendor/orders/${o.id}$`));
   await expect(page.getByRole('heading', { level: 1, name: `الطلب ${o.number}` })).toBeVisible();
   await expect(page.getByText('ريب آي بقري طازج 500 جم')).toBeVisible();
-  await expect(page.getByText('500 جم · تقطيع: ستيك · تغليف: كيس فاكيوم · بدون: الدهن')).toBeVisible();
+  await expect(page.getByText('500 جم · تقطيع: ستيك · تغليف: كيس مفرّغ · بدون: الدهن')).toBeVisible();
   await expect(page.getByText('موقع التسليم')).toBeVisible();
   // Vendors have no cancel, refund or reschedule.
   await expect(page.getByRole('button', { name: 'إلغاء واسترجاع' })).toHaveCount(0);
@@ -213,7 +213,7 @@ test('an admin reschedules to an available day only', async ({ page, context }) 
 test('the order label previews, and prints alone', async ({ page, context }) => {
   await signInAs(context, ['admin']);
   await page.goto('/admin/orders');
-  await page.getByRole('link', { name: 'فتح الطلب JZ-261110-0482' }).click();
+  await follow(page, page.getByRole('link', { name: 'فتح الطلب JZ-261110-0482' }), /\/admin\/orders\/[0-9a-f-]{36}$/);
   await page.getByRole('button', { name: 'طباعة الملصق', exact: true }).click();
   const label = page.getByRole('region', { name: 'ملصق الطلب A6 (معاينة)' });
   await expect(label.getByText('سعد العتيبي')).toBeVisible();

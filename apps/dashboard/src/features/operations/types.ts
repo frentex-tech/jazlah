@@ -1,41 +1,26 @@
-// Operations settings (SCH-API-1 `ops.*` keys) and per-vendor capacity (SCH-API-2 `DayCapacity`), as sprint-3.md
-// describes them. Not in openapi.json yet: the mock follows these shapes (docs/frontend/not-built-yet.md).
+// Operations settings (SCH-API-1) and per-vendor capacity (SCH-API-2), as the generated client types them
+// (docs/frontend/orders.md). Type-only imports: the unit tests run under plain node.
+import type { Schemas } from '../../api/client.ts';
 
-/** Order types with a cutoff; `adha` (`{…}` in the sprint file, no field in the frame) is left out until it is defined. */
-export const ORDER_TYPES = ['ready_meat', 'carcass', 'cooked', 'occasion'] as const;
+/** The order types the page edits (cutoff, COD); `adha` (Sprint 6) and `mixed` are kept as received, never shown. */
+export const ORDER_TYPES = ['ready_meat', 'carcass', 'cooked', 'occasion'] as const satisfies readonly Schemas['OrderType'][];
 export type OrderType = (typeof ORDER_TYPES)[number];
-export const SCOPES = ['both', 'delivery', 'pickup'] as const;
+/** The cutoff key of an order type (`ready_meat` → `readyMeat`). */
+export const CUTOFF_KEY = { ready_meat: 'readyMeat', carcass: 'carcass', cooked: 'cooked', occasion: 'occasion' } as const satisfies Record<OrderType, keyof Schemas['CutoffsDto']>;
+export const SCOPES = ['both', 'delivery', 'pickup'] as const satisfies readonly Schemas['ClosedDayDto']['scope'][];
 export type ClosedScope = (typeof SCOPES)[number];
-/** Saturday first, as the frame's weekly hours and calendar. */
-export const WEEKDAYS = ['sat', 'sun', 'mon', 'tue', 'wed', 'thu', 'fri'] as const;
-export type Weekday = (typeof WEEKDAYS)[number];
 
-export type ClosedDay = { date: string; scope: ClosedScope; reasonAr: string; reasonEn: string };
-export type Paused = { isPaused: boolean; messageAr: string; messageEn: string };
+export type ClosedDay = Schemas['ClosedDayDto'];
+/** The pause as read: the messages are null while not paused. */
+export type Paused = Schemas['OrderingPauseResponseDto'];
+/** The pause as sent: the messages are required when pausing, ignored when resuming. */
+export type SetPause = Schemas['SetOrderingPauseDto'];
+export type OperationsSettings = Schemas['OperationsSettingsResponseDto'];
+/** What the page saves: every key but the pause (its own route) and `updatedAt`. */
+export type OperationsPage = Required<Schemas['UpdateOperationsSettingsDto']>;
+export type OperationsPatch = Schemas['UpdateOperationsSettingsDto'];
 
-export type OperationsSettings = {
-  deliveryWindow: { start: string; end: string };
-  /**
-   * `occasion` has no time in the sprint file (optional here; the frame shows one). Other keys (`adha`, `{…}` in the
-   * sprint file) are kept as received, so a save never drops them.
-   */
-  cutoffs: { [K in OrderType]: { time?: string; leadDays: number } } & Record<string, unknown>;
-  bookingHorizonDays: number;
-  closedDays: ClosedDay[];
-  capacity: { ordersPerDay: number; carcassesPerDay: number };
-  minOrderHalalas: number;
-  deliveryFeeHalalas: number;
-  cod: { enabled: boolean; maxOrderHalalas: number | null; allowedOrderTypes: OrderType[]; confirmation: 'auto' | 'review' };
-  paused: Paused;
-  complaintWindowHours: number;
-  /**
-   * The frame's weekly hours (118:11181); not an `ops.*` key in the sprint file: the section shows only when present.
-   * shortcut: platform hours have no consumer in the plan (SCH-API-2 uses the vendor's); keep, move or drop once the API
-   * session answers A12 (#70).
-   */
-  workingHours?: { day: Weekday; open: boolean; start: string; end: string }[];
-};
-
-/** A vendor's capacity: its default override (null = the platform default) and its specific dates. */
-export type DayCapacity = { date: string; ordersLimit: number | null; carcassesLimit: number | null; ordersBooked: number; carcassesBooked: number };
-export type VendorCapacity = { ordersPerDay: number | null; carcassesPerDay: number | null; days: DayCapacity[] };
+export type DayCapacity = Schemas['VendorCapacityDayResponseDto'];
+export type VendorCapacity = Schemas['VendorCapacityResponseDto'];
+export type VendorDefault = Schemas['SetVendorCapacityDto'];
+export type DayLimit = Schemas['SetVendorDayCapacityDto'];

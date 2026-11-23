@@ -9,7 +9,7 @@ export function GET(req: NextRequest) {
 }
 
 /** Only the keys sent change: the page sends its sections (the pause has its own route, ./pause). */
-export async function PUT(req: NextRequest) {
+export async function PATCH(req: NextRequest) {
   const parsed = OperationsPatchSchema.safeParse(await req.json().catch(() => null));
   return withPanelSession(req, 'admin', async (token) => (parsed.success ? operationsBackend().update(token, langOf(req), parsed.data) : invalidBody(parsed.error)));
 }
