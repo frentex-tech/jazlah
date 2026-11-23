@@ -39,8 +39,7 @@ test('create with validation errors, then a duplicate code, then success', async
   await signInAs(context, ['admin']);
   await page.goto('/admin/marketing/coupons');
   await expect(table(page).getByRole('link', { name: 'RAMADAN25', exact: true })).toBeVisible(); // hydrated before the click
-  await page.getByRole('link', { name: 'كوبون جديد' }).click();
-  await expect(page).toHaveURL(/\/admin\/marketing\/coupons\/new$/, { timeout: 15_000 });
+  await follow(page, page.getByRole('link', { name: 'كوبون جديد' }), /\/admin\/marketing\/coupons\/new$/);
   await expect(page.getByRole('heading', { level: 1, name: 'كوبون جديد' })).toBeVisible();
 
   await page.getByLabel('رمز الكوبون').fill('a b');
@@ -146,7 +145,7 @@ test('English mirrors the list and the form', async ({ page, context }) => {
   await expect(page.locator('html')).toHaveAttribute('dir', 'ltr');
   await expect(page.getByRole('heading', { level: 1, name: 'Coupons' })).toBeVisible();
   await expect(page.getByRole('table', { name: 'Coupons' }).getByRole('row').filter({ hasText: 'WELCOME50' })).toContainText('Fixed amount · SAR 50.00');
-  await page.getByRole('link', { name: 'New coupon' }).click();
-  await expect(page.getByLabel('Discount (%)')).toBeVisible({ timeout: 15_000 });
+  await follow(page, page.getByRole('link', { name: 'New coupon' }), /\/en\/admin\/marketing\/coupons\/new$/);
+  await expect(page.getByLabel('Discount (%)')).toBeVisible();
   await expect(page.getByText('No store chosen: applies to every store')).toBeVisible();
 });
