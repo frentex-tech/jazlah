@@ -72,7 +72,7 @@ class PlaceholderTab extends StatelessWidget {
 }
 
 /// shortcut: a pushed "coming soon" page with a back button, for routes whose screens belong to later
-/// tasks (notifications NOT-MOB-1 #105, checkout SCH-MOB-1 #71).
+/// tasks (notifications NOT-MOB-1 #105).
 class ComingSoonPage extends StatelessWidget {
   const ComingSoonPage({required this.title, super.key});
 

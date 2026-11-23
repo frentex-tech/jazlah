@@ -27,12 +27,16 @@ Future<bool> addToCart(BuildContext context, WidgetRef ref, CartItemInput item) 
   } on ApiError catch (e) {
     if (e.code != CartError.vendorMismatch || !context.mounted) rethrow;
     final l10n = AppLocalizations.of(context);
-    final vendor = ref.read(cartProvider).value?.vendorName?.of(context.lang) ?? l10n.cartAnotherStore;
+    // `details.vendorName`: the cart's store (a plain name or `{ar, en}`).
+    final named = e.details is Map ? (e.details! as Map)['vendorName'] : null;
+    final vendor =
+        (named is Map ? named[context.lang] : named) as String? ??
+        ref.read(cartProvider).value?.vendorName?.of(context.lang) ??
+        l10n.cartAnotherStore;
     final replace = await showJDialog(
       context,
       title: l10n.cartReplaceTitle,
-      // The API's message already names the current store.
-      body: e.message ?? l10n.cartReplaceBody(vendor),
+      body: l10n.cartReplaceBody(vendor),
       confirmLabel: l10n.cartReplace,
       cancelLabel: l10n.cancel,
     );

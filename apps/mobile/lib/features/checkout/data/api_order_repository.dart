@@ -143,8 +143,8 @@ Order orderFrom(OrderResponseDto o) {
 
 /// A list row (`OrderSummaryResponseDto`): only these fields come; the money parts, lines and window are not in a
 /// summary, so they stay empty here.
-// shortcut: the card's items line, thumbnail and «اليوم، 4:00 م» time are hidden until a summary carries the lines'
-// names and image and the window, an ask for ORD-API-3 #83 (not-built-yet.md).
+// shortcut: the card hides its items line, shows a placeholder thumbnail and no «4:00 م» until a summary carries
+// the lines' names and image and the window, an ask for ORD-API-3 #83 (not-built-yet.md).
 Order orderFromSummary(OrderSummaryResponseDto o) => Order(
   id: o.id,
   number: o.number,
