@@ -20,15 +20,11 @@ final cartRepositoryProvider = Provider<CartRepository>((ref) {
 });
 
 /// The public client settings' minimum order and delivery fee (`GET /v1/public/settings/client`), for the cart on
-/// the device; the account cart carries its own. Null while they cannot be read (NOT_IMPLEMENTED until SCH-API-1):
-/// never invented, so they are hidden and the device cart does not offer checkout.
+/// the device; the account cart carries its own. Fails while they cannot be read (NOT_IMPLEMENTED until SCH-API-1):
+/// never invented: the device cart then prices without them, hides them and does not offer checkout.
 final FutureProvider<CartSettings?> clientCartSettingsProvider = FutureProvider<CartSettings?>((ref) async {
   if (ref.watch(cartMocksProvider)) return MockCartRepository.opsSettings;
-  try {
-    return await clientCartSettings(ref.watch(apiProvider));
-  } on Object {
-    return null;
-  }
+  return clientCartSettings(ref.watch(apiProvider));
 }, retry: (_, _) => null);
 
 /// The settings given to the device cart up front: the mock's with USE_MOCKS; in real builds none, and the device
@@ -50,7 +46,15 @@ final localCartProvider = Provider<LocalCartRepository>((ref) {
       }
     },
     settings: ref.watch(cartSettingsProvider),
-    loadSettings: () => ref.read(clientCartSettingsProvider.future),
+    // Only a success is kept: a failure (or 501) prices without them now and is read again next time.
+    loadSettings: () async {
+      try {
+        return await ref.read(clientCartSettingsProvider.future);
+      } on Object {
+        ref.invalidate(clientCartSettingsProvider);
+        return null;
+      }
+    },
   );
 });
 

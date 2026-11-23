@@ -40,8 +40,16 @@ class ApiOrderRepository implements OrderRepository, OrdersRepository {
 
   @override
   Future<List<Order>> list({OrderScope? scope}) => _call(() async {
-    final res = (await _api.getCustomerOrdersApi().customerListOrders(scope: scope?.name)).data!;
-    return [for (final o in res.items) orderFromSummary(o)];
+    // shortcut: every page is read up front (a customer has few orders); page on scroll in the orders tab if
+    // lists grow long, ORD-MOB-2 #85.
+    final orders = <Order>[];
+    String? cursor;
+    do {
+      final res = (await _api.getCustomerOrdersApi().customerListOrders(scope: scope?.name, cursor: cursor)).data!;
+      orders.addAll(res.items.map(orderFromSummary));
+      cursor = res.nextCursor;
+    } while (cursor != null);
+    return orders;
   });
 
   @override

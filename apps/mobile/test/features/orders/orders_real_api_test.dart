@@ -37,7 +37,48 @@ Map<String, Object?> _history(String at, String to, [String? from]) => {
   'at': at,
 };
 
+Map<String, Object?> _summary(String id, {String? number}) {
+  final o = orderJson(id, status: 'confirmed');
+  return {
+    for (final k in [
+      'id',
+      'number',
+      'status',
+      'orderType',
+      'fulfilment',
+      'fulfilmentDate',
+      'vendor',
+      'customer',
+      'paymentMethod',
+      'totalHalalas',
+      'createdAt',
+    ])
+      k: o[k],
+    'number': ?number,
+  };
+}
+
 void main() {
+  testWidgets('the list follows nextCursor: two pages, no duplicates, the last page not asked again', (t) async {
+    final http = FakeHttp((r) {
+      if (r.path != '/v1/customer/orders') return null;
+      return r.queryParameters['cursor'] == 'c2'
+          ? {
+              'items': [_summary('o2', number: 'JZ-261110-0008')],
+              'nextCursor': null,
+            }
+          : {
+              'items': [_summary('o1')],
+              'nextCursor': 'c2',
+            };
+    });
+    await t.pumpScreen(const OrdersScreen(), overrides: _overrides(http));
+    await _settle(t);
+    expect(find.text('طلب JZ-261110-0007'), findsOneWidget);
+    expect(find.text('طلب JZ-261110-0008'), findsOneWidget);
+    expect([for (final r in http.to('/v1/customer/orders')) r.queryParameters['cursor']], [null, 'c2']);
+  });
+
   testWidgets('a status changed on the dashboard reaches the open detail: the 30 s poll reads it from GET', (t) async {
     var status = 'confirmed';
     final http = FakeHttp(
@@ -70,26 +111,8 @@ void main() {
   testWidgets('the list reads the summaries (OrderSummaryResponseDto)', (t) async {
     final http = FakeHttp((r) {
       if (r.path == '/v1/customer/orders') {
-        final o = orderJson('o1', status: 'confirmed');
         return {
-          'items': [
-            {
-              for (final k in [
-                'id',
-                'number',
-                'status',
-                'orderType',
-                'fulfilment',
-                'fulfilmentDate',
-                'vendor',
-                'customer',
-                'paymentMethod',
-                'totalHalalas',
-                'createdAt',
-              ])
-                k: o[k],
-            },
-          ],
+          'items': [_summary('o1')],
           'nextCursor': null,
         };
       }

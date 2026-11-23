@@ -102,4 +102,39 @@ void main() {
     expect(find.text('أضف 50.50 ر.س من المنتجات لإكمال طلبك.'), findsOneWidget);
     expect(t.widget<JButton>(find.widgetWithText(JButton, 'متابعة إلى الدفع')).onPressed, isNull);
   });
+
+  test('a failed settings read is read again: the next cart read shows the minimum order and fee', () async {
+    SharedPreferences.setMockInitialValues({'guest': true, 'onboardingSeen': true, 'locale': 'ar'});
+    final prefs = await Prefs.load();
+    final tokens = MemoryTokens();
+    var settingsUp = false;
+    final http = FakeHttp((r) {
+      if (r.path == '/v1/public/products/p1') return productJson('p1');
+      if (r.path == '/v1/public/settings/client') {
+        return settingsUp ? clientSettingsJson() : notImplemented('SCH-API-1');
+      }
+      return null;
+    });
+    final c = ProviderContainer(
+      overrides: [
+        envProvider.overrideWithValue(const Env(Flavor.dev)),
+        prefsProvider.overrideWithValue(prefs),
+        tokenStorageProvider.overrideWithValue(tokens),
+        authRepositoryProvider.overrideWithValue(MockAuthRepository(tokens)),
+        apiOn(http),
+      ],
+    );
+    addTearDown(c.dispose);
+    c.read(sessionProvider);
+    await Future<void>.delayed(Duration.zero);
+
+    await c.read(cartProvider.notifier).add(const CartItemInput(productId: 'p1', sizeId: 'sz-1'));
+    expect((await c.read(cartProvider.future)).minOrder, isNull);
+
+    settingsUp = true;
+    c.invalidate(cartProvider); // the cart opened again
+    final cart = await c.read(cartProvider.future);
+    expect(cart.minOrder, 10000);
+    expect(http.to('/v1/public/settings/client').length, greaterThanOrEqualTo(2));
+  });
 }

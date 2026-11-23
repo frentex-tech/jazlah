@@ -199,7 +199,7 @@ With the mock switch on, the mock order server keeps each order's payments. The 
 | What the app needs | Screen | Today | Issue |
 |---|---|---|---|
 | The payments route and the order read | Payment step | Wired: `POST /orders/{id}/payments` with its own key, `nextAction` redirect in the webview, PAYMENT_IN_PROGRESS re-reads the status, the outcome from `GET /orders/{id}` (also on a cold start). The routes answer 501 until they land | PAY-API-1 #76, ORD-API-3 #83 |
-| **For Kerolles:** the payment methods route takes no order: the wallet is measured against the whole total on a retry, and no wallet part is offered there | Payment step: «طريقة الدفع» | No tender plan on a retry; the retry charges the whole total (as orders.md says after a failed online part) | PAY-API-1 #76 |
+| A wallet part on a payment retry (an app limit: the methods route is asked with `?orderId=`) | Payment step: «طريقة الدفع» | No wallet part offered on a retry yet; the retry charges what is left | PAY-MOB-1 #78 |
 | The live gateway (mada, cards, Apple Pay) | Payment step | Real builds open the hosted page in the webview; a native SDK can come behind the same port | PAY-MOB-2 #79 |
 
 ### My orders and order detail (ORD-MOB-2 #85)
