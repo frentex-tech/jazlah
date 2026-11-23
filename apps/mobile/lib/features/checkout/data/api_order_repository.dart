@@ -44,11 +44,13 @@ class ApiOrderRepository implements OrderRepository, OrdersRepository {
     // lists grow long, ORD-MOB-2 #85.
     final orders = <Order>[];
     String? cursor;
-    do {
+    // A repeated cursor or more than 10 pages stops the loop, so a bad server answer can't page forever.
+    for (var page = 0; page < 10; page++) {
       final res = (await _api.getCustomerOrdersApi().customerListOrders(scope: scope?.name, cursor: cursor)).data!;
       orders.addAll(res.items.map(orderFromSummary));
+      if (res.nextCursor == null || res.nextCursor == cursor) break;
       cursor = res.nextCursor;
-    } while (cursor != null);
+    }
     return orders;
   });
 

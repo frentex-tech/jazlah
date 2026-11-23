@@ -79,6 +79,19 @@ void main() {
     expect([for (final r in http.to('/v1/customer/orders')) r.queryParameters['cursor']], [null, 'c2']);
   });
 
+  testWidgets('a server that repeats its cursor does not page forever', (t) async {
+    final http = FakeHttp((r) {
+      if (r.path != '/v1/customer/orders') return null;
+      return {
+        'items': [_summary('o1')],
+        'nextCursor': 'c2',
+      };
+    });
+    await t.pumpScreen(const OrdersScreen(), overrides: _overrides(http));
+    await _settle(t);
+    expect([for (final r in http.to('/v1/customer/orders')) r.queryParameters['cursor']], [null, 'c2']);
+  });
+
   testWidgets('a status changed on the dashboard reaches the open detail: the 30 s poll reads it from GET', (t) async {
     var status = 'confirmed';
     final http = FakeHttp(
