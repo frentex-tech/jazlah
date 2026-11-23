@@ -4,6 +4,8 @@
 
 **Release:** v0.5.0
 
+**Closing rule:** see CONTRIBUTING.md §5, "When an issue closes". A frontend task built ahead of the API closes when it is wired to the merged contract with tests. The staging check goes with the backend task and the release.
+
 **Exit criteria (demo on staging):**
 - Occasion: a customer requests 5 carcasses + cooking for a wedding → admin adjusts the quote → customer pays a 30% deposit → the balance is collected before the date → it runs through the normal order stages.
 - Cooking: "cook it for me" on a Jazlah carcass → auto-assigned to a kitchen in the zone → meat transfer shipment Jazlah → kitchen → the kitchen dashboard moves it to ready → the customer's shipment is picked up from the kitchen.

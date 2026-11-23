@@ -4,6 +4,8 @@
 
 **Release:** v0.4.0
 
+**Closing rule:** see CONTRIBUTING.md §5, "When an issue closes". A frontend task built ahead of the API closes when it is wired to the merged contract with tests. The staging check goes with the backend task and the release.
+
 **Exit criteria (demo on staging):**
 - Cancelling before "preparing" refunds to the card or the wallet and frees the capacity. A complaint with photos is resolved with a partial refund.
 - Vendor marks an order ready → shipment created (provider sandbox or manual adapter) → webhook updates → delivered, with a push to the customer at each stage. With the provider down, the admin assigns a courier manually and can reschedule.

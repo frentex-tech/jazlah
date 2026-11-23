@@ -6,9 +6,9 @@
 
 | Item | Value |
 |---|---|
-| Phase | **Planning done, Sprint 1 not started** |
-| Current sprint | Sprint 1 — Foundation, accounts & coverage |
-| Last release | — |
+| Phase | **Sprints 1–2 released; Sprint 3 frontend done, Sprint 3 backend handed to Kerolles** |
+| Current sprint | Sprint 3 — backend (Kerolles, MP-1 order); frontend moves on to Sprint 4 on mocks |
+| Last release | v0.2.0 (includes v0.1.0), 2026-11-23 |
 | Scope baseline | SRS v1.0 (approved 2026-11-09), 44 client decisions (`docs/decisions/`) |
 | Team | Abdulrhman Magdy (`@abdulrhmanmagdy1`), Kerolles Sobhy (`@kerolles2003`) |
 | Board | GitHub Project "Jazlah — Delivery Board" (org `frentex-tech`). Repo + board are **public** for now (decided 2026-11-09), to be made private later on request |
@@ -37,6 +37,34 @@
 - **Feed buyers** are registered platform users. Feed sellers need admin approval.
 
 ## Log
+
+### 2026-11-23 — Sprints 1 and 2 released; Sprint 3 frontend done; Sprint 3 backend to Kerolles (owner)
+- **The stopping point:** Sprint 1 and Sprint 2 are closed, frontend and backend. The Sprint 3 frontend is closed. The Sprint 3 backend starts from the merged contract (#314, 39 operations answering 501 with `details.task`) and is **Kerolles' work**. The handover is in `services/api/.claude/DECISIONS.md` (#315).
+- **Release v0.2.0** (`release/v0.2.0` → `main`, tags `v0.1.0` and `v0.2.0`). Sprint 1 was never released on its own, so it ships in the same release and both tags point to it.
+- **Closing rule** (CONTRIBUTING.md §5, "When an issue closes"; one line in every sprint file):
+  - An issue closes on its own acceptance criteria, each proven by a test in CI.
+  - A frontend task built ahead of the API closes when it is wired to the merged contract with HTTP-layer tests. The staging check moves to the backend task and the release.
+  - Client inputs never block a task.
+- **Checked live on staging (2026-11-23):**
+  - Sign-in for admin, vendor (`?panel=vendor`), kitchen (`?panel=kitchen`) and all panels.
+  - A customer phone is refused on the dashboard but accepted on `/vendor/apply`.
+  - Sign-out after the fix in #313.
+  - Swagger `/docs`.
+  - Search: «نعيمي», «نعيمى» and "naimi" each return 10 products.
+  - Coverage: central Riyadh is covered and Jeddah is not.
+  - Customer journey: OTP, then profile, then an address on the map.
+  - The Sprint 3 dashboard pages show «قريبًا» on the API's 501.
+  - The Sprint 2 vendor and product flows run against the real API in CI (`e2e-api`, #313); the app product page and search were run on staging from the simulator (#310).
+- **Moved with a reason:**
+  - No Firebase App Distribution build yet: the mobile staging flavour runs from a simulator against staging. It moves to the first device-testing round.
+  - Staging object storage is still disabled (step 7.5 of the staging guide), so images show placeholders.
+- **CI fix (#319):** the progress dashboard workflow no longer cancels its own runs. Issue events run on develop's head commit, so its cancelled checks had made Render's "After CI Checks Pass" skip the deploys of #313, #317 and #318.
+- **Left for the backend (Kerolles), listed in `docs/frontend/not-built-yet.md`:**
+  - Store hours, pickup with instructions and the visits switch (VND-API-2 #44 leftovers).
+  - `orderType` and `isFeatured` on products (CAT-API-1 #48 leftovers).
+  - The Sprint 3 contract gaps found while wiring: pickup details before the method is saved, the order summary in the list, saved cards, the platform support number, first-order coupons, and the realtime socket.
+- **Product questions, no task yet:** a gift-box packaging, back-in-stock alerts, the fulfilment badge, a store tagline and street address, and SKU, minimum quantity and preparation time on products.
+- **Progress:** 71 of 205 issues closed, up from 46 on 2026-11-22.
 
 ### 2026-11-22 — Hosting and ZATCA decided; staging closed (owner)
 - **#8 closed:** staging was checked live on Render (see the last comment on #8).

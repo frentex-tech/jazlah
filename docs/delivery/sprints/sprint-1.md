@@ -4,6 +4,8 @@
 
 **Release:** v0.1.0
 
+**Closing rule:** see CONTRIBUTING.md §5, "When an issue closes". A frontend task built ahead of the API closes when it is wired to the merged contract with tests. The staging check goes with the backend task and the release.
+
 **Exit criteria (demo on staging):**
 - The client has approved the full launch design in writing (DSN-DES-2); every launch screen is listed in `docs/design/screens.md` with its Figma link.
 - `GET /v1/health/ready` is green on staging; Swagger at `/docs`. Merging to `develop` auto-deploys; a failing test blocks the PR.

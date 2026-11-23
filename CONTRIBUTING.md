@@ -85,6 +85,11 @@ Issue types: **Epic** (module), **Feature** (user-facing sub-issue), **Task** (t
 - [ ] No secrets in code, inputs validated, permissions checked
 - [ ] Verified on staging and moved to **Done**
 
+**When an issue closes** (owner, 2026-11-23):
+- An issue closes when **its own acceptance criteria** are met, each proven by a test that runs in CI. A Figma element that needs another task's API (often a later sprint) does not block it: list it in `docs/frontend/not-built-yet.md` under the issue that owns it.
+- **Frontend tasks built ahead of the API** close when the screen is wired to the generated client of a merged `openapi.json` contract and has HTTP-layer tests with openapi-shaped responses. The staging check of that flow belongs to the backend task that implements the endpoint and to the sprint's release issue.
+- **Client inputs never block a task:** external providers are built behind their port with a fake or sandbox provider, and the live hookup is its own task. Spikes waiting on the client are decided by the owner in an ADR.
+
 ## 6. Releases
 
 1. At the end of a sprint, branch `release/vX.Y.0` from `develop`.

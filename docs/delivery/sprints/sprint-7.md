@@ -4,6 +4,8 @@
 
 **Release:** **v1.0.0**
 
+**Closing rule:** see CONTRIBUTING.md §5, "When an issue closes". A frontend task built ahead of the API closes when it is wired to the merged contract with tests. The staging check goes with the backend task and the release.
+
 **Exit criteria:**
 - Production is live on a Saudi-region host with backups verified by a restore drill, monitoring and alerts.
 - Load test: p95 API latency < 500 ms at the expected peak, and the Adha scenario (10× normal) without errors.

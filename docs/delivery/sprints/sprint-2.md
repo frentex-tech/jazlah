@@ -4,6 +4,8 @@
 
 **Release:** v0.2.0
 
+**Closing rule:** see CONTRIBUTING.md §5, "When an issue closes". A frontend task built ahead of the API closes when it is wired to the merged contract with tests. The staging check goes with the backend task and the release.
+
 **Exit criteria (demo on staging):**
 - A vendor applies with documents → admin approves with a commission % → vendor edits the store profile and adds a product → admin approves it → it appears in the app.
 - An admin creates a Jazlah carcass product with 3 sizes, cuts (one with an extra price), packaging with one incompatible combination, and exclusions.
