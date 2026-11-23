@@ -118,7 +118,7 @@ What the customer app needs from the API and does not have yet. Each row names t
 | Gap | Screen waiting on it | The app today | Issue |
 |---|---|---|---|
 | `isLocked` on addresses (an address used by an open order) | Addresses: lock state, edit and delete disabled | Always unlocked from the API; only the mock shows a locked address | API gap (planned in ACC-API-2 #18; real rule with ORD-API-1 #81) |
-| A public list of served cities (or of zones) | Location: out of coverage, "available areas" line | The line is hidden in real builds; the mock lists Riyadh, Jeddah, Dammam | API gap |
+| A public list of served cities (or of zones) | Location: out of coverage, "available areas" line | The line is hidden in real builds; the mock lists Riyadh, Jeddah, Dammam | LOC-API-1 #24 |
 | A geocoding and place-search proxy (a public geocode route) | Location: map picker address line and search | The device calls Google Geocoding with the key from the app config. Until the proxy exists, use a **separate key restricted to the Geocoding API**, with daily quota caps and billing alerts, and keep the Maps SDK key app-restricted (owner action). In dev or with the mock switch on, the app uses sample places; real builds without a key leave the fields empty for typing | API gap |
 | The app hash in the sign-in SMS, per flavor (Android SMS Retriever) | Sign-in: OTP autofill on Android (`sms_autofill`) | Keyboard suggestion only (`AutofillHints.oneTimeCode`) | API gap |
 | Account counters: orders, animals, listings | Account: the stats row | Orders count the order list without cancelled orders ("—" without the orders route); addresses are real; animals and listings show "—" | Orders: ORD-API-3 #83; animals and listings with FED-MOB-1 #152; counters: API gap |
@@ -134,15 +134,15 @@ The app reads the public catalog through one repository. Categories, product lis
 | Gap | Screen waiting on it | The app today | Issue |
 |---|---|---|---|
 | A home feed (banners, best sellers, featured, partner stores in one call) | Home | Built from the category list and the first 3 stores; the best sellers section is hidden (no true list yet) and there are no banners | CAT-API-5 #50; banners CMS-API-1 #162 |
-| A "stores near you are paused" flag | Home: closed state | Never shown from the API; the mock can show it | API gap |
+| A "stores near you are paused" flag | Home: closed state | Never shown from the API; the mock can show it | SCH-API-1 #68 (the public paused setting) |
 | Filtering home and lists by the customer's location | Home: empty state ("no stores in your area") | Shown only when the catalog has no stores | CAT-API-5 #50 |
 | Sorting product lists (best selling, price up, price down) | Category page: sort chips | Chips hidden with the API; the mock sorts | CAT-API-5 #50 |
-| Store rating and rating count | Home store cards, store page | Hidden | API gap |
-| Store opening hours and open/closed now | Store page: open/closed badge, closed notice, info sheet; products shown unavailable while closed | Hidden; a store is treated as open | API gap |
-| Store delivery time and minimum order | Store page badges and minimum order line | Hidden | API gap |
-| Store pickup flag | Store info sheet | Hidden | API gap |
-| The categories a store sells | Store page: category chips | Taken from the store's products loaded so far | API gap |
-| The default size line and the "slaughtered today" tag on product cards | Product cards everywhere | Hidden (card shows vendor, name and the lowest price) | API gap |
+| Store rating and rating count | Home store cards, store page | Hidden | RAT-API-1 #158 |
+| Store opening hours and open/closed now | Store page: open/closed badge, closed notice, info sheet; products shown unavailable while closed | Hidden; a store is treated as open | VND-API-2 #44 (working hours in the public store) |
+| Store delivery time and minimum order | Store page badges and minimum order line | Hidden | SCH-API-1 #68 (minimum order); delivery time: CAT-API-5 #50 |
+| Store pickup flag | Store info sheet | Hidden | VND-API-2 #44 |
+| The categories a store sells | Store page: category chips | Taken from the store's products loaded so far | CAT-API-5 #50 |
+| The default size line and the "slaughtered today" tag on product cards | Product cards everywhere | Hidden (card shows vendor, name and the lowest price) | CAT-API-5 #50; slaughter time VOP-API-1 #108 |
 
 ### Product detail and customization (STF-MOB-3 #56)
 
@@ -150,12 +150,12 @@ The product page reads one public product (images, sizes with their availability
 
 | Gap | Screen waiting on it | The app today | Issue |
 |---|---|---|---|
-| Slaughter time and chilled delivery window | Product: freshness card | Hidden | API gap |
-| Store rating in the product | Product: rating next to the store name | Hidden | API gap |
-| A gift box packaging | Product: packaging list (the design shows one) | The API knows trays, bags, vacuum and none; only the mock offers a gift box | API gap |
+| Slaughter time and chilled delivery window | Product: freshness card | Hidden | VOP-API-1 #108, DLV-MOB-1 #101 |
+| Store rating in the product | Product: rating next to the store name | Hidden | RAT-API-1 #158 |
+| A gift box packaging | Product: packaging list (the design shows one) | The API knows trays, bags, vacuum and none; only the mock offers a gift box | No task yet: an API decision on the packaging list (raised in CAT-API-1 #48) |
 | Server price for a product line | Product: total and price details | Computed on the device by the same function, errors in the fixture's and price-line.ts's order, proven on the shared cases; no route prices a single line: the cart returns the server's prices | CRT-API-1 #61 |
 | A design for the fulfilment badge (delivery, pickup or both) | Product: the badge the task Output asks for | The value is read from the product and kept, nothing is drawn until the badge is designed | Design gap |
-| "Notify me when back in stock" (stock alerts) | Product: out-of-stock notice | The notice says only that the product is unavailable; the design's "you can ask to be notified" sentence is left out until the feature exists | API gap |
+| "Notify me when back in stock" (stock alerts) | Product: out-of-stock notice | The notice says only that the product is unavailable; the design's "you can ask to be notified" sentence is left out until the feature exists | No task yet: stock alerts are not in the plan (NOT-API-1 #104 would send them) |
 
 ### Cart (CRT-MOB-1 #64)
 
@@ -242,10 +242,10 @@ Search reads the public product list with its words, category, store and price r
 | Gap | Screen waiting on it | The app today | Issue |
 |---|---|---|---|
 | A result count (and facets per category and store) | Search results: "24 results for …"; filters sheet: "Show 24 results" | No count text; the sheet button reads "Show results" | CAT-API-5 #50 |
-| Popular searches | Search start: "Most searched" | Section hidden | API gap (CAT-API-5 #50) |
+| Popular searches | Search start: "Most searched" | Section hidden | CAT-API-5 #50 |
 | Sorting search results | Filters sheet: sort chips (the design has no sort control; added as a chip group in the sheet) | Group hidden; the mock sorts | CAT-API-5 #50 |
-| An "available now only" filter | Filters sheet: switch and its chip | Switch hidden; the mock filters | API gap |
-| A public list of meat types | Filters sheet: meat type (not in the design) | Not shown; the product list already accepts a meat type, so it can be added once names can be listed | API gap |
-| Store names for any store id (or the whole store list in one call) | Search: store chips in the filters sheet and the active store chip | Only the first page of stores is offered; a chosen store outside it shows as a generic "Store" chip | API gap |
+| An "available now only" filter | Filters sheet: switch and its chip | Switch hidden; the mock filters | CAT-API-5 #50 |
+| A public list of meat types | Filters sheet: meat type (not in the design) | Not shown; the product list already accepts a meat type, so it can be added once names can be listed | CAT-API-5 #50 |
+| Store names for any store id (or the whole store list in one call) | Search: store chips in the filters sheet and the active store chip | Only the first page of stores is offered; a chosen store outside it shows as a generic "Store" chip | CAT-API-5 #50 |
 
 When one of these lands, its endpoints appear in `openapi.json`, and this file and the module guides are updated in the same pull request.
