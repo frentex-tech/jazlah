@@ -11,6 +11,7 @@ const page1 = (...items: ReturnType<typeof summary>[]) => ({ items, nextCursor: 
 
 test.beforeEach(async ({ api }) => {
   api.on('get', '/v1/public/settings/client', 200, clientSettings());
+  api.on('get', '/v1/admin/review-queue', 200, { items: [], nextCursor: null, count: 0 }); // the side nav badge
   api.on('get', '/v1/admin/vendors', 200, { items: [vendor()], nextCursor: null });
 });
 
@@ -40,6 +41,8 @@ test('a new order appears without a refresh (polling), tinted', async ({ page, c
   await page.clock.install();
   await page.goto('/vendor/orders');
   await expect(table(page).getByText('JZ-261123-0001')).toBeVisible();
+  // The feed starts after the first load and reads the page once as its baseline.
+  await expect.poll(() => api.callsTo('get', '/v1/vendor/orders').length).toBe(2);
   const fresh = summary({ id: '0a0a0a0a-2222-4222-8222-000000000009', number: 'JZ-261123-0009', createdAt: new Date().toISOString() });
   api.on('get', '/v1/vendor/orders', 200, page1(fresh, summary()));
   await page.clock.runFor(16_000);
@@ -82,9 +85,9 @@ test('an admin confirms or rejects a cash-on-delivery order', async ({ page, con
   await signInAs(context, ['admin']);
   api.on('get', '/v1/admin/orders/{id}', 200, order());
   api.on('post', '/v1/admin/orders/{id}/transition', 200, (c) =>
-    (c.body as { to: string }).to === 'confirmed'
+    c.body.to === 'confirmed'
       ? order({ status: 'confirmed', allowedTransitions: ['preparing', 'cancelled'] })
-      : order({ status: 'cancelled', allowedTransitions: [], cancelReason: (c.body as { note: string }).note }),
+      : order({ status: 'cancelled', allowedTransitions: [], cancelReason: c.body.note ?? null }),
   );
   await page.goto(`/admin/orders/${ORDER_ID}`);
   await expect(page.getByText('دفع عند الاستلام: راجع الطلب قبل إرساله للمتجر.')).toBeVisible();
@@ -103,6 +106,21 @@ test('an admin confirms or rejects a cash-on-delivery order', async ({ page, con
   await page.getByRole('button', { name: 'تأكيد الطلب' }).click();
   await toast(page, 'تم تأكيد الطلب JZ-261123-0001');
   expect(api.callsTo('post', `/v1/admin/orders/${ORDER_ID}/transition`)[1]!.body).toEqual({ to: 'confirmed' });
+});
+
+test('the COD review offers only what allowedTransitions holds', async ({ page, context, api }) => {
+  await signInAs(context, ['admin']);
+  api.on('get', '/v1/admin/orders/{id}', 200, order({ allowedTransitions: [] }));
+  await page.goto(`/admin/orders/${ORDER_ID}`);
+  await expect(page.getByRole('heading', { level: 1, name: 'الطلب JZ-261123-0001' })).toBeVisible();
+  await expect(page.getByText('دفع عند الاستلام: راجع الطلب قبل إرساله للمتجر.')).toHaveCount(0);
+  await expect(page.getByRole('button', { name: 'تأكيد الطلب' })).toHaveCount(0);
+  await expect(page.getByRole('button', { name: 'رفض الطلب' })).toHaveCount(0);
+
+  api.on('get', '/v1/admin/orders/{id}', 200, order({ allowedTransitions: ['cancelled'] }));
+  await page.reload();
+  await expect(page.getByRole('button', { name: 'رفض الطلب' })).toBeVisible();
+  await expect(page.getByRole('button', { name: 'تأكيد الطلب' })).toHaveCount(0);
 });
 
 for (const [locale, title] of [['ar', 'قريبًا'], ['en', 'Coming soon']] as const) {

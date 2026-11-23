@@ -1,5 +1,5 @@
 import { createServer, type Server } from 'node:http';
-import { test as base, type BrowserContext } from '@playwright/test';
+import { test as base, expect, type BrowserContext } from '@playwright/test';
 import type { components, paths } from '../src/api/schema';
 
 // A stub of the API for the real (non-mock) build: the dashboard server calls it as API_URL. Every reply is typed by
@@ -14,8 +14,10 @@ type Responses<O> = O extends { responses: infer R } ? R : never;
 type StatusOf<P extends keyof paths, M extends Method> = keyof Responses<Op<P, M>> & number;
 type Json<R> = R extends { content: { 'application/json': infer B } } ? B : null;
 export type BodyOf<P extends keyof paths, M extends Method, S> = Json<Responses<Op<P, M>>[S & keyof Responses<Op<P, M>>]>;
+/** The request body the operation takes (what the dashboard sent; the stub trusts the dashboard's own typing). */
+type RequestOf<P extends keyof paths, M extends Method> = Op<P, M> extends { requestBody?: { content: { 'application/json': infer B } } } ? B : null;
 
-export type Call = { method: string; path: string; query: URLSearchParams; body: unknown; auth: string | null };
+export type Call<B = unknown> = { method: string; path: string; query: URLSearchParams; body: B; auth: string | null };
 type Route = { method: string; re: RegExp; status: number; reply: (call: Call) => unknown };
 
 /** An ErrorResponseDto. */
@@ -34,7 +36,7 @@ export class Stub {
   unhandled: string[] = [];
 
   /** Replies to `method path` (path as in openapi.json, `{id}` matching one segment); the latest one set wins. */
-  on<P extends keyof paths, M extends MethodOf<P>, S extends StatusOf<P, M>>(method: M, path: P, status: S, reply: BodyOf<P, M, S> | ((call: Call) => BodyOf<P, M, S>)) {
+  on<P extends keyof paths, M extends MethodOf<P>, S extends StatusOf<P, M>>(method: M, path: P, status: S, reply: BodyOf<P, M, S> | ((call: Call<RequestOf<P, M>>) => BodyOf<P, M, S>)) {
     const re = new RegExp(`^${String(path).replace(/\{[^}]+\}/g, '[^/]+')}$`);
     this.routes.unshift({ method: method.toUpperCase(), re, status, reply: typeof reply === 'function' ? (reply as (c: Call) => unknown) : () => reply });
     return this;
@@ -98,9 +100,17 @@ export const test = base.extend<{ api: Stub }, { stub: Stub }>({
     { scope: 'worker' },
   ],
   api: [
-    async ({ stub }, use) => {
+    async ({ stub, page }, use) => {
       stub.reset();
       await use(stub);
+      // Leave the page and let the server's last calls land, so they are checked here and never reach the next test.
+      await page.goto('about:blank');
+      for (let n = -1; n !== stub.calls.length; ) {
+        n = stub.calls.length;
+        await new Promise((r) => setTimeout(r, 300));
+      }
+      // Every API call a screen makes must be one the test answered: an unexpected route is a contract drift.
+      expect(stub.unhandled, 'API calls no reply was set for').toEqual([]);
     },
     { auto: true },
   ],

@@ -26,7 +26,8 @@ function apiBackend(): OperationsBackend {
   const day = (id: string, date: string) => ({ path: { id, date } });
   return {
     pause: async (lang) => {
-      const r = await call(api.GET('/v1/public/settings/client', { headers: headers(null, lang) }));
+      // Never from a cache here: the switch must show what the last change left (the API allows a minute of caching).
+      const r = await call(api.GET('/v1/public/settings/client', { cache: 'no-store', headers: { ...headers(null, lang), 'Cache-Control': 'no-cache' } }));
       return r.ok ? { ok: true, data: r.data.paused } : r;
     },
     get: (token, lang) => call(api.GET('/v1/admin/settings/operations', { headers: headers(token, lang) })),

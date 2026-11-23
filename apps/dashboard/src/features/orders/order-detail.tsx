@@ -188,8 +188,12 @@ export function OrderDetail({ panel, id, adminActions = false }: { panel: Orders
         ? t('cancel.wallet', { amount: sar(paid + wallet, locale) })
         : t('cancel.nothing');
   const chosen = typeof days === 'object' ? days.find((x) => x.date === day) : undefined;
-  // The moves come from the order (`allowedTransitions` for this caller); cancel has its own dialogs.
-  const transitions = o.allowedTransitions.filter((s) => s !== 'cancelled' && !(s === 'confirmed' && awaitsCodReview(o)));
+  // The moves come from the order (`allowedTransitions` for this caller); cancel has its own dialogs. An admin's COD
+  // confirm sits in the review card; any other caller offered `confirmed` gets it as a plain move.
+  const codReview = admin && awaitsCodReview(o);
+  const canConfirm = codReview && o.allowedTransitions.includes('confirmed');
+  const canReject = codReview && o.allowedTransitions.includes('cancelled');
+  const transitions = o.allowedTransitions.filter((s) => s !== 'cancelled' && !(s === 'confirmed' && codReview));
   const place = o.fulfilment === 'pickup' ? o.pickupPoint : o.address;
   const placeText = o.address
     ? [o.address.district, o.address.street, o.address.building, o.address.city].filter(Boolean).join('، ')
@@ -291,12 +295,12 @@ export function OrderDetail({ panel, id, adminActions = false }: { panel: Orders
             <section className={card}>
               <h2 className="text-h3 text-ink">{t('status.title')}</h2>
               <StatusTimeline label={t('status.title')} steps={stepsOf(o, (k) => to(`statuses.${k}`), (k) => t(`status.steps.${k}`), locale)} />
-              {admin && awaitsCodReview(o) && (
+              {(canConfirm || canReject) && (
                 <>
                   <Notice tone="sand" role="status" text={t('cod.notice')} />
                   <div className="flex gap-s12">
-                    <Button size="S" className="flex-1" loading={busy === 'confirmed'} disabled={!!busy} onClick={() => void move('confirmed')}>{t('cod.confirm')}</Button>
-                    <Button size="S" variant="secondary" className="flex-1" disabled={!!busy} onClick={() => openDialog('codReject')}>{t('cod.reject')}</Button>
+                    {canConfirm && <Button size="S" className="flex-1" loading={busy === 'confirmed'} disabled={!!busy} onClick={() => void move('confirmed')}>{t('cod.confirm')}</Button>}
+                    {canReject && <Button size="S" variant="secondary" className="flex-1" disabled={!!busy} onClick={() => openDialog('codReject')}>{t('cod.reject')}</Button>}
                   </div>
                 </>
               )}

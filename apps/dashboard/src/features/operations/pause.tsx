@@ -2,7 +2,7 @@
 
 import { PauseCircle } from '@phosphor-icons/react';
 import { useLocale, useTranslations } from 'next-intl';
-import { createContext, useCallback, useContext, useEffect, useState } from 'react';
+import { createContext, useCallback, useContext, useEffect, useRef, useState } from 'react';
 import { Badge } from '@/components/ui/badge';
 import { ConfirmDialog } from '@/components/ui/confirm-dialog';
 import { InputField } from '@/components/ui/form-field';
@@ -17,6 +17,8 @@ import { fieldErrors } from '@/features/catalog/client';
 type PauseState = { paused: Paused | null; sync: (p: Paused) => void; apply: (p: SetPause) => Promise<OperationsSettings> };
 const Ctx = createContext<PauseState>({ paused: null, sync: () => {}, apply: () => Promise.reject(new ApiError('NETWORK')) });
 export const usePause = () => useContext(Ctx);
+/** How long `GET /v1/public/settings/client` may be cached (openapi.json: «cache for a minute at most»). */
+const PUBLIC_CACHE_MS = 60_000;
 
 /**
  * The pause switch state for the whole admin panel (FR-SCH-07): read once by the admin layout, changed from the header
@@ -24,12 +26,15 @@ export const usePause = () => useContext(Ctx);
  */
 export function PauseProvider({ initial, children }: { initial: Paused | null; children: React.ReactNode }) {
   const [paused, sync] = useState(initial);
-  // A new server read (navigation, refresh) wins.
+  const appliedAt = useRef(0);
+  // A new server read (navigation, refresh) wins, except within a minute of a change made here: the public read may be
+  // cached that long (openapi.json), and an older answer must not flip the switch back.
   useEffect(() => {
-    if (initial) sync(initial);
+    if (initial && Date.now() - appliedAt.current > PUBLIC_CACHE_MS) sync(initial);
   }, [initial]);
   const apply = useCallback(async (p: SetPause) => {
     const s = await panelFetch<OperationsSettings>('admin', '/api/admin/settings/operations/pause', { method: 'PUT', body: JSON.stringify(p) });
+    appliedAt.current = Date.now();
     sync(s.paused);
     return s;
   }, []);

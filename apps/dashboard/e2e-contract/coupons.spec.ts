@@ -11,6 +11,7 @@ const riyadh = (days: number) => new Date(Date.now() + days * 86_400_000 + 3 * 3
 test.beforeEach(async ({ context, api }) => {
   await signInAs(context, ['admin']);
   api.on('get', '/v1/public/settings/client', 200, clientSettings());
+  api.on('get', '/v1/admin/review-queue', 200, { items: [], nextCursor: null, count: 0 }); // the side nav badge
   api.on('get', '/v1/admin/vendors', 200, { items: [vendor()], nextCursor: null });
   api.on('get', '/v1/admin/lists/{list}', 200, { items: [], nextCursor: null });
 });
@@ -47,7 +48,7 @@ test('create sends CreateCouponDto; COUPON_CODE_TAKEN lands on the code', async 
     usageLimit: null, perUserLimit: 1, isActive: true,
   });
 
-  api.on('post', '/v1/admin/coupons', 201, (c) => coupon({ ...(c.body as object), id: COUPON_ID, status: 'scheduled', usageCount: 0 }));
+  api.on('post', '/v1/admin/coupons', 201, (c) => coupon({ ...c.body, id: COUPON_ID, status: 'scheduled', usageCount: 0 }));
   api.on('get', '/v1/admin/coupons/{id}', 200, coupon({ code: 'EID10', type: 'fixed', value: 3000 }));
   api.on('get', '/v1/admin/coupons/{id}/usage', 200, { uses: 0, distinctCustomers: 0, totalDiscountHalalas: 0 });
   await page.getByLabel('رمز الكوبون').fill('eid11');
@@ -58,7 +59,7 @@ test('create sends CreateCouponDto; COUPON_CODE_TAKEN lands on the code', async 
 test('edit sends only a PATCH; usage reads distinctCustomers; deactivate sends isActive alone', async ({ page, api }) => {
   api.on('get', '/v1/admin/coupons/{id}', 200, coupon());
   api.on('get', '/v1/admin/coupons/{id}/usage', 200, { uses: 132, distinctCustomers: 120, totalDiscountHalalas: 528000 });
-  api.on('patch', '/v1/admin/coupons/{id}', 200, (c) => coupon(c.body as object));
+  api.on('patch', '/v1/admin/coupons/{id}', 200, (c) => coupon(c.body));
   await page.goto(`/admin/marketing/coupons/${COUPON_ID}`);
   const usage = page.locator('section').filter({ has: page.getByRole('heading', { name: 'الاستخدام' }) });
   await expect(usage).toContainText('132 / 500');
@@ -92,6 +93,18 @@ for (const [locale, title] of [['ar', 'قريبًا'], ['en', 'Coming soon']] as
     await expect(page.getByRole('status').filter({ hasText: title })).toBeVisible();
   });
 }
+
+test('a create answered 501 says coming soon and stays on the new form', async ({ page, api }) => {
+  api.on('post', '/v1/admin/coupons', 501, notImplemented('CRT-API-3'));
+  await page.goto('/admin/marketing/coupons/new');
+  await page.getByLabel('رمز الكوبون').fill('soon10');
+  await page.getByLabel('نسبة الخصم (%)').fill('10');
+  await page.getByLabel('ينتهي في').fill(`${riyadh(30)}T23:59`);
+  await page.getByRole('button', { name: 'إنشاء الكوبون' }).click();
+  await toast(page, 'هذا الإجراء غير متاح بعد، سيعمل قريبًا.');
+  await expect(page).toHaveURL(/\/admin\/marketing\/coupons\/new$/);
+  await expect(page.getByRole('heading', { level: 1, name: 'كوبون جديد' })).toBeVisible();
+});
 
 test('PERMISSION_DENIED shows not allowed', async ({ page, api }) => {
   api.on('get', '/v1/admin/coupons', 403, error('PERMISSION_DENIED'));

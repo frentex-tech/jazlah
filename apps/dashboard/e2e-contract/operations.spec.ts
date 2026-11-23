@@ -10,11 +10,12 @@ const headerSwitch = (page: import('@playwright/test').Page) => page.getByRole('
 test.beforeEach(async ({ context, api }) => {
   await signInAs(context, ['admin']);
   api.on('get', '/v1/public/settings/client', 200, clientSettings());
+  api.on('get', '/v1/admin/review-queue', 200, { items: [], nextCursor: null, count: 0 }); // the side nav badge
 });
 
 test('every section saves with the contract keys, and the API field errors land on their fields', async ({ page, api }) => {
   api.on('get', '/v1/admin/settings/operations', 200, settings());
-  api.on('patch', '/v1/admin/settings/operations', 200, (c) => settings(c.body as object));
+  api.on('patch', '/v1/admin/settings/operations', 200, (c) => settings(c.body));
   await page.goto('/admin/settings/operations');
   await expect(page.getByLabel('الحد الأقصى للطلبات يوميًا')).toHaveValue('40');
   await expect(page.getByLabel('آخر وقت للطلب: لحوم جاهزة')).toHaveValue('12:00');
@@ -51,11 +52,13 @@ test('every section saves with the contract keys, and the API field errors land 
 test('the pause: read from the client settings on every admin page, set on its own route', async ({ page, api }) => {
   api.on('get', '/v1/admin/settings/operations', 200, settings());
   api.on('put', '/v1/admin/settings/operations/pause', 200, (c) => {
-    const p = c.body as { isPaused: boolean; messageAr?: string; messageEn?: string };
+    const p = c.body;
     const paused = p.isPaused ? { isPaused: true, messageAr: p.messageAr!, messageEn: p.messageEn! } : { isPaused: false, messageAr: null, messageEn: null };
     api.on('get', '/v1/public/settings/client', 200, clientSettings(paused));
     return settings({ paused });
   });
+  api.on('get', '/v1/admin/lists/{list}', 200, { items: [], nextCursor: null });
+  api.on('get', '/v1/admin/vendors', 200, { items: [vendor()], nextCursor: null });
   await page.goto('/admin/catalog/categories');
   await headerSwitch(page).click();
   const dialog = page.getByRole('dialog', { name: 'إيقاف استقبال الطلبات؟' });
@@ -92,6 +95,17 @@ for (const [locale, title, body] of [
   });
 }
 
+test('a save answered 501 says coming soon and keeps the edits', async ({ page, api }) => {
+  api.on('get', '/v1/admin/settings/operations', 200, settings());
+  api.on('patch', '/v1/admin/settings/operations', 501, notImplemented('SCH-API-1'));
+  await page.goto('/admin/settings/operations');
+  await page.getByLabel('الحد الأقصى للطلبات يوميًا').fill('55');
+  await page.getByRole('button', { name: 'حفظ التغييرات' }).click();
+  await toast(page, 'هذا الإجراء غير متاح بعد، سيعمل قريبًا.');
+  await expect(page.getByRole('status').getByText('تم حفظ الإعدادات التشغيلية')).toHaveCount(0);
+  await expect(page.getByLabel('الحد الأقصى للطلبات يوميًا')).toHaveValue('55'); // the draft stays, nothing pretends to be saved
+});
+
 test('PERMISSION_DENIED shows not allowed and keeps the session', async ({ page, api }) => {
   api.on('get', '/v1/admin/settings/operations', 403, error('PERMISSION_DENIED'));
   await page.goto('/admin/settings/operations');
@@ -103,7 +117,7 @@ test('per-vendor capacity: the default and one day on the contract routes; 501 s
   api.on('get', '/v1/admin/vendors/{id}', 200, vendor());
   api.on('get', '/v1/admin/settings/operations', 200, settings());
   api.on('get', '/v1/admin/vendors/{id}/capacity', 200, capacity());
-  api.on('put', '/v1/admin/vendors/{id}/capacity', 200, (c) => capacity(c.body as object));
+  api.on('put', '/v1/admin/vendors/{id}/capacity', 200, (c) => capacity(c.body));
   const day = riyadh(5);
   api.on('put', '/v1/admin/vendors/{id}/capacity/{date}', 200, (c) =>
     capacity({
@@ -111,7 +125,7 @@ test('per-vendor capacity: the default and one day on the contract routes; 501 s
       // Every day of the horizon comes back; only the one with its own limits is a «specific date».
       days: [
         { date: riyadh(4), ordersLimit: null, carcassesLimit: null, ordersBooked: 5, carcassesBooked: 1 },
-        { date: day, ...(c.body as { ordersLimit: number | null; carcassesLimit: number | null }), ordersBooked: 2, carcassesBooked: 0 },
+        { date: day, ...c.body, ordersBooked: 2, carcassesBooked: 0 },
       ],
     }),
   );

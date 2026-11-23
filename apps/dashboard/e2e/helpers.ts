@@ -15,8 +15,9 @@ export async function signInAs(context: BrowserContext, panels: string[]) {
 }
 
 /**
- * Clicks a client-side link until the page reaches `url`. A list loaded right after hydration can show its links before
- * the App Router takes navigations, and such a click is lost (CI run 45085538692): the click is repeated, never slept on.
+ * Clicks a client-side link until the page reaches `url`. On a slow machine the first navigation from a freshly loaded
+ * list can fail to commit even though its RSC request and chunks answer 200 (CI run 45085538692; the known issue in
+ * docs/frontend/not-built-yet.md): the click is repeated, never slept on.
  */
 export async function follow(page: Page, link: Locator, url: RegExp) {
   await expect(async () => {

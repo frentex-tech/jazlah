@@ -42,6 +42,8 @@ export function OrdersList({ panel, live }: { panel: OrdersPanel; live: boolean 
   const [vendors, setVendors] = useState<Vendor[]>([]);
   const [paging, setPaging] = useState<{ key: string; cursors: (string | undefined)[] }>({ key: '', cursors: [undefined] });
   const [data, setData] = useState<Data>('loading');
+  // The feed runs once a list has loaded, and stops while the board shows «coming soon» or «not allowed».
+  const [feeding, setFeeding] = useState(false);
   const [fresh, setFresh] = useState<Set<string>>(new Set());
   const [announce, setAnnounce] = useState('');
 
@@ -69,8 +71,11 @@ export function OrdersList({ panel, live }: { panel: OrdersPanel; live: boolean 
       try {
         const p = await panelFetch<Page<OrderSummary>>(panel, `/api/${panel}/orders?${query}`);
         if (req === latest.current) setData({ rows: p.items, next: p.nextCursor });
+        setFeeding(true);
       } catch (e) {
-        if (!quiet && req === latest.current) setData(failedState(e));
+        const state = failedState(e);
+        if (state !== 'error') setFeeding(false);
+        if (!quiet && req === latest.current) setData(state);
       }
     },
     [panel, status, method, vendorId, date, q, cursor],
@@ -83,6 +88,7 @@ export function OrdersList({ panel, live }: { panel: OrdersPanel; live: boolean 
   const reload = useRef(load);
   reload.current = load;
   useEffect(() => {
+    if (!feeding) return;
     const feed = live ? streamFeed(panel) : pollFeed(panel);
     return feed.subscribe(
       (o) => {
@@ -96,7 +102,7 @@ export function OrdersList({ panel, live }: { panel: OrdersPanel; live: boolean 
       // A status changed elsewhere: the page reloads quietly, without the new-order tint.
       () => onFirstPage.current && void reload.current(true),
     );
-  }, [panel, live, t]);
+  }, [panel, live, t, feeding]);
 
   const columns = useMemo<ColumnDef<OrderSummary, unknown>[]>(
     () => [
