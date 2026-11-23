@@ -23,8 +23,6 @@ abstract final class CartError {
 /// Codes of `issues[]`. Both block checkout.
 abstract final class CartIssueCode {
   static const priceChanged = 'PRICE_CHANGED';
-
-  /// The app's name until CRT-API-1 #61 fixes it (not-built-yet.md).
   static const unavailable = 'ITEM_UNAVAILABLE';
 }
 
@@ -202,31 +200,30 @@ class FulfilmentChoice {
   final String? addressId;
 }
 
-/// Where a pickup order is collected (SCH-API-2: vendor address, map point, hours, instructions). [opensAt] and
-/// [closesAt] are Riyadh `HH:mm`.
+/// Where a pickup order is collected: the contract's `pickupPoint { name, address, location, phone, hours }`.
+/// [opensAt] and [closesAt] are the chosen day's hours, Riyadh `HH:mm`. Every part but the name may be missing.
 @immutable
 class PickupInfo {
   const PickupInfo({
     required this.name,
-    required this.address,
-    required this.point,
-    required this.opensAt,
-    required this.closesAt,
+    this.address,
+    this.point,
+    this.opensAt,
+    this.closesAt,
     this.instructions,
     this.phone,
   });
 
   final LocalizedText name;
-  final LocalizedText address;
-  final GeoPoint point;
-  // shortcut: one open–close pair for every day; the chosen date's hours (the vendor's weekly hours) come with
-  // SCH-API-2 #69 (lead review A12, not-built-yet.md).
-  final String opensAt;
-  final String closesAt;
+  final LocalizedText? address;
+  final GeoPoint? point;
+  final String? opensAt;
+  final String? closesAt;
+
+  /// Not in the contract (an API gap, not-built-yet.md); only the mock has it.
   final LocalizedText? instructions;
 
-  /// The store's phone; null until the pickup point carries one.
-  // shortcut: no phone in the pickup point yet, so «اتصال بالمتجر» stays hidden until SCH-API-2 #69 sends it.
+  /// The store's phone: «اتصال بالمتجر» shows with it.
   final String? phone;
 }
 

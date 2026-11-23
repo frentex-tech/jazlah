@@ -31,7 +31,7 @@ class Cutoff {
 
 /// The SCH-API-1 defaults and SCH-API-2 day rules in memory, for USE_MOCKS and tests, on top of the mock cart.
 /// "Now" is Riyadh (UTC+3, no daylight saving) from the injectable [now].
-// shortcut: mock settings and scheduling until SCH-API-1 #68 and SCH-API-2 #69 land (not-built-yet.md).
+// USE_MOCKS only (demos and tests); real builds use ApiCheckoutRepository.
 class MockCheckoutRepository implements CheckoutRepository {
   MockCheckoutRepository(
     this.cart, {

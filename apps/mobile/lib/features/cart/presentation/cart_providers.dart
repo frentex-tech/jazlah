@@ -1,41 +1,61 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-
 import 'package:jazlah/app/providers.dart';
 import 'package:jazlah/core/config/env.dart';
 import 'package:jazlah/core/errors/api_error.dart';
 import 'package:jazlah/features/auth/presentation/session_controller.dart';
+import 'package:jazlah/features/cart/data/api_cart_repository.dart';
 import 'package:jazlah/features/cart/data/cart_repository.dart';
 import 'package:jazlah/features/cart/domain/cart.dart';
+import 'package:jazlah/features/checkout/data/api_checkout_repository.dart';
 import 'package:jazlah/features/product/presentation/product_providers.dart';
 
 /// USE_MOCKS for the cart (a seam for tests, which build without the define).
 final cartMocksProvider = Provider<bool>((ref) => Env.useMocks);
 
-/// The account cart (server). Null while the API has no cart routes: then every cart stays on the device.
-// shortcut: mock server cart until CRT-API-1 #61 lands (not-built-yet.md).
-final cartRepositoryProvider = Provider<CartRepository?>((ref) {
+/// The account cart on the server (CRT-API-1): the API's, or the in-memory one with USE_MOCKS (demos and tests).
+final cartRepositoryProvider = Provider<CartRepository>((ref) {
   // A new mock account cart after sign-out: the next account on the phone does not see this one's.
   ref.watch(accountDataClearedProvider);
-  return ref.watch(cartMocksProvider) ? MockCartRepository() : null;
+  return ref.watch(cartMocksProvider) ? MockCartRepository() : ApiCartRepository(ref.watch(apiProvider));
 });
 
-/// Minimum order and delivery fee. Null in real builds: never invented, so they are hidden and checkout
-/// is not offered there.
-// shortcut: mock ops settings until SCH-API-1 #68 serves the public client settings (not-built-yet.md).
+/// The public client settings' minimum order and delivery fee (`GET /v1/public/settings/client`), for the cart on
+/// the device; the account cart carries its own. Fails while they cannot be read (NOT_IMPLEMENTED until SCH-API-1):
+/// never invented: the device cart then prices without them, hides them and does not offer checkout.
+final FutureProvider<CartSettings?> clientCartSettingsProvider = FutureProvider<CartSettings?>((ref) async {
+  if (ref.watch(cartMocksProvider)) return MockCartRepository.opsSettings;
+  return clientCartSettings(ref.watch(apiProvider));
+}, retry: (_, _) => null);
+
+/// The settings given to the device cart up front: the mock's with USE_MOCKS; in real builds none, and the device
+/// cart reads [clientCartSettingsProvider] once it has a line to price.
 final cartSettingsProvider = Provider<CartSettings?>(
   (ref) => ref.watch(cartMocksProvider) ? MockCartRepository.opsSettings : null,
 );
 
 final localCartProvider = Provider<LocalCartRepository>((ref) {
   final products = ref.watch(productRepositoryProvider);
-  return LocalCartRepository(ref.watch(prefsProvider), (id) async {
-    try {
-      return await products.product(id);
-    } on ApiError catch (e) {
-      if (e.code == 'NOT_FOUND') return null; // a removed product: the line shows as unavailable
-      rethrow;
-    }
-  }, settings: ref.watch(cartSettingsProvider));
+  return LocalCartRepository(
+    ref.watch(prefsProvider),
+    (id) async {
+      try {
+        return await products.product(id);
+      } on ApiError catch (e) {
+        if (e.code == 'NOT_FOUND') return null; // a removed product: the line shows as unavailable
+        rethrow;
+      }
+    },
+    settings: ref.watch(cartSettingsProvider),
+    // Only a success is kept: a failure (or 501) prices without them now and is read again next time.
+    loadSettings: () async {
+      try {
+        return await ref.read(clientCartSettingsProvider.future);
+      } on Object {
+        ref.invalidate(clientCartSettingsProvider);
+        return null;
+      }
+    },
+  );
 });
 
 /// The cart on screen: the account cart once signed in (the guest cart is merged into it first), else the
@@ -67,7 +87,7 @@ class CartController extends AsyncNotifier<Cart> {
     ref.watch(accountDataClearedProvider); // sign-out cleared the device cart
     final local = ref.watch(localCartProvider);
     final server = ref.watch(cartRepositoryProvider);
-    if (server == null || ref.watch(sessionProvider) != SessionStatus.signedIn) {
+    if (ref.watch(sessionProvider) != SessionStatus.signedIn) {
       _repo = local;
       return local.get();
     }

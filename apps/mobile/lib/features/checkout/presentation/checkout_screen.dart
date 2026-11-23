@@ -46,7 +46,7 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen> {
   Future<void> _save(FulfilmentChoice choice) async {
     setState(() => _saving = true);
     try {
-      await ref.read(checkoutRepositoryProvider)!.save(choice);
+      await ref.read(checkoutRepositoryProvider).save(choice);
       // The cart now carries the fulfilment (and the delivery fee for delivery).
       ref.invalidate(cartProvider);
       if (mounted) unawaited(_review());
@@ -133,7 +133,11 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen> {
         !paused &&
         !_saving &&
         (day?.available ?? false) &&
-        (method == Fulfilment.pickup ? pickup != null : addressId != null);
+        // Pickup needs no point to continue: the API sends the pickup point once the fulfilment is saved, and refuses
+        // a store without pickup.
+        // shortcut: no pickup card before the save until the cart answers the store's pickup point, an ask for
+        // SCH-API-2 #69 (not-built-yet.md).
+        (method == Fulfilment.pickup || addressId != null);
 
     Widget body;
     if (cart.hasError && !cart.hasValue) {
@@ -159,9 +163,9 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen> {
             for (var i = 0; i < 4; i++) const JSkeletonRow()
           else if (method == Fulfilment.delivery)
             ..._delivery(addresses, covered, addressId)
-          else ...[
+          else if (pickup != null) ...[
             _TitleRow(title: l10n.checkoutPickupPlace),
-            if (pickup != null) _PickupCard(pickup: pickup),
+            _PickupCard(pickup: pickup),
           ],
           if (!loading && daysAsync != null) ...[
             _TitleRow(
@@ -190,7 +194,8 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen> {
               AsyncValue(hasValue: false) => [const _DaysSkeleton()],
               _ => [
                 _DayStrip(days: days, selected: date, onTap: (d) => setState(() => _date = d)),
-                if (day != null) day.available ? _WindowCard(day: day, method: method) : _ReasonCard(day: day),
+                if (day != null && (!day.available || day.window != null))
+                  day.available ? _WindowCard(day: day, method: method) : _ReasonCard(day: day),
                 if ((day?.available ?? false) && !paused) _Legend(days: days),
               ],
             },
@@ -525,24 +530,28 @@ class _PickupCard extends ConsumerWidget {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(pickup.name.of(lang), style: JText.labelM),
-                    const SizedBox(height: JSpace.s4),
-                    Text(pickup.address.of(lang), style: JText.bodyM.copyWith(color: JColors.ink2)),
-                    const SizedBox(height: JSpace.s4),
-                    Row(
-                      children: [
-                        const Icon(JIcons.clock, size: 16, color: JColors.ink2),
-                        const SizedBox(width: JSpace.s8),
-                        Expanded(
-                          child: Text(
-                            l10n.checkoutPickupHours(
-                              clockText(l10n, pickup.opensAt, short: true),
-                              clockText(l10n, pickup.closesAt, short: true),
+                    if (pickup.address case final address?) ...[
+                      const SizedBox(height: JSpace.s4),
+                      Text(address.of(lang), style: JText.bodyM.copyWith(color: JColors.ink2)),
+                    ],
+                    if (pickup.opensAt != null && pickup.closesAt != null) ...[
+                      const SizedBox(height: JSpace.s4),
+                      Row(
+                        children: [
+                          const Icon(JIcons.clock, size: 16, color: JColors.ink2),
+                          const SizedBox(width: JSpace.s8),
+                          Expanded(
+                            child: Text(
+                              l10n.checkoutPickupHours(
+                                clockText(l10n, pickup.opensAt!, short: true),
+                                clockText(l10n, pickup.closesAt!, short: true),
+                              ),
+                              style: JText.bodyM.copyWith(color: JColors.ink2),
                             ),
-                            style: JText.bodyM.copyWith(color: JColors.ink2),
                           ),
-                        ),
-                      ],
-                    ),
+                        ],
+                      ),
+                    ],
                     if (instructions != null && instructions.isNotEmpty) ...[
                       const SizedBox(height: JSpace.s4),
                       Text(instructions, style: JText.bodyM.copyWith(color: JColors.ink2)),
@@ -552,22 +561,24 @@ class _PickupCard extends ConsumerWidget {
               ),
             ],
           ),
-          const SizedBox(height: JSpace.s12),
           // The store's point, not draggable; the button below opens directions.
-          IgnorePointer(
-            child: ClipRRect(
-              borderRadius: BorderRadius.circular(JRadius.md),
-              child: SizedBox(
-                height: 56,
-                child: MapPicker(
-                  initial: pickup.point,
-                  onIdle: (_) {},
-                  pin: const Icon(JIcons.mapPinFill, size: 28, color: JColors.ink2),
-                  useGoogle: ref.watch(envProvider).hasMapsKey,
+          if (pickup.point case final point?) ...[
+            const SizedBox(height: JSpace.s12),
+            IgnorePointer(
+              child: ClipRRect(
+                borderRadius: BorderRadius.circular(JRadius.md),
+                child: SizedBox(
+                  height: 56,
+                  child: MapPicker(
+                    initial: point,
+                    onIdle: (_) {},
+                    pin: const Icon(JIcons.mapPinFill, size: 28, color: JColors.ink2),
+                    useGoogle: ref.watch(envProvider).hasMapsKey,
+                  ),
                 ),
               ),
             ),
-          ),
+          ],
           const SizedBox(height: JSpace.s12),
           // 118-9741: «اتصال بالمتجر» (only with a phone), and directions to the pickup point in maps.
           if (pickup.phone case final phone?) ...[
@@ -579,12 +590,13 @@ class _PickupCard extends ConsumerWidget {
             ),
             const SizedBox(height: JSpace.s8),
           ],
-          JButton(
-            label: l10n.checkoutDirections,
-            variant: JButtonVariant.secondary,
-            expand: true,
-            onPressed: () => ref.read(urlLauncherProvider)(directionsUri(pickup.point)),
-          ),
+          if (pickup.point case final point?)
+            JButton(
+              label: l10n.checkoutDirections,
+              variant: JButtonVariant.secondary,
+              expand: true,
+              onPressed: () => ref.read(urlLauncherProvider)(directionsUri(point)),
+            ),
         ],
       ),
     );
@@ -758,7 +770,7 @@ class _WindowCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
-    final w = day.window;
+    final w = day.window!; // shown only with a window
     bool pm(String t) => int.parse(t.split(':').first) >= 12;
     final start = clockText(l10n, w.start, period: pm(w.start) != pm(w.end));
     final end = clockText(l10n, w.end);

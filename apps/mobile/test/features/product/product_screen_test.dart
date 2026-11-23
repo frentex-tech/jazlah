@@ -123,6 +123,7 @@ void main() {
     await t.pump();
     expect(find.text('اختر طريقة التقطيع قبل الإضافة إلى السلة'), findsNothing);
     await t.tap(find.text('أضف إلى السلة'));
+    await t.pump(const Duration(seconds: 1)); // the device cart reads the client settings (a fake 501)
     await t.pump();
     await t.pump();
     expect(find.text('أُضيفت القطعة إلى السلة'), findsOneWidget);

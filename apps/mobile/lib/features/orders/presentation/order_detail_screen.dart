@@ -5,8 +5,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart' show DateFormat;
 
+import 'package:jazlah/app/providers.dart';
 import 'package:jazlah/app/router/router.dart';
-import 'package:jazlah/app/shell/main_shell.dart';
 import 'package:jazlah/app/theme/theme.dart';
 import 'package:jazlah/core/errors/api_error.dart';
 import 'package:jazlah/core/widgets/widgets.dart';
@@ -80,8 +80,6 @@ class _OrderDetailScreenState extends ConsumerState<OrderDetailScreen> {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
-    // shortcut: no order routes in real builds until ORD-API-3 #83 (not-built-yet.md).
-    if (ref.watch(ordersRepositoryProvider) == null) return ComingSoonPage(title: l10n.orderDetailTitle);
     final detail = ref.watch(orderDetailProvider(widget.id));
     // Not this customer's order (or gone): nothing will change, so stop asking.
     ref.listen(orderDetailProvider(widget.id), (_, next) {
@@ -168,7 +166,7 @@ class _Body extends ConsumerWidget {
     final lang = context.lang;
     final o = detail.order;
     final delivery = o.fulfilment == Fulfilment.delivery;
-    final (start, end) = windowText(l10n, o.window);
+    final window = o.window == null ? null : windowText(l10n, o.window!);
     final day = calendarDate(o.deliveryDate);
     final dayLabel = o.deliveryDate == riyadhToday(ref.watch(ordersClockProvider)())
         ? l10n.ordersToday
@@ -211,8 +209,12 @@ class _Body extends ConsumerWidget {
           ),
           Text(
             delivery
-                ? l10n.orderLineDelivery(o.vendorName.of(lang), dayLabel, start, end, place)
-                : l10n.orderLinePickup(o.vendorName.of(lang), dayLabel, start, end, place),
+                ? (window == null
+                      ? l10n.orderLineDeliveryDay(o.vendorName.of(lang), dayLabel, place)
+                      : l10n.orderLineDelivery(o.vendorName.of(lang), dayLabel, window.$1, window.$2, place))
+                : (window == null
+                      ? l10n.orderLinePickupDay(o.vendorName.of(lang), dayLabel, place)
+                      : l10n.orderLinePickup(o.vendorName.of(lang), dayLabel, window.$1, window.$2, place)),
             style: JText.bodyM.copyWith(color: JColors.ink2),
           ),
         ],
@@ -227,14 +229,31 @@ class _Body extends ConsumerWidget {
       if (!delivery && o.pickupSnapshot != null)
         section(l10n.checkoutPickupPlace, [
           Text(o.pickupSnapshot!.name.of(lang), style: JText.labelM),
-          Text(o.pickupSnapshot!.address.of(lang), style: JText.bodyM.copyWith(color: JColors.ink2)),
-          Text(
-            l10n.checkoutPickupHours(
-              clockText(l10n, o.pickupSnapshot!.opensAt, short: true),
-              clockText(l10n, o.pickupSnapshot!.closesAt, short: true),
+          if (o.pickupSnapshot!.address case final address?)
+            Text(address.of(lang), style: JText.bodyM.copyWith(color: JColors.ink2)),
+          if (o.pickupSnapshot!.opensAt != null && o.pickupSnapshot!.closesAt != null)
+            Text(
+              l10n.checkoutPickupHours(
+                clockText(l10n, o.pickupSnapshot!.opensAt!, short: true),
+                clockText(l10n, o.pickupSnapshot!.closesAt!, short: true),
+              ),
+              style: JText.bodyM.copyWith(color: JColors.ink2),
             ),
-            style: JText.bodyM.copyWith(color: JColors.ink2),
-          ),
+          // The store's phone and point from the contract (`pickupPoint.phone`, `vendor { phone, location }`).
+          if (o.pickupSnapshot!.phone ?? o.vendorPhone case final phone?)
+            JButton(
+              label: l10n.checkoutCallStore,
+              variant: JButtonVariant.secondary,
+              expand: true,
+              onPressed: () => ref.read(urlLauncherProvider)(Uri(scheme: 'tel', path: phone)),
+            ),
+          if (o.pickupSnapshot!.point ?? o.vendorPoint case final point?)
+            JButton(
+              label: l10n.checkoutDirections,
+              variant: JButtonVariant.secondary,
+              expand: true,
+              onPressed: () => ref.read(urlLauncherProvider)(directionsUri(point)),
+            ),
         ]),
       section(l10n.orderItems, [
         for (final i in o.items)

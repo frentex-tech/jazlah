@@ -8,7 +8,7 @@ void main() {
     paymentId: 'pay-1',
     method: PaymentMethodCode.mada,
     amount: 12300,
-    url: 'https://gateway.test/3ds/pay-1',
+    redirectUrl: 'https://gateway.test/3ds/pay-1',
     returnUrl: 'jazlah://checkout/pay/o-1/return',
   );
 
@@ -26,10 +26,10 @@ void main() {
     // Only the redirect logic: the sheet is exercised by the payment screen tests.
     String? open(String url, String choice) => choice == 'away' ? 'https://elsewhere.test' : '${action.returnUrl}?p=1';
     var done = false;
-    hostedNavigation(open(action.url, 'approve')!, action, () => done = true);
+    hostedNavigation(open(action.redirectUrl, 'approve')!, action, () => done = true);
     expect(done, isTrue);
     done = false;
-    hostedNavigation(open(action.url, 'away')!, action, () => done = true);
+    hostedNavigation(open(action.redirectUrl, 'away')!, action, () => done = true);
     expect(done, isFalse);
   });
 }

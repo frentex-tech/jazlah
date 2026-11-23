@@ -90,15 +90,15 @@ void main() {
     await setUpRepos();
     final a = (await orders.place(idempotencyKey: 'k', paymentMethod: PaymentMethodCode.mada)).nextAction!;
     expect(a.type, PaymentAction.redirect);
-    expect(a.url, '${MockOrderRepository.hostedBase}/${a.paymentId}');
-    final back = orders.hostedPage(a.url, 'cancel')!;
+    expect(a.redirectUrl, '${MockOrderRepository.hostedBase}/${a.paymentId}');
+    final back = orders.hostedPage(a.redirectUrl, 'cancel')!;
     expect(isReturnUrl(back, a.returnUrl), isTrue);
     final s = await payments.status('o-1');
     expect(s.paymentStatus, PaymentStatus.cancelled);
     expect(s.order.status, OrderStatus.pendingPayment);
     // Cancelled: a new payment may start.
     final again = await payments.retry(orderId: 'o-1', method: PaymentMethodCode.mada, idempotencyKey: 'p2');
-    expect(orders.hostedPage(again.nextAction!.url, 'approve'), startsWith(again.nextAction!.returnUrl));
+    expect(orders.hostedPage(again.nextAction!.redirectUrl, 'approve'), startsWith(again.nextAction!.returnUrl));
     expect((await payments.status('o-1')).order.status, OrderStatus.confirmed);
     expect(orders.hostedPage('https://elsewhere.test/x', 'approve'), isNull);
   });

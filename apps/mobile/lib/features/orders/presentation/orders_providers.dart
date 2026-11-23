@@ -1,21 +1,19 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_riverpod/misc.dart';
 
-import 'package:jazlah/core/errors/api_error.dart';
 import 'package:jazlah/features/checkout/data/order_repository.dart';
 import 'package:jazlah/features/checkout/domain/order.dart';
 import 'package:jazlah/features/checkout/presentation/checkout_providers.dart';
 import 'package:jazlah/features/orders/data/orders_repository.dart';
 
-/// Null in real builds: no order routes yet, and no invented orders (the list shows its error state).
-// shortcut: mock orders until ORD-API-3 #83 lands (not-built-yet.md).
-final ordersRepositoryProvider = Provider<OrdersRepository?>((ref) {
-  final orders = ref.watch(orderRepositoryProvider);
-  return orders is MockOrderRepository ? orders : null;
-});
+/// The customer's orders on the API (ORD-API-3); the mock order server's with USE_MOCKS.
+final ordersRepositoryProvider = Provider<OrdersRepository>(
+  (ref) => ref.watch(orderRepositoryProvider) as OrdersRepository, // both the API and the mock serve the list
+);
 
-/// `order.updated` events; null in real builds (no socket yet): the detail then relies on polling.
-// shortcut: mock events until ORD-API-3 #83 opens the socket gateway (not-built-yet.md).
+/// `order.updated` events; null in real builds: the socket (`order.updated { id, status }`) comes with ORD-API-3
+/// and is not in the contract yet, so the detail polls.
+// shortcut: polling until ORD-API-3 #83 opens the socket gateway (not-built-yet.md).
 final orderRealtimeProvider = Provider<OrderRealtime?>((ref) {
   final orders = ref.watch(orderRepositoryProvider);
   return orders is MockOrderRepository ? orders : null;
@@ -29,14 +27,10 @@ final FutureProviderFamily<List<Order>, OrderScope?> ordersProvider = FutureProv
       // Any order.updated (a status changed on the dashboard, a payment settled) re-reads the list.
       final events = ref.watch(orderRealtimeProvider)?.orderUpdated().listen((_) => ref.invalidateSelf());
       if (events != null) ref.onDispose(events.cancel);
-      final repo = ref.watch(ordersRepositoryProvider);
-      if (repo == null) throw const ApiError(code: ApiError.unknown);
-      return repo.list(scope: scope);
+      return ref.watch(ordersRepositoryProvider).list(scope: scope);
     }, retry: (_, _) => null);
 
 final FutureProviderFamily<OrderDetail, String> orderDetailProvider = FutureProvider.autoDispose
     .family<OrderDetail, String>((ref, id) {
-      final repo = ref.watch(ordersRepositoryProvider);
-      if (repo == null) throw const ApiError(code: ApiError.unknown);
-      return repo.detail(id);
+      return ref.watch(ordersRepositoryProvider).detail(id);
     }, retry: (_, _) => null);

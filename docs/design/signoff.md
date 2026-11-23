@@ -236,7 +236,7 @@ Everything else follows the ten frames (118-9638, 118-9741, 118-9829, 118-10052,
 
 | Screen (node) | Figma | Build | Why |
 |---|---|---|---|
-| Pickup card (118-9741) | «اتصال بالمتجر» secondary button | The same secondary L button «اتصال بالمتجر», shown only when the pickup point carries the store's phone (none does yet); plus a secondary L «الاتجاهات» that opens directions to the pickup point in maps | No phone in the pickup point yet (SCH-API-2 #69); directions work with the point alone. **Figma needs the directions button.** |
+| Pickup card (118-9741) | «اتصال بالمتجر» secondary button | The same secondary L button «اتصال بالمتجر», shown when the pickup point carries the store's phone; plus a secondary L «الاتجاهات» that opens directions in maps, shown when it carries a location. Before the fulfilment is saved the card only says pickup is at the store (no address or buttons) | The contract (#314) sends `pickupPoint.phone` and `location`, but only in the cart answer after the fulfilment is saved (SCH-API-2 #69). **Figma needs the directions button.** |
 | Delivery address (118-9638) | No way to add an address | «+ إضافة عنوان» link in the title row, opening the existing add-address flow and coming back | The task asks for adding an address inline. |
 | Window card (all) | «يصل بين 4 و 6 مساءً» | The day's window from the server (the default 16:00 to 22:00 reads «يصل بين 4 و 10 مساءً») | Data, not design: the SCH-API-1 default window. |
 | Uncovered address (118-9638) | Second line «بريدة، خارج نطاق التوصيل الحالي» | The address line (city, street) and the «خارج نطاق التغطية» pill | The pill already says it; the address has no such text. |
@@ -285,6 +285,8 @@ Everything else follows 135-63663, 135-63749, 135-63826, 135-63940, 135-64028, 1
 | Tracking (135-64472, 135-64553, 135-64644, 135-64730) | Tracking screen with the timeline, driver, photos and temperature | Not built | Its timeline is on the order detail; the rest (driver, map, photos, temperature, tracking errors) is DLV-MOB-1 #101, which builds the screen. |
 | Orders list (135-63663) | Filters on one row | The same chips, wrapping to a second row when they do not fit | A long translation or a narrow screen. |
 | Orders empty (135-63826) | `package` icon | The design system's `receipt` icon (State panel kind=orders) | Figma disagrees with itself: the frame shows `package`, the DS panel `receipt`. **Figma needs one icon.** |
+| Orders card (135-63663) | Items line («2 × ربع ذبيحة…»), thumbnail and «اليوم، 4:00 م» | The items line is hidden, the thumbnail shows the image placeholder and the day shows without its time | The order summary in the contract carries no lines, image or window (ORD-API-3 #83). |
+| Order detail pickup section | Not drawn | «اتصال بالمتجر» (the pickup point's phone, else the store's) and «الاتجاهات» (its location), each only when the order carries it | The contract sends `vendor.phone`, `vendor.location` and `pickupPoint.phone`. |
 | Orders loading and error (135-63749, 135-63940) | No filters | No filters (fixed after design QA M4); an empty «الجارية» or «المكتملة» keeps them so the customer can switch back | An empty scope must not trap the customer. |
 
 ## Checks run on the file (2026-11-13)

@@ -311,7 +311,12 @@ class CatalogErrorPanel extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
-    final offline = ApiError.from(error).code == ApiError.network;
+    final e = ApiError.from(error);
+    // A route whose task has not landed (501): the coming-soon panel, as the coming-soon pages draw it; no retry.
+    if (e.isNotImplemented) {
+      return JEmptyState(kind: JEmptyStateKind.search, title: l10n.comingSoonTitle, body: l10n.comingSoonBody);
+    }
+    final offline = e.code == ApiError.network;
     return JEmptyState(
       kind: offline ? JEmptyStateKind.offline : JEmptyStateKind.error,
       title: offline ? l10n.offlineTitle : title,

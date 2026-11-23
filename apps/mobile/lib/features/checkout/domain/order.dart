@@ -4,6 +4,7 @@ library;
 
 import 'package:flutter/foundation.dart';
 
+import 'package:jazlah/core/geo/geo_point.dart';
 import 'package:jazlah/features/addresses/domain/address.dart';
 import 'package:jazlah/features/cart/domain/cart.dart';
 import 'package:jazlah/features/catalog/domain/catalog.dart';
@@ -31,12 +32,14 @@ abstract final class OrderStatus {
 abstract final class OrderError {
   static const String priceChanged = CartIssueCode.priceChanged;
 
-  /// The app's names until ORD-API-1 #81 fixes them (not-built-yet.md).
   static const String itemUnavailable = CartIssueCode.unavailable;
-  static const minOrderNotMet = 'MIN_ORDER_NOT_MET';
 
-  /// Lead review A6 proposals until ORD-API-1 #81 names them (not-built-yet.md).
+  /// `details.remainingHalalas` says how much is missing.
+  static const minOrderNotMet = 'MIN_ORDER_NOT_MET';
   static const cartEmpty = 'CART_EMPTY';
+
+  /// The customer's name is missing: open the name step, then place again.
+  static const profileIncomplete = 'PROFILE_INCOMPLETE';
   static const fulfilmentRequired = 'FULFILMENT_REQUIRED';
 
   /// The wallet part (or wallet only) is above the balance: stay on the review and read the methods again.
@@ -89,7 +92,6 @@ class Order {
     required this.vendorName,
     required this.fulfilment,
     required this.deliveryDate,
-    required this.window,
     required this.subtotal,
     required this.discount,
     required this.deliveryFee,
@@ -103,6 +105,11 @@ class Order {
     this.couponCode,
     this.notes,
     this.walletAmount = 0,
+    this.window,
+    this.vendorPhone,
+    this.vendorPoint,
+    this.cardLast4,
+    this.expiresAt,
   });
 
   final String id;
@@ -122,7 +129,9 @@ class Order {
 
   /// Riyadh `yyyy-MM-dd`.
   final String deliveryDate;
-  final TimeWindow window;
+
+  /// The delivery window, or the pickup point's hours; null when the answer has neither (a list row).
+  final TimeWindow? window;
   final int subtotal;
   final int discount;
   final int deliveryFee;
@@ -140,6 +149,16 @@ class Order {
 
   /// Halalas paid from the wallet (PAY-API-1 tender); the rest is paid with [paymentMethod].
   final int walletAmount;
+
+  /// The store (`vendor { phone, location }`): «اتصال بالمتجر» and directions.
+  final String? vendorPhone;
+  final GeoPoint? vendorPoint;
+
+  /// `payment.cardLast4` of a card order.
+  final String? cardLast4;
+
+  /// While unpaid: when the order is cancelled (ORD-API-2, 15 minutes). UTC.
+  final DateTime? expiresAt;
 
   Order copyWith({String? status, String? paymentMethod, int? walletAmount}) => Order(
     id: id,
@@ -163,6 +182,10 @@ class Order {
     items: items,
     createdAt: createdAt,
     walletAmount: walletAmount ?? this.walletAmount,
+    vendorPhone: vendorPhone,
+    vendorPoint: vendorPoint,
+    cardLast4: cardLast4,
+    expiresAt: expiresAt,
   );
 }
 

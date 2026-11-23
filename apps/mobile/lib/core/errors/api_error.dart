@@ -35,6 +35,12 @@ class ApiError implements Exception {
   static const network = 'NETWORK';
   static const unknown = 'UNKNOWN';
 
+  /// 501: a route in the contract whose task has not landed yet (`details.task`). Shown as «قريبًا», never retried;
+  /// the same screen works with no change once the route answers.
+  static const notImplemented = 'NOT_IMPLEMENTED';
+
+  bool get isNotImplemented => code == notImplemented;
+
   final String code;
 
   /// Already translated by the API (Accept-Language). Null for client-side codes.

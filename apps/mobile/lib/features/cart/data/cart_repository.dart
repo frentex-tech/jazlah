@@ -23,9 +23,8 @@ abstract interface class CartRepository {
   Future<Cart> applyCoupon(String code);
   Future<Cart> removeCoupon();
 
-  /// The guest cart after sign-in (CRT-API-1 merge rules). [mergeId] is the device cart's stable id, so a merge
-  /// repeated after the app died before clearing the device cart answers the first result (lead review A8).
-  // shortcut: the server ignores the merge id until CRT-API-1 #61 dedupes by it (not-built-yet.md).
+  /// The guest cart after sign-in (`POST /v1/customer/cart/merge`). [mergeId] is the device cart's stable id: a merge
+  /// repeated after the app died before clearing the device cart answers the first result.
   Future<CartMergeResult> merge(List<CartItemInput> items, {String? mergeId});
 }
 
@@ -113,11 +112,13 @@ abstract class EntriesCart implements CartRepository {
   }
 }
 
-/// The cart kept on this device: a guest's cart (merged into the account on sign-in), and everyone's
-/// cart in builds without the cart API. Priced from the public product; no coupons or merge.
-// shortcut: real builds keep every cart here until CRT-API-1 #61 lands (not-built-yet.md).
+/// The cart kept on this device: a guest's cart, merged into the account cart on sign-in. Priced from the public
+/// product (the shared price function); no coupons or merge.
 class LocalCartRepository extends EntriesCart {
-  LocalCartRepository(this._prefs, super.product, {super.settings});
+  LocalCartRepository(this._prefs, super.product, {super.settings, this.loadSettings});
+
+  /// Reads the ops settings when [settings] is not given; only asked once there is a line to price.
+  final Future<CartSettings?> Function()? loadSettings;
 
   final Prefs _prefs;
 
@@ -155,7 +156,7 @@ class LocalCartRepository extends EntriesCart {
   Future<Cart> priced(List<CartEntry> entries) async => priceCart(
     entries,
     await products(entries.map((e) => e.item.productId)),
-    settings: settings,
+    settings: settings ?? (entries.isEmpty ? null : await loadSettings?.call()),
     onDevice: true,
   );
 
@@ -220,7 +221,7 @@ class _Coupon {
   }
 
   /// The discount on the eligible lines' total.
-  // shortcut: percent is floored; the server's rounding is open (lead review A10) until CRT-API-3 #62 decides it.
+  // The mock floors the percent; the API computes the real discount (the rounding is the server's, CRT-API-3).
   int discount(int eligibleTotal) {
     final d = fixed + eligibleTotal * percent ~/ 100;
     return maxDiscount == null ? d : d.clamp(0, maxDiscount!);
@@ -229,7 +230,7 @@ class _Coupon {
 
 /// The account cart for USE_MOCKS and tests: the server rules of CRT-API-1 / CRT-API-3 in memory, priced
 /// against the mock catalog ([MockProductRepository]) on every read.
-// shortcut: mock cart until CRT-API-1 #61 and CRT-API-3 #62 land (not-built-yet.md).
+// USE_MOCKS only (demos and tests); real builds use ApiCartRepository.
 class MockCartRepository extends EntriesCart {
   MockCartRepository({ProductLookup? products, this.delay = const Duration(milliseconds: 300)})
     : super(products ?? catalogProduct, settings: opsSettings);
@@ -312,8 +313,8 @@ class MockCartRepository extends EntriesCart {
 
   String? _check(String code, Cart cart) {
     final c = _coupons[code];
-    // shortcut: an inactive coupon answers not found and a scheduled one not applicable until CRT-API-3 #62
-    // names their codes (lead review A10, not-built-yet.md).
+    // As the contract: an inactive coupon answers not found, a scheduled one not applicable; first-order-only is
+    // mock-only (not in the contract).
     if (c == null || !c.isActive) return CartError.couponNotFound;
     if (c.expired) return CartError.couponExpired;
     if (c.scheduled) return CartError.couponNotApplicable;

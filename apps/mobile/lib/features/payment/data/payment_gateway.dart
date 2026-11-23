@@ -68,7 +68,7 @@ class _HostedPageState extends State<_HostedPage> {
         onWebResourceError: (e) => e.isForMainFrame ?? true ? setState(() => _failed = true) : null,
       ),
     )
-    ..loadRequest(Uri.parse(widget.action.url));
+    ..loadRequest(Uri.parse(widget.action.redirectUrl));
 
   var _done = false;
   var _failed = false;
@@ -128,7 +128,7 @@ class _HostedPageState extends State<_HostedPage> {
 /// approving, declining or cancelling "loads" the page at the action's url on the mock provider ([open]), which
 /// records the choice like its webhook and answers a redirect. The step ends when that redirect is the return url
 /// ([hostedNavigation], as in the webview). Closing the sheet leaves the payment open (cancelled).
-// shortcut: a sheet instead of a mock web page until the API's fake provider serves one (PAY-API-1 #76).
+// USE_MOCKS only: real builds open the API's hosted page (on staging the fake provider's) in HostedPagePaymentGateway.
 class MockHostedPageGateway implements PaymentGateway {
   MockHostedPageGateway(this.open);
 
@@ -143,7 +143,7 @@ class MockHostedPageGateway implements PaymentGateway {
       builder: (_) => _FakePage(action: action),
     );
     if (choice == null) return GatewayResult.cancelled;
-    final redirect = open(action.url, choice);
+    final redirect = open(action.redirectUrl, choice);
     var returned = false;
     if (redirect != null) hostedNavigation(redirect, action, () => returned = true);
     return returned ? GatewayResult.finished : GatewayResult.cancelled;

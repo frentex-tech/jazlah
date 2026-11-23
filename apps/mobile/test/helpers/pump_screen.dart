@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:go_router/go_router.dart';
 import 'package:jazlah/app/locale.dart';
@@ -9,6 +10,8 @@ import 'package:jazlah/core/config/env.dart';
 import 'package:jazlah/core/storage/prefs.dart';
 import 'package:jazlah/l10n/app_localizations.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+
+import 'fake_api.dart';
 
 /// Pumps a full screen with Riverpod, go_router and the app's localisations on a 390x844 phone.
 extension PumpScreen on WidgetTester {
@@ -33,6 +36,8 @@ extension PumpScreen on WidgetTester {
     List<RouteBase> routes = const [],
   }) async {
     SharedPreferences.setMockInitialValues(prefs);
+    // A guest with no stored tokens, so a screen that asks for the session never reaches the platform channel.
+    FlutterSecureStorage.setMockInitialValues({});
     final p = await Prefs.load();
     view
       ..physicalSize = const Size(390, 844)
@@ -42,6 +47,8 @@ extension PumpScreen on WidgetTester {
       overrides: [
         envProvider.overrideWithValue(const Env(Flavor.dev)),
         prefsProvider.overrideWithValue(p),
+        // No test reaches the network: an API route not faked by the test answers as before its task lands.
+        apiAdapterProvider.overrideWithValue(FakeHttp((_) => notImplemented('test'))),
         ...overrides.cast(),
       ],
     );

@@ -18,6 +18,7 @@ import 'package:jazlah/features/product/presentation/product_providers.dart';
 import 'package:jazlah/features/product/presentation/product_screen.dart';
 
 import '../../helpers/cart_fakes.dart';
+import '../../helpers/fake_api.dart';
 import '../../helpers/fakes.dart';
 import '../../helpers/pump_screen.dart';
 
@@ -43,8 +44,13 @@ List<dynamic> _overrides(MockCartRepository? server, {bool guest = false}) {
     tokenStorageProvider.overrideWithValue(tokens),
     authRepositoryProvider.overrideWithValue(MockAuthRepository(tokens)),
     productRepositoryProvider.overrideWithValue(MockProductRepository(delay: Duration.zero)),
-    cartRepositoryProvider.overrideWithValue(server),
-    cartSettingsProvider.overrideWithValue(server == null ? null : MockCartRepository.opsSettings),
+    // A real build: the Api* repositories over HTTP, where every Sprint 3 route answers NOT_IMPLEMENTED.
+    if (server == null)
+      apiOn(FakeHttp((r) => r.path.startsWith('/v1/public/products/') ? null : notImplemented('CRT-API-1')))
+    else ...[
+      cartRepositoryProvider.overrideWithValue(server),
+      cartSettingsProvider.overrideWithValue(MockCartRepository.opsSettings),
+    ],
   ];
 }
 
@@ -176,9 +182,25 @@ void main() {
     expect(find.text('سلتك فارغة'), findsOneWidget);
   });
 
-  testWidgets('a real build without the cart API: the device cart, no coupon, no invented fees', (t) async {
-    final c = await _pump(t, null);
-    await c.read(cartProvider.notifier).add(kebab.withQuantity(5));
+  testWidgets('a real build before CRT-API-1 (501): the account cart reads «قريبًا», no retry', (t) async {
+    await _pump(t, null);
+    await t.pump(const Duration(seconds: 1));
+    await t.pump(const Duration(seconds: 1));
+    expect(find.text('قريبًا'), findsOneWidget);
+    expect(find.text('إعادة المحاولة'), findsNothing);
+  });
+
+  testWidgets('a guest in a real build: the device cart, no coupon, no invented fees (settings 501)', (t) async {
+    final c = await t.pumpScreen(
+      const CartScreen(),
+      prefs: const {'locale': 'ar', 'onboardingSeen': true, 'guest': true},
+      overrides: _overrides(null, guest: true),
+    );
+    await t.pump(const Duration(seconds: 1));
+    final adding = c.read(cartProvider.notifier).add(kebab.withQuantity(5));
+    await t.pump(const Duration(seconds: 1)); // the settings read (501) answers over the fake HTTP layer
+    await t.pump(const Duration(seconds: 1));
+    await adding;
     await t.pump();
     expect(find.text('كباب لحم غنم'), findsOneWidget);
     expect(find.text('رمز الخصم · اختياري'), findsNothing);

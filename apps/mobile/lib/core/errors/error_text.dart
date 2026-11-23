@@ -8,6 +8,8 @@ String errorText(BuildContext context, Object error) {
   final l10n = AppLocalizations.of(context);
   final e = ApiError.from(error);
   if (e.code == ApiError.network) return l10n.errorNetwork;
+  if (e.isNotImplemented) return l10n.comingSoonTitle; // «قريبًا»: the one place a 501 reads
+
   return e.message ??
       switch (e.code) {
         'COUPON_NOT_FOUND' => l10n.errCouponNotFound,
@@ -26,6 +28,8 @@ String errorText(BuildContext context, Object error) {
         'FULFILMENT_REQUIRED' => l10n.errFulfilmentRequired,
         'CART_EMPTY' => l10n.errCartEmpty,
         'WALLET_INSUFFICIENT' => l10n.errWalletInsufficient,
+        'PAYMENT_METHOD_NOT_AVAILABLE' => l10n.errPaymentMethodNotAvailable,
+        'PROFILE_INCOMPLETE' => l10n.errProfileIncomplete,
         'ORDER_NOT_PAYABLE' => l10n.errOrderNotPayable,
         'PAYMENT_IN_PROGRESS' => l10n.errPaymentInProgress,
         _ => l10n.errorGeneric,

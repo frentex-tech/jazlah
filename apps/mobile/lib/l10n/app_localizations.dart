@@ -3499,6 +3499,30 @@ abstract class AppLocalizations {
   /// In ar, this message translates to:
   /// **'متابعة الدفع'**
   String get payContinue;
+
+  /// No description provided for @orderLineDeliveryDay.
+  ///
+  /// In ar, this message translates to:
+  /// **'{vendor} · توصيل {day} إلى {place}'**
+  String orderLineDeliveryDay(String vendor, String day, String place);
+
+  /// No description provided for @orderLinePickupDay.
+  ///
+  /// In ar, this message translates to:
+  /// **'{vendor} · استلام {day} من {place}'**
+  String orderLinePickupDay(String vendor, String day, String place);
+
+  /// No description provided for @errPaymentMethodNotAvailable.
+  ///
+  /// In ar, this message translates to:
+  /// **'طريقة الدفع هذه غير متاحة لطلبك، اختر طريقة أخرى.'**
+  String get errPaymentMethodNotAvailable;
+
+  /// No description provided for @errProfileIncomplete.
+  ///
+  /// In ar, this message translates to:
+  /// **'أضف اسمك إلى حسابك أولًا.'**
+  String get errProfileIncomplete;
 }
 
 class _AppLocalizationsDelegate extends LocalizationsDelegate<AppLocalizations> {

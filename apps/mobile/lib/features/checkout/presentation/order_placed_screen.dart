@@ -28,7 +28,7 @@ class OrderPlacedScreen extends StatelessWidget {
     final lang = context.lang;
     final o = args.order;
     final date = calendarDate(o.deliveryDate);
-    final (start, end) = windowText(l10n, o.window);
+    final window = o.window == null ? null : windowText(l10n, o.window!);
     final delivery = o.fulfilment == Fulfilment.delivery;
     final address = o.addressSnapshot;
 
@@ -88,7 +88,12 @@ class OrderPlacedScreen extends StatelessWidget {
                       ),
                     ),
                     fact(
-                      delivery ? l10n.placedDeliveryWindow(start, end) : l10n.placedPickupWindow(start, end),
+                      switch ((delivery, window)) {
+                        (true, (final s, final e)?) => l10n.placedDeliveryWindow(s, e),
+                        (false, (final s, final e)?) => l10n.placedPickupWindow(s, e),
+                        (true, null) => l10n.checkoutDelivery,
+                        (false, null) => l10n.checkoutPickup,
+                      },
                       delivery
                           ? (address == null ? '' : addressPlace(context, address))
                           : o.pickupSnapshot?.name.of(lang) ?? '',
