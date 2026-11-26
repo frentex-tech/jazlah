@@ -44,7 +44,9 @@ From the session that covered the backend from 2026-11-21 to 2026-11-23, for the
 - Review the Arabic messages of the 28 new codes in `error-messages.constants.ts` (those of #302 and #304 were approved by the project owner on 2026-11-22).
 - Where the webhook controller lives is still an open question (below): #314 placed it provisionally in `payments/api/controllers/webhook.controller.ts`; keep or move it.
 
-**The apps are wired to the contract:** the dashboard and mobile Sprint 3 screens build on the generated clients. Any change to a route, DTO or code needs `pnpm openapi:generate`, `pnpm api:generate` (dashboard) and `apps/mobile/scripts/gen-api-client.sh`, a line in `docs/frontend/orders.md`, and a note to the DSH and MOB sessions.
+**The apps are wired to the contract:** the dashboard and mobile Sprint 3 screens build on the generated clients. Any change to a route, DTO or code needs `pnpm openapi:generate`, both clients regenerated (the `regenerate-clients` workflow, below), a line in `docs/frontend/orders.md`, and a note to the DSH and MOB sessions.
+
+**Regenerating the clients** (2026-11-26): on the pull request's branch, after pushing, run `gh workflow run regenerate-clients.yml -f branch=<branch>` (`.github/workflows/regenerate-clients.yml`, the toolchain of Dashboard CI and Mobile CI: pnpm and Node from `.nvmrc`, Temurin 17, Node 22, Flutter 3.44.8). It commits the clients back only if they changed and refuses develop and main. Its push starts no checks (GITHUB_TOKEN), so open the pull request after it, or close and reopen it. Locally, optional: `pnpm api:generate` in `apps/dashboard`; `apps/mobile/scripts/gen-api-client.sh` needs Java 17 (Temurin, `JAVA_HOME`) and Dart from Flutter 3.44.8 on the PATH; another Flutter version may generate different files.
 
 ## Sprint 3 order: cash on delivery first (2026-11-26, backend owner)
 
@@ -52,7 +54,7 @@ Approved over the handover's MP-1 order, one pull request each: (1) the Riyadh t
 
 **Every cart order is `ready_meat` in Sprint 3** (2026-11-26, backend owner, accepted for the test): catalog products carry no order type yet, so the cart, the days and the order treat every line as ready meat, and the daily carcass capacity is not counted. The first item after November 30: products get an order type (a catalog field or a mapping by category, to propose with its cost), and the daily slaughter capacity is counted for whole animals. *Session:* the assumption sits behind one function, marked `ASSUMPTION:`, so the change is one place.
 
-**Every change to `openapi.json` ships both clients** (2026-11-26, backend owner, after #325 was merged with Dashboard CI and Mobile CI red): the same pull request regenerates the dashboard client (`pnpm api:generate` in `apps/dashboard`) and the mobile client (`apps/mobile/scripts/gen-api-client.sh`, Java 17: Temurin, as Mobile CI), and merges only when every check on it is green: API CI, Dashboard CI, Mobile CI and the policy check. Reading API CI alone is not enough.
+**Every change to `openapi.json` ships both clients** (2026-11-26, backend owner, after #325 was merged with Dashboard CI and Mobile CI red): the same pull request regenerates the dashboard and mobile clients, by the `regenerate-clients` workflow on its branch (2026-11-26, backend owner: not locally; local generation stays optional), and merges only when every check on it is green: API CI, Dashboard CI, Mobile CI and the policy check. Reading API CI alone is not enough.
 
 ## Open questions
 
