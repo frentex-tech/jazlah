@@ -169,7 +169,7 @@ export class CustomerCheckoutController {
     name: 'Idempotency-Key',
     required: true,
     description:
-      'A UUID the app makes once per attempt and sends again on a retry of the same attempt: the same key with the same body answers the first success again (the order as placed, whatever the cart is now); the same key with a different body is IDEMPOTENCY_KEY_REUSED. A refusal is not kept, so the same key may be sent again after fixing it. Missing or not a UUID: VALIDATION_FAILED on `Idempotency-Key`.',
+      'A UUID the app makes once per attempt and sends again on a retry of the same attempt: the same key with the same body answers the first order again (as it is now, whatever the cart is now); the same key with a different body is IDEMPOTENCY_KEY_REUSED. A refusal is not kept, so the same key may be sent again after fixing it. Missing or not a UUID: VALIDATION_FAILED on `Idempotency-Key`.',
     schema: {
       type: 'string',
       format: 'uuid',

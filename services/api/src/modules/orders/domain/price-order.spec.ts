@@ -34,10 +34,11 @@ describe('priceOrder', () => {
     expect(priced.vat.halalas).toBe(25_767);
   });
 
-  it('rounds the VAT half up at exactly half a halala', () => {
-    // 23 x 15 / 115 = 3 exactly; 46 x 15 / 115 = 6; 10 x 15 / 115 = 1.304
+  it('rounds the VAT to the nearest halala, half up', () => {
+    // 10 x 15 / 115 = 1.30 -> 1; 12 x 15 / 115 = 1.565 -> 2 (up)
     expect(priceOrder([line(10, 1)], Money.zero()).vat.halalas).toBe(1);
-    // 100 x 15 / 115 = 13.04 -> 13; 115 x 15 / 115 = 15
+    expect(priceOrder([line(12, 1)], Money.zero()).vat.halalas).toBe(2);
+    // 115 x 15 / 115 = 15 exactly
     expect(priceOrder([line(115, 1)], Money.zero()).vat.halalas).toBe(15);
   });
 

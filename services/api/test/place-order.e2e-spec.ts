@@ -10,6 +10,7 @@ import { STORAGE_PORT } from '@integrations/storage';
 import { FakeStorageProvider } from '@integrations/storage/testing';
 import { CatalogJourney, type CatalogOptions } from './support/catalog-journey';
 import { createHttpApp } from './support/create-http-app';
+import { FindCustomerOrderUseCase } from '@modules/orders';
 import { holdRowLock } from './support/row-lock';
 import { VendorJourney, type TestUser } from './support/vendor-journey';
 
@@ -375,6 +376,23 @@ describe('Place order (e2e)', () => {
         where: { id: order.id },
       });
       expect(saved.addressSnapshot).toMatchObject({ label: 'البيت' });
+    });
+
+    it('reads an order only for its own customer: the real lookup filters by user', async () => {
+      const { user } = await ready('po-lookup', 'pickup');
+      const other = await customer('po-lookup-other');
+      const res = await place(user).expect(201);
+      const orderId = (res.body as PlacedBody).order.id;
+      const lookup = app.get(FindCustomerOrderUseCase);
+
+      const own = await lookup.execute(user.userId, orderId);
+      const foreign = await lookup.execute(other.userId, orderId).then(
+        () => 'found',
+        (error: unknown) => (error as { code?: string }).code,
+      );
+
+      expect(own.id).toBe(orderId);
+      expect(foreign).toBe('NOT_FOUND');
     });
 
     it('gives each order of many placed at once its own number', async () => {

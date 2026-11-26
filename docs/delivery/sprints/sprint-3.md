@@ -346,6 +346,7 @@ Then call the payment intent outside the transaction. If it fails, the payment-t
 **Where:** `services/api/src/modules/orders/`
 
 **Acceptance:**
+- [ ] Moved from ORD-API-1 (#81): an address used by a non-final order is locked (`isLocked`, ADDRESS_IN_USE) and deleting an account with non-final orders is ACCOUNT_HAS_ACTIVE_ORDERS; until then a customer can delete the account while an order is open, and the order keeps the old phone
 - [ ] Unit tests: every allowed and forbidden transition
 - [ ] e2e: unpaid order cancelled by the job and capacity released
 - [ ] e2e: a webhook capturing a payment for an expired order triggers a refund and an alert
