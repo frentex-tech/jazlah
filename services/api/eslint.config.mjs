@@ -54,7 +54,7 @@ const DOMAIN_SAFE_COMMON = [
 
 /** The modules that have four layers (DECISIONS.md, "Settled"); R14 gives them no CRUD exception. */
 const FOUR_LAYER_MODULES =
-  '{auth,vendors,catalog,orders,checkout,payments,refunds,wallet,finance}';
+  '{auth,vendors,catalog,cart,orders,checkout,payments,refunds,wallet,finance}';
 
 /**
  * Packages a file under a module's `domain/` folder may import (R8). Empty: domain

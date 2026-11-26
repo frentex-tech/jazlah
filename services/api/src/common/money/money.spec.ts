@@ -63,6 +63,35 @@ describe('Money', () => {
     });
   });
 
+  describe('multiplyByFraction', () => {
+    it('is zero for zero, and for one halala below half', () => {
+      expect(Money.zero().multiplyByFraction(15, 115).halalas).toBe(0);
+      // 1 × 15 / 115 = 0.13
+      expect(Money.of(1).multiplyByFraction(15, 115).halalas).toBe(0);
+    });
+
+    it('rounds half up, and exact values stay exact', () => {
+      // 23 × 15 / 115 = 3 exactly; 4 × 1 / 8 = 0.5 rounds up to 1; 3 × 1 / 8 = 0.375 down.
+      expect(Money.of(23).multiplyByFraction(15, 115).halalas).toBe(3);
+      expect(Money.of(4).multiplyByFraction(1, 8).halalas).toBe(1);
+      expect(Money.of(3).multiplyByFraction(1, 8).halalas).toBe(0);
+      // 11500 × 15 / 115 = 1500; 10001 × 15 / 115 = 1304.478… → 1304; 10005 → 1305.
+      expect(Money.of(11_500).multiplyByFraction(15, 115).halalas).toBe(1500);
+      expect(Money.of(10_001).multiplyByFraction(15, 115).halalas).toBe(1304);
+      expect(Money.of(10_005).multiplyByFraction(15, 115).halalas).toBe(1305);
+    });
+
+    it('rounds a negative half toward the larger amount', () => {
+      expect(Money.of(-4).multiplyByFraction(1, 8).halalas).toBe(0);
+    });
+
+    it('refuses a fraction that is not whole, negative or over zero', () => {
+      expect(() => Money.of(1).multiplyByFraction(1.5, 2)).toThrow(RangeError);
+      expect(() => Money.of(1).multiplyByFraction(-1, 2)).toThrow(RangeError);
+      expect(() => Money.of(1).multiplyByFraction(1, 0)).toThrow(RangeError);
+    });
+  });
+
   describe('splitByBasisPoints', () => {
     it('splits evenly when it divides', () => {
       expect(

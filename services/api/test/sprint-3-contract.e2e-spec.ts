@@ -65,7 +65,6 @@ describe('Sprint 3 contract (e2e)', () => {
   const codeOf = (body: unknown) => (body as ErrorResponseBody).code;
 
   it.each([
-    ['customer', '/v1/customer/cart', 'CRT-API-1'],
     ['customer', '/v1/customer/checkout/days?method=delivery', 'SCH-API-2'],
     ['customer', '/v1/customer/checkout/payment-methods', 'PAY-API-1'],
     ['customer', '/v1/customer/orders?scope=current', 'ORD-API-3'],

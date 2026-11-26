@@ -1,6 +1,8 @@
 import { readFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { Money } from '@common/money/money';
+import { InMemoryCatalogMedia } from '../domain/fakes/in-memory-catalog-media.fake';
+import { InMemoryCatalogVendors } from '../domain/fakes/in-memory-catalog-vendors.fake';
 import { InMemoryCuttingPackagingIncompatibilities } from '../domain/fakes/in-memory-cutting-packaging-incompatibilities.fake';
 import type { ProductRepository } from '../domain/ports/product.repository.port';
 import type { ProductDetails } from '../domain/product-details.type';
@@ -112,6 +114,8 @@ async function serviceFor(key: string): Promise<PricingService> {
   return new PricingService(
     publicProducts(new Map([[key, details(key, product)]])),
     rules,
+    new InMemoryCatalogMedia(),
+    new InMemoryCatalogVendors(),
   );
 }
 
@@ -149,6 +153,8 @@ describe('PricingService', () => {
     const service = new PricingService(
       publicProducts(new Map()),
       new InMemoryCuttingPackagingIncompatibilities(),
+      new InMemoryCatalogMedia(),
+      new InMemoryCatalogVendors(),
     );
 
     const line = await service.priceLine({
@@ -164,5 +170,73 @@ describe('PricingService', () => {
     expect(line.lineTotal.halalas).toBe(0);
     expect(line.breakdown).toEqual([]);
     expect(line.errors).toEqual(['PRODUCT_UNAVAILABLE']);
+  });
+
+  describe('quoteLines', () => {
+    const product: FixtureProduct = {
+      isAvailable: true,
+      sizes: [{ id: 'sz', priceHalalas: 10_000, isAvailable: true }],
+      cuttings: [{ cuttingStyleId: 'cut', extraPriceHalalas: 500 }],
+      packagings: [{ packaging: 'vacuum', extraPriceHalalas: 300 }],
+      exclusions: [{ id: 'fat' }],
+      incompatiblePairs: [],
+    };
+    const selection = {
+      productId: 'lamb',
+      sizeId: 'sz',
+      cuttingStyleId: 'cut',
+      packaging: 'vacuum' as const,
+      exclusionItemIds: ['fat'],
+      quantity: 2,
+    };
+
+    async function quoting(pairs: FixtureProduct['incompatiblePairs']) {
+      const rules = new InMemoryCuttingPackagingIncompatibilities();
+      for (const pair of pairs) {
+        await rules.create(pair.cuttingStyleId, pair.packaging);
+      }
+      const media = new InMemoryCatalogMedia();
+      const vendors = new InMemoryCatalogVendors();
+      vendors.names.set('lamb', { ar: 'المتجر', en: 'The store' });
+      return new PricingService(
+        publicProducts(new Map([['lamb', details('lamb', product)]])),
+        rules,
+        media,
+        vendors,
+      );
+    }
+
+    it('prices each line as priceLine does and names what was chosen', async () => {
+      const service = await quoting([]);
+
+      const [quote, gone] = await service.quoteLines([
+        selection,
+        { ...selection, productId: 'gone' },
+      ]);
+
+      expect(quote.priced.unitPrice.halalas).toBe(10_800);
+      expect(quote.priced.lineTotal.halalas).toBe(21_600);
+      expect(quote.priced.errors).toEqual([]);
+      expect(quote.product).toMatchObject({
+        vendorName: { en: 'The store' },
+        imageUrl: null,
+        size: { id: 'sz', approxWeightGrams: 1000 },
+        cutting: { id: 'cut' },
+        exclusions: [{ id: 'fat' }],
+      });
+      expect(gone.priced.errors).toEqual(['PRODUCT_UNAVAILABLE']);
+      expect(gone.product).toBeNull();
+    });
+
+    it('refuses a cutting style and packaging an admin rule forbids together', async () => {
+      const service = await quoting([
+        { cuttingStyleId: 'cut', packaging: 'vacuum' },
+      ]);
+
+      const [quote] = await service.quoteLines([selection]);
+
+      expect(quote.priced.errors).toEqual(['INCOMPATIBLE_CUTTING_PACKAGING']);
+      expect(quote.priced.lineTotal.halalas).toBe(0);
+    });
   });
 });

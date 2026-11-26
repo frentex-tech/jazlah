@@ -1,0 +1,53 @@
+// Domain: cart. Owned by the cart module (src/modules/cart/): each customer's cart on
+// the server, one store at a time.
+
+/// A customer's cart (CRT-API-1, FR-CRT-01): at most one per user, made on the first
+/// write. Every write locks this row first. Lines of one store only (`vendor_id`).
+model Cart {
+  id        String     @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  userId    String     @map("user_id") @db.Uuid
+  /// The store of its lines; null while the cart is empty.
+  vendorId  String?    @map("vendor_id") @db.Uuid
+  createdAt DateTime   @default(now()) @map("created_at") @db.Timestamptz(3)
+  updatedAt DateTime   @updatedAt @map("updated_at") @db.Timestamptz(3)
+  user      User       @relation(fields: [userId], references: [id], onDelete: Cascade)
+  vendor    Vendor?    @relation(fields: [vendorId], references: [id], onDelete: Cascade)
+  items     CartItem[]
+
+  @@unique([userId], map: "carts_user_id_key")
+  @@index([vendorId])
+  @@map("carts")
+}
+
+/// One line of a cart: a product as chosen, its quantity and the unit price the customer
+/// accepted (halalas, VAT included). `configuration_key` names the choice (size, cutting
+/// style, packaging, "without" items, note), so the same choice adds to its line. The
+/// size, cutting style and "without" items are plain ids, not foreign keys: an option the
+/// product stops offering makes the line unavailable rather than deleting it.
+model CartItem {
+  id               String            @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  cartId           String            @map("cart_id") @db.Uuid
+  productId        String            @map("product_id") @db.Uuid
+  sizeId           String            @map("size_id") @db.Uuid
+  /// Null when no cutting style is chosen.
+  cuttingStyleId   String?           @map("cutting_style_id") @db.Uuid
+  /// Null when no packaging is chosen.
+  packaging        ProductPackaging?
+  exclusionItemIds String[]          @map("exclusion_item_ids") @db.Uuid
+  /// Null when the line has no note.
+  notes            String?
+  quantity         Int
+  unitPriceHalalas Int               @map("unit_price_halalas")
+  configurationKey String            @map("configuration_key")
+  /// What the line shows, as last priced (`{ vendorName, name, size, cutting, exclusions }`, read
+  /// through a zod schema): used when the public can no longer see the product.
+  display          Json
+  createdAt        DateTime          @default(now()) @map("created_at") @db.Timestamptz(3)
+  updatedAt        DateTime          @updatedAt @map("updated_at") @db.Timestamptz(3)
+  cart             Cart              @relation(fields: [cartId], references: [id], onDelete: Cascade)
+  product          Product           @relation(fields: [productId], references: [id], onDelete: Cascade)
+
+  @@unique([cartId, configurationKey], map: "cart_items_cart_id_configuration_key_key")
+  @@index([productId])
+  @@map("cart_items")
+}

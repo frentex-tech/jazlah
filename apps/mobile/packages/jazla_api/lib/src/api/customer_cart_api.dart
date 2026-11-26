@@ -25,7 +25,7 @@ class CustomerCartApi {
   const CustomerCartApi(this._dio);
 
   /// Add to my cart
-  /// Customer app, product page \&quot;add to cart\&quot;. Prices the selection with the catalog’s rules; the same configuration (size, options, note) adds to its line’s quantity (past 99: VALIDATION_FAILED on &#x60;quantity&#x60;). A product of another store: CART_VENDOR_MISMATCH (&#x60;details.vendorId&#x60;, &#x60;details.vendorName&#x60;: the cart’s store) unless &#x60;replaceCart&#x60; is true. Selection refusals, in this order: PRODUCT_UNAVAILABLE, OPTION_NOT_IN_PRODUCT, SIZE_UNAVAILABLE, INCOMPATIBLE_CUTTING_PACKAGING, OPTION_REQUIRED. ORDERING_PAUSED while orders are paused (&#x60;details.messageAr&#x60;, &#x60;details.messageEn&#x60;: the admin’s message). Until CRT-API-1 lands: NOT_IMPLEMENTED.
+  /// Customer app, product page \&quot;add to cart\&quot;. Prices the selection with the catalog’s rules; the same configuration (size, options, note) adds to its line’s quantity (past 99: VALIDATION_FAILED on &#x60;quantity&#x60;). A product of another store: CART_VENDOR_MISMATCH (&#x60;details.vendorId&#x60;, &#x60;details.vendorName&#x60;: the cart’s store) unless &#x60;replaceCart&#x60; is true. Selection refusals, in this order: PRODUCT_UNAVAILABLE, OPTION_NOT_IN_PRODUCT, SIZE_UNAVAILABLE, INCOMPATIBLE_CUTTING_PACKAGING, OPTION_REQUIRED. ORDERING_PAUSED while orders are paused (&#x60;details.messageAr&#x60;, &#x60;details.messageEn&#x60;: the admin’s message).
   ///
   /// Parameters:
   /// * [addCartItemDto] 
@@ -215,7 +215,7 @@ _responseData = rawData == null ? null : deserialize<CartResponseDto, CartRespon
   }
 
   /// Empty my cart
-  /// Customer app, \&quot;empty cart\&quot;. Removes every line, the coupon and the fulfilment. ORDERING_PAUSED while orders are paused (&#x60;details.messageAr&#x60;, &#x60;details.messageEn&#x60;: the admin’s message). Until CRT-API-1 lands: NOT_IMPLEMENTED.
+  /// Customer app, \&quot;empty cart\&quot;. Removes every line, the coupon and the fulfilment. ORDERING_PAUSED while orders are paused (&#x60;details.messageAr&#x60;, &#x60;details.messageEn&#x60;: the admin’s message).
   ///
   /// Parameters:
   /// * [cancelToken] - A [CancelToken] that can be used to cancel the operation
@@ -290,7 +290,7 @@ _responseData = rawData == null ? null : deserialize<CartResponseDto, CartRespon
   }
 
   /// My cart
-  /// Customer app, cart tab and checkout. The cart priced today: a line whose price changed since it was accepted carries a PRICE_CHANGED issue, one that can no longer be ordered as chosen an ITEM_UNAVAILABLE issue; a coupon that stopped applying is removed. An empty cart has no vendor and no lines. Until CRT-API-1 lands: NOT_IMPLEMENTED.
+  /// Customer app, cart tab and checkout. The cart priced today: a line whose price changed since it was accepted carries a PRICE_CHANGED issue, one that can no longer be ordered as chosen an ITEM_UNAVAILABLE issue; a coupon that stopped applying is removed. An empty cart has no vendor and no lines.
   ///
   /// Parameters:
   /// * [cancelToken] - A [CancelToken] that can be used to cancel the operation
@@ -460,7 +460,7 @@ _responseData = rawData == null ? null : deserialize<MergeCartResponseDto, Merge
   }
 
   /// Remove a line
-  /// Customer app, cart swipe or remove. NOT_FOUND for a line not in the cart. ORDERING_PAUSED while orders are paused (&#x60;details.messageAr&#x60;, &#x60;details.messageEn&#x60;: the admin’s message). Until CRT-API-1 lands: NOT_IMPLEMENTED.
+  /// Customer app, cart swipe or remove. NOT_FOUND for a line not in the cart. ORDERING_PAUSED while orders are paused (&#x60;details.messageAr&#x60;, &#x60;details.messageEn&#x60;: the admin’s message).
   ///
   /// Parameters:
   /// * [id] - The id (a UUID) of the item the path names; another value is VALIDATION_FAILED on `id`.
@@ -707,7 +707,7 @@ _responseData = rawData == null ? null : deserialize<CartResponseDto, CartRespon
   }
 
   /// Change a line’s quantity
-  /// Customer app, cart stepper; also how the customer accepts a changed price (send the same quantity). NOT_FOUND for a line not in the cart. ORDERING_PAUSED while orders are paused (&#x60;details.messageAr&#x60;, &#x60;details.messageEn&#x60;: the admin’s message). Until CRT-API-1 lands: NOT_IMPLEMENTED.
+  /// Customer app, cart stepper; also how the customer accepts a changed price (send the same quantity). NOT_FOUND for a line not in the cart. ORDERING_PAUSED while orders are paused (&#x60;details.messageAr&#x60;, &#x60;details.messageEn&#x60;: the admin’s message).
   ///
   /// Parameters:
   /// * [id] - The id (a UUID) of the item the path names; another value is VALIDATION_FAILED on `id`.

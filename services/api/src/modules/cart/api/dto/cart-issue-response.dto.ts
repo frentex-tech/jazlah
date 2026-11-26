@@ -1,5 +1,5 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { CART_ISSUE_CODES } from '../cart-issue-codes.constants';
+import { CART_ISSUE_CODES } from '../../domain/cart-issue-codes.constants';
 
 /** Something on a line that blocks checkout. */
 export class CartIssueResponseDto {

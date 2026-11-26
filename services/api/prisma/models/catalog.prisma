@@ -193,6 +193,8 @@ model Product {
   exclusions     ProductExclusion[]
   changeRequests ProductChangeRequest[]
 
+  cartItems CartItem[]
+
   @@index([vendorId, createdAt, id])
   /// Also the public list filtered by vendor (is_available checked on the rows read).
   @@index([vendorId, status, createdAt, id])

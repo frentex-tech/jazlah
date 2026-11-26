@@ -37,6 +37,8 @@ Always loaded: the registry index (imported at the end; its area files are not) 
 4. The always-loaded instructions are still under the limit (`pnpm instructions:check`).
 5. The report has: **Changed** (files, and what you searched for first), **Evidence** (each command with its real result, failures quoted), **Not verified** (and why; "nothing" only if true), **Assumptions**, **Suggestions**, **Registry and decisions**.
 
+**Merge:** a change to `openapi.json` ships both regenerated clients in the same pull request: push, then run `gh workflow run regenerate-clients.yml -f branch=<branch>` (local generation is optional, for whoever has Java 17 and Flutter), then open the pull request or close and reopen it so its checks run on the bot's commit. It merges only when every check is green: API CI, Dashboard CI, Mobile CI and the policy check (DECISIONS.md, Sprint 3 order).
+
 **Review:** after finishing a module and before asking for merge, run `/api-review` (a separate read-only reviewer) and pass its report on unedited.
 
 ## Commands (from `services/api/`; CI runs the same list)
