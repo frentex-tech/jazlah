@@ -172,6 +172,8 @@ export enum ErrorCode {
   ORDER_NOT_PAYABLE = 'ORDER_NOT_PAYABLE',
   /** A payment of this order with another method is still open. Details: `{ paymentId }`. Finish or wait for it. */
   PAYMENT_IN_PROGRESS = 'PAYMENT_IN_PROGRESS',
+  /** This `Idempotency-Key` was already used for a different request. Make a new key for a new attempt; send the same key only with the same body. */
+  IDEMPOTENCY_KEY_REUSED = 'IDEMPOTENCY_KEY_REUSED',
   /** The order cannot move to that status now, or not by this caller. Details: `{ from, to }`. Reload the order. */
   ORDER_TRANSITION_NOT_ALLOWED = 'ORDER_TRANSITION_NOT_ALLOWED',
 }

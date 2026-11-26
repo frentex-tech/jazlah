@@ -47,3 +47,4 @@ What exists, by area. Before writing anything, read this index, then open the ar
 - **cart** — `.claude/registry/cart.md` — `CartModule`: the server cart.
 - **customers** — `.claude/registry/customers.md` — `CustomersModule`: profiles, marketing consent, addresses.
 - **coverage** — `.claude/registry/coverage.md` — `CoverageModule`: delivery zones, `CoverageService` (is a point covered).
+- **orders** — `.claude/registry/orders.md` — `OrdersModule`: orders, `CreateOrderUseCase`; `CheckoutModule`: placing an order.

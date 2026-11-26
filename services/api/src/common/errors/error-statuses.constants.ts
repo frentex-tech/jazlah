@@ -71,5 +71,6 @@ export const ERROR_STATUSES: Readonly<Record<ErrorCode, number>> = {
   [ErrorCode.PAYMENT_METHOD_NOT_AVAILABLE]: 422,
   [ErrorCode.ORDER_NOT_PAYABLE]: 409,
   [ErrorCode.PAYMENT_IN_PROGRESS]: 409,
+  [ErrorCode.IDEMPOTENCY_KEY_REUSED]: 422,
   [ErrorCode.ORDER_TRANSITION_NOT_ALLOWED]: 409,
 };

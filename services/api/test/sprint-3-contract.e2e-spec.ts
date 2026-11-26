@@ -85,32 +85,6 @@ describe('Sprint 3 contract (e2e)', () => {
     });
   });
 
-  // The Idempotency-Key header is checked by ORD-API-1 itself; the stub only names its task.
-  it('places an order only with a token and a valid body', async () => {
-    const unsigned = await http()
-      .post('/v1/customer/orders')
-      .send({ paymentMethod: 'mada' })
-      .expect(401);
-    const invalid = await http()
-      .post('/v1/customer/orders')
-      .set(...token(customer))
-      .send({ paymentMethod: 'cash' })
-      .expect(400);
-    const stub = await http()
-      .post('/v1/customer/orders')
-      .set(...token(customer))
-      .set('Idempotency-Key', ID)
-      .send({ paymentMethod: 'mada', walletAmountHalalas: 0 })
-      .expect(501);
-
-    expect(codeOf(unsigned.body)).toBe('UNAUTHORIZED');
-    expect(invalid.body).toMatchObject({
-      code: 'VALIDATION_FAILED',
-      details: [{ field: 'paymentMethod' }],
-    });
-    expect(stub.body).toMatchObject({ details: { task: 'ORD-API-1' } });
-  });
-
   it('refuses null for a coupon key that cannot be null (PATCH)', async () => {
     const coupon = await http()
       .patch(`/v1/admin/coupons/${ID}`)

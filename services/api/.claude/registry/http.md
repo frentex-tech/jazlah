@@ -17,3 +17,4 @@ One line per building block: name, path, purpose; the detail is in that file's d
 - **CharLength** — `src/common/decorators/char-length.decorator.ts` — a string length in code points, as PostgreSQL's `char_length` counts it (constraint `charLength`): for every length a check constraint also limits.
 - **GeoPointDto** — `src/common/dto/geo-point.dto.ts` — a `{ latitude, longitude }` point in degrees, request and response, numbers only (vendors, customers' addresses).
 - **TimeWindowDto** — `src/common/dto/time-window.dto.ts` — a Riyadh `HH:mm` to `HH:mm` window, request and response (delivery window, store hours, checkout days).
+- **IdempotencyKey** — `src/common/decorators/idempotency-key.decorator.ts` — `@IdempotencyKey()` parameter: the required `Idempotency-Key` header as a lower-case UUID, VALIDATION_FAILED on `Idempotency-Key` otherwise; the use case keeps the key per user with `IdempotencyRunner` and `hashRequestBody` (IDEMPOTENCY_KEY_REUSED for another body).

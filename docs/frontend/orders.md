@@ -16,7 +16,7 @@ Money is integer halalas with VAT included. Days are Riyadh `yyyy-MM-dd`, times 
 | `GET /v1/customer/wallet`, `GET /v1/customer/wallet/transactions`, `GET /v1/admin/customers/{id}/wallet`, `POST /v1/admin/customers/{id}/wallet/adjustments` | WAL-API-1 |
 | `GET /v1/customer/checkout/payment-methods` without `orderId` | PAY-API-1's methods route (**live**: cash on delivery only, `walletBalanceHalalas` 0; with `orderId` still 501) |
 | `POST /v1/customer/orders/{id}/payments` (tag Customer checkout), `POST /v1/webhooks/payments/{provider}` | PAY-API-1 |
-| `POST /v1/customer/orders` | ORD-API-1 |
+| `POST /v1/customer/orders` | ORD-API-1 (**live**, cash on delivery only: see "Paying") |
 | `POST /v1/vendor/orders/{id}/transition`, `POST /v1/admin/orders/{id}/transition` | ORD-API-2 |
 | `GET /v1/customer/orders`, `GET /v1/customer/orders/{id}`, `GET /v1/vendor/orders`, `GET /v1/vendor/orders/{id}`, `GET /v1/admin/orders`, `GET /v1/admin/orders/{id}` | ORD-API-3 |
 | `POST /v1/customer/cart/coupon`, `DELETE /v1/customer/cart/coupon`, `GET /v1/admin/coupons`, `POST /v1/admin/coupons`, `GET /v1/admin/coupons/{id}`, `PATCH /v1/admin/coupons/{id}`, `GET /v1/admin/coupons/{id}/usage` | CRT-API-3 |
@@ -40,7 +40,8 @@ Not in Sprint 3: the customer's cancel (CAN-API-1, Sprint 4), the admin's cancel
 
 ## Paying
 
-- Place with `POST /v1/customer/orders`, header **`Idempotency-Key`** (a UUID made once per attempt; send it again on a retry of that attempt and the first success is answered again). A refusal is not kept: fix it and send the same key.
+- Place with `POST /v1/customer/orders`, header **`Idempotency-Key`** (a UUID made once per attempt; send it again on a retry of that attempt, with the same body, and the first success is answered again). The same key with a **different body** is `IDEMPOTENCY_KEY_REUSED` (422): make a new key. A refusal is not kept: fix it and send the same key.
+- **Sprint 3 places cash on delivery only** (`paymentMethod: "cod"`, no `walletAmountHalalas`): any other method is `PAYMENT_METHOD_NOT_AVAILABLE`. The order starts `new` and `payment` is null. The server prices every line again: a price that moved since the customer accepted it is `PRICE_CHANGED` (`details.lineIds`, show the new price, PATCH the line to accept it), a line that can no longer be ordered `ITEM_UNAVAILABLE`. A customer with no full name gets `PROFILE_INCOMPLETE`: send them to the name step.
 - The answer is `{ order, payment }`. When `payment.nextAction` is not null, open **`nextAction.redirectUrl`** (the provider's hosted page; on staging the fake provider's approve or decline page) in a web view; close it when it reaches **`nextAction.returnUrl`** (match scheme, host and path). **The result always comes from the server:** poll `GET /v1/customer/orders/{id}` every 2 s up to 60 s; paid once the status is neither `pending_payment` nor `cancelled`.
 - `payment` is null for cash on delivery and wallet only (no payment record is made); `nextAction` is also null on any later read: read the order, not the payment.
 - **One open payment per order.** `POST /v1/customer/orders/{id}/payments` with the same method while the latest is still `initiated` answers that payment again; another method gets PAYMENT_IN_PROGRESS (`details.paymentId`). An `initiated` payment ends when the provider reports it or **10 minutes** after it started, so the customer can still switch method (to cash on delivery, say) before the order expires. A second capture is refunded in full and alerted.

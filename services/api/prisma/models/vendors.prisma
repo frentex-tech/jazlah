@@ -105,6 +105,7 @@ model Vendor {
 
   carts         Cart[]
   dayCapacities DayCapacity[]
+  orders        Order[]
 
   @@unique([applicationId], map: "vendors_application_id_key")
   /// One vendor per commercial registration number (null for the platform vendor).

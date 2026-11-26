@@ -1,10 +1,15 @@
 import { Module } from '@nestjs/common';
 import { CartModule } from '@modules/cart';
+import { CustomersModule } from '@modules/customers';
+import { OrdersModule } from '@modules/orders';
 import { SchedulingModule } from '@modules/scheduling';
 import { SettingsModule } from '@modules/settings';
+import { UsersModule } from '@modules/users';
+import { VendorsModule } from '@modules/vendors';
 import { CustomerCheckoutController } from './api/controllers/customer.controller';
 import { ListCheckoutDaysUseCase } from './application/list-checkout-days.use-case';
 import { ListPaymentMethodsUseCase } from './application/list-payment-methods.use-case';
+import { PlaceOrderUseCase } from './application/place-order.use-case';
 import { CHECKOUT_CART_SOURCE } from './domain/ports/checkout-cart-source.port';
 import { CHECKOUT_SCHEDULING } from './domain/ports/checkout-scheduling.port';
 import { CHECKOUT_SETTINGS } from './domain/ports/checkout-settings.port';
@@ -15,15 +20,24 @@ import { SchedulingServiceCheckoutScheduling } from './infrastructure/scheduling
 /**
  * Checkout: what joins the cart, scheduling, orders and payments. Live: the days the
  * cart can be fulfilled on (SCH-API-2) and the cart's payment methods (cash on
- * delivery, PAY-API-1's methods route). Placing an order (ORD-API-1) and paying
- * (PAY-API-1) still answer NOT_IMPLEMENTED.
+ * delivery, PAY-API-1's methods route) and placing an order, cash on delivery only
+ * (ORD-API-1). Paying (PAY-API-1) still answers NOT_IMPLEMENTED.
  */
 @Module({
-  imports: [CartModule, SchedulingModule, SettingsModule],
+  imports: [
+    CartModule,
+    CustomersModule,
+    OrdersModule,
+    SchedulingModule,
+    SettingsModule,
+    UsersModule,
+    VendorsModule,
+  ],
   controllers: [CustomerCheckoutController],
   providers: [
     ListCheckoutDaysUseCase,
     ListPaymentMethodsUseCase,
+    PlaceOrderUseCase,
     { provide: CHECKOUT_CART_SOURCE, useClass: GetCartCheckoutCartSource },
     {
       provide: CHECKOUT_SCHEDULING,
