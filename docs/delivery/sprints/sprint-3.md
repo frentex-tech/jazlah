@@ -338,8 +338,8 @@ Then call the payment intent outside the transaction. If it fails, the payment-t
 - Statuses: `pending_payment → new → confirmed → preparing → ready → picked_up → out_for_delivery → delivered`; pickup: `ready → collected`; exceptions: `cancelled`, `delivery_failed`, `returned`
 - `OrderStatusHistory` (from, to, actorType system|customer|admin|vendor|kitchen|delivery, actorId, note, at)
 - `OrdersService.transition(orderId, to, actor, meta)` with a transition table (allowed from→to and actor), emits `order.status.changed`
-- Rules: payment captured → `confirmed`; COD → `confirmed` if `ops.cod.confirmation=auto`, else stays `new` for admin review; a job cancels `pending_payment` after 15 min (releases capacity, coupon and wallet)
-- **Late capture:** a payment captured after the order was cancelled or expired → automatic full refund + admin alert (`payment.captured` listener checks the order state)
+- Rules: payment captured → `confirmed`; COD → `confirmed` if `ops.cod.confirmation=auto`, else stays `new` for admin review; an unpaid `pending_payment` order past `expiresAt` (15 min) is cancelled when read or moved, releasing capacity, coupon and wallet (workers are off on staging: the contract's expiry on read)
+- **Late capture:** a payment captured after the order was cancelled or expired → automatic full refund + admin alert, decided in the webhook's own transaction (the webhook handler reads the order state under its row lock and records the refund there) or through the outbox once it exists; never through an in-memory event bus listener, whose delivery is lost on a crash between commit and dispatch (modules.md, Events 3)
 
 **How:** the transition table is data in code (`orders/state-machine.ts`) with exhaustive unit tests. No other module updates `order.status` directly.
 

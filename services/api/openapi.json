@@ -9403,7 +9403,7 @@
     },
     "/v1/admin/settings/operations": {
       "get": {
-        "description": "Admin dashboard, operations page. Until SCH-API-1 lands: NOT_IMPLEMENTED.",
+        "description": "Admin dashboard, operations page.",
         "operationId": "adminGetOperationsSettings",
         "parameters": [],
         "responses": {
@@ -9457,16 +9457,6 @@
               }
             }
           },
-          "501": {
-            "description": "Error. code: NOT_IMPLEMENTED.",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ErrorResponseDto"
-                }
-              }
-            }
-          },
           "503": {
             "description": "Error. code: SERVICE_UNAVAILABLE.",
             "content": {
@@ -9489,7 +9479,7 @@
         ]
       },
       "patch": {
-        "description": "Admin dashboard, operations page \"save\": only the keys sent change (a stale tab cannot undo another change it did not send); the pause is not here. A closed day added in the past: VALIDATION_FAILED `notPast` on `closedDays.<i>.date`; a window ending before it starts: `endBeforeStart`. The next cart and checkout reads use the new values. Until SCH-API-1 lands: NOT_IMPLEMENTED.",
+        "description": "Admin dashboard, operations page \"save\": only the keys sent change (a stale tab cannot undo another change it did not send); the pause is not here. A closed day added in the past: VALIDATION_FAILED `notPast` on `closedDays.<i>.date`; a window ending before it starts: `endBeforeStart`. The next cart and checkout reads use the new values.",
         "operationId": "adminUpdateOperationsSettings",
         "parameters": [],
         "requestBody": {
@@ -9573,16 +9563,6 @@
               }
             }
           },
-          "501": {
-            "description": "Error. code: NOT_IMPLEMENTED.",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ErrorResponseDto"
-                }
-              }
-            }
-          },
           "503": {
             "description": "Error. code: SERVICE_UNAVAILABLE.",
             "content": {
@@ -9607,7 +9587,7 @@
     },
     "/v1/admin/settings/operations/pause": {
       "put": {
-        "description": "Admin dashboard, the pause switch. Pausing makes every cart change and checkout call answer ORDERING_PAUSED with the message; orders already placed carry on. Until SCH-API-1 lands: NOT_IMPLEMENTED.",
+        "description": "Admin dashboard, the pause switch. Pausing makes every cart change and checkout call answer ORDERING_PAUSED with the message; orders already placed carry on.",
         "operationId": "adminSetOrderingPause",
         "parameters": [],
         "requestBody": {
@@ -9691,16 +9671,6 @@
               }
             }
           },
-          "501": {
-            "description": "Error. code: NOT_IMPLEMENTED.",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ErrorResponseDto"
-                }
-              }
-            }
-          },
           "503": {
             "description": "Error. code: SERVICE_UNAVAILABLE.",
             "content": {
@@ -9725,7 +9695,7 @@
     },
     "/v1/public/settings/client": {
       "get": {
-        "description": "Customer app (cart, checkout) and the dashboard’s pause banner: delivery window, booking horizon, minimum order, delivery fee, cash on delivery and the pause. Public; cache for a minute at most. Until SCH-API-1 lands: NOT_IMPLEMENTED.",
+        "description": "Customer app (cart, checkout) and the dashboard’s pause banner: delivery window, booking horizon, minimum order, delivery fee, cash on delivery and the pause. Public; cache for a minute at most.",
         "operationId": "publicGetClientSettings",
         "parameters": [],
         "responses": {
@@ -9751,16 +9721,6 @@
           },
           "500": {
             "description": "Error. code: INTERNAL_ERROR.",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ErrorResponseDto"
-                }
-              }
-            }
-          },
-          "501": {
-            "description": "Error. code: NOT_IMPLEMENTED.",
             "content": {
               "application/json": {
                 "schema": {
