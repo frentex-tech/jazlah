@@ -46,6 +46,10 @@ From the session that covered the backend from 2026-11-21 to 2026-11-23, for the
 
 **The apps are wired to the contract:** the dashboard and mobile Sprint 3 screens build on the generated clients. Any change to a route, DTO or code needs `pnpm openapi:generate`, `pnpm api:generate` (dashboard) and `apps/mobile/scripts/gen-api-client.sh`, a line in `docs/frontend/orders.md`, and a note to the DSH and MOB sessions.
 
+## Sprint 3 order: cash on delivery first (2026-11-26, backend owner)
+
+Approved over the handover's MP-1 order, one pull request each: (1) the Riyadh time helper and the settings (SCH-API-1 core), (2) the cart without merge (CRT-API-1), (3) days, fulfilment, capacity and the payment methods answering cash on delivery (SCH-API-2 core, PAY-API-1's methods route), (4) placing the order (ORD-API-1), (5) moving it (ORD-API-2), (6) reading it (ORD-API-3). After November 30: the wallet, online payment (port, fake provider, webhook, pay again, the 15-minute expiry), coupons, the guest cart merge, the admin capacity routes and realtime. *Why:* a customer must place a cash-on-delivery order on staging and see it move by November 30; cash needs none of the wallet, payment or coupon steps, which come back into the order flow when built (the `payments` row of a cash order is the seam).
+
 ## Open questions
 
 ### Before launch
@@ -305,6 +309,12 @@ Decided 2026-11-17 by the backend owner (the approved plan and its decisions) un
 - **Files of a deleted account leave in two steps** (backend owner, review of #240): the media cleanup deletes a ready file's checked copy at its next run, and the row with its staging object only once the upload's confirm window has ended. Removing the row earlier broke "an upload is never removed while its upload URL is still valid": an upload to a still-valid ticket after the row was gone left an object no row names, which no cleanup finds. So a pending upload's staging object can outlive the deletion by up to `MEDIA_PENDING_UPLOAD_TTL_SECONDS` plus one cleanup interval.
 - *Session:* a new upload rejection reason `OWNER_DELETED` (removed by the cleanup like `EXPIRED`, as above); `GeoPointDto` moved to `src/common/dto/` for reuse; `CUSTOMER_AUTH_ERRORS` beside the admin and vendor lists; the session's `created_at` is now written from the auth clock (`AuthSession.signedInAt`).
 
+### Time and settings (issue #68)
+
+- **The time helper uses a fixed UTC+3 offset** (2026-11-26, backend owner): Saudi Arabia keeps UTC+3 all year without daylight saving time, so `RiyadhCalendar` (`src/common/time/`) needs no time zone package. The ASSUMPTION is in `riyadh-utc-offset.constants.ts`; the day boundary at Riyadh midnight is tested. A `Clock` port beside it lets each module inject the time. *Session:* the auth module keeps its own domain clock port (R8 lets a domain import only the plain parts of common, and `time` is not among them); moving auth onto the shared one is a suggestion, not done.
+- **The operations settings are one typed row, not a key-value store** (session, SCH-API-1): table `operations_settings` with a column per scalar and JSON (validated by zod when read) for the cut-offs and closed days, its check constraints mirroring the DTOs, the row made by its migration. The sprint plan's `Setting` key store with a zod schema per key would carry the same values with weaker types and no constraints. No cache: one primary-key read per cart or checkout call, so a change counts from the next request (the plan's acceptance). Placeholder values until the client sends its numbers: the plan's window, cut-offs, horizon and complaint window; minimum order and delivery fee 0 (no price invented); capacity 40 orders and 10 carcasses a day; cash on delivery on for every order type but `adha`, no cap, `review`.
+- **Settings validation beyond the DTOs** (session, from the contract): `endBeforeStart` on `deliveryWindow.end`; `isNotRepeated` and `notPast` on `closedDays.<i>.date`, where `notPast` compares with today in Riyadh and spares a day already saved.
+
 ### Coverage zones (issue #24)
 
 - **`coverage` is a new CRUD-shaped module** (no state machine, no money): `CoverageZonesService` (admins' list and changes, and the database side of the check) and `CoverageService` (the check, exported: `findZone(point)`, `isCovered(point)`). Every zone change is audited (`coverage.zone.created`, `updated`, `deleted`) in its transaction. Admins are the whole admin audience: there is no finer permission system yet. Each zone has a map colour for the dashboard editor (`color`, `#RRGGBB`, default `#6A1A20`, the brand's deep red; check constraint `coverage_zones_color_check`).
@@ -326,6 +336,8 @@ Decided 2026-11-17 by the backend owner (the approved plan and its decisions) un
 - **The customer's phone on an order** (review of #314): in full for admins, masked for the vendor (a vendor never needs to dial it before delivery lands in Sprint 4; the platform calls). The shape is the same; the value differs by audience. Keeps the rule that only `GET /v1/customer/me` and admin screens show a phone in full.
 - **The admin wallet credit or debit takes an `Idempotency-Key`** (review of #314): it moves money, so a double click or retry moves it once.
 - **Proposed, not done: promote `cart` and `coupons` to four layers** when CRT-API-1 and CRT-API-3 start (modules.md: they will hold money logic: totals, discount rounding). Awaiting the owner; they are CRUD-shaped until then.
+- **Who delivers in Sprint 3** (2026-11-26, backend owner): both the vendor and the admin may move an order to `out_for_delivery`, `delivered` and `delivery_failed`; Sprint 4 adds the delivery actor and its own moves.
+- **The cart and coupons are four-layer** (2026-11-26, backend owner; answers the proposal above): the cart holds totals and money rules, so it is promoted with CRT-API-1 (`FOUR_LAYER_MODULES`); coupons become four-layer when CRT-API-3 builds them.
 - **Capacity** (A16): a vendor's own daily limits (null: the platform's `defaultCapacity` in the settings) and one day's limits, on `/v1/admin/vendors/{id}/capacity`.
 - **Out of Sprint 3:** the customer's cancel and the admin's cancel, refund and reschedule are CAN-API-1 (Sprint 4); rejecting a cash-on-delivery order is a move to `cancelled` with a note (D3). Realtime events (`order.created`, `order.updated`) come with ORD-API-3 over the socket, not in the document.
 

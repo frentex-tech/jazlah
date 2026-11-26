@@ -1,0 +1,40 @@
+// Domain: settings. Owned by the settings module (src/modules/settings/): the platform's
+// operating rules, edited by admins without a deploy.
+
+/// The operations settings (SCH-API-1, FR-ADM-05): one row, made by its migration with
+/// placeholder values until the client sends its operating numbers. The unique
+/// `singleton` column keeps the table to that row. Times are Riyadh `HH:mm`; money is
+/// halalas, VAT included. `cutoffs` and `closed_days` are JSON read through zod schemas
+/// in the settings module.
+model OperationsSettings {
+  id                     String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  /// Always true (check constraint `operations_settings_singleton_check`).
+  singleton              Boolean  @default(true)
+  deliveryWindowStart    String   @map("delivery_window_start")
+  deliveryWindowEnd      String   @map("delivery_window_end")
+  /// `{ readyMeat, carcass, cooked, occasion, adha }`, each `{ time: 'HH:mm' | null, leadDays }`.
+  cutoffs                Json
+  defaultOrdersPerDay    Int      @map("default_orders_per_day")
+  defaultCarcassesPerDay Int      @map("default_carcasses_per_day")
+  codEnabled             Boolean  @map("cod_enabled")
+  /// Null when cash on delivery has no cap.
+  codMaxOrderHalalas     Int?     @map("cod_max_order_halalas")
+  codAllowedOrderTypes   String[] @map("cod_allowed_order_types")
+  codConfirmation        String   @map("cod_confirmation")
+  bookingHorizonDays     Int      @map("booking_horizon_days")
+  minOrderHalalas        Int      @map("min_order_halalas")
+  deliveryFeeHalalas     Int      @map("delivery_fee_halalas")
+  complaintWindowHours   Int      @map("complaint_window_hours")
+  /// `[{ date: 'yyyy-MM-dd', scope, reasonAr, reasonEn }]` in date order, past days kept.
+  closedDays             Json     @map("closed_days")
+  isPaused               Boolean  @default(false) @map("is_paused")
+  /// Null when ordering is not paused.
+  pauseMessageAr         String?  @map("pause_message_ar")
+  /// Null when ordering is not paused.
+  pauseMessageEn         String?  @map("pause_message_en")
+  createdAt              DateTime @default(now()) @map("created_at") @db.Timestamptz(3)
+  updatedAt              DateTime @updatedAt @map("updated_at") @db.Timestamptz(3)
+
+  @@unique([singleton], map: "operations_settings_singleton_key")
+  @@map("operations_settings")
+}

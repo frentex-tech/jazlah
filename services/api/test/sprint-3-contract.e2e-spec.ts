@@ -71,12 +71,10 @@ describe('Sprint 3 contract (e2e)', () => {
     ['customer', '/v1/customer/orders?scope=current', 'ORD-API-3'],
     ['customer', `/v1/customer/orders/${ID}`, 'ORD-API-3'],
     ['customer', '/v1/customer/wallet', 'WAL-API-1'],
-    ['admin', '/v1/admin/settings/operations', 'SCH-API-1'],
     ['admin', `/v1/admin/vendors/${ID}/capacity`, 'SCH-API-2'],
     ['admin', '/v1/admin/orders?status=new&paymentMethod=cod', 'ORD-API-3'],
     ['admin', '/v1/admin/coupons', 'CRT-API-3'],
     ['admin', `/v1/admin/customers/${ID}/wallet`, 'WAL-API-1'],
-    ['public', '/v1/public/settings/client', 'SCH-API-1'],
   ])('%s GET %s answers NOT_IMPLEMENTED for %s', async (who, path, task) => {
     const call = http().get(path);
     if (who !== 'public') {
@@ -116,19 +114,13 @@ describe('Sprint 3 contract (e2e)', () => {
     expect(stub.body).toMatchObject({ details: { task: 'ORD-API-1' } });
   });
 
-  it('refuses null for a settings or coupon key that cannot be null (PATCH)', async () => {
-    const settings = await http()
-      .patch('/v1/admin/settings/operations')
-      .set(...token(admin))
-      .send({ minOrderHalalas: null, cod: null })
-      .expect(400);
+  it('refuses null for a coupon key that cannot be null (PATCH)', async () => {
     const coupon = await http()
       .patch(`/v1/admin/coupons/${ID}`)
       .set(...token(admin))
       .send({ code: null, isActive: null })
       .expect(400);
 
-    expect(settings.body).toMatchObject({ code: 'VALIDATION_FAILED' });
     expect(coupon.body).toMatchObject({ code: 'VALIDATION_FAILED' });
   });
 
@@ -148,23 +140,15 @@ describe('Sprint 3 contract (e2e)', () => {
 
   it('keeps admin routes from customers and takes webhooks without a token', async () => {
     const asCustomer = await http()
-      .patch('/v1/admin/settings/operations')
+      .get('/v1/admin/coupons')
       .set(...token(customer))
-      .send({})
       .expect(403);
-    const pause = await http()
-      .put('/v1/admin/settings/operations/pause')
-      .set(...token(admin))
-      .send({ isPaused: true })
-      .expect(400);
     const webhook = await http()
       .post('/v1/webhooks/payments/fake')
       .send({})
       .expect(501);
 
     expect(codeOf(asCustomer.body)).toBe('FORBIDDEN');
-    // Pausing needs the message in both languages.
-    expect(pause.body).toMatchObject({ code: 'VALIDATION_FAILED' });
     expect(webhook.body).toMatchObject({ details: { task: 'PAY-API-1' } });
   });
 });

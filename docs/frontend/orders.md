@@ -8,7 +8,7 @@ Money is integer halalas with VAT included. Days are Riyadh `yyyy-MM-dd`, times 
 
 | Route | Task |
 |---|---|
-| `GET /v1/public/settings/client`, `GET /v1/admin/settings/operations`, `PATCH /v1/admin/settings/operations`, `PUT /v1/admin/settings/operations/pause` | SCH-API-1 |
+| `GET /v1/public/settings/client`, `GET /v1/admin/settings/operations`, `PATCH /v1/admin/settings/operations`, `PUT /v1/admin/settings/operations/pause` | SCH-API-1 (**live**: real answers, same shapes) |
 | `GET /v1/customer/cart`, `DELETE /v1/customer/cart`, `POST /v1/customer/cart/items`, `PATCH /v1/customer/cart/items/{id}`, `DELETE /v1/customer/cart/items/{id}`, `POST /v1/customer/cart/merge` | CRT-API-1 |
 | `PATCH /v1/customer/cart/fulfilment`, `GET /v1/customer/checkout/days`, `GET /v1/admin/vendors/{id}/capacity`, `PUT /v1/admin/vendors/{id}/capacity`, `PUT /v1/admin/vendors/{id}/capacity/{date}`, `DELETE /v1/admin/vendors/{id}/capacity/{date}` | SCH-API-2 |
 | `GET /v1/customer/wallet`, `GET /v1/customer/wallet/transactions`, `GET /v1/admin/customers/{id}/wallet`, `POST /v1/admin/customers/{id}/wallet/adjustments` | WAL-API-1 |
