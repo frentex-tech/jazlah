@@ -15,13 +15,20 @@ import {
   ApiOperation,
   ApiTags,
 } from '@nestjs/swagger';
+import type { AuthenticatedUser } from '@common/auth/authenticated-user.type';
 import { ApiErrorResponses } from '@common/decorators/api-error-responses.decorator';
 import { BEARER_AUTH_SCHEME } from '@common/decorators/bearer-auth.constants';
+import { CurrentUser } from '@common/decorators/current-user.decorator';
 import { CUSTOMER_AUTH_ERRORS } from '@common/decorators/customer-auth-errors.constants';
 import { IdParamDto } from '@common/dto/id-param.dto';
 import { ErrorCode } from '@common/errors/error-code.enum';
 import { notImplemented } from '@common/errors/not-implemented';
 import { API_TAGS } from '@infra/api-docs/api-tags.constants';
+import { AddCartItemUseCase } from '../../application/add-cart-item.use-case';
+import { ClearCartUseCase } from '../../application/clear-cart.use-case';
+import { GetCartUseCase } from '../../application/get-cart.use-case';
+import { RemoveCartItemUseCase } from '../../application/remove-cart-item.use-case';
+import { UpdateCartItemUseCase } from '../../application/update-cart-item.use-case';
 import { AddCartItemDto } from '../dto/add-cart-item.dto';
 import { ApplyCouponDto } from '../dto/apply-coupon.dto';
 import { CartResponseDto } from '../dto/cart-response.dto';
@@ -29,32 +36,39 @@ import { MergeCartResponseDto } from '../dto/merge-cart-response.dto';
 import { MergeCartDto } from '../dto/merge-cart.dto';
 import { SetCartFulfilmentDto } from '../dto/set-cart-fulfilment.dto';
 import { UpdateCartItemDto } from '../dto/update-cart-item.dto';
+import { toCartResponse } from '../to-cart-response';
 
 /**
- * The customer’s cart, kept on the server: one store, lines priced by the catalog’s price function, a coupon, the fulfilment, the totals (CRT-API-1, CRT-API-3, SCH-API-2). Every operation answers NOT_IMPLEMENTED (501) until its task lands; the shapes are the contract.
+ * The customer’s cart, kept on the server: one store, lines priced by the catalog’s price function, a coupon, the fulfilment, the totals (CRT-API-1, CRT-API-3, SCH-API-2). The cart and its lines are live (CRT-API-1); the merge, the coupon and the fulfilment answer NOT_IMPLEMENTED (501) until their tasks land, and their shapes are the contract.
  */
 @ApiBearerAuth(BEARER_AUTH_SCHEME)
 @Controller('customer')
 export class CustomerCartController {
+  constructor(
+    private readonly getCartUseCase: GetCartUseCase,
+    private readonly clearCartUseCase: ClearCartUseCase,
+    private readonly addCartItemUseCase: AddCartItemUseCase,
+    private readonly updateCartItemUseCase: UpdateCartItemUseCase,
+    private readonly removeCartItemUseCase: RemoveCartItemUseCase,
+  ) {}
+
   @Get('cart')
   @ApiTags(API_TAGS.customerCart.name)
   @ApiOperation({
     operationId: 'customerGetCart',
     summary: 'My cart',
     description:
-      'Customer app, cart tab and checkout. The cart priced today: a line whose price changed since it was accepted carries a PRICE_CHANGED issue, one that can no longer be ordered as chosen an ITEM_UNAVAILABLE issue; a coupon that stopped applying is removed. An empty cart has no vendor and no lines. Until CRT-API-1 lands: NOT_IMPLEMENTED.',
+      'Customer app, cart tab and checkout. The cart priced today: a line whose price changed since it was accepted carries a PRICE_CHANGED issue, one that can no longer be ordered as chosen an ITEM_UNAVAILABLE issue; a coupon that stopped applying is removed. An empty cart has no vendor and no lines.',
   })
   @ApiOkResponse({
     type: CartResponseDto,
     description: 'The cart.',
   })
-  @ApiErrorResponses(
-    ErrorCode.NOT_IMPLEMENTED,
-    ErrorCode.SERVICE_UNAVAILABLE,
-    ...CUSTOMER_AUTH_ERRORS,
-  )
-  getCart(): Promise<CartResponseDto> {
-    return notImplemented('CRT-API-1');
+  @ApiErrorResponses(ErrorCode.SERVICE_UNAVAILABLE, ...CUSTOMER_AUTH_ERRORS)
+  async getCart(
+    @CurrentUser() user: AuthenticatedUser,
+  ): Promise<CartResponseDto> {
+    return toCartResponse(await this.getCartUseCase.execute(user.userId));
   }
 
   @Delete('cart')
@@ -63,7 +77,7 @@ export class CustomerCartController {
     operationId: 'customerClearCart',
     summary: 'Empty my cart',
     description:
-      'Customer app, "empty cart". Removes every line, the coupon and the fulfilment. ORDERING_PAUSED while orders are paused (`details.messageAr`, `details.messageEn`: the admin’s message). Until CRT-API-1 lands: NOT_IMPLEMENTED.',
+      'Customer app, "empty cart". Removes every line, the coupon and the fulfilment. ORDERING_PAUSED while orders are paused (`details.messageAr`, `details.messageEn`: the admin’s message).',
   })
   @ApiOkResponse({
     type: CartResponseDto,
@@ -72,12 +86,13 @@ export class CustomerCartController {
   @ApiErrorResponses(
     ErrorCode.ORDERING_PAUSED,
     ErrorCode.TRANSACTION_CONFLICT,
-    ErrorCode.NOT_IMPLEMENTED,
     ErrorCode.SERVICE_UNAVAILABLE,
     ...CUSTOMER_AUTH_ERRORS,
   )
-  clearCart(): Promise<CartResponseDto> {
-    return notImplemented('CRT-API-1');
+  async clearCart(
+    @CurrentUser() user: AuthenticatedUser,
+  ): Promise<CartResponseDto> {
+    return toCartResponse(await this.clearCartUseCase.execute(user.userId));
   }
 
   @Post('cart/items')
@@ -87,7 +102,7 @@ export class CustomerCartController {
     operationId: 'customerAddCartItem',
     summary: 'Add to my cart',
     description:
-      'Customer app, product page "add to cart". Prices the selection with the catalog’s rules; the same configuration (size, options, note) adds to its line’s quantity (past 99: VALIDATION_FAILED on `quantity`). A product of another store: CART_VENDOR_MISMATCH (`details.vendorId`, `details.vendorName`: the cart’s store) unless `replaceCart` is true. Selection refusals, in this order: PRODUCT_UNAVAILABLE, OPTION_NOT_IN_PRODUCT, SIZE_UNAVAILABLE, INCOMPATIBLE_CUTTING_PACKAGING, OPTION_REQUIRED. ORDERING_PAUSED while orders are paused (`details.messageAr`, `details.messageEn`: the admin’s message). Until CRT-API-1 lands: NOT_IMPLEMENTED.',
+      'Customer app, product page "add to cart". Prices the selection with the catalog’s rules; the same configuration (size, options, note) adds to its line’s quantity (past 99: VALIDATION_FAILED on `quantity`). A product of another store: CART_VENDOR_MISMATCH (`details.vendorId`, `details.vendorName`: the cart’s store) unless `replaceCart` is true. Selection refusals, in this order: PRODUCT_UNAVAILABLE, OPTION_NOT_IN_PRODUCT, SIZE_UNAVAILABLE, INCOMPATIBLE_CUTTING_PACKAGING, OPTION_REQUIRED. ORDERING_PAUSED while orders are paused (`details.messageAr`, `details.messageEn`: the admin’s message).',
   })
   @ApiOkResponse({
     type: CartResponseDto,
@@ -103,12 +118,30 @@ export class CustomerCartController {
     ErrorCode.CART_VENDOR_MISMATCH,
     ErrorCode.ORDERING_PAUSED,
     ErrorCode.TRANSACTION_CONFLICT,
-    ErrorCode.NOT_IMPLEMENTED,
     ErrorCode.SERVICE_UNAVAILABLE,
     ...CUSTOMER_AUTH_ERRORS,
   )
-  addCartItem(@Body() body: AddCartItemDto): Promise<CartResponseDto> {
-    return notImplemented('CRT-API-1', body);
+  async addCartItem(
+    @CurrentUser() user: AuthenticatedUser,
+    @Body() body: AddCartItemDto,
+  ): Promise<CartResponseDto> {
+    return toCartResponse(
+      await this.addCartItemUseCase.execute(
+        user.userId,
+        {
+          choice: {
+            productId: body.productId,
+            sizeId: body.sizeId,
+            cuttingStyleId: body.cuttingStyleId ?? null,
+            packaging: body.packaging ?? null,
+            exclusionItemIds: [...new Set(body.exclusionItemIds ?? [])].sort(),
+            notes: body.notes ?? null,
+          },
+          quantity: body.quantity,
+        },
+        body.replaceCart ?? false,
+      ),
+    );
   }
 
   @Patch('cart/items/:id')
@@ -117,7 +150,7 @@ export class CustomerCartController {
     operationId: 'customerUpdateCartItem',
     summary: 'Change a line’s quantity',
     description:
-      'Customer app, cart stepper; also how the customer accepts a changed price (send the same quantity). NOT_FOUND for a line not in the cart. ORDERING_PAUSED while orders are paused (`details.messageAr`, `details.messageEn`: the admin’s message). Until CRT-API-1 lands: NOT_IMPLEMENTED.',
+      'Customer app, cart stepper; also how the customer accepts a changed price (send the same quantity). NOT_FOUND for a line not in the cart. ORDERING_PAUSED while orders are paused (`details.messageAr`, `details.messageEn`: the admin’s message).',
   })
   @ApiOkResponse({
     type: CartResponseDto,
@@ -130,15 +163,21 @@ export class CustomerCartController {
     ErrorCode.SIZE_UNAVAILABLE,
     ErrorCode.ORDERING_PAUSED,
     ErrorCode.TRANSACTION_CONFLICT,
-    ErrorCode.NOT_IMPLEMENTED,
     ErrorCode.SERVICE_UNAVAILABLE,
     ...CUSTOMER_AUTH_ERRORS,
   )
-  updateCartItem(
+  async updateCartItem(
+    @CurrentUser() user: AuthenticatedUser,
     @Param() params: IdParamDto,
     @Body() body: UpdateCartItemDto,
   ): Promise<CartResponseDto> {
-    return notImplemented('CRT-API-1', params, body);
+    return toCartResponse(
+      await this.updateCartItemUseCase.execute(
+        user.userId,
+        params.id,
+        body.quantity,
+      ),
+    );
   }
 
   @Delete('cart/items/:id')
@@ -147,7 +186,7 @@ export class CustomerCartController {
     operationId: 'customerRemoveCartItem',
     summary: 'Remove a line',
     description:
-      'Customer app, cart swipe or remove. NOT_FOUND for a line not in the cart. ORDERING_PAUSED while orders are paused (`details.messageAr`, `details.messageEn`: the admin’s message). Until CRT-API-1 lands: NOT_IMPLEMENTED.',
+      'Customer app, cart swipe or remove. NOT_FOUND for a line not in the cart. ORDERING_PAUSED while orders are paused (`details.messageAr`, `details.messageEn`: the admin’s message).',
   })
   @ApiOkResponse({
     type: CartResponseDto,
@@ -158,12 +197,16 @@ export class CustomerCartController {
     ErrorCode.NOT_FOUND,
     ErrorCode.ORDERING_PAUSED,
     ErrorCode.TRANSACTION_CONFLICT,
-    ErrorCode.NOT_IMPLEMENTED,
     ErrorCode.SERVICE_UNAVAILABLE,
     ...CUSTOMER_AUTH_ERRORS,
   )
-  removeCartItem(@Param() params: IdParamDto): Promise<CartResponseDto> {
-    return notImplemented('CRT-API-1', params);
+  async removeCartItem(
+    @CurrentUser() user: AuthenticatedUser,
+    @Param() params: IdParamDto,
+  ): Promise<CartResponseDto> {
+    return toCartResponse(
+      await this.removeCartItemUseCase.execute(user.userId, params.id),
+    );
   }
 
   @Post('cart/merge')

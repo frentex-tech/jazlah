@@ -43,5 +43,6 @@ What exists, by area. Before writing anything, read this index, then open the ar
 - **catalog** — `.claude/registry/catalog.md` — `CatalogModule`.
 - **time** — `.claude/registry/time.md` — `RiyadhCalendar` (the Riyadh business calendar) and the injectable `Clock`.
 - **settings** — `.claude/registry/settings.md` — `SettingsModule`: the operations settings.
+- **cart** — `.claude/registry/cart.md` — `CartModule`: the server cart.
 - **customers** — `.claude/registry/customers.md` — `CustomersModule`: profiles, marketing consent, addresses.
 - **coverage** — `.claude/registry/coverage.md` — `CoverageModule`: delivery zones, `CoverageService` (is a point covered).

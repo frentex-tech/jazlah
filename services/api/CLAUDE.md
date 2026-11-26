@@ -37,6 +37,8 @@ Always loaded: the registry index (imported at the end; its area files are not) 
 4. The always-loaded instructions are still under the limit (`pnpm instructions:check`).
 5. The report has: **Changed** (files, and what you searched for first), **Evidence** (each command with its real result, failures quoted), **Not verified** (and why; "nothing" only if true), **Assumptions**, **Suggestions**, **Registry and decisions**.
 
+**Merge:** a change to `openapi.json` ships both regenerated clients in the same pull request (`pnpm api:generate` in `apps/dashboard`, `apps/mobile/scripts/gen-api-client.sh`), and merges only when every check on the pull request is green: API CI, Dashboard CI, Mobile CI and the policy check (DECISIONS.md, Sprint 3 order).
+
 **Review:** after finishing a module and before asking for merge, run `/api-review` (a separate read-only reviewer) and pass its report on unedited.
 
 ## Commands (from `services/api/`; CI runs the same list)

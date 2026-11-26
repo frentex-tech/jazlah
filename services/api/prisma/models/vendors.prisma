@@ -64,7 +64,7 @@ model Vendor {
   /// asked. The city name as typed, 2 to 50 characters (check constraint
   /// `vendors_city_check`); only an admin changes it. Public.
   city                         String?
-  isPlatform                  Boolean      @default(false) @map("is_platform")
+  isPlatform                   Boolean      @default(false) @map("is_platform")
   status                       VendorStatus @default(active)
   /// Nullable: null while the vendor is active (check constraint `vendors_suspension_check`).
   suspendedAt                  DateTime?    @map("suspended_at") @db.Timestamptz(3)
@@ -102,6 +102,8 @@ model Vendor {
   commissionChanges VendorCommissionChange[]
   access            UserAccess[]
   products          Product[]
+
+  carts Cart[]
 
   @@unique([applicationId], map: "vendors_application_id_key")
   /// One vendor per commercial registration number (null for the platform vendor).

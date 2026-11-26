@@ -57,6 +57,31 @@ export class Money {
     return Money.of(this.halalas * quantity);
   }
 
+  /**
+   * This amount × `numerator` / `denominator`, rounded half up to the halala: the VAT
+   * inside a price that includes it is `total.multiplyByFraction(15, 115)`. Both are
+   * whole numbers, the numerator zero or more and the denominator more than zero;
+   * otherwise RangeError. Integer arithmetic only, so no halala is lost to a float.
+   */
+  multiplyByFraction(numerator: number, denominator: number): Money {
+    if (
+      !Number.isSafeInteger(numerator) ||
+      numerator < 0 ||
+      !Number.isSafeInteger(denominator) ||
+      denominator <= 0
+    ) {
+      throw new RangeError(
+        `A fraction is a whole numerator, zero or more, over a whole denominator above zero: ${numerator}/${denominator}`,
+      );
+    }
+    const doubled = 2 * this.halalas * numerator + denominator;
+    if (!Number.isSafeInteger(doubled)) {
+      throw new RangeError(`Out of range: ${this.halalas} × ${numerator}`);
+    }
+    // floor(x + 1/2) of x = halalas × numerator / denominator: half rounds up.
+    return Money.of(Math.floor(doubled / (2 * denominator)));
+  }
+
   /** -1, 0 or 1 as this amount is less than, equal to or more than `other`. */
   compare(other: Money): -1 | 0 | 1 {
     if (this.halalas === other.halalas) {

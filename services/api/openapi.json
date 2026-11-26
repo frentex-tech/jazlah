@@ -10428,7 +10428,7 @@
     },
     "/v1/customer/cart": {
       "get": {
-        "description": "Customer app, cart tab and checkout. The cart priced today: a line whose price changed since it was accepted carries a PRICE_CHANGED issue, one that can no longer be ordered as chosen an ITEM_UNAVAILABLE issue; a coupon that stopped applying is removed. An empty cart has no vendor and no lines. Until CRT-API-1 lands: NOT_IMPLEMENTED.",
+        "description": "Customer app, cart tab and checkout. The cart priced today: a line whose price changed since it was accepted carries a PRICE_CHANGED issue, one that can no longer be ordered as chosen an ITEM_UNAVAILABLE issue; a coupon that stopped applying is removed. An empty cart has no vendor and no lines.",
         "operationId": "customerGetCart",
         "parameters": [],
         "responses": {
@@ -10482,16 +10482,6 @@
               }
             }
           },
-          "501": {
-            "description": "Error. code: NOT_IMPLEMENTED.",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ErrorResponseDto"
-                }
-              }
-            }
-          },
           "503": {
             "description": "Error. code: SERVICE_UNAVAILABLE.",
             "content": {
@@ -10514,7 +10504,7 @@
         ]
       },
       "delete": {
-        "description": "Customer app, \"empty cart\". Removes every line, the coupon and the fulfilment. ORDERING_PAUSED while orders are paused (`details.messageAr`, `details.messageEn`: the admin’s message). Until CRT-API-1 lands: NOT_IMPLEMENTED.",
+        "description": "Customer app, \"empty cart\". Removes every line, the coupon and the fulfilment. ORDERING_PAUSED while orders are paused (`details.messageAr`, `details.messageEn`: the admin’s message).",
         "operationId": "customerClearCart",
         "parameters": [],
         "responses": {
@@ -10578,16 +10568,6 @@
               }
             }
           },
-          "501": {
-            "description": "Error. code: NOT_IMPLEMENTED.",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ErrorResponseDto"
-                }
-              }
-            }
-          },
           "503": {
             "description": "Error. code: SERVICE_UNAVAILABLE.",
             "content": {
@@ -10612,7 +10592,7 @@
     },
     "/v1/customer/cart/items": {
       "post": {
-        "description": "Customer app, product page \"add to cart\". Prices the selection with the catalog’s rules; the same configuration (size, options, note) adds to its line’s quantity (past 99: VALIDATION_FAILED on `quantity`). A product of another store: CART_VENDOR_MISMATCH (`details.vendorId`, `details.vendorName`: the cart’s store) unless `replaceCart` is true. Selection refusals, in this order: PRODUCT_UNAVAILABLE, OPTION_NOT_IN_PRODUCT, SIZE_UNAVAILABLE, INCOMPATIBLE_CUTTING_PACKAGING, OPTION_REQUIRED. ORDERING_PAUSED while orders are paused (`details.messageAr`, `details.messageEn`: the admin’s message). Until CRT-API-1 lands: NOT_IMPLEMENTED.",
+        "description": "Customer app, product page \"add to cart\". Prices the selection with the catalog’s rules; the same configuration (size, options, note) adds to its line’s quantity (past 99: VALIDATION_FAILED on `quantity`). A product of another store: CART_VENDOR_MISMATCH (`details.vendorId`, `details.vendorName`: the cart’s store) unless `replaceCart` is true. Selection refusals, in this order: PRODUCT_UNAVAILABLE, OPTION_NOT_IN_PRODUCT, SIZE_UNAVAILABLE, INCOMPATIBLE_CUTTING_PACKAGING, OPTION_REQUIRED. ORDERING_PAUSED while orders are paused (`details.messageAr`, `details.messageEn`: the admin’s message).",
         "operationId": "customerAddCartItem",
         "parameters": [],
         "requestBody": {
@@ -10706,16 +10686,6 @@
               }
             }
           },
-          "501": {
-            "description": "Error. code: NOT_IMPLEMENTED.",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ErrorResponseDto"
-                }
-              }
-            }
-          },
           "503": {
             "description": "Error. code: SERVICE_UNAVAILABLE.",
             "content": {
@@ -10740,7 +10710,7 @@
     },
     "/v1/customer/cart/items/{id}": {
       "patch": {
-        "description": "Customer app, cart stepper; also how the customer accepts a changed price (send the same quantity). NOT_FOUND for a line not in the cart. ORDERING_PAUSED while orders are paused (`details.messageAr`, `details.messageEn`: the admin’s message). Until CRT-API-1 lands: NOT_IMPLEMENTED.",
+        "description": "Customer app, cart stepper; also how the customer accepts a changed price (send the same quantity). NOT_FOUND for a line not in the cart. ORDERING_PAUSED while orders are paused (`details.messageAr`, `details.messageEn`: the admin’s message).",
         "operationId": "customerUpdateCartItem",
         "parameters": [
           {
@@ -10846,16 +10816,6 @@
               }
             }
           },
-          "501": {
-            "description": "Error. code: NOT_IMPLEMENTED.",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ErrorResponseDto"
-                }
-              }
-            }
-          },
           "503": {
             "description": "Error. code: SERVICE_UNAVAILABLE.",
             "content": {
@@ -10878,7 +10838,7 @@
         ]
       },
       "delete": {
-        "description": "Customer app, cart swipe or remove. NOT_FOUND for a line not in the cart. ORDERING_PAUSED while orders are paused (`details.messageAr`, `details.messageEn`: the admin’s message). Until CRT-API-1 lands: NOT_IMPLEMENTED.",
+        "description": "Customer app, cart swipe or remove. NOT_FOUND for a line not in the cart. ORDERING_PAUSED while orders are paused (`details.messageAr`, `details.messageEn`: the admin’s message).",
         "operationId": "customerRemoveCartItem",
         "parameters": [
           {
@@ -10966,16 +10926,6 @@
           },
           "500": {
             "description": "Error. code: INTERNAL_ERROR.",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ErrorResponseDto"
-                }
-              }
-            }
-          },
-          "501": {
-            "description": "Error. code: NOT_IMPLEMENTED.",
             "content": {
               "application/json": {
                 "schema": {
