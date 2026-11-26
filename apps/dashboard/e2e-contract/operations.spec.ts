@@ -80,31 +80,8 @@ test('the pause: read from the client settings on every admin page, set on its o
   await expect(headerSwitch(page)).not.toBeChecked();
 });
 
-for (const [locale, title, body] of [
-  ['ar', 'قريبًا', 'هذه الخدمة غير متاحة بعد'],
-  ['en', 'Coming soon', "This isn't available yet"],
-] as const) {
-  test(`501 NOT_IMPLEMENTED shows «coming soon», never data (${locale})`, async ({ page, api }) => {
-    api.on('get', '/v1/public/settings/client', 501, notImplemented('SCH-API-1'));
-    api.on('get', '/v1/admin/settings/operations', 501, notImplemented('SCH-API-1'));
-    await page.goto(`${locale === 'en' ? '/en' : ''}/admin/settings/operations`);
-    const state = page.getByRole('status').filter({ hasText: title });
-    await expect(state).toContainText(body);
-    await expect(page.getByRole('region')).toHaveCount(0); // no pause card, no form
-    await expect(page.getByRole('banner').getByRole('switch')).toHaveCount(0); // the header switch needs the pause read
-  });
-}
-
-test('a save answered 501 says coming soon and keeps the edits', async ({ page, api }) => {
-  api.on('get', '/v1/admin/settings/operations', 200, settings());
-  api.on('patch', '/v1/admin/settings/operations', 501, notImplemented('SCH-API-1'));
-  await page.goto('/admin/settings/operations');
-  await page.getByLabel('الحد الأقصى للطلبات يوميًا').fill('55');
-  await page.getByRole('button', { name: 'حفظ التغييرات' }).click();
-  await toast(page, 'هذا الإجراء غير متاح بعد، سيعمل قريبًا.');
-  await expect(page.getByRole('status').getByText('تم حفظ الإعدادات التشغيلية')).toHaveCount(0);
-  await expect(page.getByLabel('الحد الأقصى للطلبات يوميًا')).toHaveValue('55'); // the draft stays, nothing pretends to be saved
-});
+// SCH-API-1 is live (#325): its routes no longer answer 501, so the «coming soon» state is proven on
+// the capacity routes below, which are still stubs.
 
 test('PERMISSION_DENIED shows not allowed and keeps the session', async ({ page, api }) => {
   api.on('get', '/v1/admin/settings/operations', 403, error('PERMISSION_DENIED'));
