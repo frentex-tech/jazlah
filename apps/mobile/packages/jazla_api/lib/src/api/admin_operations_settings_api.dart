@@ -21,7 +21,7 @@ class AdminOperationsSettingsApi {
   const AdminOperationsSettingsApi(this._dio);
 
   /// The operations settings
-  /// Admin dashboard, operations page. Until SCH-API-1 lands: NOT_IMPLEMENTED.
+  /// Admin dashboard, operations page.
   ///
   /// Parameters:
   /// * [cancelToken] - A [CancelToken] that can be used to cancel the operation
@@ -96,7 +96,7 @@ _responseData = rawData == null ? null : deserialize<OperationsSettingsResponseD
   }
 
   /// Pause or resume new orders
-  /// Admin dashboard, the pause switch. Pausing makes every cart change and checkout call answer ORDERING_PAUSED with the message; orders already placed carry on. Until SCH-API-1 lands: NOT_IMPLEMENTED.
+  /// Admin dashboard, the pause switch. Pausing makes every cart change and checkout call answer ORDERING_PAUSED with the message; orders already placed carry on.
   ///
   /// Parameters:
   /// * [setOrderingPauseDto] 
@@ -191,7 +191,7 @@ _responseData = rawData == null ? null : deserialize<OperationsSettingsResponseD
   }
 
   /// Change the operations settings
-  /// Admin dashboard, operations page \&quot;save\&quot;: only the keys sent change (a stale tab cannot undo another change it did not send); the pause is not here. A closed day added in the past: VALIDATION_FAILED &#x60;notPast&#x60; on &#x60;closedDays.&lt;i&gt;.date&#x60;; a window ending before it starts: &#x60;endBeforeStart&#x60;. The next cart and checkout reads use the new values. Until SCH-API-1 lands: NOT_IMPLEMENTED.
+  /// Admin dashboard, operations page \&quot;save\&quot;: only the keys sent change (a stale tab cannot undo another change it did not send); the pause is not here. A closed day added in the past: VALIDATION_FAILED &#x60;notPast&#x60; on &#x60;closedDays.&lt;i&gt;.date&#x60;; a window ending before it starts: &#x60;endBeforeStart&#x60;. The next cart and checkout reads use the new values.
   ///
   /// Parameters:
   /// * [updateOperationsSettingsDto] 
