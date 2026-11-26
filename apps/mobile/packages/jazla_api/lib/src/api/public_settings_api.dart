@@ -19,7 +19,7 @@ class PublicSettingsApi {
   const PublicSettingsApi(this._dio);
 
   /// Settings for the apps
-  /// Customer app (cart, checkout) and the dashboard’s pause banner: delivery window, booking horizon, minimum order, delivery fee, cash on delivery and the pause. Public; cache for a minute at most. Until SCH-API-1 lands: NOT_IMPLEMENTED.
+  /// Customer app (cart, checkout) and the dashboard’s pause banner: delivery window, booking horizon, minimum order, delivery fee, cash on delivery and the pause. Public; cache for a minute at most.
   ///
   /// Parameters:
   /// * [cancelToken] - A [CancelToken] that can be used to cancel the operation
