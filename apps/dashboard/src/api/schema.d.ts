@@ -16003,7 +16003,7 @@ export interface operations {
                     "application/json": components["schemas"]["ErrorResponseDto"];
                 };
             };
-            /** @description Error. code: FORBIDDEN. */
+            /** @description Error. code: ACCOUNT_DISABLED, FORBIDDEN. */
             403: {
                 headers: {
                     [name: string]: unknown;
