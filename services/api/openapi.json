@@ -9747,139 +9747,6 @@
         "security": []
       }
     },
-    "/v1/customer/checkout/days": {
-      "get": {
-        "description": "Customer app, checkout day picker. Every day of the booking horizon from today (Riyadh), for the cart’s store and kinds of order: the cut-offs and lead days, closed days, the store’s capacity and, for pickup, its hours decide each day. Refetch after changing the method or the address. Unpaid orders past `expiresAt` no longer count against a day. CART_EMPTY for an empty cart; FULFILMENT_NOT_SUPPORTED when the cart’s products do not allow the method. ORDERING_PAUSED while orders are paused (`details.messageAr`, `details.messageEn`: the admin’s message). Until SCH-API-2 lands: NOT_IMPLEMENTED.",
-        "operationId": "customerListCheckoutDays",
-        "parameters": [
-          {
-            "name": "method",
-            "required": true,
-            "in": "query",
-            "description": "`delivery` or `pickup`.",
-            "schema": {
-              "example": "delivery",
-              "allOf": [
-                {
-                  "$ref": "#/components/schemas/FulfilmentMethod"
-                }
-              ]
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "The days.",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/CheckoutDayListResponseDto"
-                }
-              }
-            }
-          },
-          "400": {
-            "description": "Error. code: VALIDATION_FAILED.",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ErrorResponseDto"
-                }
-              }
-            }
-          },
-          "401": {
-            "description": "Error. code: UNAUTHORIZED, ACCESS_TOKEN_EXPIRED.",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ErrorResponseDto"
-                }
-              }
-            }
-          },
-          "403": {
-            "description": "Error. code: FORBIDDEN.",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ErrorResponseDto"
-                }
-              }
-            }
-          },
-          "409": {
-            "description": "Error. code: CART_EMPTY, ORDERING_PAUSED.",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ErrorResponseDto"
-                }
-              }
-            }
-          },
-          "422": {
-            "description": "Error. code: FULFILMENT_NOT_SUPPORTED.",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ErrorResponseDto"
-                }
-              }
-            }
-          },
-          "429": {
-            "description": "Error. code: RATE_LIMITED.",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ErrorResponseDto"
-                }
-              }
-            }
-          },
-          "500": {
-            "description": "Error. code: INTERNAL_ERROR.",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ErrorResponseDto"
-                }
-              }
-            }
-          },
-          "501": {
-            "description": "Error. code: NOT_IMPLEMENTED.",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ErrorResponseDto"
-                }
-              }
-            }
-          },
-          "503": {
-            "description": "Error. code: SERVICE_UNAVAILABLE.",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ErrorResponseDto"
-                }
-              }
-            }
-          }
-        },
-        "security": [
-          {
-            "bearer": []
-          }
-        ],
-        "summary": "Days I can choose",
-        "tags": [
-          "Customer scheduling"
-        ]
-      }
-    },
     "/v1/admin/vendors/{id}/capacity": {
       "get": {
         "description": "Admin dashboard, vendor screen, capacity tab: the vendor’s daily limits and every day of the booking horizon with its own limits and what is booked. NOT_FOUND for an unknown vendor. Until SCH-API-2 lands: NOT_IMPLEMENTED.",
@@ -11300,7 +11167,7 @@
     },
     "/v1/customer/cart/fulfilment": {
       "patch": {
-        "description": "Customer app, checkout first step. Refusals: CART_EMPTY; FULFILMENT_NOT_SUPPORTED (a product of the cart does not allow the method); NOT_FOUND (not one of the customer’s addresses); ADDRESS_NOT_COVERED (outside every active zone); DAY_FULL; DAY_NOT_AVAILABLE (`details.reason`: PAST_CUTOFF, CLOSED, OUTSIDE_HORIZON or VENDOR_CLOSED). The capacity is reserved when the order is placed, not here. ORDERING_PAUSED while orders are paused (`details.messageAr`, `details.messageEn`: the admin’s message). Until SCH-API-2 lands: NOT_IMPLEMENTED.",
+        "description": "Customer app, checkout first step. Refusals: CART_EMPTY; FULFILMENT_NOT_SUPPORTED (a product of the cart does not allow the method); NOT_FOUND (not one of the customer’s addresses); ADDRESS_NOT_COVERED (outside every active zone); DAY_FULL; DAY_NOT_AVAILABLE (`details.reason`: PAST_CUTOFF, CLOSED, OUTSIDE_HORIZON or VENDOR_CLOSED). The capacity is reserved when the order is placed, not here. ORDERING_PAUSED while orders are paused (`details.messageAr`, `details.messageEn`: the admin’s message).",
         "operationId": "customerSetCartFulfilment",
         "parameters": [],
         "requestBody": {
@@ -11396,16 +11263,6 @@
           },
           "500": {
             "description": "Error. code: INTERNAL_ERROR.",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ErrorResponseDto"
-                }
-              }
-            }
-          },
-          "501": {
-            "description": "Error. code: NOT_IMPLEMENTED.",
             "content": {
               "application/json": {
                 "schema": {
@@ -13939,9 +13796,132 @@
         ]
       }
     },
+    "/v1/customer/checkout/days": {
+      "get": {
+        "description": "Customer app, checkout day picker. Every day of the booking horizon from today (Riyadh), for the cart’s store and kinds of order: the cut-offs and lead days, closed days, the store’s capacity and, for pickup, its hours decide each day. Refetch after changing the method or the address. Unpaid orders past `expiresAt` no longer count against a day. CART_EMPTY for an empty cart; FULFILMENT_NOT_SUPPORTED when the cart’s products do not allow the method. ORDERING_PAUSED while orders are paused (`details.messageAr`, `details.messageEn`: the admin’s message).",
+        "operationId": "customerListCheckoutDays",
+        "parameters": [
+          {
+            "name": "method",
+            "required": true,
+            "in": "query",
+            "description": "`delivery` or `pickup`.",
+            "schema": {
+              "example": "delivery",
+              "allOf": [
+                {
+                  "$ref": "#/components/schemas/FulfilmentMethod"
+                }
+              ]
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "The days.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CheckoutDayListResponseDto"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Error. code: VALIDATION_FAILED.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Error. code: UNAUTHORIZED, ACCESS_TOKEN_EXPIRED.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Error. code: FORBIDDEN.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Error. code: CART_EMPTY, ORDERING_PAUSED.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Error. code: FULFILMENT_NOT_SUPPORTED.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Error. code: RATE_LIMITED.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Error. code: INTERNAL_ERROR.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "Error. code: SERVICE_UNAVAILABLE.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Days I can choose",
+        "tags": [
+          "Customer scheduling"
+        ]
+      }
+    },
     "/v1/customer/checkout/payment-methods": {
       "get": {
-        "description": "Customer app, checkout payment step (or paying an unpaid order again with `orderId`): the methods for the cart’s (or the order’s) total and kinds, and the wallet balance. NOT_FOUND for an order that is not the customer’s; ORDER_NOT_PAYABLE for one no longer waiting for payment; CART_EMPTY without `orderId` and an empty cart. Until PAY-API-1 lands: NOT_IMPLEMENTED.",
+        "description": "Customer app, checkout payment step (or paying an unpaid order again with `orderId`): the methods for the cart’s (or the order’s) total and kinds, and the wallet balance. NOT_FOUND for an order that is not the customer’s; ORDER_NOT_PAYABLE for one no longer waiting for payment; CART_EMPTY without `orderId` and an empty cart. Sprint 3 lists cash on delivery only, with a wallet balance of 0; paying again with `orderId` answers NOT_IMPLEMENTED until PAY-API-1 lands.",
         "operationId": "customerListPaymentMethods",
         "parameters": [
           {
@@ -19089,72 +19069,6 @@
           "paused"
         ]
       },
-      "FulfilmentMethod": {
-        "type": "string",
-        "enum": [
-          "delivery",
-          "pickup"
-        ]
-      },
-      "CheckoutDayResponseDto": {
-        "type": "object",
-        "properties": {
-          "date": {
-            "type": "string",
-            "example": "2026-11-24",
-            "description": "The day, Riyadh calendar `yyyy-MM-dd`."
-          },
-          "isAvailable": {
-            "type": "boolean",
-            "example": true,
-            "description": "Whether it can be chosen; `false`: shown disabled with `reason`."
-          },
-          "reason": {
-            "type": "string",
-            "enum": [
-              "PAST_CUTOFF",
-              "CLOSED",
-              "FULL",
-              "OUTSIDE_HORIZON",
-              "VENDOR_CLOSED"
-            ],
-            "nullable": true,
-            "example": "FULL",
-            "description": "Why not, when `isAvailable` is false; null otherwise."
-          },
-          "window": {
-            "nullable": true,
-            "description": "The delivery window (delivery) or the store’s hours that day (pickup); null when unavailable.",
-            "type": "object",
-            "allOf": [
-              {
-                "$ref": "#/components/schemas/TimeWindowDto"
-              }
-            ]
-          }
-        },
-        "required": [
-          "date",
-          "isAvailable",
-          "reason",
-          "window"
-        ]
-      },
-      "CheckoutDayListResponseDto": {
-        "type": "object",
-        "properties": {
-          "items": {
-            "description": "The days, today first.",
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/CheckoutDayResponseDto"
-            }
-          }
-        },
-        "required": [
-          "items"
-        ]
-      },
       "VendorCapacityDayResponseDto": {
         "type": "object",
         "properties": {
@@ -19484,6 +19398,14 @@
           "code",
           "discountHalalas"
         ]
+      },
+      "FulfilmentMethod": {
+        "type": "string",
+        "enum": [
+          "delivery",
+          "pickup"
+        ],
+        "description": "Delivered or picked up."
       },
       "PickupPointResponseDto": {
         "type": "object",
@@ -21334,6 +21256,65 @@
         },
         "required": [
           "to"
+        ]
+      },
+      "CheckoutDayResponseDto": {
+        "type": "object",
+        "properties": {
+          "date": {
+            "type": "string",
+            "example": "2026-11-24",
+            "description": "The day, Riyadh calendar `yyyy-MM-dd`."
+          },
+          "isAvailable": {
+            "type": "boolean",
+            "example": true,
+            "description": "Whether it can be chosen; `false`: shown disabled with `reason`."
+          },
+          "reason": {
+            "type": "string",
+            "enum": [
+              "PAST_CUTOFF",
+              "CLOSED",
+              "FULL",
+              "OUTSIDE_HORIZON",
+              "VENDOR_CLOSED"
+            ],
+            "nullable": true,
+            "example": "FULL",
+            "description": "Why not, when `isAvailable` is false; null otherwise."
+          },
+          "window": {
+            "nullable": true,
+            "description": "The delivery window (delivery) or the store’s hours that day (pickup); null when unavailable.",
+            "type": "object",
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/TimeWindowDto"
+              }
+            ]
+          }
+        },
+        "required": [
+          "date",
+          "isAvailable",
+          "reason",
+          "window"
+        ]
+      },
+      "CheckoutDayListResponseDto": {
+        "type": "object",
+        "properties": {
+          "items": {
+            "description": "The days, today first.",
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/CheckoutDayResponseDto"
+            }
+          }
+        },
+        "required": [
+          "items"
         ]
       },
       "PaymentMethodOptionResponseDto": {

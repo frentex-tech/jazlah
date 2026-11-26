@@ -1,6 +1,6 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { TimeWindowDto } from '@common/dto/time-window.dto';
-import { DAY_UNAVAILABLE_REASONS } from '../day-unavailable-reasons.constants';
+import { DAY_UNAVAILABLE_REASONS } from '@modules/scheduling';
 
 /** One day of the booking horizon, and whether the cart can be fulfilled on it. */
 export class CheckoutDayResponseDto {

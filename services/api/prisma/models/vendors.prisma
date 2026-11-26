@@ -103,7 +103,8 @@ model Vendor {
   access            UserAccess[]
   products          Product[]
 
-  carts Cart[]
+  carts         Cart[]
+  dayCapacities DayCapacity[]
 
   @@unique([applicationId], map: "vendors_application_id_key")
   /// One vendor per commercial registration number (null for the platform vendor).

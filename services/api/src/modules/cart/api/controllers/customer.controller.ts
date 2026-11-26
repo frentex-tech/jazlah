@@ -28,6 +28,7 @@ import { AddCartItemUseCase } from '../../application/add-cart-item.use-case';
 import { ClearCartUseCase } from '../../application/clear-cart.use-case';
 import { GetCartUseCase } from '../../application/get-cart.use-case';
 import { RemoveCartItemUseCase } from '../../application/remove-cart-item.use-case';
+import { SetCartFulfilmentUseCase } from '../../application/set-cart-fulfilment.use-case';
 import { UpdateCartItemUseCase } from '../../application/update-cart-item.use-case';
 import { AddCartItemDto } from '../dto/add-cart-item.dto';
 import { ApplyCouponDto } from '../dto/apply-coupon.dto';
@@ -39,7 +40,7 @@ import { UpdateCartItemDto } from '../dto/update-cart-item.dto';
 import { toCartResponse } from '../to-cart-response';
 
 /**
- * The customer’s cart, kept on the server: one store, lines priced by the catalog’s price function, a coupon, the fulfilment, the totals (CRT-API-1, CRT-API-3, SCH-API-2). The cart and its lines are live (CRT-API-1); the merge, the coupon and the fulfilment answer NOT_IMPLEMENTED (501) until their tasks land, and their shapes are the contract.
+ * The customer’s cart, kept on the server: one store, lines priced by the catalog’s price function, a coupon, the fulfilment, the totals (CRT-API-1, CRT-API-3, SCH-API-2). The cart and its lines are live (CRT-API-1); the fulfilment is live (SCH-API-2); the merge and the coupon answer NOT_IMPLEMENTED (501) until their tasks land, and their shapes are the contract.
  */
 @ApiBearerAuth(BEARER_AUTH_SCHEME)
 @Controller('customer')
@@ -50,6 +51,7 @@ export class CustomerCartController {
     private readonly addCartItemUseCase: AddCartItemUseCase,
     private readonly updateCartItemUseCase: UpdateCartItemUseCase,
     private readonly removeCartItemUseCase: RemoveCartItemUseCase,
+    private readonly setCartFulfilmentUseCase: SetCartFulfilmentUseCase,
   ) {}
 
   @Get('cart')
@@ -294,7 +296,7 @@ export class CustomerCartController {
     operationId: 'customerSetCartFulfilment',
     summary: 'Choose delivery or pickup, and the day',
     description:
-      'Customer app, checkout first step. Refusals: CART_EMPTY; FULFILMENT_NOT_SUPPORTED (a product of the cart does not allow the method); NOT_FOUND (not one of the customer’s addresses); ADDRESS_NOT_COVERED (outside every active zone); DAY_FULL; DAY_NOT_AVAILABLE (`details.reason`: PAST_CUTOFF, CLOSED, OUTSIDE_HORIZON or VENDOR_CLOSED). The capacity is reserved when the order is placed, not here. ORDERING_PAUSED while orders are paused (`details.messageAr`, `details.messageEn`: the admin’s message). Until SCH-API-2 lands: NOT_IMPLEMENTED.',
+      'Customer app, checkout first step. Refusals: CART_EMPTY; FULFILMENT_NOT_SUPPORTED (a product of the cart does not allow the method); NOT_FOUND (not one of the customer’s addresses); ADDRESS_NOT_COVERED (outside every active zone); DAY_FULL; DAY_NOT_AVAILABLE (`details.reason`: PAST_CUTOFF, CLOSED, OUTSIDE_HORIZON or VENDOR_CLOSED). The capacity is reserved when the order is placed, not here. ORDERING_PAUSED while orders are paused (`details.messageAr`, `details.messageEn`: the admin’s message).',
   })
   @ApiOkResponse({
     type: CartResponseDto,
@@ -310,13 +312,19 @@ export class CustomerCartController {
     ErrorCode.DAY_NOT_AVAILABLE,
     ErrorCode.ORDERING_PAUSED,
     ErrorCode.TRANSACTION_CONFLICT,
-    ErrorCode.NOT_IMPLEMENTED,
     ErrorCode.SERVICE_UNAVAILABLE,
     ...CUSTOMER_AUTH_ERRORS,
   )
-  setCartFulfilment(
+  async setCartFulfilment(
+    @CurrentUser() user: AuthenticatedUser,
     @Body() body: SetCartFulfilmentDto,
   ): Promise<CartResponseDto> {
-    return notImplemented('SCH-API-2', body);
+    return toCartResponse(
+      await this.setCartFulfilmentUseCase.execute(user.userId, {
+        method: body.method,
+        addressId: body.method === 'delivery' ? (body.addressId ?? null) : null,
+        date: body.date,
+      }),
+    );
   }
 }

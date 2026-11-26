@@ -122,7 +122,7 @@ _responseData = rawData == null ? null : deserialize<OrderWithPaymentResponseDto
   }
 
   /// How I can pay
-  /// Customer app, checkout payment step (or paying an unpaid order again with &#x60;orderId&#x60;): the methods for the cart’s (or the order’s) total and kinds, and the wallet balance. NOT_FOUND for an order that is not the customer’s; ORDER_NOT_PAYABLE for one no longer waiting for payment; CART_EMPTY without &#x60;orderId&#x60; and an empty cart. Until PAY-API-1 lands: NOT_IMPLEMENTED.
+  /// Customer app, checkout payment step (or paying an unpaid order again with &#x60;orderId&#x60;): the methods for the cart’s (or the order’s) total and kinds, and the wallet balance. NOT_FOUND for an order that is not the customer’s; ORDER_NOT_PAYABLE for one no longer waiting for payment; CART_EMPTY without &#x60;orderId&#x60; and an empty cart. Sprint 3 lists cash on delivery only, with a wallet balance of 0; paying again with &#x60;orderId&#x60; answers NOT_IMPLEMENTED until PAY-API-1 lands.
   ///
   /// Parameters:
   /// * [orderId] - An unpaid order of the customer (UUID), to pay again; left out: the cart.

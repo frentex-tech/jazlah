@@ -2,6 +2,7 @@ import { Money } from '@common/money/money';
 import type { Prisma } from '@infra/database/generated/prisma/client';
 import { ProductPackaging } from '@infra/database/generated/prisma/enums';
 import { Cart } from '../domain/cart.entity';
+import type { CartFulfilment } from '../domain/cart-fulfilment.type';
 import type { CartLine } from '../domain/cart-line.type';
 import type { CartWithItemsRow } from './cart-row.type';
 import { LINE_DISPLAY_SCHEMA } from './line-display.schema';
@@ -27,7 +28,40 @@ export const CartMapper = {
         unitPrice: Money.of(item.unitPriceHalalas),
         display: LINE_DISPLAY_SCHEMA.parse(item.display),
       })),
+      CartMapper.toFulfilment(row),
     );
+  },
+
+  /** The chosen fulfilment of a row; null when none (the check constraint keeps the three columns together). */
+  toFulfilment(
+    row: Pick<
+      CartWithItemsRow,
+      'fulfilmentMethod' | 'fulfilmentAddressId' | 'fulfilmentDate'
+    >,
+  ): CartFulfilment | null {
+    if (row.fulfilmentMethod === null || row.fulfilmentDate === null) {
+      return null;
+    }
+    return {
+      method: row.fulfilmentMethod,
+      addressId: row.fulfilmentAddressId,
+      // A DATE column comes back as UTC midnight of that calendar day.
+      date: row.fulfilmentDate.toISOString().slice(0, 10),
+    };
+  },
+
+  /** The fulfilment columns of a cart. */
+  toFulfilmentData(fulfilment: CartFulfilment | null): {
+    fulfilmentMethod: CartFulfilment['method'] | null;
+    fulfilmentAddressId: string | null;
+    fulfilmentDate: Date | null;
+  } {
+    return {
+      fulfilmentMethod: fulfilment?.method ?? null,
+      fulfilmentAddressId: fulfilment?.addressId ?? null,
+      fulfilmentDate:
+        fulfilment === null ? null : new Date(`${fulfilment.date}T00:00:00Z`),
+    };
   },
 
   /** The columns of a line, apart from its cart. */

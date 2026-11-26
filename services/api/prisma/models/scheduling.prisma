@@ -1,0 +1,24 @@
+// Domain: scheduling. Owned by the scheduling module (src/modules/scheduling/): what each
+// vendor has booked on each day, and the limits an admin sets for one day.
+
+/// One vendor's bookings on one Riyadh calendar day (SCH-API-2, FR-SCH-04). Made on the first
+/// reservation of the day (`INSERT … ON CONFLICT DO NOTHING`); booked counts move only by
+/// a conditional update that keeps them within the limit, so two reservations cannot both
+/// take the last place.
+model DayCapacity {
+  id              String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  vendorId        String   @map("vendor_id") @db.Uuid
+  date            DateTime @db.Date
+  ordersBooked    Int      @default(0) @map("orders_booked")
+  carcassesBooked Int      @default(0) @map("carcasses_booked")
+  /// Null: the default of the operations settings.
+  ordersLimit     Int?     @map("orders_limit")
+  /// Null: the default of the operations settings.
+  carcassesLimit  Int?     @map("carcasses_limit")
+  createdAt       DateTime @default(now()) @map("created_at") @db.Timestamptz(3)
+  updatedAt       DateTime @updatedAt @map("updated_at") @db.Timestamptz(3)
+  vendor          Vendor   @relation(fields: [vendorId], references: [id], onDelete: Cascade)
+
+  @@unique([vendorId, date], map: "day_capacities_vendor_id_date_key")
+  @@map("day_capacities")
+}

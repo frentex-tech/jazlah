@@ -1,8 +1,14 @@
 import { Cart } from '../cart.entity';
+import type { CartFulfilment } from '../cart-fulfilment.type';
 import type { CartLine } from '../cart-line.type';
 import type { CartRepository } from '../ports/cart.repository.port';
 
-type Stored = { id: string; vendorId: string | null; lines: CartLine[] };
+type Stored = {
+  id: string;
+  vendorId: string | null;
+  lines: CartLine[];
+  fulfilment: CartFulfilment | null;
+};
 
 /** CartRepository in memory: ids are counters; `locks` counts lockForWrite calls. */
 export class InMemoryCartRepository implements CartRepository {
@@ -15,7 +21,13 @@ export class InMemoryCartRepository implements CartRepository {
     return Promise.resolve(
       stored === undefined
         ? null
-        : Cart.restore(stored.id, userId, stored.vendorId, stored.lines),
+        : Cart.restore(
+            stored.id,
+            userId,
+            stored.vendorId,
+            stored.lines,
+            stored.fulfilment,
+          ),
     );
   }
 
@@ -26,6 +38,7 @@ export class InMemoryCartRepository implements CartRepository {
         id: `cart-${this.nextId++}`,
         vendorId: null,
         lines: [],
+        fulfilment: null,
       });
     }
     return this.findByUser(userId).then((cart) => cart as Cart);
@@ -37,6 +50,7 @@ export class InMemoryCartRepository implements CartRepository {
       throw new Error('save before lockForWrite');
     }
     stored.vendorId = cart.vendorId;
+    stored.fulfilment = cart.fulfilment;
     stored.lines = cart.lines.map((line) => ({
       ...line,
       id: line.id ?? `line-${this.nextId++}`,

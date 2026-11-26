@@ -1,6 +1,7 @@
 import { Money } from '@common/money/money';
 import { FakeCartCatalog } from '../domain/fakes/fake-cart-catalog.fake';
 import { FakeCartSettings } from '../domain/fakes/fake-cart-settings.fake';
+import { FakeCartScheduling } from '../domain/fakes/fake-cart-scheduling.fake';
 import { InMemoryCartRepository } from '../domain/fakes/in-memory-cart.repository.fake';
 import { AddCartItemUseCase } from './add-cart-item.use-case';
 import { CartPricer } from './cart-pricer';
@@ -20,7 +21,7 @@ function setUp() {
   const carts = new InMemoryCartRepository();
   const catalog = new FakeCartCatalog();
   const settings = new FakeCartSettings();
-  const pricer = new CartPricer(catalog, settings);
+  const pricer = new CartPricer(catalog, settings, new FakeCartScheduling());
   const add = new AddCartItemUseCase(
     carts,
     catalog,

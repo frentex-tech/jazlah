@@ -62,7 +62,10 @@ export class PrismaCartRepository implements CartRepository {
     const saved = await this.query(() =>
       client.cart.update({
         where: { userId: cart.userId },
-        data: { vendorId: cart.vendorId },
+        data: {
+          vendorId: cart.vendorId,
+          ...CartMapper.toFulfilmentData(cart.fulfilment),
+        },
         select: { id: true, items: { select: { id: true } } },
       }),
     );

@@ -2,6 +2,7 @@ import { AppError } from '@common/errors/app-error';
 import { ErrorCode } from '@common/errors/error-code.enum';
 import { FakeCartCatalog } from '../domain/fakes/fake-cart-catalog.fake';
 import { FakeCartSettings } from '../domain/fakes/fake-cart-settings.fake';
+import { FakeCartScheduling } from '../domain/fakes/fake-cart-scheduling.fake';
 import { InMemoryCartRepository } from '../domain/fakes/in-memory-cart.repository.fake';
 import { AddCartItemUseCase } from './add-cart-item.use-case';
 import { CartPricer } from './cart-pricer';
@@ -14,7 +15,7 @@ async function setUp() {
   const catalog = new FakeCartCatalog();
   const settings = new FakeCartSettings();
   const transactions = { run: <T>(work: () => Promise<T>) => work() };
-  const pricer = new CartPricer(catalog, settings);
+  const pricer = new CartPricer(catalog, settings, new FakeCartScheduling());
   catalog.set('naimi', {});
   await new AddCartItemUseCase(
     carts,

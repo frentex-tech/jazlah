@@ -20,7 +20,7 @@ class CustomerSchedulingApi {
   const CustomerSchedulingApi(this._dio);
 
   /// Days I can choose
-  /// Customer app, checkout day picker. Every day of the booking horizon from today (Riyadh), for the cart’s store and kinds of order: the cut-offs and lead days, closed days, the store’s capacity and, for pickup, its hours decide each day. Refetch after changing the method or the address. Unpaid orders past &#x60;expiresAt&#x60; no longer count against a day. CART_EMPTY for an empty cart; FULFILMENT_NOT_SUPPORTED when the cart’s products do not allow the method. ORDERING_PAUSED while orders are paused (&#x60;details.messageAr&#x60;, &#x60;details.messageEn&#x60;: the admin’s message). Until SCH-API-2 lands: NOT_IMPLEMENTED.
+  /// Customer app, checkout day picker. Every day of the booking horizon from today (Riyadh), for the cart’s store and kinds of order: the cut-offs and lead days, closed days, the store’s capacity and, for pickup, its hours decide each day. Refetch after changing the method or the address. Unpaid orders past &#x60;expiresAt&#x60; no longer count against a day. CART_EMPTY for an empty cart; FULFILMENT_NOT_SUPPORTED when the cart’s products do not allow the method. ORDERING_PAUSED while orders are paused (&#x60;details.messageAr&#x60;, &#x60;details.messageEn&#x60;: the admin’s message).
   ///
   /// Parameters:
   /// * [method] - `delivery` or `pickup`.
