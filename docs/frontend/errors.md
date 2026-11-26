@@ -149,6 +149,7 @@ Business refusals have their own code, never VALIDATION_FAILED. Until a route's 
 | `PAYMENT_METHOD_NOT_AVAILABLE` | 422 | This payment method is not available for your order. | **Stay** on the payment step and refetch the methods. |
 | `ORDER_NOT_PAYABLE` | 409 | This order cannot be paid now. | **Reload** the order: it is paid, cancelled or expired. |
 | `PAYMENT_IN_PROGRESS` | 409 | A payment for this order is still in progress. | **Reopen** the open payment, or wait and reload the order. |
+| `IDEMPOTENCY_KEY_REUSED` | 422 | This request was already sent with different details. Please try again. | Customer app: **make a new `Idempotency-Key`** for a new attempt; send the same key only with the same body. |
 | `ORDER_TRANSITION_NOT_ALLOWED` | 409 | This order cannot be moved to that status. | Dashboard: **reload** the order; its `allowedTransitions` changed. |
 
 ## Which codes an endpoint returns

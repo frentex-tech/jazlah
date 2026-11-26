@@ -8,6 +8,7 @@ import { AddCartItemUseCase } from './application/add-cart-item.use-case';
 import { CartPricer } from './application/cart-pricer';
 import { ClearCartUseCase } from './application/clear-cart.use-case';
 import { GetCartUseCase } from './application/get-cart.use-case';
+import { LockCartForCheckoutUseCase } from './application/lock-cart-for-checkout.use-case';
 import { RemoveCartItemUseCase } from './application/remove-cart-item.use-case';
 import { SetCartFulfilmentUseCase } from './application/set-cart-fulfilment.use-case';
 import { UpdateCartItemUseCase } from './application/update-cart-item.use-case';
@@ -34,6 +35,7 @@ import { SchedulingServiceCartScheduling } from './infrastructure/scheduling-ser
   providers: [
     CartPricer,
     GetCartUseCase,
+    LockCartForCheckoutUseCase,
     AddCartItemUseCase,
     UpdateCartItemUseCase,
     RemoveCartItemUseCase,
@@ -45,6 +47,6 @@ import { SchedulingServiceCartScheduling } from './infrastructure/scheduling-ser
     { provide: CART_SCHEDULING, useClass: SchedulingServiceCartScheduling },
     { provide: CART_ADDRESSES, useClass: CustomerAddressesCartAddresses },
   ],
-  exports: [GetCartUseCase],
+  exports: [GetCartUseCase, LockCartForCheckoutUseCase, ClearCartUseCase],
 })
 export class CartModule {}

@@ -2098,7 +2098,7 @@ export interface paths {
         put?: never;
         /**
          * Place my order
-         * @description Customer app, checkout "place order". Checks the cart again, then in one transaction: reserves the day’s capacity, uses the coupon, takes the wallet part, creates the order (`pending_payment`, or `new`/`confirmed` for cash on delivery and wallet only) and its payment attempt, and empties the cart. Open `payment.nextAction.redirectUrl` when it is not null; an unpaid order is cancelled after 15 minutes (`order.expiresAt`), giving back the capacity, the coupon and the wallet part. Refusals send the customer back: to the cart for CART_EMPTY, PRICE_CHANGED and ITEM_UNAVAILABLE (`details.lineIds`), MIN_ORDER_NOT_MET (`details.minOrderHalalas`, `details.remainingHalalas`) and the coupon codes; to the fulfilment step for FULFILMENT_REQUIRED, ADDRESS_NOT_COVERED, DAY_FULL and DAY_NOT_AVAILABLE; to the payment step for PAYMENT_METHOD_NOT_AVAILABLE and WALLET_INSUFFICIENT; to the profile for PROFILE_INCOMPLETE (no full name). ORDERING_PAUSED while orders are paused (`details.messageAr`, `details.messageEn`: the admin’s message). Until ORD-API-1 lands: NOT_IMPLEMENTED.
+         * @description Customer app, checkout "place order". Checks the cart again, then in one transaction: reserves the day’s capacity, uses the coupon, takes the wallet part, creates the order (`pending_payment`, or `new`/`confirmed` for cash on delivery and wallet only) and its payment attempt, and empties the cart. Open `payment.nextAction.redirectUrl` when it is not null; an unpaid order is cancelled after 15 minutes (`order.expiresAt`), giving back the capacity, the coupon and the wallet part. Refusals send the customer back: to the cart for CART_EMPTY, PRICE_CHANGED and ITEM_UNAVAILABLE (`details.lineIds`), MIN_ORDER_NOT_MET (`details.minOrderHalalas`, `details.remainingHalalas`) and the coupon codes; to the fulfilment step for FULFILMENT_REQUIRED, ADDRESS_NOT_COVERED, DAY_FULL and DAY_NOT_AVAILABLE; to the payment step for PAYMENT_METHOD_NOT_AVAILABLE and WALLET_INSUFFICIENT; to the profile for PROFILE_INCOMPLETE (no full name). ORDERING_PAUSED while orders are paused (`details.messageAr`, `details.messageEn`: the admin’s message). Sprint 3 takes cash on delivery only (`paymentMethod: cod`, no wallet part): another method is PAYMENT_METHOD_NOT_AVAILABLE and a wallet part WALLET_INSUFFICIENT. The order starts `new` and `payment` is null (no payment record for cash). A line that can no longer be ordered, or whose price moved since it was accepted, is ITEM_UNAVAILABLE or PRICE_CHANGED with `details.lineIds`; nothing is charged at a price the customer did not see. IDEMPOTENCY_KEY_REUSED when the key was already used with a different body.
          */
         post: operations["customerPlaceOrder"];
         delete?: never;
@@ -2355,7 +2355,7 @@ export interface components {
          * @description Stable error code. Clients branch on it; it is never renamed or reused.
          * @enum {string}
          */
-        ErrorCode: "VALIDATION_FAILED" | "BAD_REQUEST" | "NOT_FOUND" | "METHOD_NOT_ALLOWED" | "UNAUTHORIZED" | "FORBIDDEN" | "PERMISSION_DENIED" | "CONFLICT" | "PAYLOAD_TOO_LARGE" | "UNSUPPORTED_MEDIA_TYPE" | "RATE_LIMITED" | "TRANSACTION_CONFLICT" | "SERVICE_UNAVAILABLE" | "INTERNAL_ERROR" | "MEDIA_CONTENT_TYPE_NOT_ALLOWED" | "MEDIA_NOT_FOUND" | "MEDIA_UPLOAD_EXPIRED" | "MEDIA_UPLOAD_REJECTED" | "MEDIA_NOT_READY" | "OTP_INVALID" | "OTP_EXPIRED" | "REFRESH_TOKEN_INVALID" | "ACCESS_TOKEN_EXPIRED" | "ACCOUNT_DISABLED" | "VENDOR_APPLICATION_ALREADY_PENDING" | "VENDOR_APPLICATION_NOT_PENDING" | "VENDOR_SUSPENDED" | "VENDOR_ACCESS_ALREADY_HELD" | "VENDOR_CR_EXISTS" | "PRODUCT_NOT_EDITABLE" | "PRODUCT_NOT_SUBMITTABLE" | "PRODUCT_CHANGE_REQUEST_SUPERSEDED" | "ADDRESS_LIMIT_REACHED" | "ACCOUNT_HAS_STAFF_ACCESS" | "RECENT_SIGN_IN_REQUIRED" | "INVALID_POLYGON" | "NOT_IMPLEMENTED" | "CART_EMPTY" | "CART_VENDOR_MISMATCH" | "PRODUCT_UNAVAILABLE" | "SIZE_UNAVAILABLE" | "OPTION_NOT_IN_PRODUCT" | "INCOMPATIBLE_CUTTING_PACKAGING" | "OPTION_REQUIRED" | "PRICE_CHANGED" | "ITEM_UNAVAILABLE" | "MIN_ORDER_NOT_MET" | "COUPON_NOT_FOUND" | "COUPON_EXPIRED" | "COUPON_NOT_APPLICABLE" | "COUPON_MIN_ORDER" | "COUPON_LIMIT_REACHED" | "COUPON_CODE_TAKEN" | "FULFILMENT_REQUIRED" | "FULFILMENT_NOT_SUPPORTED" | "ADDRESS_NOT_COVERED" | "DAY_FULL" | "DAY_NOT_AVAILABLE" | "ORDERING_PAUSED" | "PROFILE_INCOMPLETE" | "WALLET_INSUFFICIENT" | "PAYMENT_METHOD_NOT_AVAILABLE" | "ORDER_NOT_PAYABLE" | "PAYMENT_IN_PROGRESS" | "ORDER_TRANSITION_NOT_ALLOWED";
+        ErrorCode: "VALIDATION_FAILED" | "BAD_REQUEST" | "NOT_FOUND" | "METHOD_NOT_ALLOWED" | "UNAUTHORIZED" | "FORBIDDEN" | "PERMISSION_DENIED" | "CONFLICT" | "PAYLOAD_TOO_LARGE" | "UNSUPPORTED_MEDIA_TYPE" | "RATE_LIMITED" | "TRANSACTION_CONFLICT" | "SERVICE_UNAVAILABLE" | "INTERNAL_ERROR" | "MEDIA_CONTENT_TYPE_NOT_ALLOWED" | "MEDIA_NOT_FOUND" | "MEDIA_UPLOAD_EXPIRED" | "MEDIA_UPLOAD_REJECTED" | "MEDIA_NOT_READY" | "OTP_INVALID" | "OTP_EXPIRED" | "REFRESH_TOKEN_INVALID" | "ACCESS_TOKEN_EXPIRED" | "ACCOUNT_DISABLED" | "VENDOR_APPLICATION_ALREADY_PENDING" | "VENDOR_APPLICATION_NOT_PENDING" | "VENDOR_SUSPENDED" | "VENDOR_ACCESS_ALREADY_HELD" | "VENDOR_CR_EXISTS" | "PRODUCT_NOT_EDITABLE" | "PRODUCT_NOT_SUBMITTABLE" | "PRODUCT_CHANGE_REQUEST_SUPERSEDED" | "ADDRESS_LIMIT_REACHED" | "ACCOUNT_HAS_STAFF_ACCESS" | "RECENT_SIGN_IN_REQUIRED" | "INVALID_POLYGON" | "NOT_IMPLEMENTED" | "CART_EMPTY" | "CART_VENDOR_MISMATCH" | "PRODUCT_UNAVAILABLE" | "SIZE_UNAVAILABLE" | "OPTION_NOT_IN_PRODUCT" | "INCOMPATIBLE_CUTTING_PACKAGING" | "OPTION_REQUIRED" | "PRICE_CHANGED" | "ITEM_UNAVAILABLE" | "MIN_ORDER_NOT_MET" | "COUPON_NOT_FOUND" | "COUPON_EXPIRED" | "COUPON_NOT_APPLICABLE" | "COUPON_MIN_ORDER" | "COUPON_LIMIT_REACHED" | "COUPON_CODE_TAKEN" | "FULFILMENT_REQUIRED" | "FULFILMENT_NOT_SUPPORTED" | "ADDRESS_NOT_COVERED" | "DAY_FULL" | "DAY_NOT_AVAILABLE" | "ORDERING_PAUSED" | "PROFILE_INCOMPLETE" | "WALLET_INSUFFICIENT" | "PAYMENT_METHOD_NOT_AVAILABLE" | "ORDER_NOT_PAYABLE" | "PAYMENT_IN_PROGRESS" | "IDEMPOTENCY_KEY_REUSED" | "ORDER_TRANSITION_NOT_ALLOWED";
         ErrorResponseDto: {
             /**
              * @description Stable error code. Clients branch on it; it is never renamed or reused.
@@ -15964,7 +15964,7 @@ export interface operations {
         parameters: {
             query?: never;
             header: {
-                /** @description A UUID the app makes once per attempt and sends again on a retry of the same attempt: the same key answers the first success again (the body is not compared); a refusal is not kept, so the same key may be sent again after fixing it. Missing or not a UUID: VALIDATION_FAILED on `Idempotency-Key`. */
+                /** @description A UUID the app makes once per attempt and sends again on a retry of the same attempt: the same key with the same body answers the first order again (as it is now, whatever the cart is now); the same key with a different body is IDEMPOTENCY_KEY_REUSED. A refusal is not kept, so the same key may be sent again after fixing it. Missing or not a UUID: VALIDATION_FAILED on `Idempotency-Key`. */
                 "Idempotency-Key": string;
             };
             path?: never;
@@ -16003,7 +16003,7 @@ export interface operations {
                     "application/json": components["schemas"]["ErrorResponseDto"];
                 };
             };
-            /** @description Error. code: FORBIDDEN. */
+            /** @description Error. code: ACCOUNT_DISABLED, FORBIDDEN. */
             403: {
                 headers: {
                     [name: string]: unknown;
@@ -16021,7 +16021,7 @@ export interface operations {
                     "application/json": components["schemas"]["ErrorResponseDto"];
                 };
             };
-            /** @description Error. code: COUPON_NOT_FOUND, COUPON_EXPIRED, COUPON_NOT_APPLICABLE, COUPON_MIN_ORDER, COUPON_LIMIT_REACHED, ADDRESS_NOT_COVERED, PAYMENT_METHOD_NOT_AVAILABLE. */
+            /** @description Error. code: COUPON_NOT_FOUND, COUPON_EXPIRED, COUPON_NOT_APPLICABLE, COUPON_MIN_ORDER, COUPON_LIMIT_REACHED, FULFILMENT_NOT_SUPPORTED, ADDRESS_NOT_COVERED, PAYMENT_METHOD_NOT_AVAILABLE, IDEMPOTENCY_KEY_REUSED. */
             422: {
                 headers: {
                     [name: string]: unknown;
@@ -16041,15 +16041,6 @@ export interface operations {
             };
             /** @description Error. code: INTERNAL_ERROR. */
             500: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ErrorResponseDto"];
-                };
-            };
-            /** @description Error. code: NOT_IMPLEMENTED. */
-            501: {
                 headers: {
                     [name: string]: unknown;
                 };

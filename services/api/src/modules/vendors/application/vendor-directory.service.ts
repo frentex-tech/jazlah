@@ -34,6 +34,11 @@ export class VendorDirectory {
     );
   }
 
+  /** The commission of a vendor now, in basis points; null for an unknown id. */
+  async commissionBasisPointsOf(id: string): Promise<number | null> {
+    return (await this.vendors.findById(id))?.commissionBasisPoints ?? null;
+  }
+
   /** The store a customer collects from, whatever its status; null for an unknown id. */
   async storeOf(id: string): Promise<VendorStore | null> {
     const vendor = await this.vendors.findById(id);

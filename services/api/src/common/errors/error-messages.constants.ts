@@ -268,6 +268,10 @@ export const ERROR_MESSAGES: Readonly<Record<ErrorCode, LocalizedText>> = {
     ar: 'فيه عملية دفع مفتوحة لهالطلب، كمّلها أو انتظر شوي',
     en: 'A payment for this order is still in progress.',
   },
+  [ErrorCode.IDEMPOTENCY_KEY_REUSED]: {
+    ar: 'أرسلت هالطلب قبل بتفاصيل مختلفة، جرّب مرة ثانية',
+    en: 'This request was already sent with different details. Please try again.',
+  },
   [ErrorCode.ORDER_TRANSITION_NOT_ALLOWED]: {
     ar: 'ما ينفع تغيّر حالة الطلب لهالخطوة، حدّث الصفحة',
     en: 'This order cannot be moved to that status.',

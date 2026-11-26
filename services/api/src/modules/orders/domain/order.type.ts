@@ -1,0 +1,40 @@
+import type { Money } from '@common/money/money';
+import type { FulfilmentMethod } from './fulfilment-method.type';
+import type { OrderAddressSnapshot } from './order-address-snapshot.type';
+import type { OrderHistoryEntry } from './order-history-entry.type';
+import type { OrderItem } from './order-item.type';
+import type { OrderPaymentMethod } from './order-payment-method.type';
+import type { OrderPickupSnapshot } from './order-pickup-snapshot.type';
+import type { OrderStatus } from './order-status.type';
+import type { OrderType } from './order-type.type';
+import type { OrderVendorSnapshot } from './order-vendor-snapshot.type';
+import type { TimeWindow } from './time-window.type';
+
+/** An order as saved: its lines, its place and money as they were when it was placed, and its history. */
+export type Order = Readonly<{
+  id: string;
+  number: string;
+  userId: string;
+  customer: Readonly<{ name: string; phone: string }>;
+  vendorId: string;
+  vendor: OrderVendorSnapshot;
+  commissionBasisPoints: number;
+  status: OrderStatus;
+  orderType: OrderType;
+  fulfilment: FulfilmentMethod;
+  fulfilmentDate: string;
+  window: TimeWindow | null;
+  address: OrderAddressSnapshot | null;
+  pickupPoint: OrderPickupSnapshot | null;
+  paymentMethod: OrderPaymentMethod;
+  subtotal: Money;
+  discount: Money;
+  deliveryFee: Money;
+  vat: Money;
+  total: Money;
+  carcasses: number;
+  notes: string | null;
+  items: readonly OrderItem[];
+  history: readonly OrderHistoryEntry[];
+  createdAt: Date;
+}>;

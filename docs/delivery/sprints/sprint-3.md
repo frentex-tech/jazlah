@@ -320,7 +320,7 @@ Placing orders atomically, the order state machine, routing to the right dashboa
 8. create the order (`pending_payment`, or `new` for COD/wallet-only) and items
 9. clear the cart
 
-Then call the payment intent outside the transaction. If it fails, the payment-timeout job undoes the order. Implement the `AddressUsagePort` and active-orders ports from ACC-API-2. Increment `salesCount` on confirmation.
+Then call the payment intent outside the transaction. If it fails, the payment-timeout job undoes the order. The `AddressUsagePort` and active-orders ports from ACC-API-2 (`isLocked`, ADDRESS_IN_USE, ACCOUNT_HAS_ACTIVE_ORDERS) **move to ORD-API-2 (2026-11-26, review of #332)**: "not final" is the state machine's to define, and they change the customers and auth modules and the apps' contract, which the cash-on-delivery order did not need. Increment `salesCount` on confirmation.
 
 **Where:** `services/api/src/modules/checkout/`, `services/api/src/modules/orders/`
 
@@ -346,6 +346,7 @@ Then call the payment intent outside the transaction. If it fails, the payment-t
 **Where:** `services/api/src/modules/orders/`
 
 **Acceptance:**
+- [ ] Moved from ORD-API-1 (#81): an address used by a non-final order is locked (`isLocked`, ADDRESS_IN_USE) and deleting an account with non-final orders is ACCOUNT_HAS_ACTIVE_ORDERS; until then a customer can delete the account while an order is open, and the order keeps the old phone
 - [ ] Unit tests: every allowed and forbidden transition
 - [ ] e2e: unpaid order cancelled by the job and capacity released
 - [ ] e2e: a webhook capturing a payment for an expired order triggers a refund and an alert

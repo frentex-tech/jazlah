@@ -1,0 +1,167 @@
+// Domain: orders. Owned by the orders module (src/modules/orders/): what customers have
+// ordered, its lines and its history, as they were when it was placed.
+
+/// Where an order is (the values of `ORDER_STATUSES`). Only the order state machine
+/// changes it (ORD-API-2); placing an order sets the first one.
+enum OrderStatus {
+  pending_payment
+  new
+  confirmed
+  preparing
+  ready
+  picked_up
+  out_for_delivery
+  delivered
+  collected
+  cancelled
+  delivery_failed
+  returned
+
+  @@map("order_status")
+}
+
+/// The kind of order (the values of `ORDER_TYPES`); `mixed` when its lines are of several kinds.
+enum OrderType {
+  ready_meat
+  carcass
+  cooked
+  occasion
+  adha
+  mixed
+
+  @@map("order_type")
+}
+
+/// The payment method chosen (the values of `PAYMENT_METHOD_NAMES`, owned by payments).
+enum OrderPaymentMethod {
+  mada
+  card
+  applepay
+  cod
+  wallet
+
+  @@map("order_payment_method")
+}
+
+/// Who moved an order (the values of `ORDER_ACTOR_TYPES`).
+enum OrderActorType {
+  system
+  customer
+  admin
+  vendor
+  kitchen
+  delivery
+
+  @@map("order_actor_type")
+}
+
+/// One order (ORD-API-1, FR-ORD-01): placed from a cart, fulfilled by one store. Names,
+/// prices, the address, the pickup point and the commission are copied when it is placed,
+/// so later changes to the product, the address or the store never change it. Money in
+/// halalas, VAT included; sums are BigInt (a whole-animal order may pass 2^31).
+model Order {
+  id                    String               @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  /// `JZ-YYMMDD-NNNN`: the Riyadh day it was placed and that day's sequence.
+  number                String
+  userId                String               @map("user_id") @db.Uuid
+  vendorId              String               @map("vendor_id") @db.Uuid
+  status                OrderStatus
+  orderType             OrderType            @map("order_type")
+  fulfilmentMethod      FulfilmentMethod     @map("fulfilment_method")
+  /// The delivery or pickup day, a Riyadh calendar day.
+  fulfilmentDate        DateTime             @map("fulfilment_date") @db.Date
+  /// Null for pickup (see `pickup_snapshot.hours`): the delivery window, Riyadh `HH:mm`.
+  windowStart           String?              @map("window_start")
+  /// Null for pickup: the end of the delivery window.
+  windowEnd             String?              @map("window_end")
+  paymentMethod         OrderPaymentMethod   @map("payment_method")
+  subtotalHalalas       BigInt               @map("subtotal_halalas")
+  discountHalalas       BigInt               @default(0) @map("discount_halalas")
+  deliveryFeeHalalas    Int                  @map("delivery_fee_halalas")
+  vatHalalas            BigInt               @map("vat_halalas")
+  totalHalalas          BigInt               @map("total_halalas")
+  /// The vendor's commission when the order was placed, in basis points (1250 = 12.5%).
+  commissionBasisPoints Int                  @map("commission_basis_points")
+  /// Whole carcasses the order holds, as booked against the day's capacity (0 until products have an order type).
+  carcasses             Int                  @default(0)
+  /// Null when the customer left no note.
+  notes                 String?
+  /// The customer's full name when ordering (required to place an order).
+  customerName          String               @map("customer_name")
+  /// The customer's mobile when ordering.
+  customerPhone         String               @map("customer_phone")
+  /// The store as it was: `{ name, phone, location, city }`, read through a zod schema.
+  vendorSnapshot        Json                 @map("vendor_snapshot")
+  /// Null for pickup: the delivery address as it was, read through a zod schema.
+  addressSnapshot       Json?                @map("address_snapshot")
+  /// Null for delivery: where to collect it, read through a zod schema.
+  pickupSnapshot        Json?                @map("pickup_snapshot")
+  createdAt             DateTime             @default(now()) @map("created_at") @db.Timestamptz(3)
+  updatedAt             DateTime             @updatedAt @map("updated_at") @db.Timestamptz(3)
+  user                  User                 @relation(fields: [userId], references: [id], onDelete: Restrict)
+  vendor                Vendor               @relation(fields: [vendorId], references: [id], onDelete: Restrict)
+  items                 OrderItem[]
+  history               OrderStatusHistory[]
+
+  @@unique([number], map: "orders_number_key")
+  @@index([userId, createdAt])
+  @@index([vendorId, status])
+  @@map("orders")
+}
+
+/// One line of an order, as it was ordered. The product and size are plain ids, not
+/// foreign keys: the product may change or go without touching the order.
+model OrderItem {
+  id               String            @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  orderId          String            @map("order_id") @db.Uuid
+  /// The order of the lines, from 0.
+  position         Int
+  productId        String            @map("product_id") @db.Uuid
+  sizeId           String            @map("size_id") @db.Uuid
+  quantity         Int
+  unitPriceHalalas Int               @map("unit_price_halalas")
+  totalHalalas     BigInt            @map("total_halalas")
+  /// Null when no packaging was chosen.
+  packaging        ProductPackaging?
+  /// Null when the line has no note.
+  notes            String?
+  /// Null when the product had no image.
+  imageUrl         String?           @map("image_url")
+  /// The names as ordered: `{ name, size, cutting, exclusions }`, read through a zod schema.
+  snapshot         Json
+  order            Order             @relation(fields: [orderId], references: [id], onDelete: Cascade)
+
+  @@index([orderId])
+  @@map("order_items")
+}
+
+/// The moves of an order, insert-only: the first row is the order being placed; a
+/// correction is a new row, never an update (ORD-API-2 adds the others).
+model OrderStatusHistory {
+  id         String         @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  orderId    String         @map("order_id") @db.Uuid
+  /// Null for the first row: the order did not exist before.
+  fromStatus OrderStatus?   @map("from_status")
+  toStatus   OrderStatus    @map("to_status")
+  actorType  OrderActorType @map("actor_type")
+  /// Null when the actor is the system.
+  actorId    String?        @map("actor_id") @db.Uuid
+  /// Null when no note was given.
+  note       String?
+  createdAt  DateTime       @default(now()) @map("created_at") @db.Timestamptz(3)
+  order      Order          @relation(fields: [orderId], references: [id], onDelete: Cascade)
+
+  @@index([orderId, createdAt])
+  @@map("order_status_history")
+}
+
+/// The last order sequence of each Riyadh day, for `Order.number`. Taken by one atomic
+/// `INSERT … ON CONFLICT DO UPDATE … RETURNING`, so two orders never get one number.
+model OrderNumberCounter {
+  id        String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  day       DateTime @db.Date
+  lastValue Int      @map("last_value")
+
+  @@unique([day], map: "order_number_counters_day_key")
+  @@map("order_number_counters")
+}
