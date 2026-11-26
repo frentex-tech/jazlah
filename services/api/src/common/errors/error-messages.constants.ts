@@ -269,7 +269,7 @@ export const ERROR_MESSAGES: Readonly<Record<ErrorCode, LocalizedText>> = {
     en: 'A payment for this order is still in progress.',
   },
   [ErrorCode.IDEMPOTENCY_KEY_REUSED]: {
-    ar: 'أرسلت هالطلب قبل بتفاصيل مختلفة، جرّب مرة ثانية',
+    ar: 'فيه طلب سابق بنفس المحاولة وتفاصيله مختلفة، حدّث الصفحة وجرّب مرة ثانية',
     en: 'This request was already sent with different details. Please try again.',
   },
   [ErrorCode.ORDER_TRANSITION_NOT_ALLOWED]: {
