@@ -612,7 +612,7 @@ _responseData = rawData == null ? null : deserialize<CartResponseDto, CartRespon
   }
 
   /// Choose delivery or pickup, and the day
-  /// Customer app, checkout first step. Refusals: CART_EMPTY; FULFILMENT_NOT_SUPPORTED (a product of the cart does not allow the method); NOT_FOUND (not one of the customer’s addresses); ADDRESS_NOT_COVERED (outside every active zone); DAY_FULL; DAY_NOT_AVAILABLE (&#x60;details.reason&#x60;: PAST_CUTOFF, CLOSED, OUTSIDE_HORIZON or VENDOR_CLOSED). The capacity is reserved when the order is placed, not here. ORDERING_PAUSED while orders are paused (&#x60;details.messageAr&#x60;, &#x60;details.messageEn&#x60;: the admin’s message). Until SCH-API-2 lands: NOT_IMPLEMENTED.
+  /// Customer app, checkout first step. Refusals: CART_EMPTY; FULFILMENT_NOT_SUPPORTED (a product of the cart does not allow the method); NOT_FOUND (not one of the customer’s addresses); ADDRESS_NOT_COVERED (outside every active zone); DAY_FULL; DAY_NOT_AVAILABLE (&#x60;details.reason&#x60;: PAST_CUTOFF, CLOSED, OUTSIDE_HORIZON or VENDOR_CLOSED). The capacity is reserved when the order is placed, not here. ORDERING_PAUSED while orders are paused (&#x60;details.messageAr&#x60;, &#x60;details.messageEn&#x60;: the admin’s message).
   ///
   /// Parameters:
   /// * [setCartFulfilmentDto] 
