@@ -81,7 +81,13 @@ export class OperationsSettingsService {
         actorId,
         ...SETTINGS_AUDIT.operationsUpdated,
         entityId: updated.id,
-        metadata: { keys: Object.keys(changes).sort().join(',') },
+        metadata: {
+          keys: Object.entries(changes)
+            .filter(([, value]) => value !== undefined)
+            .map(([key]) => key)
+            .sort()
+            .join(','),
+        },
       });
       return updated;
     });
