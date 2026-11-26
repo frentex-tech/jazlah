@@ -200,6 +200,9 @@ enum ErrorCode {
       @JsonValue(r'PAYMENT_IN_PROGRESS')
       PAYMENT_IN_PROGRESS(r'PAYMENT_IN_PROGRESS'),
           /// Stable error code. Clients branch on it; it is never renamed or reused.
+      @JsonValue(r'IDEMPOTENCY_KEY_REUSED')
+      IDEMPOTENCY_KEY_REUSED(r'IDEMPOTENCY_KEY_REUSED'),
+          /// Stable error code. Clients branch on it; it is never renamed or reused.
       @JsonValue(r'ORDER_TRANSITION_NOT_ALLOWED')
       ORDER_TRANSITION_NOT_ALLOWED(r'ORDER_TRANSITION_NOT_ALLOWED'),
           /// Stable error code. Clients branch on it; it is never renamed or reused.
