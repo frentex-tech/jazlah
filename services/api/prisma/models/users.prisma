@@ -42,7 +42,7 @@ model User {
   requestedProductChanges    ProductChangeRequest[]   @relation("ProductChangeRequester")
   reviewedProductChanges     ProductChangeRequest[]   @relation("ProductChangeReviewer")
 
-  carts Cart[]
+  carts  Cart[]
   orders Order[]
 
   @@unique([phone], map: "users_phone_key")
