@@ -1,0 +1,101 @@
+# Regenerates the dashboard and mobile API clients from services/api/openapi.json on one
+# branch, and commits them back to that branch if they changed. Run it on a pull
+# request's branch after an openapi.json change (services/api/CLAUDE.md, "Merge"):
+#   gh workflow run regenerate-clients.yml -f branch=<branch>
+# Never on develop or main. The toolchain is the one Dashboard CI and Mobile CI use.
+#
+# A push made with GITHUB_TOKEN starts no other workflow, so the checks of the pull
+# request do not rerun on the bot's commit by themselves: open the pull request after
+# this run, or close and reopen it (or push any later commit) to run them.
+name: Regenerate API clients
+
+on:
+  workflow_dispatch:
+    inputs:
+      branch:
+        description: 'The branch to regenerate the clients on (never develop or main)'
+        required: true
+        type: string
+
+permissions:
+  contents: write
+
+concurrency:
+  group: regenerate-clients-${{ inputs.branch }}
+  cancel-in-progress: false
+
+jobs:
+  regenerate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    env:
+      BRANCH: ${{ inputs.branch }}
+      NEXT_TELEMETRY_DISABLED: '1'
+
+    steps:
+      - name: Refuse develop, main and anything that is not a plain branch name
+        run: |
+          case "$BRANCH" in
+            develop|main|refs/heads/develop|refs/heads/main)
+              echo "::error::Refusing to commit to $BRANCH"; exit 1 ;;
+          esac
+          if ! printf '%s' "$BRANCH" | grep -Eq '^[A-Za-z0-9._/-]+$'; then
+            echo "::error::Not a plain branch name: $BRANCH"; exit 1
+          fi
+
+      - name: Check out the branch
+        uses: actions/checkout@v7
+        with:
+          ref: ${{ inputs.branch }}
+
+      # As Dashboard CI (ci-dashboard.yml).
+      - name: Set up pnpm (version from package.json "packageManager")
+        uses: pnpm/action-setup@v6
+        with:
+          package_json_file: apps/dashboard/package.json
+
+      - name: Set up Node (version from .nvmrc)
+        uses: actions/setup-node@v7
+        with:
+          node-version-file: apps/dashboard/.nvmrc
+          cache: pnpm
+          cache-dependency-path: apps/dashboard/pnpm-lock.yaml
+
+      - name: Install the dashboard (lockfile frozen)
+        working-directory: apps/dashboard
+        run: pnpm install --frozen-lockfile
+
+      - name: Regenerate the dashboard client
+        working-directory: apps/dashboard
+        run: pnpm api:generate
+
+      # As Mobile CI (ci-mobile.yml).
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - uses: subosito/flutter-action@v2
+        with:
+          flutter-version: '3.44.8'
+          channel: stable
+          cache: true
+
+      - name: Regenerate the mobile client
+        working-directory: apps/mobile
+        run: ./scripts/gen-api-client.sh
+
+      - name: Commit the clients to the branch if they changed
+        run: |
+          if [ -z "$(git status --porcelain -- apps/dashboard/src/api apps/mobile/packages/jazla_api)" ]; then
+            echo "The clients already match openapi.json: nothing to commit."
+            exit 0
+          fi
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add -A -- apps/dashboard/src/api apps/mobile/packages/jazla_api
+          git commit -m 'chore(clients): regenerate the dashboard and mobile API clients' \
+            -m 'From services/api/openapi.json, by the regenerate-clients workflow.'
+          git push origin "HEAD:refs/heads/$BRANCH"
