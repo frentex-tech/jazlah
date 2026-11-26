@@ -1680,7 +1680,7 @@ export interface paths {
         };
         /**
          * The operations settings
-         * @description Admin dashboard, operations page. Until SCH-API-1 lands: NOT_IMPLEMENTED.
+         * @description Admin dashboard, operations page.
          */
         get: operations["adminGetOperationsSettings"];
         put?: never;
@@ -1690,7 +1690,7 @@ export interface paths {
         head?: never;
         /**
          * Change the operations settings
-         * @description Admin dashboard, operations page "save": only the keys sent change (a stale tab cannot undo another change it did not send); the pause is not here. A closed day added in the past: VALIDATION_FAILED `notPast` on `closedDays.<i>.date`; a window ending before it starts: `endBeforeStart`. The next cart and checkout reads use the new values. Until SCH-API-1 lands: NOT_IMPLEMENTED.
+         * @description Admin dashboard, operations page "save": only the keys sent change (a stale tab cannot undo another change it did not send); the pause is not here. A closed day added in the past: VALIDATION_FAILED `notPast` on `closedDays.<i>.date`; a window ending before it starts: `endBeforeStart`. The next cart and checkout reads use the new values.
          */
         patch: operations["adminUpdateOperationsSettings"];
         trace?: never;
@@ -1705,7 +1705,7 @@ export interface paths {
         get?: never;
         /**
          * Pause or resume new orders
-         * @description Admin dashboard, the pause switch. Pausing makes every cart change and checkout call answer ORDERING_PAUSED with the message; orders already placed carry on. Until SCH-API-1 lands: NOT_IMPLEMENTED.
+         * @description Admin dashboard, the pause switch. Pausing makes every cart change and checkout call answer ORDERING_PAUSED with the message; orders already placed carry on.
          */
         put: operations["adminSetOrderingPause"];
         post?: never;
@@ -1724,7 +1724,7 @@ export interface paths {
         };
         /**
          * Settings for the apps
-         * @description Customer app (cart, checkout) and the dashboard’s pause banner: delivery window, booking horizon, minimum order, delivery fee, cash on delivery and the pause. Public; cache for a minute at most. Until SCH-API-1 lands: NOT_IMPLEMENTED.
+         * @description Customer app (cart, checkout) and the dashboard’s pause banner: delivery window, booking horizon, minimum order, delivery fee, cash on delivery and the pause. Public; cache for a minute at most.
          */
         get: operations["publicGetClientSettings"];
         put?: never;
@@ -13449,15 +13449,6 @@ export interface operations {
                     "application/json": components["schemas"]["ErrorResponseDto"];
                 };
             };
-            /** @description Error. code: NOT_IMPLEMENTED. */
-            501: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ErrorResponseDto"];
-                };
-            };
             /** @description Error. code: SERVICE_UNAVAILABLE. */
             503: {
                 headers: {
@@ -13538,15 +13529,6 @@ export interface operations {
             };
             /** @description Error. code: INTERNAL_ERROR. */
             500: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ErrorResponseDto"];
-                };
-            };
-            /** @description Error. code: NOT_IMPLEMENTED. */
-            501: {
                 headers: {
                     [name: string]: unknown;
                 };
@@ -13641,15 +13623,6 @@ export interface operations {
                     "application/json": components["schemas"]["ErrorResponseDto"];
                 };
             };
-            /** @description Error. code: NOT_IMPLEMENTED. */
-            501: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ErrorResponseDto"];
-                };
-            };
             /** @description Error. code: SERVICE_UNAVAILABLE. */
             503: {
                 headers: {
@@ -13690,15 +13663,6 @@ export interface operations {
             };
             /** @description Error. code: INTERNAL_ERROR. */
             500: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ErrorResponseDto"];
-                };
-            };
-            /** @description Error. code: NOT_IMPLEMENTED. */
-            501: {
                 headers: {
                     [name: string]: unknown;
                 };
