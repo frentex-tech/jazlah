@@ -15,32 +15,75 @@ import {
   ApiOperation,
   ApiTags,
 } from '@nestjs/swagger';
+import type { AuthenticatedUser } from '@common/auth/authenticated-user.type';
 import { ApiErrorResponses } from '@common/decorators/api-error-responses.decorator';
 import { BEARER_AUTH_SCHEME } from '@common/decorators/bearer-auth.constants';
+import { CurrentUser } from '@common/decorators/current-user.decorator';
 import { CUSTOMER_AUTH_ERRORS } from '@common/decorators/customer-auth-errors.constants';
 import { IdParamDto } from '@common/dto/id-param.dto';
 import { ErrorCode } from '@common/errors/error-code.enum';
 import { notImplemented } from '@common/errors/not-implemented';
 import { API_TAGS } from '@infra/api-docs/api-tags.constants';
+import { ListCheckoutDaysUseCase } from '../../application/list-checkout-days.use-case';
+import { ListPaymentMethodsUseCase } from '../../application/list-payment-methods.use-case';
+import { CheckoutDayListResponseDto } from '../dto/checkout-day-list-response.dto';
 import { CreatePaymentDto } from '../dto/create-payment.dto';
+import { ListCheckoutDaysQueryDto } from '../dto/list-checkout-days-query.dto';
 import { ListPaymentMethodsQueryDto } from '../dto/list-payment-methods-query.dto';
 import { OrderWithPaymentResponseDto } from '../dto/order-with-payment-response.dto';
 import { PaymentMethodListResponseDto } from '../dto/payment-method-list-response.dto';
 import { PlaceOrderDto } from '../dto/place-order.dto';
+import { toCheckoutDayListResponse } from '../to-checkout-day-list-response';
+import { toPaymentMethodListResponse } from '../to-payment-method-list-response';
 
 /**
- * Paying: the methods, placing the cart as an order in one transaction (ORD-API-1), and paying an unpaid order again (PAY-API-1). It joins the cart, the orders, the payments and the wallet. Every operation answers NOT_IMPLEMENTED (501) until its task lands; the shapes are the contract.
+ * The days the cart can be fulfilled on (SCH-API-2: the route reads the cart, so it lives
+ * here, not in scheduling), paying: the methods, placing the cart as an order in one transaction (ORD-API-1), and paying an unpaid order again (PAY-API-1). It joins the cart, the orders, the payments and the wallet. The days and the cart's payment methods are live; paying again (`orderId`), placing and paying answer NOT_IMPLEMENTED (501) until their tasks land.
  */
 @ApiBearerAuth(BEARER_AUTH_SCHEME)
 @Controller('customer')
 export class CustomerCheckoutController {
+  constructor(
+    private readonly listCheckoutDaysUseCase: ListCheckoutDaysUseCase,
+    private readonly listPaymentMethodsUseCase: ListPaymentMethodsUseCase,
+  ) {}
+
+  @Get('checkout/days')
+  @ApiTags(API_TAGS.customerScheduling.name)
+  @ApiOperation({
+    operationId: 'customerListCheckoutDays',
+    summary: 'Days I can choose',
+    description:
+      'Customer app, checkout day picker. Every day of the booking horizon from today (Riyadh), for the cart’s store and kinds of order: the cut-offs and lead days, closed days, the store’s capacity and, for pickup, its hours decide each day. Refetch after changing the method or the address. Unpaid orders past `expiresAt` no longer count against a day. CART_EMPTY for an empty cart; FULFILMENT_NOT_SUPPORTED when the cart’s products do not allow the method. ORDERING_PAUSED while orders are paused (`details.messageAr`, `details.messageEn`: the admin’s message).',
+  })
+  @ApiOkResponse({
+    type: CheckoutDayListResponseDto,
+    description: 'The days.',
+  })
+  @ApiErrorResponses(
+    ErrorCode.VALIDATION_FAILED,
+    ErrorCode.CART_EMPTY,
+    ErrorCode.FULFILMENT_NOT_SUPPORTED,
+    ErrorCode.ORDERING_PAUSED,
+    ErrorCode.SERVICE_UNAVAILABLE,
+    ...CUSTOMER_AUTH_ERRORS,
+  )
+  async listCheckoutDays(
+    @CurrentUser() user: AuthenticatedUser,
+    @Query() query: ListCheckoutDaysQueryDto,
+  ): Promise<CheckoutDayListResponseDto> {
+    return toCheckoutDayListResponse(
+      await this.listCheckoutDaysUseCase.execute(user.userId, query.method),
+    );
+  }
+
   @Get('checkout/payment-methods')
   @ApiTags(API_TAGS.customerCheckout.name)
   @ApiOperation({
     operationId: 'customerListPaymentMethods',
     summary: 'How I can pay',
     description:
-      'Customer app, checkout payment step (or paying an unpaid order again with `orderId`): the methods for the cart’s (or the order’s) total and kinds, and the wallet balance. NOT_FOUND for an order that is not the customer’s; ORDER_NOT_PAYABLE for one no longer waiting for payment; CART_EMPTY without `orderId` and an empty cart. Until PAY-API-1 lands: NOT_IMPLEMENTED.',
+      'Customer app, checkout payment step (or paying an unpaid order again with `orderId`): the methods for the cart’s (or the order’s) total and kinds, and the wallet balance. NOT_FOUND for an order that is not the customer’s; ORDER_NOT_PAYABLE for one no longer waiting for payment; CART_EMPTY without `orderId` and an empty cart. Sprint 3 lists cash on delivery only, with a wallet balance of 0; paying again with `orderId` answers NOT_IMPLEMENTED until PAY-API-1 lands.',
   })
   @ApiOkResponse({
     type: PaymentMethodListResponseDto,
@@ -55,10 +98,16 @@ export class CustomerCheckoutController {
     ErrorCode.SERVICE_UNAVAILABLE,
     ...CUSTOMER_AUTH_ERRORS,
   )
-  listPaymentMethods(
+  async listPaymentMethods(
+    @CurrentUser() user: AuthenticatedUser,
     @Query() query: ListPaymentMethodsQueryDto,
   ): Promise<PaymentMethodListResponseDto> {
-    return notImplemented('PAY-API-1', query);
+    if (query.orderId !== undefined) {
+      return notImplemented('PAY-API-1', query);
+    }
+    return toPaymentMethodListResponse(
+      await this.listPaymentMethodsUseCase.execute(user.userId),
+    );
   }
 
   @Post('orders/:id/payments')

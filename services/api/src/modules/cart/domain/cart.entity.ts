@@ -2,6 +2,7 @@ import { AppError } from '@common/errors/app-error';
 import { ErrorCode } from '@common/errors/error-code.enum';
 import type { LocalizedText } from '@common/i18n/localized-text.type';
 import type { Money } from '@common/money/money';
+import type { CartFulfilment } from './cart-fulfilment.type';
 import { CART_LIMITS } from './cart-limits.constants';
 import type { CartLine } from './cart-line.type';
 import type { LineChoice } from './line-choice.type';
@@ -18,7 +19,9 @@ import type { LineDisplay } from './line-display.type';
  *   99 it is VALIDATION_FAILED on `quantity` (`max`), nothing changed.
  * - **The accepted price.** Adding or changing a line takes today's price: that is how a
  *   customer accepts a changed price.
- * - An empty cart has no store.
+ * - An empty cart has no store and no fulfilment; replacing the store drops the
+ *   fulfilment too (another store's days differ). The fulfilment is set only after the
+ *   checks of `SetCartFulfilmentUseCase`.
  */
 export class Cart {
   private constructor(
@@ -26,6 +29,7 @@ export class Cart {
     readonly userId: string,
     private storeId: string | null,
     private items: CartLine[],
+    private chosen: CartFulfilment | null,
   ) {}
 
   /** A cart as saved. */
@@ -34,13 +38,14 @@ export class Cart {
     userId: string,
     vendorId: string | null,
     lines: readonly CartLine[],
+    fulfilment: CartFulfilment | null = null,
   ): Cart {
-    return new Cart(id, userId, vendorId, [...lines]);
+    return new Cart(id, userId, vendorId, [...lines], fulfilment);
   }
 
   /** The cart of a customer who has none yet. */
   static empty(userId: string): Cart {
-    return new Cart(null, userId, null, []);
+    return new Cart(null, userId, null, [], null);
   }
 
   /**
@@ -64,6 +69,19 @@ export class Cart {
 
   get lines(): readonly CartLine[] {
     return this.items;
+  }
+
+  /** Null until chosen. */
+  get fulfilment(): CartFulfilment | null {
+    return this.chosen;
+  }
+
+  /** Sets the fulfilment the caller checked; CART_EMPTY for an empty cart. */
+  setFulfilment(fulfilment: CartFulfilment): void {
+    if (this.items.length === 0) {
+      throw new AppError(ErrorCode.CART_EMPTY);
+    }
+    this.chosen = fulfilment;
   }
 
   /**
@@ -93,6 +111,7 @@ export class Cart {
         });
       }
       this.items = [];
+      this.chosen = null;
     }
     const key = Cart.configurationKey(item.choice);
     const index = this.items.findIndex(
@@ -135,6 +154,7 @@ export class Cart {
     this.items = this.items.filter((other) => other !== line);
     if (this.items.length === 0) {
       this.storeId = null;
+      this.chosen = null;
     }
   }
 
@@ -142,6 +162,7 @@ export class Cart {
   clear(): void {
     this.items = [];
     this.storeId = null;
+    this.chosen = null;
   }
 
   /** The line `lineId`, or NOT_FOUND. */

@@ -7,6 +7,7 @@ export class FakeCartSettings implements CartSettingsSource {
   settings: CartSettings = {
     minOrder: Money.zero(),
     deliveryFee: Money.zero(),
+    deliveryWindow: { start: '16:00', end: '22:00' },
     pause: { isPaused: false, messageAr: null, messageEn: null },
   };
 

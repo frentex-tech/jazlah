@@ -400,6 +400,38 @@ describe('Cart (e2e)', () => {
     );
   });
 
+  // The pause is one global row: it is set and lifted inside this test, between two
+  // requests, as the settings suite does.
+  it('refuses a cart change while orders are paused, with the admin’s message', async () => {
+    const customer = await vendors.customer('cart-paused');
+    const body = await item();
+    await catalog.http
+      .put('/v1/admin/settings/operations/pause')
+      .set(...bearer(admin))
+      .send({
+        isPaused: true,
+        messageAr: 'متوقفين للجرد',
+        messageEn: 'Stock count',
+      })
+      .expect(200);
+    let paused: Awaited<ReturnType<typeof add>>;
+    try {
+      paused = await add(customer, body);
+    } finally {
+      await catalog.http
+        .put('/v1/admin/settings/operations/pause')
+        .set(...bearer(admin))
+        .send({ isPaused: false })
+        .expect(200);
+    }
+
+    expect(paused.status).toBe(409);
+    expect(paused.body).toMatchObject({
+      code: 'ORDERING_PAUSED',
+      details: { messageAr: 'متوقفين للجرد', messageEn: 'Stock count' },
+    });
+  });
+
   it('refuses an invalid body with its fields', async () => {
     const customer = await vendors.customer('cart-invalid');
 

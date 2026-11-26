@@ -1,5 +1,6 @@
 import { Money } from '@common/money/money';
 import type { LineChoice } from '../line-choice.type';
+import type { LineFulfilment } from '../line-fulfilment.type';
 import type { LineQuote } from '../line-quote.type';
 import type { LineRefusal } from '../line-refusal.type';
 import type { CartCatalog } from '../ports/cart-catalog.port';
@@ -9,6 +10,7 @@ type FakeProduct = {
   vendorId: string;
   unitPriceHalalas: number;
   refusals: LineRefusal[];
+  fulfilment: LineFulfilment;
 };
 
 /** CartCatalog in memory: products a test sets by id; an unknown product is PRODUCT_UNAVAILABLE. */
@@ -20,6 +22,7 @@ export class FakeCartCatalog implements CartCatalog {
       vendorId: 'vendor-1',
       unitPriceHalalas: 10_000,
       refusals: [],
+      fulfilment: 'both',
       ...this.products.get(productId),
       ...product,
     });
@@ -38,6 +41,7 @@ export class FakeCartCatalog implements CartCatalog {
             vendorId: null,
             display: null,
             imageUrl: null,
+            fulfilment: null,
           };
         }
         return {
@@ -55,6 +59,7 @@ export class FakeCartCatalog implements CartCatalog {
             exclusions: [],
           },
           imageUrl: null,
+          fulfilment: product.fulfilment,
         };
       }),
     );

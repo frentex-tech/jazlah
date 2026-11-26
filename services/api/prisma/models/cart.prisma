@@ -4,15 +4,22 @@
 /// A customer's cart (CRT-API-1, FR-CRT-01): at most one per user, made on the first
 /// write. Every write locks this row first. Lines of one store only (`vendor_id`).
 model Cart {
-  id        String     @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  userId    String     @map("user_id") @db.Uuid
+  id                  String            @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  userId              String            @map("user_id") @db.Uuid
   /// The store of its lines; null while the cart is empty.
-  vendorId  String?    @map("vendor_id") @db.Uuid
-  createdAt DateTime   @default(now()) @map("created_at") @db.Timestamptz(3)
-  updatedAt DateTime   @updatedAt @map("updated_at") @db.Timestamptz(3)
-  user      User       @relation(fields: [userId], references: [id], onDelete: Cascade)
-  vendor    Vendor?    @relation(fields: [vendorId], references: [id], onDelete: Cascade)
-  items     CartItem[]
+  vendorId            String?           @map("vendor_id") @db.Uuid
+  /// Null until the customer chooses delivery or pickup (PATCH cart/fulfilment).
+  fulfilmentMethod    FulfilmentMethod? @map("fulfilment_method")
+  /// Null unless the method is delivery: one of the customer's addresses (a plain id, checked
+  /// when used: a deleted address makes the choice invalid rather than deleting it).
+  fulfilmentAddressId String?           @map("fulfilment_address_id") @db.Uuid
+  /// Null until a fulfilment is chosen: the Riyadh calendar day.
+  fulfilmentDate      DateTime?         @map("fulfilment_date") @db.Date
+  createdAt           DateTime          @default(now()) @map("created_at") @db.Timestamptz(3)
+  updatedAt           DateTime          @updatedAt @map("updated_at") @db.Timestamptz(3)
+  user                User              @relation(fields: [userId], references: [id], onDelete: Cascade)
+  vendor              Vendor?           @relation(fields: [vendorId], references: [id], onDelete: Cascade)
+  items               CartItem[]
 
   @@unique([userId], map: "carts_user_id_key")
   @@index([vendorId])
@@ -50,4 +57,13 @@ model CartItem {
   @@unique([cartId, configurationKey], map: "cart_items_cart_id_configuration_key_key")
   @@index([productId])
   @@map("cart_items")
+}
+
+/// How an order reaches the customer (the values of `FULFILMENT_METHODS`, owned by orders):
+/// the cart is its first user; orders reuse it.
+enum FulfilmentMethod {
+  delivery
+  pickup
+
+  @@map("fulfilment_method")
 }

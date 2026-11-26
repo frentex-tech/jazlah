@@ -14,6 +14,7 @@ export class OperationsSettingsCartSettings implements CartSettingsSource {
     return {
       minOrder: Money.of(saved.minOrderHalalas),
       deliveryFee: Money.of(saved.deliveryFeeHalalas),
+      deliveryWindow: saved.deliveryWindow,
       pause: saved.paused,
     };
   }

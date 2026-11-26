@@ -2,13 +2,14 @@ import { PRODUCT_PACKAGINGS } from '@modules/catalog';
 import type { CartIssue } from '../domain/cart-issue.type';
 import type { PricedCart } from '../domain/priced-cart.type';
 import type { PricedCartLine } from '../domain/priced-cart-line.type';
+import type { PricedFulfilment } from '../domain/priced-fulfilment.type';
+import type { CartFulfilmentResponseDto } from './dto/cart-fulfilment-response.dto';
 import type { CartIssueResponseDto } from './dto/cart-issue-response.dto';
 import type { CartLineResponseDto } from './dto/cart-line-response.dto';
 import type { CartResponseDto } from './dto/cart-response.dto';
 
 /**
- * A priced cart as the contract shows it. No coupon (CRT-API-3) and no fulfilment
- * (SCH-API-2) yet: both null. The store is null when its name is unknown, which only a
+ * A priced cart as the contract shows it. No coupon yet (CRT-API-3): null. The store is null when its name is unknown, which only a
  * deleted vendor causes, and that deletes the cart with it.
  */
 export function toCartResponse(cart: PricedCart): CartResponseDto {
@@ -19,7 +20,7 @@ export function toCartResponse(cart: PricedCart): CartResponseDto {
         : { id: cart.vendorId, name: { ...cart.vendorName } },
     lines: cart.lines.map(toLine),
     coupon: null,
-    fulfilment: null,
+    fulfilment: cart.fulfilment === null ? null : toFulfilment(cart.fulfilment),
     subtotalHalalas: cart.subtotal.halalas,
     discountHalalas: cart.discount.halalas,
     deliveryFeeHalalas: cart.deliveryFee.halalas,
@@ -65,6 +66,26 @@ function toLine({
     unitPriceHalalas: line.unitPrice.halalas,
     totalHalalas: total.halalas,
     isAvailable,
+  };
+}
+
+function toFulfilment(fulfilment: PricedFulfilment): CartFulfilmentResponseDto {
+  const point = fulfilment.pickupPoint;
+  return {
+    method: fulfilment.method,
+    addressId: fulfilment.addressId,
+    date: fulfilment.date,
+    window: fulfilment.window === null ? null : { ...fulfilment.window },
+    pickupPoint:
+      point === null
+        ? null
+        : {
+            name: { ...point.name },
+            address: point.address === null ? null : { ...point.address },
+            location: point.location === null ? null : { ...point.location },
+            phone: point.phone,
+            hours: point.hours === null ? null : { ...point.hours },
+          },
   };
 }
 

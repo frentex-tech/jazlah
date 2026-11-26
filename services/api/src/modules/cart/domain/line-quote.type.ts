@@ -1,5 +1,6 @@
 import type { Money } from '@common/money/money';
 import type { LineDisplay } from './line-display.type';
+import type { LineFulfilment } from './line-fulfilment.type';
 import type { LineRefusal } from './line-refusal.type';
 
 /** A choice priced now by the catalog (`CartCatalog`). */
@@ -14,4 +15,6 @@ export type LineQuote = Readonly<{
   display: LineDisplay | null;
   /** Its first image now; null for none or when the public cannot see it. */
   imageUrl: string | null;
+  /** How the product may be fulfilled now; null when the public cannot see it. */
+  fulfilment: LineFulfilment | null;
 }>;

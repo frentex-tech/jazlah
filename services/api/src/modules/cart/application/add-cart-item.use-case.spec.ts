@@ -2,6 +2,7 @@ import { AppError } from '@common/errors/app-error';
 import { ErrorCode } from '@common/errors/error-code.enum';
 import { FakeCartCatalog } from '../domain/fakes/fake-cart-catalog.fake';
 import { FakeCartSettings } from '../domain/fakes/fake-cart-settings.fake';
+import { FakeCartScheduling } from '../domain/fakes/fake-cart-scheduling.fake';
 import { InMemoryCartRepository } from '../domain/fakes/in-memory-cart.repository.fake';
 import type { LineChoice } from '../domain/line-choice.type';
 import { AddCartItemUseCase } from './add-cart-item.use-case';
@@ -27,7 +28,7 @@ function setUp() {
     catalog,
     settings,
     { run: (work) => work() },
-    new CartPricer(catalog, settings),
+    new CartPricer(catalog, settings, new FakeCartScheduling()),
   );
   catalog.set('naimi', { vendorId: 'v1', unitPriceHalalas: 97_000 });
   return { carts, catalog, settings, useCase };

@@ -52,6 +52,7 @@ function toCartQuote({ priced, product }: CatalogLineQuote): LineQuote {
             exclusions: product.exclusions,
           },
     imageUrl: product?.imageUrl ?? null,
+    fulfilment: product?.fulfilment ?? null,
   };
 }
 

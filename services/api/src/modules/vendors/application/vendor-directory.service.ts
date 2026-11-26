@@ -4,10 +4,11 @@ import {
   VENDOR_REPOSITORY,
   type VendorRepository,
 } from '../domain/ports/vendor.repository.port';
+import type { VendorStore } from './vendor-store.type';
 
 /**
  * What other modules may read about vendors (exported): the platform vendor's id and
- * vendor names. Reads only; a vendor changes through this module's own use cases.
+ * vendor names, a store's pickup facts. Reads only; a vendor changes through this module's own use cases.
  */
 @Injectable()
 export class VendorDirectory {
@@ -31,5 +32,20 @@ export class VendorDirectory {
         vendor.name,
       ]),
     );
+  }
+
+  /** The store a customer collects from, whatever its status; null for an unknown id. */
+  async storeOf(id: string): Promise<VendorStore | null> {
+    const vendor = await this.vendors.findById(id);
+    if (vendor === null) {
+      return null;
+    }
+    return {
+      id: vendor.id,
+      name: vendor.name,
+      city: vendor.city,
+      location: vendor.location,
+      contactPhone: vendor.contactPhone,
+    };
   }
 }

@@ -9,11 +9,13 @@ Money is integer halalas with VAT included. Days are Riyadh `yyyy-MM-dd`, times 
 | Route | Task |
 |---|---|
 | `GET /v1/public/settings/client`, `GET /v1/admin/settings/operations`, `PATCH /v1/admin/settings/operations`, `PUT /v1/admin/settings/operations/pause` | SCH-API-1 (**live**: real answers, same shapes) |
-| `GET /v1/customer/cart`, `DELETE /v1/customer/cart`, `POST /v1/customer/cart/items`, `PATCH /v1/customer/cart/items/{id}`, `DELETE /v1/customer/cart/items/{id}` | CRT-API-1 (**live**: real answers, same shapes; `coupon` and `fulfilment` stay null until CRT-API-3 and SCH-API-2) |
+| `GET /v1/customer/cart`, `DELETE /v1/customer/cart`, `POST /v1/customer/cart/items`, `PATCH /v1/customer/cart/items/{id}`, `DELETE /v1/customer/cart/items/{id}` | CRT-API-1 (**live**: real answers, same shapes; `coupon` stays null until CRT-API-3) |
 | `POST /v1/customer/cart/merge` | CRT-API-1, after November 30 (still 501) |
-| `PATCH /v1/customer/cart/fulfilment`, `GET /v1/customer/checkout/days`, `GET /v1/admin/vendors/{id}/capacity`, `PUT /v1/admin/vendors/{id}/capacity`, `PUT /v1/admin/vendors/{id}/capacity/{date}`, `DELETE /v1/admin/vendors/{id}/capacity/{date}` | SCH-API-2 |
+| `PATCH /v1/customer/cart/fulfilment`, `GET /v1/customer/checkout/days` | SCH-API-2 (**live**: real answers, same shapes. Sprint 3: every cart counts as ready meat; pickup follows the operations settings, so days never answer `VENDOR_CLOSED`, and the pickup point's `hours` is null) |
+| `GET /v1/admin/vendors/{id}/capacity`, `PUT /v1/admin/vendors/{id}/capacity`, `PUT /v1/admin/vendors/{id}/capacity/{date}`, `DELETE /v1/admin/vendors/{id}/capacity/{date}` | SCH-API-2, after November 30 (still 501) |
 | `GET /v1/customer/wallet`, `GET /v1/customer/wallet/transactions`, `GET /v1/admin/customers/{id}/wallet`, `POST /v1/admin/customers/{id}/wallet/adjustments` | WAL-API-1 |
-| `GET /v1/customer/checkout/payment-methods`, `POST /v1/customer/orders/{id}/payments` (tag Customer checkout), `POST /v1/webhooks/payments/{provider}` | PAY-API-1 |
+| `GET /v1/customer/checkout/payment-methods` without `orderId` | PAY-API-1's methods route (**live**: cash on delivery only, `walletBalanceHalalas` 0; with `orderId` still 501) |
+| `POST /v1/customer/orders/{id}/payments` (tag Customer checkout), `POST /v1/webhooks/payments/{provider}` | PAY-API-1 |
 | `POST /v1/customer/orders` | ORD-API-1 |
 | `POST /v1/vendor/orders/{id}/transition`, `POST /v1/admin/orders/{id}/transition` | ORD-API-2 |
 | `GET /v1/customer/orders`, `GET /v1/customer/orders/{id}`, `GET /v1/vendor/orders`, `GET /v1/vendor/orders/{id}`, `GET /v1/admin/orders`, `GET /v1/admin/orders/{id}` | ORD-API-3 |

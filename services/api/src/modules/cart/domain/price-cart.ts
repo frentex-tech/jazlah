@@ -4,6 +4,7 @@ import type { Cart } from './cart.entity';
 import type { CartIssue } from './cart-issue.type';
 import type { CartPricingRules } from './cart-pricing-rules.type';
 import type { LineQuote } from './line-quote.type';
+import { orderTypesOf } from './order-types-of';
 import type { PricedCart } from './priced-cart.type';
 import type { PricedCartLine } from './priced-cart-line.type';
 
@@ -46,6 +47,7 @@ export function priceCart(
       display: quote?.display ?? line.display,
       imageUrl: quote?.imageUrl ?? null,
       isAvailable,
+      fulfilment: quote?.fulfilment ?? null,
       total: line.unitPrice.multiply(line.quantity),
     };
   });
@@ -75,6 +77,8 @@ export function priceCart(
     minOrder: rules.minOrder,
     minOrderRemaining,
     issues,
+    fulfilment: rules.fulfilment,
+    orderTypes: orderTypesOf(cart),
     canCheckout:
       lines.length > 0 &&
       issues.length === 0 &&
