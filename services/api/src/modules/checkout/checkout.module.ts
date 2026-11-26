@@ -4,7 +4,6 @@ import { CustomersModule } from '@modules/customers';
 import { OrdersModule } from '@modules/orders';
 import { SchedulingModule } from '@modules/scheduling';
 import { SettingsModule } from '@modules/settings';
-import { UsersModule } from '@modules/users';
 import { VendorsModule } from '@modules/vendors';
 import { CustomerCheckoutController } from './api/controllers/customer.controller';
 import { ListCheckoutDaysUseCase } from './application/list-checkout-days.use-case';
@@ -30,7 +29,6 @@ import { SchedulingServiceCheckoutScheduling } from './infrastructure/scheduling
     OrdersModule,
     SchedulingModule,
     SettingsModule,
-    UsersModule,
     VendorsModule,
   ],
   controllers: [CustomerCheckoutController],

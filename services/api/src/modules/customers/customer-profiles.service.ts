@@ -52,6 +52,18 @@ export class CustomerProfilesService {
   }
 
   /**
+   * Locks the customer's user row for the rest of the caller's transaction and returns
+   * their mobile: the first step of placing an order, taken before any other lock
+   * (account deletion locks the user first, then deletes the cart under it). UNAUTHORIZED
+   * for a deleted account, ACCOUNT_DISABLED for a disabled one, whatever the fulfilment.
+   * Call inside `TransactionRunner.run`.
+   */
+  async lockAccount(userId: string): Promise<Readonly<{ phone: string }>> {
+    const user = await lockCustomer(this.accounts, userId);
+    return { phone: user.phone };
+  }
+
+  /**
    * Saves changes to the customer's profile, creating it at the first save, and returns
    * it. UNAUTHORIZED for a deleted account, ACCOUNT_DISABLED for a disabled one.
    */

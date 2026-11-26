@@ -442,6 +442,22 @@ describe('Place order (e2e)', () => {
       await place(user).expect(201);
     });
 
+    it.each(['pickup', 'delivery'] as const)(
+      'refuses a disabled customer the same way for %s: ACCOUNT_DISABLED, nothing placed',
+      async (method) => {
+        const { user } = await ready(`po-disabled-${method}`, method);
+        await prisma.user.update({
+          where: { id: user.userId },
+          data: { disabledAt: new Date() },
+        });
+
+        const res = await place(user).expect(403);
+
+        expect(codeOf(res.body)).toBe('ACCOUNT_DISABLED');
+        expect(await ordersOf(user)).toEqual([]);
+      },
+    );
+
     it('refuses a cart whose fulfilment was never chosen: FULFILMENT_REQUIRED', async () => {
       const user = await customer('po-no-fulfilment');
       await addToCart(user);

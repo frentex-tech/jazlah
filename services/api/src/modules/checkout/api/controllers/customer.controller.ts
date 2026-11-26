@@ -201,6 +201,7 @@ export class CustomerCheckoutController {
     ErrorCode.PROFILE_INCOMPLETE,
     ErrorCode.ORDERING_PAUSED,
     ErrorCode.IDEMPOTENCY_KEY_REUSED,
+    ErrorCode.ACCOUNT_DISABLED,
     ErrorCode.TRANSACTION_CONFLICT,
     ErrorCode.SERVICE_UNAVAILABLE,
     ...CUSTOMER_AUTH_ERRORS,

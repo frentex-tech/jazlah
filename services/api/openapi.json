@@ -12724,7 +12724,7 @@
             }
           },
           "403": {
-            "description": "Error. code: FORBIDDEN.",
+            "description": "Error. code: ACCOUNT_DISABLED, FORBIDDEN.",
             "content": {
               "application/json": {
                 "schema": {

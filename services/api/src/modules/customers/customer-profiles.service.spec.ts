@@ -95,4 +95,12 @@ describe('CustomerProfilesService', () => {
     expect(kit.client.profiles).toEqual([]);
     expect((await kit.profiles.profileOf(CUSTOMER)).isComplete).toBe(false);
   });
+  it('locks the user and answers their phone for placing an order', async () => {
+    const kit = kitWithFakes();
+
+    const account = await kit.profiles.lockAccount(CUSTOMER);
+
+    expect(account.phone).toEqual(expect.any(String));
+    expect(kit.accounts.locked).toEqual([CUSTOMER]);
+  });
 });

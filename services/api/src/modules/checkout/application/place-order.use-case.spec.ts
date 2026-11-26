@@ -80,6 +80,7 @@ type Setup = Readonly<{
   cod: { enabled: boolean };
   dayError: AppError | null;
   reserveError: AppError | null;
+  accountError: AppError | null;
 }>;
 
 function build(setup: Partial<Setup> = {}) {
@@ -92,12 +93,14 @@ function build(setup: Partial<Setup> = {}) {
     cod: { enabled: true },
     dayError: null,
     reserveError: null,
+    accountError: null,
     ...setup,
   };
   const outcomes = new Map<string, unknown>();
   const created: unknown[] = [];
   const reserved: unknown[] = [];
   let cleared = 0;
+  const calls: string[] = [];
   const useCase = new PlaceOrderUseCase(
     { run: <T>(work: () => Promise<T>) => work() },
     {
@@ -125,7 +128,12 @@ function build(setup: Partial<Setup> = {}) {
           allowedOrderTypes: ['ready_meat'],
         }),
     },
-    { execute: () => Promise.resolve(s.cart) },
+    {
+      execute: () => {
+        calls.push('cart');
+        return Promise.resolve(s.cart);
+      },
+    },
     {
       execute: () => {
         cleared += 1;
@@ -133,6 +141,12 @@ function build(setup: Partial<Setup> = {}) {
       },
     },
     {
+      lockAccount: () => {
+        calls.push('user');
+        return s.accountError === null
+          ? Promise.resolve({ phone: '+966500000001' })
+          : Promise.reject(s.accountError);
+      },
       profileOf: () =>
         Promise.resolve({
           fullName: s.fullName,
@@ -160,10 +174,6 @@ function build(setup: Partial<Setup> = {}) {
               createdAt: new Date(),
               updatedAt: new Date(),
             }),
-    },
-    {
-      findById: () =>
-        Promise.resolve({ id: USER, phone: '+966500000001' } as never),
     },
     {
       storeOf: () =>
@@ -217,7 +227,7 @@ function build(setup: Partial<Setup> = {}) {
       execute: (_user, id) => Promise.resolve({ id } as Order),
     },
   );
-  return { useCase, created, reserved, cleared: () => cleared };
+  return { useCase, created, reserved, calls, cleared: () => cleared };
 }
 
 const BODY = { paymentMethod: 'cod' };
@@ -327,6 +337,10 @@ describe('PlaceOrderUseCase', () => {
     ['CART_EMPTY', { cart: cart({ vendorId: null, lines: [] }) }],
     ['PROFILE_INCOMPLETE', { fullName: null }],
     [
+      'ACCOUNT_DISABLED',
+      { accountError: new AppError(ErrorCode.ACCOUNT_DISABLED) },
+    ],
+    [
       'ITEM_UNAVAILABLE',
       { cart: cart({ issues: [{ code: 'ITEM_UNAVAILABLE', lineId: 'l1' }] }) },
     ],
@@ -412,6 +426,30 @@ describe('PlaceOrderUseCase', () => {
       code: ErrorCode.WALLET_INSUFFICIENT,
       details: { balanceHalalas: 0 },
     });
+  });
+
+  it('locks the user row before the cart row, and a disabled customer is refused before the cart is read, for pickup as for delivery', async () => {
+    const ok = build();
+    await ok.useCase.execute(USER, KEY, BODY);
+    const pickup = build({
+      accountError: new AppError(ErrorCode.ACCOUNT_DISABLED),
+      cart: cart({
+        deliveryFee: Money.zero(),
+        fulfilment: {
+          method: 'pickup',
+          addressId: null,
+          date: '2026-11-28',
+          window: null,
+          pickupPoint: null,
+        },
+      }),
+    });
+
+    expect(ok.calls.slice(0, 2)).toEqual(['user', 'cart']);
+    expect(await code(pickup.useCase.execute(USER, KEY, BODY))).toMatchObject({
+      code: ErrorCode.ACCOUNT_DISABLED,
+    });
+    expect(pickup.calls).toEqual(['user']);
   });
 
   it('takes no capacity when a check before it refuses', async () => {

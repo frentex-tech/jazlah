@@ -1,16 +1,10 @@
 import { Inject, Injectable } from '@nestjs/common';
+import { hashRequestBody } from '@common/crypto/hash-request-body';
 import { AppError } from '@common/errors/app-error';
 import { ErrorCode } from '@common/errors/error-code.enum';
-import { hashRequestBody } from '@common/crypto/hash-request-body';
-import { Money } from '@common/money/money';
 import { IdempotencyRunner } from '@infra/database/idempotency-runner';
 import { TransactionRunner } from '@infra/database/transaction-runner';
-import {
-  ClearCartUseCase,
-  LockCartForCheckoutUseCase,
-  type PricedCart,
-  type PricedCartLine,
-} from '@modules/cart';
+import { ClearCartUseCase, LockCartForCheckoutUseCase } from '@modules/cart';
 import {
   CustomerAddressesService,
   CustomerProfilesService,
@@ -25,21 +19,22 @@ import {
   type OrderPickupSnapshot,
 } from '@modules/orders';
 import { CapacityService, SchedulingService } from '@modules/scheduling';
-import { UsersService } from '@modules/users';
 import { VendorDirectory } from '@modules/vendors';
+import { assertLinesOrderable } from '../domain/assert-lines-orderable';
+import { assertMethodSupported } from '../domain/assert-method-supported';
+import { assertMinimumReached } from '../domain/assert-minimum-reached';
 import { assertOrderingOpen } from '../domain/assert-ordering-open';
+import type { CheckoutCart } from '../domain/checkout-cart.type';
 import { paymentMethodsFor } from '../domain/payment-methods-for';
 import type { PlaceOrderRequest } from '../domain/place-order-request.type';
 import {
   CHECKOUT_SETTINGS,
   type CheckoutSettings,
 } from '../domain/ports/checkout-settings.port';
-
-/** The name the once-only key of placing an order is kept under (`idempotency_keys.operation`). */
-const OPERATION = 'place-order';
-
-/** What a placement leaves in the key's stored outcome: the order and the request that made it. */
-type PlacedOutcome = { orderId: string; bodyHash: string };
+import { PLACE_ORDER_OPERATION } from './place-order-operation.constants';
+import type { PlacedOrderOutcome } from './placed-order-outcome.type';
+import { toCheckoutCart } from './to-checkout-cart';
+import { toOrderLine } from './to-order-line';
 
 /**
  * Turns the customer's cart into an order (POST /v1/customer/orders, ORD-API-1), cash
@@ -49,7 +44,10 @@ type PlacedOutcome = { orderId: string; bodyHash: string };
  *   (`IdempotencyRunner.runOnce`). The same key and body answer the first order again,
  *   whatever the cart is now; the same key with another body is IDEMPOTENCY_KEY_REUSED;
  *   two requests at once with one key make one order. A refusal keeps nothing.
- * - **The cart.** ORDERING_PAUSED; then its row is locked and read again
+ * - **The locks, in this order:** the user row of the customer first (UNAUTHORIZED for
+ *   a deleted account, ACCOUNT_DISABLED for a disabled one, for pickup as for delivery;
+ *   account deletion takes the same lock first), then the cart row.
+ * - **The cart.** ORDERING_PAUSED; the cart read again under its lock
  *   (`LockCartForCheckoutUseCase`), so two placements of one cart happen one after the
  *   other; CART_EMPTY for an empty cart.
  * - **The customer.** PROFILE_INCOMPLETE without a full name.
@@ -82,11 +80,12 @@ export class PlaceOrderUseCase {
     @Inject(ClearCartUseCase)
     private readonly clearCart: Pick<ClearCartUseCase, 'execute'>,
     @Inject(CustomerProfilesService)
-    private readonly profiles: Pick<CustomerProfilesService, 'profileOf'>,
+    private readonly profiles: Pick<
+      CustomerProfilesService,
+      'profileOf' | 'lockAccount'
+    >,
     @Inject(CustomerAddressesService)
     private readonly addresses: Pick<CustomerAddressesService, 'get'>,
-    @Inject(UsersService)
-    private readonly users: Pick<UsersService, 'findById'>,
     @Inject(VendorDirectory)
     private readonly vendors: Pick<
       VendorDirectory,
@@ -112,8 +111,8 @@ export class PlaceOrderUseCase {
   ): Promise<Order> {
     const bodyHash = hashRequestBody(request);
     const outcome = await this.transactions.run(async () => {
-      const stored = await this.idempotency.runOnce<PlacedOutcome>(
-        OPERATION,
+      const stored = await this.idempotency.runOnce<PlacedOrderOutcome>(
+        PLACE_ORDER_OPERATION,
         `${userId}:${idempotencyKey}`,
         () => this.place(userId, request, bodyHash),
       );
@@ -129,43 +128,39 @@ export class PlaceOrderUseCase {
     userId: string,
     request: PlaceOrderRequest,
     bodyHash: string,
-  ): Promise<PlacedOutcome> {
+  ): Promise<PlacedOrderOutcome> {
     assertOrderingOpen(await this.settings.pause());
+    // The user row before the cart row: account deletion locks the user, then deletes
+    // the cart under it, so the other order could deadlock.
+    const { phone } = await this.profiles.lockAccount(userId);
     const cart = await this.carts.execute(userId);
     if (cart.vendorId === null || cart.lines.length === 0) {
       throw new AppError(ErrorCode.CART_EMPTY);
     }
-    const customer = await this.customerOf(userId);
-    assertLinesOrderable(cart);
-    assertMinimumReached(cart);
+    const { fullName } = await this.profiles.profileOf(userId);
+    if (fullName === null) {
+      throw new AppError(ErrorCode.PROFILE_INCOMPLETE);
+    }
+    assertLinesOrderable(cart.issues);
+    assertMinimumReached(cart.minOrder, cart.minOrderRemaining);
     const { fulfilment } = cart;
     if (fulfilment === null) {
       throw new AppError(ErrorCode.FULFILMENT_REQUIRED);
     }
-    if (
-      cart.lines.some(
-        (line) =>
-          line.fulfilment !== 'both' && line.fulfilment !== fulfilment.method,
-      )
-    ) {
-      throw new AppError(ErrorCode.FULFILMENT_NOT_SUPPORTED);
-    }
+    const checkoutCart = toCheckoutCart(cart);
+    const vendorId = assertMethodSupported(checkoutCart, fulfilment.method);
     const address =
       fulfilment.method === 'delivery'
         ? await this.addressOf(userId, fulfilment.addressId)
         : null;
     const day = await this.scheduling.assertDayAvailable(
-      {
-        vendorId: cart.vendorId,
-        method: fulfilment.method,
-        orderTypes: cart.orderTypes,
-      },
+      { vendorId, method: fulfilment.method, orderTypes: cart.orderTypes },
       fulfilment.date,
     );
-    await this.assertPaymentAllowed(cart, request);
+    await this.assertPaymentAllowed(checkoutCart, request);
     const [store, commission] = await Promise.all([
-      this.vendors.storeOf(cart.vendorId),
-      this.vendors.commissionBasisPointsOf(cart.vendorId),
+      this.vendors.storeOf(vendorId),
+      this.vendors.commissionBasisPointsOf(vendorId),
     ]);
     if (store === null || commission === null) {
       throw new AppError(ErrorCode.ITEM_UNAVAILABLE, {
@@ -174,18 +169,20 @@ export class PlaceOrderUseCase {
     }
     const pickupPoint: OrderPickupSnapshot | null =
       fulfilment.method === 'pickup'
-        ? (await this.scheduling.pickupTerms(cart.vendorId)).point
+        ? (await this.scheduling.pickupTerms(vendorId)).point
         : null;
+    // ASSUMPTION (DECISIONS.md, "Every cart order is ready_meat in Sprint 3"): no
+    // carcasses are counted until products have an order type.
     const carcasses = 0;
     await this.capacity.reserve({
-      vendorId: cart.vendorId,
+      vendorId,
       date: fulfilment.date,
       carcasses,
     });
     const order = await this.createOrder.execute({
       userId,
-      customer,
-      vendorId: cart.vendorId,
+      customer: { name: fullName, phone },
+      vendorId,
       vendor: {
         name: store.name,
         phone: store.contactPhone,
@@ -207,23 +204,6 @@ export class PlaceOrderUseCase {
     } satisfies NewOrder);
     await this.clearCart.execute(userId);
     return { orderId: order.id, bodyHash };
-  }
-
-  /** The name and mobile to keep on the order; PROFILE_INCOMPLETE without a full name. */
-  private async customerOf(
-    userId: string,
-  ): Promise<{ name: string; phone: string }> {
-    const [profile, user] = await Promise.all([
-      this.profiles.profileOf(userId),
-      this.users.findById(userId),
-    ]);
-    if (profile.fullName === null) {
-      throw new AppError(ErrorCode.PROFILE_INCOMPLETE);
-    }
-    if (user === null) {
-      throw new AppError(ErrorCode.NOT_FOUND);
-    }
-    return { name: profile.fullName, phone: user.phone };
   }
 
   /** The delivery address as it is now; FULFILMENT_REQUIRED when it was deleted, ADDRESS_NOT_COVERED outside every active zone. */
@@ -259,7 +239,7 @@ export class PlaceOrderUseCase {
   }
 
   private async assertPaymentAllowed(
-    cart: PricedCart,
+    cart: CheckoutCart,
     request: PlaceOrderRequest,
   ): Promise<void> {
     if (request.paymentMethod !== 'cod') {
@@ -272,62 +252,11 @@ export class PlaceOrderUseCase {
         details: { balanceHalalas: 0 },
       });
     }
-    const offered = paymentMethodsFor(
-      {
-        vendorId: cart.vendorId,
-        lineFulfilments: [],
-        orderTypes: cart.orderTypes,
-        total: cart.total,
-      },
-      await this.settings.cod(),
-    );
+    const offered = paymentMethodsFor(cart, await this.settings.cod());
     if (!offered.some((option) => option.method === 'cod')) {
       throw new AppError(ErrorCode.PAYMENT_METHOD_NOT_AVAILABLE, {
         details: { method: 'cod' },
       });
     }
   }
-}
-
-/** ITEM_UNAVAILABLE, then PRICE_CHANGED, each naming the lines. */
-function assertLinesOrderable(cart: PricedCart): void {
-  for (const code of ['ITEM_UNAVAILABLE', 'PRICE_CHANGED'] as const) {
-    const lineIds = cart.issues
-      .filter((issue) => issue.code === code)
-      .map((issue) => issue.lineId);
-    if (lineIds.length > 0) {
-      throw new AppError(ErrorCode[code], { details: { lineIds } });
-    }
-  }
-}
-
-function assertMinimumReached(cart: PricedCart): void {
-  if (cart.minOrderRemaining.isGreaterThan(Money.zero())) {
-    throw new AppError(ErrorCode.MIN_ORDER_NOT_MET, {
-      details: {
-        minOrderHalalas: cart.minOrder.halalas,
-        remainingHalalas: cart.minOrderRemaining.halalas,
-      },
-    });
-  }
-}
-
-function toOrderLine(line: PricedCartLine): NewOrder['lines'][number] {
-  const { choice } = line.line;
-  return {
-    productId: choice.productId,
-    sizeId: choice.sizeId,
-    quantity: line.line.quantity,
-    // Equal to today's catalog price: a moved price was refused above.
-    unitPrice: line.line.unitPrice,
-    packaging: choice.packaging,
-    notes: choice.notes,
-    imageUrl: line.imageUrl,
-    names: {
-      name: line.display.name,
-      size: line.display.size,
-      cutting: line.display.cutting,
-      exclusions: line.display.exclusions,
-    },
-  };
 }

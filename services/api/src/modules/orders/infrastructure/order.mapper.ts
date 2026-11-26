@@ -84,6 +84,7 @@ export const OrderMapper = {
       userId: request.userId,
       vendorId: request.vendorId,
       status: draft.status,
+      createdAt: draft.firstEntry.at,
       orderType: request.orderType,
       fulfilmentMethod: request.fulfilment,
       fulfilmentDate: new Date(`${request.fulfilmentDate}T00:00:00Z`),
