@@ -1812,14 +1812,14 @@ export interface paths {
         };
         /**
          * My cart
-         * @description Customer app, cart tab and checkout. The cart priced today: a line whose price changed since it was accepted carries a PRICE_CHANGED issue, one that can no longer be ordered as chosen an ITEM_UNAVAILABLE issue; a coupon that stopped applying is removed. An empty cart has no vendor and no lines. Until CRT-API-1 lands: NOT_IMPLEMENTED.
+         * @description Customer app, cart tab and checkout. The cart priced today: a line whose price changed since it was accepted carries a PRICE_CHANGED issue, one that can no longer be ordered as chosen an ITEM_UNAVAILABLE issue; a coupon that stopped applying is removed. An empty cart has no vendor and no lines.
          */
         get: operations["customerGetCart"];
         put?: never;
         post?: never;
         /**
          * Empty my cart
-         * @description Customer app, "empty cart". Removes every line, the coupon and the fulfilment. ORDERING_PAUSED while orders are paused (`details.messageAr`, `details.messageEn`: the admin’s message). Until CRT-API-1 lands: NOT_IMPLEMENTED.
+         * @description Customer app, "empty cart". Removes every line, the coupon and the fulfilment. ORDERING_PAUSED while orders are paused (`details.messageAr`, `details.messageEn`: the admin’s message).
          */
         delete: operations["customerClearCart"];
         options?: never;
@@ -1838,7 +1838,7 @@ export interface paths {
         put?: never;
         /**
          * Add to my cart
-         * @description Customer app, product page "add to cart". Prices the selection with the catalog’s rules; the same configuration (size, options, note) adds to its line’s quantity (past 99: VALIDATION_FAILED on `quantity`). A product of another store: CART_VENDOR_MISMATCH (`details.vendorId`, `details.vendorName`: the cart’s store) unless `replaceCart` is true. Selection refusals, in this order: PRODUCT_UNAVAILABLE, OPTION_NOT_IN_PRODUCT, SIZE_UNAVAILABLE, INCOMPATIBLE_CUTTING_PACKAGING, OPTION_REQUIRED. ORDERING_PAUSED while orders are paused (`details.messageAr`, `details.messageEn`: the admin’s message). Until CRT-API-1 lands: NOT_IMPLEMENTED.
+         * @description Customer app, product page "add to cart". Prices the selection with the catalog’s rules; the same configuration (size, options, note) adds to its line’s quantity (past 99: VALIDATION_FAILED on `quantity`). A product of another store: CART_VENDOR_MISMATCH (`details.vendorId`, `details.vendorName`: the cart’s store) unless `replaceCart` is true. Selection refusals, in this order: PRODUCT_UNAVAILABLE, OPTION_NOT_IN_PRODUCT, SIZE_UNAVAILABLE, INCOMPATIBLE_CUTTING_PACKAGING, OPTION_REQUIRED. ORDERING_PAUSED while orders are paused (`details.messageAr`, `details.messageEn`: the admin’s message).
          */
         post: operations["customerAddCartItem"];
         delete?: never;
@@ -1859,14 +1859,14 @@ export interface paths {
         post?: never;
         /**
          * Remove a line
-         * @description Customer app, cart swipe or remove. NOT_FOUND for a line not in the cart. ORDERING_PAUSED while orders are paused (`details.messageAr`, `details.messageEn`: the admin’s message). Until CRT-API-1 lands: NOT_IMPLEMENTED.
+         * @description Customer app, cart swipe or remove. NOT_FOUND for a line not in the cart. ORDERING_PAUSED while orders are paused (`details.messageAr`, `details.messageEn`: the admin’s message).
          */
         delete: operations["customerRemoveCartItem"];
         options?: never;
         head?: never;
         /**
          * Change a line’s quantity
-         * @description Customer app, cart stepper; also how the customer accepts a changed price (send the same quantity). NOT_FOUND for a line not in the cart. ORDERING_PAUSED while orders are paused (`details.messageAr`, `details.messageEn`: the admin’s message). Until CRT-API-1 lands: NOT_IMPLEMENTED.
+         * @description Customer app, cart stepper; also how the customer accepts a changed price (send the same quantity). NOT_FOUND for a line not in the cart. ORDERING_PAUSED while orders are paused (`details.messageAr`, `details.messageEn`: the admin’s message).
          */
         patch: operations["customerUpdateCartItem"];
         trace?: never;
@@ -14258,15 +14258,6 @@ export interface operations {
                     "application/json": components["schemas"]["ErrorResponseDto"];
                 };
             };
-            /** @description Error. code: NOT_IMPLEMENTED. */
-            501: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ErrorResponseDto"];
-                };
-            };
             /** @description Error. code: SERVICE_UNAVAILABLE. */
             503: {
                 headers: {
@@ -14334,15 +14325,6 @@ export interface operations {
             };
             /** @description Error. code: INTERNAL_ERROR. */
             500: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ErrorResponseDto"];
-                };
-            };
-            /** @description Error. code: NOT_IMPLEMENTED. */
-            501: {
                 headers: {
                     [name: string]: unknown;
                 };
@@ -14446,15 +14428,6 @@ export interface operations {
                     "application/json": components["schemas"]["ErrorResponseDto"];
                 };
             };
-            /** @description Error. code: NOT_IMPLEMENTED. */
-            501: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ErrorResponseDto"];
-                };
-            };
             /** @description Error. code: SERVICE_UNAVAILABLE. */
             503: {
                 headers: {
@@ -14543,15 +14516,6 @@ export interface operations {
             };
             /** @description Error. code: INTERNAL_ERROR. */
             500: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ErrorResponseDto"];
-                };
-            };
-            /** @description Error. code: NOT_IMPLEMENTED. */
-            501: {
                 headers: {
                     [name: string]: unknown;
                 };
@@ -14651,15 +14615,6 @@ export interface operations {
             };
             /** @description Error. code: INTERNAL_ERROR. */
             500: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ErrorResponseDto"];
-                };
-            };
-            /** @description Error. code: NOT_IMPLEMENTED. */
-            501: {
                 headers: {
                     [name: string]: unknown;
                 };
