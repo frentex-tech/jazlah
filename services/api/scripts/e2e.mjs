@@ -13,8 +13,9 @@
 // 2. Fails fast, with one line, when either server does not answer.
 // 3. Applies the migrations to the test database (`prisma migrate deploy`).
 // 4. Runs Jest with both URLs pointing at the test targets and no queue workers unless
-//    a suite turns one on. Extra arguments go to Jest. Suites run in parallel and stay
-//    apart:
+//    a suite turns one on. Extra arguments go to both phases. Most suites run in parallel;
+//    the suites that write the shared operations settings row run serially after those
+//    suites, so settings writes cannot race with another suite's reads:
 //    - Each test sends its own client address (X-Forwarded-For, set by createHttpApp;
 //      TRUST_PROXY_HOPS=1 here), so no test shares a rate limit counter with another.
 //    - Each run has its own Redis key prefix (REDIS_KEY_PREFIX=jazla-e2e-<run id>), for
@@ -147,17 +148,29 @@ if (migrate.status !== 0) {
   fail(`e2e: applying migrations to the test database "${databaseUrl.pathname.slice(1)}" failed (output above).`);
 }
 
-const jest = spawnSync(
-  process.execPath,
-  [
-    '--experimental-vm-modules',
-    join(ROOT, 'node_modules', 'jest', 'bin', 'jest.js'),
-    '--config',
-    './test/jest-e2e.json',
-    ...process.argv.slice(2),
-  ],
-  { cwd: ROOT, env, stdio: 'inherit' },
-);
+function runJest(configPath, options = []) {
+  return spawnSync(
+    process.execPath,
+    [
+      '--experimental-vm-modules',
+      join(ROOT, 'node_modules', 'jest', 'bin', 'jest.js'),
+      '--config',
+      configPath,
+      ...options,
+      ...process.argv.slice(2),
+    ],
+    { cwd: ROOT, env, stdio: 'inherit' },
+  );
+}
+
+const parallelSuites = runJest('./test/jest-e2e.json');
+let e2eStatus = parallelSuites.status ?? 1;
+if (e2eStatus === 0) {
+  const settingsSuites = runJest('./test/jest-e2e-settings.json', [
+    '--runInBand',
+  ]);
+  e2eStatus = settingsSuites.status ?? 1;
+}
 
 /** Deletes every key of this run (rate limit counters, queues) from the test Redis database. */
 async function deleteRunKeys() {
@@ -182,4 +195,4 @@ async function deleteRunKeys() {
 }
 
 await deleteRunKeys();
-process.exit(jest.status ?? 1);
+process.exit(e2eStatus);

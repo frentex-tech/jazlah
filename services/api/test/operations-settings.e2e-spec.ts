@@ -12,9 +12,9 @@ import { createHttpApp } from './support/create-http-app';
 import { testPhone } from './support/test-phone';
 
 /**
- * The operations settings (SCH-API-1). The settings are one row shared by every suite:
- * this is the only suite that changes them, it puts every value back after each test,
- * and it pauses ordering only between two consecutive requests.
+ * The operations settings (SCH-API-1). The settings are one row shared by every suite;
+ * this suite puts every value back after each test. scripts/e2e.mjs runs it serially
+ * with the other settings-writing suites, after all other suites have finished.
  */
 describe('Operations settings (e2e)', () => {
   let app: INestApplication<App>;

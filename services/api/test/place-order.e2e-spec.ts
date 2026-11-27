@@ -128,6 +128,9 @@ describe('Place order (e2e)', () => {
     // An order restricts the deletion of its customer and its vendor; its lines and
     // history go with it (cascade).
     await prisma.order.deleteMany({ where: { vendorId: { in: vendorIds } } });
+    await prisma.auditLog.deleteMany({
+      where: { actorId: admin.userId, action: 'settings.ordering.paused' },
+    });
     await prisma.auditLog.deleteMany({ where: { entityId: { in: zoneIds } } });
     await prisma.coverageZone.deleteMany({ where: { id: { in: zoneIds } } });
     await catalog.cleanUp();
@@ -441,6 +444,62 @@ describe('Place order (e2e)', () => {
 
       expect(codeOf(res.body)).toBe('CART_EMPTY');
       expect(await ordersOf(user)).toEqual([]);
+    });
+
+    it('refuses a paused checkout: ORDERING_PAUSED', async () => {
+      const { user } = await ready('po-paused');
+      const saved = await prisma.operationsSettings.findUniqueOrThrow({
+        where: { singleton: true },
+      });
+
+      try {
+        await catalog.http
+          .put('/v1/admin/settings/operations/pause')
+          .set(...bearer(admin))
+          .send({
+            isPaused: true,
+            messageAr: 'الطلبات متوقفة مؤقتًا',
+            messageEn: 'Ordering is paused for now.',
+          })
+          .expect(200);
+        const refused = await place(user).expect(409);
+
+        expect(codeOf(refused.body)).toBe('ORDERING_PAUSED');
+        expect(await ordersOf(user)).toEqual([]);
+      } finally {
+        await prisma.operationsSettings.update({
+          where: { singleton: true },
+          data: {
+            isPaused: saved.isPaused,
+            pauseMessageAr: saved.pauseMessageAr,
+            pauseMessageEn: saved.pauseMessageEn,
+          },
+        });
+      }
+    });
+
+    it('refuses a total below the minimum: MIN_ORDER_NOT_MET', async () => {
+      const { user } = await ready('po-minimum', 'pickup');
+      const cart = await cartOf(user);
+      const saved = await prisma.operationsSettings.findUniqueOrThrow({
+        where: { singleton: true },
+      });
+
+      try {
+        await prisma.operationsSettings.update({
+          where: { singleton: true },
+          data: { minOrderHalalas: cart.totalHalalas + 1 },
+        });
+        const refused = await place(user).expect(409);
+
+        expect(codeOf(refused.body)).toBe('MIN_ORDER_NOT_MET');
+        await expectNothingPlaced(user);
+      } finally {
+        await prisma.operationsSettings.update({
+          where: { singleton: true },
+          data: { minOrderHalalas: saved.minOrderHalalas },
+        });
+      }
     });
 
     it('refuses a customer without a full name: PROFILE_INCOMPLETE, and succeeds once named', async () => {
