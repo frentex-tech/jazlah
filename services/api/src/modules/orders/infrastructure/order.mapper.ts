@@ -1,7 +1,11 @@
 import { Money } from '@common/money/money';
-import type { Prisma } from '@infra/database/generated/prisma/client';
+import type {
+  Order as OrderRow,
+  Prisma,
+} from '@infra/database/generated/prisma/client';
 import { ProductPackaging } from '@infra/database/generated/prisma/enums';
 import type { Order } from '../domain/order.type';
+import type { OrderSummary } from '../domain/order-summary.type';
 import type { OrderDraft } from '../domain/order-draft.type';
 import type { NewOrderLine } from '../domain/new-order-line.type';
 import {
@@ -72,6 +76,25 @@ export const OrderMapper = {
           note: entry.note,
           at: entry.createdAt,
         })),
+      createdAt: row.createdAt,
+    };
+  },
+
+  /** A row of `orders` alone as a list row. */
+  toSummary(row: OrderRow): OrderSummary {
+    return {
+      id: row.id,
+      number: row.number,
+      userId: row.userId,
+      customer: { name: row.customerName, phone: row.customerPhone },
+      vendorId: row.vendorId,
+      vendor: ORDER_VENDOR_SNAPSHOT_SCHEMA.parse(row.vendorSnapshot),
+      status: row.status,
+      orderType: row.orderType,
+      fulfilment: row.fulfilmentMethod,
+      fulfilmentDate: row.fulfilmentDate.toISOString().slice(0, 10),
+      paymentMethod: row.paymentMethod,
+      total: Money.of(Number(row.totalHalalas)),
       createdAt: row.createdAt,
     };
   },

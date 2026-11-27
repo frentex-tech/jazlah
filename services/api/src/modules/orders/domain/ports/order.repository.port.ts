@@ -1,5 +1,9 @@
+import type { Page } from '@common/pagination/page.type';
+import type { PageRequest } from '@common/pagination/page-request.type';
 import type { Order } from '../order.type';
 import type { OrderDraft } from '../order-draft.type';
+import type { OrderListFilter } from '../order-list-filter.type';
+import type { OrderSummary } from '../order-summary.type';
 
 /** Injection token of the OrderRepository. */
 export const ORDER_REPOSITORY = Symbol('ORDER_REPOSITORY');
@@ -18,4 +22,13 @@ export interface OrderRepository {
 
   /** The order of this customer, or null (the order of another customer is not found either). */
   findOfCustomer(userId: string, id: string): Promise<Order | null>;
+
+  /** The order of this store, or null (the order of another store is not found either). */
+  findOfVendor(vendorId: string, id: string): Promise<Order | null>;
+
+  /** The order, whoever placed it, or null. Only for callers that see every order. */
+  findById(id: string): Promise<Order | null>;
+
+  /** One page of the orders matching `filter`, newest first (keyset: createdAt, then id). */
+  list(filter: OrderListFilter, page: PageRequest): Promise<Page<OrderSummary>>;
 }

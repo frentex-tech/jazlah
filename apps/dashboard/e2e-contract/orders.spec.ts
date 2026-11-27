@@ -123,20 +123,6 @@ test('the COD review offers only what allowedTransitions holds', async ({ page, 
   await expect(page.getByRole('button', { name: 'تأكيد الطلب' })).toHaveCount(0);
 });
 
-for (const [locale, title] of [['ar', 'قريبًا'], ['en', 'Coming soon']] as const) {
-  test(`501 NOT_IMPLEMENTED: the board and the detail show coming soon (${locale})`, async ({ page, context, api }) => {
-    await signInAs(context, ['admin']);
-    api.on('get', '/v1/admin/orders', 501, notImplemented('ORD-API-3'));
-    api.on('get', '/v1/admin/orders/{id}', 501, notImplemented('ORD-API-3'));
-    const prefix = locale === 'en' ? '/en' : '';
-    await page.goto(`${prefix}/admin/orders`);
-    await expect(page.getByRole('status').filter({ hasText: title })).toBeVisible();
-    await expect(page.getByRole('table')).toHaveCount(0);
-    await page.goto(`${prefix}/admin/orders/${ORDER_ID}`);
-    await expect(page.getByRole('status').filter({ hasText: title })).toBeVisible();
-  });
-}
-
 test('a transition answered 501 says coming soon and keeps the order', async ({ page, context, api }) => {
   await signInAs(context, ['admin']);
   api.on('get', '/v1/admin/orders/{id}', 200, order());
