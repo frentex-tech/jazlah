@@ -19,8 +19,6 @@ import { OPERATIONS_SETTINGS_ROW_SCHEMA } from './operations-settings-row.schema
 import type { OrderingPause } from './ordering-pause.type';
 import { SETTINGS_AUDIT } from './settings-audit-actions.constants';
 
-const THE_ROW = { singleton: true } as const;
-
 /**
  * The operations settings (table `operations_settings`, SCH-API-1): one row, made by
  * its migration. Read on every cart and checkout call (no cache: one primary-key read,
@@ -73,7 +71,7 @@ export class OperationsSettingsService {
           : this.checkedClosedDays(changes.closedDays, saved.closedDays);
       const updated = await this.query(() =>
         this.db.client.operationsSettings.update({
-          where: THE_ROW,
+          where: { singleton: true },
           data: this.toData({ ...changes, closedDays }),
         }),
       );
@@ -103,7 +101,7 @@ export class OperationsSettingsService {
       await this.lockRow();
       const updated = await this.query(() =>
         this.db.client.operationsSettings.update({
-          where: THE_ROW,
+          where: { singleton: true },
           data: pause.isPaused
             ? {
                 isPaused: true,
@@ -221,7 +219,9 @@ export class OperationsSettingsService {
 
   private async readRow(): Promise<OperationsSettingsRow> {
     const row = await this.query(() =>
-      this.db.client.operationsSettings.findUnique({ where: THE_ROW }),
+      this.db.client.operationsSettings.findUnique({
+        where: { singleton: true },
+      }),
     );
     if (row === null) {
       // The migration makes the row; without it the database is not migrated.

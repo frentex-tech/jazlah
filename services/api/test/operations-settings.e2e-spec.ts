@@ -129,6 +129,18 @@ describe('Operations settings (e2e)', () => {
     });
   });
 
+  it('reads the shared settings row across many parallel requests', async () => {
+    const responses = await Promise.all(
+      Array.from({ length: 100 }, () =>
+        http().get('/v1/public/settings/client'),
+      ),
+    );
+
+    expect(responses.map(({ status }) => status)).toEqual(
+      Array.from({ length: 100 }, () => 200),
+    );
+  });
+
   it('keeps the admin settings from callers without a token and from customers', async () => {
     const unsigned = await http()
       .get('/v1/admin/settings/operations')
