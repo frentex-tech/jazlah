@@ -10,7 +10,8 @@ import { SMS_PORTS } from '@integrations/sms';
 import { FakeSmsProvider } from '@integrations/sms/testing';
 import { STORAGE_PORT } from '@integrations/storage';
 import { FakeStorageProvider } from '@integrations/storage/testing';
-import { CatalogJourney } from './support/catalog-journey';
+import { CatalogJourney, type CatalogOptions } from './support/catalog-journey';
+import { CheckoutSteps, type PlacedOrderBody } from './support/checkout-steps';
 import { createHttpApp } from './support/create-http-app';
 import { VendorJourney, type TestUser } from './support/vendor-journey';
 
@@ -54,6 +55,7 @@ describe('Order lists and detail (e2e)', () => {
   let vendorB: string;
   let customerA: TestUser;
   let customerB: TestUser;
+  let options: CatalogOptions;
   let productId: string;
   let sizeId: string;
   const tag = Date.now().toString(36).toUpperCase();
@@ -83,7 +85,7 @@ describe('Order lists and detail (e2e)', () => {
     vendorB = second.vendorId;
     customerA = await vendors.customer('order-lists-customer-a');
     customerB = await vendors.customer('order-lists-customer-b');
-    const options = await catalog.options(admin);
+    options = await catalog.options(admin);
     productId = await catalog.published(ownerA, admin, options);
     const size = await prisma.productSize.findFirst({ where: { productId } });
     sizeId = size?.id ?? '';
@@ -245,6 +247,66 @@ describe('Order lists and detail (e2e)', () => {
     }
     throw new Error('A list never ended');
   }
+
+  describe('an order placed through the API', () => {
+    it('is read back by the customer, the vendor and the admin as it was placed', async () => {
+      // Runs first in the file: the snapshot test below changes the product's price.
+      const steps = new CheckoutSteps(vendors, catalog);
+      const buyer = await steps.namedCustomer('order-lists-buyer');
+      await steps.addToCart(buyer, productId, options, 2);
+      await steps.choosePickupDay(buyer);
+      const placed = await steps.place(buyer).expect(201);
+      const order = (placed.body as PlacedOrderBody).order;
+
+      expect(order.vendor.id).toBe(vendorA);
+      expect(order.items).toHaveLength(1);
+      const line = order.items[0];
+      expect(line).toMatchObject({ productId, quantity: 2 });
+      expect(line?.totalHalalas).toBe((line?.unitPriceHalalas ?? 0) * 2);
+      expect(order.subtotalHalalas).toBe(line?.totalHalalas);
+
+      const listed = await vendors.http
+        .get('/v1/customer/orders')
+        .set(...bearer(buyer))
+        .expect(200);
+      const reads = [
+        await vendors.http
+          .get(`/v1/customer/orders/${order.id}`)
+          .set(...bearer(buyer))
+          .expect(200),
+        await vendors.http
+          .get(`/v1/vendor/orders/${order.id}`)
+          .set(...bearer(ownerA))
+          .expect(200),
+        await vendors.http
+          .get(`/v1/admin/orders/${order.id}`)
+          .set(...bearer(admin))
+          .expect(200),
+      ];
+
+      expect((listed.body as PageBody).items.map((row) => row.id)).toEqual([
+        order.id,
+      ]);
+      expect(
+        (listed.body as { items: { totalHalalas: number }[] }).items[0]
+          ?.totalHalalas,
+      ).toBe(order.totalHalalas);
+      for (const read of reads) {
+        const body = read.body as PlacedOrderBody['order'];
+        expect(body).toMatchObject({
+          id: order.id,
+          number: order.number,
+          status: order.status,
+          totalHalalas: order.totalHalalas,
+          subtotalHalalas: order.subtotalHalalas,
+          deliveryFeeHalalas: order.deliveryFeeHalalas,
+          vatHalalas: order.vatHalalas,
+        });
+        expect(body.items).toEqual(order.items);
+        expect(body.history).toEqual(order.history);
+      }
+    });
+  });
 
   describe('customer', () => {
     it('lists only my orders, newest first, over pages with no duplicate or gap', async () => {
