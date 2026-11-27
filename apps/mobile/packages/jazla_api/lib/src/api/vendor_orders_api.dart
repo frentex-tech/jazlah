@@ -23,7 +23,7 @@ class VendorOrdersApi {
   const VendorOrdersApi(this._dio);
 
   /// One order
-  /// Vendor dashboard, order detail, with &#x60;allowedTransitions&#x60; for the caller. An order past &#x60;expiresAt&#x60; and still unpaid is cancelled when read (workers are off on staging), so the answer is always current; capacity, coupon use and wallet reads treat such orders as already released. NOT_FOUND for an unknown order or another vendor’s. Until ORD-API-3 lands: NOT_IMPLEMENTED.
+  /// Vendor dashboard, order detail, with &#x60;allowedTransitions&#x60; for the caller. An order past &#x60;expiresAt&#x60; and still unpaid is cancelled when read (workers are off on staging), so the answer is always current; capacity, coupon use and wallet reads treat such orders as already released. NOT_FOUND for an unknown order or another vendor’s.
   ///
   /// Parameters:
   /// * [id] - The id (a UUID) of the item the path names; another value is VALIDATION_FAILED on `id`.
@@ -100,7 +100,7 @@ _responseData = rawData == null ? null : deserialize<OrderResponseDto, OrderResp
   }
 
   /// Orders
-  /// Vendor dashboard, orders list: the vendor’s own orders, newest first. An order past &#x60;expiresAt&#x60; and still unpaid is cancelled when read (workers are off on staging), so the answer is always current; capacity, coupon use and wallet reads treat such orders as already released. Until ORD-API-3 lands: NOT_IMPLEMENTED.
+  /// Vendor dashboard, orders list: the vendor’s own orders, newest first. An order past &#x60;expiresAt&#x60; and still unpaid is cancelled when read (workers are off on staging), so the answer is always current; capacity, coupon use and wallet reads treat such orders as already released.
   ///
   /// Parameters:
   /// * [cursor] - The `nextCursor` of the previous page; omit it for the first page. Opaque: never build or change it.

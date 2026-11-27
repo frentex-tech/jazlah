@@ -2092,7 +2092,7 @@ export interface paths {
         };
         /**
          * My orders
-         * @description Customer app, orders tab: newest first, `current` or `past`. An order past `expiresAt` and still unpaid is cancelled when read (workers are off on staging), so the answer is always current; capacity, coupon use and wallet reads treat such orders as already released. Until ORD-API-3 lands: NOT_IMPLEMENTED.
+         * @description Customer app, orders tab: newest first, `current` or `past`. An order past `expiresAt` and still unpaid is cancelled when read (workers are off on staging), so the answer is always current; capacity, coupon use and wallet reads treat such orders as already released.
          */
         get: operations["customerListOrders"];
         put?: never;
@@ -2116,7 +2116,7 @@ export interface paths {
         };
         /**
          * One of my orders
-         * @description Customer app, order detail, and the payment result: poll it after the payment page closes (every 2 s, up to 60 s): paid once the status is neither `pending_payment` nor `cancelled`. Carries the store’s phone and location. Cancelling is Sprint 4 (CAN-API-1). An order past `expiresAt` and still unpaid is cancelled when read (workers are off on staging), so the answer is always current; capacity, coupon use and wallet reads treat such orders as already released. NOT_FOUND for another customer’s order. Until ORD-API-3 lands: NOT_IMPLEMENTED.
+         * @description Customer app, order detail, and the payment result: poll it after the payment page closes (every 2 s, up to 60 s): paid once the status is neither `pending_payment` nor `cancelled`. Carries the store’s phone and location. Cancelling is Sprint 4 (CAN-API-1). An order past `expiresAt` and still unpaid is cancelled when read (workers are off on staging), so the answer is always current; capacity, coupon use and wallet reads treat such orders as already released. NOT_FOUND for another customer’s order.
          */
         get: operations["customerGetOrder"];
         put?: never;
@@ -2136,7 +2136,7 @@ export interface paths {
         };
         /**
          * Orders
-         * @description Vendor dashboard, orders list: the vendor’s own orders, newest first. An order past `expiresAt` and still unpaid is cancelled when read (workers are off on staging), so the answer is always current; capacity, coupon use and wallet reads treat such orders as already released. Until ORD-API-3 lands: NOT_IMPLEMENTED.
+         * @description Vendor dashboard, orders list: the vendor’s own orders, newest first. An order past `expiresAt` and still unpaid is cancelled when read (workers are off on staging), so the answer is always current; capacity, coupon use and wallet reads treat such orders as already released.
          */
         get: operations["vendorListOrders"];
         put?: never;
@@ -2156,7 +2156,7 @@ export interface paths {
         };
         /**
          * One order
-         * @description Vendor dashboard, order detail, with `allowedTransitions` for the caller. An order past `expiresAt` and still unpaid is cancelled when read (workers are off on staging), so the answer is always current; capacity, coupon use and wallet reads treat such orders as already released. NOT_FOUND for an unknown order or another vendor’s. Until ORD-API-3 lands: NOT_IMPLEMENTED.
+         * @description Vendor dashboard, order detail, with `allowedTransitions` for the caller. An order past `expiresAt` and still unpaid is cancelled when read (workers are off on staging), so the answer is always current; capacity, coupon use and wallet reads treat such orders as already released. NOT_FOUND for an unknown order or another vendor’s.
          */
         get: operations["vendorGetOrder"];
         put?: never;
@@ -2196,7 +2196,7 @@ export interface paths {
         };
         /**
          * Orders
-         * @description Admin dashboard, orders list: every order, with a vendor filter, newest first. An order past `expiresAt` and still unpaid is cancelled when read (workers are off on staging), so the answer is always current; capacity, coupon use and wallet reads treat such orders as already released. Until ORD-API-3 lands: NOT_IMPLEMENTED.
+         * @description Admin dashboard, orders list: every order, with a vendor filter, newest first. An order past `expiresAt` and still unpaid is cancelled when read (workers are off on staging), so the answer is always current; capacity, coupon use and wallet reads treat such orders as already released.
          */
         get: operations["adminListOrders"];
         put?: never;
@@ -2216,7 +2216,7 @@ export interface paths {
         };
         /**
          * One order
-         * @description Admin dashboard, order detail, with `allowedTransitions` for the caller. An order past `expiresAt` and still unpaid is cancelled when read (workers are off on staging), so the answer is always current; capacity, coupon use and wallet reads treat such orders as already released. NOT_FOUND for an unknown order. Until ORD-API-3 lands: NOT_IMPLEMENTED.
+         * @description Admin dashboard, order detail, with `allowedTransitions` for the caller. An order past `expiresAt` and still unpaid is cancelled when read (workers are off on staging), so the answer is always current; capacity, coupon use and wallet reads treat such orders as already released. NOT_FOUND for an unknown order.
          */
         get: operations["adminGetOrder"];
         put?: never;
@@ -15940,15 +15940,6 @@ export interface operations {
                     "application/json": components["schemas"]["ErrorResponseDto"];
                 };
             };
-            /** @description Error. code: NOT_IMPLEMENTED. */
-            501: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ErrorResponseDto"];
-                };
-            };
             /** @description Error. code: SERVICE_UNAVAILABLE. */
             503: {
                 headers: {
@@ -16134,15 +16125,6 @@ export interface operations {
                     "application/json": components["schemas"]["ErrorResponseDto"];
                 };
             };
-            /** @description Error. code: NOT_IMPLEMENTED. */
-            501: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ErrorResponseDto"];
-                };
-            };
             /** @description Error. code: SERVICE_UNAVAILABLE. */
             503: {
                 headers: {
@@ -16230,15 +16212,6 @@ export interface operations {
                     "application/json": components["schemas"]["ErrorResponseDto"];
                 };
             };
-            /** @description Error. code: NOT_IMPLEMENTED. */
-            501: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ErrorResponseDto"];
-                };
-            };
             /** @description Error. code: SERVICE_UNAVAILABLE. */
             503: {
                 headers: {
@@ -16318,15 +16291,6 @@ export interface operations {
             };
             /** @description Error. code: INTERNAL_ERROR. */
             500: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ErrorResponseDto"];
-                };
-            };
-            /** @description Error. code: NOT_IMPLEMENTED. */
-            501: {
                 headers: {
                     [name: string]: unknown;
                 };
@@ -16531,15 +16495,6 @@ export interface operations {
                     "application/json": components["schemas"]["ErrorResponseDto"];
                 };
             };
-            /** @description Error. code: NOT_IMPLEMENTED. */
-            501: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ErrorResponseDto"];
-                };
-            };
             /** @description Error. code: SERVICE_UNAVAILABLE. */
             503: {
                 headers: {
@@ -16619,15 +16574,6 @@ export interface operations {
             };
             /** @description Error. code: INTERNAL_ERROR. */
             500: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ErrorResponseDto"];
-                };
-            };
-            /** @description Error. code: NOT_IMPLEMENTED. */
-            501: {
                 headers: {
                     [name: string]: unknown;
                 };
