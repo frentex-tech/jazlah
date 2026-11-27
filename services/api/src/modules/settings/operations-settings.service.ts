@@ -1,4 +1,4 @@
-import { Inject, Injectable } from '@nestjs/common';
+import { Inject, Injectable, Logger } from '@nestjs/common';
 import { AppError } from '@common/errors/app-error';
 import { ErrorCode } from '@common/errors/error-code.enum';
 import type { FieldError } from '@common/errors/field-error.type';
@@ -6,9 +6,9 @@ import { CLOCK, type Clock } from '@common/time/clock.port';
 import { RiyadhCalendar } from '@common/time/riyadh-calendar';
 import { AuditLogWriter } from '@infra/audit/audit-log-writer';
 import { DbContext } from '@infra/database/db-context';
-import type {
-  OperationsSettings as OperationsSettingsRow,
+import {
   Prisma,
+  type OperationsSettings as OperationsSettingsRow,
 } from '@infra/database/generated/prisma/client';
 import { mapPrismaError } from '@infra/database/map-prisma-error';
 import { TransactionRunner } from '@infra/database/transaction-runner';
@@ -33,6 +33,8 @@ import { SETTINGS_AUDIT } from './settings-audit-actions.constants';
  */
 @Injectable()
 export class OperationsSettingsService {
+  private readonly logger = new Logger(OperationsSettingsService.name);
+
   constructor(
     private readonly db: DbContext,
     // Narrowed to what is used, so a unit test passes a plain object.
@@ -222,7 +224,18 @@ export class OperationsSettingsService {
       this.db.client.operationsSettings.findUnique({
         where: { singleton: true },
       }),
-    );
+    ).catch((error: unknown) => {
+      if (error instanceof Prisma.PrismaClientValidationError) {
+        this.logger.error(
+          {
+            prismaErrorMessage: error.message,
+            prismaErrorStack: error.stack,
+          },
+          'Operations settings read failed',
+        );
+      }
+      throw error;
+    });
     if (row === null) {
       // The migration makes the row; without it the database is not migrated.
       throw new AppError(ErrorCode.INTERNAL_ERROR, {
