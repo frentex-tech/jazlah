@@ -65,11 +65,8 @@ describe('Sprint 3 contract (e2e)', () => {
   const codeOf = (body: unknown) => (body as ErrorResponseBody).code;
 
   it.each([
-    ['customer', '/v1/customer/orders?scope=current', 'ORD-API-3'],
-    ['customer', `/v1/customer/orders/${ID}`, 'ORD-API-3'],
     ['customer', '/v1/customer/wallet', 'WAL-API-1'],
     ['admin', `/v1/admin/vendors/${ID}/capacity`, 'SCH-API-2'],
-    ['admin', '/v1/admin/orders?status=new&paymentMethod=cod', 'ORD-API-3'],
     ['admin', '/v1/admin/coupons', 'CRT-API-3'],
     ['admin', `/v1/admin/customers/${ID}/wallet`, 'WAL-API-1'],
   ])('%s GET %s answers NOT_IMPLEMENTED for %s', async (who, path, task) => {

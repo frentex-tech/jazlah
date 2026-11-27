@@ -12533,7 +12533,7 @@
     },
     "/v1/customer/orders": {
       "get": {
-        "description": "Customer app, orders tab: newest first, `current` or `past`. An order past `expiresAt` and still unpaid is cancelled when read (workers are off on staging), so the answer is always current; capacity, coupon use and wallet reads treat such orders as already released. Until ORD-API-3 lands: NOT_IMPLEMENTED.",
+        "description": "Customer app, orders tab: newest first, `current` or `past`. An order past `expiresAt` and still unpaid is cancelled when read (workers are off on staging), so the answer is always current; capacity, coupon use and wallet reads treat such orders as already released.",
         "operationId": "customerListOrders",
         "parameters": [
           {
@@ -12627,16 +12627,6 @@
           },
           "500": {
             "description": "Error. code: INTERNAL_ERROR.",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ErrorResponseDto"
-                }
-              }
-            }
-          },
-          "501": {
-            "description": "Error. code: NOT_IMPLEMENTED.",
             "content": {
               "application/json": {
                 "schema": {
@@ -12797,7 +12787,7 @@
     },
     "/v1/customer/orders/{id}": {
       "get": {
-        "description": "Customer app, order detail, and the payment result: poll it after the payment page closes (every 2 s, up to 60 s): paid once the status is neither `pending_payment` nor `cancelled`. Carries the store’s phone and location. Cancelling is Sprint 4 (CAN-API-1). An order past `expiresAt` and still unpaid is cancelled when read (workers are off on staging), so the answer is always current; capacity, coupon use and wallet reads treat such orders as already released. NOT_FOUND for another customer’s order. Until ORD-API-3 lands: NOT_IMPLEMENTED.",
+        "description": "Customer app, order detail, and the payment result: poll it after the payment page closes (every 2 s, up to 60 s): paid once the status is neither `pending_payment` nor `cancelled`. Carries the store’s phone and location. Cancelling is Sprint 4 (CAN-API-1). An order past `expiresAt` and still unpaid is cancelled when read (workers are off on staging), so the answer is always current; capacity, coupon use and wallet reads treat such orders as already released. NOT_FOUND for another customer’s order.",
         "operationId": "customerGetOrder",
         "parameters": [
           {
@@ -12883,16 +12873,6 @@
               }
             }
           },
-          "501": {
-            "description": "Error. code: NOT_IMPLEMENTED.",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ErrorResponseDto"
-                }
-              }
-            }
-          },
           "503": {
             "description": "Error. code: SERVICE_UNAVAILABLE.",
             "content": {
@@ -12917,7 +12897,7 @@
     },
     "/v1/vendor/orders": {
       "get": {
-        "description": "Vendor dashboard, orders list: the vendor’s own orders, newest first. An order past `expiresAt` and still unpaid is cancelled when read (workers are off on staging), so the answer is always current; capacity, coupon use and wallet reads treat such orders as already released. Until ORD-API-3 lands: NOT_IMPLEMENTED.",
+        "description": "Vendor dashboard, orders list: the vendor’s own orders, newest first. An order past `expiresAt` and still unpaid is cancelled when read (workers are off on staging), so the answer is always current; capacity, coupon use and wallet reads treat such orders as already released.",
         "operationId": "vendorListOrders",
         "parameters": [
           {
@@ -13053,16 +13033,6 @@
               }
             }
           },
-          "501": {
-            "description": "Error. code: NOT_IMPLEMENTED.",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ErrorResponseDto"
-                }
-              }
-            }
-          },
           "503": {
             "description": "Error. code: SERVICE_UNAVAILABLE.",
             "content": {
@@ -13087,7 +13057,7 @@
     },
     "/v1/vendor/orders/{id}": {
       "get": {
-        "description": "Vendor dashboard, order detail, with `allowedTransitions` for the caller. An order past `expiresAt` and still unpaid is cancelled when read (workers are off on staging), so the answer is always current; capacity, coupon use and wallet reads treat such orders as already released. NOT_FOUND for an unknown order or another vendor’s. Until ORD-API-3 lands: NOT_IMPLEMENTED.",
+        "description": "Vendor dashboard, order detail, with `allowedTransitions` for the caller. An order past `expiresAt` and still unpaid is cancelled when read (workers are off on staging), so the answer is always current; capacity, coupon use and wallet reads treat such orders as already released. NOT_FOUND for an unknown order or another vendor’s.",
         "operationId": "vendorGetOrder",
         "parameters": [
           {
@@ -13165,16 +13135,6 @@
           },
           "500": {
             "description": "Error. code: INTERNAL_ERROR.",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ErrorResponseDto"
-                }
-              }
-            }
-          },
-          "501": {
-            "description": "Error. code: NOT_IMPLEMENTED.",
             "content": {
               "application/json": {
                 "schema": {
@@ -13347,7 +13307,7 @@
     },
     "/v1/admin/orders": {
       "get": {
-        "description": "Admin dashboard, orders list: every order, with a vendor filter, newest first. An order past `expiresAt` and still unpaid is cancelled when read (workers are off on staging), so the answer is always current; capacity, coupon use and wallet reads treat such orders as already released. Until ORD-API-3 lands: NOT_IMPLEMENTED.",
+        "description": "Admin dashboard, orders list: every order, with a vendor filter, newest first. An order past `expiresAt` and still unpaid is cancelled when read (workers are off on staging), so the answer is always current; capacity, coupon use and wallet reads treat such orders as already released.",
         "operationId": "adminListOrders",
         "parameters": [
           {
@@ -13494,16 +13454,6 @@
               }
             }
           },
-          "501": {
-            "description": "Error. code: NOT_IMPLEMENTED.",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ErrorResponseDto"
-                }
-              }
-            }
-          },
           "503": {
             "description": "Error. code: SERVICE_UNAVAILABLE.",
             "content": {
@@ -13528,7 +13478,7 @@
     },
     "/v1/admin/orders/{id}": {
       "get": {
-        "description": "Admin dashboard, order detail, with `allowedTransitions` for the caller. An order past `expiresAt` and still unpaid is cancelled when read (workers are off on staging), so the answer is always current; capacity, coupon use and wallet reads treat such orders as already released. NOT_FOUND for an unknown order. Until ORD-API-3 lands: NOT_IMPLEMENTED.",
+        "description": "Admin dashboard, order detail, with `allowedTransitions` for the caller. An order past `expiresAt` and still unpaid is cancelled when read (workers are off on staging), so the answer is always current; capacity, coupon use and wallet reads treat such orders as already released. NOT_FOUND for an unknown order.",
         "operationId": "adminGetOrder",
         "parameters": [
           {
@@ -13606,16 +13556,6 @@
           },
           "500": {
             "description": "Error. code: INTERNAL_ERROR.",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ErrorResponseDto"
-                }
-              }
-            }
-          },
-          "501": {
-            "description": "Error. code: NOT_IMPLEMENTED.",
             "content": {
               "application/json": {
                 "schema": {

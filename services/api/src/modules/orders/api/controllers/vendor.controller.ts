@@ -14,31 +14,45 @@ import {
   ApiOperation,
   ApiTags,
 } from '@nestjs/swagger';
+import type { AuthenticatedUser } from '@common/auth/authenticated-user.type';
+import { organisationOf } from '@common/auth/organisation-of';
 import { ApiErrorResponses } from '@common/decorators/api-error-responses.decorator';
 import { BEARER_AUTH_SCHEME } from '@common/decorators/bearer-auth.constants';
+import { CurrentUser } from '@common/decorators/current-user.decorator';
 import { VENDOR_AUTH_ERRORS } from '@common/decorators/vendor-auth-errors.constants';
 import { IdParamDto } from '@common/dto/id-param.dto';
 import { ErrorCode } from '@common/errors/error-code.enum';
 import { notImplemented } from '@common/errors/not-implemented';
+import { toNextCursor } from '@common/pagination/to-next-cursor';
+import { toPageRequest } from '@common/pagination/to-page-request';
 import { API_TAGS } from '@infra/api-docs/api-tags.constants';
+import { FindVendorOrderUseCase } from '../../application/find-vendor-order.use-case';
+import { ListVendorOrdersUseCase } from '../../application/list-vendor-orders.use-case';
 import { ListVendorOrdersQueryDto } from '../dto/list-vendor-orders-query.dto';
 import { OrderPageResponseDto } from '../dto/order-page-response.dto';
 import { OrderResponseDto } from '../dto/order-response.dto';
 import { TransitionOrderDto } from '../dto/transition-order.dto';
+import { toOrderResponse } from '../to-order-response';
+import { toOrderSummaryResponse } from '../to-order-summary-response';
 
 /**
- * Orders as the vendor see them (ORD-API-2, ORD-API-3). Every operation answers NOT_IMPLEMENTED (501) until its task lands; the shapes are the contract.
+ * Orders as the vendor sees them. The list and the detail are live (ORD-API-3); the transition answers NOT_IMPLEMENTED (501) until ORD-API-2 lands; the shapes are the contract.
  */
 @ApiBearerAuth(BEARER_AUTH_SCHEME)
 @Controller('vendor')
 export class VendorOrdersController {
+  constructor(
+    private readonly listOrders: ListVendorOrdersUseCase,
+    private readonly findOrder: FindVendorOrderUseCase,
+  ) {}
+
   @Get('orders')
   @ApiTags(API_TAGS.vendorOrders.name)
   @ApiOperation({
     operationId: 'vendorListOrders',
     summary: 'Orders',
     description:
-      'Vendor dashboard, orders list: the vendor’s own orders, newest first. An order past `expiresAt` and still unpaid is cancelled when read (workers are off on staging), so the answer is always current; capacity, coupon use and wallet reads treat such orders as already released. Until ORD-API-3 lands: NOT_IMPLEMENTED.',
+      'Vendor dashboard, orders list: the vendor’s own orders, newest first. An order past `expiresAt` and still unpaid is cancelled when read (workers are off on staging), so the answer is always current; capacity, coupon use and wallet reads treat such orders as already released.',
   })
   @ApiOkResponse({
     type: OrderPageResponseDto,
@@ -46,14 +60,27 @@ export class VendorOrdersController {
   })
   @ApiErrorResponses(
     ErrorCode.VALIDATION_FAILED,
-    ErrorCode.NOT_IMPLEMENTED,
     ErrorCode.SERVICE_UNAVAILABLE,
     ...VENDOR_AUTH_ERRORS,
   )
-  listOrders(
+  async list(
+    @CurrentUser() user: AuthenticatedUser,
     @Query() query: ListVendorOrdersQueryDto,
   ): Promise<OrderPageResponseDto> {
-    return notImplemented('ORD-API-3', query);
+    const page = await this.listOrders.execute(
+      organisationOf(user),
+      {
+        status: query.status,
+        paymentMethod: query.paymentMethod,
+        fulfilmentDate: query.fulfilmentDate,
+        search: query.q,
+      },
+      toPageRequest(query),
+    );
+    return {
+      items: page.items.map(toOrderSummaryResponse),
+      nextCursor: toNextCursor(page),
+    };
   }
 
   @Get('orders/:id')
@@ -62,7 +89,7 @@ export class VendorOrdersController {
     operationId: 'vendorGetOrder',
     summary: 'One order',
     description:
-      'Vendor dashboard, order detail, with `allowedTransitions` for the caller. An order past `expiresAt` and still unpaid is cancelled when read (workers are off on staging), so the answer is always current; capacity, coupon use and wallet reads treat such orders as already released. NOT_FOUND for an unknown order or another vendor’s. Until ORD-API-3 lands: NOT_IMPLEMENTED.',
+      'Vendor dashboard, order detail, with `allowedTransitions` for the caller. An order past `expiresAt` and still unpaid is cancelled when read (workers are off on staging), so the answer is always current; capacity, coupon use and wallet reads treat such orders as already released. NOT_FOUND for an unknown order or another vendor’s.',
   })
   @ApiOkResponse({
     type: OrderResponseDto,
@@ -71,12 +98,16 @@ export class VendorOrdersController {
   @ApiErrorResponses(
     ErrorCode.VALIDATION_FAILED,
     ErrorCode.NOT_FOUND,
-    ErrorCode.NOT_IMPLEMENTED,
     ErrorCode.SERVICE_UNAVAILABLE,
     ...VENDOR_AUTH_ERRORS,
   )
-  getOrder(@Param() params: IdParamDto): Promise<OrderResponseDto> {
-    return notImplemented('ORD-API-3', params);
+  async getOrder(
+    @CurrentUser() user: AuthenticatedUser,
+    @Param() params: IdParamDto,
+  ): Promise<OrderResponseDto> {
+    return toOrderResponse(
+      await this.findOrder.execute(organisationOf(user), params.id),
+    );
   }
 
   @Post('orders/:id/transition')
