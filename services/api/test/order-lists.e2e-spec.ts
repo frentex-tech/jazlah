@@ -130,8 +130,13 @@ describe('Order lists and detail (e2e)', () => {
   const numberOf = (name: string) => `JZ-E2E-${tag}-${name}`;
   const idOf = (name: string) => ids.get(name) ?? '';
   const codeOf = (body: unknown) => (body as ErrorResponseBody).code;
+  /** The names of the saved orders; the order placed through the API is `placed`. */
   const namesOf = (page: PageBody) =>
-    page.items.map((row) => row.number.slice(`JZ-E2E-${tag}-`.length));
+    page.items.map((row) =>
+      row.number.startsWith(`JZ-E2E-${tag}-`)
+        ? row.number.slice(`JZ-E2E-${tag}-`.length)
+        : 'placed',
+    );
 
   /** Saves an order as it was when placed, `minute` minutes after the suite's first instant. */
   async function save(
@@ -448,10 +453,11 @@ describe('Order lists and detail (e2e)', () => {
       const all = await allPages('/v1/vendor/orders', ownerA, {}, 3);
 
       expect([...all].sort()).toEqual(
-        ['a1', 'a2', 'a3', 'a4', 'a5', 'a6', 'b1'].sort(),
+        ['a1', 'a2', 'a3', 'a4', 'a5', 'a6', 'b1', 'placed'].sort(),
       );
       expect(new Set(all).size).toBe(all.length);
-      expect(all[0]).toBe('b1');
+      // The order placed through the API is the newest: it was made now.
+      expect(all.slice(0, 2)).toEqual(['placed', 'b1']);
       expect(await allPages('/v1/vendor/orders', ownerB, {}, 3)).toEqual([
         'x1',
       ]);
@@ -527,9 +533,9 @@ describe('Order lists and detail (e2e)', () => {
         2,
       );
 
-      expect(storeA).toHaveLength(7);
-      expect(new Set(storeA).size).toBe(7);
-      expect(storeA[0]).toBe('b1');
+      expect(storeA).toHaveLength(8);
+      expect(new Set(storeA).size).toBe(8);
+      expect(storeA.slice(0, 2)).toEqual(['placed', 'b1']);
       expect(storeB).toEqual(['x1']);
     });
 
