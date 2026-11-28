@@ -1,4 +1,4 @@
-import { Module } from '@nestjs/common';
+import { forwardRef, Module } from '@nestjs/common';
 import { CLOCK } from '@common/time/clock.port';
 import { SystemClock } from '@common/time/system-clock';
 import { AuditModule } from '@infra/audit/audit.module';
@@ -25,7 +25,10 @@ import { PrismaOrderRepository } from './infrastructure/prisma-order.repository'
  * webhooks and realtime subscribers are later work.
  */
 @Module({
-  imports: [AuditModule, SchedulingModule],
+  // Through forwardRef: the file imports are circular (scheduling imports settings,
+  // which imports ORDER_TYPES from this module's index), and the lazy reference keeps
+  // the decorator from capturing a half-evaluated SchedulingModule.
+  imports: [AuditModule, forwardRef(() => SchedulingModule)],
   controllers: [
     CustomerOrdersController,
     VendorOrdersController,
