@@ -101,8 +101,7 @@ export class PrismaOrderRepository
         SELECT "id"
         FROM "orders"
         WHERE "id" = ${id}::uuid
-          AND (${scopeVendorId}::uuid IS NULL OR "vendor_id" = ${scopeVendorId}::uuid)
-        FOR UPDATE`,
+          AND (${scopeVendorId}::uuid IS NULL OR "vendor_id" = ${scopeVendorId}::uuid)`,
     );
     if (rows.length === 0) {
       return null;
