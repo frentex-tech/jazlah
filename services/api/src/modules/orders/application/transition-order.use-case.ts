@@ -1,4 +1,4 @@
-import { Inject, Injectable } from '@nestjs/common';
+import { Inject, Injectable, forwardRef } from '@nestjs/common';
 import { AppError } from '@common/errors/app-error';
 import { ErrorCode } from '@common/errors/error-code.enum';
 import { CLOCK, type Clock } from '@common/time/clock.port';
@@ -30,7 +30,10 @@ export class TransitionOrderUseCase {
       OrderRepository,
       'lockForWrite' | 'transition'
     >,
-    @Inject(CapacityService)
+    // Through forwardRef for the same reason as the module import (DECISIONS.md,
+    // ORD-API-2): the file imports are circular, and the decorator must not capture a
+    // half-evaluated CapacityService.
+    @Inject(forwardRef(() => CapacityService))
     private readonly capacity: Pick<CapacityService, 'release'>,
     @Inject(CLOCK) private readonly clock: Clock,
     @Inject(TransactionRunner)

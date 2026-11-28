@@ -323,9 +323,10 @@ describe('Order transitions (e2e)', () => {
       .get(addressesPath)
       .set(...bearer(user))
       .expect(200);
-    expect(
-      (listed.body as { items: { id: string; isLocked: boolean }[] }).items,
-    ).toContainEqual({ id: address.id, isLocked: true });
+    const savedAddress = (
+      listed.body as { items: { id: string; isLocked: boolean }[] }
+    ).items.find((item) => item.id === address.id);
+    expect(savedAddress?.isLocked).toBe(true);
     const lockedDefault = await vendors.http
       .post(`${addressPath}/default`)
       .set(...bearer(user))
