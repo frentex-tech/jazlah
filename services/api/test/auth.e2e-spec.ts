@@ -1058,7 +1058,7 @@ describe('Authentication (e2e)', () => {
       await client.deleteAccount(signedIn.accessToken).expect(204);
     });
 
-    it('refuses account deletion while an order is non-final', async () => {
+    it('refuses account deletion while an order is non-final, and deletes once it is final', async () => {
       const signedIn = await customer('active-order');
       const { userId } = signedIn.principal;
       const vendorId = await organisation(userId);
@@ -1119,6 +1119,22 @@ describe('Authentication (e2e)', () => {
       expect(
         await prisma.order.findUnique({ where: { id: order.id } }),
       ).not.toBe(null);
+
+      // The order reaching a final state frees the account: an admin rejects the order
+      // through the real transition route, and the same session may then delete it.
+      const staff = phone('active-order-admin');
+      await grant(staff, 'admin');
+      const admin = await client.signIn(staff, 'admin');
+      await http()
+        .post(`/v1/admin/orders/${order.id}/transition`)
+        .set(...bearer(admin.accessToken))
+        .send({ to: 'cancelled', note: 'المتجر مغلق اليوم' })
+        .expect(200);
+
+      await client.deleteAccount(signedIn.accessToken).expect(204);
+      expect(
+        await prisma.user.findUniqueOrThrow({ where: { id: userId } }),
+      ).toMatchObject({ phone: null });
     });
 
     it('refuses a disabled user with ACCOUNT_DISABLED', async () => {
