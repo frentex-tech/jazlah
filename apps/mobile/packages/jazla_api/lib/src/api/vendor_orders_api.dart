@@ -23,7 +23,7 @@ class VendorOrdersApi {
   const VendorOrdersApi(this._dio);
 
   /// One order
-  /// Vendor dashboard, order detail, with &#x60;allowedTransitions&#x60; for the caller. An order past &#x60;expiresAt&#x60; and still unpaid is cancelled when read (workers are off on staging), so the answer is always current; capacity, coupon use and wallet reads treat such orders as already released. NOT_FOUND for an unknown order or another vendor’s.
+  /// Vendor dashboard, order detail, with &#x60;allowedTransitions&#x60; for this vendor. Status is the value last committed by the state machine. NOT_FOUND for an unknown order or another vendor’s.
   ///
   /// Parameters:
   /// * [id] - The id (a UUID) of the item the path names; another value is VALIDATION_FAILED on `id`.
@@ -100,7 +100,7 @@ _responseData = rawData == null ? null : deserialize<OrderResponseDto, OrderResp
   }
 
   /// Orders
-  /// Vendor dashboard, orders list: the vendor’s own orders, newest first. An order past &#x60;expiresAt&#x60; and still unpaid is cancelled when read (workers are off on staging), so the answer is always current; capacity, coupon use and wallet reads treat such orders as already released.
+  /// Vendor dashboard, orders list: the vendor’s own orders, newest first. Status is the value last committed by the order state machine. The payment timeout is deferred to a later payment task.
   ///
   /// Parameters:
   /// * [cursor] - The `nextCursor` of the previous page; omit it for the first page. Opaque: never build or change it.
@@ -197,7 +197,7 @@ _responseData = rawData == null ? null : deserialize<OrderPageResponseDto, Order
   }
 
   /// Move an order to another status
-  /// Vendor dashboard, order actions. Moves the order along its state machine: &#x60;to&#x60; must be one of the order’s &#x60;allowedTransitions&#x60; for this caller, else ORDER_TRANSITION_NOT_ALLOWED (&#x60;details.from&#x60;, &#x60;details.to&#x60;). Recorded in the history with the note; every move is published to the dashboards and the customer. NOT_FOUND for an unknown order or another vendor’s. Until ORD-API-2 lands: NOT_IMPLEMENTED.
+  /// Vendor dashboard, the vendor of this order moves it along its state machine: &#x60;to&#x60; must be one of the order’s &#x60;allowedTransitions&#x60;, else ORDER_TRANSITION_NOT_ALLOWED (&#x60;details.from&#x60;, &#x60;details.to&#x60;). The move and one history row are saved together and published as &#x60;order.status.changed&#x60; after commit. A COD rejection is &#x60;{ to: \&quot;cancelled\&quot;, note: &lt;reason&gt; }&#x60;. NOT_FOUND for an unknown order or another vendor’s.
   ///
   /// Parameters:
   /// * [id] - The id (a UUID) of the item the path names; another value is VALIDATION_FAILED on `id`.

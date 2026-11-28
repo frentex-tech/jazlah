@@ -132,6 +132,7 @@ export interface paths {
          *
          *     Errors:
          *     - RECENT_SIGN_IN_REQUIRED (403): the session was signed in more than 10 minutes ago. Sign the customer in again (code by SMS), then repeat the request.
+         *     - ACCOUNT_HAS_ACTIVE_ORDERS (409): an order has not reached a final status; wait until it is finished, then retry.
          *     - ACCOUNT_HAS_STAFF_ACCESS (409): the account also has vendor, kitchen or admin access; it cannot be deleted in the app until that access is removed.
          *     - ACCOUNT_DISABLED (403): the account is disabled; deletion goes through support.
          *     - UNAUTHORIZED (401): also when the account is already deleted.
@@ -959,14 +960,14 @@ export interface paths {
         post?: never;
         /**
          * Delete a saved address
-         * @description Customer app, the address book. Deletes the address at once and for good. When it was the default, the newest remaining address becomes the default (reload the list to show it); deleting the last one leaves none. Orders placed earlier keep the address as it was at checkout. NOT_FOUND: no such address, or it belongs to another customer; also when it was already deleted (a repeated request, or another device), so treat it as gone and reload the list. ACCOUNT_DISABLED: the account was disabled by the platform; show a message, do not retry. UNAUTHORIZED can also mean the account was deleted while the token was still valid: sign out. TRANSACTION_CONFLICT: another change to this account was saved at the same moment; send the request again.
+         * @description Customer app, the address book. Deletes the address at once and for good. When it was the default, the newest remaining address becomes the default (reload the list to show it); deleting the last one leaves none. Orders keep the address snapshot as it was at checkout. While a non-final order uses this address, `isLocked` is true and deletion is refused with ADDRESS_IN_USE. NOT_FOUND: no such address, or it belongs to another customer; also when it was already deleted (a repeated request, or another device), so treat it as gone and reload the list. ACCOUNT_DISABLED: the account was disabled by the platform; show a message, do not retry. UNAUTHORIZED can also mean the account was deleted while the token was still valid: sign out. TRANSACTION_CONFLICT: another change to this account was saved at the same moment; send the request again.
          */
         delete: operations["customerDeleteAddress"];
         options?: never;
         head?: never;
         /**
          * Change a saved address
-         * @description Customer app, the edit address screen. Saves the fields sent at once; a field left out keeps its value. For the readable fields (city, district, street, building, shortNationalAddress, driverInstructions), null or blank clears the field. label and location can be changed but not removed (null is VALIDATION_FAILED). Whether the address is the default does not change here: use POST /v1/customer/addresses/{id}/default. Orders placed earlier keep the address as it was at checkout. NOT_FOUND: no such address, or it belongs to another customer (both answer the same); it may have been deleted on another device, so reload the list. ACCOUNT_DISABLED: the account was disabled by the platform; show a message, do not retry. UNAUTHORIZED can also mean the account was deleted while the token was still valid: sign out. TRANSACTION_CONFLICT: another change to this account was saved at the same moment; send the request again.
+         * @description Customer app, the edit address screen. Saves the fields sent at once; a field left out keeps its value. For the readable fields (city, district, street, building, shortNationalAddress, driverInstructions), null or blank clears the field. label and location can be changed but not removed (null is VALIDATION_FAILED). Whether the address is the default does not change here: use POST /v1/customer/addresses/{id}/default. Orders keep the address snapshot as it was at checkout. While a non-final order uses this address, `isLocked` is true and changes are refused with ADDRESS_IN_USE. NOT_FOUND: no such address, or it belongs to another customer (both answer the same); it may have been deleted on another device, so reload the list. ACCOUNT_DISABLED: the account was disabled by the platform; show a message, do not retry. UNAUTHORIZED can also mean the account was deleted while the token was still valid: sign out. TRANSACTION_CONFLICT: another change to this account was saved at the same moment; send the request again.
          */
         patch: operations["customerUpdateAddress"];
         trace?: never;
@@ -1059,6 +1060,282 @@ export interface paths {
          *     VALIDATION_FAILED for a missing or out-of-range lat or lng.
          */
         get: operations["publicCheckCoverage"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/customer/orders": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * My orders
+         * @description Customer app, orders tab: newest first, `current` or `past`. Status is the value last committed by the order state machine; customers cannot move statuses in Sprint 3.
+         */
+        get: operations["customerListOrders"];
+        put?: never;
+        /**
+         * Place my order
+         * @description Customer app, checkout "place order". Checks the cart again, then in one transaction: reserves the day’s capacity, uses the coupon, takes the wallet part, creates the order (`pending_payment`, or `new`/`confirmed` for cash on delivery and wallet only) and its payment attempt, and empties the cart. Open `payment.nextAction.redirectUrl` when it is not null; an unpaid order is cancelled after 15 minutes (`order.expiresAt`), giving back the capacity, the coupon and the wallet part. Refusals send the customer back: to the cart for CART_EMPTY, PRICE_CHANGED and ITEM_UNAVAILABLE (`details.lineIds`), MIN_ORDER_NOT_MET (`details.minOrderHalalas`, `details.remainingHalalas`) and the coupon codes; to the fulfilment step for FULFILMENT_REQUIRED, ADDRESS_NOT_COVERED, DAY_FULL and DAY_NOT_AVAILABLE; to the payment step for PAYMENT_METHOD_NOT_AVAILABLE and WALLET_INSUFFICIENT; to the profile for PROFILE_INCOMPLETE (no full name). ORDERING_PAUSED while orders are paused (`details.messageAr`, `details.messageEn`: the admin’s message). Sprint 3 takes cash on delivery only (`paymentMethod: cod`, no wallet part): another method is PAYMENT_METHOD_NOT_AVAILABLE and a wallet part WALLET_INSUFFICIENT. The order starts `new` and `payment` is null (no payment record for cash). A line that can no longer be ordered, or whose price moved since it was accepted, is ITEM_UNAVAILABLE or PRICE_CHANGED with `details.lineIds`; nothing is charged at a price the customer did not see. IDEMPOTENCY_KEY_REUSED when the key was already used with a different body.
+         */
+        post: operations["customerPlaceOrder"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/customer/orders/{id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * One of my orders
+         * @description Customer app, order detail, and the payment result: poll it after the payment page closes (every 2 s, up to 60 s): paid once the status is neither `pending_payment` nor `cancelled`. Carries the store’s phone and location. Customer cancellation is Sprint 4 (CAN-API-1). Payment timeout and expiry are deferred to a later payment task. NOT_FOUND for another customer’s order.
+         */
+        get: operations["customerGetOrder"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/vendor/orders": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Orders
+         * @description Vendor dashboard, orders list: the vendor’s own orders, newest first. Status is the value last committed by the order state machine. The payment timeout is deferred to a later payment task.
+         */
+        get: operations["vendorListOrders"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/vendor/orders/{id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * One order
+         * @description Vendor dashboard, order detail, with `allowedTransitions` for this vendor. Status is the value last committed by the state machine. NOT_FOUND for an unknown order or another vendor’s.
+         */
+        get: operations["vendorGetOrder"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/vendor/orders/{id}/transition": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Move an order to another status
+         * @description Vendor dashboard, the vendor of this order moves it along its state machine: `to` must be one of the order’s `allowedTransitions`, else ORDER_TRANSITION_NOT_ALLOWED (`details.from`, `details.to`). The move and one history row are saved together and published as `order.status.changed` after commit. A COD rejection is `{ to: "cancelled", note: <reason> }`. NOT_FOUND for an unknown order or another vendor’s.
+         */
+        post: operations["vendorTransitionOrder"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/admin/orders": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Orders
+         * @description Admin dashboard, orders list: every order, with a vendor filter, newest first. Status is the value last committed by the order state machine. The payment timeout is deferred to a later payment task.
+         */
+        get: operations["adminListOrders"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/admin/orders/{id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * One order
+         * @description Admin dashboard, order detail, with `allowedTransitions` for this admin. Status is the value last committed by the state machine. NOT_FOUND for an unknown order.
+         */
+        get: operations["adminGetOrder"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/admin/orders/{id}/transition": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Move an order to another status
+         * @description Admin dashboard, order actions. Moves the order along its state machine: `to` must be one of the order’s `allowedTransitions`, else ORDER_TRANSITION_NOT_ALLOWED (`details.from`, `details.to`). The move and one history row are saved together and published as `order.status.changed` after commit. Rejecting a COD order under review is `{ to: "cancelled", note: <reason> }`. Admins alone can retry a failed delivery or return it. NOT_FOUND for an unknown order.
+         */
+        post: operations["adminTransitionOrder"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/admin/vendors/{id}/capacity": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * A vendor’s capacity
+         * @description Admin dashboard, vendor screen, capacity tab: the vendor’s daily limits and every day of the booking horizon with its own limits and what is booked. NOT_FOUND for an unknown vendor. Until SCH-API-2 lands: NOT_IMPLEMENTED.
+         */
+        get: operations["adminGetVendorCapacity"];
+        /**
+         * Set a vendor’s daily limits
+         * @description Admin dashboard, capacity tab. Applied at once to days not yet full; audited. NOT_FOUND for an unknown vendor. Until SCH-API-2 lands: NOT_IMPLEMENTED.
+         */
+        put: operations["adminSetVendorCapacity"];
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/admin/vendors/{id}/capacity/{date}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        /**
+         * Set one day’s limits
+         * @description Admin dashboard, capacity calendar. A past day: VALIDATION_FAILED `notPast` on `date`. A limit below what is booked keeps the bookings and closes the day. Audited. NOT_FOUND for an unknown vendor. Until SCH-API-2 lands: NOT_IMPLEMENTED.
+         */
+        put: operations["adminSetVendorDayCapacity"];
+        post?: never;
+        /**
+         * Remove one day’s limits
+         * @description Admin dashboard, capacity calendar: the day goes back to the daily limits. NOT_FOUND for an unknown vendor or a day without its own limits. Audited. Until SCH-API-2 lands: NOT_IMPLEMENTED.
+         */
+        delete: operations["adminClearVendorDayCapacity"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/admin/settings/operations": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * The operations settings
+         * @description Admin dashboard, operations page.
+         */
+        get: operations["adminGetOperationsSettings"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        /**
+         * Change the operations settings
+         * @description Admin dashboard, operations page "save": only the keys sent change (a stale tab cannot undo another change it did not send); the pause is not here. A closed day added in the past: VALIDATION_FAILED `notPast` on `closedDays.<i>.date`; a window ending before it starts: `endBeforeStart`. The next cart and checkout reads use the new values.
+         */
+        patch: operations["adminUpdateOperationsSettings"];
+        trace?: never;
+    };
+    "/v1/admin/settings/operations/pause": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        /**
+         * Pause or resume new orders
+         * @description Admin dashboard, the pause switch. Pausing makes every cart change and checkout call answer ORDERING_PAUSED with the message; orders already placed carry on.
+         */
+        put: operations["adminSetOrderingPause"];
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/public/settings/client": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Settings for the apps
+         * @description Customer app (cart, checkout) and the dashboard’s pause banner: delivery window, booking horizon, minimum order, delivery fee, cash on delivery and the pause. Public; cache for a minute at most.
+         */
+        get: operations["publicGetClientSettings"];
         put?: never;
         post?: never;
         delete?: never;
@@ -1671,118 +1948,6 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/v1/admin/settings/operations": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /**
-         * The operations settings
-         * @description Admin dashboard, operations page.
-         */
-        get: operations["adminGetOperationsSettings"];
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        /**
-         * Change the operations settings
-         * @description Admin dashboard, operations page "save": only the keys sent change (a stale tab cannot undo another change it did not send); the pause is not here. A closed day added in the past: VALIDATION_FAILED `notPast` on `closedDays.<i>.date`; a window ending before it starts: `endBeforeStart`. The next cart and checkout reads use the new values.
-         */
-        patch: operations["adminUpdateOperationsSettings"];
-        trace?: never;
-    };
-    "/v1/admin/settings/operations/pause": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        /**
-         * Pause or resume new orders
-         * @description Admin dashboard, the pause switch. Pausing makes every cart change and checkout call answer ORDERING_PAUSED with the message; orders already placed carry on.
-         */
-        put: operations["adminSetOrderingPause"];
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/v1/public/settings/client": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /**
-         * Settings for the apps
-         * @description Customer app (cart, checkout) and the dashboard’s pause banner: delivery window, booking horizon, minimum order, delivery fee, cash on delivery and the pause. Public; cache for a minute at most.
-         */
-        get: operations["publicGetClientSettings"];
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/v1/admin/vendors/{id}/capacity": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /**
-         * A vendor’s capacity
-         * @description Admin dashboard, vendor screen, capacity tab: the vendor’s daily limits and every day of the booking horizon with its own limits and what is booked. NOT_FOUND for an unknown vendor. Until SCH-API-2 lands: NOT_IMPLEMENTED.
-         */
-        get: operations["adminGetVendorCapacity"];
-        /**
-         * Set a vendor’s daily limits
-         * @description Admin dashboard, capacity tab. Applied at once to days not yet full; audited. NOT_FOUND for an unknown vendor. Until SCH-API-2 lands: NOT_IMPLEMENTED.
-         */
-        put: operations["adminSetVendorCapacity"];
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/v1/admin/vendors/{id}/capacity/{date}": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        /**
-         * Set one day’s limits
-         * @description Admin dashboard, capacity calendar. A past day: VALIDATION_FAILED `notPast` on `date`. A limit below what is booked keeps the bookings and closes the day. Audited. NOT_FOUND for an unknown vendor. Until SCH-API-2 lands: NOT_IMPLEMENTED.
-         */
-        put: operations["adminSetVendorDayCapacity"];
-        post?: never;
-        /**
-         * Remove one day’s limits
-         * @description Admin dashboard, capacity calendar: the day goes back to the daily limits. NOT_FOUND for an unknown vendor or a day without its own limits. Audited. Until SCH-API-2 lands: NOT_IMPLEMENTED.
-         */
-        delete: operations["adminClearVendorDayCapacity"];
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
     "/v1/customer/cart": {
         parameters: {
             query?: never;
@@ -2083,170 +2248,6 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/v1/customer/orders": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /**
-         * My orders
-         * @description Customer app, orders tab: newest first, `current` or `past`. An order past `expiresAt` and still unpaid is cancelled when read (workers are off on staging), so the answer is always current; capacity, coupon use and wallet reads treat such orders as already released.
-         */
-        get: operations["customerListOrders"];
-        put?: never;
-        /**
-         * Place my order
-         * @description Customer app, checkout "place order". Checks the cart again, then in one transaction: reserves the day’s capacity, uses the coupon, takes the wallet part, creates the order (`pending_payment`, or `new`/`confirmed` for cash on delivery and wallet only) and its payment attempt, and empties the cart. Open `payment.nextAction.redirectUrl` when it is not null; an unpaid order is cancelled after 15 minutes (`order.expiresAt`), giving back the capacity, the coupon and the wallet part. Refusals send the customer back: to the cart for CART_EMPTY, PRICE_CHANGED and ITEM_UNAVAILABLE (`details.lineIds`), MIN_ORDER_NOT_MET (`details.minOrderHalalas`, `details.remainingHalalas`) and the coupon codes; to the fulfilment step for FULFILMENT_REQUIRED, ADDRESS_NOT_COVERED, DAY_FULL and DAY_NOT_AVAILABLE; to the payment step for PAYMENT_METHOD_NOT_AVAILABLE and WALLET_INSUFFICIENT; to the profile for PROFILE_INCOMPLETE (no full name). ORDERING_PAUSED while orders are paused (`details.messageAr`, `details.messageEn`: the admin’s message). Sprint 3 takes cash on delivery only (`paymentMethod: cod`, no wallet part): another method is PAYMENT_METHOD_NOT_AVAILABLE and a wallet part WALLET_INSUFFICIENT. The order starts `new` and `payment` is null (no payment record for cash). A line that can no longer be ordered, or whose price moved since it was accepted, is ITEM_UNAVAILABLE or PRICE_CHANGED with `details.lineIds`; nothing is charged at a price the customer did not see. IDEMPOTENCY_KEY_REUSED when the key was already used with a different body.
-         */
-        post: operations["customerPlaceOrder"];
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/v1/customer/orders/{id}": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /**
-         * One of my orders
-         * @description Customer app, order detail, and the payment result: poll it after the payment page closes (every 2 s, up to 60 s): paid once the status is neither `pending_payment` nor `cancelled`. Carries the store’s phone and location. Cancelling is Sprint 4 (CAN-API-1). An order past `expiresAt` and still unpaid is cancelled when read (workers are off on staging), so the answer is always current; capacity, coupon use and wallet reads treat such orders as already released. NOT_FOUND for another customer’s order.
-         */
-        get: operations["customerGetOrder"];
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/v1/vendor/orders": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /**
-         * Orders
-         * @description Vendor dashboard, orders list: the vendor’s own orders, newest first. An order past `expiresAt` and still unpaid is cancelled when read (workers are off on staging), so the answer is always current; capacity, coupon use and wallet reads treat such orders as already released.
-         */
-        get: operations["vendorListOrders"];
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/v1/vendor/orders/{id}": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /**
-         * One order
-         * @description Vendor dashboard, order detail, with `allowedTransitions` for the caller. An order past `expiresAt` and still unpaid is cancelled when read (workers are off on staging), so the answer is always current; capacity, coupon use and wallet reads treat such orders as already released. NOT_FOUND for an unknown order or another vendor’s.
-         */
-        get: operations["vendorGetOrder"];
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/v1/vendor/orders/{id}/transition": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        /**
-         * Move an order to another status
-         * @description Vendor dashboard, order actions. Moves the order along its state machine: `to` must be one of the order’s `allowedTransitions` for this caller, else ORDER_TRANSITION_NOT_ALLOWED (`details.from`, `details.to`). Recorded in the history with the note; every move is published to the dashboards and the customer. NOT_FOUND for an unknown order or another vendor’s. Until ORD-API-2 lands: NOT_IMPLEMENTED.
-         */
-        post: operations["vendorTransitionOrder"];
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/v1/admin/orders": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /**
-         * Orders
-         * @description Admin dashboard, orders list: every order, with a vendor filter, newest first. An order past `expiresAt` and still unpaid is cancelled when read (workers are off on staging), so the answer is always current; capacity, coupon use and wallet reads treat such orders as already released.
-         */
-        get: operations["adminListOrders"];
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/v1/admin/orders/{id}": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /**
-         * One order
-         * @description Admin dashboard, order detail, with `allowedTransitions` for the caller. An order past `expiresAt` and still unpaid is cancelled when read (workers are off on staging), so the answer is always current; capacity, coupon use and wallet reads treat such orders as already released. NOT_FOUND for an unknown order.
-         */
-        get: operations["adminGetOrder"];
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/v1/admin/orders/{id}/transition": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        /**
-         * Move an order to another status
-         * @description Admin dashboard, order actions. Moves the order along its state machine: `to` must be one of the order’s `allowedTransitions` for this caller, else ORDER_TRANSITION_NOT_ALLOWED (`details.from`, `details.to`). Recorded in the history with the note; every move is published to the dashboards and the customer. Rejecting a cash-on-delivery order under review is `{ to: "cancelled", note: <reason> }`. NOT_FOUND for an unknown order. Until ORD-API-2 lands: NOT_IMPLEMENTED.
-         */
-        post: operations["adminTransitionOrder"];
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
     "/v1/customer/checkout/days": {
         parameters: {
             query?: never;
@@ -2355,7 +2356,7 @@ export interface components {
          * @description Stable error code. Clients branch on it; it is never renamed or reused.
          * @enum {string}
          */
-        ErrorCode: "VALIDATION_FAILED" | "BAD_REQUEST" | "NOT_FOUND" | "METHOD_NOT_ALLOWED" | "UNAUTHORIZED" | "FORBIDDEN" | "PERMISSION_DENIED" | "CONFLICT" | "PAYLOAD_TOO_LARGE" | "UNSUPPORTED_MEDIA_TYPE" | "RATE_LIMITED" | "TRANSACTION_CONFLICT" | "SERVICE_UNAVAILABLE" | "INTERNAL_ERROR" | "MEDIA_CONTENT_TYPE_NOT_ALLOWED" | "MEDIA_NOT_FOUND" | "MEDIA_UPLOAD_EXPIRED" | "MEDIA_UPLOAD_REJECTED" | "MEDIA_NOT_READY" | "OTP_INVALID" | "OTP_EXPIRED" | "REFRESH_TOKEN_INVALID" | "ACCESS_TOKEN_EXPIRED" | "ACCOUNT_DISABLED" | "VENDOR_APPLICATION_ALREADY_PENDING" | "VENDOR_APPLICATION_NOT_PENDING" | "VENDOR_SUSPENDED" | "VENDOR_ACCESS_ALREADY_HELD" | "VENDOR_CR_EXISTS" | "PRODUCT_NOT_EDITABLE" | "PRODUCT_NOT_SUBMITTABLE" | "PRODUCT_CHANGE_REQUEST_SUPERSEDED" | "ADDRESS_LIMIT_REACHED" | "ACCOUNT_HAS_STAFF_ACCESS" | "RECENT_SIGN_IN_REQUIRED" | "INVALID_POLYGON" | "NOT_IMPLEMENTED" | "CART_EMPTY" | "CART_VENDOR_MISMATCH" | "PRODUCT_UNAVAILABLE" | "SIZE_UNAVAILABLE" | "OPTION_NOT_IN_PRODUCT" | "INCOMPATIBLE_CUTTING_PACKAGING" | "OPTION_REQUIRED" | "PRICE_CHANGED" | "ITEM_UNAVAILABLE" | "MIN_ORDER_NOT_MET" | "COUPON_NOT_FOUND" | "COUPON_EXPIRED" | "COUPON_NOT_APPLICABLE" | "COUPON_MIN_ORDER" | "COUPON_LIMIT_REACHED" | "COUPON_CODE_TAKEN" | "FULFILMENT_REQUIRED" | "FULFILMENT_NOT_SUPPORTED" | "ADDRESS_NOT_COVERED" | "DAY_FULL" | "DAY_NOT_AVAILABLE" | "ORDERING_PAUSED" | "PROFILE_INCOMPLETE" | "WALLET_INSUFFICIENT" | "PAYMENT_METHOD_NOT_AVAILABLE" | "ORDER_NOT_PAYABLE" | "PAYMENT_IN_PROGRESS" | "IDEMPOTENCY_KEY_REUSED" | "ORDER_TRANSITION_NOT_ALLOWED";
+        ErrorCode: "VALIDATION_FAILED" | "BAD_REQUEST" | "NOT_FOUND" | "METHOD_NOT_ALLOWED" | "UNAUTHORIZED" | "FORBIDDEN" | "PERMISSION_DENIED" | "CONFLICT" | "PAYLOAD_TOO_LARGE" | "UNSUPPORTED_MEDIA_TYPE" | "RATE_LIMITED" | "TRANSACTION_CONFLICT" | "SERVICE_UNAVAILABLE" | "INTERNAL_ERROR" | "MEDIA_CONTENT_TYPE_NOT_ALLOWED" | "MEDIA_NOT_FOUND" | "MEDIA_UPLOAD_EXPIRED" | "MEDIA_UPLOAD_REJECTED" | "MEDIA_NOT_READY" | "OTP_INVALID" | "OTP_EXPIRED" | "REFRESH_TOKEN_INVALID" | "ACCESS_TOKEN_EXPIRED" | "ACCOUNT_DISABLED" | "VENDOR_APPLICATION_ALREADY_PENDING" | "VENDOR_APPLICATION_NOT_PENDING" | "VENDOR_SUSPENDED" | "VENDOR_ACCESS_ALREADY_HELD" | "VENDOR_CR_EXISTS" | "PRODUCT_NOT_EDITABLE" | "PRODUCT_NOT_SUBMITTABLE" | "PRODUCT_CHANGE_REQUEST_SUPERSEDED" | "ADDRESS_LIMIT_REACHED" | "ADDRESS_IN_USE" | "ACCOUNT_HAS_STAFF_ACCESS" | "ACCOUNT_HAS_ACTIVE_ORDERS" | "RECENT_SIGN_IN_REQUIRED" | "INVALID_POLYGON" | "NOT_IMPLEMENTED" | "CART_EMPTY" | "CART_VENDOR_MISMATCH" | "PRODUCT_UNAVAILABLE" | "SIZE_UNAVAILABLE" | "OPTION_NOT_IN_PRODUCT" | "INCOMPATIBLE_CUTTING_PACKAGING" | "OPTION_REQUIRED" | "PRICE_CHANGED" | "ITEM_UNAVAILABLE" | "MIN_ORDER_NOT_MET" | "COUPON_NOT_FOUND" | "COUPON_EXPIRED" | "COUPON_NOT_APPLICABLE" | "COUPON_MIN_ORDER" | "COUPON_LIMIT_REACHED" | "COUPON_CODE_TAKEN" | "FULFILMENT_REQUIRED" | "FULFILMENT_NOT_SUPPORTED" | "ADDRESS_NOT_COVERED" | "DAY_FULL" | "DAY_NOT_AVAILABLE" | "ORDERING_PAUSED" | "PROFILE_INCOMPLETE" | "WALLET_INSUFFICIENT" | "PAYMENT_METHOD_NOT_AVAILABLE" | "ORDER_NOT_PAYABLE" | "PAYMENT_IN_PROGRESS" | "IDEMPOTENCY_KEY_REUSED" | "ORDER_TRANSITION_NOT_ALLOWED";
         ErrorResponseDto: {
             /**
              * @description Stable error code. Clients branch on it; it is never renamed or reused.
@@ -3463,6 +3464,11 @@ export interface components {
              */
             isCovered: boolean;
             /**
+             * @description Whether a non-final order uses this address. A locked address cannot be edited or deleted, but can still be made the default.
+             * @example false
+             */
+            isLocked: boolean;
+            /**
              * Format: date-time
              * @description When the address was saved, UTC (ISO 8601).
              * @example 2026-11-15T10:00:00.000Z
@@ -3714,6 +3720,796 @@ export interface components {
             covered: boolean;
             /** @description The zone covering the point; null when `covered` is false. */
             zone: components["schemas"]["CoveringZoneResponseDto"] | null;
+        };
+        /**
+         * @description Where the order is.
+         * @enum {string}
+         */
+        OrderStatus: "pending_payment" | "new" | "confirmed" | "preparing" | "ready" | "picked_up" | "out_for_delivery" | "delivered" | "collected" | "cancelled" | "delivery_failed" | "returned";
+        /**
+         * @description The kind of order, from its lines; `mixed` for several kinds.
+         * @enum {string}
+         */
+        OrderType: "ready_meat" | "carcass" | "cooked" | "occasion" | "adha" | "mixed";
+        /**
+         * @description Delivered or picked up.
+         * @enum {string}
+         */
+        FulfilmentMethod: "delivery" | "pickup";
+        OrderVendorResponseDto: {
+            /**
+             * Format: uuid
+             * @description The vendor (UUID).
+             * @example 7f3a2c1e-0b9d-4e5f-8a6b-1c2d3e4f5a6b
+             */
+            id: string;
+            /** @description The store’s name. */
+            name: components["schemas"]["LocalizedTextResponseDto"];
+            /**
+             * @description The store’s contact number; null when it has none. Shown as "call the store".
+             * @example +966500000002
+             */
+            phone: string | null;
+            /** @description The store’s pin; null when it has none. */
+            location: components["schemas"]["GeoPointDto"] | null;
+            /**
+             * @description The store’s city; null when not set.
+             * @example الرياض
+             */
+            city: string | null;
+        };
+        OrderCustomerResponseDto: {
+            /**
+             * Format: uuid
+             * @description The customer (UUID).
+             * @example 2b1c0d9e-8f7a-4b6c-9d5e-4f3a2b1c0d9e
+             */
+            id: string;
+            /**
+             * @description The profile’s full name; null when not set.
+             * @example عبدالله الحربي
+             */
+            name: string | null;
+            /**
+             * @description The customer’s mobile: in full for admins, masked for the vendor (`+966*******01`, as maskPhoneNumber).
+             * @example +966500000001
+             */
+            phone: string;
+        };
+        /**
+         * @description The method chosen (beside any wallet part).
+         * @enum {string}
+         */
+        PaymentMethod: "mada" | "card" | "applepay" | "cod" | "wallet";
+        OrderSummaryResponseDto: {
+            /**
+             * Format: uuid
+             * @description The order (UUID).
+             * @example 7f3a2c1e-0b9d-4e5f-8a6b-1c2d3e4f5a6b
+             */
+            id: string;
+            /**
+             * @description The order number customers and staff quote: `JZ-` + the Riyadh date `YYMMDD` + `-` + a 4-digit sequence of that day.
+             * @example JZ-261122-0042
+             */
+            number: string;
+            /**
+             * @description Where the order is.
+             * @example confirmed
+             */
+            status: components["schemas"]["OrderStatus"];
+            /**
+             * @description The kind of order, from its lines; `mixed` for several kinds.
+             * @example carcass
+             */
+            orderType: components["schemas"]["OrderType"];
+            /**
+             * @description Delivered or picked up.
+             * @example delivery
+             */
+            fulfilment: components["schemas"]["FulfilmentMethod"];
+            /**
+             * @description The delivery or pickup day, Riyadh calendar `yyyy-MM-dd`.
+             * @example 2026-11-24
+             */
+            fulfilmentDate: string;
+            /** @description The store that fulfils it. */
+            vendor: components["schemas"]["OrderVendorResponseDto"];
+            /** @description Who placed it. */
+            customer: components["schemas"]["OrderCustomerResponseDto"];
+            /**
+             * @description The method chosen (beside any wallet part).
+             * @example mada
+             */
+            paymentMethod: components["schemas"]["PaymentMethod"];
+            /**
+             * @description What the customer pays in all, in halalas, VAT included.
+             * @example 196500
+             */
+            totalHalalas: number;
+            /**
+             * Format: date-time
+             * @description When it was placed (UTC).
+             * @example 2026-11-22T10:00:00.000Z
+             */
+            createdAt: string;
+        };
+        OrderPageResponseDto: {
+            /** @description The orders on this page. */
+            items: components["schemas"]["OrderSummaryResponseDto"][];
+            /**
+             * @description Send as `cursor` for the next page; null on the last.
+             * @example eyJjIjoiMjAyNi0xMS0yMlQxMDowMDowMC4wMDBaIn0
+             */
+            nextCursor: string | null;
+        };
+        OrderItemSizeResponseDto: {
+            /**
+             * Format: uuid
+             * @description The size’s id (UUID).
+             * @example 7f3a2c1e-0b9d-4e5f-8a6b-1c2d3e4f5a6b
+             */
+            id: string;
+            /**
+             * @description Approximate weight in grams; the final weight may differ.
+             * @example 8000
+             */
+            approxWeightGrams: number;
+            /** @description The size’s label, null for none. */
+            tag: components["schemas"]["LocalizedTextResponseDto"] | null;
+        };
+        OrderOptionResponseDto: {
+            /**
+             * Format: uuid
+             * @description The option’s id (UUID).
+             * @example 7f3a2c1e-0b9d-4e5f-8a6b-1c2d3e4f5a6b
+             */
+            id: string;
+            /** @description Its name in Arabic and English, as when ordered. */
+            name: components["schemas"]["LocalizedTextResponseDto"];
+        };
+        OrderItemResponseDto: {
+            /**
+             * Format: uuid
+             * @description The line’s id (UUID).
+             * @example 7f3a2c1e-0b9d-4e5f-8a6b-1c2d3e4f5a6b
+             */
+            id: string;
+            /**
+             * Format: uuid
+             * @description The product (UUID); it may have changed or gone since.
+             * @example 2b1c0d9e-8f7a-4b6c-9d5e-4f3a2b1c0d9e
+             */
+            productId: string;
+            /** @description The product’s name when ordered. */
+            name: components["schemas"]["LocalizedTextResponseDto"];
+            /**
+             * @description The product’s first image when ordered; null for none.
+             * @example https://media.example.com/p/naimi.webp
+             */
+            imageUrl: string | null;
+            /** @description The chosen size. */
+            size: components["schemas"]["OrderItemSizeResponseDto"];
+            /** @description The chosen cutting style; null for none. */
+            cutting: components["schemas"]["OrderOptionResponseDto"] | null;
+            /**
+             * @description The chosen packaging; null for none. Names are the apps’.
+             * @example vacuum
+             * @enum {string|null}
+             */
+            packaging: "trays" | "bags" | "vacuum" | "none" | null;
+            /** @description The "without" items chosen; empty for none. */
+            exclusions: components["schemas"]["OrderOptionResponseDto"][];
+            /**
+             * @description The customer’s note on the line; null for none.
+             * @example بدون شحم
+             */
+            notes: string | null;
+            /**
+             * @description How many.
+             * @example 2
+             */
+            quantity: number;
+            /**
+             * @description The price of one, size plus options, in halalas (VAT included), as charged.
+             * @example 97000
+             */
+            unitPriceHalalas: number;
+            /**
+             * @description unitPriceHalalas × quantity.
+             * @example 194000
+             */
+            totalHalalas: number;
+        };
+        OrderAddressResponseDto: {
+            /**
+             * @description The address’s label.
+             * @example البيت
+             */
+            label: string;
+            /** @description The pin. */
+            location: components["schemas"]["GeoPointDto"];
+            /**
+             * @description City; null when not given.
+             * @example الرياض
+             */
+            city: string | null;
+            /**
+             * @description District; null when not given.
+             * @example الملقا
+             */
+            district: string | null;
+            /**
+             * @description Street; null when not given.
+             * @example طريق أنس بن مالك
+             */
+            street: string | null;
+            /**
+             * @description Building; null when not given.
+             * @example 12
+             */
+            building: string | null;
+            /**
+             * @description Short national address; null when not given.
+             * @example RRRD2929
+             */
+            shortNationalAddress: string | null;
+            /**
+             * @description Notes for the driver; null for none.
+             * @example البوابة الشرقية
+             */
+            driverInstructions: string | null;
+        };
+        TimeWindowDto: {
+            /**
+             * @description Start, Riyadh time, `HH:mm` (24 hours).
+             * @example 14:00
+             */
+            start: string;
+            /**
+             * @description End, Riyadh time, `HH:mm`, after `start` (VALIDATION_FAILED `endBeforeStart` otherwise).
+             * @example 22:00
+             */
+            end: string;
+        };
+        PickupPointResponseDto: {
+            /** @description The store’s name. */
+            name: components["schemas"]["LocalizedTextResponseDto"];
+            /** @description The pickup address in words; null when the store has none yet. */
+            address: components["schemas"]["LocalizedTextResponseDto"] | null;
+            /** @description The pin, for directions; null when the store has none. */
+            location: components["schemas"]["GeoPointDto"] | null;
+            /**
+             * @description The store’s contact number (`+9665…` or a landline); null when it has none.
+             * @example +966500000002
+             */
+            phone: string | null;
+            /** @description The store’s hours on the chosen day, Riyadh time; null before a day is chosen or when unknown. */
+            hours: components["schemas"]["TimeWindowDto"] | null;
+        };
+        /**
+         * @description The latest payment’s status; null when nothing is charged online (cash on delivery, wallet only).
+         * @enum {string}
+         */
+        PaymentStatus: "initiated" | "authorized" | "captured" | "failed" | "cancelled" | "refunded" | "partially_refunded";
+        OrderPaymentSummaryResponseDto: {
+            /**
+             * @description The method chosen for what the wallet does not cover.
+             * @example mada
+             */
+            method: components["schemas"]["PaymentMethod"];
+            /**
+             * @description The latest payment’s status; null when nothing is charged online (cash on delivery, wallet only).
+             * @example captured
+             */
+            status: components["schemas"]["PaymentStatus"] | null;
+            /**
+             * Format: uuid
+             * @description The latest payment (UUID); null as status is.
+             * @example 7f3a2c1e-0b9d-4e5f-8a6b-1c2d3e4f5a6b
+             */
+            paymentId: string | null;
+            /**
+             * @description The part paid from the wallet, in halalas; 0 for none.
+             * @example 5000
+             */
+            walletHalalas: number;
+            /**
+             * @description Wallet money given back because the online part failed or the order was cancelled unpaid; 0 for none.
+             * @example 0
+             */
+            walletRestoredHalalas: number;
+            /**
+             * @description The card’s last 4 digits once known; null otherwise.
+             * @example 4242
+             */
+            cardLast4: string | null;
+        };
+        OrderRefundResponseDto: {
+            /**
+             * Format: uuid
+             * @description The refund (UUID).
+             * @example 7f3a2c1e-0b9d-4e5f-8a6b-1c2d3e4f5a6b
+             */
+            id: string;
+            /**
+             * @description How much, in halalas.
+             * @example 97000
+             */
+            amountHalalas: number;
+            /**
+             * @description Where it goes.
+             * @example wallet
+             * @enum {string}
+             */
+            destination: "wallet" | "original";
+            /**
+             * @description Where it is.
+             * @example succeeded
+             * @enum {string}
+             */
+            status: "pending" | "succeeded" | "failed";
+            /**
+             * @description Why, as written by staff.
+             * @example تأخر التوصيل
+             */
+            reason: string;
+            /**
+             * Format: date-time
+             * @description When it was made (UTC).
+             * @example 2026-11-22T11:00:00.000Z
+             */
+            createdAt: string;
+        };
+        OrderHistoryEntryResponseDto: {
+            /**
+             * @description The status before; null for the first entry (placed).
+             * @example pending_payment
+             */
+            from: components["schemas"]["OrderStatus"] | null;
+            /**
+             * @description The status after.
+             * @example confirmed
+             */
+            to: components["schemas"]["OrderStatus"];
+            /**
+             * @description Who moved it.
+             * @example system
+             * @enum {string}
+             */
+            actorType: "system" | "customer" | "admin" | "vendor" | "kitchen" | "delivery";
+            /**
+             * @description The note given with the move (a cancellation reason, for example); null for none.
+             * @example null
+             */
+            note: string | null;
+            /**
+             * Format: date-time
+             * @description When (UTC).
+             * @example 2026-11-22T10:03:00.000Z
+             */
+            at: string;
+        };
+        OrderResponseDto: {
+            /**
+             * Format: uuid
+             * @description The order (UUID).
+             * @example 7f3a2c1e-0b9d-4e5f-8a6b-1c2d3e4f5a6b
+             */
+            id: string;
+            /**
+             * @description The order number customers and staff quote: `JZ-` + the Riyadh date `YYMMDD` + `-` + a 4-digit sequence of that day.
+             * @example JZ-261122-0042
+             */
+            number: string;
+            /**
+             * @description Where the order is.
+             * @example confirmed
+             */
+            status: components["schemas"]["OrderStatus"];
+            /**
+             * @description The kind of order, from its lines; `mixed` for several kinds.
+             * @example carcass
+             */
+            orderType: components["schemas"]["OrderType"];
+            /**
+             * @description Delivered or picked up.
+             * @example delivery
+             */
+            fulfilment: components["schemas"]["FulfilmentMethod"];
+            /**
+             * @description The delivery or pickup day, Riyadh calendar `yyyy-MM-dd`.
+             * @example 2026-11-24
+             */
+            fulfilmentDate: string;
+            /** @description The store that fulfils it. */
+            vendor: components["schemas"]["OrderVendorResponseDto"];
+            /** @description Who placed it. */
+            customer: components["schemas"]["OrderCustomerResponseDto"];
+            /**
+             * @description The method chosen (beside any wallet part).
+             * @example mada
+             */
+            paymentMethod: components["schemas"]["PaymentMethod"];
+            /**
+             * @description What the customer pays in all, in halalas, VAT included.
+             * @example 196500
+             */
+            totalHalalas: number;
+            /**
+             * Format: date-time
+             * @description When it was placed (UTC).
+             * @example 2026-11-22T10:00:00.000Z
+             */
+            createdAt: string;
+            /** @description The lines, in the order added. */
+            items: components["schemas"]["OrderItemResponseDto"][];
+            /** @description The delivery address as placed; null for pickup. */
+            address: components["schemas"]["OrderAddressResponseDto"] | null;
+            /** @description Where to collect it; null for delivery. */
+            pickupPoint: components["schemas"]["PickupPointResponseDto"] | null;
+            /** @description The delivery window, Riyadh time; null for pickup (see pickupPoint.hours). */
+            window: components["schemas"]["TimeWindowDto"] | null;
+            /**
+             * @description The lines’ total, in halalas, VAT included.
+             * @example 194000
+             */
+            subtotalHalalas: number;
+            /**
+             * @description The coupon discount, in halalas; 0 for none. Never applied to the delivery fee.
+             * @example 0
+             */
+            discountHalalas: number;
+            /**
+             * @description The delivery fee, in halalas; 0 for pickup.
+             * @example 2500
+             */
+            deliveryFeeHalalas: number;
+            /**
+             * @description The VAT inside totalHalalas: round half up of total × 15 / 115.
+             * @example 25630
+             */
+            vatHalalas: number;
+            /**
+             * @description The coupon applied, upper case; null for none.
+             * @example EID15
+             */
+            couponCode: string | null;
+            /**
+             * @description The customer’s note on the order; null for none.
+             * @example null
+             */
+            notes: string | null;
+            /**
+             * @description Why it was cancelled; for a rejected COD order this is the vendor’s or admin’s required transition note. Null otherwise.
+             * @example null
+             */
+            cancelReason: string | null;
+            /**
+             * Format: date-time
+             * @description Reserved for the payment-expiry task; null in the COD-only API while that task is deferred.
+             * @example 2026-11-22T10:15:00.000Z
+             */
+            expiresAt: string | null;
+            /** @description How it is paid. */
+            payment: components["schemas"]["OrderPaymentSummaryResponseDto"];
+            /** @description Refunds made; empty for none (Sprint 4). */
+            refunds: components["schemas"]["OrderRefundResponseDto"][];
+            /** @description Every move of the order, oldest first. */
+            history: components["schemas"]["OrderHistoryEntryResponseDto"][];
+            /**
+             * @description The statuses this caller may move it to now with POST …/orders/{id}/transition, from the order state machine; empty for none. Customers cannot move order statuses in Sprint 3.
+             * @example [
+             *       "confirmed",
+             *       "cancelled"
+             *     ]
+             */
+            allowedTransitions: components["schemas"]["OrderStatus"][];
+        };
+        TransitionOrderDto: {
+            /**
+             * @description The status to move to; one of the order’s `allowedTransitions` (ORDER_TRANSITION_NOT_ALLOWED otherwise).
+             * @example preparing
+             */
+            to: components["schemas"]["OrderStatus"];
+            /**
+             * @description A note kept in the history, up to 500 characters; required when moving to `cancelled` (VALIDATION_FAILED on `note` without it): for a rejected cash-on-delivery order, the reason the customer sees.
+             * @example العميل ما رد على الاتصال
+             */
+            note?: string;
+        };
+        VendorCapacityDayResponseDto: {
+            /**
+             * @description The day, Riyadh calendar `yyyy-MM-dd`.
+             * @example 2026-11-24
+             */
+            date: string;
+            /**
+             * @description This day’s own order limit; null: the vendor’s (or the platform’s) daily limit.
+             * @example 60
+             */
+            ordersLimit: number | null;
+            /**
+             * @description This day’s own carcass limit; null: the daily limit.
+             * @example null
+             */
+            carcassesLimit: number | null;
+            /**
+             * @description Orders already booked for the day (unpaid orders past their `expiresAt` no longer count).
+             * @example 12
+             */
+            ordersBooked: number;
+            /**
+             * @description Carcasses already booked for the day (unpaid orders past their `expiresAt` no longer count).
+             * @example 3
+             */
+            carcassesBooked: number;
+        };
+        VendorCapacityResponseDto: {
+            /**
+             * Format: uuid
+             * @description The vendor (UUID).
+             * @example 7f3a2c1e-0b9d-4e5f-8a6b-1c2d3e4f5a6b
+             */
+            vendorId: string;
+            /**
+             * @description The vendor’s own daily order limit; null: the platform default (operations settings).
+             * @example 40
+             */
+            ordersPerDay: number | null;
+            /**
+             * @description The vendor’s own daily carcass limit; null: the platform default.
+             * @example null
+             */
+            carcassesPerDay: number | null;
+            /** @description Every day of the booking horizon from today, with its own limits and bookings. */
+            days: components["schemas"]["VendorCapacityDayResponseDto"][];
+        };
+        SetVendorCapacityDto: {
+            /**
+             * @description Orders per day, 1 to 100000; null: use the platform default.
+             * @example 40
+             */
+            ordersPerDay: number | null;
+            /**
+             * @description Carcasses per day, 1 to 100000; null: use the platform default.
+             * @example null
+             */
+            carcassesPerDay: number | null;
+        };
+        SetVendorDayCapacityDto: {
+            /**
+             * @description Orders that day, 1 to 100000; null: the daily limit.
+             * @example 60
+             */
+            ordersLimit: number | null;
+            /**
+             * @description Carcasses that day, 1 to 100000; null: the daily limit.
+             * @example null
+             */
+            carcassesLimit: number | null;
+        };
+        CutoffRuleDto: {
+            /**
+             * @description The daily cut-off, Riyadh time `HH:mm`; null: no cut-off time, only the lead days count.
+             * @example 20:00
+             */
+            time: string | null;
+            /**
+             * @description Whole days between ordering and the first possible day, 0 to 30.
+             * @example 1
+             */
+            leadDays: number;
+        };
+        CutoffsDto: {
+            /** @description Ready meat (`ready_meat`); default 12:00, 0 days. */
+            readyMeat: components["schemas"]["CutoffRuleDto"];
+            /** @description Whole carcasses (`carcass`); default 20:00, 1 day. */
+            carcass: components["schemas"]["CutoffRuleDto"];
+            /** @description Cooked food (`cooked`); default 18:00, 1 day. */
+            cooked: components["schemas"]["CutoffRuleDto"];
+            /** @description Occasion packages (`occasion`); default no time, 3 days. */
+            occasion: components["schemas"]["CutoffRuleDto"];
+            /** @description Eid al-Adha sacrifices (`adha`); default no time, 3 days, until the Adha calendar lands (Sprint 6). */
+            adha: components["schemas"]["CutoffRuleDto"];
+        };
+        DefaultCapacityDto: {
+            /**
+             * @description Orders per day, 1 to 100000.
+             * @example 40
+             */
+            ordersPerDay: number;
+            /**
+             * @description Whole carcasses per day, 1 to 100000.
+             * @example 10
+             */
+            carcassesPerDay: number;
+        };
+        CodSettingsDto: {
+            /**
+             * @description Whether customers may choose cash on delivery.
+             * @example true
+             */
+            enabled: boolean;
+            /**
+             * @description The largest order total (halalas, VAT included) cash on delivery is offered for; null: no limit.
+             * @example 150000
+             */
+            maxOrderHalalas: number | null;
+            /**
+             * @description The kinds of order it is offered for; empty: none.
+             * @example [
+             *       "ready_meat",
+             *       "cooked"
+             *     ]
+             */
+            allowedOrderTypes: components["schemas"]["OrderType"][];
+            /**
+             * @description `auto`: the order is confirmed when placed; `review`: it waits as `new` for an admin to confirm or reject it (POST /v1/admin/orders/{id}/transition).
+             * @example review
+             * @enum {string}
+             */
+            confirmation: "auto" | "review";
+        };
+        ClosedDayDto: {
+            /**
+             * @description The day, Riyadh calendar `yyyy-MM-dd`. A day added in the past is VALIDATION_FAILED `notPast`; past days already saved are kept as history.
+             * @example 2026-12-02
+             */
+            date: string;
+            /**
+             * @description What it closes: `both`, `delivery` or `pickup`.
+             * @example both
+             * @enum {string}
+             */
+            scope: "both" | "delivery" | "pickup";
+            /**
+             * @description Why, in Arabic, shown to the customer beside the day; 1 to 100 characters.
+             * @example إجازة اليوم الوطني
+             */
+            reasonAr: string;
+            /**
+             * @description Why, in English; 1 to 100 characters.
+             * @example National Day holiday
+             */
+            reasonEn: string;
+        };
+        OrderingPauseResponseDto: {
+            /**
+             * @description While true, every cart change and checkout call answers ORDERING_PAUSED with these messages.
+             * @example false
+             */
+            isPaused: boolean;
+            /**
+             * @description The message in Arabic; null when not paused.
+             * @example نعتذر، الطلبات متوقفة مؤقتًا
+             */
+            messageAr: string | null;
+            /**
+             * @description The message in English; null when not paused.
+             * @example Ordering is paused for now.
+             */
+            messageEn: string | null;
+        };
+        OperationsSettingsResponseDto: {
+            /** @description The delivery window every delivery day uses, Riyadh time. */
+            deliveryWindow: components["schemas"]["TimeWindowDto"];
+            /** @description The cut-off and lead days of each kind of order. */
+            cutoffs: components["schemas"]["CutoffsDto"];
+            /** @description Each vendor’s daily capacity unless it has its own (PUT /v1/admin/vendors/{id}/capacity). */
+            defaultCapacity: components["schemas"]["DefaultCapacityDto"];
+            /** @description Cash on delivery. */
+            cod: components["schemas"]["CodSettingsDto"];
+            /**
+             * @description How many days ahead can be booked, counting today: 14 offers today to today + 13. 1 to 60.
+             * @example 14
+             */
+            bookingHorizonDays: number;
+            /**
+             * @description The smallest order, in halalas (VAT included), compared with the subtotal before any discount. 0 to 10000000.
+             * @example 10000
+             */
+            minOrderHalalas: number;
+            /**
+             * @description The delivery fee, in halalas (VAT included), added to delivery orders only and never discounted. 0 to 1000000.
+             * @example 2500
+             */
+            deliveryFeeHalalas: number;
+            /**
+             * @description How long after delivery a complaint can be opened (complaints: Sprint 5). 1 to 720.
+             * @example 48
+             */
+            complaintWindowHours: number;
+            /** @description The closed days, past ones included, in date order. */
+            closedDays: components["schemas"]["ClosedDayDto"][];
+            /** @description The pause; changed only with PUT /v1/admin/settings/operations/pause. */
+            paused: components["schemas"]["OrderingPauseResponseDto"];
+            /**
+             * Format: date-time
+             * @description When the settings last changed (UTC).
+             * @example 2026-11-22T09:30:00.000Z
+             */
+            updatedAt: string;
+        };
+        UpdateOperationsSettingsDto: {
+            /** @description The delivery window every delivery day uses, Riyadh time. Left out: unchanged; null: VALIDATION_FAILED. */
+            deliveryWindow?: components["schemas"]["TimeWindowDto"];
+            /** @description The cut-off and lead days of each kind of order. Left out: unchanged; null: VALIDATION_FAILED. */
+            cutoffs?: components["schemas"]["CutoffsDto"];
+            /** @description Each vendor’s daily capacity unless it has its own (PUT /v1/admin/vendors/{id}/capacity). Left out: unchanged; null: VALIDATION_FAILED. */
+            defaultCapacity?: components["schemas"]["DefaultCapacityDto"];
+            /** @description Cash on delivery. Left out: unchanged; null: VALIDATION_FAILED. */
+            cod?: components["schemas"]["CodSettingsDto"];
+            /**
+             * @description How many days ahead can be booked, counting today: 14 offers today to today + 13. 1 to 60. Left out: unchanged; null: VALIDATION_FAILED.
+             * @example 14
+             */
+            bookingHorizonDays?: number;
+            /**
+             * @description The smallest order, in halalas (VAT included), compared with the subtotal before any discount. 0 to 10000000. Left out: unchanged; null: VALIDATION_FAILED.
+             * @example 10000
+             */
+            minOrderHalalas?: number;
+            /**
+             * @description The delivery fee, in halalas (VAT included), added to delivery orders only and never discounted. 0 to 1000000. Left out: unchanged; null: VALIDATION_FAILED.
+             * @example 2500
+             */
+            deliveryFeeHalalas?: number;
+            /**
+             * @description How long after delivery a complaint can be opened (complaints: Sprint 5). 1 to 720. Left out: unchanged; null: VALIDATION_FAILED.
+             * @example 48
+             */
+            complaintWindowHours?: number;
+            /** @description The whole list of closed days, at most 366; replaces the saved list. A date twice: VALIDATION_FAILED `isNotRepeated` on `closedDays.<i>.date`. Left out: unchanged; null: VALIDATION_FAILED. */
+            closedDays?: components["schemas"]["ClosedDayDto"][];
+        };
+        SetOrderingPauseDto: {
+            /**
+             * @description `true`: pause new orders now; `false`: resume.
+             * @example true
+             */
+            isPaused: boolean;
+            /**
+             * @description The message in Arabic, 1 to 200 characters; required when pausing, ignored when resuming.
+             * @example نعتذر، الطلبات متوقفة مؤقتًا
+             */
+            messageAr?: string;
+            /**
+             * @description The message in English, 1 to 200 characters; required when pausing, ignored when resuming.
+             * @example Ordering is paused for now.
+             */
+            messageEn?: string;
+        };
+        ClientSettingsResponseDto: {
+            /** @description The delivery window, Riyadh time. */
+            deliveryWindow: components["schemas"]["TimeWindowDto"];
+            /**
+             * @description How many days ahead can be booked, counting today.
+             * @example 14
+             */
+            bookingHorizonDays: number;
+            /**
+             * @description The smallest order (halalas, VAT included), compared with the subtotal before discounts.
+             * @example 10000
+             */
+            minOrderHalalas: number;
+            /**
+             * @description The delivery fee of a delivery order (halalas, VAT included).
+             * @example 2500
+             */
+            deliveryFeeHalalas: number;
+            /**
+             * @description Whether cash on delivery is offered at all (each order also needs its type and total allowed).
+             * @example true
+             */
+            codEnabled: boolean;
+            /**
+             * @description The largest order total cash on delivery is offered for; null: no limit.
+             * @example 150000
+             */
+            codMaxOrderHalalas: number | null;
+            /** @description Whether new orders are paused, with the message to show. */
+            paused: components["schemas"]["OrderingPauseResponseDto"];
         };
         LivenessResponseDto: {
             /**
@@ -4578,316 +5374,6 @@ export interface components {
              */
             minPriceHalalas: number;
         };
-        TimeWindowDto: {
-            /**
-             * @description Start, Riyadh time, `HH:mm` (24 hours).
-             * @example 14:00
-             */
-            start: string;
-            /**
-             * @description End, Riyadh time, `HH:mm`, after `start` (VALIDATION_FAILED `endBeforeStart` otherwise).
-             * @example 22:00
-             */
-            end: string;
-        };
-        CutoffRuleDto: {
-            /**
-             * @description The daily cut-off, Riyadh time `HH:mm`; null: no cut-off time, only the lead days count.
-             * @example 20:00
-             */
-            time: string | null;
-            /**
-             * @description Whole days between ordering and the first possible day, 0 to 30.
-             * @example 1
-             */
-            leadDays: number;
-        };
-        CutoffsDto: {
-            /** @description Ready meat (`ready_meat`); default 12:00, 0 days. */
-            readyMeat: components["schemas"]["CutoffRuleDto"];
-            /** @description Whole carcasses (`carcass`); default 20:00, 1 day. */
-            carcass: components["schemas"]["CutoffRuleDto"];
-            /** @description Cooked food (`cooked`); default 18:00, 1 day. */
-            cooked: components["schemas"]["CutoffRuleDto"];
-            /** @description Occasion packages (`occasion`); default no time, 3 days. */
-            occasion: components["schemas"]["CutoffRuleDto"];
-            /** @description Eid al-Adha sacrifices (`adha`); default no time, 3 days, until the Adha calendar lands (Sprint 6). */
-            adha: components["schemas"]["CutoffRuleDto"];
-        };
-        DefaultCapacityDto: {
-            /**
-             * @description Orders per day, 1 to 100000.
-             * @example 40
-             */
-            ordersPerDay: number;
-            /**
-             * @description Whole carcasses per day, 1 to 100000.
-             * @example 10
-             */
-            carcassesPerDay: number;
-        };
-        /**
-         * @description The kinds of order it is offered for; empty: none.
-         * @enum {string}
-         */
-        OrderType: "ready_meat" | "carcass" | "cooked" | "occasion" | "adha" | "mixed";
-        CodSettingsDto: {
-            /**
-             * @description Whether customers may choose cash on delivery.
-             * @example true
-             */
-            enabled: boolean;
-            /**
-             * @description The largest order total (halalas, VAT included) cash on delivery is offered for; null: no limit.
-             * @example 150000
-             */
-            maxOrderHalalas: number | null;
-            /**
-             * @description The kinds of order it is offered for; empty: none.
-             * @example [
-             *       "ready_meat",
-             *       "cooked"
-             *     ]
-             */
-            allowedOrderTypes: components["schemas"]["OrderType"][];
-            /**
-             * @description `auto`: the order is confirmed when placed; `review`: it waits as `new` for an admin to confirm or reject it (POST /v1/admin/orders/{id}/transition).
-             * @example review
-             * @enum {string}
-             */
-            confirmation: "auto" | "review";
-        };
-        ClosedDayDto: {
-            /**
-             * @description The day, Riyadh calendar `yyyy-MM-dd`. A day added in the past is VALIDATION_FAILED `notPast`; past days already saved are kept as history.
-             * @example 2026-12-02
-             */
-            date: string;
-            /**
-             * @description What it closes: `both`, `delivery` or `pickup`.
-             * @example both
-             * @enum {string}
-             */
-            scope: "both" | "delivery" | "pickup";
-            /**
-             * @description Why, in Arabic, shown to the customer beside the day; 1 to 100 characters.
-             * @example إجازة اليوم الوطني
-             */
-            reasonAr: string;
-            /**
-             * @description Why, in English; 1 to 100 characters.
-             * @example National Day holiday
-             */
-            reasonEn: string;
-        };
-        OrderingPauseResponseDto: {
-            /**
-             * @description While true, every cart change and checkout call answers ORDERING_PAUSED with these messages.
-             * @example false
-             */
-            isPaused: boolean;
-            /**
-             * @description The message in Arabic; null when not paused.
-             * @example نعتذر، الطلبات متوقفة مؤقتًا
-             */
-            messageAr: string | null;
-            /**
-             * @description The message in English; null when not paused.
-             * @example Ordering is paused for now.
-             */
-            messageEn: string | null;
-        };
-        OperationsSettingsResponseDto: {
-            /** @description The delivery window every delivery day uses, Riyadh time. */
-            deliveryWindow: components["schemas"]["TimeWindowDto"];
-            /** @description The cut-off and lead days of each kind of order. */
-            cutoffs: components["schemas"]["CutoffsDto"];
-            /** @description Each vendor’s daily capacity unless it has its own (PUT /v1/admin/vendors/{id}/capacity). */
-            defaultCapacity: components["schemas"]["DefaultCapacityDto"];
-            /** @description Cash on delivery. */
-            cod: components["schemas"]["CodSettingsDto"];
-            /**
-             * @description How many days ahead can be booked, counting today: 14 offers today to today + 13. 1 to 60.
-             * @example 14
-             */
-            bookingHorizonDays: number;
-            /**
-             * @description The smallest order, in halalas (VAT included), compared with the subtotal before any discount. 0 to 10000000.
-             * @example 10000
-             */
-            minOrderHalalas: number;
-            /**
-             * @description The delivery fee, in halalas (VAT included), added to delivery orders only and never discounted. 0 to 1000000.
-             * @example 2500
-             */
-            deliveryFeeHalalas: number;
-            /**
-             * @description How long after delivery a complaint can be opened (complaints: Sprint 5). 1 to 720.
-             * @example 48
-             */
-            complaintWindowHours: number;
-            /** @description The closed days, past ones included, in date order. */
-            closedDays: components["schemas"]["ClosedDayDto"][];
-            /** @description The pause; changed only with PUT /v1/admin/settings/operations/pause. */
-            paused: components["schemas"]["OrderingPauseResponseDto"];
-            /**
-             * Format: date-time
-             * @description When the settings last changed (UTC).
-             * @example 2026-11-22T09:30:00.000Z
-             */
-            updatedAt: string;
-        };
-        UpdateOperationsSettingsDto: {
-            /** @description The delivery window every delivery day uses, Riyadh time. Left out: unchanged; null: VALIDATION_FAILED. */
-            deliveryWindow?: components["schemas"]["TimeWindowDto"];
-            /** @description The cut-off and lead days of each kind of order. Left out: unchanged; null: VALIDATION_FAILED. */
-            cutoffs?: components["schemas"]["CutoffsDto"];
-            /** @description Each vendor’s daily capacity unless it has its own (PUT /v1/admin/vendors/{id}/capacity). Left out: unchanged; null: VALIDATION_FAILED. */
-            defaultCapacity?: components["schemas"]["DefaultCapacityDto"];
-            /** @description Cash on delivery. Left out: unchanged; null: VALIDATION_FAILED. */
-            cod?: components["schemas"]["CodSettingsDto"];
-            /**
-             * @description How many days ahead can be booked, counting today: 14 offers today to today + 13. 1 to 60. Left out: unchanged; null: VALIDATION_FAILED.
-             * @example 14
-             */
-            bookingHorizonDays?: number;
-            /**
-             * @description The smallest order, in halalas (VAT included), compared with the subtotal before any discount. 0 to 10000000. Left out: unchanged; null: VALIDATION_FAILED.
-             * @example 10000
-             */
-            minOrderHalalas?: number;
-            /**
-             * @description The delivery fee, in halalas (VAT included), added to delivery orders only and never discounted. 0 to 1000000. Left out: unchanged; null: VALIDATION_FAILED.
-             * @example 2500
-             */
-            deliveryFeeHalalas?: number;
-            /**
-             * @description How long after delivery a complaint can be opened (complaints: Sprint 5). 1 to 720. Left out: unchanged; null: VALIDATION_FAILED.
-             * @example 48
-             */
-            complaintWindowHours?: number;
-            /** @description The whole list of closed days, at most 366; replaces the saved list. A date twice: VALIDATION_FAILED `isNotRepeated` on `closedDays.<i>.date`. Left out: unchanged; null: VALIDATION_FAILED. */
-            closedDays?: components["schemas"]["ClosedDayDto"][];
-        };
-        SetOrderingPauseDto: {
-            /**
-             * @description `true`: pause new orders now; `false`: resume.
-             * @example true
-             */
-            isPaused: boolean;
-            /**
-             * @description The message in Arabic, 1 to 200 characters; required when pausing, ignored when resuming.
-             * @example نعتذر، الطلبات متوقفة مؤقتًا
-             */
-            messageAr?: string;
-            /**
-             * @description The message in English, 1 to 200 characters; required when pausing, ignored when resuming.
-             * @example Ordering is paused for now.
-             */
-            messageEn?: string;
-        };
-        ClientSettingsResponseDto: {
-            /** @description The delivery window, Riyadh time. */
-            deliveryWindow: components["schemas"]["TimeWindowDto"];
-            /**
-             * @description How many days ahead can be booked, counting today.
-             * @example 14
-             */
-            bookingHorizonDays: number;
-            /**
-             * @description The smallest order (halalas, VAT included), compared with the subtotal before discounts.
-             * @example 10000
-             */
-            minOrderHalalas: number;
-            /**
-             * @description The delivery fee of a delivery order (halalas, VAT included).
-             * @example 2500
-             */
-            deliveryFeeHalalas: number;
-            /**
-             * @description Whether cash on delivery is offered at all (each order also needs its type and total allowed).
-             * @example true
-             */
-            codEnabled: boolean;
-            /**
-             * @description The largest order total cash on delivery is offered for; null: no limit.
-             * @example 150000
-             */
-            codMaxOrderHalalas: number | null;
-            /** @description Whether new orders are paused, with the message to show. */
-            paused: components["schemas"]["OrderingPauseResponseDto"];
-        };
-        VendorCapacityDayResponseDto: {
-            /**
-             * @description The day, Riyadh calendar `yyyy-MM-dd`.
-             * @example 2026-11-24
-             */
-            date: string;
-            /**
-             * @description This day’s own order limit; null: the vendor’s (or the platform’s) daily limit.
-             * @example 60
-             */
-            ordersLimit: number | null;
-            /**
-             * @description This day’s own carcass limit; null: the daily limit.
-             * @example null
-             */
-            carcassesLimit: number | null;
-            /**
-             * @description Orders already booked for the day (unpaid orders past their `expiresAt` no longer count).
-             * @example 12
-             */
-            ordersBooked: number;
-            /**
-             * @description Carcasses already booked for the day (unpaid orders past their `expiresAt` no longer count).
-             * @example 3
-             */
-            carcassesBooked: number;
-        };
-        VendorCapacityResponseDto: {
-            /**
-             * Format: uuid
-             * @description The vendor (UUID).
-             * @example 7f3a2c1e-0b9d-4e5f-8a6b-1c2d3e4f5a6b
-             */
-            vendorId: string;
-            /**
-             * @description The vendor’s own daily order limit; null: the platform default (operations settings).
-             * @example 40
-             */
-            ordersPerDay: number | null;
-            /**
-             * @description The vendor’s own daily carcass limit; null: the platform default.
-             * @example null
-             */
-            carcassesPerDay: number | null;
-            /** @description Every day of the booking horizon from today, with its own limits and bookings. */
-            days: components["schemas"]["VendorCapacityDayResponseDto"][];
-        };
-        SetVendorCapacityDto: {
-            /**
-             * @description Orders per day, 1 to 100000; null: use the platform default.
-             * @example 40
-             */
-            ordersPerDay: number | null;
-            /**
-             * @description Carcasses per day, 1 to 100000; null: use the platform default.
-             * @example null
-             */
-            carcassesPerDay: number | null;
-        };
-        SetVendorDayCapacityDto: {
-            /**
-             * @description Orders that day, 1 to 100000; null: the daily limit.
-             * @example 60
-             */
-            ordersLimit: number | null;
-            /**
-             * @description Carcasses that day, 1 to 100000; null: the daily limit.
-             * @example null
-             */
-            carcassesLimit: number | null;
-        };
         CartVendorResponseDto: {
             /**
              * Format: uuid
@@ -4896,31 +5382,6 @@ export interface components {
              */
             id: string;
             /** @description The store’s name. */
-            name: components["schemas"]["LocalizedTextResponseDto"];
-        };
-        OrderItemSizeResponseDto: {
-            /**
-             * Format: uuid
-             * @description The size’s id (UUID).
-             * @example 7f3a2c1e-0b9d-4e5f-8a6b-1c2d3e4f5a6b
-             */
-            id: string;
-            /**
-             * @description Approximate weight in grams; the final weight may differ.
-             * @example 8000
-             */
-            approxWeightGrams: number;
-            /** @description The size’s label, null for none. */
-            tag: components["schemas"]["LocalizedTextResponseDto"] | null;
-        };
-        OrderOptionResponseDto: {
-            /**
-             * Format: uuid
-             * @description The option’s id (UUID).
-             * @example 7f3a2c1e-0b9d-4e5f-8a6b-1c2d3e4f5a6b
-             */
-            id: string;
-            /** @description Its name in Arabic and English, as when ordered. */
             name: components["schemas"]["LocalizedTextResponseDto"];
         };
         CartLineResponseDto: {
@@ -4992,26 +5453,6 @@ export interface components {
              * @example 15000
              */
             discountHalalas: number;
-        };
-        /**
-         * @description Delivered or picked up.
-         * @enum {string}
-         */
-        FulfilmentMethod: "delivery" | "pickup";
-        PickupPointResponseDto: {
-            /** @description The store’s name. */
-            name: components["schemas"]["LocalizedTextResponseDto"];
-            /** @description The pickup address in words; null when the store has none yet. */
-            address: components["schemas"]["LocalizedTextResponseDto"] | null;
-            /** @description The pin, for directions; null when the store has none. */
-            location: components["schemas"]["GeoPointDto"] | null;
-            /**
-             * @description The store’s contact number (`+9665…` or a landline); null when it has none.
-             * @example +966500000002
-             */
-            phone: string | null;
-            /** @description The store’s hours on the chosen day, Riyadh time; null before a day is chosen or when unknown. */
-            hours: components["schemas"]["TimeWindowDto"] | null;
         };
         CartFulfilmentResponseDto: {
             /**
@@ -5598,441 +6039,6 @@ export interface components {
              */
             received: boolean;
         };
-        /**
-         * @description Where the order is.
-         * @enum {string}
-         */
-        OrderStatus: "pending_payment" | "new" | "confirmed" | "preparing" | "ready" | "picked_up" | "out_for_delivery" | "delivered" | "collected" | "cancelled" | "delivery_failed" | "returned";
-        OrderVendorResponseDto: {
-            /**
-             * Format: uuid
-             * @description The vendor (UUID).
-             * @example 7f3a2c1e-0b9d-4e5f-8a6b-1c2d3e4f5a6b
-             */
-            id: string;
-            /** @description The store’s name. */
-            name: components["schemas"]["LocalizedTextResponseDto"];
-            /**
-             * @description The store’s contact number; null when it has none. Shown as "call the store".
-             * @example +966500000002
-             */
-            phone: string | null;
-            /** @description The store’s pin; null when it has none. */
-            location: components["schemas"]["GeoPointDto"] | null;
-            /**
-             * @description The store’s city; null when not set.
-             * @example الرياض
-             */
-            city: string | null;
-        };
-        OrderCustomerResponseDto: {
-            /**
-             * Format: uuid
-             * @description The customer (UUID).
-             * @example 2b1c0d9e-8f7a-4b6c-9d5e-4f3a2b1c0d9e
-             */
-            id: string;
-            /**
-             * @description The profile’s full name; null when not set.
-             * @example عبدالله الحربي
-             */
-            name: string | null;
-            /**
-             * @description The customer’s mobile: in full for admins, masked for the vendor (`+966*******01`, as maskPhoneNumber).
-             * @example +966500000001
-             */
-            phone: string;
-        };
-        /**
-         * @description The method chosen (beside any wallet part).
-         * @enum {string}
-         */
-        PaymentMethod: "mada" | "card" | "applepay" | "cod" | "wallet";
-        OrderSummaryResponseDto: {
-            /**
-             * Format: uuid
-             * @description The order (UUID).
-             * @example 7f3a2c1e-0b9d-4e5f-8a6b-1c2d3e4f5a6b
-             */
-            id: string;
-            /**
-             * @description The order number customers and staff quote: `JZ-` + the Riyadh date `YYMMDD` + `-` + a 4-digit sequence of that day.
-             * @example JZ-261122-0042
-             */
-            number: string;
-            /**
-             * @description Where the order is.
-             * @example confirmed
-             */
-            status: components["schemas"]["OrderStatus"];
-            /**
-             * @description The kind of order, from its lines; `mixed` for several kinds.
-             * @example carcass
-             */
-            orderType: components["schemas"]["OrderType"];
-            /**
-             * @description Delivered or picked up.
-             * @example delivery
-             */
-            fulfilment: components["schemas"]["FulfilmentMethod"];
-            /**
-             * @description The delivery or pickup day, Riyadh calendar `yyyy-MM-dd`.
-             * @example 2026-11-24
-             */
-            fulfilmentDate: string;
-            /** @description The store that fulfils it. */
-            vendor: components["schemas"]["OrderVendorResponseDto"];
-            /** @description Who placed it. */
-            customer: components["schemas"]["OrderCustomerResponseDto"];
-            /**
-             * @description The method chosen (beside any wallet part).
-             * @example mada
-             */
-            paymentMethod: components["schemas"]["PaymentMethod"];
-            /**
-             * @description What the customer pays in all, in halalas, VAT included.
-             * @example 196500
-             */
-            totalHalalas: number;
-            /**
-             * Format: date-time
-             * @description When it was placed (UTC).
-             * @example 2026-11-22T10:00:00.000Z
-             */
-            createdAt: string;
-        };
-        OrderPageResponseDto: {
-            /** @description The orders on this page. */
-            items: components["schemas"]["OrderSummaryResponseDto"][];
-            /**
-             * @description Send as `cursor` for the next page; null on the last.
-             * @example eyJjIjoiMjAyNi0xMS0yMlQxMDowMDowMC4wMDBaIn0
-             */
-            nextCursor: string | null;
-        };
-        OrderItemResponseDto: {
-            /**
-             * Format: uuid
-             * @description The line’s id (UUID).
-             * @example 7f3a2c1e-0b9d-4e5f-8a6b-1c2d3e4f5a6b
-             */
-            id: string;
-            /**
-             * Format: uuid
-             * @description The product (UUID); it may have changed or gone since.
-             * @example 2b1c0d9e-8f7a-4b6c-9d5e-4f3a2b1c0d9e
-             */
-            productId: string;
-            /** @description The product’s name when ordered. */
-            name: components["schemas"]["LocalizedTextResponseDto"];
-            /**
-             * @description The product’s first image when ordered; null for none.
-             * @example https://media.example.com/p/naimi.webp
-             */
-            imageUrl: string | null;
-            /** @description The chosen size. */
-            size: components["schemas"]["OrderItemSizeResponseDto"];
-            /** @description The chosen cutting style; null for none. */
-            cutting: components["schemas"]["OrderOptionResponseDto"] | null;
-            /**
-             * @description The chosen packaging; null for none. Names are the apps’.
-             * @example vacuum
-             * @enum {string|null}
-             */
-            packaging: "trays" | "bags" | "vacuum" | "none" | null;
-            /** @description The "without" items chosen; empty for none. */
-            exclusions: components["schemas"]["OrderOptionResponseDto"][];
-            /**
-             * @description The customer’s note on the line; null for none.
-             * @example بدون شحم
-             */
-            notes: string | null;
-            /**
-             * @description How many.
-             * @example 2
-             */
-            quantity: number;
-            /**
-             * @description The price of one, size plus options, in halalas (VAT included), as charged.
-             * @example 97000
-             */
-            unitPriceHalalas: number;
-            /**
-             * @description unitPriceHalalas × quantity.
-             * @example 194000
-             */
-            totalHalalas: number;
-        };
-        OrderAddressResponseDto: {
-            /**
-             * @description The address’s label.
-             * @example البيت
-             */
-            label: string;
-            /** @description The pin. */
-            location: components["schemas"]["GeoPointDto"];
-            /**
-             * @description City; null when not given.
-             * @example الرياض
-             */
-            city: string | null;
-            /**
-             * @description District; null when not given.
-             * @example الملقا
-             */
-            district: string | null;
-            /**
-             * @description Street; null when not given.
-             * @example طريق أنس بن مالك
-             */
-            street: string | null;
-            /**
-             * @description Building; null when not given.
-             * @example 12
-             */
-            building: string | null;
-            /**
-             * @description Short national address; null when not given.
-             * @example RRRD2929
-             */
-            shortNationalAddress: string | null;
-            /**
-             * @description Notes for the driver; null for none.
-             * @example البوابة الشرقية
-             */
-            driverInstructions: string | null;
-        };
-        /**
-         * @description The latest payment’s status; null when nothing is charged online (cash on delivery, wallet only).
-         * @enum {string}
-         */
-        PaymentStatus: "initiated" | "authorized" | "captured" | "failed" | "cancelled" | "refunded" | "partially_refunded";
-        OrderPaymentSummaryResponseDto: {
-            /**
-             * @description The method chosen for what the wallet does not cover.
-             * @example mada
-             */
-            method: components["schemas"]["PaymentMethod"];
-            /**
-             * @description The latest payment’s status; null when nothing is charged online (cash on delivery, wallet only).
-             * @example captured
-             */
-            status: components["schemas"]["PaymentStatus"] | null;
-            /**
-             * Format: uuid
-             * @description The latest payment (UUID); null as status is.
-             * @example 7f3a2c1e-0b9d-4e5f-8a6b-1c2d3e4f5a6b
-             */
-            paymentId: string | null;
-            /**
-             * @description The part paid from the wallet, in halalas; 0 for none.
-             * @example 5000
-             */
-            walletHalalas: number;
-            /**
-             * @description Wallet money given back because the online part failed or the order was cancelled unpaid; 0 for none.
-             * @example 0
-             */
-            walletRestoredHalalas: number;
-            /**
-             * @description The card’s last 4 digits once known; null otherwise.
-             * @example 4242
-             */
-            cardLast4: string | null;
-        };
-        OrderRefundResponseDto: {
-            /**
-             * Format: uuid
-             * @description The refund (UUID).
-             * @example 7f3a2c1e-0b9d-4e5f-8a6b-1c2d3e4f5a6b
-             */
-            id: string;
-            /**
-             * @description How much, in halalas.
-             * @example 97000
-             */
-            amountHalalas: number;
-            /**
-             * @description Where it goes.
-             * @example wallet
-             * @enum {string}
-             */
-            destination: "wallet" | "original";
-            /**
-             * @description Where it is.
-             * @example succeeded
-             * @enum {string}
-             */
-            status: "pending" | "succeeded" | "failed";
-            /**
-             * @description Why, as written by staff.
-             * @example تأخر التوصيل
-             */
-            reason: string;
-            /**
-             * Format: date-time
-             * @description When it was made (UTC).
-             * @example 2026-11-22T11:00:00.000Z
-             */
-            createdAt: string;
-        };
-        OrderHistoryEntryResponseDto: {
-            /**
-             * @description The status before; null for the first entry (placed).
-             * @example pending_payment
-             */
-            from: components["schemas"]["OrderStatus"] | null;
-            /**
-             * @description The status after.
-             * @example confirmed
-             */
-            to: components["schemas"]["OrderStatus"];
-            /**
-             * @description Who moved it.
-             * @example system
-             * @enum {string}
-             */
-            actorType: "system" | "customer" | "admin" | "vendor" | "kitchen" | "delivery";
-            /**
-             * @description The note given with the move (a cancellation reason, for example); null for none.
-             * @example null
-             */
-            note: string | null;
-            /**
-             * Format: date-time
-             * @description When (UTC).
-             * @example 2026-11-22T10:03:00.000Z
-             */
-            at: string;
-        };
-        OrderResponseDto: {
-            /**
-             * Format: uuid
-             * @description The order (UUID).
-             * @example 7f3a2c1e-0b9d-4e5f-8a6b-1c2d3e4f5a6b
-             */
-            id: string;
-            /**
-             * @description The order number customers and staff quote: `JZ-` + the Riyadh date `YYMMDD` + `-` + a 4-digit sequence of that day.
-             * @example JZ-261122-0042
-             */
-            number: string;
-            /**
-             * @description Where the order is.
-             * @example confirmed
-             */
-            status: components["schemas"]["OrderStatus"];
-            /**
-             * @description The kind of order, from its lines; `mixed` for several kinds.
-             * @example carcass
-             */
-            orderType: components["schemas"]["OrderType"];
-            /**
-             * @description Delivered or picked up.
-             * @example delivery
-             */
-            fulfilment: components["schemas"]["FulfilmentMethod"];
-            /**
-             * @description The delivery or pickup day, Riyadh calendar `yyyy-MM-dd`.
-             * @example 2026-11-24
-             */
-            fulfilmentDate: string;
-            /** @description The store that fulfils it. */
-            vendor: components["schemas"]["OrderVendorResponseDto"];
-            /** @description Who placed it. */
-            customer: components["schemas"]["OrderCustomerResponseDto"];
-            /**
-             * @description The method chosen (beside any wallet part).
-             * @example mada
-             */
-            paymentMethod: components["schemas"]["PaymentMethod"];
-            /**
-             * @description What the customer pays in all, in halalas, VAT included.
-             * @example 196500
-             */
-            totalHalalas: number;
-            /**
-             * Format: date-time
-             * @description When it was placed (UTC).
-             * @example 2026-11-22T10:00:00.000Z
-             */
-            createdAt: string;
-            /** @description The lines, in the order added. */
-            items: components["schemas"]["OrderItemResponseDto"][];
-            /** @description The delivery address as placed; null for pickup. */
-            address: components["schemas"]["OrderAddressResponseDto"] | null;
-            /** @description Where to collect it; null for delivery. */
-            pickupPoint: components["schemas"]["PickupPointResponseDto"] | null;
-            /** @description The delivery window, Riyadh time; null for pickup (see pickupPoint.hours). */
-            window: components["schemas"]["TimeWindowDto"] | null;
-            /**
-             * @description The lines’ total, in halalas, VAT included.
-             * @example 194000
-             */
-            subtotalHalalas: number;
-            /**
-             * @description The coupon discount, in halalas; 0 for none. Never applied to the delivery fee.
-             * @example 0
-             */
-            discountHalalas: number;
-            /**
-             * @description The delivery fee, in halalas; 0 for pickup.
-             * @example 2500
-             */
-            deliveryFeeHalalas: number;
-            /**
-             * @description The VAT inside totalHalalas: round half up of total × 15 / 115.
-             * @example 25630
-             */
-            vatHalalas: number;
-            /**
-             * @description The coupon applied, upper case; null for none.
-             * @example EID15
-             */
-            couponCode: string | null;
-            /**
-             * @description The customer’s note on the order; null for none.
-             * @example null
-             */
-            notes: string | null;
-            /**
-             * @description Why it was cancelled (a rejected cash-on-delivery order gets the admin’s note); null otherwise.
-             * @example null
-             */
-            cancelReason: string | null;
-            /**
-             * Format: date-time
-             * @description While `pending_payment`: when it is cancelled if still unpaid (15 minutes after placing); null otherwise.
-             * @example 2026-11-22T10:15:00.000Z
-             */
-            expiresAt: string | null;
-            /** @description How it is paid. */
-            payment: components["schemas"]["OrderPaymentSummaryResponseDto"];
-            /** @description Refunds made; empty for none (Sprint 4). */
-            refunds: components["schemas"]["OrderRefundResponseDto"][];
-            /** @description Every move of the order, oldest first. */
-            history: components["schemas"]["OrderHistoryEntryResponseDto"][];
-            /**
-             * @description The statuses the caller may move it to now with POST …/orders/{id}/transition; empty for none (always empty in the customer app until cancellation, Sprint 4).
-             * @example [
-             *       "preparing",
-             *       "cancelled"
-             *     ]
-             */
-            allowedTransitions: components["schemas"]["OrderStatus"][];
-        };
-        TransitionOrderDto: {
-            /**
-             * @description The status to move to; one of the order’s `allowedTransitions` (ORDER_TRANSITION_NOT_ALLOWED otherwise).
-             * @example preparing
-             */
-            to: components["schemas"]["OrderStatus"];
-            /**
-             * @description A note kept in the history, up to 500 characters; required when moving to `cancelled` (VALIDATION_FAILED on `note` without it): for a rejected cash-on-delivery order, the reason the customer sees.
-             * @example العميل ما رد على الاتصال
-             */
-            note?: string;
-        };
         CheckoutDayResponseDto: {
             /**
              * @description The day, Riyadh calendar `yyyy-MM-dd`.
@@ -6594,7 +6600,7 @@ export interface operations {
                     "application/json": components["schemas"]["ErrorResponseDto"];
                 };
             };
-            /** @description Error. code: ACCOUNT_HAS_STAFF_ACCESS, TRANSACTION_CONFLICT. */
+            /** @description Error. code: ACCOUNT_HAS_ACTIVE_ORDERS, ACCOUNT_HAS_STAFF_ACCESS, TRANSACTION_CONFLICT. */
             409: {
                 headers: {
                     [name: string]: unknown;
@@ -9609,7 +9615,7 @@ export interface operations {
                     "application/json": components["schemas"]["ErrorResponseDto"];
                 };
             };
-            /** @description Error. code: TRANSACTION_CONFLICT. */
+            /** @description Error. code: ADDRESS_IN_USE, TRANSACTION_CONFLICT. */
             409: {
                 headers: {
                     [name: string]: unknown;
@@ -9708,7 +9714,7 @@ export interface operations {
                     "application/json": components["schemas"]["ErrorResponseDto"];
                 };
             };
-            /** @description Error. code: TRANSACTION_CONFLICT. */
+            /** @description Error. code: ADDRESS_IN_USE, TRANSACTION_CONFLICT. */
             409: {
                 headers: {
                     [name: string]: unknown;
@@ -10333,6 +10339,1523 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["ErrorResponseDto"];
+                };
+            };
+            /** @description Error. code: RATE_LIMITED. */
+            429: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponseDto"];
+                };
+            };
+            /** @description Error. code: INTERNAL_ERROR. */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponseDto"];
+                };
+            };
+            /** @description Error. code: SERVICE_UNAVAILABLE. */
+            503: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponseDto"];
+                };
+            };
+        };
+    };
+    customerListOrders: {
+        parameters: {
+            query?: {
+                /** @description The `nextCursor` of the previous page; omit it for the first page. Opaque: never build or change it. */
+                cursor?: string;
+                /** @description How many items to return, 1 to 50. */
+                limit?: number;
+                /** @description `current` or `past`; left out: both. */
+                scope?: "current" | "past";
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description One page of orders. */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["OrderPageResponseDto"];
+                };
+            };
+            /** @description Error. code: VALIDATION_FAILED. */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponseDto"];
+                };
+            };
+            /** @description Error. code: UNAUTHORIZED, ACCESS_TOKEN_EXPIRED. */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponseDto"];
+                };
+            };
+            /** @description Error. code: FORBIDDEN. */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponseDto"];
+                };
+            };
+            /** @description Error. code: RATE_LIMITED. */
+            429: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponseDto"];
+                };
+            };
+            /** @description Error. code: INTERNAL_ERROR. */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponseDto"];
+                };
+            };
+            /** @description Error. code: SERVICE_UNAVAILABLE. */
+            503: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponseDto"];
+                };
+            };
+        };
+    };
+    customerPlaceOrder: {
+        parameters: {
+            query?: never;
+            header: {
+                /** @description A UUID the app makes once per attempt and sends again on a retry of the same attempt: the same key with the same body answers the first order again (as it is now, whatever the cart is now); the same key with a different body is IDEMPOTENCY_KEY_REUSED. A refusal is not kept, so the same key may be sent again after fixing it. Missing or not a UUID: VALIDATION_FAILED on `Idempotency-Key`. */
+                "Idempotency-Key": string;
+            };
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["PlaceOrderDto"];
+            };
+        };
+        responses: {
+            /** @description The order and its payment attempt. */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["OrderWithPaymentResponseDto"];
+                };
+            };
+            /** @description Error. code: VALIDATION_FAILED. */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponseDto"];
+                };
+            };
+            /** @description Error. code: UNAUTHORIZED, ACCESS_TOKEN_EXPIRED. */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponseDto"];
+                };
+            };
+            /** @description Error. code: ACCOUNT_DISABLED, FORBIDDEN. */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponseDto"];
+                };
+            };
+            /** @description Error. code: CART_EMPTY, PRICE_CHANGED, ITEM_UNAVAILABLE, MIN_ORDER_NOT_MET, FULFILMENT_REQUIRED, DAY_FULL, DAY_NOT_AVAILABLE, WALLET_INSUFFICIENT, PROFILE_INCOMPLETE, ORDERING_PAUSED, TRANSACTION_CONFLICT. */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponseDto"];
+                };
+            };
+            /** @description Error. code: COUPON_NOT_FOUND, COUPON_EXPIRED, COUPON_NOT_APPLICABLE, COUPON_MIN_ORDER, COUPON_LIMIT_REACHED, FULFILMENT_NOT_SUPPORTED, ADDRESS_NOT_COVERED, PAYMENT_METHOD_NOT_AVAILABLE, IDEMPOTENCY_KEY_REUSED. */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponseDto"];
+                };
+            };
+            /** @description Error. code: RATE_LIMITED. */
+            429: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponseDto"];
+                };
+            };
+            /** @description Error. code: INTERNAL_ERROR. */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponseDto"];
+                };
+            };
+            /** @description Error. code: SERVICE_UNAVAILABLE. */
+            503: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponseDto"];
+                };
+            };
+        };
+    };
+    customerGetOrder: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description The id (a UUID) of the item the path names; another value is VALIDATION_FAILED on `id`. */
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description The order. */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["OrderResponseDto"];
+                };
+            };
+            /** @description Error. code: VALIDATION_FAILED. */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponseDto"];
+                };
+            };
+            /** @description Error. code: UNAUTHORIZED, ACCESS_TOKEN_EXPIRED. */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponseDto"];
+                };
+            };
+            /** @description Error. code: FORBIDDEN. */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponseDto"];
+                };
+            };
+            /** @description Error. code: NOT_FOUND. */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponseDto"];
+                };
+            };
+            /** @description Error. code: RATE_LIMITED. */
+            429: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponseDto"];
+                };
+            };
+            /** @description Error. code: INTERNAL_ERROR. */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponseDto"];
+                };
+            };
+            /** @description Error. code: SERVICE_UNAVAILABLE. */
+            503: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponseDto"];
+                };
+            };
+        };
+    };
+    vendorListOrders: {
+        parameters: {
+            query?: {
+                /** @description The `nextCursor` of the previous page; omit it for the first page. Opaque: never build or change it. */
+                cursor?: string;
+                /** @description How many items to return, 1 to 50. */
+                limit?: number;
+                /** @description Only orders in this status. */
+                status?: components["schemas"]["OrderStatus"];
+                /** @description Only orders with this method (`cod` with status `new`: the cash-on-delivery review queue). */
+                paymentMethod?: components["schemas"]["PaymentMethod"];
+                /** @description Only orders for this delivery or pickup day, `yyyy-MM-dd`. */
+                fulfilmentDate?: string;
+                /** @description The order number, or part of the customer’s name or mobile; 1 to 100 characters after trimming. */
+                q?: string;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description One page of orders. */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["OrderPageResponseDto"];
+                };
+            };
+            /** @description Error. code: VALIDATION_FAILED. */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponseDto"];
+                };
+            };
+            /** @description Error. code: UNAUTHORIZED, ACCESS_TOKEN_EXPIRED. */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponseDto"];
+                };
+            };
+            /** @description Error. code: FORBIDDEN, VENDOR_SUSPENDED. */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponseDto"];
+                };
+            };
+            /** @description Error. code: RATE_LIMITED. */
+            429: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponseDto"];
+                };
+            };
+            /** @description Error. code: INTERNAL_ERROR. */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponseDto"];
+                };
+            };
+            /** @description Error. code: SERVICE_UNAVAILABLE. */
+            503: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponseDto"];
+                };
+            };
+        };
+    };
+    vendorGetOrder: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description The id (a UUID) of the item the path names; another value is VALIDATION_FAILED on `id`. */
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description The order. */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["OrderResponseDto"];
+                };
+            };
+            /** @description Error. code: VALIDATION_FAILED. */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponseDto"];
+                };
+            };
+            /** @description Error. code: UNAUTHORIZED, ACCESS_TOKEN_EXPIRED. */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponseDto"];
+                };
+            };
+            /** @description Error. code: FORBIDDEN, VENDOR_SUSPENDED. */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponseDto"];
+                };
+            };
+            /** @description Error. code: NOT_FOUND. */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponseDto"];
+                };
+            };
+            /** @description Error. code: RATE_LIMITED. */
+            429: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponseDto"];
+                };
+            };
+            /** @description Error. code: INTERNAL_ERROR. */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponseDto"];
+                };
+            };
+            /** @description Error. code: SERVICE_UNAVAILABLE. */
+            503: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponseDto"];
+                };
+            };
+        };
+    };
+    vendorTransitionOrder: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description The id (a UUID) of the item the path names; another value is VALIDATION_FAILED on `id`. */
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["TransitionOrderDto"];
+            };
+        };
+        responses: {
+            /** @description The order after the move. */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["OrderResponseDto"];
+                };
+            };
+            /** @description Error. code: VALIDATION_FAILED. */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponseDto"];
+                };
+            };
+            /** @description Error. code: UNAUTHORIZED, ACCESS_TOKEN_EXPIRED. */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponseDto"];
+                };
+            };
+            /** @description Error. code: FORBIDDEN, VENDOR_SUSPENDED. */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponseDto"];
+                };
+            };
+            /** @description Error. code: NOT_FOUND. */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponseDto"];
+                };
+            };
+            /** @description Error. code: ORDER_TRANSITION_NOT_ALLOWED, TRANSACTION_CONFLICT. */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponseDto"];
+                };
+            };
+            /** @description Error. code: RATE_LIMITED. */
+            429: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponseDto"];
+                };
+            };
+            /** @description Error. code: INTERNAL_ERROR. */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponseDto"];
+                };
+            };
+            /** @description Error. code: SERVICE_UNAVAILABLE. */
+            503: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponseDto"];
+                };
+            };
+        };
+    };
+    adminListOrders: {
+        parameters: {
+            query?: {
+                /** @description The `nextCursor` of the previous page; omit it for the first page. Opaque: never build or change it. */
+                cursor?: string;
+                /** @description How many items to return, 1 to 50. */
+                limit?: number;
+                /** @description Only orders in this status. */
+                status?: components["schemas"]["OrderStatus"];
+                /** @description Only orders with this method (`cod` with status `new`: the cash-on-delivery review queue). */
+                paymentMethod?: components["schemas"]["PaymentMethod"];
+                /** @description Only orders for this delivery or pickup day, `yyyy-MM-dd`. */
+                fulfilmentDate?: string;
+                /** @description The order number, or part of the customer’s name or mobile; 1 to 100 characters after trimming. */
+                q?: string;
+                /** @description Only this vendor’s orders (UUID). */
+                vendorId?: string;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description One page of orders. */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["OrderPageResponseDto"];
+                };
+            };
+            /** @description Error. code: VALIDATION_FAILED. */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponseDto"];
+                };
+            };
+            /** @description Error. code: UNAUTHORIZED, ACCESS_TOKEN_EXPIRED. */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponseDto"];
+                };
+            };
+            /** @description Error. code: FORBIDDEN. */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponseDto"];
+                };
+            };
+            /** @description Error. code: RATE_LIMITED. */
+            429: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponseDto"];
+                };
+            };
+            /** @description Error. code: INTERNAL_ERROR. */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponseDto"];
+                };
+            };
+            /** @description Error. code: SERVICE_UNAVAILABLE. */
+            503: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponseDto"];
+                };
+            };
+        };
+    };
+    adminGetOrder: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description The id (a UUID) of the item the path names; another value is VALIDATION_FAILED on `id`. */
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description The order. */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["OrderResponseDto"];
+                };
+            };
+            /** @description Error. code: VALIDATION_FAILED. */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponseDto"];
+                };
+            };
+            /** @description Error. code: UNAUTHORIZED, ACCESS_TOKEN_EXPIRED. */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponseDto"];
+                };
+            };
+            /** @description Error. code: FORBIDDEN. */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponseDto"];
+                };
+            };
+            /** @description Error. code: NOT_FOUND. */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponseDto"];
+                };
+            };
+            /** @description Error. code: RATE_LIMITED. */
+            429: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponseDto"];
+                };
+            };
+            /** @description Error. code: INTERNAL_ERROR. */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponseDto"];
+                };
+            };
+            /** @description Error. code: SERVICE_UNAVAILABLE. */
+            503: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponseDto"];
+                };
+            };
+        };
+    };
+    adminTransitionOrder: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description The id (a UUID) of the item the path names; another value is VALIDATION_FAILED on `id`. */
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["TransitionOrderDto"];
+            };
+        };
+        responses: {
+            /** @description The order after the move. */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["OrderResponseDto"];
+                };
+            };
+            /** @description Error. code: VALIDATION_FAILED. */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponseDto"];
+                };
+            };
+            /** @description Error. code: UNAUTHORIZED, ACCESS_TOKEN_EXPIRED. */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponseDto"];
+                };
+            };
+            /** @description Error. code: FORBIDDEN. */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponseDto"];
+                };
+            };
+            /** @description Error. code: NOT_FOUND. */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponseDto"];
+                };
+            };
+            /** @description Error. code: ORDER_TRANSITION_NOT_ALLOWED, TRANSACTION_CONFLICT. */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponseDto"];
+                };
+            };
+            /** @description Error. code: RATE_LIMITED. */
+            429: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponseDto"];
+                };
+            };
+            /** @description Error. code: INTERNAL_ERROR. */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponseDto"];
+                };
+            };
+            /** @description Error. code: SERVICE_UNAVAILABLE. */
+            503: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponseDto"];
+                };
+            };
+        };
+    };
+    adminGetVendorCapacity: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description The id (a UUID) of the item the path names; another value is VALIDATION_FAILED on `id`. */
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description The capacity. */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["VendorCapacityResponseDto"];
+                };
+            };
+            /** @description Error. code: VALIDATION_FAILED. */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponseDto"];
+                };
+            };
+            /** @description Error. code: UNAUTHORIZED, ACCESS_TOKEN_EXPIRED. */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponseDto"];
+                };
+            };
+            /** @description Error. code: FORBIDDEN. */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponseDto"];
+                };
+            };
+            /** @description Error. code: NOT_FOUND. */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponseDto"];
+                };
+            };
+            /** @description Error. code: RATE_LIMITED. */
+            429: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponseDto"];
+                };
+            };
+            /** @description Error. code: INTERNAL_ERROR. */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponseDto"];
+                };
+            };
+            /** @description Error. code: NOT_IMPLEMENTED. */
+            501: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponseDto"];
+                };
+            };
+            /** @description Error. code: SERVICE_UNAVAILABLE. */
+            503: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponseDto"];
+                };
+            };
+        };
+    };
+    adminSetVendorCapacity: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description The id (a UUID) of the item the path names; another value is VALIDATION_FAILED on `id`. */
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["SetVendorCapacityDto"];
+            };
+        };
+        responses: {
+            /** @description The capacity after the change. */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["VendorCapacityResponseDto"];
+                };
+            };
+            /** @description Error. code: VALIDATION_FAILED. */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponseDto"];
+                };
+            };
+            /** @description Error. code: UNAUTHORIZED, ACCESS_TOKEN_EXPIRED. */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponseDto"];
+                };
+            };
+            /** @description Error. code: FORBIDDEN. */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponseDto"];
+                };
+            };
+            /** @description Error. code: NOT_FOUND. */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponseDto"];
+                };
+            };
+            /** @description Error. code: TRANSACTION_CONFLICT. */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponseDto"];
+                };
+            };
+            /** @description Error. code: RATE_LIMITED. */
+            429: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponseDto"];
+                };
+            };
+            /** @description Error. code: INTERNAL_ERROR. */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponseDto"];
+                };
+            };
+            /** @description Error. code: NOT_IMPLEMENTED. */
+            501: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponseDto"];
+                };
+            };
+            /** @description Error. code: SERVICE_UNAVAILABLE. */
+            503: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponseDto"];
+                };
+            };
+        };
+    };
+    adminSetVendorDayCapacity: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description The vendor (UUID). */
+                id: string;
+                /** @description The day, Riyadh calendar `yyyy-MM-dd`; a past day is VALIDATION_FAILED `notPast` when setting it. */
+                date: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["SetVendorDayCapacityDto"];
+            };
+        };
+        responses: {
+            /** @description The capacity after the change. */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["VendorCapacityResponseDto"];
+                };
+            };
+            /** @description Error. code: VALIDATION_FAILED. */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponseDto"];
+                };
+            };
+            /** @description Error. code: UNAUTHORIZED, ACCESS_TOKEN_EXPIRED. */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponseDto"];
+                };
+            };
+            /** @description Error. code: FORBIDDEN. */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponseDto"];
+                };
+            };
+            /** @description Error. code: NOT_FOUND. */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponseDto"];
+                };
+            };
+            /** @description Error. code: TRANSACTION_CONFLICT. */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponseDto"];
+                };
+            };
+            /** @description Error. code: RATE_LIMITED. */
+            429: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponseDto"];
+                };
+            };
+            /** @description Error. code: INTERNAL_ERROR. */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponseDto"];
+                };
+            };
+            /** @description Error. code: NOT_IMPLEMENTED. */
+            501: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponseDto"];
+                };
+            };
+            /** @description Error. code: SERVICE_UNAVAILABLE. */
+            503: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponseDto"];
+                };
+            };
+        };
+    };
+    adminClearVendorDayCapacity: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description The vendor (UUID). */
+                id: string;
+                /** @description The day, Riyadh calendar `yyyy-MM-dd`; a past day is VALIDATION_FAILED `notPast` when setting it. */
+                date: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description The capacity after the change. */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["VendorCapacityResponseDto"];
+                };
+            };
+            /** @description Error. code: VALIDATION_FAILED. */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponseDto"];
+                };
+            };
+            /** @description Error. code: UNAUTHORIZED, ACCESS_TOKEN_EXPIRED. */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponseDto"];
+                };
+            };
+            /** @description Error. code: FORBIDDEN. */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponseDto"];
+                };
+            };
+            /** @description Error. code: NOT_FOUND. */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponseDto"];
+                };
+            };
+            /** @description Error. code: TRANSACTION_CONFLICT. */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponseDto"];
+                };
+            };
+            /** @description Error. code: RATE_LIMITED. */
+            429: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponseDto"];
+                };
+            };
+            /** @description Error. code: INTERNAL_ERROR. */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponseDto"];
+                };
+            };
+            /** @description Error. code: NOT_IMPLEMENTED. */
+            501: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponseDto"];
+                };
+            };
+            /** @description Error. code: SERVICE_UNAVAILABLE. */
+            503: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponseDto"];
+                };
+            };
+        };
+    };
+    adminGetOperationsSettings: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description The settings. */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["OperationsSettingsResponseDto"];
+                };
+            };
+            /** @description Error. code: UNAUTHORIZED, ACCESS_TOKEN_EXPIRED. */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponseDto"];
+                };
+            };
+            /** @description Error. code: FORBIDDEN. */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponseDto"];
+                };
+            };
+            /** @description Error. code: RATE_LIMITED. */
+            429: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponseDto"];
+                };
+            };
+            /** @description Error. code: INTERNAL_ERROR. */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponseDto"];
+                };
+            };
+            /** @description Error. code: SERVICE_UNAVAILABLE. */
+            503: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponseDto"];
+                };
+            };
+        };
+    };
+    adminUpdateOperationsSettings: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["UpdateOperationsSettingsDto"];
+            };
+        };
+        responses: {
+            /** @description The settings after the change. */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["OperationsSettingsResponseDto"];
+                };
+            };
+            /** @description Error. code: VALIDATION_FAILED. */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponseDto"];
+                };
+            };
+            /** @description Error. code: UNAUTHORIZED, ACCESS_TOKEN_EXPIRED. */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponseDto"];
+                };
+            };
+            /** @description Error. code: FORBIDDEN. */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponseDto"];
+                };
+            };
+            /** @description Error. code: TRANSACTION_CONFLICT. */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponseDto"];
+                };
+            };
+            /** @description Error. code: RATE_LIMITED. */
+            429: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponseDto"];
+                };
+            };
+            /** @description Error. code: INTERNAL_ERROR. */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponseDto"];
+                };
+            };
+            /** @description Error. code: SERVICE_UNAVAILABLE. */
+            503: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponseDto"];
+                };
+            };
+        };
+    };
+    adminSetOrderingPause: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["SetOrderingPauseDto"];
+            };
+        };
+        responses: {
+            /** @description The settings after the change. */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["OperationsSettingsResponseDto"];
+                };
+            };
+            /** @description Error. code: VALIDATION_FAILED. */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponseDto"];
+                };
+            };
+            /** @description Error. code: UNAUTHORIZED, ACCESS_TOKEN_EXPIRED. */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponseDto"];
+                };
+            };
+            /** @description Error. code: FORBIDDEN. */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponseDto"];
+                };
+            };
+            /** @description Error. code: TRANSACTION_CONFLICT. */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponseDto"];
+                };
+            };
+            /** @description Error. code: RATE_LIMITED. */
+            429: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponseDto"];
+                };
+            };
+            /** @description Error. code: INTERNAL_ERROR. */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponseDto"];
+                };
+            };
+            /** @description Error. code: SERVICE_UNAVAILABLE. */
+            503: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponseDto"];
+                };
+            };
+        };
+    };
+    publicGetClientSettings: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description The settings. */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ClientSettingsResponseDto"];
                 };
             };
             /** @description Error. code: RATE_LIMITED. */
@@ -13398,711 +14921,6 @@ export interface operations {
             };
         };
     };
-    adminGetOperationsSettings: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description The settings. */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["OperationsSettingsResponseDto"];
-                };
-            };
-            /** @description Error. code: UNAUTHORIZED, ACCESS_TOKEN_EXPIRED. */
-            401: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ErrorResponseDto"];
-                };
-            };
-            /** @description Error. code: FORBIDDEN. */
-            403: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ErrorResponseDto"];
-                };
-            };
-            /** @description Error. code: RATE_LIMITED. */
-            429: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ErrorResponseDto"];
-                };
-            };
-            /** @description Error. code: INTERNAL_ERROR. */
-            500: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ErrorResponseDto"];
-                };
-            };
-            /** @description Error. code: SERVICE_UNAVAILABLE. */
-            503: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ErrorResponseDto"];
-                };
-            };
-        };
-    };
-    adminUpdateOperationsSettings: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                "application/json": components["schemas"]["UpdateOperationsSettingsDto"];
-            };
-        };
-        responses: {
-            /** @description The settings after the change. */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["OperationsSettingsResponseDto"];
-                };
-            };
-            /** @description Error. code: VALIDATION_FAILED. */
-            400: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ErrorResponseDto"];
-                };
-            };
-            /** @description Error. code: UNAUTHORIZED, ACCESS_TOKEN_EXPIRED. */
-            401: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ErrorResponseDto"];
-                };
-            };
-            /** @description Error. code: FORBIDDEN. */
-            403: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ErrorResponseDto"];
-                };
-            };
-            /** @description Error. code: TRANSACTION_CONFLICT. */
-            409: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ErrorResponseDto"];
-                };
-            };
-            /** @description Error. code: RATE_LIMITED. */
-            429: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ErrorResponseDto"];
-                };
-            };
-            /** @description Error. code: INTERNAL_ERROR. */
-            500: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ErrorResponseDto"];
-                };
-            };
-            /** @description Error. code: SERVICE_UNAVAILABLE. */
-            503: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ErrorResponseDto"];
-                };
-            };
-        };
-    };
-    adminSetOrderingPause: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                "application/json": components["schemas"]["SetOrderingPauseDto"];
-            };
-        };
-        responses: {
-            /** @description The settings after the change. */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["OperationsSettingsResponseDto"];
-                };
-            };
-            /** @description Error. code: VALIDATION_FAILED. */
-            400: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ErrorResponseDto"];
-                };
-            };
-            /** @description Error. code: UNAUTHORIZED, ACCESS_TOKEN_EXPIRED. */
-            401: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ErrorResponseDto"];
-                };
-            };
-            /** @description Error. code: FORBIDDEN. */
-            403: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ErrorResponseDto"];
-                };
-            };
-            /** @description Error. code: TRANSACTION_CONFLICT. */
-            409: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ErrorResponseDto"];
-                };
-            };
-            /** @description Error. code: RATE_LIMITED. */
-            429: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ErrorResponseDto"];
-                };
-            };
-            /** @description Error. code: INTERNAL_ERROR. */
-            500: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ErrorResponseDto"];
-                };
-            };
-            /** @description Error. code: SERVICE_UNAVAILABLE. */
-            503: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ErrorResponseDto"];
-                };
-            };
-        };
-    };
-    publicGetClientSettings: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description The settings. */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ClientSettingsResponseDto"];
-                };
-            };
-            /** @description Error. code: RATE_LIMITED. */
-            429: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ErrorResponseDto"];
-                };
-            };
-            /** @description Error. code: INTERNAL_ERROR. */
-            500: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ErrorResponseDto"];
-                };
-            };
-            /** @description Error. code: SERVICE_UNAVAILABLE. */
-            503: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ErrorResponseDto"];
-                };
-            };
-        };
-    };
-    adminGetVendorCapacity: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                /** @description The id (a UUID) of the item the path names; another value is VALIDATION_FAILED on `id`. */
-                id: string;
-            };
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description The capacity. */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["VendorCapacityResponseDto"];
-                };
-            };
-            /** @description Error. code: VALIDATION_FAILED. */
-            400: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ErrorResponseDto"];
-                };
-            };
-            /** @description Error. code: UNAUTHORIZED, ACCESS_TOKEN_EXPIRED. */
-            401: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ErrorResponseDto"];
-                };
-            };
-            /** @description Error. code: FORBIDDEN. */
-            403: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ErrorResponseDto"];
-                };
-            };
-            /** @description Error. code: NOT_FOUND. */
-            404: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ErrorResponseDto"];
-                };
-            };
-            /** @description Error. code: RATE_LIMITED. */
-            429: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ErrorResponseDto"];
-                };
-            };
-            /** @description Error. code: INTERNAL_ERROR. */
-            500: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ErrorResponseDto"];
-                };
-            };
-            /** @description Error. code: NOT_IMPLEMENTED. */
-            501: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ErrorResponseDto"];
-                };
-            };
-            /** @description Error. code: SERVICE_UNAVAILABLE. */
-            503: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ErrorResponseDto"];
-                };
-            };
-        };
-    };
-    adminSetVendorCapacity: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                /** @description The id (a UUID) of the item the path names; another value is VALIDATION_FAILED on `id`. */
-                id: string;
-            };
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                "application/json": components["schemas"]["SetVendorCapacityDto"];
-            };
-        };
-        responses: {
-            /** @description The capacity after the change. */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["VendorCapacityResponseDto"];
-                };
-            };
-            /** @description Error. code: VALIDATION_FAILED. */
-            400: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ErrorResponseDto"];
-                };
-            };
-            /** @description Error. code: UNAUTHORIZED, ACCESS_TOKEN_EXPIRED. */
-            401: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ErrorResponseDto"];
-                };
-            };
-            /** @description Error. code: FORBIDDEN. */
-            403: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ErrorResponseDto"];
-                };
-            };
-            /** @description Error. code: NOT_FOUND. */
-            404: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ErrorResponseDto"];
-                };
-            };
-            /** @description Error. code: TRANSACTION_CONFLICT. */
-            409: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ErrorResponseDto"];
-                };
-            };
-            /** @description Error. code: RATE_LIMITED. */
-            429: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ErrorResponseDto"];
-                };
-            };
-            /** @description Error. code: INTERNAL_ERROR. */
-            500: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ErrorResponseDto"];
-                };
-            };
-            /** @description Error. code: NOT_IMPLEMENTED. */
-            501: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ErrorResponseDto"];
-                };
-            };
-            /** @description Error. code: SERVICE_UNAVAILABLE. */
-            503: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ErrorResponseDto"];
-                };
-            };
-        };
-    };
-    adminSetVendorDayCapacity: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                /** @description The vendor (UUID). */
-                id: string;
-                /** @description The day, Riyadh calendar `yyyy-MM-dd`; a past day is VALIDATION_FAILED `notPast` when setting it. */
-                date: string;
-            };
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                "application/json": components["schemas"]["SetVendorDayCapacityDto"];
-            };
-        };
-        responses: {
-            /** @description The capacity after the change. */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["VendorCapacityResponseDto"];
-                };
-            };
-            /** @description Error. code: VALIDATION_FAILED. */
-            400: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ErrorResponseDto"];
-                };
-            };
-            /** @description Error. code: UNAUTHORIZED, ACCESS_TOKEN_EXPIRED. */
-            401: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ErrorResponseDto"];
-                };
-            };
-            /** @description Error. code: FORBIDDEN. */
-            403: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ErrorResponseDto"];
-                };
-            };
-            /** @description Error. code: NOT_FOUND. */
-            404: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ErrorResponseDto"];
-                };
-            };
-            /** @description Error. code: TRANSACTION_CONFLICT. */
-            409: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ErrorResponseDto"];
-                };
-            };
-            /** @description Error. code: RATE_LIMITED. */
-            429: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ErrorResponseDto"];
-                };
-            };
-            /** @description Error. code: INTERNAL_ERROR. */
-            500: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ErrorResponseDto"];
-                };
-            };
-            /** @description Error. code: NOT_IMPLEMENTED. */
-            501: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ErrorResponseDto"];
-                };
-            };
-            /** @description Error. code: SERVICE_UNAVAILABLE. */
-            503: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ErrorResponseDto"];
-                };
-            };
-        };
-    };
-    adminClearVendorDayCapacity: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                /** @description The vendor (UUID). */
-                id: string;
-                /** @description The day, Riyadh calendar `yyyy-MM-dd`; a past day is VALIDATION_FAILED `notPast` when setting it. */
-                date: string;
-            };
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description The capacity after the change. */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["VendorCapacityResponseDto"];
-                };
-            };
-            /** @description Error. code: VALIDATION_FAILED. */
-            400: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ErrorResponseDto"];
-                };
-            };
-            /** @description Error. code: UNAUTHORIZED, ACCESS_TOKEN_EXPIRED. */
-            401: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ErrorResponseDto"];
-                };
-            };
-            /** @description Error. code: FORBIDDEN. */
-            403: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ErrorResponseDto"];
-                };
-            };
-            /** @description Error. code: NOT_FOUND. */
-            404: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ErrorResponseDto"];
-                };
-            };
-            /** @description Error. code: TRANSACTION_CONFLICT. */
-            409: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ErrorResponseDto"];
-                };
-            };
-            /** @description Error. code: RATE_LIMITED. */
-            429: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ErrorResponseDto"];
-                };
-            };
-            /** @description Error. code: INTERNAL_ERROR. */
-            500: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ErrorResponseDto"];
-                };
-            };
-            /** @description Error. code: NOT_IMPLEMENTED. */
-            501: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ErrorResponseDto"];
-                };
-            };
-            /** @description Error. code: SERVICE_UNAVAILABLE. */
-            503: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ErrorResponseDto"];
-                };
-            };
-        };
-    };
     customerGetCart: {
         parameters: {
             query?: never;
@@ -15824,836 +16642,6 @@ export interface operations {
                 };
             };
             /** @description Error. code: TRANSACTION_CONFLICT. */
-            409: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ErrorResponseDto"];
-                };
-            };
-            /** @description Error. code: RATE_LIMITED. */
-            429: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ErrorResponseDto"];
-                };
-            };
-            /** @description Error. code: INTERNAL_ERROR. */
-            500: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ErrorResponseDto"];
-                };
-            };
-            /** @description Error. code: NOT_IMPLEMENTED. */
-            501: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ErrorResponseDto"];
-                };
-            };
-            /** @description Error. code: SERVICE_UNAVAILABLE. */
-            503: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ErrorResponseDto"];
-                };
-            };
-        };
-    };
-    customerListOrders: {
-        parameters: {
-            query?: {
-                /** @description The `nextCursor` of the previous page; omit it for the first page. Opaque: never build or change it. */
-                cursor?: string;
-                /** @description How many items to return, 1 to 50. */
-                limit?: number;
-                /** @description `current` or `past`; left out: both. */
-                scope?: "current" | "past";
-            };
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description One page of orders. */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["OrderPageResponseDto"];
-                };
-            };
-            /** @description Error. code: VALIDATION_FAILED. */
-            400: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ErrorResponseDto"];
-                };
-            };
-            /** @description Error. code: UNAUTHORIZED, ACCESS_TOKEN_EXPIRED. */
-            401: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ErrorResponseDto"];
-                };
-            };
-            /** @description Error. code: FORBIDDEN. */
-            403: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ErrorResponseDto"];
-                };
-            };
-            /** @description Error. code: RATE_LIMITED. */
-            429: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ErrorResponseDto"];
-                };
-            };
-            /** @description Error. code: INTERNAL_ERROR. */
-            500: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ErrorResponseDto"];
-                };
-            };
-            /** @description Error. code: SERVICE_UNAVAILABLE. */
-            503: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ErrorResponseDto"];
-                };
-            };
-        };
-    };
-    customerPlaceOrder: {
-        parameters: {
-            query?: never;
-            header: {
-                /** @description A UUID the app makes once per attempt and sends again on a retry of the same attempt: the same key with the same body answers the first order again (as it is now, whatever the cart is now); the same key with a different body is IDEMPOTENCY_KEY_REUSED. A refusal is not kept, so the same key may be sent again after fixing it. Missing or not a UUID: VALIDATION_FAILED on `Idempotency-Key`. */
-                "Idempotency-Key": string;
-            };
-            path?: never;
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                "application/json": components["schemas"]["PlaceOrderDto"];
-            };
-        };
-        responses: {
-            /** @description The order and its payment attempt. */
-            201: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["OrderWithPaymentResponseDto"];
-                };
-            };
-            /** @description Error. code: VALIDATION_FAILED. */
-            400: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ErrorResponseDto"];
-                };
-            };
-            /** @description Error. code: UNAUTHORIZED, ACCESS_TOKEN_EXPIRED. */
-            401: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ErrorResponseDto"];
-                };
-            };
-            /** @description Error. code: ACCOUNT_DISABLED, FORBIDDEN. */
-            403: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ErrorResponseDto"];
-                };
-            };
-            /** @description Error. code: CART_EMPTY, PRICE_CHANGED, ITEM_UNAVAILABLE, MIN_ORDER_NOT_MET, FULFILMENT_REQUIRED, DAY_FULL, DAY_NOT_AVAILABLE, WALLET_INSUFFICIENT, PROFILE_INCOMPLETE, ORDERING_PAUSED, TRANSACTION_CONFLICT. */
-            409: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ErrorResponseDto"];
-                };
-            };
-            /** @description Error. code: COUPON_NOT_FOUND, COUPON_EXPIRED, COUPON_NOT_APPLICABLE, COUPON_MIN_ORDER, COUPON_LIMIT_REACHED, FULFILMENT_NOT_SUPPORTED, ADDRESS_NOT_COVERED, PAYMENT_METHOD_NOT_AVAILABLE, IDEMPOTENCY_KEY_REUSED. */
-            422: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ErrorResponseDto"];
-                };
-            };
-            /** @description Error. code: RATE_LIMITED. */
-            429: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ErrorResponseDto"];
-                };
-            };
-            /** @description Error. code: INTERNAL_ERROR. */
-            500: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ErrorResponseDto"];
-                };
-            };
-            /** @description Error. code: SERVICE_UNAVAILABLE. */
-            503: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ErrorResponseDto"];
-                };
-            };
-        };
-    };
-    customerGetOrder: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                /** @description The id (a UUID) of the item the path names; another value is VALIDATION_FAILED on `id`. */
-                id: string;
-            };
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description The order. */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["OrderResponseDto"];
-                };
-            };
-            /** @description Error. code: VALIDATION_FAILED. */
-            400: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ErrorResponseDto"];
-                };
-            };
-            /** @description Error. code: UNAUTHORIZED, ACCESS_TOKEN_EXPIRED. */
-            401: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ErrorResponseDto"];
-                };
-            };
-            /** @description Error. code: FORBIDDEN. */
-            403: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ErrorResponseDto"];
-                };
-            };
-            /** @description Error. code: NOT_FOUND. */
-            404: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ErrorResponseDto"];
-                };
-            };
-            /** @description Error. code: RATE_LIMITED. */
-            429: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ErrorResponseDto"];
-                };
-            };
-            /** @description Error. code: INTERNAL_ERROR. */
-            500: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ErrorResponseDto"];
-                };
-            };
-            /** @description Error. code: SERVICE_UNAVAILABLE. */
-            503: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ErrorResponseDto"];
-                };
-            };
-        };
-    };
-    vendorListOrders: {
-        parameters: {
-            query?: {
-                /** @description The `nextCursor` of the previous page; omit it for the first page. Opaque: never build or change it. */
-                cursor?: string;
-                /** @description How many items to return, 1 to 50. */
-                limit?: number;
-                /** @description Only orders in this status. */
-                status?: components["schemas"]["OrderStatus"];
-                /** @description Only orders with this method (`cod` with status `new`: the cash-on-delivery review queue). */
-                paymentMethod?: components["schemas"]["PaymentMethod"];
-                /** @description Only orders for this delivery or pickup day, `yyyy-MM-dd`. */
-                fulfilmentDate?: string;
-                /** @description The order number, or part of the customer’s name or mobile; 1 to 100 characters after trimming. */
-                q?: string;
-            };
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description One page of orders. */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["OrderPageResponseDto"];
-                };
-            };
-            /** @description Error. code: VALIDATION_FAILED. */
-            400: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ErrorResponseDto"];
-                };
-            };
-            /** @description Error. code: UNAUTHORIZED, ACCESS_TOKEN_EXPIRED. */
-            401: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ErrorResponseDto"];
-                };
-            };
-            /** @description Error. code: FORBIDDEN, VENDOR_SUSPENDED. */
-            403: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ErrorResponseDto"];
-                };
-            };
-            /** @description Error. code: RATE_LIMITED. */
-            429: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ErrorResponseDto"];
-                };
-            };
-            /** @description Error. code: INTERNAL_ERROR. */
-            500: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ErrorResponseDto"];
-                };
-            };
-            /** @description Error. code: SERVICE_UNAVAILABLE. */
-            503: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ErrorResponseDto"];
-                };
-            };
-        };
-    };
-    vendorGetOrder: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                /** @description The id (a UUID) of the item the path names; another value is VALIDATION_FAILED on `id`. */
-                id: string;
-            };
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description The order. */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["OrderResponseDto"];
-                };
-            };
-            /** @description Error. code: VALIDATION_FAILED. */
-            400: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ErrorResponseDto"];
-                };
-            };
-            /** @description Error. code: UNAUTHORIZED, ACCESS_TOKEN_EXPIRED. */
-            401: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ErrorResponseDto"];
-                };
-            };
-            /** @description Error. code: FORBIDDEN, VENDOR_SUSPENDED. */
-            403: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ErrorResponseDto"];
-                };
-            };
-            /** @description Error. code: NOT_FOUND. */
-            404: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ErrorResponseDto"];
-                };
-            };
-            /** @description Error. code: RATE_LIMITED. */
-            429: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ErrorResponseDto"];
-                };
-            };
-            /** @description Error. code: INTERNAL_ERROR. */
-            500: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ErrorResponseDto"];
-                };
-            };
-            /** @description Error. code: SERVICE_UNAVAILABLE. */
-            503: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ErrorResponseDto"];
-                };
-            };
-        };
-    };
-    vendorTransitionOrder: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                /** @description The id (a UUID) of the item the path names; another value is VALIDATION_FAILED on `id`. */
-                id: string;
-            };
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                "application/json": components["schemas"]["TransitionOrderDto"];
-            };
-        };
-        responses: {
-            /** @description The order after the move. */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["OrderResponseDto"];
-                };
-            };
-            /** @description Error. code: VALIDATION_FAILED. */
-            400: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ErrorResponseDto"];
-                };
-            };
-            /** @description Error. code: UNAUTHORIZED, ACCESS_TOKEN_EXPIRED. */
-            401: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ErrorResponseDto"];
-                };
-            };
-            /** @description Error. code: FORBIDDEN, VENDOR_SUSPENDED. */
-            403: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ErrorResponseDto"];
-                };
-            };
-            /** @description Error. code: NOT_FOUND. */
-            404: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ErrorResponseDto"];
-                };
-            };
-            /** @description Error. code: ORDER_TRANSITION_NOT_ALLOWED, TRANSACTION_CONFLICT. */
-            409: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ErrorResponseDto"];
-                };
-            };
-            /** @description Error. code: RATE_LIMITED. */
-            429: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ErrorResponseDto"];
-                };
-            };
-            /** @description Error. code: INTERNAL_ERROR. */
-            500: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ErrorResponseDto"];
-                };
-            };
-            /** @description Error. code: NOT_IMPLEMENTED. */
-            501: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ErrorResponseDto"];
-                };
-            };
-            /** @description Error. code: SERVICE_UNAVAILABLE. */
-            503: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ErrorResponseDto"];
-                };
-            };
-        };
-    };
-    adminListOrders: {
-        parameters: {
-            query?: {
-                /** @description The `nextCursor` of the previous page; omit it for the first page. Opaque: never build or change it. */
-                cursor?: string;
-                /** @description How many items to return, 1 to 50. */
-                limit?: number;
-                /** @description Only orders in this status. */
-                status?: components["schemas"]["OrderStatus"];
-                /** @description Only orders with this method (`cod` with status `new`: the cash-on-delivery review queue). */
-                paymentMethod?: components["schemas"]["PaymentMethod"];
-                /** @description Only orders for this delivery or pickup day, `yyyy-MM-dd`. */
-                fulfilmentDate?: string;
-                /** @description The order number, or part of the customer’s name or mobile; 1 to 100 characters after trimming. */
-                q?: string;
-                /** @description Only this vendor’s orders (UUID). */
-                vendorId?: string;
-            };
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description One page of orders. */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["OrderPageResponseDto"];
-                };
-            };
-            /** @description Error. code: VALIDATION_FAILED. */
-            400: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ErrorResponseDto"];
-                };
-            };
-            /** @description Error. code: UNAUTHORIZED, ACCESS_TOKEN_EXPIRED. */
-            401: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ErrorResponseDto"];
-                };
-            };
-            /** @description Error. code: FORBIDDEN. */
-            403: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ErrorResponseDto"];
-                };
-            };
-            /** @description Error. code: RATE_LIMITED. */
-            429: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ErrorResponseDto"];
-                };
-            };
-            /** @description Error. code: INTERNAL_ERROR. */
-            500: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ErrorResponseDto"];
-                };
-            };
-            /** @description Error. code: SERVICE_UNAVAILABLE. */
-            503: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ErrorResponseDto"];
-                };
-            };
-        };
-    };
-    adminGetOrder: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                /** @description The id (a UUID) of the item the path names; another value is VALIDATION_FAILED on `id`. */
-                id: string;
-            };
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description The order. */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["OrderResponseDto"];
-                };
-            };
-            /** @description Error. code: VALIDATION_FAILED. */
-            400: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ErrorResponseDto"];
-                };
-            };
-            /** @description Error. code: UNAUTHORIZED, ACCESS_TOKEN_EXPIRED. */
-            401: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ErrorResponseDto"];
-                };
-            };
-            /** @description Error. code: FORBIDDEN. */
-            403: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ErrorResponseDto"];
-                };
-            };
-            /** @description Error. code: NOT_FOUND. */
-            404: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ErrorResponseDto"];
-                };
-            };
-            /** @description Error. code: RATE_LIMITED. */
-            429: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ErrorResponseDto"];
-                };
-            };
-            /** @description Error. code: INTERNAL_ERROR. */
-            500: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ErrorResponseDto"];
-                };
-            };
-            /** @description Error. code: SERVICE_UNAVAILABLE. */
-            503: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ErrorResponseDto"];
-                };
-            };
-        };
-    };
-    adminTransitionOrder: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                /** @description The id (a UUID) of the item the path names; another value is VALIDATION_FAILED on `id`. */
-                id: string;
-            };
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                "application/json": components["schemas"]["TransitionOrderDto"];
-            };
-        };
-        responses: {
-            /** @description The order after the move. */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["OrderResponseDto"];
-                };
-            };
-            /** @description Error. code: VALIDATION_FAILED. */
-            400: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ErrorResponseDto"];
-                };
-            };
-            /** @description Error. code: UNAUTHORIZED, ACCESS_TOKEN_EXPIRED. */
-            401: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ErrorResponseDto"];
-                };
-            };
-            /** @description Error. code: FORBIDDEN. */
-            403: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ErrorResponseDto"];
-                };
-            };
-            /** @description Error. code: NOT_FOUND. */
-            404: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ErrorResponseDto"];
-                };
-            };
-            /** @description Error. code: ORDER_TRANSITION_NOT_ALLOWED, TRANSACTION_CONFLICT. */
             409: {
                 headers: {
                     [name: string]: unknown;

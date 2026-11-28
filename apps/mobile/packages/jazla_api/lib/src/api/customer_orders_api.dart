@@ -20,7 +20,7 @@ class CustomerOrdersApi {
   const CustomerOrdersApi(this._dio);
 
   /// One of my orders
-  /// Customer app, order detail, and the payment result: poll it after the payment page closes (every 2 s, up to 60 s): paid once the status is neither &#x60;pending_payment&#x60; nor &#x60;cancelled&#x60;. Carries the store’s phone and location. Cancelling is Sprint 4 (CAN-API-1). An order past &#x60;expiresAt&#x60; and still unpaid is cancelled when read (workers are off on staging), so the answer is always current; capacity, coupon use and wallet reads treat such orders as already released. NOT_FOUND for another customer’s order.
+  /// Customer app, order detail, and the payment result: poll it after the payment page closes (every 2 s, up to 60 s): paid once the status is neither &#x60;pending_payment&#x60; nor &#x60;cancelled&#x60;. Carries the store’s phone and location. Customer cancellation is Sprint 4 (CAN-API-1). Payment timeout and expiry are deferred to a later payment task. NOT_FOUND for another customer’s order.
   ///
   /// Parameters:
   /// * [id] - The id (a UUID) of the item the path names; another value is VALIDATION_FAILED on `id`.
@@ -97,7 +97,7 @@ _responseData = rawData == null ? null : deserialize<OrderResponseDto, OrderResp
   }
 
   /// My orders
-  /// Customer app, orders tab: newest first, &#x60;current&#x60; or &#x60;past&#x60;. An order past &#x60;expiresAt&#x60; and still unpaid is cancelled when read (workers are off on staging), so the answer is always current; capacity, coupon use and wallet reads treat such orders as already released.
+  /// Customer app, orders tab: newest first, &#x60;current&#x60; or &#x60;past&#x60;. Status is the value last committed by the order state machine; customers cannot move statuses in Sprint 3.
   ///
   /// Parameters:
   /// * [cursor] - The `nextCursor` of the previous page; omit it for the first page. Opaque: never build or change it.

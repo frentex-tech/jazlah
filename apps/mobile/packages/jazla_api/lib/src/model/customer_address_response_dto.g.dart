@@ -23,6 +23,7 @@ CustomerAddressResponseDto _$CustomerAddressResponseDtoFromJson(
       'driverInstructions',
       'isDefault',
       'isCovered',
+      'isLocked',
       'createdAt',
       'updatedAt',
     ],
@@ -48,6 +49,7 @@ CustomerAddressResponseDto _$CustomerAddressResponseDtoFromJson(
     ),
     isDefault: $checkedConvert('isDefault', (v) => v as bool),
     isCovered: $checkedConvert('isCovered', (v) => v as bool),
+    isLocked: $checkedConvert('isLocked', (v) => v as bool),
     createdAt: $checkedConvert('createdAt', (v) => DateTime.parse(v as String)),
     updatedAt: $checkedConvert('updatedAt', (v) => DateTime.parse(v as String)),
   );
@@ -68,6 +70,7 @@ Map<String, dynamic> _$CustomerAddressResponseDtoToJson(
   'driverInstructions': instance.driverInstructions,
   'isDefault': instance.isDefault,
   'isCovered': instance.isCovered,
+  'isLocked': instance.isLocked,
   'createdAt': instance.createdAt.toIso8601String(),
   'updatedAt': instance.updatedAt.toIso8601String(),
 };

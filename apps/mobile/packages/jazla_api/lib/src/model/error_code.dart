@@ -107,8 +107,14 @@ enum ErrorCode {
       @JsonValue(r'ADDRESS_LIMIT_REACHED')
       ADDRESS_LIMIT_REACHED(r'ADDRESS_LIMIT_REACHED'),
           /// Stable error code. Clients branch on it; it is never renamed or reused.
+      @JsonValue(r'ADDRESS_IN_USE')
+      ADDRESS_IN_USE(r'ADDRESS_IN_USE'),
+          /// Stable error code. Clients branch on it; it is never renamed or reused.
       @JsonValue(r'ACCOUNT_HAS_STAFF_ACCESS')
       ACCOUNT_HAS_STAFF_ACCESS(r'ACCOUNT_HAS_STAFF_ACCESS'),
+          /// Stable error code. Clients branch on it; it is never renamed or reused.
+      @JsonValue(r'ACCOUNT_HAS_ACTIVE_ORDERS')
+      ACCOUNT_HAS_ACTIVE_ORDERS(r'ACCOUNT_HAS_ACTIVE_ORDERS'),
           /// Stable error code. Clients branch on it; it is never renamed or reused.
       @JsonValue(r'RECENT_SIGN_IN_REQUIRED')
       RECENT_SIGN_IN_REQUIRED(r'RECENT_SIGN_IN_REQUIRED'),

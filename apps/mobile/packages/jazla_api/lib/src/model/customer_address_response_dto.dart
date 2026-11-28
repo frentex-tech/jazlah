@@ -41,6 +41,8 @@ class CustomerAddressResponseDto {
 
     required  this.isCovered,
 
+    required  this.isLocked,
+
     required  this.createdAt,
 
     required  this.updatedAt,
@@ -189,6 +191,19 @@ class CustomerAddressResponseDto {
 
 
 
+      /// Whether a non-final order uses this address. A locked address cannot be edited or deleted, but can still be made the default.
+  @JsonKey(
+    
+    name: r'isLocked',
+    required: true,
+    includeIfNull: false,
+  )
+
+
+  final bool isLocked;
+
+
+
       /// When the address was saved, UTC (ISO 8601).
   @JsonKey(
     
@@ -230,6 +245,7 @@ class CustomerAddressResponseDto {
       other.driverInstructions == driverInstructions &&
       other.isDefault == isDefault &&
       other.isCovered == isCovered &&
+      other.isLocked == isLocked &&
       other.createdAt == createdAt &&
       other.updatedAt == updatedAt;
 
@@ -246,6 +262,7 @@ class CustomerAddressResponseDto {
         (driverInstructions == null ? 0 : driverInstructions.hashCode) +
         isDefault.hashCode +
         isCovered.hashCode +
+        isLocked.hashCode +
         createdAt.hashCode +
         updatedAt.hashCode;
 
