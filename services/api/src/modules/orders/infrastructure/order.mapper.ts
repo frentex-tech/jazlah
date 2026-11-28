@@ -28,6 +28,8 @@ export const OrderMapper = {
       vendor: ORDER_VENDOR_SNAPSHOT_SCHEMA.parse(row.vendorSnapshot),
       commissionBasisPoints: row.commissionBasisPoints,
       status: row.status,
+      savedAddressId: row.savedAddressId,
+      cancelReason: row.cancelReason,
       orderType: row.orderType,
       fulfilment: row.fulfilmentMethod,
       // A DATE column comes back as UTC midnight of that calendar day.
@@ -107,6 +109,7 @@ export const OrderMapper = {
       userId: request.userId,
       vendorId: request.vendorId,
       status: draft.status,
+      savedAddressId: request.savedAddressId,
       createdAt: draft.firstEntry.at,
       orderType: request.orderType,
       fulfilmentMethod: request.fulfilment,

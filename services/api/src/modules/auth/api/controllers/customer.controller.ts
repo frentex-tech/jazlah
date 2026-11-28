@@ -76,6 +76,7 @@ export class CustomerAuthController {
       'Customer app, account screen ("Delete my account"), after the customer confirms. At once and for good: every session of the user ends (in every app), the profile, addresses and vendor applications not yet approved are removed, and the phone can sign up again as a new user. Afterwards delete the tokens from the device and go to the sign-in screen. The optional `reason` comes from a fixed list the app shows.\n\n' +
       'Errors:\n' +
       '- RECENT_SIGN_IN_REQUIRED (403): the session was signed in more than 10 minutes ago. Sign the customer in again (code by SMS), then repeat the request.\n' +
+      '- ACCOUNT_HAS_ACTIVE_ORDERS (409): an order has not reached a final status; wait until it is finished, then retry.\n' +
       '- ACCOUNT_HAS_STAFF_ACCESS (409): the account also has vendor, kitchen or admin access; it cannot be deleted in the app until that access is removed.\n' +
       '- ACCOUNT_DISABLED (403): the account is disabled; deletion goes through support.\n' +
       '- UNAUTHORIZED (401): also when the account is already deleted.\n' +
@@ -87,6 +88,7 @@ export class CustomerAuthController {
   @ApiErrorResponses(
     ErrorCode.VALIDATION_FAILED,
     ErrorCode.RECENT_SIGN_IN_REQUIRED,
+    ErrorCode.ACCOUNT_HAS_ACTIVE_ORDERS,
     ErrorCode.ACCOUNT_HAS_STAFF_ACCESS,
     ErrorCode.ACCOUNT_DISABLED,
     ErrorCode.TRANSACTION_CONFLICT,

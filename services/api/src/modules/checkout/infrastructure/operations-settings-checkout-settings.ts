@@ -21,6 +21,7 @@ export class OperationsSettingsCheckoutSettings implements CheckoutSettings {
       maxOrder:
         cod.maxOrderHalalas === null ? null : Money.of(cod.maxOrderHalalas),
       allowedOrderTypes: cod.allowedOrderTypes,
+      autoConfirm: cod.confirmation === 'auto',
     };
   }
 }

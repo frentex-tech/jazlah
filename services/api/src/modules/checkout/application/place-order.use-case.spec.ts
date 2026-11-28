@@ -77,7 +77,7 @@ type Setup = Readonly<{
   isCovered: boolean;
   addressMissing: boolean;
   paused: boolean;
-  cod: { enabled: boolean };
+  cod: { enabled: boolean; autoConfirm: boolean };
   dayError: AppError | null;
   reserveError: AppError | null;
   accountError: AppError | null;
@@ -90,7 +90,7 @@ function build(setup: Partial<Setup> = {}) {
     isCovered: true,
     addressMissing: false,
     paused: false,
-    cod: { enabled: true },
+    cod: { enabled: true, autoConfirm: false },
     dayError: null,
     reserveError: null,
     accountError: null,
@@ -98,6 +98,7 @@ function build(setup: Partial<Setup> = {}) {
   };
   const outcomes = new Map<string, unknown>();
   const created: unknown[] = [];
+  const transitioned: unknown[] = [];
   const reserved: unknown[] = [];
   let cleared = 0;
   const calls: string[] = [];
@@ -126,6 +127,7 @@ function build(setup: Partial<Setup> = {}) {
           enabled: s.cod.enabled,
           maxOrder: null,
           allowedOrderTypes: ['ready_meat'],
+          autoConfirm: s.cod.autoConfirm,
         }),
     },
     {
@@ -165,6 +167,7 @@ function build(setup: Partial<Setup> = {}) {
               location: { latitude: 24.7, longitude: 46.7 },
               isDefault: true,
               isCovered: s.isCovered,
+              isLocked: false,
               city: 'Riyadh',
               district: null,
               street: null,
@@ -224,10 +227,23 @@ function build(setup: Partial<Setup> = {}) {
       },
     },
     {
+      execute: (orderId, to, actor, note) => {
+        transitioned.push({ orderId, to, actor, note });
+        return Promise.resolve({ id: orderId } as Order);
+      },
+    },
+    {
       execute: (_user, id) => Promise.resolve({ id } as Order),
     },
   );
-  return { useCase, created, reserved, calls, cleared: () => cleared };
+  return {
+    useCase,
+    created,
+    transitioned,
+    reserved,
+    calls,
+    cleared: () => cleared,
+  };
 }
 
 const BODY = { paymentMethod: 'cod' };
@@ -245,7 +261,7 @@ async function code(promise: Promise<unknown>): Promise<unknown> {
 
 describe('PlaceOrderUseCase', () => {
   it('places a delivery order from the server cart, snapshots it and empties the cart', async () => {
-    const { useCase, created, reserved, cleared } = build();
+    const { useCase, created, transitioned, reserved, cleared } = build();
 
     const order = await useCase.execute(USER, KEY, {
       ...BODY,
@@ -264,6 +280,7 @@ describe('PlaceOrderUseCase', () => {
       orderType: 'ready_meat',
       fulfilment: 'delivery',
       window: { start: '14:00', end: '22:00' },
+      savedAddressId: 'a1',
       address: { label: 'Home', city: 'Riyadh' },
       pickupPoint: null,
       paymentMethod: 'cod',
@@ -276,10 +293,32 @@ describe('PlaceOrderUseCase', () => {
         { quantity: 2, unitPrice: Money.of(97_000), packaging: 'vacuum' },
       ],
     });
+    expect(transitioned).toEqual([]);
+  });
+
+  it('auto-confirms COD through the state machine in the placement transaction', async () => {
+    const { useCase, created, transitioned } = build({
+      cod: { enabled: true, autoConfirm: true },
+    });
+
+    await useCase.execute(USER, KEY, BODY);
+
+    expect(created[0]).toMatchObject({
+      paymentMethod: 'cod',
+      savedAddressId: 'a1',
+    });
+    expect(transitioned).toEqual([
+      {
+        orderId: 'order-1',
+        to: 'confirmed',
+        actor: { type: 'system', id: null },
+        note: undefined,
+      },
+    ]);
   });
 
   it('places a pickup order with the pickup point and no address or window', async () => {
-    const { useCase, created } = build({
+    const { useCase, created, transitioned } = build({
       cart: cart({
         deliveryFee: Money.zero(),
         fulfilment: {
@@ -297,10 +336,12 @@ describe('PlaceOrderUseCase', () => {
     expect(created[0]).toMatchObject({
       fulfilment: 'pickup',
       window: null,
+      savedAddressId: null,
       address: null,
       pickupPoint: { phone: '+966500000002', hours: null },
       deliveryFee: Money.zero(),
     });
+    expect(transitioned).toEqual([]);
   });
 
   it('answers the first order again for the same key and body, placing nothing twice', async () => {
@@ -372,7 +413,10 @@ describe('PlaceOrderUseCase', () => {
       { dayError: new AppError(ErrorCode.DAY_NOT_AVAILABLE) },
     ],
     ['DAY_FULL', { reserveError: new AppError(ErrorCode.DAY_FULL) }],
-    ['PAYMENT_METHOD_NOT_AVAILABLE', { cod: { enabled: false } }],
+    [
+      'PAYMENT_METHOD_NOT_AVAILABLE',
+      { cod: { enabled: false, autoConfirm: false } },
+    ],
   ] as const)('refuses with %s and places nothing', async (expected, setup) => {
     const { useCase, created, cleared } = build(setup);
 

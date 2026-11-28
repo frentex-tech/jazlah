@@ -1,5 +1,6 @@
 import { Module } from '@nestjs/common';
 import { CoverageModule } from '@modules/coverage';
+import { OrdersModule } from '@modules/orders';
 import { UsersModule } from '@modules/users';
 import { CustomerCustomersController } from './controllers/customer.controller';
 import { CustomerAddressesService } from './customer-addresses.service';
@@ -19,7 +20,7 @@ import { MarketingConsentsService } from './marketing-consents.service';
  * is covered (CoverageModule).
  */
 @Module({
-  imports: [UsersModule, CoverageModule],
+  imports: [UsersModule, CoverageModule, OrdersModule],
   controllers: [CustomerCustomersController],
   providers: [
     CustomerProfilesService,

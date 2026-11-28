@@ -159,6 +159,14 @@ describe('Authentication (e2e)', () => {
         ).map((user) => user.id),
         ...deletedUserIds,
       ];
+      await prisma.order.deleteMany({
+        where: {
+          OR: [
+            { userId: { in: userIds } },
+            { vendorId: { in: organisations.map((each) => each.vendorId) } },
+          ],
+        },
+      });
       // Access rows first: they hold the vendors (Restrict), which hold the
       // applications, which hold their applicants. Sessions, refresh tokens, profiles
       // and addresses go with their user (cascade); consent history restricts it.
@@ -1048,6 +1056,69 @@ describe('Authentication (e2e)', () => {
         data: { deactivatedAt: new Date() },
       });
       await client.deleteAccount(signedIn.accessToken).expect(204);
+    });
+
+    it('refuses account deletion while an order is non-final', async () => {
+      const signedIn = await customer('active-order');
+      const { userId } = signedIn.principal;
+      const vendorId = await organisation(userId);
+      const user = await prisma.user.findUniqueOrThrow({
+        where: { id: userId },
+      });
+      const order = await prisma.order.create({
+        data: {
+          number: `JZ-E2E-ACTIVE-${userId.slice(-8)}`,
+          userId,
+          vendorId,
+          status: 'new',
+          orderType: 'ready_meat',
+          fulfilmentMethod: 'pickup',
+          fulfilmentDate: new Date('2026-12-01T00:00:00Z'),
+          paymentMethod: 'cod',
+          subtotalHalalas: 97_000n,
+          vatHalalas: 12_652n,
+          totalHalalas: 97_000n,
+          deliveryFeeHalalas: 0,
+          commissionBasisPoints: 0,
+          customerName: 'Test Customer',
+          customerPhone: user.phone ?? '+966500000000',
+          vendorSnapshot: {
+            name: { ar: 'متجر', en: 'Test Store' },
+            phone: null,
+            location: null,
+            city: null,
+          },
+          pickupSnapshot: {
+            name: { ar: 'متجر', en: 'Test Store' },
+            address: null,
+            location: null,
+            phone: null,
+            hours: null,
+          },
+          history: {
+            create: {
+              fromStatus: null,
+              toStatus: 'new',
+              actorType: 'customer',
+              actorId: userId,
+            },
+          },
+        },
+      });
+
+      const refused = await client
+        .deleteAccount(signedIn.accessToken)
+        .expect(409);
+
+      expect((refused.body as ErrorResponseBody).code).toBe(
+        'ACCOUNT_HAS_ACTIVE_ORDERS',
+      );
+      expect(
+        (await prisma.user.findUniqueOrThrow({ where: { id: userId } })).phone,
+      ).toBe(user.phone);
+      expect(
+        await prisma.order.findUnique({ where: { id: order.id } }),
+      ).not.toBe(null);
     });
 
     it('refuses a disabled user with ACCOUNT_DISABLED', async () => {

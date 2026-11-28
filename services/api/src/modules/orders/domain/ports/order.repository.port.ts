@@ -4,6 +4,7 @@ import type { Order } from '../order.type';
 import type { OrderDraft } from '../order-draft.type';
 import type { OrderListFilter } from '../order-list-filter.type';
 import type { OrderSummary } from '../order-summary.type';
+import type { OrderStatusChange } from '../order-status-change.type';
 
 /** Injection token of the OrderRepository. */
 export const ORDER_REPOSITORY = Symbol('ORDER_REPOSITORY');
@@ -28,6 +29,12 @@ export interface OrderRepository {
 
   /** The order, whoever placed it, or null. Only for callers that see every order. */
   findById(id: string): Promise<Order | null>;
+
+  /** Locks the order row for a transition; a vendor's lookup is scoped to its own store. */
+  lockForWrite(id: string, vendorId?: string): Promise<Order | null>;
+
+  /** Updates the status and inserts its one history row at the same timestamp. */
+  transition(change: OrderStatusChange): Promise<Order>;
 
   /** One page of the orders matching `filter`, newest first (keyset: createdAt, then id). */
   list(filter: OrderListFilter, page: PageRequest): Promise<Page<OrderSummary>>;

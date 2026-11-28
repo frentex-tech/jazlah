@@ -65,6 +65,8 @@ model Order {
   number                String
   userId                String               @map("user_id") @db.Uuid
   vendorId              String               @map("vendor_id") @db.Uuid
+  /// Nullable for pickup, legacy test orders, or when the saved address was deleted; the snapshot remains.
+  savedAddressId        String?              @map("saved_address_id") @db.Uuid
   status                OrderStatus
   orderType             OrderType            @map("order_type")
   fulfilmentMethod      FulfilmentMethod     @map("fulfilment_method")
@@ -86,6 +88,8 @@ model Order {
   carcasses             Int                  @default(0)
   /// Null when the customer left no note.
   notes                 String?
+  /// Null unless the vendor or admin rejected the order.
+  cancelReason          String?              @map("cancel_reason")
   /// The customer's full name when ordering (required to place an order).
   customerName          String               @map("customer_name")
   /// The customer's mobile when ordering.
@@ -100,11 +104,13 @@ model Order {
   updatedAt             DateTime             @updatedAt @map("updated_at") @db.Timestamptz(3)
   user                  User                 @relation(fields: [userId], references: [id], onDelete: Restrict)
   vendor                Vendor               @relation(fields: [vendorId], references: [id], onDelete: Restrict)
+  savedAddress          CustomerAddress?     @relation("OrderSavedAddress", fields: [savedAddressId], references: [id], onDelete: SetNull)
   items                 OrderItem[]
   history               OrderStatusHistory[]
 
   @@unique([number], map: "orders_number_key")
   @@index([vendorId, status])
+  @@index([savedAddressId], map: "orders_saved_address_id_idx")
   /// The keyset order of the order lists (newest first, then id): the customer's, the vendor's and the admin's.
   @@index([userId, createdAt(sort: Desc), id(sort: Desc)], map: "orders_user_id_created_at_id_idx")
   @@index([vendorId, createdAt(sort: Desc), id(sort: Desc)], map: "orders_vendor_id_created_at_id_idx")

@@ -3,6 +3,7 @@ import { AppError } from '@common/errors/app-error';
 import { ErrorCode } from '@common/errors/error-code.enum';
 import { AuditLogWriter } from '@infra/audit/audit-log-writer';
 import { TransactionRunner } from '@infra/database/transaction-runner';
+import { ACTIVE_ORDER_LOOKUP, type ActiveOrderLookup } from '@modules/orders';
 import { AUTH_AUDIT } from '../domain/auth-audit-actions.constants';
 import {
   APPLICANT_DATA,
@@ -36,19 +37,20 @@ import type { DeleteCustomerAccountInput } from './delete-customer-account-input
  *    repeat after success) is UNAUTHORIZED; a disabled user is ACCOUNT_DISABLED: such a
  *    deletion goes through support, or deleting and signing up again would get around a
  *    ban.
- * 2. Any active vendor, kitchen or admin access: ACCOUNT_HAS_STAFF_ACCESS, until that
+ * 2. A non-final order: ACCOUNT_HAS_ACTIVE_ORDERS until it reaches a final status.
+ * 3. Any active vendor, kitchen or admin access: ACCOUNT_HAS_STAFF_ACCESS, until that
  *    access is removed. Checked before the sign-in, since signing in again cannot help.
- * 3. The session of the request must be active and signed in within
+ * 4. The session of the request must be active and signed in within
  *    RECENT_SIGN_IN_SECONDS (AuthSession.isRecentSignIn), or RECENT_SIGN_IN_REQUIRED:
  *    the app signs the customer in again.
- * 4. What they gave when applying to become a vendor (ApplicantData), then what they keep
+ * 5. What they gave when applying to become a vendor (ApplicantData), then what they keep
  *    as a customer (CustomerData: profile and addresses deleted, the consent history
  *    kept and ended withdrawn).
- * 5. Every session of the user, in every audience, with its refresh tokens, and every
+ * 6. Every session of the user, in every audience, with its refresh tokens, and every
  *    verification challenge of the phone.
- * 6. The user becomes a tombstone: no phone, so the number signs up again as a new user
+ * 7. The user becomes a tombstone: no phone, so the number signs up again as a new user
  *    with nothing of the old one.
- * 7. The audit entry: ids and the reason's code only.
+ * 8. The audit entry: ids and the reason's code only.
  *
  * Any refusal or failure rolls all of it back. Nothing outside the database happens
  * inside: uploaded files leave storage through the media cleanup job after the commit.
@@ -61,6 +63,8 @@ export class DeleteCustomerAccountUseCase {
 
   constructor(
     @Inject(USER_ACCOUNTS) private readonly users: UserAccounts,
+    @Inject(ACTIVE_ORDER_LOOKUP)
+    private readonly activeOrders: ActiveOrderLookup,
     @Inject(AUTH_SESSION_REPOSITORY)
     private readonly sessions: AuthSessionRepository,
     @Inject(OTP_CHALLENGE_REPOSITORY)
@@ -85,6 +89,9 @@ export class DeleteCustomerAccountUseCase {
       }
       if (user.disabledAt !== null) {
         throw new AppError(ErrorCode.ACCOUNT_DISABLED);
+      }
+      if (await this.activeOrders.hasActiveOrders(user.id)) {
+        throw new AppError(ErrorCode.ACCOUNT_HAS_ACTIVE_ORDERS);
       }
       if (await this.users.hasActiveStaffAccess(user.id)) {
         throw new AppError(ErrorCode.ACCOUNT_HAS_STAFF_ACCESS);

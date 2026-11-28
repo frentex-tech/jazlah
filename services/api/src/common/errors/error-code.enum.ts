@@ -101,11 +101,15 @@ export enum ErrorCode {
    * Details: `{ limit }`.
    */
   ADDRESS_LIMIT_REACHED = 'ADDRESS_LIMIT_REACHED',
+  /** A saved address is used by an order that has not reached a final status. */
+  ADDRESS_IN_USE = 'ADDRESS_IN_USE',
   /**
    * The account holds vendor, kitchen or admin access, so it cannot be deleted through
    * the app until that access is removed.
    */
   ACCOUNT_HAS_STAFF_ACCESS = 'ACCOUNT_HAS_STAFF_ACCESS',
+  /** The customer has an order that has not reached a final status. */
+  ACCOUNT_HAS_ACTIVE_ORDERS = 'ACCOUNT_HAS_ACTIVE_ORDERS',
   /**
    * The action needs a recent sign-in (account deletion: within the last 10 minutes).
    * Sign in again, then repeat it. 403, not 401, so a client does not just refresh.

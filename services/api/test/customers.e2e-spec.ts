@@ -24,6 +24,7 @@ type AddressBody = {
   shortNationalAddress: string | null;
   driverInstructions: string | null;
   isDefault: boolean;
+  isLocked: boolean;
 };
 
 const errorOf = (res: Response): ErrorResponseBody =>

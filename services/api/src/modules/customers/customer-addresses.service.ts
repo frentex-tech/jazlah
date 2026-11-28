@@ -6,6 +6,7 @@ import type { CustomerAddress as CustomerAddressRow } from '@infra/database/gene
 import { mapPrismaError } from '@infra/database/map-prisma-error';
 import { TransactionRunner } from '@infra/database/transaction-runner';
 import { CoverageService } from '@modules/coverage';
+import { ORDER_ADDRESS_USAGE, type OrderAddressUsage } from '@modules/orders';
 import { UsersService } from '@modules/users';
 import type { CustomerAccounts } from './customer-accounts.type';
 import type { CustomerAddress } from './customer-address.type';
@@ -32,9 +33,9 @@ const NEWEST_FIRST = [{ createdAt: 'desc' }, { id: 'desc' }] as const;
  * code were wrong; "at least one" is this code's alone.
  *
  * Another customer's address is NOT_FOUND, exactly like a missing one. Every address
- * returned says whether an active coverage zone covers it (`isCovered`), asked of
- * CoverageService after any transaction (the check may read Redis). Orders copy the
- * address at checkout, so editing a saved one never changes an order.
+ * returned says whether an active coverage zone covers it (`isCovered`) and whether a
+ * non-final order uses it (`isLocked`). Orders keep both the immutable checkout snapshot
+ * and a nullable reference to the saved address; only the reference is used for locking.
  */
 @Injectable()
 export class CustomerAddressesService {
@@ -46,6 +47,8 @@ export class CustomerAddressesService {
     private readonly transactions: Pick<TransactionRunner, 'run'>,
     @Inject(CoverageService)
     private readonly coverage: Pick<CoverageService, 'isCovered'>,
+    @Inject(ORDER_ADDRESS_USAGE)
+    private readonly orderAddressUsage: OrderAddressUsage,
   ) {}
 
   /** The customer's addresses, the default first, then newest first; at most ten. */
@@ -119,6 +122,7 @@ export class CustomerAddressesService {
     const row = await this.transactions.run(async () => {
       await lockCustomer(this.accounts, userId);
       await this.ownRow(userId, id);
+      await this.assertNotLocked(userId, id);
       const { location, ...fields } = changes;
       return this.query(() =>
         this.db.client.customerAddress.update({
@@ -157,6 +161,7 @@ export class CustomerAddressesService {
     return this.transactions.run(async () => {
       await lockCustomer(this.accounts, userId);
       const row = await this.ownRow(userId, id);
+      await this.assertNotLocked(userId, id);
       await this.query(() =>
         this.db.client.customerAddress.delete({ where: { id } }),
       );
@@ -203,6 +208,13 @@ export class CustomerAddressesService {
     return row;
   }
 
+  /** Address edits and deletion wait until every referring order is final. */
+  private async assertNotLocked(userId: string, id: string): Promise<void> {
+    if (await this.orderAddressUsage.isLocked(userId, id)) {
+      throw new AppError(ErrorCode.ADDRESS_IN_USE);
+    }
+  }
+
   /** Before a new default is set: the partial unique index allows one at a time. */
   private async clearDefault(userId: string): Promise<void> {
     await this.query(() =>
@@ -215,6 +227,10 @@ export class CustomerAddressesService {
 
   private async toAddress(row: CustomerAddressRow): Promise<CustomerAddress> {
     const location = { latitude: row.latitude, longitude: row.longitude };
+    const [isCovered, isLocked] = await Promise.all([
+      this.coverage.isCovered(location),
+      this.orderAddressUsage.isLocked(row.userId, row.id),
+    ]);
     return {
       id: row.id,
       label: row.label,
@@ -226,7 +242,8 @@ export class CustomerAddressesService {
       shortNationalAddress: row.shortNationalAddress,
       driverInstructions: row.driverInstructions,
       isDefault: row.isDefault,
-      isCovered: await this.coverage.isCovered(location),
+      isCovered,
+      isLocked,
       createdAt: row.createdAt,
       updatedAt: row.updatedAt,
     };

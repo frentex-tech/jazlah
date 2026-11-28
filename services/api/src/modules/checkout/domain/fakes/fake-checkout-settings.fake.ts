@@ -9,6 +9,7 @@ export class FakeCheckoutSettings implements CheckoutSettings {
     enabled: true,
     maxOrder: null,
     allowedOrderTypes: ['ready_meat'],
+    autoConfirm: false,
   };
 
   pause(): Promise<OrderingPause> {

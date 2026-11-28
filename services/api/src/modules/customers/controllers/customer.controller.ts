@@ -251,7 +251,7 @@ export class CustomerCustomersController {
       'For the readable fields (city, district, street, building, shortNationalAddress, driverInstructions), null or blank clears the field. ' +
       'label and location can be changed but not removed (null is VALIDATION_FAILED). ' +
       'Whether the address is the default does not change here: use POST /v1/customer/addresses/{id}/default. ' +
-      'Orders placed earlier keep the address as it was at checkout. ' +
+      'Orders keep the address snapshot as it was at checkout. While a non-final order uses this address, `isLocked` is true and changes are refused with ADDRESS_IN_USE. ' +
       'NOT_FOUND: no such address, or it belongs to another customer (both answer the same); it may have been deleted on another device, so reload the list. ' +
       'ACCOUNT_DISABLED: the account was disabled by the platform; show a message, do not retry. ' +
       'UNAUTHORIZED can also mean the account was deleted while the token was still valid: sign out. ' +
@@ -264,6 +264,7 @@ export class CustomerCustomersController {
   @ApiErrorResponses(
     ErrorCode.VALIDATION_FAILED,
     ErrorCode.NOT_FOUND,
+    ErrorCode.ADDRESS_IN_USE,
     ErrorCode.ACCOUNT_DISABLED,
     ErrorCode.TRANSACTION_CONFLICT,
     ErrorCode.SERVICE_UNAVAILABLE,
@@ -338,7 +339,7 @@ export class CustomerCustomersController {
     description:
       'Customer app, the address book. Deletes the address at once and for good. ' +
       'When it was the default, the newest remaining address becomes the default (reload the list to show it); deleting the last one leaves none. ' +
-      'Orders placed earlier keep the address as it was at checkout. ' +
+      'Orders keep the address snapshot as it was at checkout. While a non-final order uses this address, `isLocked` is true and deletion is refused with ADDRESS_IN_USE. ' +
       'NOT_FOUND: no such address, or it belongs to another customer; also when it was already deleted (a repeated request, or another device), so treat it as gone and reload the list. ' +
       'ACCOUNT_DISABLED: the account was disabled by the platform; show a message, do not retry. ' +
       'UNAUTHORIZED can also mean the account was deleted while the token was still valid: sign out. ' +
@@ -350,6 +351,7 @@ export class CustomerCustomersController {
   @ApiErrorResponses(
     ErrorCode.VALIDATION_FAILED,
     ErrorCode.NOT_FOUND,
+    ErrorCode.ADDRESS_IN_USE,
     ErrorCode.ACCOUNT_DISABLED,
     ErrorCode.TRANSACTION_CONFLICT,
     ErrorCode.SERVICE_UNAVAILABLE,

@@ -320,7 +320,7 @@ Placing orders atomically, the order state machine, routing to the right dashboa
 8. create the order (`pending_payment`, or `new` for COD/wallet-only) and items
 9. clear the cart
 
-Then call the payment intent outside the transaction. If it fails, the payment-timeout job undoes the order. The `AddressUsagePort` and active-orders ports from ACC-API-2 (`isLocked`, ADDRESS_IN_USE, ACCOUNT_HAS_ACTIVE_ORDERS) **move to ORD-API-2 (2026-11-26, review of #332)**: "not final" is the state machine's to define, and they change the customers and auth modules and the apps' contract, which the cash-on-delivery order did not need. Increment `salesCount` on confirmation.
+Then call the payment intent outside the transaction. A payment-timeout job is deferred to the payment follow-up. The `AddressUsagePort` and active-orders ports from ACC-API-2 (`isLocked`, ADDRESS_IN_USE, ACCOUNT_HAS_ACTIVE_ORDERS) **move to ORD-API-2 (2026-11-26, review of #332)**: "not final" is the state machine's to define, and they change the customers and auth modules and the apps' contract, which the cash-on-delivery order did not need. Incrementing `salesCount` on confirmation is deferred; ORD-API-2 does not add the product field or update it.
 
 **Where:** `services/api/src/modules/checkout/`, `services/api/src/modules/orders/`
 
@@ -335,21 +335,24 @@ Then call the payment intent outside the transaction. If it fails, the payment-t
 **What:** every order status change goes through one guarded state machine.
 
 **Output:**
-- Statuses: `pending_payment → new → confirmed → preparing → ready → picked_up → out_for_delivery → delivered`; pickup: `ready → collected`; exceptions: `cancelled`, `delivery_failed`, `returned`
+- Statuses: `pending_payment`, `new`, `confirmed`, `preparing`, `ready`, `picked_up`, `out_for_delivery`, `delivered`, `collected`, `cancelled`, `delivery_failed`, `returned`. Online orders wait at `pending_payment`; COD starts at `new`.
+- Delivery: `new → confirmed → preparing → ready → picked_up → out_for_delivery → delivered`. Pickup: `new → confirmed → preparing → ready → collected`.
+- Exceptions: vendor/admin may reject `new → cancelled` with a required note; vendor/admin may move `out_for_delivery → delivery_failed`; only admin may retry `delivery_failed → out_for_delivery` or finish `delivery_failed → returned`.
 - `OrderStatusHistory` (from, to, actorType system|customer|admin|vendor|kitchen|delivery, actorId, note, at)
-- `OrdersService.transition(orderId, to, actor, meta)` with a transition table (allowed from→to and actor), emits `order.status.changed`
-- Rules: payment captured → `confirmed`; COD → `confirmed` if `ops.cod.confirmation=auto`, else stays `new` for admin review; an unpaid `pending_payment` order past `expiresAt` (15 min) is cancelled when read or moved, releasing capacity, coupon and wallet (workers are off on staging: the contract's expiry on read)
-- **Late capture:** a payment captured after the order was cancelled or expired → automatic full refund + admin alert, decided in the webhook's own transaction (the webhook handler reads the order state under its row lock and records the refund there) or through the outbox once it exists; never through an in-memory event bus listener, whose delivery is lost on a crash between commit and dispatch (modules.md, Events 3)
+- `TransitionOrderUseCase` with a transition table (allowed from→to, actor and fulfilment), emits `order.status.changed`
+- Rules: payment captured → `confirmed` through the state machine (the capture webhook is a later task); COD → `confirmed` if `ops.cod.confirmation=auto` by a `system` transition in the placement transaction with its own history row, else stays `new` for review. The 15-minute payment timeout/expiry and late-capture refund/alert are deferred to the payment follow-up.
 
-**How:** the transition table is data in code (`orders/state-machine.ts`) with exhaustive unit tests. No other module updates `order.status` directly.
+**How:** the transition table is data in code (`orders/domain/order-state-machine.ts`) with exhaustive unit tests. No other module updates `order.status` directly.
 
 **Where:** `services/api/src/modules/orders/`
 
 **Acceptance:**
-- [ ] Moved from ORD-API-1 (#81): an address used by a non-final order is locked (`isLocked`, ADDRESS_IN_USE) and deleting an account with non-final orders is ACCOUNT_HAS_ACTIVE_ORDERS; until then a customer can delete the account while an order is open, and the order keeps the old phone
+- [ ] Moved from ORD-API-1 (#81): an address used by a non-final order is locked (`isLocked`, ADDRESS_IN_USE); deleting an account with non-final orders is refused with ACCOUNT_HAS_ACTIVE_ORDERS.
 - [ ] Unit tests: every allowed and forbidden transition
-- [ ] e2e: unpaid order cancelled by the job and capacity released
-- [ ] e2e: a webhook capturing a payment for an expired order triggers a refund and an alert
+- [ ] e2e: delivery and pickup transitions, vendor/admin actor rules, and delivery-failure retry/return rules
+- [ ] e2e: COD review and auto-confirm modes; rejection requires a note, records `cancelReason`, and releases capacity
+- [ ] e2e: address lock, account-deletion refusal for a non-final order, and transition row-lock concurrency
+- [ ] CI rollback checks: capacity, order status/history, cart/idempotency, and events are unchanged when a transition or auto-confirm transaction fails
 
 ### ORD-API-3 — Order routing, realtime events & order history endpoints
 `type: Feature · area: api · size: L · prio: P0 · reqs: FR-ORD-02, FR-ORD-04 · depends: ORD-API-2, FND-API-4`

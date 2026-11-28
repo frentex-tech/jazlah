@@ -40,7 +40,7 @@ export class CustomerOrdersController {
     operationId: 'customerListOrders',
     summary: 'My orders',
     description:
-      'Customer app, orders tab: newest first, `current` or `past`. An order past `expiresAt` and still unpaid is cancelled when read (workers are off on staging), so the answer is always current; capacity, coupon use and wallet reads treat such orders as already released.',
+      'Customer app, orders tab: newest first, `current` or `past`. Status is the value last committed by the order state machine; customers cannot move statuses in Sprint 3.',
   })
   @ApiOkResponse({
     type: OrderPageResponseDto,
@@ -72,7 +72,7 @@ export class CustomerOrdersController {
     operationId: 'customerGetOrder',
     summary: 'One of my orders',
     description:
-      'Customer app, order detail, and the payment result: poll it after the payment page closes (every 2 s, up to 60 s): paid once the status is neither `pending_payment` nor `cancelled`. Carries the store’s phone and location. Cancelling is Sprint 4 (CAN-API-1). An order past `expiresAt` and still unpaid is cancelled when read (workers are off on staging), so the answer is always current; capacity, coupon use and wallet reads treat such orders as already released. NOT_FOUND for another customer’s order.',
+      'Customer app, order detail, and the payment result: poll it after the payment page closes (every 2 s, up to 60 s): paid once the status is neither `pending_payment` nor `cancelled`. Carries the store’s phone and location. Customer cancellation is Sprint 4 (CAN-API-1). Payment timeout and expiry are deferred to a later payment task. NOT_FOUND for another customer’s order.',
   })
   @ApiOkResponse({
     type: OrderResponseDto,
@@ -90,6 +90,7 @@ export class CustomerOrdersController {
   ): Promise<OrderResponseDto> {
     return toOrderResponse(
       await this.findOrder.execute(user.userId, params.id),
+      'customer',
     );
   }
 }

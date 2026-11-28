@@ -67,6 +67,12 @@ export function buildAuthUseCases(
   const profiles = new InMemoryCustomerProfiles();
   const erasures = new InMemoryErasures();
   const audit = new InMemoryAuditLog();
+  const activeOrders = {
+    userIds: new Set<string>(),
+    hasActiveOrders(userId: string): Promise<boolean> {
+      return Promise.resolve(this.userIds.has(userId));
+    },
+  };
 
   const transactions: Pick<TransactionRunner, 'run'> = {
     async run<T>(work: () => Promise<T>): Promise<T> {
@@ -110,6 +116,7 @@ export function buildAuthUseCases(
     profiles,
     erasures,
     audit,
+    activeOrders,
     requestOtp: new RequestOtpUseCase(
       challenges,
       codes,
@@ -151,6 +158,7 @@ export function buildAuthUseCases(
     getCustomerMe: new GetCustomerMeUseCase(users, profiles),
     deleteCustomerAccount: new DeleteCustomerAccountUseCase(
       users,
+      activeOrders,
       sessions,
       challenges,
       erasures.customers,

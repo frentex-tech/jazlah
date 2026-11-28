@@ -92,6 +92,13 @@ export class CustomerAddressResponseDto {
   isCovered!: boolean;
 
   @ApiProperty({
+    description:
+      'Whether a non-final order uses this address. A locked address cannot be edited or deleted, but can still be made the default.',
+    example: false,
+  })
+  isLocked!: boolean;
+
+  @ApiProperty({
     format: 'date-time',
     description: 'When the address was saved, UTC (ISO 8601).',
     example: '2026-11-15T10:00:00.000Z',

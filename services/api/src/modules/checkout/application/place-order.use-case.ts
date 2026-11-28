@@ -12,6 +12,7 @@ import {
 import {
   CreateOrderUseCase,
   FindCustomerOrderUseCase,
+  TransitionOrderUseCase,
   orderTypeOf,
   type NewOrder,
   type Order,
@@ -64,8 +65,10 @@ import { toOrderLine } from './to-order-line';
  * - **Payment.** Only cash on delivery, and only when the cart may use it
  *   (`paymentMethodsFor`): another method is PAYMENT_METHOD_NOT_AVAILABLE
  *   (`details.method`), a wallet part is WALLET_INSUFFICIENT (the balance is 0).
- * - **The order** is made by `CreateOrderUseCase` with snapshots of everything, the
- *   cart is emptied, and the order-placed event is delivered after the commit.
+ * - **The order** is made by `CreateOrderUseCase` with snapshots of everything. When
+ *   COD is configured for auto-confirmation, `TransitionOrderUseCase` moves it from
+ *   `new` to `confirmed` as the system in this same transaction. The cart is emptied,
+ *   and both order events are delivered after the commit.
  */
 @Injectable()
 export class PlaceOrderUseCase {
@@ -100,6 +103,8 @@ export class PlaceOrderUseCase {
     private readonly capacity: Pick<CapacityService, 'reserve'>,
     @Inject(CreateOrderUseCase)
     private readonly createOrder: Pick<CreateOrderUseCase, 'execute'>,
+    @Inject(TransitionOrderUseCase)
+    private readonly transitionOrder: Pick<TransitionOrderUseCase, 'execute'>,
     @Inject(FindCustomerOrderUseCase)
     private readonly findOrder: Pick<FindCustomerOrderUseCase, 'execute'>,
   ) {}
@@ -157,7 +162,7 @@ export class PlaceOrderUseCase {
       { vendorId, method: fulfilment.method, orderTypes: cart.orderTypes },
       fulfilment.date,
     );
-    await this.assertPaymentAllowed(checkoutCart, request);
+    const codRules = await this.assertPaymentAllowed(checkoutCart, request);
     const [store, commission] = await Promise.all([
       this.vendors.storeOf(vendorId),
       this.vendors.commissionBasisPointsOf(vendorId),
@@ -195,6 +200,8 @@ export class PlaceOrderUseCase {
       fulfilment: fulfilment.method,
       fulfilmentDate: fulfilment.date,
       window: fulfilment.method === 'delivery' ? day.window : null,
+      savedAddressId:
+        fulfilment.method === 'delivery' ? fulfilment.addressId : null,
       address,
       pickupPoint,
       deliveryFee: cart.deliveryFee,
@@ -202,6 +209,12 @@ export class PlaceOrderUseCase {
       notes: request.notes ?? null,
       carcasses,
     } satisfies NewOrder);
+    if (codRules.autoConfirm) {
+      await this.transitionOrder.execute(order.id, 'confirmed', {
+        type: 'system',
+        id: null,
+      });
+    }
     await this.clearCart.execute(userId);
     return { orderId: order.id, bodyHash };
   }
@@ -241,7 +254,7 @@ export class PlaceOrderUseCase {
   private async assertPaymentAllowed(
     cart: CheckoutCart,
     request: PlaceOrderRequest,
-  ): Promise<void> {
+  ): Promise<Awaited<ReturnType<CheckoutSettings['cod']>>> {
     if (request.paymentMethod !== 'cod') {
       throw new AppError(ErrorCode.PAYMENT_METHOD_NOT_AVAILABLE, {
         details: { method: request.paymentMethod },
@@ -252,11 +265,13 @@ export class PlaceOrderUseCase {
         details: { balanceHalalas: 0 },
       });
     }
-    const offered = paymentMethodsFor(cart, await this.settings.cod());
+    const codRules = await this.settings.cod();
+    const offered = paymentMethodsFor(cart, codRules);
     if (!offered.some((option) => option.method === 'cod')) {
       throw new AppError(ErrorCode.PAYMENT_METHOD_NOT_AVAILABLE, {
         details: { method: 'cod' },
       });
     }
+    return codRules;
   }
 }

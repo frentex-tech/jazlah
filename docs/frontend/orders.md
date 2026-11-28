@@ -1,6 +1,6 @@
 # Cart, checkout, payments and orders (Sprint 3)
 
-The Sprint 3 contract: the cart, the days, placing an order, paying, the order shape, the operations settings, coupons and the wallet. Every route below is in `openapi.json` now. **Until its task lands, a route answers NOT_IMPLEMENTED (501) with `details.task`** (the task key), so build against the shapes and show "coming soon" on 501. Each task keeps the shape it ships with; a change would come with a note here.
+The Sprint 3 contract: the cart, the days, placing an order, paying, the order shape, the operations settings, coupons and the wallet. Every route below is in `openapi.json` now. **Until its task lands, a route answers NOT_IMPLEMENTED (501) with `details.task`** (the task key), so build against the shapes and show "coming soon" on 501. ORD-API-2 now serves the vendor and admin transition routes. Each task keeps the shape it ships with; a change would come with a note here.
 
 Money is integer halalas with VAT included. Days are Riyadh `yyyy-MM-dd`, times of day Riyadh `HH:mm`, instants ISO UTC.
 
@@ -17,11 +17,11 @@ Money is integer halalas with VAT included. Days are Riyadh `yyyy-MM-dd`, times 
 | `GET /v1/customer/checkout/payment-methods` without `orderId` | PAY-API-1's methods route (**live**: cash on delivery only, `walletBalanceHalalas` 0; with `orderId` still 501) |
 | `POST /v1/customer/orders/{id}/payments` (tag Customer checkout), `POST /v1/webhooks/payments/{provider}` | PAY-API-1 |
 | `POST /v1/customer/orders` | ORD-API-1 (**live**, cash on delivery only: see "Paying") |
-| `POST /v1/vendor/orders/{id}/transition`, `POST /v1/admin/orders/{id}/transition` | ORD-API-2 |
+| `POST /v1/vendor/orders/{id}/transition`, `POST /v1/admin/orders/{id}/transition` | ORD-API-2 (**live**: state-machine guarded, with history and after-commit event) |
 | `GET /v1/customer/orders`, `GET /v1/customer/orders/{id}`, `GET /v1/vendor/orders`, `GET /v1/vendor/orders/{id}`, `GET /v1/admin/orders`, `GET /v1/admin/orders/{id}` | ORD-API-3 |
 | `POST /v1/customer/cart/coupon`, `DELETE /v1/customer/cart/coupon`, `GET /v1/admin/coupons`, `POST /v1/admin/coupons`, `GET /v1/admin/coupons/{id}`, `PATCH /v1/admin/coupons/{id}`, `GET /v1/admin/coupons/{id}/usage` | CRT-API-3 |
 
-Not in Sprint 3: the customer's cancel (CAN-API-1, Sprint 4), the admin's cancel with a refund choice and the reschedule (Sprint 4). Rejecting a cash-on-delivery order is a move: `POST /v1/admin/orders/{id}/transition` with `{ "to": "cancelled", "note": "<reason>" }`.
+Not in Sprint 3: customer cancellation and admin cancellation/refund (CAN-API-1, Sprint 4), rescheduling (DLV-API-1), and the payment timeout job, payment webhook and late-capture handling. Rejecting a COD order under review is a move: the vendor or admin sends `{ "to": "cancelled", "note": "<reason>" }` to its transition route. The note is required; it is saved as both the history note and `cancelReason`.
 
 ## The order: one shape for every app
 
@@ -32,21 +32,21 @@ Not in Sprint 3: the customer's cancel (CAN-API-1, Sprint 4), the admin's cancel
 - **Moves:** never work them out in the app. Each order answers `allowedTransitions` for the caller; send one of them to `…/transition`.
 - **Money:** `subtotalHalalas`, `discountHalalas` (never on the delivery fee), `deliveryFeeHalalas`, `totalHalalas`, `vatHalalas` (round half up of total × 15 / 115).
 - **Lines** (`items`): `name`, `imageUrl`, `size { id, approxWeightGrams, tag }`, `cutting { id, name } | null`, `packaging` (the enum value: `trays`, `bags`, `vacuum`, `none`; names are the app's), `exclusions [{ id, name }]`, `notes`, `quantity`, `unitPriceHalalas`, `totalHalalas`. Names are as when ordered.
-- **Where:** `address` (the saved address's fields, copied when placed) for delivery, `pickupPoint { name, address, location, phone, hours }` for pickup; `window` is the delivery window (null for pickup).
+- **Where:** `address` (the saved address's fields, copied when placed) for delivery, `pickupPoint { name, address, location, phone, hours }` for pickup; `window` is the delivery window (null for pickup). A saved address used by a non-final order has `isLocked: true`; edits and deletion return `ADDRESS_IN_USE`, while making it the default remains allowed. Deleting an address after its orders are final never changes their snapshots.
 - **The store:** `vendor { id, name, phone, location, city }`: the customer's "call the store" and directions.
-- **Payment:** `payment { method, status, paymentId, walletHalalas, walletRestoredHalalas, cardLast4 }`; `expiresAt` while unpaid.
+- **Payment:** `payment { method, status, paymentId, walletHalalas, walletRestoredHalalas, cardLast4 }`; `expiresAt` is reserved for the deferred payment-expiry task and is null in the COD-only API.
 - **The customer:** `customer { id, name, phone }`; the phone is in full for admins and masked for the vendor.
 - **History:** `history [{ from, to, actorType, note, at }]`, oldest first. `refunds` is empty until Sprint 4.
 
 ## Paying
 
 - Place with `POST /v1/customer/orders`, header **`Idempotency-Key`** (a UUID made once per attempt; send it again on a retry of that attempt, with the same body, and the first success is answered again). The same key with a **different body** is `IDEMPOTENCY_KEY_REUSED` (422): make a new key. A refusal is not kept: fix it and send the same key.
-- **Sprint 3 places cash on delivery only** (`paymentMethod: "cod"`, no `walletAmountHalalas`): any other method is `PAYMENT_METHOD_NOT_AVAILABLE`. The order starts `new` and `payment` is null. The server prices every line again: a price that moved since the customer accepted it is `PRICE_CHANGED` (`details.lineIds`, show the new price, PATCH the line to accept it), a line that can no longer be ordered `ITEM_UNAVAILABLE`. A customer with no full name gets `PROFILE_INCOMPLETE`: send them to the name step.
+- **Sprint 3 places cash on delivery only** (`paymentMethod: "cod"`, no `walletAmountHalalas`): any other method is `PAYMENT_METHOD_NOT_AVAILABLE`. The order starts as `new`; with `ops.cod.confirmation=auto`, placement moves it to `confirmed` through the state machine in the same transaction, as `system`, with a second history row. With `review` (the default), it stays `new`. `payment` is null. The server prices every line again: a price that moved since the customer accepted it is `PRICE_CHANGED` (`details.lineIds`, show the new price, PATCH the line to accept it), a line that can no longer be ordered `ITEM_UNAVAILABLE`. A customer with no full name gets `PROFILE_INCOMPLETE`: send them to the name step.
 - The answer is `{ order, payment }`. When `payment.nextAction` is not null, open **`nextAction.redirectUrl`** (the provider's hosted page; on staging the fake provider's approve or decline page) in a web view; close it when it reaches **`nextAction.returnUrl`** (match scheme, host and path). **The result always comes from the server:** poll `GET /v1/customer/orders/{id}` every 2 s up to 60 s; paid once the status is neither `pending_payment` nor `cancelled`.
 - `payment` is null for cash on delivery and wallet only (no payment record is made); `nextAction` is also null on any later read: read the order, not the payment.
-- **One open payment per order.** `POST /v1/customer/orders/{id}/payments` with the same method while the latest is still `initiated` answers that payment again; another method gets PAYMENT_IN_PROGRESS (`details.paymentId`). An `initiated` payment ends when the provider reports it or **10 minutes** after it started, so the customer can still switch method (to cash on delivery, say) before the order expires. A second capture is refunded in full and alerted.
+- **One open payment per order** (PAY-API-1, not built): `POST /v1/customer/orders/{id}/payments` with the same method while the latest is still `initiated` answers that payment again; another method gets PAYMENT_IN_PROGRESS (`details.paymentId`). The webhook and duplicate/late-capture refund and alert are deferred to the payment follow-up.
 - **Wallet:** `walletAmountHalalas` pays part with another method (0 to less than the total); with `paymentMethod: wallet` leave it out: the whole total is taken and the order is confirmed at once. Paying again sends `paymentMethod` too. If the online part fails, the wallet part comes back at once (`walletRestoredHalalas`) and the next attempt charges the whole total. Cash on delivery can take a wallet part too.
-- **Unpaid for 15 minutes** (`expiresAt`): cancelled, giving back the day's capacity, the coupon and the wallet part. Workers are off on staging, so this happens when the order is read or moved; until then, the days, coupon limits and the wallet balance already count it as released. Webhooks are processed at once.
+- **Deferred from ORD-API-2:** the 15-minute payment timeout, expiry-on-read, payment webhook, and late-capture refund/alert. `expiresAt` remains null in the COD-only API until the payment task implements it.
 - Cash on delivery lands as `new` (review) or `confirmed` (auto), from the settings.
 
 ## The cart

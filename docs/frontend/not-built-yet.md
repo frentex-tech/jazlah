@@ -6,7 +6,7 @@ The designs cover the whole product, but the API is built in steps. **If a scree
 
 Everything in `openapi.json`, which is:
 - **Sign-in and sessions:** all four audiences.
-- **Customers:** the profile, marketing consent, addresses (each with `isCovered`) and account deletion.
+- **Customers:** the profile, marketing consent, addresses (`isCovered`, `isLocked`) and account deletion (refused while a non-final order exists).
 - **Coverage zones:** the admin's zones (polygons) and the public coverage check ([coverage.md](coverage.md)).
 - **Vendors:**
   - applications (with city, optional VAT number and the optional document kinds) and their review;
@@ -39,8 +39,9 @@ The Sprint 3 contract (cart, checkout, payments, orders, settings, coupons, wall
 | Area | What the screens may show | Status |
 |---|---|---|
 | **Cart** | Adding a product with a size, cutting, packaging and exclusions; the cart badge; preparation notes on a cart line | not built |
-| **Checkout** | Address choice, delivery slot, totals with VAT, payment method; the complete-profile check and the address lock at checkout | not built |
-| **Orders** | Order list and detail, statuses, cancellation, re-order; the vendor's and kitchen's order queues | not built |
+| **Checkout** | Address choice, delivery slot, totals with VAT, payment method; the complete-profile check | not built |
+| **Orders** | Order list and detail, re-order; the vendor's and kitchen's order queues | State transitions are live (ORD-API-2); read routes and queues are not built (ORD-API-3). Customer/admin cancellation and refunds are deferred to CAN-API-1. |
+| **Product sales count** | Best-seller ranking and the `salesCount` product counter | Deferred: ORD-API-2 does not add the field or increment it; a later task must define and implement the counting rule | #82 (deferred)
 | **Payments** | Card payment (Geidea), Apple Pay, cash on delivery, BNPL (instalments) | not built |
 | **Delivery and scheduling** | Slots and capacity, Eid days, driver tracking (coverage zones are built) | not built |
 | **Refunds and wallet** | Refunds, partial refunds, weight adjustments, wallet balance | not built |
@@ -119,7 +120,6 @@ What the customer app needs from the API and does not have yet. Each row names t
 
 | Gap | Screen waiting on it | The app today | Issue |
 |---|---|---|---|
-| `isLocked` on addresses (an address used by an open order) | Addresses: lock state, edit and delete disabled | Always unlocked from the API; only the mock shows a locked address | API gap (planned in ACC-API-2 #18; real rule moved from ORD-API-1 #81 to ORD-API-2 #82: an order exists now, but an address is never locked and account deletion is not blocked by open orders yet) |
 | A public list of served cities (or of zones) | Location: out of coverage, "available areas" line | The line is hidden in real builds; the mock lists Riyadh, Jeddah, Dammam | LOC-API-1 #24 |
 | A geocoding and place-search proxy (a public geocode route) | Location: map picker address line and search | The device calls Google Geocoding with the key from the app config. Until the proxy exists, use a **separate key restricted to the Geocoding API**, with daily quota caps and billing alerts, and keep the Maps SDK key app-restricted (owner action). In dev or with the mock switch on, the app uses sample places; real builds without a key leave the fields empty for typing | API gap |
 | The app hash in the sign-in SMS, per flavor (Android SMS Retriever) | Sign-in: OTP autofill on Android (`sms_autofill`) | Keyboard suggestion only (`AutofillHints.oneTimeCode`) | API gap |

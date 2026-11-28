@@ -1,5 +1,7 @@
 import { PAYMENT_METHOD_NAMES } from '@modules/payments';
 import { PRODUCT_PACKAGINGS } from '@modules/catalog';
+import { allowedOrderTransitions } from '../domain/order-state-machine';
+import type { OrderActorType } from '../domain/order-actor-type.type';
 import type { Order } from '../domain/order.type';
 import type { OrderItem } from '../domain/order-item.type';
 import type { OrderResponseDto } from './dto/order-response.dto';
@@ -11,7 +13,10 @@ import type { OrderItemResponseDto } from './dto/order-item-response.dto';
  * expiry and no refund, so those parts are empty; the moves a caller may make
  * (`allowedTransitions`) come with the state machine (ORD-API-2).
  */
-export function toOrderResponse(order: Order): OrderResponseDto {
+export function toOrderResponse(
+  order: Order,
+  actorType: OrderActorType = 'customer',
+): OrderResponseDto {
   return {
     id: order.id,
     number: order.number,
@@ -44,7 +49,7 @@ export function toOrderResponse(order: Order): OrderResponseDto {
     vatHalalas: order.vat.halalas,
     couponCode: null,
     notes: order.notes,
-    cancelReason: null,
+    cancelReason: order.cancelReason,
     expiresAt: null,
     payment: {
       method: toPaymentMethod(order.paymentMethod),
@@ -62,7 +67,11 @@ export function toOrderResponse(order: Order): OrderResponseDto {
       note: entry.note,
       at: entry.at,
     })),
-    allowedTransitions: [],
+    allowedTransitions: allowedOrderTransitions(
+      order.status,
+      order.fulfilment,
+      actorType,
+    ),
   };
 }
 

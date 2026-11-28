@@ -6,4 +6,6 @@ export type CodRules = Readonly<{
   /** Null: no cap. */
   maxOrder: Money | null;
   allowedOrderTypes: readonly string[];
+  /** Auto-confirm COD after placement through the orders state machine. */
+  autoConfirm: boolean;
 }>;

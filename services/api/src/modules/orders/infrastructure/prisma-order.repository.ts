@@ -12,10 +12,14 @@ import type { Prisma } from '@infra/database/generated/prisma/client';
 import { keysetAfter } from '@infra/database/keyset-after';
 import { KEYSET_ORDER } from '@infra/database/keyset-order.constants';
 import { mapPrismaError } from '@infra/database/map-prisma-error';
+import { FINAL_ORDER_STATUSES } from '../domain/final-order-statuses.constants';
 import type { Order } from '../domain/order.type';
 import type { OrderDraft } from '../domain/order-draft.type';
 import type { OrderListFilter } from '../domain/order-list-filter.type';
 import type { OrderSummary } from '../domain/order-summary.type';
+import type { OrderStatusChange } from '../domain/order-status-change.type';
+import type { ActiveOrderLookup } from '../domain/ports/active-order-lookup.port';
+import type { OrderAddressUsage } from '../domain/ports/order-address-usage.port';
 import { PAST_ORDER_STATUSES } from '../domain/past-order-statuses.constants';
 import type { OrderRepository } from '../domain/ports/order.repository.port';
 import { OrderMapper } from './order.mapper';
@@ -27,7 +31,9 @@ const WITH_DETAILS = {
 
 /** `OrderRepository` on tables `orders`, `order_items`, `order_status_history` and `order_number_counters`. */
 @Injectable()
-export class PrismaOrderRepository implements OrderRepository {
+export class PrismaOrderRepository
+  implements OrderRepository, OrderAddressUsage, ActiveOrderLookup
+{
   constructor(private readonly db: DbContext) {}
 
   async nextSequence(day: CalendarDate): Promise<number> {
@@ -86,6 +92,85 @@ export class PrismaOrderRepository implements OrderRepository {
       }),
     );
     return row === null ? null : OrderMapper.toOrder(row);
+  }
+
+  async lockForWrite(id: string, vendorId?: string): Promise<Order | null> {
+    const scopeVendorId = vendorId ?? null;
+    const rows = await this.query(
+      () => this.db.client.$queryRaw<{ id: string }[]>`
+        SELECT "id"
+        FROM "orders"
+        WHERE "id" = ${id}::uuid
+          AND (${scopeVendorId}::uuid IS NULL OR "vendor_id" = ${scopeVendorId}::uuid)
+        FOR UPDATE`,
+    );
+    if (rows.length === 0) {
+      return null;
+    }
+    return this.findById(id);
+  }
+
+  async transition(change: OrderStatusChange): Promise<Order> {
+    const updated = await this.query(() =>
+      this.db.client.order.updateMany({
+        where: { id: change.orderId, status: change.from },
+        data: {
+          status: change.to,
+          updatedAt: change.at,
+          ...(change.to === 'cancelled' ? { cancelReason: change.note } : {}),
+        },
+      }),
+    );
+    if (updated.count !== 1) {
+      throw new AppError(ErrorCode.ORDER_TRANSITION_NOT_ALLOWED, {
+        details: { from: change.from, to: change.to },
+      });
+    }
+    await this.query(() =>
+      this.db.client.orderStatusHistory.create({
+        data: {
+          orderId: change.orderId,
+          fromStatus: change.from,
+          toStatus: change.to,
+          actorType: change.actorType,
+          actorId: change.actorId,
+          note: change.note,
+          createdAt: change.at,
+        },
+      }),
+    );
+    const order = await this.findById(change.orderId);
+    if (order === null) {
+      throw new AppError(ErrorCode.NOT_FOUND);
+    }
+    return order;
+  }
+
+  async isLocked(userId: string, addressId: string): Promise<boolean> {
+    const order = await this.query(() =>
+      this.db.client.order.findFirst({
+        where: {
+          userId,
+          savedAddressId: addressId,
+          status: { notIn: [...FINAL_ORDER_STATUSES] },
+        },
+        select: { id: true },
+      }),
+    );
+    return order !== null;
+  }
+
+  async hasActiveOrders(userId: string): Promise<boolean> {
+    const order = await this.query(() =>
+      this.db.client.order.findFirst({
+        where: {
+          userId,
+          status: { notIn: [...FINAL_ORDER_STATUSES] },
+        },
+        select: { id: true },
+      }),
+    );
+    return order !== null;
   }
 
   async list(

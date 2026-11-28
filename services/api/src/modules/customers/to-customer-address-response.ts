@@ -20,6 +20,7 @@ export function toCustomerAddressResponse(
     driverInstructions: address.driverInstructions,
     isDefault: address.isDefault,
     isCovered: address.isCovered,
+    isLocked: address.isLocked,
     createdAt: address.createdAt,
     updatedAt: address.updatedAt,
   };

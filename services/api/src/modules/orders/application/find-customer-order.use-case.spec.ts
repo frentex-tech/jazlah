@@ -36,6 +36,7 @@ const REQUEST: NewOrder = {
   fulfilment: 'pickup',
   fulfilmentDate: '2026-11-28',
   window: null,
+  savedAddressId: null,
   address: null,
   pickupPoint: {
     name: { ar: 'م', en: 'S' },

@@ -172,7 +172,7 @@ export class OrderResponseDto {
     nullable: true,
     example: null,
     description:
-      'Why it was cancelled (a rejected cash-on-delivery order gets the admin’s note); null otherwise.',
+      'Why it was cancelled; for a rejected COD order this is the vendor’s or admin’s required transition note. Null otherwise.',
   })
   cancelReason!: string | null;
 
@@ -181,7 +181,7 @@ export class OrderResponseDto {
     nullable: true,
     example: '2026-11-22T10:15:00.000Z',
     description:
-      'While `pending_payment`: when it is cancelled if still unpaid (15 minutes after placing); null otherwise.',
+      'Reserved for the payment-expiry task; null in the COD-only API while that task is deferred.',
   })
   expiresAt!: Date | null;
 
@@ -207,9 +207,9 @@ export class OrderResponseDto {
     enum: ORDER_STATUSES,
     enumName: 'OrderStatus',
     isArray: true,
-    example: ['preparing', 'cancelled'],
+    example: ['confirmed', 'cancelled'],
     description:
-      'The statuses the caller may move it to now with POST …/orders/{id}/transition; empty for none (always empty in the customer app until cancellation, Sprint 4).',
+      'The statuses this caller may move it to now with POST …/orders/{id}/transition, from the order state machine; empty for none. Customers cannot move order statuses in Sprint 3.',
   })
   allowedTransitions!: (typeof ORDER_STATUSES)[number][];
 }

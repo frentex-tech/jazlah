@@ -22,6 +22,7 @@ prisma/
   models/users.prisma         User -> users (a deleted account is a tombstone: no phone), UserAccess -> user_access
                               (enum audience; organisation -> vendors)
   models/customers.prisma     CustomerProfile -> customer_profiles, CustomerAddress -> customer_addresses,
+                               Order.savedAddress relation (nullable, SetNull),
                               ConsentRecord -> consent_records (enums preferred_language, consent_kind,
                               consent_source)
   models/vendors.prisma       Vendor -> vendors, VendorApplication -> vendor_applications,
@@ -47,7 +48,15 @@ prisma/
                               20261116160000_catalog_change_request_superseded (superseded status; review check
                               rewritten by hand); 20261117120000_customers (profiles, addresses, consent records;
                               users' tombstone; checks and the default address index by hand);
-                              20261118120000_coverage_zones (the ST_IsValid check by hand)
+                               20261118120000_coverage_zones (the ST_IsValid check by hand);
+                               20261121182718_catalog_size_availability;
+                               20261122090000_vendors_unique_commercial_registration;
+                               20261122150000_catalog_search_store_names;
+                               20261126100000_operations_settings; 20261126110000_carts;
+                               20261126120000_day_capacities_and_cart_fulfilment;
+                               20261126194426_orders; 20261127003832_order_list_keyset_indexes;
+                               20261128120000_remove_redundant_orders_user_created_at_index;
+                               20261128140000_order_state_machine (saved address reference, cancel reason)
   seed/                       pnpm db:seed (and `prisma db seed`): development data for the frontends, idempotent,
                               refuses production. seed.ts (entry), seed.module.ts, one step per file (seed-vendors.ts,
                               seed-products.ts…), placeholder PNG and PDF encoders, data/ (*.constants.ts data sets,
@@ -180,12 +189,14 @@ src/
                               public browsing. api/ (vendor, admin, public controllers), application/,
                               domain/ (Product rules, ProductStatusMachine, ports, fakes), infrastructure/
                               (Prisma repositories, MediaService and VendorDirectory adapters)
-    settings/ scheduling/ cart/ coupons/   CRUD-shaped; wallet/ payments/ orders/ checkout/ four layers
-                              (api/ only so far). The Sprint 3 contract (2026-11-23): controllers and DTOs whose
-                              routes answer NOT_IMPLEMENTED (common/errors/not-implemented.ts) until each task
-                              (SCH-API-1/2, CRT-API-1/3, WAL-API-1, PAY-API-1, ORD-API-1/2/3) lands; a task adds
-                              the layers it needs. Payment enums in payments/domain, order enums in orders/domain;
-                              checkout holds the routes that join cart, orders, payments and wallet
+  settings/ scheduling/ cart/ coupons/   CRUD-shaped; wallet/ payments/ checkout/ four-layer contract
+                               modules; orders/ four layers with creation, reads and its state machine live.
+                               The Sprint 3 contract (2026-11-23): routes answer NOT_IMPLEMENTED
+                               (common/errors/not-implemented.ts) until each task lands. Orders exports its
+                               state-transition use case and address/activity ports. Payment expiry,
+                               webhook/late capture, and realtime subscribers remain deferred. Payment enums
+                               live in payments/domain, order enums in orders/domain; checkout holds routes
+                               that join cart, orders, payments and wallet.
 test/
   *.e2e-spec.ts               health, errors, request-id, database, queue, event-bus, api-docs, http-security,
                               rate-limit, startup, logging, redis-logging, shutdown, media (fake storage),

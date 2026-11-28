@@ -27,6 +27,8 @@ export type NewOrder = Readonly<{
   fulfilmentDate: string;
   /** The delivery window; null for pickup. */
   window: TimeWindow | null;
+  /** The saved delivery address id; null for pickup. */
+  savedAddressId: string | null;
   address: OrderAddressSnapshot | null;
   pickupPoint: OrderPickupSnapshot | null;
   deliveryFee: Money;

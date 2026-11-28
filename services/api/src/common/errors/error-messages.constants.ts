@@ -144,9 +144,17 @@ export const ERROR_MESSAGES: Readonly<Record<ErrorCode, LocalizedText>> = {
     ar: 'وصلت للحد الأعلى من العناوين، احذف عنوان عشان تضيف جديد',
     en: 'You have reached the maximum number of addresses. Delete one to add another.',
   },
+  [ErrorCode.ADDRESS_IN_USE]: {
+    ar: 'العنوان مرتبط بطلب مفتوح، تقدر تعدّله أو تحذفه بعد ما ينتهي الطلب',
+    en: 'This address is used by an active order. You can change or delete it after the order is finished.',
+  },
   [ErrorCode.ACCOUNT_HAS_STAFF_ACCESS]: {
     ar: 'حسابك عنده صلاحية تاجر أو مطبخ أو إدارة، تواصل معنا نشيلها قبل حذف الحساب',
     en: 'Your account has vendor, kitchen or admin access. Contact us to remove it before deleting your account.',
+  },
+  [ErrorCode.ACCOUNT_HAS_ACTIVE_ORDERS]: {
+    ar: 'عندك طلب مفتوح، انتظر لين ينتهي قبل حذف الحساب',
+    en: 'You have an active order. Wait until it is finished before deleting your account.',
   },
   [ErrorCode.RECENT_SIGN_IN_REQUIRED]: {
     ar: 'عشان نحمي حسابك، سجّل دخولك مرة ثانية وبعدها احذف الحساب',

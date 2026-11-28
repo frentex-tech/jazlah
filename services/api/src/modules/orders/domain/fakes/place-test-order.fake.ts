@@ -59,6 +59,7 @@ export function placeTestOrder(
     fulfilment: 'pickup',
     fulfilmentDate: options.fulfilmentDate ?? '2026-11-28',
     window: null,
+    savedAddressId: null,
     address: null,
     pickupPoint: {
       name: { ar: 'م', en: 'S' },

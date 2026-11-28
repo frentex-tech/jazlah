@@ -166,6 +166,22 @@ describe('DeleteCustomerAccountUseCase', () => {
     expect(kit.erasures.rows).toEqual([]);
   });
 
+  it('refuses an account with an active order and changes nothing', async () => {
+    const kit = buildAuthUseCases();
+    const principal = await signIn(kit);
+    kit.activeOrders.userIds.add(principal.userId);
+
+    expect(
+      await codeOf(
+        kit.deleteCustomerAccount.execute({ principal, reason: null }),
+      ),
+    ).toBe(ErrorCode.ACCOUNT_HAS_ACTIVE_ORDERS);
+    expect(kit.users.users).toHaveLength(1);
+    expect(kit.sessions.rows).toHaveLength(1);
+    expect(kit.erasures.rows).toEqual([]);
+    expect(kit.audit.rows).toEqual([]);
+  });
+
   it('deletes once the staff access is removed', async () => {
     const kit = buildAuthUseCases();
     const principal = await signIn(kit);

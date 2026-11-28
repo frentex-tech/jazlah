@@ -1,15 +1,23 @@
 import type { Page } from '@common/pagination/page.type';
 import type { PageRequest } from '@common/pagination/page-request.type';
+import { AppError } from '@common/errors/app-error';
+import { ErrorCode } from '@common/errors/error-code.enum';
 import { keysetPage } from '@common/pagination/keyset-page.fake';
 import { PAST_ORDER_STATUSES } from '../past-order-statuses.constants';
+import { FINAL_ORDER_STATUSES } from '../final-order-statuses.constants';
 import type { Order } from '../order.type';
 import type { OrderDraft } from '../order-draft.type';
 import type { OrderListFilter } from '../order-list-filter.type';
 import type { OrderSummary } from '../order-summary.type';
+import type { OrderStatusChange } from '../order-status-change.type';
+import type { ActiveOrderLookup } from '../ports/active-order-lookup.port';
+import type { OrderAddressUsage } from '../ports/order-address-usage.port';
 import type { OrderRepository } from '../ports/order.repository.port';
 
 /** `OrderRepository` in memory, for unit tests: sequences per day, orders by id. */
-export class InMemoryOrderRepository implements OrderRepository {
+export class InMemoryOrderRepository
+  implements OrderRepository, OrderAddressUsage, ActiveOrderLookup
+{
   readonly saved: Order[] = [];
   private readonly counters = new Map<string, number>();
 
@@ -30,6 +38,8 @@ export class InMemoryOrderRepository implements OrderRepository {
       vendor: request.vendor,
       commissionBasisPoints: request.commissionBasisPoints,
       status: draft.status,
+      savedAddressId: request.savedAddressId,
+      cancelReason: null,
       orderType: request.orderType,
       fulfilment: request.fulfilment,
       fulfilmentDate: request.fulfilmentDate,
@@ -80,6 +90,64 @@ export class InMemoryOrderRepository implements OrderRepository {
 
   findById(id: string): Promise<Order | null> {
     return Promise.resolve(this.saved.find((order) => order.id === id) ?? null);
+  }
+
+  lockForWrite(id: string, vendorId?: string): Promise<Order | null> {
+    return Promise.resolve(
+      this.saved.find(
+        (order) =>
+          order.id === id &&
+          (vendorId === undefined || order.vendorId === vendorId),
+      ) ?? null,
+    );
+  }
+
+  transition(change: OrderStatusChange): Promise<Order> {
+    const index = this.saved.findIndex((order) => order.id === change.orderId);
+    const order = this.saved[index];
+    if (order === undefined) {
+      return Promise.reject(new AppError(ErrorCode.NOT_FOUND));
+    }
+    const updated: Order = {
+      ...order,
+      status: change.to,
+      cancelReason:
+        change.to === 'cancelled' ? change.note : order.cancelReason,
+      history: [
+        ...order.history,
+        {
+          from: change.from,
+          to: change.to,
+          actorType: change.actorType,
+          actorId: change.actorId,
+          note: change.note,
+          at: change.at,
+        },
+      ],
+    };
+    this.saved[index] = updated;
+    return Promise.resolve(updated);
+  }
+
+  isLocked(userId: string, addressId: string): Promise<boolean> {
+    return Promise.resolve(
+      this.saved.some(
+        (order) =>
+          order.userId === userId &&
+          order.savedAddressId === addressId &&
+          !FINAL_ORDER_STATUSES.includes(order.status),
+      ),
+    );
+  }
+
+  hasActiveOrders(userId: string): Promise<boolean> {
+    return Promise.resolve(
+      this.saved.some(
+        (order) =>
+          order.userId === userId &&
+          !FINAL_ORDER_STATUSES.includes(order.status),
+      ),
+    );
   }
 
   list(

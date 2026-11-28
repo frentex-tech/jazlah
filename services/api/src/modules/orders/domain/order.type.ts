@@ -20,6 +20,10 @@ export type Order = Readonly<{
   vendor: OrderVendorSnapshot;
   commissionBasisPoints: number;
   status: OrderStatus;
+  /** The saved address used at checkout; null for pickup or after its deletion. */
+  savedAddressId: string | null;
+  /** Null unless the order was rejected. */
+  cancelReason: string | null;
   orderType: OrderType;
   fulfilment: FulfilmentMethod;
   fulfilmentDate: string;

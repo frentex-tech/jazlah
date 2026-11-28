@@ -82,6 +82,7 @@ model CustomerAddress {
   updatedAt            DateTime @updatedAt @map("updated_at") @db.Timestamptz(3)
 
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  orders Order[] @relation("OrderSavedAddress")
 
   // Also the index of the foreign key (user_id is its first column).
   @@index([userId, createdAt, id])

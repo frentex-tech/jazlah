@@ -1,6 +1,7 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import { Transform } from 'class-transformer';
-import { IsIn, IsOptional, IsString, Length } from 'class-validator';
+import { IsDefined, IsIn, IsString, ValidateIf } from 'class-validator';
+import { CharLength } from '@common/decorators/char-length.decorator';
 import { trimText } from '@common/dto/trim-text';
 import { ORDER_STATUSES } from '../../domain/order-statuses.constants';
 
@@ -21,9 +22,14 @@ export class TransitionOrderDto {
     description:
       'A note kept in the history, up to 500 characters; required when moving to `cancelled` (VALIDATION_FAILED on `note` without it): for a rejected cash-on-delivery order, the reason the customer sees.',
   })
-  @IsOptional()
+  @ValidateIf(
+    (body: TransitionOrderDto) =>
+      body.to === 'cancelled' ||
+      (body.note !== undefined && body.note !== null),
+  )
+  @IsDefined()
   @Transform(trimText)
   @IsString()
-  @Length(1, 500)
+  @CharLength(1, 500)
   note?: string;
 }

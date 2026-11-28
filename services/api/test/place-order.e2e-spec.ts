@@ -11,7 +11,10 @@ import { FakeStorageProvider } from '@integrations/storage/testing';
 import { CatalogJourney, type CatalogOptions } from './support/catalog-journey';
 import { CheckoutSteps, type PlacedOrderBody } from './support/checkout-steps';
 import { createHttpApp } from './support/create-http-app';
-import { FindCustomerOrderUseCase } from '@modules/orders';
+import {
+  FindCustomerOrderUseCase,
+  TransitionOrderUseCase,
+} from '@modules/orders';
 import { holdRowLock } from './support/row-lock';
 import { VendorJourney, type TestUser } from './support/vendor-journey';
 
@@ -223,11 +226,15 @@ describe('Place order (e2e)', () => {
         where: { id: order.id },
         include: { items: true, history: true },
       });
+      const savedAddress = await prisma.customerAddress.findFirstOrThrow({
+        where: { userId: user.userId },
+      });
       const vendor = await prisma.vendor.findUniqueOrThrow({
         where: { id: vendorId },
       });
       expect(saved.commissionBasisPoints).toBe(vendor.commissionBasisPoints);
       expect(saved.customerPhone).toBe(user.phone);
+      expect(saved.savedAddressId).toBe(savedAddress.id);
       expect(saved.items).toHaveLength(1);
       expect(saved.history).toHaveLength(1);
       expect(await bookedOn(date)).toBe(bookedBefore + 1);
@@ -251,6 +258,116 @@ describe('Place order (e2e)', () => {
       });
       expect(order.pickupPoint?.name.en).toEqual(expect.any(String));
       expect(order.totalHalalas).toBe(order.subtotalHalalas);
+    });
+
+    it('leaves COD as new in review mode and auto-confirms it through the state machine in auto mode', async () => {
+      const saved = await prisma.operationsSettings.findUniqueOrThrow({
+        where: { singleton: true },
+      });
+      const emitter = app.get(EventEmitter2);
+      const statusEvents: unknown[] = [];
+      const listener = (event: unknown) => statusEvents.push(event);
+      emitter.on('order.status.changed', listener);
+
+      try {
+        await prisma.operationsSettings.update({
+          where: { singleton: true },
+          data: { codConfirmation: 'review' },
+        });
+        const review = await ready('po-cod-review', 'pickup');
+        const reviewResult = await place(review.user).expect(201);
+        const reviewOrder = (reviewResult.body as PlacedOrderBody).order;
+        expect(reviewOrder.status).toBe('new');
+        expect(reviewOrder.history).toHaveLength(1);
+        expect(statusEvents).toEqual([]);
+
+        await prisma.operationsSettings.update({
+          where: { singleton: true },
+          data: { codConfirmation: 'auto' },
+        });
+        const automatic = await ready('po-cod-auto', 'pickup');
+        const autoResult = await place(automatic.user).expect(201);
+        const autoOrder = (autoResult.body as PlacedOrderBody).order;
+        expect(autoOrder).toMatchObject({
+          status: 'confirmed',
+          history: [
+            { from: null, to: 'new', actorType: 'customer' },
+            { from: 'new', to: 'confirmed', actorType: 'system' },
+          ],
+        });
+        expect(statusEvents).toMatchObject([
+          {
+            orderId: autoOrder.id,
+            from: 'new',
+            to: 'confirmed',
+            actorType: 'system',
+          },
+        ]);
+        const savedAuto = await prisma.order.findUniqueOrThrow({
+          where: { id: autoOrder.id },
+          include: {
+            history: { orderBy: [{ createdAt: 'asc' }, { id: 'asc' }] },
+          },
+        });
+        expect(savedAuto.history).toHaveLength(2);
+        expect(savedAuto.history[1]?.createdAt.getTime()).toBeGreaterThan(
+          savedAuto.history[0]?.createdAt.getTime() ?? 0,
+        );
+        expect(savedAuto.updatedAt).toEqual(savedAuto.history[1]?.createdAt);
+      } finally {
+        emitter.off('order.status.changed', listener);
+        await prisma.operationsSettings.update({
+          where: { singleton: true },
+          data: { codConfirmation: saved.codConfirmation },
+        });
+      }
+    });
+
+    it('rolls back placement, capacity, history, idempotency and both events if auto-confirmation fails', async () => {
+      const { user, date } = await ready('po-auto-rollback', 'pickup');
+      const saved = await prisma.operationsSettings.findUniqueOrThrow({
+        where: { singleton: true },
+      });
+      const booked = await bookedOn(date);
+      const key = newKey();
+      const emitter = app.get(EventEmitter2);
+      const events: unknown[] = [];
+      const listener = (event: unknown) => events.push(event);
+      emitter.on('orders.order.placed', listener);
+      emitter.on('order.status.changed', listener);
+      const transitions = app.get(TransitionOrderUseCase);
+      const execute = transitions.execute.bind(transitions);
+      const spy = jest
+        .spyOn(transitions, 'execute')
+        .mockImplementation(async (orderId, to, actor, note) => {
+          await execute(orderId, to, actor, note);
+          throw new Error('force rollback after auto-confirmation');
+        });
+
+      try {
+        await prisma.operationsSettings.update({
+          where: { singleton: true },
+          data: { codConfirmation: 'auto' },
+        });
+        await place(user, key).expect(500);
+      } finally {
+        spy.mockRestore();
+        emitter.off('orders.order.placed', listener);
+        emitter.off('order.status.changed', listener);
+        await prisma.operationsSettings.update({
+          where: { singleton: true },
+          data: { codConfirmation: saved.codConfirmation },
+        });
+      }
+
+      expect(await ordersOf(user)).toEqual([]);
+      expect((await cartOf(user)).lines).toHaveLength(1);
+      expect(await bookedOn(date)).toBe(booked);
+      expect(events).toEqual([]);
+
+      // The same idempotency key remains available after the rolled-back transaction.
+      await place(user, key).expect(201);
+      expect(await ordersOf(user)).toHaveLength(1);
     });
 
     it('keeps the order as placed when the saved address changes afterwards', async () => {

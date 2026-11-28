@@ -32,6 +32,11 @@ export function buildCustomersKit(
     isCovered: (point: GeoPoint): Promise<boolean> =>
       Promise.resolve(point.latitude > 24),
   };
+  const lockedAddressIds = new Set<string>();
+  const orderAddressUsage = {
+    isLocked: (userId: string, addressId: string): Promise<boolean> =>
+      Promise.resolve(userId.length > 0 && lockedAddressIds.has(addressId)),
+  };
   return {
     client,
     accounts,
@@ -42,6 +47,9 @@ export function buildCustomersKit(
       accounts,
       transactions,
       coverage,
+      orderAddressUsage,
     ),
+    lockedAddressIds,
+    orderAddressUsage,
   };
 }

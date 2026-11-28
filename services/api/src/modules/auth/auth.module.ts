@@ -10,6 +10,7 @@ import { AuditModule } from '@infra/audit/audit.module';
 import { RateLimitModule } from '@infra/rate-limit/rate-limit.module';
 import { SmsModule } from '@integrations/sms';
 import { CustomersModule } from '@modules/customers';
+import { OrdersModule } from '@modules/orders';
 import { UsersModule } from '@modules/users';
 import { VendorsModule } from '@modules/vendors';
 import { AdminAuthController } from './api/controllers/admin.controller';
@@ -87,6 +88,7 @@ import { VendorsApplicantData } from './infrastructure/vendors-applicant-data';
     UsersModule,
     VendorsModule,
     CustomersModule,
+    OrdersModule,
   ],
   controllers: [
     PublicAuthController,

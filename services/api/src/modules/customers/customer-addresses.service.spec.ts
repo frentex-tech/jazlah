@@ -92,6 +92,38 @@ describe('CustomerAddressesService', () => {
     expect(await listed(kit)).toEqual(['Work*', 'Home']);
   });
 
+  it('locks an address with an active order but still allows making it the default', async () => {
+    const kit = kitWithFakes();
+    const home = await kit.addresses.create(CUSTOMER, address('Home'));
+    await kit.addresses.create(
+      CUSTOMER,
+      address('Work', { makeDefault: true }),
+    );
+    kit.lockedAddressIds.add(home.id);
+
+    expect(
+      (await kit.addresses.list(CUSTOMER)).map((each) => [
+        each.label,
+        each.isLocked,
+      ]),
+    ).toEqual([
+      ['Work', false],
+      ['Home', true],
+    ]);
+    expect(
+      await codeOf(kit.addresses.update(CUSTOMER, home.id, { label: 'New' })),
+    ).toBe(ErrorCode.ADDRESS_IN_USE);
+    expect(await codeOf(kit.addresses.remove(CUSTOMER, home.id))).toBe(
+      ErrorCode.ADDRESS_IN_USE,
+    );
+
+    const madeDefault = await kit.addresses.makeDefault(CUSTOMER, home.id);
+
+    expect(madeDefault).toMatchObject({ isDefault: true, isLocked: true });
+    expect(await listed(kit)).toEqual(['Home*', 'Work']);
+    expect(kit.client.addresses).toHaveLength(2);
+  });
+
   it(`refuses address ${CUSTOMER_LIMITS.addresses + 1} with ADDRESS_LIMIT_REACHED, adding nothing`, async () => {
     const kit = kitWithFakes();
     for (let n = 1; n <= CUSTOMER_LIMITS.addresses; n += 1) {
