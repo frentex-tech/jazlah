@@ -332,9 +332,13 @@ describe('Order transitions (e2e)', () => {
       .set(...bearer(user))
       .expect(200);
     expect((lockedDefault.body as { isDefault: boolean }).isDefault).toBe(true);
-    expect((secondAddress.body as { isDefault: boolean }).isDefault).toBe(
-      false,
-    );
+    // The second address was the default until this switch: re-read it, its creation
+    // response still says isDefault true.
+    const secondAfter = await vendors.http
+      .get(`${addressesPath}/${(secondAddress.body as { id: string }).id}`)
+      .set(...bearer(user))
+      .expect(200);
+    expect((secondAfter.body as { isDefault: boolean }).isDefault).toBe(false);
     const updateBlocked = await vendors.http
       .patch(addressPath)
       .set(...bearer(user))
