@@ -104,7 +104,6 @@ model Order {
   history               OrderStatusHistory[]
 
   @@unique([number], map: "orders_number_key")
-  @@index([userId, createdAt])
   @@index([vendorId, status])
   /// The keyset order of the order lists (newest first, then id): the customer's, the vendor's and the admin's.
   @@index([userId, createdAt(sort: Desc), id(sort: Desc)], map: "orders_user_id_created_at_id_idx")

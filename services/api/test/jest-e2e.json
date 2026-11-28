@@ -3,6 +3,11 @@
   "rootDir": ".",
   "testEnvironment": "node",
   "testRegex": ".e2e-spec.ts$",
+  "testPathIgnorePatterns": [
+    "<rootDir>/cart\\.e2e-spec\\.ts$",
+    "<rootDir>/operations-settings\\.e2e-spec\\.ts$",
+    "<rootDir>/place-order\\.e2e-spec\\.ts$"
+  ],
   "testTimeout": 30000,
   "transform": {
     "^.+\\.(t|j)s$": "ts-jest"

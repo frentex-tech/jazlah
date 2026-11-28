@@ -10,11 +10,19 @@ export type PlacedOrderBody = {
     id: string;
     number: string;
     status: string;
+    fulfilment: string;
+    fulfilmentDate: string;
+    paymentMethod: string;
     totalHalalas: number;
     subtotalHalalas: number;
     deliveryFeeHalalas: number;
     vatHalalas: number;
-    vendor: { id: string };
+    notes: string | null;
+    window: { start: string; end: string } | null;
+    address: { label: string; city: string | null } | null;
+    pickupPoint: { name: { en: string }; phone: string | null } | null;
+    vendor: { id: string; name: { en: string } };
+    customer: { id: string; name: string | null; phone: string };
     items: {
       productId: string;
       quantity: number;
@@ -27,13 +35,13 @@ export type PlacedOrderBody = {
     }[];
     history: { from: string | null; to: string; actorType: string }[];
   };
+  payment: unknown;
 };
 
 /**
- * The steps that lead to a placed cash-on-delivery pickup order, through the real
- * endpoints: a named customer, a cart line, the first available day, `POST
- * /v1/customer/orders`. The same steps as place-order.e2e-spec.ts takes, for the suites
- * that need an order made by the API rather than saved into the tables.
+ * The steps that lead to a placed order through the real endpoints: a named customer, a
+ * cart line, an available pickup or delivery day, and `POST /v1/customer/orders`. Used
+ * by suites that need an order made by the API rather than saved into the tables.
  */
 export class CheckoutSteps {
   private keys = 0;
@@ -85,34 +93,79 @@ export class CheckoutSteps {
     return sizeId ?? '';
   }
 
-  /** Chooses pickup on the first day the days route says is available. */
-  async choosePickupDay(user: TestUser): Promise<string> {
+  /** Chooses the first or last available day for pickup or delivery. */
+  async chooseFulfilment(
+    user: TestUser,
+    method: 'delivery' | 'pickup',
+    which: 'first' | 'last' = 'first',
+    addressId?: string,
+    deliveryLocation?: { latitude: number; longitude: number },
+  ): Promise<string> {
     const res = await this.catalog.http
-      .get('/v1/customer/checkout/days?method=pickup')
+      .get(`/v1/customer/checkout/days?method=${method}`)
       .set(...this.bearer(user))
       .expect(200);
-    const day = (res.body as { items: Day[] }).items.find(
+    const available = (res.body as { items: Day[] }).items.filter(
       (item) => item.isAvailable,
     );
+    const day = which === 'first' ? available[0] : available.at(-1);
     expect(day).toBeDefined();
+
+    const fulfilment =
+      method === 'delivery'
+        ? {
+            method,
+            addressId:
+              addressId ?? (await this.addressOf(user, deliveryLocation)),
+            date: day?.date,
+          }
+        : { method, date: day?.date };
     await this.catalog.http
       .patch('/v1/customer/cart/fulfilment')
       .set(...this.bearer(user))
-      .send({ method: 'pickup', date: day?.date })
+      .send(fulfilment)
       .expect(200);
     return day?.date ?? '';
   }
 
-  /** Places the cart as a cash-on-delivery order under a fresh idempotency key. */
-  place(user: TestUser): request.Test {
+  /** Chooses pickup on the first day the days route says is available. */
+  choosePickupDay(user: TestUser): Promise<string> {
+    return this.chooseFulfilment(user, 'pickup');
+  }
+
+  /** Places an order; by default, cash on delivery under a fresh idempotency key. */
+  place(
+    user: TestUser,
+    key?: string | null,
+    body: object = { paymentMethod: 'cod' },
+  ): request.Test {
     this.keys += 1;
-    return this.catalog.http
+    const idempotencyKey =
+      key === undefined
+        ? `00000000-0000-4000-8000-${String(Date.now() % 1e6).padStart(6, '0')}${String(this.keys).padStart(6, '0')}`
+        : key;
+    const call = this.catalog.http
       .post('/v1/customer/orders')
+      .set(...this.bearer(user));
+    return (
+      idempotencyKey === null
+        ? call
+        : call.set('Idempotency-Key', idempotencyKey)
+    ).send(body);
+  }
+
+  private async addressOf(
+    user: TestUser,
+    location: { latitude: number; longitude: number } | undefined,
+  ): Promise<string> {
+    if (location === undefined) {
+      throw new Error('A delivery location is required to create an address.');
+    }
+    const res = await this.catalog.http
+      .post('/v1/customer/addresses')
       .set(...this.bearer(user))
-      .set(
-        'Idempotency-Key',
-        `00000000-0000-4000-8000-${String(Date.now() % 1e6).padStart(6, '0')}${String(this.keys).padStart(6, '0')}`,
-      )
-      .send({ paymentMethod: 'cod' });
+      .send({ label: 'البيت', location, city: 'الرياض' })
+      .expect(201);
+    return (res.body as { id: string }).id;
   }
 }

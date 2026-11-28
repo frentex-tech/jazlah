@@ -9,44 +9,12 @@ import { FakeSmsProvider } from '@integrations/sms/testing';
 import { STORAGE_PORT } from '@integrations/storage';
 import { FakeStorageProvider } from '@integrations/storage/testing';
 import { CatalogJourney, type CatalogOptions } from './support/catalog-journey';
+import { CheckoutSteps, type PlacedOrderBody } from './support/checkout-steps';
 import { createHttpApp } from './support/create-http-app';
 import { FindCustomerOrderUseCase } from '@modules/orders';
 import { holdRowLock } from './support/row-lock';
 import { VendorJourney, type TestUser } from './support/vendor-journey';
 
-type Day = { date: string; isAvailable: boolean };
-type PlacedBody = {
-  order: {
-    id: string;
-    number: string;
-    status: string;
-    fulfilment: string;
-    fulfilmentDate: string;
-    paymentMethod: string;
-    totalHalalas: number;
-    subtotalHalalas: number;
-    deliveryFeeHalalas: number;
-    vatHalalas: number;
-    notes: string | null;
-    window: { start: string; end: string } | null;
-    address: { label: string; city: string | null } | null;
-    pickupPoint: { name: { en: string }; phone: string | null } | null;
-    vendor: { id: string; name: { en: string } };
-    customer: { id: string; name: string | null; phone: string };
-    items: {
-      productId: string;
-      quantity: number;
-      unitPriceHalalas: number;
-      totalHalalas: number;
-      name: { ar: string; en: string };
-      packaging: string | null;
-      cutting: { name: { en: string } } | null;
-      exclusions: { name: { en: string } }[];
-    }[];
-    history: { from: string | null; to: string; actorType: string }[];
-  };
-  payment: unknown;
-};
 type CartBody = {
   totalHalalas: number;
   lines: { id: string; unitPriceHalalas: number }[];
@@ -81,6 +49,7 @@ describe('Place order (e2e)', () => {
   let prisma: PrismaService;
   let vendors: VendorJourney;
   let catalog: CatalogJourney;
+  let checkout: CheckoutSteps;
   let admin: TestUser;
   let owner: TestUser;
   let vendorId: string;
@@ -102,6 +71,7 @@ describe('Place order (e2e)', () => {
     prisma = app.get(PrismaService);
     vendors = new VendorJourney(app, sms, storage);
     catalog = new CatalogJourney(app, vendors);
+    checkout = new CheckoutSteps(vendors, catalog);
     const vendor = await vendors.approvedVendor('place-order-vendor');
     admin = vendor.admin;
     owner = vendor.owner;
@@ -128,6 +98,9 @@ describe('Place order (e2e)', () => {
     // An order restricts the deletion of its customer and its vendor; its lines and
     // history go with it (cascade).
     await prisma.order.deleteMany({ where: { vendorId: { in: vendorIds } } });
+    await prisma.auditLog.deleteMany({
+      where: { actorId: admin.userId, action: 'settings.ordering.paused' },
+    });
     await prisma.auditLog.deleteMany({ where: { entityId: { in: zoneIds } } });
     await prisma.coverageZone.deleteMany({ where: { id: { in: zoneIds } } });
     await catalog.cleanUp();
@@ -143,89 +116,12 @@ describe('Place order (e2e)', () => {
     keyCounter += 1;
     return `00000000-0000-4000-8000-${String(keyCounter).padStart(12, '0')}`;
   };
-
-  async function sizeOf(product: string): Promise<string> {
-    const res = await catalog.http
-      .get(`/v1/public/products/${product}`)
-      .expect(200);
-    return (res.body as { sizes: { id: string }[] }).sizes[0]?.id ?? '';
-  }
-
-  /** A signed-in customer, with a full name unless `named` is false. */
-  async function customer(label: string, named = true): Promise<TestUser> {
-    const user = await vendors.customer(label);
-    if (named) {
-      await catalog.http
-        .patch('/v1/customer/profile')
-        .set(...bearer(user))
-        .send({ fullName: 'عبدالله الحربي' })
-        .expect(200);
-    }
-    return user;
-  }
-
-  async function addToCart(
+  // Keep this suite's deterministic keys; the HTTP step itself is shared.
+  const place = (
     user: TestUser,
-    product = productId,
-    productOptions = options,
-    quantity = 1,
-  ): Promise<void> {
-    await catalog.http
-      .post('/v1/customer/cart/items')
-      .set(...bearer(user))
-      .send({
-        productId: product,
-        sizeId: await sizeOf(product),
-        cuttingStyleId: productOptions.cuttingStyleId,
-        packaging: 'trays',
-        exclusionItemIds: [productOptions.exclusionItemId],
-        quantity,
-      })
-      .expect(200);
-  }
-
-  async function days(user: TestUser, method: string): Promise<Day[]> {
-    const res = await catalog.http
-      .get(`/v1/customer/checkout/days?method=${method}`)
-      .set(...bearer(user))
-      .expect(200);
-    return (res.body as { items: Day[] }).items;
-  }
-
-  async function addressOf(user: TestUser, location = INSIDE): Promise<string> {
-    const res = await catalog.http
-      .post('/v1/customer/addresses')
-      .set(...bearer(user))
-      .send({ label: 'البيت', location, city: 'الرياض' })
-      .expect(201);
-    return (res.body as { id: string }).id;
-  }
-
-  /** `which` day of the available ones: the first, or the last of the horizon. */
-  async function chooseFulfilment(
-    user: TestUser,
-    method: 'delivery' | 'pickup',
-    which: 'first' | 'last' = 'first',
-    addressId?: string,
-  ): Promise<string> {
-    const available = (await days(user, method)).filter((d) => d.isAvailable);
-    const day = which === 'first' ? available[0] : available.at(-1);
-    expect(day).toBeDefined();
-    await catalog.http
-      .patch('/v1/customer/cart/fulfilment')
-      .set(...bearer(user))
-      .send(
-        method === 'delivery'
-          ? {
-              method,
-              addressId: addressId ?? (await addressOf(user)),
-              date: day?.date,
-            }
-          : { method, date: day?.date },
-      )
-      .expect(200);
-    return day?.date ?? '';
-  }
+    key: string | null = newKey(),
+    body: object = { paymentMethod: 'cod' },
+  ): request.Test => checkout.place(user, key, body);
 
   /** A named customer whose cart has one line and a fulfilment chosen. */
   async function ready(
@@ -233,18 +129,16 @@ describe('Place order (e2e)', () => {
     method: 'delivery' | 'pickup' = 'delivery',
     which: 'first' | 'last' = 'first',
   ): Promise<{ user: TestUser; date: string }> {
-    const user = await customer(label);
-    await addToCart(user);
-    return { user, date: await chooseFulfilment(user, method, which) };
-  }
-
-  function place(
-    user: TestUser,
-    key: string | null = newKey(),
-    body: object = { paymentMethod: 'cod' },
-  ): request.Test {
-    const call = catalog.http.post('/v1/customer/orders').set(...bearer(user));
-    return (key === null ? call : call.set('Idempotency-Key', key)).send(body);
+    const user = await checkout.namedCustomer(label);
+    await checkout.addToCart(user, productId, options, 1);
+    const date = await checkout.chooseFulfilment(
+      user,
+      method,
+      which,
+      undefined,
+      method === 'delivery' ? INSIDE : undefined,
+    );
+    return { user, date };
   }
 
   const cartOf = async (user: TestUser): Promise<CartBody> =>
@@ -289,7 +183,7 @@ describe('Place order (e2e)', () => {
       }).expect(201);
       emitter.off('orders.order.placed', listener);
 
-      const { order, payment } = res.body as PlacedBody;
+      const { order, payment } = res.body as PlacedOrderBody;
       expect(payment).toBeNull();
       expect(order).toMatchObject({
         status: 'new',
@@ -347,7 +241,7 @@ describe('Place order (e2e)', () => {
 
       const res = await place(user).expect(201);
 
-      const { order } = res.body as PlacedBody;
+      const { order } = res.body as PlacedOrderBody;
       expect(order).toMatchObject({
         status: 'new',
         fulfilment: 'pickup',
@@ -362,7 +256,7 @@ describe('Place order (e2e)', () => {
     it('keeps the order as placed when the saved address changes afterwards', async () => {
       const { user } = await ready('po-snapshot');
       const res = await place(user).expect(201);
-      const { order } = res.body as PlacedBody;
+      const { order } = res.body as PlacedOrderBody;
       const [address] = await prisma.customerAddress.findMany({
         where: { userId: user.userId },
       });
@@ -380,9 +274,9 @@ describe('Place order (e2e)', () => {
 
     it('reads an order only for its own customer: the real lookup filters by user', async () => {
       const { user } = await ready('po-lookup', 'pickup');
-      const other = await customer('po-lookup-other');
+      const other = await checkout.namedCustomer('po-lookup-other');
       const res = await place(user).expect(201);
-      const orderId = (res.body as PlacedBody).order.id;
+      const orderId = (res.body as PlacedOrderBody).order.id;
       const lookup = app.get(FindCustomerOrderUseCase);
 
       const own = await lookup.execute(user.userId, orderId);
@@ -406,7 +300,7 @@ describe('Place order (e2e)', () => {
       );
 
       const numbers = responses.map(
-        (res) => (res.body as PlacedBody).order.number,
+        (res) => (res.body as PlacedOrderBody).order.number,
       );
       expect(new Set(numbers).size).toBe(numbers.length);
     });
@@ -435,7 +329,7 @@ describe('Place order (e2e)', () => {
     });
 
     it('refuses an empty cart: CART_EMPTY', async () => {
-      const user = await customer('po-empty');
+      const user = await checkout.namedCustomer('po-empty');
 
       const res = await place(user).expect(409);
 
@@ -443,10 +337,66 @@ describe('Place order (e2e)', () => {
       expect(await ordersOf(user)).toEqual([]);
     });
 
+    it('refuses a paused checkout: ORDERING_PAUSED', async () => {
+      const { user } = await ready('po-paused');
+      const saved = await prisma.operationsSettings.findUniqueOrThrow({
+        where: { singleton: true },
+      });
+
+      try {
+        await catalog.http
+          .put('/v1/admin/settings/operations/pause')
+          .set(...bearer(admin))
+          .send({
+            isPaused: true,
+            messageAr: 'الطلبات متوقفة مؤقتًا',
+            messageEn: 'Ordering is paused for now.',
+          })
+          .expect(200);
+        const refused = await place(user).expect(409);
+
+        expect(codeOf(refused.body)).toBe('ORDERING_PAUSED');
+        expect(await ordersOf(user)).toEqual([]);
+      } finally {
+        await prisma.operationsSettings.update({
+          where: { singleton: true },
+          data: {
+            isPaused: saved.isPaused,
+            pauseMessageAr: saved.pauseMessageAr,
+            pauseMessageEn: saved.pauseMessageEn,
+          },
+        });
+      }
+    });
+
+    it('refuses a total below the minimum: MIN_ORDER_NOT_MET', async () => {
+      const { user } = await ready('po-minimum', 'pickup');
+      const cart = await cartOf(user);
+      const saved = await prisma.operationsSettings.findUniqueOrThrow({
+        where: { singleton: true },
+      });
+
+      try {
+        await prisma.operationsSettings.update({
+          where: { singleton: true },
+          data: { minOrderHalalas: cart.totalHalalas + 1 },
+        });
+        const refused = await place(user).expect(409);
+
+        expect(codeOf(refused.body)).toBe('MIN_ORDER_NOT_MET');
+        await expectNothingPlaced(user);
+      } finally {
+        await prisma.operationsSettings.update({
+          where: { singleton: true },
+          data: { minOrderHalalas: saved.minOrderHalalas },
+        });
+      }
+    });
+
     it('refuses a customer without a full name: PROFILE_INCOMPLETE, and succeeds once named', async () => {
-      const user = await customer('po-unnamed', false);
-      await addToCart(user);
-      await chooseFulfilment(user, 'pickup');
+      const user = await vendors.customer('po-unnamed');
+      await checkout.addToCart(user, productId, options, 1);
+      await checkout.chooseFulfilment(user, 'pickup');
 
       const refused = await place(user).expect(409);
 
@@ -477,8 +427,8 @@ describe('Place order (e2e)', () => {
     );
 
     it('refuses a cart whose fulfilment was never chosen: FULFILMENT_REQUIRED', async () => {
-      const user = await customer('po-no-fulfilment');
-      await addToCart(user);
+      const user = await checkout.namedCustomer('po-no-fulfilment');
+      await checkout.addToCart(user, productId, options, 1);
 
       const res = await place(user).expect(409);
 
@@ -488,9 +438,9 @@ describe('Place order (e2e)', () => {
 
     it('refuses a product switched off, naming the line: ITEM_UNAVAILABLE', async () => {
       const product = await catalog.published(owner, admin, options);
-      const user = await customer('po-off');
-      await addToCart(user, product);
-      await chooseFulfilment(user, 'pickup');
+      const user = await checkout.namedCustomer('po-off');
+      await checkout.addToCart(user, product, options, 1);
+      await checkout.chooseFulfilment(user, 'pickup');
       const [line] = (await cartOf(user)).lines;
       await prisma.product.update({
         where: { id: product },
@@ -508,9 +458,9 @@ describe('Place order (e2e)', () => {
 
     it('refuses a product that is no longer published: ITEM_UNAVAILABLE', async () => {
       const product = await catalog.published(owner, admin, options);
-      const user = await customer('po-unpublished');
-      await addToCart(user, product);
-      await chooseFulfilment(user, 'pickup');
+      const user = await checkout.namedCustomer('po-unpublished');
+      await checkout.addToCart(user, product, options, 1);
+      await checkout.chooseFulfilment(user, 'pickup');
       await prisma.product.update({
         where: { id: product },
         data: { status: 'draft' },
@@ -531,9 +481,9 @@ describe('Place order (e2e)', () => {
         other.admin,
         otherOptions,
       );
-      const user = await customer('po-suspended');
-      await addToCart(user, product, otherOptions);
-      await chooseFulfilment(user, 'pickup');
+      const user = await checkout.namedCustomer('po-suspended');
+      await checkout.addToCart(user, product, otherOptions, 1);
+      await checkout.chooseFulfilment(user, 'pickup');
       await prisma.vendor.update({
         where: { id: other.vendorId },
         data: {
@@ -550,9 +500,9 @@ describe('Place order (e2e)', () => {
     });
 
     it('refuses a cutting style and packaging an admin rule now forbids: ITEM_UNAVAILABLE', async () => {
-      const user = await customer('po-incompatible');
-      await addToCart(user);
-      await chooseFulfilment(user, 'pickup');
+      const user = await checkout.namedCustomer('po-incompatible');
+      await checkout.addToCart(user, productId, options, 1);
+      await checkout.chooseFulfilment(user, 'pickup');
       const rule = await prisma.cuttingPackagingIncompatibility.create({
         data: { cuttingStyleId: options.cuttingStyleId, packaging: 'trays' },
       });
@@ -570,9 +520,15 @@ describe('Place order (e2e)', () => {
 
     it('refuses a product that stopped allowing the method: FULFILMENT_NOT_SUPPORTED', async () => {
       const product = await catalog.published(owner, admin, options);
-      const user = await customer('po-method');
-      await addToCart(user, product);
-      await chooseFulfilment(user, 'delivery');
+      const user = await checkout.namedCustomer('po-method');
+      await checkout.addToCart(user, product, options, 1);
+      await checkout.chooseFulfilment(
+        user,
+        'delivery',
+        'first',
+        undefined,
+        INSIDE,
+      );
       await prisma.product.update({
         where: { id: product },
         data: { fulfilment: 'pickup' },
@@ -693,9 +649,9 @@ describe('Place order (e2e)', () => {
   describe('prices come from the server', () => {
     it('refuses a price that moved after the line was added, then orders at the new server price once accepted', async () => {
       const product = await catalog.published(owner, admin, options);
-      const user = await customer('po-price');
-      await addToCart(user, product, options, 2);
-      await chooseFulfilment(user, 'pickup');
+      const user = await checkout.namedCustomer('po-price');
+      await checkout.addToCart(user, product, options, 2);
+      await checkout.chooseFulfilment(user, 'pickup');
       const [before] = (await cartOf(user)).lines;
       const oldPrice = before?.unitPriceHalalas ?? 0;
       const size = await prisma.productSize.findFirstOrThrow({
@@ -729,7 +685,7 @@ describe('Place order (e2e)', () => {
 
       const res = await place(user).expect(201);
 
-      const { order } = res.body as PlacedBody;
+      const { order } = res.body as PlacedOrderBody;
       expect(order.items[0]?.unitPriceHalalas).toBe(oldPrice + 5_000);
       expect(order.items[0]?.totalHalalas).toBe((oldPrice + 5_000) * 2);
       expect(order.totalHalalas).toBe(accepted.totalHalalas);
@@ -745,11 +701,11 @@ describe('Place order (e2e)', () => {
       const first = await place(user, key).expect(201);
       const again = await place(user, key).expect(201);
 
-      expect((again.body as PlacedBody).order.id).toBe(
-        (first.body as PlacedBody).order.id,
+      expect((again.body as PlacedOrderBody).order.id).toBe(
+        (first.body as PlacedOrderBody).order.id,
       );
-      expect((again.body as PlacedBody).order.number).toBe(
-        (first.body as PlacedBody).order.number,
+      expect((again.body as PlacedOrderBody).order.number).toBe(
+        (first.body as PlacedOrderBody).order.number,
       );
       expect(await ordersOf(user)).toHaveLength(1);
       expect(await bookedOn(date)).toBe(booked + 1);
@@ -768,7 +724,7 @@ describe('Place order (e2e)', () => {
       expect(codeOf(reused.body)).toBe('IDEMPOTENCY_KEY_REUSED');
       const orders = await ordersOf(user);
       expect(orders.map((order) => order.id)).toEqual([
-        (first.body as PlacedBody).order.id,
+        (first.body as PlacedOrderBody).order.id,
       ]);
     });
 
@@ -790,20 +746,20 @@ describe('Place order (e2e)', () => {
       const [a, b] = await Promise.all([place(user, key), place(user, key)]);
 
       expect([a.status, b.status]).toEqual([201, 201]);
-      expect((a.body as PlacedBody).order.id).toBe(
-        (b.body as PlacedBody).order.id,
+      expect((a.body as PlacedOrderBody).order.id).toBe(
+        (b.body as PlacedOrderBody).order.id,
       );
       expect(await ordersOf(user)).toHaveLength(1);
       expect(await bookedOn(date)).toBe(booked + 1);
     });
 
     it('keeps no key for a refusal: the same key works once the cart is fixed', async () => {
-      const user = await customer('po-refusal-key');
-      await addToCart(user);
+      const user = await checkout.namedCustomer('po-refusal-key');
+      await checkout.addToCart(user, productId, options, 1);
       const key = newKey();
 
       await place(user, key).expect(409);
-      await chooseFulfilment(user, 'pickup');
+      await checkout.chooseFulfilment(user, 'pickup');
 
       await place(user, key).expect(201);
     });
