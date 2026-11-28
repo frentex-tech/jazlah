@@ -211,8 +211,8 @@ describe('Order transitions (e2e)', () => {
   }
 
   it('moves a delivery order through the vendor flow and publishes each committed history row', async () => {
-    const { user, order } = await place('ot-delivery-flow');
-    const initial = await vendorOrder(user, order.id);
+    const { order } = await place('ot-delivery-flow');
+    const initial = await vendorOrder(owner, order.id);
     expect(initial.allowedTransitions).toEqual(['confirmed', 'cancelled']);
 
     const emitter = app.get(EventEmitter2);
@@ -233,7 +233,7 @@ describe('Order transitions (e2e)', () => {
         'out_for_delivery',
         'delivered',
       ].entries()) {
-        const moved = await vendorTransition(user, order.id, { to }).expect(
+        const moved = await vendorTransition(owner, order.id, { to }).expect(
           200,
         );
         expect((moved.body as OrderBody).status).toBe(to);
@@ -346,14 +346,14 @@ describe('Order transitions (e2e)', () => {
     expect(codeOf(updateBlocked.body)).toBe('ADDRESS_IN_USE');
     expect(codeOf(deleteBlocked.body)).toBe('ADDRESS_IN_USE');
 
-    const missingNote = await vendorTransition(user, order.id, {
+    const missingNote = await vendorTransition(owner, order.id, {
       to: 'cancelled',
     }).expect(400);
     expect(codeOf(missingNote.body)).toBe('VALIDATION_FAILED');
-    expect((await vendorOrder(user, order.id)).status).toBe('new');
+    expect((await vendorOrder(owner, order.id)).status).toBe('new');
     expect(await bookedOn(date)).toBe(booked);
 
-    const rejected = await vendorTransition(user, order.id, {
+    const rejected = await vendorTransition(owner, order.id, {
       to: 'cancelled',
       note: 'المتجر لا يستطيع تنفيذ الطلب',
     }).expect(200);
@@ -390,7 +390,7 @@ describe('Order transitions (e2e)', () => {
   });
 
   it('allows only admin to retry or return a failed delivery', async () => {
-    const { user, order } = await place('ot-delivery-failed');
+    const { order } = await place('ot-delivery-failed');
     for (const to of [
       'confirmed',
       'preparing',
@@ -398,18 +398,18 @@ describe('Order transitions (e2e)', () => {
       'picked_up',
       'out_for_delivery',
     ]) {
-      await vendorTransition(user, order.id, { to }).expect(200);
+      await vendorTransition(owner, order.id, { to }).expect(200);
     }
-    await vendorTransition(user, order.id, { to: 'delivery_failed' }).expect(
+    await vendorTransition(owner, order.id, { to: 'delivery_failed' }).expect(
       200,
     );
 
-    expect((await vendorOrder(user, order.id)).allowedTransitions).toEqual([]);
+    expect((await vendorOrder(owner, order.id)).allowedTransitions).toEqual([]);
     expect((await adminOrder(order.id)).allowedTransitions).toEqual([
       'out_for_delivery',
       'returned',
     ]);
-    const vendorRetry = await vendorTransition(user, order.id, {
+    const vendorRetry = await vendorTransition(owner, order.id, {
       to: 'out_for_delivery',
     }).expect(409);
     expect(codeOf(vendorRetry.body)).toBe('ORDER_TRANSITION_NOT_ALLOWED');
@@ -474,19 +474,19 @@ describe('Order transitions (e2e)', () => {
     expect(codeOf(foreign.body)).toBe('NOT_FOUND');
     expect(codeOf(customer.body)).toBe('FORBIDDEN');
     expect(codeOf(anonymous.body)).toBe('UNAUTHORIZED');
-    expect((await vendorOrder(user, order.id)).status).toBe('new');
+    expect((await vendorOrder(owner, order.id)).status).toBe('new');
   });
 
   it('serializes competing moves on the order row; only one transition is committed', async () => {
-    const { user, date, order } = await place('ot-transition-race', 'pickup');
+    const { date, order } = await place('ot-transition-race', 'pickup');
     const booked = await bookedOn(date);
     const lock = await holdRowLock(prisma, 'orders', order.id);
     let confirm!: ReturnType<typeof sent>;
     let reject!: ReturnType<typeof sent>;
     try {
-      confirm = sent(vendorTransition(user, order.id, { to: 'confirmed' }));
+      confirm = sent(vendorTransition(owner, order.id, { to: 'confirmed' }));
       reject = sent(
-        vendorTransition(user, order.id, {
+        vendorTransition(owner, order.id, {
           to: 'cancelled',
           note: 'رفض متزامن',
         }),
