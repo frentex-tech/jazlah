@@ -90,9 +90,6 @@ export class DeleteCustomerAccountUseCase {
       if (user.disabledAt !== null) {
         throw new AppError(ErrorCode.ACCOUNT_DISABLED);
       }
-      if (await this.activeOrders.hasActiveOrders(user.id)) {
-        throw new AppError(ErrorCode.ACCOUNT_HAS_ACTIVE_ORDERS);
-      }
       if (await this.users.hasActiveStaffAccess(user.id)) {
         throw new AppError(ErrorCode.ACCOUNT_HAS_STAFF_ACCESS);
       }
