@@ -9,6 +9,7 @@ import { FakeSmsProvider } from '@integrations/sms/testing';
 import { UsersService } from '@modules/users';
 import { AuthClient, type SignedInBody } from './support/auth-client';
 import { createHttpApp } from './support/create-http-app';
+import { LogCapture } from './support/log-capture';
 import { testPhone } from './support/test-phone';
 
 /**
@@ -22,11 +23,14 @@ describe('Operations settings (e2e)', () => {
   let customer: SignedInBody;
   let admin: SignedInBody;
   let saved: OperationsSettingsRow;
+  let logs: LogCapture;
   const phones: string[] = [];
 
   beforeAll(async () => {
     const sms = new FakeSmsProvider();
+    logs = new LogCapture();
     app = await createHttpApp({
+      logDestination: logs.stream,
       overrides: [{ provide: SMS_PORTS, useValue: [sms] }],
     });
     prisma = app.get(PrismaService);
@@ -135,10 +139,17 @@ describe('Operations settings (e2e)', () => {
         http().get('/v1/public/settings/client'),
       ),
     );
+    const statuses = responses.map(({ status }) => status);
+    if (statuses.some((status) => status !== 200)) {
+      const diagnostics = logs.lines.filter(
+        (line) => line.msg === 'Operations settings read failed',
+      );
+      process.stdout.write(
+        `readRow diagnostics: ${JSON.stringify(diagnostics)}\n`,
+      );
+    }
 
-    expect(responses.map(({ status }) => status)).toEqual(
-      Array.from({ length: 100 }, () => 200),
-    );
+    expect(statuses).toEqual(Array.from({ length: 100 }, () => 200));
   });
 
   it('keeps the admin settings from callers without a token and from customers', async () => {
