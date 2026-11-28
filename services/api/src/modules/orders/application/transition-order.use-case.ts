@@ -73,13 +73,6 @@ export class TransitionOrderUseCase {
       }
 
       const at = this.nextTimestamp(order);
-      if (rule.releaseCapacity) {
-        await this.capacity.release({
-          vendorId: order.vendorId,
-          date: order.fulfilmentDate,
-          carcasses: order.carcasses,
-        });
-      }
       const updated = await this.orders.transition({
         orderId: order.id,
         from: order.status,
